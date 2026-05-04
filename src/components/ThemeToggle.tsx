@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 
+const BUTTON_CLASS =
+  "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors";
+const BUTTON_STYLE: React.CSSProperties = {
+  background: "var(--card)",
+  border: "1px solid var(--line)",
+  color: "var(--text-2)",
+};
+
 export default function ThemeToggle({
   className = "",
 }: {
@@ -15,52 +23,36 @@ export default function ThemeToggle({
     setMounted(true);
   }, []);
 
+  // Pre-hydration shell — identical between server and client to avoid mismatch.
+  if (!mounted) {
+    return (
+      <button
+        type="button"
+        className={`${BUTTON_CLASS} ${className}`}
+        style={BUTTON_STYLE}
+        aria-label="Cambiar tema"
+        title="Cambiar tema"
+      >
+        <span style={{ width: 14, height: 14, display: "inline-block" }} />
+        <span className="hidden sm:inline">Tema</span>
+      </button>
+    );
+  }
+
   const isDark = theme === "dark";
 
   return (
     <button
       type="button"
-      suppressHydrationWarning
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${className}`}
-      style={{
-        background: "var(--card)",
-        border: "1px solid var(--line)",
-        color: "var(--text-2)",
-      }}
-      aria-label={
-        mounted
-          ? isDark
-            ? "Cambiar a tema claro"
-            : "Cambiar a tema oscuro"
-          : "Cambiar tema"
-      }
-      title={mounted ? (isDark ? "Tema claro" : "Tema oscuro") : "Tema"}
+      className={`${BUTTON_CLASS} ${className}`}
+      style={BUTTON_STYLE}
+      aria-label={isDark ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
+      title={isDark ? "Tema claro" : "Tema oscuro"}
     >
-      <span suppressHydrationWarning>
-        {mounted ? isDark ? <SunIcon /> : <MoonIcon /> : <PlaceholderIcon />}
-      </span>
-      <span className="hidden sm:inline" suppressHydrationWarning>
-        {mounted ? (isDark ? "Claro" : "Oscuro") : "Tema"}
-      </span>
+      {isDark ? <SunIcon /> : <MoonIcon />}
+      <span className="hidden sm:inline">{isDark ? "Claro" : "Oscuro"}</span>
     </button>
-  );
-}
-
-function PlaceholderIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="5" />
-    </svg>
   );
 }
 

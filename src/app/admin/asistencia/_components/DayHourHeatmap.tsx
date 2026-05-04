@@ -83,6 +83,7 @@ export function DayHourHeatmap({ cells }: { cells: AttendanceHeatmapCell[] }) {
                 !cell || cell.capacity === 0
                   ? "rgba(127,127,127,0.06)"
                   : hexAlpha("#19f08b", Math.min(1, 0.18 + util * 0.82));
+              const titleStr = `${day} ${h}:00 — ${cell?.attended ?? 0}/${cell?.capacity ?? 0} (${Math.round(util * 100)}%)`;
               return (
                 <rect
                   key={`${wd}-${h}`}
@@ -94,10 +95,7 @@ export function DayHourHeatmap({ cells }: { cells: AttendanceHeatmapCell[] }) {
                   ry={3}
                   fill={fill}
                 >
-                  <title>
-                    {day} {h}:00 — {cell?.attended ?? 0}/{cell?.capacity ?? 0} (
-                    {Math.round(util * 100)}%)
-                  </title>
+                  <title>{titleStr}</title>
                 </rect>
               );
             })}
