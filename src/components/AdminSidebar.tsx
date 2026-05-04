@@ -244,6 +244,7 @@ export default function AdminSidebar() {
           return (
             <Link
               key={mod.href}
+              // @ts-expect-error typedRoutes limitation with dynamic href
               href={mod.href}
               className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive ? "text-white" : "text-white/50 hover:text-white/80"

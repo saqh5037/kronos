@@ -100,6 +100,7 @@ export default function TabBar() {
           return (
             <Link
               key={tab.href}
+              // @ts-expect-error typedRoutes limitation with dynamic href
               href={tab.href}
               className="flex-1 flex flex-col items-center gap-1.5 py-2 text-xs font-semibold transition-colors"
               style={{

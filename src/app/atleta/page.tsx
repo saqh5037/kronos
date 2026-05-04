@@ -503,6 +503,7 @@ function QuickLink({
         : "var(--text-2)";
   return (
     <Link
+      // @ts-expect-error typedRoutes limitation with dynamic href
       href={href}
       className="k-card p-4 flex items-center justify-center text-center text-sm font-display font-semibold transition-colors hover:brightness-110"
       style={{ color }}
