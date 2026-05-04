@@ -7,6 +7,7 @@ import { withTenant, db as rawDb } from "../db";
 import { scoreSchema } from "@/lib/validations/score";
 import { detectPR } from "@/lib/scores";
 import type { ScoreType } from "@/lib/validations/wod";
+import { logAudit } from "../audit";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -212,6 +213,32 @@ export async function submitScore(data: unknown) {
       });
       prAchieved = true;
     }
+  }
+
+  await logAudit({
+    tenantId,
+    actorId: session.user.id,
+    action: "SCORE_SUBMITTED",
+    targetType: "Score",
+    targetId: score.id,
+    metadata: {
+      wodId: parsed.wodId,
+      athleteId: me.id,
+      value: parsed.value,
+      unit: parsed.unit,
+      scaling: parsed.scaling,
+    },
+  });
+
+  if (prAchieved) {
+    await logAudit({
+      tenantId,
+      actorId: session.user.id,
+      action: "PR_ACHIEVED",
+      targetType: "Athlete",
+      targetId: me.id,
+      metadata: { wodId: parsed.wodId, value: parsed.value, unit: parsed.unit },
+    });
   }
 
   revalidatePath("/atleta/wod");

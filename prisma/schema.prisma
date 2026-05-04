@@ -431,3 +431,39 @@ model Streak {
   @@unique([athleteId, type])
   @@index([tenantId])
 }
+
+// ─── AUDIT ────────────────────────────────────────────────────────────────────
+
+enum AuditAction {
+  CLASS_CANCELLED
+  BOOKING_CREATED
+  BOOKING_CANCELLED
+  BOOKING_CHECKIN
+  BOOKING_NOSHOW
+  WAITLIST_PROMOTED
+  SCORE_SUBMITTED
+  PR_ACHIEVED
+  WOD_ARCHIVED
+  PLAN_ARCHIVED
+  MEMBERSHIP_ASSIGNED
+  MEMBERSHIP_PAUSED
+  MEMBERSHIP_CANCELLED
+  PAYMENT_REGISTERED
+  PAYMENT_VOIDED
+}
+
+model AuditEvent {
+  id         String      @id @default(cuid())
+  tenantId   String
+  actorId    String? // user who triggered the event (null = system)
+  action     AuditAction
+  targetType String // "Class", "Booking", "Score", etc.
+  targetId   String
+  metadata   Json?
+  createdAt  DateTime    @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, targetType, targetId])
+  @@index([tenantId, actorId])
+}

@@ -9,6 +9,7 @@ import {
   expandRecurrence,
   recurrenceToRRule,
 } from "@/lib/validations/class";
+import { logAudit } from "../audit";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -114,6 +115,15 @@ export async function cancelClass(id: string) {
     where: { id },
     data: { isActive: false },
   });
+
+  await logAudit({
+    tenantId: session.user.tenantId,
+    actorId: session.user.id,
+    action: "CLASS_CANCELLED",
+    targetType: "Class",
+    targetId: id,
+  });
+
   revalidatePath("/admin/programacion");
   return { ok: true };
 }

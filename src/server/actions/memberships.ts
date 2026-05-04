@@ -7,6 +7,7 @@ import { withTenant, db as rawDb } from "../db";
 import { membershipAssignSchema } from "@/lib/validations/membership";
 import type { MembershipStatus, PlanType } from "@/lib/validations/membership";
 import { computeMembershipEndDate, classesRemaining } from "@/lib/membership";
+import { logAudit } from "../audit";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -125,6 +126,19 @@ export async function assignMembership(data: unknown) {
     },
   });
 
+  await logAudit({
+    tenantId,
+    actorId: session.user.id,
+    action: "MEMBERSHIP_ASSIGNED",
+    targetType: "Membership",
+    targetId: membership.id,
+    metadata: {
+      athleteId: parsed.athleteId,
+      planId: parsed.planId,
+      planType: plan.type,
+    },
+  });
+
   revalidatePath("/admin/pagos");
   revalidatePath("/admin/atletas");
   return membership;
@@ -136,6 +150,13 @@ export async function pauseMembership(id: string) {
   await db.membership.update({
     where: { id },
     data: { status: "PAUSED" },
+  });
+  await logAudit({
+    tenantId: session.user.tenantId,
+    actorId: session.user.id,
+    action: "MEMBERSHIP_PAUSED",
+    targetType: "Membership",
+    targetId: id,
   });
   revalidatePath("/admin/pagos");
   return { ok: true };
@@ -158,6 +179,13 @@ export async function cancelMembership(id: string) {
   await db.membership.update({
     where: { id },
     data: { status: "CANCELLED", autoRenew: false },
+  });
+  await logAudit({
+    tenantId: session.user.tenantId,
+    actorId: session.user.id,
+    action: "MEMBERSHIP_CANCELLED",
+    targetType: "Membership",
+    targetId: id,
   });
   revalidatePath("/admin/pagos");
   return { ok: true };

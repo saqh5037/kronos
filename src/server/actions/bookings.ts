@@ -9,6 +9,7 @@ import {
   nextWaitlistPromotion,
   type BookingSnapshot,
 } from "@/lib/booking";
+import { logAudit } from "../audit";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -194,6 +195,19 @@ export async function bookClass(classId: string) {
     { isolationLevel: "Serializable" },
   );
 
+  await logAudit({
+    tenantId,
+    actorId: session.user.id,
+    action: "BOOKING_CREATED",
+    targetType: "Class",
+    targetId: classId,
+    metadata: {
+      athleteId: me.id,
+      status: decision.status,
+      ...("position" in decision ? { position: decision.position } : {}),
+    },
+  });
+
   revalidatePath("/atleta/reservar");
   revalidatePath("/admin/reservas");
   return decision;
@@ -230,6 +244,7 @@ export async function cancelBooking(bookingId: string) {
       });
 
       // Promote next waitlist atomically — only when freeing a real BOOKED slot
+      let promotedId: string | null = null;
       if (booking.status === "BOOKED") {
         const remaining = booking.class.bookings.filter(
           (b) => b.id !== bookingId,
@@ -240,11 +255,22 @@ export async function cancelBooking(bookingId: string) {
             where: { id: promoteId },
             data: { status: "BOOKED" },
           });
+          promotedId = promoteId;
         }
       }
+
+      return { previousStatus: booking.status, promotedId };
     },
     { isolationLevel: "Serializable" },
   );
+
+  await logAudit({
+    tenantId,
+    actorId: session.user.id,
+    action: "BOOKING_CANCELLED",
+    targetType: "Booking",
+    targetId: bookingId,
+  });
 
   revalidatePath("/atleta/reservar");
   revalidatePath("/admin/reservas");
@@ -268,6 +294,15 @@ export async function checkInAthlete(bookingId: string) {
     console.error("[checkIn] streak recompute failed:", err);
   }
 
+  await logAudit({
+    tenantId: session.user.tenantId,
+    actorId: session.user.id,
+    action: "BOOKING_CHECKIN",
+    targetType: "Booking",
+    targetId: bookingId,
+    metadata: { athleteId: updated.athleteId },
+  });
+
   revalidatePath("/admin/reservas");
   revalidatePath("/admin/asistencia");
   return { ok: true };
@@ -280,6 +315,14 @@ export async function markNoShow(bookingId: string) {
   await db.booking.update({
     where: { id: bookingId },
     data: { status: "NOSHOW" },
+  });
+
+  await logAudit({
+    tenantId: session.user.tenantId,
+    actorId: session.user.id,
+    action: "BOOKING_NOSHOW",
+    targetType: "Booking",
+    targetId: bookingId,
   });
 
   revalidatePath("/admin/reservas");

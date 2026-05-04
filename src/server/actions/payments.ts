@@ -6,6 +6,7 @@ import { authOptions } from "../auth";
 import { withTenant, db as rawDb } from "../db";
 import { cashPaymentSchema } from "@/lib/validations/payment";
 import type { PaymentGateway, PaymentStatus } from "@/lib/validations/payment";
+import { logAudit } from "../audit";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -121,7 +122,7 @@ export async function registerCashPayment(data: unknown) {
   });
   if (!membership) throw new Error("Membership no encontrada");
 
-  await rawDb.payment.create({
+  const created = await rawDb.payment.create({
     data: {
       tenantId,
       membershipId: parsed.membershipId,
@@ -130,6 +131,20 @@ export async function registerCashPayment(data: unknown) {
       gateway: "CASH",
       status: "PAID",
       paidAt: parsed.paidAt,
+    },
+  });
+
+  await logAudit({
+    tenantId,
+    actorId: session.user.id,
+    action: "PAYMENT_REGISTERED",
+    targetType: "Payment",
+    targetId: created.id,
+    metadata: {
+      membershipId: parsed.membershipId,
+      amount: parsed.amount,
+      currency: parsed.currency,
+      gateway: "CASH",
     },
   });
 
@@ -144,6 +159,15 @@ export async function voidPayment(id: string) {
     where: { id },
     data: { status: "REFUNDED" },
   });
+
+  await logAudit({
+    tenantId: session.user.tenantId,
+    actorId: session.user.id,
+    action: "PAYMENT_VOIDED",
+    targetType: "Payment",
+    targetId: id,
+  });
+
   revalidatePath("/admin/pagos");
   return { ok: true };
 }
