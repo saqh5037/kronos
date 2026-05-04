@@ -46,7 +46,7 @@ export function ExportCSVButton<T>({
         onClick={handle}
         disabled={disabled || busy}
         className={cn(
-          "k-btn-ghost inline-flex items-center gap-2 px-3 py-1.5 text-xs",
+          "k-btn-ghost inline-flex items-center gap-2 px-3 py-2 text-xs sm:py-1.5",
           (disabled || busy) && "opacity-50",
           className,
         )}

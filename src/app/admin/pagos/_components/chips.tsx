@@ -1,0 +1,45 @@
+export function GatewayChip({ gateway }: { gateway: string }) {
+  if (gateway === "MERCADOPAGO") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[10px] font-bold"
+        style={{
+          background: "rgba(58,163,255,0.15)",
+          color: "var(--strain)",
+          border: "1px solid rgba(58,163,255,0.3)",
+        }}
+        title="Mercado Pago"
+      >
+        <span aria-hidden>◆</span> MP
+      </span>
+    );
+  }
+  if (gateway === "CASH") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[10px] font-bold"
+        style={{
+          background: "rgba(25,240,139,0.15)",
+          color: "var(--recovery)",
+          border: "1px solid rgba(25,240,139,0.3)",
+        }}
+        title="Efectivo"
+      >
+        <span aria-hidden>$</span> EFECTIVO
+      </span>
+    );
+  }
+  return <span className="k-chip k-chip-ghost text-[10px]">{gateway}</span>;
+}
+
+export function StatusChip({ status }: { status: string }) {
+  const cls =
+    status === "PAID"
+      ? "k-chip-recovery"
+      : status === "PENDING"
+        ? "k-chip-strain"
+        : status === "FAILED" || status === "REFUNDED"
+          ? "k-chip-pr"
+          : "k-chip-ghost";
+  return <span className={`k-chip ${cls} text-[10px]`}>{status}</span>;
+}
