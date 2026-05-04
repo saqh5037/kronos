@@ -1,20 +1,22 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auth";
+import { getBox } from "@/server/actions/box";
+import BoxSettingsForm from "@/components/admin/BoxSettingsForm";
+
 export const metadata = { title: "Kronos — Ajustes" };
 
-export default function AjustesPage() {
+export default async function AjustesPage() {
+  const session = await getServerSession(authOptions);
+  const canEdit = session?.user?.role === "OWNER";
+  const box = await getBox();
+
   return (
-    <div className="p-8">
-      <p className="k-eyebrow mb-2">Módulo</p>
-      <h1 className="font-display font-bold text-3xl tracking-tight">
+    <div className="p-8 max-w-4xl mx-auto">
+      <p className="k-eyebrow mb-2">Configuración</p>
+      <h1 className="font-display font-bold text-3xl tracking-tight mb-6">
         Ajustes
       </h1>
-      <div
-        className="mt-6 p-4 rounded-xl border"
-        style={{ borderColor: "var(--line)", background: "var(--card)" }}
-      >
-        <p className="text-sm" style={{ color: "var(--text-2)" }}>
-          Este módulo está en desarrollo — llegará en Fase 1.
-        </p>
-      </div>
+      <BoxSettingsForm box={box} canEdit={canEdit} />
     </div>
   );
 }

@@ -10,14 +10,16 @@ datasource db {
 // ─── TENANT ──────────────────────────────────────────────────────────────────
 
 model Box {
-  id           String   @id @default(cuid())
-  slug         String   @unique
-  name         String
-  locale       String   @default("es-MX")
-  currency     String   @default("MXN")
-  brandColor   String?
-  logoUrl      String?
-  createdAt    DateTime @default(now())
+  id                   String   @id @default(cuid())
+  slug                 String   @unique
+  name                 String
+  locale               String   @default("es-MX")
+  currency             String   @default("MXN")
+  timezone             String   @default("America/Mexico_City")
+  defaultClassCapacity Int      @default(16)
+  brandColor           String?
+  logoUrl              String?
+  createdAt            DateTime @default(now())
 
   users           User[]
   athletes        Athlete[]
