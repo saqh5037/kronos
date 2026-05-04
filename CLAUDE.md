@@ -6,12 +6,40 @@ SaaS multi-tenant para boxes de CrossFit. Next.js 15 + Prisma + NextAuth.
 
 ## Estado actual
 
-**Fase 0 completa** (2026-05-03): Scaffold completo. Schema Prisma, auth, multi-tenancy, UI tokens, admin sidebar, app atleta skeleton, tests pasando.
+**Fase 1 completa** (2026-05-04): 7 vertical slices end-to-end con TDD.
+
+Módulos admin con datos reales:
+
+- Atletas (Fase 0)
+- Programación — CRUD clases con recurrencia + grid semanal
+- WODs — biblioteca + builder + biblioteca de movimientos
+- Reservas — roster con waitlist + check-in + no-show
+- Asistencia — vista del día con stats + check-in inline
+- PRs — agrupados por movimiento, top 1 highlighted
+- Leaderboards — ranking por WOD + asistencia semanal
+
+App atleta:
+
+- Home — hero stats (HaloRing semana/racha/PRs), próxima clase, último score, accesos rápidos
+- WOD del día — vista del WOD + ScoreForm con auto-detect PR
+- Reservar — calendario 7 días + estado mis reservas
+- Perfil — PRs + historial scores
+
+Lógica de dominio (pure helpers + tests):
+
+- `decideBooking` — capacity check, waitlist, idempotencia
+- `nextWaitlistPromotion` — promoción FIFO
+- `computeAttendanceStreak` — UTC, 1-day grace
+- `detectPR / isBetterScore / formatScore` — TIME asc, demás desc
+- `expandRecurrence / recurrenceToRRule` — RRULE simple
+
+Stats:
 
 - Branch: `main`
 - Dev server: `:3000`
 - BD: PostgreSQL en `:5434` (docker compose)
-- Tests: 9/9 passing (`pnpm test`)
+- Tests: 81/81 passing (`pnpm test`)
+- Commits Fase 1: 7 (uno por slice) — `48fd157`..`<HEAD>`
 
 ## Comandos
 

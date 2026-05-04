@@ -154,7 +154,7 @@ El `tenantId` del usuario viene del JWT (guardado en `session.user.tenantId`).
 | Fase       | Contenido                                         | Estado    |
 | ---------- | ------------------------------------------------- | --------- |
 | **Fase 0** | Scaffold, schema, auth, multi-tenancy, UI tokens  | Completa  |
-| **Fase 1** | App atleta completa, reservas, WODs, leaderboards | Pendiente |
+| **Fase 1** | App atleta completa, reservas, WODs, leaderboards | Completa  |
 | **Fase 2** | Pantalla TV, pagos (MercadoPago), reportes        | Pendiente |
 | **Fase 3** | Comunicaciones, gamificación completa, mobile PWA | Pendiente |
 | **Fase 4** | Multi-box onboarding, billing SaaS, admin global  | Pendiente |
