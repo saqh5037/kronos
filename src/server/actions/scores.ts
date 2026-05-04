@@ -129,6 +129,77 @@ export async function getTodayWOD(): Promise<TodayWOD> {
   };
 }
 
+export type MyWODPercentile = {
+  myBestValue: number | null;
+  totalAthletes: number;
+  betterThan: number; // count of athletes whose best is worse than mine
+  percentile: number; // 0..100, higher = better
+  scoreType: string;
+};
+
+/**
+ * Returns the athlete's percentile rank for a given WOD compared to all
+ * other athletes in the box who have logged a score for it. TIME score type
+ * is "lower is better"; everything else is "higher is better".
+ */
+export async function getMyWODPercentile(
+  wodId: string,
+): Promise<MyWODPercentile | null> {
+  const session = await requireSession();
+  const tenantId = session.user.tenantId;
+  const me = await getMyAthlete(session.user.id, tenantId);
+  if (!me) return null;
+
+  const db = withTenant(tenantId);
+
+  const wod = await db.wOD.findUnique({
+    where: { id: wodId },
+    select: { scoreType: true },
+  });
+  if (!wod) return null;
+
+  const allScores = await db.score.findMany({
+    where: { wodId },
+    select: { athleteId: true, value: true },
+  });
+  if (allScores.length === 0) return null;
+
+  // Best per athlete
+  const bestByAthlete = new Map<string, number>();
+  const lowerIsBetter = wod.scoreType === "TIME";
+  for (const s of allScores) {
+    const v = Number(s.value);
+    const existing = bestByAthlete.get(s.athleteId);
+    if (
+      existing === undefined ||
+      (lowerIsBetter ? v < existing : v > existing)
+    ) {
+      bestByAthlete.set(s.athleteId, v);
+    }
+  }
+
+  const myBest = bestByAthlete.get(me.id) ?? null;
+  if (myBest === null) return null;
+
+  let betterThan = 0;
+  for (const [athleteId, v] of bestByAthlete) {
+    if (athleteId === me.id) continue;
+    if (lowerIsBetter ? myBest < v : myBest > v) betterThan += 1;
+  }
+
+  const otherCount = bestByAthlete.size - 1;
+  const percentile =
+    otherCount === 0 ? 100 : Math.round((betterThan / otherCount) * 100);
+
+  return {
+    myBestValue: myBest,
+    totalAthletes: bestByAthlete.size,
+    betterThan,
+    percentile,
+    scoreType: wod.scoreType,
+  };
+}
+
 export async function listScoresForWOD(wodId: string) {
   const session = await requireSession();
   const db = withTenant(session.user.tenantId);

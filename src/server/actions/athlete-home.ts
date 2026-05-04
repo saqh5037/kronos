@@ -3,11 +3,73 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
 import { withTenant } from "../db";
+import { subDays, startOfDay } from "date-fns";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.tenantId) throw new Error("Unauthorized");
   return session;
+}
+
+export type MyAttendanceDay = { date: Date };
+
+export async function getMyAttendanceLast90d(): Promise<MyAttendanceDay[]> {
+  const session = await requireSession();
+  const db = withTenant(session.user.tenantId);
+
+  const me = await db.athlete.findFirst({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
+  if (!me) return [];
+
+  const cutoff = startOfDay(subDays(new Date(), 90));
+
+  const bookings = await db.booking.findMany({
+    where: {
+      athleteId: me.id,
+      status: "ATTENDED",
+      checkedInAt: { gte: cutoff, not: null },
+    },
+    select: { checkedInAt: true },
+  });
+
+  return bookings
+    .filter((b) => b.checkedInAt !== null)
+    .map((b) => ({ date: b.checkedInAt as Date }));
+}
+
+export type MyScoreTimelinePoint = {
+  date: string;
+  value: number;
+  wodName: string;
+};
+
+export async function getMyScoresTimeline(
+  days: number = 90,
+): Promise<MyScoreTimelinePoint[]> {
+  const session = await requireSession();
+  const db = withTenant(session.user.tenantId);
+
+  const me = await db.athlete.findFirst({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
+  if (!me) return [];
+
+  const cutoff = startOfDay(subDays(new Date(), days));
+
+  const scores = await db.score.findMany({
+    where: { athleteId: me.id, createdAt: { gte: cutoff } },
+    orderBy: { createdAt: "asc" },
+    include: { wod: { select: { name: true } } },
+  });
+
+  return scores.map((s) => ({
+    date: s.createdAt.toISOString().slice(0, 10),
+    value: Number(s.value),
+    wodName: s.wod.name,
+  }));
 }
 
 export type AthleteHome = {
