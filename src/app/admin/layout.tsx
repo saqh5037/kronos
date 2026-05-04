@@ -12,9 +12,9 @@ export default async function AdminLayout({
   if (!session) redirect("/login");
 
   return (
-    <div className="flex h-screen bg-bg overflow-hidden">
+    <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen bg-bg lg:overflow-hidden">
       <AdminSidebar />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex-1 lg:overflow-y-auto">{children}</main>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const modules = [
   { href: "/admin", label: "Dashboard", icon: "dashboard", exact: true },
@@ -211,16 +212,31 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  // Cerrar overlay al cambiar de ruta
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Bloquear scroll del body cuando overlay abierto en mobile
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   return (
-    <nav
-      className="w-56 flex flex-col border-r flex-shrink-0 py-4 overflow-y-auto"
-      style={{ background: "var(--bg-soft)", borderColor: "var(--line)" }}
-    >
-      {/* Logo */}
+    <>
+      {/* Mobile top bar — solo visible <lg */}
       <div
-        className="px-4 pb-4 mb-2 border-b"
-        style={{ borderColor: "var(--line)" }}
+        className="lg:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 h-14 border-b"
+        style={{ background: "var(--bg-soft)", borderColor: "var(--line)" }}
       >
         <div className="flex items-center gap-2">
           <div
@@ -233,30 +249,109 @@ export default function AdminSidebar() {
             Kronos
           </span>
         </div>
+        <button
+          type="button"
+          aria-label="Abrir menú"
+          aria-expanded={open}
+          onClick={() => setOpen(true)}
+          className="w-9 h-9 flex items-center justify-center rounded-lg border"
+          style={{ borderColor: "var(--line)", background: "var(--card)" }}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          >
+            <path d="M2 4h12M2 8h12M2 12h12" />
+          </svg>
+        </button>
       </div>
 
-      {/* Nav items */}
-      <div className="flex flex-col gap-0.5 px-2">
-        {modules.map((mod) => {
-          const isActive = mod.exact
-            ? pathname === mod.href
-            : pathname.startsWith(mod.href);
+      {/* Spacer para que el contenido no quede tapado por el top bar mobile */}
+      <div className="lg:hidden h-14 flex-shrink-0" aria-hidden />
 
-          return (
-            <Link
-              key={mod.href}
-              href={mod.href as Route}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive ? "text-white" : "text-white/50 hover:text-white/80"
-              }`}
-              style={isActive ? { background: "var(--card)" } : {}}
+      {/* Overlay backdrop — solo cuando abierto en mobile */}
+      {open && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={() => setOpen(false)}
+          aria-hidden
+        />
+      )}
+
+      {/* Sidebar — fijo en lg, drawer en mobile */}
+      <nav
+        className={`flex flex-col border-r flex-shrink-0 py-4 overflow-y-auto z-50
+          fixed lg:static top-0 left-0 h-screen lg:h-auto w-64 lg:w-56
+          transform transition-transform duration-200
+          ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+        style={{ background: "var(--bg-soft)", borderColor: "var(--line)" }}
+        aria-label="Menú principal"
+      >
+        {/* Logo + close button (mobile) */}
+        <div
+          className="px-4 pb-4 mb-2 border-b flex items-center justify-between"
+          style={{ borderColor: "var(--line)" }}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center font-display font-bold text-sm"
+              style={{ background: "var(--grad)", color: "#0a1a14" }}
             >
-              <NavIcon icon={mod.icon} active={isActive} />
-              {mod.label}
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+              K
+            </div>
+            <span className="font-display font-bold text-sm tracking-tight">
+              Kronos
+            </span>
+          </div>
+          <button
+            type="button"
+            aria-label="Cerrar menú"
+            onClick={() => setOpen(false)}
+            className="lg:hidden w-7 h-7 flex items-center justify-center rounded-md"
+            style={{ color: "var(--text-2)" }}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            >
+              <path d="M3 3l10 10M13 3L3 13" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Nav items */}
+        <div className="flex flex-col gap-0.5 px-2">
+          {modules.map((mod) => {
+            const isActive = mod.exact
+              ? pathname === mod.href
+              : pathname.startsWith(mod.href);
+
+            return (
+              <Link
+                key={mod.href}
+                href={mod.href as Route}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive ? "text-white" : "text-white/50 hover:text-white/80"
+                }`}
+                style={isActive ? { background: "var(--card)" } : {}}
+              >
+                <NavIcon icon={mod.icon} active={isActive} />
+                {mod.label}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </>
   );
 }
