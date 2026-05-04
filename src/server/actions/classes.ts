@@ -10,6 +10,7 @@ import {
   recurrenceToRRule,
 } from "@/lib/validations/class";
 import { logAudit } from "../audit";
+import { trackEvent } from "@/lib/analytics";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -122,6 +123,12 @@ export async function cancelClass(id: string) {
     action: "CLASS_CANCELLED",
     targetType: "Class",
     targetId: id,
+  });
+
+  await trackEvent("class_cancelled", {
+    tenantId: session.user.tenantId,
+    actorId: session.user.id,
+    classId: id,
   });
 
   revalidatePath("/admin/programacion");

@@ -8,6 +8,7 @@ import { membershipAssignSchema } from "@/lib/validations/membership";
 import type { MembershipStatus, PlanType } from "@/lib/validations/membership";
 import { computeMembershipEndDate, classesRemaining } from "@/lib/membership";
 import { logAudit } from "../audit";
+import { trackEvent } from "@/lib/analytics";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -137,6 +138,14 @@ export async function assignMembership(data: unknown) {
       planId: parsed.planId,
       planType: plan.type,
     },
+  });
+
+  await trackEvent("membership_assigned", {
+    tenantId,
+    actorId: session.user.id,
+    membershipId: membership.id,
+    planType: plan.type,
+    planPrice: Number(plan.price),
   });
 
   revalidatePath("/admin/pagos");

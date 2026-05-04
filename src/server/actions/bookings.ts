@@ -10,6 +10,7 @@ import {
   type BookingSnapshot,
 } from "@/lib/booking";
 import { logAudit } from "../audit";
+import { trackEvent } from "@/lib/analytics";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -208,6 +209,14 @@ export async function bookClass(classId: string) {
     },
   });
 
+  await trackEvent("booking_created", {
+    tenantId,
+    actorId: session.user.id,
+    classId,
+    status: decision.status,
+    waitlist: decision.status === "WAITLIST",
+  });
+
   revalidatePath("/atleta/reservar");
   revalidatePath("/admin/reservas");
   return decision;
@@ -272,6 +281,12 @@ export async function cancelBooking(bookingId: string) {
     targetId: bookingId,
   });
 
+  await trackEvent("booking_cancelled", {
+    tenantId,
+    actorId: session.user.id,
+    bookingId,
+  });
+
   revalidatePath("/atleta/reservar");
   revalidatePath("/admin/reservas");
   return { ok: true };
@@ -301,6 +316,13 @@ export async function checkInAthlete(bookingId: string) {
     targetType: "Booking",
     targetId: bookingId,
     metadata: { athleteId: updated.athleteId },
+  });
+
+  await trackEvent("booking_checkin", {
+    tenantId: session.user.tenantId,
+    actorId: session.user.id,
+    bookingId,
+    athleteId: updated.athleteId,
   });
 
   revalidatePath("/admin/reservas");

@@ -8,6 +8,7 @@ import { scoreSchema } from "@/lib/validations/score";
 import { detectPR } from "@/lib/scores";
 import type { ScoreType } from "@/lib/validations/wod";
 import { logAudit } from "../audit";
+import { trackEvent } from "@/lib/analytics";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -239,7 +240,22 @@ export async function submitScore(data: unknown) {
       targetId: me.id,
       metadata: { wodId: parsed.wodId, value: parsed.value, unit: parsed.unit },
     });
+    await trackEvent("pr_achieved", {
+      tenantId,
+      actorId: session.user.id,
+      wodId: parsed.wodId,
+      value: parsed.value,
+      unit: parsed.unit,
+    });
   }
+
+  await trackEvent("score_submitted", {
+    tenantId,
+    actorId: session.user.id,
+    wodId: parsed.wodId,
+    scaling: parsed.scaling,
+    prAchieved,
+  });
 
   revalidatePath("/atleta/wod");
   revalidatePath("/atleta");

@@ -7,6 +7,7 @@ import { withTenant, db as rawDb } from "../db";
 import { cashPaymentSchema } from "@/lib/validations/payment";
 import type { PaymentGateway, PaymentStatus } from "@/lib/validations/payment";
 import { logAudit } from "../audit";
+import { trackEvent } from "@/lib/analytics";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -146,6 +147,15 @@ export async function registerCashPayment(data: unknown) {
       currency: parsed.currency,
       gateway: "CASH",
     },
+  });
+
+  await trackEvent("payment_registered", {
+    tenantId,
+    actorId: session.user.id,
+    paymentId: created.id,
+    amount: parsed.amount,
+    currency: parsed.currency,
+    gateway: "CASH",
   });
 
   revalidatePath("/admin/pagos");
