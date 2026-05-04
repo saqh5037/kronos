@@ -18,7 +18,7 @@ export default async function PRsPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-6">
+      <div className="mb-8">
         <p className="k-eyebrow mb-1">Performance</p>
         <h1 className="font-display font-bold text-3xl tracking-tight">PRs</h1>
         <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
@@ -39,85 +39,109 @@ export default async function PRsPage() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {Array.from(byMovement.entries()).map(([movementName, movePRs]) => {
             const sorted = [...movePRs].sort((a, b) => b.value - a.value);
+            const top = sorted[0];
+            const rest = sorted.slice(1);
+
             return (
               <div
                 key={movementName}
-                className="rounded-xl border"
-                style={{
-                  borderColor: "var(--line)",
-                  background: "var(--card)",
-                }}
+                className="k-card overflow-hidden flex flex-col"
               >
+                {/* Top PR hero */}
                 <div
-                  className="px-4 py-3 border-b flex items-center justify-between"
-                  style={{ borderColor: "var(--line)" }}
+                  className="px-4 py-4 relative overflow-hidden"
+                  style={{
+                    background: "#101316",
+                    borderBottom: "1px solid var(--line)",
+                  }}
                 >
-                  <h3 className="font-display font-bold text-base">
-                    {movementName}
-                  </h3>
-                  <span
-                    className="font-mono text-xs"
-                    style={{ color: "var(--text-3)" }}
-                  >
-                    {sorted.length} atleta{sorted.length === 1 ? "" : "s"}
-                  </span>
-                </div>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr
-                      style={{
-                        borderBottom: "1px solid var(--line)",
-                        color: "var(--text-3)",
-                      }}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse at 80% 0%, rgba(58,163,255,0.18), transparent 55%), radial-gradient(ellipse at 0% 100%, rgba(25,240,139,0.12), transparent 60%)",
+                    }}
+                  />
+                  <div className="relative">
+                    <p
+                      className="k-eyebrow mb-2"
+                      style={{ color: "var(--text-2)" }}
                     >
-                      <th className="text-left px-4 py-2 k-eyebrow w-12">#</th>
-                      <th className="text-left px-4 py-2 k-eyebrow">Atleta</th>
-                      <th className="text-left px-4 py-2 k-eyebrow">PR</th>
-                      <th className="text-left px-4 py-2 k-eyebrow">Logrado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sorted.map((pr, idx) => (
-                      <tr
-                        key={pr.id}
-                        style={{ borderBottom: "1px solid var(--line)" }}
+                      {movementName.toUpperCase()}
+                    </p>
+                    <div className="flex items-baseline gap-2">
+                      <span
+                        className="font-display font-bold text-4xl"
+                        style={{
+                          letterSpacing: "-0.03em",
+                          background: "var(--grad)",
+                          WebkitBackgroundClip: "text",
+                          backgroundClip: "text",
+                          color: "transparent",
+                        }}
                       >
-                        <td
-                          className="px-4 py-2 font-mono text-xs"
-                          style={{
-                            color:
-                              idx === 0 ? "var(--recovery)" : "var(--text-3)",
-                          }}
+                        {top.value}
+                      </span>
+                      <span
+                        className="font-mono text-sm font-bold"
+                        style={{ color: "var(--text-3)" }}
+                      >
+                        {top.unit}
+                      </span>
+                    </div>
+                    <p
+                      className="text-xs mt-1"
+                      style={{ color: "var(--text-2)" }}
+                    >
+                      {top.athleteName} ·{" "}
+                      {top.achievedAt.toLocaleDateString("es-MX")}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Rest of leaderboard */}
+                {rest.length > 0 && (
+                  <div className="flex-1">
+                    <ul className="flex flex-col">
+                      {rest.map((pr, idx) => (
+                        <li
+                          key={pr.id}
+                          className="px-4 py-2.5 border-b last:border-b-0 flex items-center justify-between"
+                          style={{ borderColor: "var(--line)" }}
                         >
-                          {idx + 1}
-                        </td>
-                        <td className="px-4 py-2 font-medium">
-                          {pr.athleteName}
-                        </td>
-                        <td className="px-4 py-2">
-                          <span
-                            className="font-mono font-bold"
-                            style={{
-                              color:
-                                idx === 0 ? "var(--recovery)" : "var(--text)",
-                            }}
-                          >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span
+                              className="font-mono text-xs w-5"
+                              style={{ color: "var(--text-3)" }}
+                            >
+                              {idx + 2}
+                            </span>
+                            <span className="text-sm font-medium truncate">
+                              {pr.athleteName}
+                            </span>
+                          </div>
+                          <span className="font-mono font-bold text-sm flex-shrink-0">
                             {pr.value} {pr.unit}
                           </span>
-                        </td>
-                        <td
-                          className="px-4 py-2 font-mono text-xs"
-                          style={{ color: "var(--text-3)" }}
-                        >
-                          {pr.achievedAt.toLocaleDateString("es-MX")}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {rest.length === 0 && (
+                  <div className="flex-1 flex items-center justify-center p-4">
+                    <p
+                      className="text-xs text-center"
+                      style={{ color: "var(--text-3)" }}
+                    >
+                      Solo 1 PR registrado
+                    </p>
+                  </div>
+                )}
               </div>
             );
           })}

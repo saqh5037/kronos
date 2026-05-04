@@ -38,14 +38,33 @@ export default async function AsistenciaPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-6">
-        <p className="k-eyebrow mb-1">Operación · Hoy</p>
-        <h1 className="font-display font-bold text-3xl tracking-tight capitalize">
-          {todayLabel}
-        </h1>
+      {/* HERO */}
+      <div
+        className="relative rounded-[18px] overflow-hidden mb-8 p-6"
+        style={{
+          background: "#101316",
+          border: "1px solid rgba(255,255,255,0.06)",
+        }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse at 80% 0%, rgba(58,163,255,0.25), transparent 55%), radial-gradient(ellipse at 0% 100%, rgba(25,240,139,0.18), transparent 60%)",
+          }}
+        />
+        <div className="relative">
+          <p className="k-eyebrow mb-2" style={{ color: "var(--text-2)" }}>
+            Operación · Hoy
+          </p>
+          <h1 className="font-display font-bold text-4xl tracking-tight capitalize">
+            {todayLabel}
+          </h1>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      {/* STATS */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         <Stat label="Clases" value={String(stats.totalClasses)} />
         <Stat label="Reservados" value={String(stats.totalBooked)} />
         <Stat
@@ -98,14 +117,11 @@ function Stat({
           ? "var(--pr)"
           : "var(--text)";
   return (
-    <div
-      className="p-3 rounded-xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
-    >
+    <div className="k-card p-4">
       <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
         {label}
       </p>
-      <p className="font-display font-bold text-2xl mt-1" style={{ color }}>
+      <p className="font-display font-bold text-3xl mt-1" style={{ color }}>
         {value}
       </p>
     </div>
@@ -121,22 +137,26 @@ function DayRoster({ roster }: { roster: ClassRoster }) {
   ).length;
 
   return (
-    <div
-      className="rounded-xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
-    >
+    <div className="k-card overflow-hidden">
       <div
         className="px-4 py-3 border-b flex items-center justify-between"
         style={{ borderColor: "var(--line)" }}
       >
-        <div>
-          <p className="font-mono text-sm font-semibold">
+        <div className="flex items-center gap-3">
+          <div className="font-display font-bold text-xl">
             {formatTime(roster.startsAt)}
-          </p>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-3)" }}>
-            {roster.wodName ?? "Sin WOD"}
-            {roster.coachName && ` · ${roster.coachName}`}
-          </p>
+          </div>
+          <div>
+            <p className="text-sm font-medium">{roster.wodName ?? "Sin WOD"}</p>
+            {roster.coachName && (
+              <p
+                className="text-[10px] mt-0.5"
+                style={{ color: "var(--text-3)" }}
+              >
+                {roster.coachName}
+              </p>
+            )}
+          </div>
         </div>
         <div
           className="font-mono text-sm font-bold"
