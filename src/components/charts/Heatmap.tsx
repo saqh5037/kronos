@@ -93,22 +93,23 @@ export function Heatmap({
       preserveAspectRatio="xMinYMid meet"
     >
       {weeks.map((week, wi) =>
-        week.map((cell, di) => (
-          <rect
-            key={`${wi}-${di}`}
-            x={wi * (cellSize + cellGap)}
-            y={di * (cellSize + cellGap)}
-            width={cellSize}
-            height={cellSize}
-            rx={2}
-            ry={2}
-            fill={colorFor(cell.value, cell.inRange)}
-          >
-            <title>
-              {format(cell.date, "yyyy-MM-dd")}: {cell.value}
-            </title>
-          </rect>
-        )),
+        week.map((cell, di) => {
+          const titleStr = `${format(cell.date, "yyyy-MM-dd")}: ${cell.value}`;
+          return (
+            <rect
+              key={`${wi}-${di}`}
+              x={wi * (cellSize + cellGap)}
+              y={di * (cellSize + cellGap)}
+              width={cellSize}
+              height={cellSize}
+              rx={2}
+              ry={2}
+              fill={colorFor(cell.value, cell.inRange)}
+            >
+              <title>{titleStr}</title>
+            </rect>
+          );
+        }),
       )}
     </svg>
   );
