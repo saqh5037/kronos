@@ -467,3 +467,45 @@ model AuditEvent {
   @@index([tenantId, targetType, targetId])
   @@index([tenantId, actorId])
 }
+
+// ─── COMMUNICATIONS ───────────────────────────────────────────────────────────
+
+enum AnnouncementAudience {
+  ALL
+  ACTIVE
+  PAUSED
+  COACHES
+}
+
+enum AnnouncementChannel {
+  EMAIL
+  PUSH
+  IN_APP
+}
+
+enum AnnouncementStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+}
+
+model Announcement {
+  id          String               @id @default(cuid())
+  tenantId    String
+  title       String
+  body        String               @db.Text
+  audience    AnnouncementAudience @default(ALL)
+  channel     AnnouncementChannel  @default(IN_APP)
+  status      AnnouncementStatus   @default(DRAFT)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  recipientCount Int               @default(0)
+  authorId    String?
+  createdAt   DateTime             @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, status])
+}
