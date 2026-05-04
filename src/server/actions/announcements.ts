@@ -9,7 +9,7 @@ import type {
   AnnouncementAudience,
   AnnouncementChannel,
 } from "@/lib/validations/announcement";
-import { sendEmail } from "@/lib/email";
+import { dispatchAnnouncement } from "../announcements/dispatch";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -69,47 +69,6 @@ export async function listAnnouncements(): Promise<AnnouncementRow[]> {
   }));
 }
 
-/**
- * Resolve target athletes/users for a given audience. Returns email list
- * (de-duped) — used by EMAIL channel. For IN_APP we'd link the announcement
- * to a Notification table (out of scope for Fase 1).
- */
-async function resolveAudience(
-  tenantId: string,
-  audience: AnnouncementAudience,
-): Promise<{ count: number; emails: string[] }> {
-  const db = withTenant(tenantId);
-
-  if (audience === "COACHES") {
-    const coaches = await db.user.findMany({
-      where: { role: { in: ["COACH", "OWNER"] } },
-      select: { email: true },
-    });
-    const emails = coaches.map((c) => c.email).filter(Boolean);
-    return { count: emails.length, emails };
-  }
-
-  // Athlete-bound audiences. Athletes don't always have an email — only those
-  // with a linked User account get email delivery; the rest will receive IN_APP
-  // when that channel exists.
-  const statusFilter =
-    audience === "ACTIVE"
-      ? { status: "ACTIVE" as const }
-      : audience === "PAUSED"
-        ? { status: "PAUSED" as const }
-        : {};
-
-  const athletes = await db.athlete.findMany({
-    where: statusFilter,
-    select: { id: true, user: { select: { email: true } } },
-  });
-  const emails = athletes
-    .map((a) => a.user?.email)
-    .filter((e): e is string => !!e);
-
-  return { count: athletes.length, emails: Array.from(new Set(emails)) };
-}
-
 export async function createAnnouncement(data: unknown) {
   const session = await requireSession();
   const tenantId = session.user.tenantId;
@@ -133,58 +92,20 @@ export async function createAnnouncement(data: unknown) {
 }
 
 /**
- * Send a DRAFT or SCHEDULED announcement. Marks SENDING → SENT/FAILED
- * depending on the result. Uses the mock email sender for now.
+ * Send a DRAFT or SCHEDULED announcement now. Delegates the side-effects to
+ * dispatchAnnouncement so the cron endpoint reuses the same path.
  */
 export async function sendAnnouncement(id: string) {
   const session = await requireSession();
   const tenantId = session.user.tenantId;
-  const db = withTenant(tenantId);
 
-  const announcement = await db.announcement.findUnique({ where: { id } });
-  if (!announcement) throw new Error("Anuncio no encontrado");
-  if (announcement.status === "SENT") {
-    throw new Error("Este anuncio ya fue enviado");
+  const result = await dispatchAnnouncement(tenantId, id);
+  revalidatePath("/admin/comunicaciones");
+
+  if (result.status === "FAILED") {
+    throw new Error(result.error ?? "Falló el envío");
   }
-
-  await rawDb.announcement.update({
-    where: { id },
-    data: { status: "SENDING" },
-  });
-
-  try {
-    const { count, emails } = await resolveAudience(
-      tenantId,
-      announcement.audience as AnnouncementAudience,
-    );
-
-    if (announcement.channel === "EMAIL" && emails.length > 0) {
-      await sendEmail({
-        to: emails,
-        subject: announcement.title,
-        html: `<p>${announcement.body.replace(/\n/g, "<br/>")}</p>`,
-      });
-    }
-    // IN_APP / PUSH: stub — would create Notification rows / FCM dispatch in Fase 3
-
-    await rawDb.announcement.update({
-      where: { id },
-      data: {
-        status: "SENT",
-        sentAt: new Date(),
-        recipientCount: count,
-      },
-    });
-
-    revalidatePath("/admin/comunicaciones");
-    return { ok: true, recipientCount: count };
-  } catch (err) {
-    await rawDb.announcement.update({
-      where: { id },
-      data: { status: "FAILED" },
-    });
-    throw err;
-  }
+  return { ok: true, recipientCount: result.recipientCount };
 }
 
 export async function deleteAnnouncement(id: string) {

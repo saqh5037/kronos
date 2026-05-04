@@ -34,6 +34,14 @@ Auth:
 - Google OAuth (opcional, gateado por env)
 - **Dev login** — CredentialsProvider solo en NODE_ENV=development. UI bajo `NEXT_PUBLIC_DEV_LOGIN=1`.
   Seed crea `owner@iron-hands.demo`, `coach@iron-hands.demo`, `atleta@iron-hands.demo` (password "dev").
+- **Role guard middleware**: ATHLETE solo /atleta/_, OWNER/COACH/STAFF solo /admin/_. Cross-access redirige al surface correcto.
+
+Operativa (Fase 2 hardening):
+
+- **Email**: Resend cuando `RESEND_API_KEY` está cableada, fallback a console.log mock para dev local.
+- **Cron** `/api/cron/dispatch-announcements` (GET, Bearer `CRON_SECRET`): dispara anuncios SCHEDULED con `scheduledAt <= now`.
+  Vercel Cron friendly — agendar `*/5 * * * *` en `vercel.json`.
+- **Sidebar admin responsive**: drawer + hamburger en `<lg`, fijo en `lg+`.
 
 Lógica de dominio (pure helpers + tests):
 
@@ -48,8 +56,8 @@ Stats:
 - Branch: `main`
 - Dev server: `:3000`
 - BD: PostgreSQL en `:5434` (docker compose)
-- Tests unit: 138/138 (`pnpm test`) — 11 archivos
-- Tests E2E: 19/19 (`pnpm test:e2e`) — 4 specs (auth, reservar, score-pr, leaderboard)
+- Tests unit: 150/150 (`pnpm test`) — 13 archivos
+- Tests E2E: 21/21 (`pnpm test:e2e`) — 4 specs (auth, reservar, score-pr, leaderboard)
 - Build: `pnpm build` ✅
 - Commits Fase 1 + cierre: `48fd157`..`<HEAD>` (10+ commits)
 
