@@ -454,16 +454,39 @@ async function main() {
         description: recipe.description,
         timeCap: recipe.timeCap ?? null,
         movements: {
-          create: recipe.movements.map((m, idx) => {
-            const movementId = movementByName.get(m.name);
-            if (!movementId) throw new Error(`Movement not seeded: ${m.name}`);
-            return {
-              movementId,
-              reps: m.reps ?? null,
-              weight: m.weight ?? null,
-              order: idx,
-            };
-          }),
+          create: (() => {
+            // Dedupe by movementId (schema has @@unique([wodId, movementId])).
+            // For repeated movements like Murph's "Run x2", we collapse and
+            // sum reps so the WOD totals stay correct.
+            const acc = new Map<
+              string,
+              {
+                movementId: string;
+                reps: number | null;
+                weight: number | null;
+                order: number;
+              }
+            >();
+            recipe.movements.forEach((m, idx) => {
+              const movementId = movementByName.get(m.name);
+              if (!movementId)
+                throw new Error(`Movement not seeded: ${m.name}`);
+              const existing = acc.get(movementId);
+              if (existing) {
+                if (m.reps != null) {
+                  existing.reps = (existing.reps ?? 0) + m.reps;
+                }
+              } else {
+                acc.set(movementId, {
+                  movementId,
+                  reps: m.reps ?? null,
+                  weight: m.weight ?? null,
+                  order: idx,
+                });
+              }
+            });
+            return Array.from(acc.values());
+          })(),
         },
       },
     });
