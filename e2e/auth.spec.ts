@@ -52,11 +52,29 @@ test.describe("Auth — guards y dev login", () => {
     await expect(page.getByRole("link", { name: /Reservas/ })).toBeVisible();
   });
 
-  test("dev login ATHLETE → llega a admin (deuda: middleware sin role guard)", async ({
+  test("dev login ATHLETE → middleware redirige a /atleta", async ({
     page,
   }) => {
     await loginAs(page, "atleta");
-    await expect(page).toHaveURL(/\/(admin|atleta)/);
+    // Middleware fuerza /atleta para role=ATHLETE aunque callbackUrl sea /admin
+    await page.waitForURL(/\/atleta/, { timeout: 5000 });
+    await expect(page).toHaveURL(/\/atleta/);
+  });
+
+  test("ATHLETE intenta /admin/atletas → redirige a /atleta", async ({
+    page,
+  }) => {
+    await loginAs(page, "atleta");
+    await page.goto("/admin/atletas");
+    await page.waitForURL(/\/atleta/, { timeout: 5000 });
+    await expect(page).toHaveURL(/\/atleta/);
+  });
+
+  test("OWNER intenta /atleta → redirige a /admin", async ({ page }) => {
+    await loginAs(page, "owner");
+    await page.goto("/atleta");
+    await page.waitForURL(/\/admin/, { timeout: 5000 });
+    await expect(page).toHaveURL(/\/admin/);
   });
 
   test("sign out vuelve a /login", async ({ page }) => {
