@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { listPlans, type PlanRow } from "@/server/actions/plans";
 import {
   listMemberships,
@@ -14,10 +15,26 @@ import PlanForm from "@/components/PlanForm";
 import MembershipAssignForm from "@/components/MembershipAssignForm";
 import CashPaymentForm from "@/components/CashPaymentForm";
 import { formatDayMonth } from "@/lib/week";
+import type { PaymentGateway } from "@/lib/validations/payment";
 
 export const metadata = { title: "Kronos — Pagos" };
 
-export default async function PagosPage() {
+const GATEWAY_FILTERS: { value: PaymentGateway | "ALL"; label: string }[] = [
+  { value: "ALL", label: "Todos" },
+  { value: "CASH", label: "Efectivo" },
+  { value: "MERCADOPAGO", label: "Mercado Pago" },
+];
+
+export default async function PagosPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ gateway?: string }>;
+}) {
+  const sp = (await searchParams) ?? {};
+  const gatewayFilter: PaymentGateway | undefined =
+    sp.gateway === "CASH" || sp.gateway === "MERCADOPAGO"
+      ? sp.gateway
+      : undefined;
   let plans: PlanRow[] = [];
   let memberships: MembershipRow[] = [];
   let payments: PaymentRow[] = [];
@@ -33,7 +50,7 @@ export default async function PagosPage() {
     [plans, memberships, payments, stats, athletes] = await Promise.all([
       listPlans(),
       listMemberships({ status: "ACTIVE" }),
-      listPayments({ limit: 30 }),
+      listPayments({ limit: 30, gateway: gatewayFilter }),
       getPaymentStats(),
       listAthletes(),
     ]);
@@ -208,6 +225,32 @@ export default async function PagosPage() {
             />
           )}
         </div>
+
+        <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+          {GATEWAY_FILTERS.map((f) => {
+            const active =
+              (f.value === "ALL" && !gatewayFilter) ||
+              f.value === gatewayFilter;
+            const href =
+              f.value === "ALL"
+                ? { pathname: "/admin/pagos" }
+                : { pathname: "/admin/pagos", query: { gateway: f.value } };
+            return (
+              <Link
+                key={f.value}
+                href={href}
+                className="k-chip text-[11px]"
+                style={{
+                  background: active ? "var(--grad-soft)" : "var(--bg-soft)",
+                  color: active ? "var(--text)" : "var(--text-2)",
+                  borderColor: active ? "var(--strain)" : "var(--line)",
+                }}
+              >
+                {f.label}
+              </Link>
+            );
+          })}
+        </div>
         {payments.length === 0 ? (
           <div
             className="p-6 rounded-xl border text-center"
@@ -260,9 +303,7 @@ export default async function PagosPage() {
                       {p.planName ?? "—"}
                     </td>
                     <td className="px-4 py-2.5 text-xs">
-                      <span className="k-chip k-chip-ghost text-[10px]">
-                        {p.gateway}
-                      </span>
+                      <GatewayChip gateway={p.gateway} />
                     </td>
                     <td className="px-4 py-2.5">
                       <span className={`k-chip ${chipForStatus(p.status)}`}>
@@ -370,6 +411,40 @@ function PlanCard({ p }: { p: PlanRow }) {
       </div>
     </div>
   );
+}
+
+function GatewayChip({ gateway }: { gateway: string }) {
+  if (gateway === "MERCADOPAGO") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold"
+        style={{
+          background: "rgba(58,163,255,0.15)",
+          color: "var(--strain)",
+          border: "1px solid rgba(58,163,255,0.3)",
+        }}
+        title="Mercado Pago"
+      >
+        <span aria-hidden>◆</span> MP
+      </span>
+    );
+  }
+  if (gateway === "CASH") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold"
+        style={{
+          background: "rgba(25,240,139,0.15)",
+          color: "var(--recovery)",
+          border: "1px solid rgba(25,240,139,0.3)",
+        }}
+        title="Efectivo"
+      >
+        <span aria-hidden>$</span> EFECTIVO
+      </span>
+    );
+  }
+  return <span className="k-chip k-chip-ghost text-[10px]">{gateway}</span>;
 }
 
 function chipForStatus(status: string): string {

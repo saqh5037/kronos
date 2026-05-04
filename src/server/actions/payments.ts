@@ -34,6 +34,7 @@ export type PaymentRow = {
 
 export async function listPayments(opts?: {
   status?: PaymentStatus;
+  gateway?: PaymentGateway;
   fromDate?: Date;
   toDate?: Date;
   limit?: number;
@@ -44,6 +45,7 @@ export async function listPayments(opts?: {
   const payments = await db.payment.findMany({
     where: {
       ...(opts?.status ? { status: opts.status } : {}),
+      ...(opts?.gateway ? { gateway: opts.gateway } : {}),
       ...(opts?.fromDate || opts?.toDate
         ? {
             createdAt: {
