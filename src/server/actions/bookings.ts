@@ -238,10 +238,18 @@ export async function checkInAthlete(bookingId: string) {
   const session = await requireSession();
   const db = withTenant(session.user.tenantId);
 
-  await db.booking.update({
+  const updated = await db.booking.update({
     where: { id: bookingId },
     data: { status: "ATTENDED", checkedInAt: new Date() },
   });
+
+  // Fire-and-forget streak recompute. If it fails the check-in still stands.
+  try {
+    const { recomputeAttendanceStreak } = await import("./attendance");
+    await recomputeAttendanceStreak(updated.athleteId);
+  } catch (err) {
+    console.error("[checkIn] streak recompute failed:", err);
+  }
 
   revalidatePath("/admin/reservas");
   revalidatePath("/admin/asistencia");
