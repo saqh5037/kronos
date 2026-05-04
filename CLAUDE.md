@@ -48,7 +48,8 @@ Stats:
 - Branch: `main`
 - Dev server: `:3000`
 - BD: PostgreSQL en `:5434` (docker compose)
-- Tests: 138/138 passing (`pnpm test`) — 11 archivos
+- Tests unit: 138/138 (`pnpm test`) — 11 archivos
+- Tests E2E: 19/19 (`pnpm test:e2e`) — 4 specs (auth, reservar, score-pr, leaderboard)
 - Build: `pnpm build` ✅
 - Commits Fase 1 + cierre: `48fd157`..`<HEAD>` (10+ commits)
 
@@ -60,7 +61,7 @@ pnpm build            # Build producción
 pnpm typecheck        # TypeScript check
 pnpm lint             # ESLint
 pnpm test             # Vitest unit tests
-pnpm test:e2e         # Playwright
+pnpm test:e2e         # Playwright E2E (requiere pnpm db:seed previo)
 pnpm db:push          # Push schema (dev — sin migraciones)
 pnpm db:seed          # Seed: 2 boxes, 5 atletas, WODs, clases, badges
 pnpm db:studio        # Prisma Studio GUI
