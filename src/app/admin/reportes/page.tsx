@@ -1,4 +1,5 @@
 import { getReports, type Reports } from "@/server/actions/reports";
+import { KPI, SimpleCard } from "@/components/kronos/StatCard";
 
 export const metadata = { title: "Kronos — Reportes" };
 
@@ -128,90 +129,6 @@ export default async function ReportesPage() {
         />
         <PlanDistribution distribution={r.planDistribution} />
       </div>
-    </div>
-  );
-}
-
-function KPI({
-  label,
-  value,
-  subtitle,
-  tone,
-  delta,
-}: {
-  label: string;
-  value: string;
-  subtitle?: string;
-  tone?: "recovery" | "strain" | "pr";
-  delta?: number;
-}) {
-  const color =
-    tone === "recovery"
-      ? "var(--recovery)"
-      : tone === "strain"
-        ? "var(--strain)"
-        : tone === "pr"
-          ? "var(--pr)"
-          : "var(--text)";
-  return (
-    <div
-      className="p-4 rounded-xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
-    >
-      <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
-        {label}
-      </p>
-      <p className="font-display font-bold text-3xl mt-1" style={{ color }}>
-        {value}
-      </p>
-      {delta !== undefined && delta !== 0 && (
-        <p
-          className="text-[10px] font-mono mt-1"
-          style={{
-            color:
-              delta > 0
-                ? "var(--recovery)"
-                : delta < 0
-                  ? "var(--pr)"
-                  : "var(--text-3)",
-          }}
-        >
-          {delta > 0 ? "↑" : "↓"} {Math.abs(Math.round(delta * 100))}% vs mes
-          anterior
-        </p>
-      )}
-      {subtitle && (
-        <p className="text-[10px] mt-1" style={{ color: "var(--text-3)" }}>
-          {subtitle}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function SimpleCard({
-  label,
-  value,
-  subtitle,
-}: {
-  label: string;
-  value: string;
-  subtitle?: string;
-}) {
-  return (
-    <div
-      className="p-4 rounded-xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
-    >
-      <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
-        {label}
-      </p>
-      <p className="font-display font-bold text-2xl mt-1">{value}</p>
-      {subtitle && (
-        <p className="text-xs mt-1" style={{ color: "var(--text-3)" }}>
-          {subtitle}
-        </p>
-      )}
     </div>
   );
 }
