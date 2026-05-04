@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
 import { withTenant } from "../db";
 import type { PlanType } from "@/lib/validations/membership";
+import { startOfMonth, subMonths, endOfMonth } from "date-fns";
+import { monthKey } from "@/lib/dates";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -251,4 +253,100 @@ export async function getReports(): Promise<Reports> {
     topAttendees,
     planDistribution,
   };
+}
+
+export type RevenueByMonthPoint = {
+  month: string; // YYYY-MM
+  revenue: number;
+  paymentCount: number;
+};
+
+export async function getRevenueByMonth(
+  months: number = 12,
+): Promise<RevenueByMonthPoint[]> {
+  const session = await requireSession();
+  const db = withTenant(session.user.tenantId);
+
+  const now = new Date();
+  const from = startOfMonth(subMonths(now, months - 1));
+  const to = endOfMonth(now);
+
+  const payments = await db.payment.findMany({
+    where: {
+      status: "PAID",
+      paidAt: { gte: from, lte: to, not: null },
+    },
+    select: { amount: true, paidAt: true },
+  });
+
+  const byMonth = new Map<string, { revenue: number; count: number }>();
+  for (const p of payments) {
+    if (!p.paidAt) continue;
+    const k = monthKey(p.paidAt);
+    const existing = byMonth.get(k) ?? { revenue: 0, count: 0 };
+    existing.revenue += Number(p.amount);
+    existing.count += 1;
+    byMonth.set(k, existing);
+  }
+
+  const out: RevenueByMonthPoint[] = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const d = subMonths(now, i);
+    const k = monthKey(d);
+    const v = byMonth.get(k) ?? { revenue: 0, count: 0 };
+    out.push({ month: k, revenue: v.revenue, paymentCount: v.count });
+  }
+  return out;
+}
+
+export type AthletesByMonthPoint = {
+  month: string;
+  newAthletes: number;
+  churnedMemberships: number;
+};
+
+export async function getAthletesByMonth(
+  months: number = 12,
+): Promise<AthletesByMonthPoint[]> {
+  const session = await requireSession();
+  const db = withTenant(session.user.tenantId);
+
+  const now = new Date();
+  const from = startOfMonth(subMonths(now, months - 1));
+  const to = endOfMonth(now);
+
+  const [newAthletes, cancelled] = await Promise.all([
+    db.athlete.findMany({
+      where: { createdAt: { gte: from, lte: to } },
+      select: { createdAt: true },
+    }),
+    db.membership.findMany({
+      where: { status: "CANCELLED", createdAt: { gte: from, lte: to } },
+      select: { createdAt: true },
+    }),
+  ]);
+
+  const newByMonth = new Map<string, number>();
+  for (const a of newAthletes) {
+    const k = monthKey(a.createdAt);
+    newByMonth.set(k, (newByMonth.get(k) ?? 0) + 1);
+  }
+
+  const churnByMonth = new Map<string, number>();
+  for (const c of cancelled) {
+    const k = monthKey(c.createdAt);
+    churnByMonth.set(k, (churnByMonth.get(k) ?? 0) + 1);
+  }
+
+  const out: AthletesByMonthPoint[] = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const d = subMonths(now, i);
+    const k = monthKey(d);
+    out.push({
+      month: k,
+      newAthletes: newByMonth.get(k) ?? 0,
+      churnedMemberships: churnByMonth.get(k) ?? 0,
+    });
+  }
+  return out;
 }

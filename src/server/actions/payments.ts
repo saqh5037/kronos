@@ -12,6 +12,8 @@ import type { PaymentGateway, PaymentStatus } from "@/lib/validations/payment";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
 import { getPreferenceClient, isMpConfigured } from "@/lib/payments/mp-client";
+import { type ListOpts, type ListResult, normalizePagination } from "./types";
+import { eachDayInRange, dayKey } from "@/lib/dates";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -89,6 +91,181 @@ export type PaymentStats = {
   pendingRevenue: number;
   pendingCount: number;
 };
+
+export type PaymentSort = "createdAt" | "paidAt" | "amount";
+
+export async function listPaymentsPaged(
+  opts?: ListOpts<PaymentSort> & {
+    gateway?: PaymentGateway;
+  },
+): Promise<ListResult<PaymentRow>> {
+  const session = await requireSession();
+  const db = withTenant(session.user.tenantId);
+  const { page, pageSize, skip, take } = normalizePagination(opts);
+
+  const search = opts?.search?.trim();
+  const where = {
+    ...(opts?.status ? { status: opts.status as PaymentStatus } : {}),
+    ...(opts?.gateway ? { gateway: opts.gateway } : {}),
+    ...(opts?.dateFrom || opts?.dateTo
+      ? {
+          createdAt: {
+            ...(opts.dateFrom ? { gte: opts.dateFrom } : {}),
+            ...(opts.dateTo ? { lte: opts.dateTo } : {}),
+          },
+        }
+      : {}),
+    ...(search
+      ? {
+          membership: {
+            athlete: {
+              OR: [
+                {
+                  firstName: { contains: search, mode: "insensitive" as const },
+                },
+                {
+                  lastName: { contains: search, mode: "insensitive" as const },
+                },
+              ],
+            },
+          },
+        }
+      : {}),
+  };
+
+  const sortBy = opts?.sortBy ?? "createdAt";
+  const sortDir = opts?.sortDir ?? "desc";
+  const orderBy = { [sortBy]: sortDir };
+
+  const [total, payments] = await Promise.all([
+    db.payment.count({ where }),
+    db.payment.findMany({
+      where,
+      orderBy,
+      skip,
+      take,
+      include: {
+        membership: {
+          include: {
+            athlete: { select: { firstName: true, lastName: true } },
+            plan: { select: { name: true } },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const rows: PaymentRow[] = payments.map((p) => ({
+    id: p.id,
+    amount: Number(p.amount),
+    currency: p.currency,
+    gateway: p.gateway as PaymentGateway,
+    status: p.status as PaymentStatus,
+    paidAt: p.paidAt,
+    createdAt: p.createdAt,
+    membershipId: p.membershipId,
+    athleteName: p.membership
+      ? `${p.membership.athlete.firstName} ${p.membership.athlete.lastName}`
+      : null,
+    planName: p.membership?.plan.name ?? null,
+  }));
+
+  return { rows, total, page, pageSize };
+}
+
+export type RevenueByDayPoint = { day: string; revenue: number; count: number };
+
+export async function getRevenueByDay(opts: {
+  dateFrom: Date;
+  dateTo: Date;
+}): Promise<RevenueByDayPoint[]> {
+  const session = await requireSession();
+  const db = withTenant(session.user.tenantId);
+
+  const payments = await db.payment.findMany({
+    where: {
+      status: "PAID",
+      paidAt: { gte: opts.dateFrom, lte: opts.dateTo, not: null },
+    },
+    select: { amount: true, paidAt: true },
+  });
+
+  const byDay = new Map<string, { revenue: number; count: number }>();
+  for (const p of payments) {
+    if (!p.paidAt) continue;
+    const k = dayKey(p.paidAt);
+    const existing = byDay.get(k) ?? { revenue: 0, count: 0 };
+    existing.revenue += Number(p.amount);
+    existing.count += 1;
+    byDay.set(k, existing);
+  }
+
+  return eachDayInRange({ from: opts.dateFrom, to: opts.dateTo }).map((d) => {
+    const k = dayKey(d);
+    const v = byDay.get(k) ?? { revenue: 0, count: 0 };
+    return { day: k, revenue: v.revenue, count: v.count };
+  });
+}
+
+export type OverdueMembership = {
+  membershipId: string;
+  athleteId: string;
+  athleteName: string;
+  planName: string;
+  endDate: Date;
+  daysOverdue: number;
+  pendingAmount: number;
+  currency: string;
+};
+
+export async function listOverdueMemberships(opts?: {
+  graceDays?: number;
+  limit?: number;
+}): Promise<OverdueMembership[]> {
+  const session = await requireSession();
+  const db = withTenant(session.user.tenantId);
+  const graceDays = opts?.graceDays ?? 0;
+  const limit = opts?.limit ?? 50;
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - graceDays * 86400000);
+
+  const memberships = await db.membership.findMany({
+    where: {
+      status: { in: ["ACTIVE", "PENDING"] },
+      endDate: { lt: cutoff },
+    },
+    orderBy: { endDate: "asc" },
+    take: limit,
+    include: {
+      athlete: { select: { id: true, firstName: true, lastName: true } },
+      plan: { select: { name: true, price: true, currency: true } },
+      payments: { where: { status: "PENDING" }, select: { amount: true } },
+    },
+  });
+
+  return memberships
+    .filter((m) => m.endDate !== null)
+    .map((m) => {
+      const endDate = m.endDate!;
+      const daysOverdue = Math.floor(
+        (now.getTime() - endDate.getTime()) / 86400000,
+      );
+      const pendingAmount = m.payments.reduce(
+        (acc, p) => acc + Number(p.amount),
+        0,
+      );
+      return {
+        membershipId: m.id,
+        athleteId: m.athlete.id,
+        athleteName: `${m.athlete.firstName} ${m.athlete.lastName}`,
+        planName: m.plan.name,
+        endDate,
+        daysOverdue,
+        pendingAmount: pendingAmount || Number(m.plan.price),
+        currency: m.plan.currency,
+      };
+    });
+}
 
 export async function getPaymentStats(): Promise<PaymentStats> {
   const session = await requireSession();

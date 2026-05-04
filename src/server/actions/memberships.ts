@@ -9,6 +9,7 @@ import type { MembershipStatus, PlanType } from "@/lib/validations/membership";
 import { computeMembershipEndDate, classesRemaining } from "@/lib/membership";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
+import { type ListOpts, type ListResult, normalizePagination } from "./types";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -95,6 +96,101 @@ export async function listMemberships(opts?: {
   }
 
   return out;
+}
+
+export type MembershipSort = "createdAt" | "startDate" | "endDate";
+
+export async function listMembershipsPaged(
+  opts?: ListOpts<MembershipSort> & { planId?: string },
+): Promise<ListResult<MembershipRow>> {
+  const session = await requireSession();
+  const tenantId = session.user.tenantId;
+  const db = withTenant(tenantId);
+  const { page, pageSize, skip, take } = normalizePagination(opts);
+
+  const search = opts?.search?.trim();
+  const where = {
+    ...(opts?.status ? { status: opts.status as MembershipStatus } : {}),
+    ...(opts?.planId ? { planId: opts.planId } : {}),
+    ...(opts?.dateFrom || opts?.dateTo
+      ? {
+          startDate: {
+            ...(opts.dateFrom ? { gte: opts.dateFrom } : {}),
+            ...(opts.dateTo ? { lte: opts.dateTo } : {}),
+          },
+        }
+      : {}),
+    ...(search
+      ? {
+          athlete: {
+            OR: [
+              { firstName: { contains: search, mode: "insensitive" as const } },
+              { lastName: { contains: search, mode: "insensitive" as const } },
+            ],
+          },
+        }
+      : {}),
+  };
+
+  const sortBy = opts?.sortBy ?? "createdAt";
+  const sortDir = opts?.sortDir ?? "desc";
+
+  const [total, memberships] = await Promise.all([
+    db.membership.count({ where }),
+    db.membership.findMany({
+      where,
+      orderBy: { [sortBy]: sortDir },
+      skip,
+      take,
+      include: {
+        athlete: { select: { id: true, firstName: true, lastName: true } },
+        plan: true,
+        payments: { where: { status: "PAID" }, select: { amount: true } },
+      },
+    }),
+  ]);
+
+  const rows: MembershipRow[] = [];
+  for (const m of memberships) {
+    const periodStart = m.startDate;
+    const periodEnd = m.endDate ?? new Date();
+    const attendedCount = await db.booking.count({
+      where: {
+        athleteId: m.athleteId,
+        status: "ATTENDED",
+        class: { startsAt: { gte: periodStart, lte: periodEnd } },
+      },
+    });
+
+    const remaining = classesRemaining(
+      {
+        type: m.plan.type as PlanType,
+        classesPerMonth: m.plan.classesPerMonth,
+        durationDays: m.plan.durationDays,
+      },
+      attendedCount,
+    );
+
+    const amountPaid = m.payments.reduce((acc, p) => acc + Number(p.amount), 0);
+
+    rows.push({
+      id: m.id,
+      athleteId: m.athleteId,
+      athleteName: `${m.athlete.firstName} ${m.athlete.lastName}`,
+      planId: m.planId,
+      planName: m.plan.name,
+      planType: m.plan.type as PlanType,
+      startDate: m.startDate,
+      endDate: m.endDate,
+      status: m.status as MembershipStatus,
+      autoRenew: m.autoRenew,
+      amountPaid,
+      classesUsed: attendedCount,
+      classesRemaining: remaining,
+    });
+  }
+
+  return { rows, total, page, pageSize };
 }
 
 export async function assignMembership(data: unknown) {
