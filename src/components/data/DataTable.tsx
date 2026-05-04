@@ -107,7 +107,7 @@ export function DataTable<T>({
                       <button
                         type="button"
                         onClick={header.column.getToggleSortingHandler()}
-                        className="inline-flex items-center gap-1 hover:text-[var(--text-2)]"
+                        className="inline-flex min-h-8 items-center gap-1 py-1 hover:text-[var(--text-2)]"
                       >
                         {flexRender(
                           header.column.columnDef.header,

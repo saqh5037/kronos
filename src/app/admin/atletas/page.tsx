@@ -1,88 +1,293 @@
-import { listAthletes } from "@/server/actions/athletes";
+import {
+  listAthletesPaged,
+  getAthleteGrowthByDay,
+  getAtRiskAthletes,
+  type AthleteRow,
+  type AthleteGrowthPoint,
+  type AtRiskAthlete,
+} from "@/server/actions/athletes";
 import AthleteForm from "@/components/AthleteForm";
+import { rangeFromParams, previousRange, formatRange } from "@/lib/dates";
+import { MetricDelta } from "@/components/charts/MetricDelta";
+import type { AthleteStatus } from "@prisma/client";
+import { AtletasFilters } from "./_components/AtletasFilters";
+import { GrowthChart } from "./_components/GrowthChart";
+import { AtletasTable } from "./_components/AtletasTable";
 
 export const metadata = { title: "Kronos — Atletas" };
 
-export default async function AtletasPage() {
-  let athletes: Awaited<ReturnType<typeof listAthletes>> = [];
+type SearchParams = {
+  preset?: string;
+  from?: string;
+  to?: string;
+  q?: string;
+  status?: string;
+  page?: string;
+};
+
+const PAGE_SIZE = 25;
+
+const VALID_STATUS = new Set<AthleteStatus>([
+  "ACTIVE",
+  "PAUSED",
+  "DROPIN",
+  "CANCELLED",
+]);
+
+function parseStatus(v?: string): AthleteStatus | undefined {
+  return v && VALID_STATUS.has(v as AthleteStatus)
+    ? (v as AthleteStatus)
+    : undefined;
+}
+
+function parsePage(v?: string): number {
+  const n = parseInt(v ?? "1", 10);
+  return Number.isFinite(n) && n > 0 ? n : 1;
+}
+
+export default async function AtletasPage({
+  searchParams,
+}: {
+  searchParams?: Promise<SearchParams>;
+}) {
+  const sp = (await searchParams) ?? {};
+  const range = rangeFromParams({
+    preset: sp.preset,
+    from: sp.from,
+    to: sp.to,
+  });
+  const prev = previousRange(range);
+  const search = (sp.q ?? "").trim() || undefined;
+  const status = parseStatus(sp.status);
+  const page = parsePage(sp.page);
+
+  let rows: {
+    rows: AthleteRow[];
+    total: number;
+    page: number;
+    pageSize: number;
+  } = {
+    rows: [],
+    total: 0,
+    page,
+    pageSize: PAGE_SIZE,
+  };
+  let growth: AthleteGrowthPoint[] = [];
+  let atRisk: AtRiskAthlete[] = [];
+  let activeNow = 0;
+  let newInRange = 0;
+  let newPrev = 0;
+
   try {
-    athletes = await listAthletes();
+    const [
+      tableRes,
+      growthData,
+      atRiskData,
+      allActive,
+      newInRangeData,
+      newPrevData,
+    ] = await Promise.all([
+      listAthletesPaged({
+        dateFrom: range.from,
+        dateTo: range.to,
+        search,
+        status,
+        page,
+        pageSize: PAGE_SIZE,
+      }),
+      getAthleteGrowthByDay({ dateFrom: range.from, dateTo: range.to }),
+      getAtRiskAthletes({ inactivityDays: 14, limit: 20 }),
+      listAthletesPaged({
+        status: "ACTIVE" as AthleteStatus,
+        page: 1,
+        pageSize: 1,
+      }),
+      listAthletesPaged({
+        dateFrom: range.from,
+        dateTo: range.to,
+        page: 1,
+        pageSize: 1,
+      }),
+      listAthletesPaged({
+        dateFrom: prev.from,
+        dateTo: prev.to,
+        page: 1,
+        pageSize: 1,
+      }),
+    ]);
+    rows = tableRes;
+    growth = growthData;
+    atRisk = atRiskData;
+    activeNow = allActive.total;
+    newInRange = newInRangeData.total;
+    newPrev = newPrevData.total;
   } catch {
-    // Graceful fallback — DB may not be seeded yet
+    // BD/sesión ausente
   }
 
   return (
     <div className="p-8">
-      <div className="flex items-start justify-between mb-6">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="k-eyebrow mb-1">CRM</p>
-          <h1 className="font-display font-bold text-3xl tracking-tight">
+          <h1 className="font-display text-3xl font-bold tracking-tight">
             Atletas
           </h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
+            {formatRange(range)} · {rows.total} en filtro · {activeNow} activos
+            totales
+          </p>
         </div>
         <AthleteForm />
       </div>
 
-      {athletes.length === 0 ? (
-        <div
-          className="p-6 rounded-xl border text-center"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
-        >
-          <p className="text-sm" style={{ color: "var(--text-2)" }}>
-            No hay atletas aún. Agrega el primero.
+      <AtletasFilters />
+
+      {/* KPIs */}
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <KpiCard
+          label="Activos totales"
+          value={String(activeNow)}
+          tone="recovery"
+        />
+        <KpiCard
+          label="Nuevos rango"
+          value={String(newInRange)}
+          tone="strain"
+          delta={
+            <MetricDelta
+              current={newInRange}
+              previous={newPrev}
+              goodWhen="higher"
+              formatter={(v) => v.toFixed(0)}
+            />
+          }
+        />
+        <KpiCard
+          label="En filtro"
+          value={String(rows.total)}
+          subtitle="Atletas que cumplen los filtros"
+        />
+        <KpiCard
+          label="En riesgo"
+          value={String(atRisk.length)}
+          tone={atRisk.length > 0 ? "pr" : undefined}
+          subtitle={
+            atRisk.length > 0
+              ? "Sin asistencia 14d+ o vencidos"
+              : "Todos al día"
+          }
+        />
+      </div>
+
+      {/* Growth chart */}
+      <div className="mb-6 k-card p-4">
+        <p className="k-eyebrow mb-2">Crecimiento · {formatRange(range)}</p>
+        {growth.length > 0 ? (
+          <GrowthChart data={growth} />
+        ) : (
+          <p className="py-10 text-center text-sm text-[var(--text-3)]">
+            Sin datos en el rango
           </p>
-        </div>
-      ) : (
-        <div
-          className="rounded-xl border overflow-hidden"
-          style={{ borderColor: "var(--line)" }}
-        >
-          <table className="w-full text-sm">
-            <thead>
-              <tr
-                style={{
-                  borderBottom: "1px solid var(--line)",
-                  background: "var(--card)",
-                }}
-              >
-                <th className="text-left px-4 py-3 k-eyebrow">Nombre</th>
-                <th className="text-left px-4 py-3 k-eyebrow">Teléfono</th>
-                <th className="text-left px-4 py-3 k-eyebrow">Estado</th>
-                <th className="text-left px-4 py-3 k-eyebrow">Registro</th>
-              </tr>
-            </thead>
-            <tbody>
-              {athletes.map((a) => (
-                <tr
-                  key={a.id}
-                  style={{ borderBottom: "1px solid var(--line)" }}
-                  className="hover:bg-card transition-colors"
-                >
-                  <td className="px-4 py-3 font-medium">
-                    {a.firstName} {a.lastName}
-                  </td>
-                  <td className="px-4 py-3" style={{ color: "var(--text-2)" }}>
-                    {a.phone ?? "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`k-chip ${a.status === "ACTIVE" ? "k-chip-recovery" : "k-chip-ghost"}`}
-                    >
-                      {a.status}
-                    </span>
-                  </td>
-                  <td
-                    className="px-4 py-3 font-mono text-xs"
-                    style={{ color: "var(--text-3)" }}
-                  >
-                    {new Date(a.createdAt).toLocaleDateString("es-MX")}
-                  </td>
+        )}
+      </div>
+
+      {/* En riesgo */}
+      {atRisk.length > 0 && (
+        <section className="mb-6">
+          <p className="k-eyebrow mb-3" style={{ color: "var(--pr)" }}>
+            🔥 Atletas en riesgo ({atRisk.length})
+          </p>
+          <div className="k-card overflow-hidden">
+            <table className="k-table text-sm">
+              <thead>
+                <tr>
+                  <th>Atleta</th>
+                  <th>Días sin asistir</th>
+                  <th>Membresía</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {atRisk.map((a) => (
+                  <tr key={a.id}>
+                    <td className="font-medium">
+                      {a.firstName} {a.lastName}
+                    </td>
+                    <td>
+                      <span className="k-chip k-chip-pr text-[10px]">
+                        {a.daysSinceLastAttendance ?? "Nunca"}
+                        {a.daysSinceLastAttendance !== null ? "d" : ""}
+                      </span>
+                    </td>
+                    <td className="text-xs">
+                      {a.hasOverdueMembership ? (
+                        <span className="text-[var(--pr)]">Vencida</span>
+                      ) : (
+                        <span className="text-[var(--text-3)]">Vigente</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
+
+      {/* Table */}
+      <section>
+        <AtletasTable
+          rows={rows.rows}
+          total={rows.total}
+          page={rows.page}
+          pageSize={rows.pageSize}
+          filterValues={{
+            dateFrom: range.from,
+            dateTo: range.to,
+            search,
+            status,
+          }}
+        />
+      </section>
+    </div>
+  );
+}
+
+function KpiCard({
+  label,
+  value,
+  subtitle,
+  tone,
+  delta,
+}: {
+  label: string;
+  value: string;
+  subtitle?: string;
+  tone?: "recovery" | "strain" | "pr";
+  delta?: React.ReactNode;
+}) {
+  const color =
+    tone === "recovery"
+      ? "var(--recovery)"
+      : tone === "strain"
+        ? "var(--strain)"
+        : tone === "pr"
+          ? "var(--pr)"
+          : "var(--text)";
+  return (
+    <div className="k-card p-3">
+      <div className="flex items-start justify-between gap-2">
+        <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+          {label}
+        </p>
+        {delta}
+      </div>
+      <p className="font-display mt-1 text-2xl font-bold" style={{ color }}>
+        {value}
+      </p>
+      {subtitle ? (
+        <p className="mt-1 text-xs text-[var(--text-3)]">{subtitle}</p>
+      ) : null}
     </div>
   );
 }

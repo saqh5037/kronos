@@ -251,6 +251,183 @@ export async function getAtRiskAthletes(opts?: {
   return out;
 }
 
+export type AthleteDetail = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  status: AthleteStatus;
+  phone: string | null;
+  email: string | null;
+  createdAt: Date;
+  activeMembership: {
+    id: string;
+    planName: string;
+    planType: string;
+    startDate: Date;
+    endDate: Date | null;
+    classesUsed: number;
+  } | null;
+  attendanceLast90d: { date: Date }[];
+  prsTop: {
+    id: string;
+    movementName: string;
+    value: number;
+    unit: string;
+    achievedAt: Date;
+  }[];
+  paymentsRecent: {
+    id: string;
+    amount: number;
+    currency: string;
+    status: string;
+    gateway: string;
+    paidAt: Date | null;
+    createdAt: Date;
+  }[];
+  nextClass: {
+    id: string;
+    startsAt: Date;
+    wodName: string | null;
+  } | null;
+};
+
+export async function getAthleteDetail(
+  athleteId: string,
+): Promise<AthleteDetail | null> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  const db = withTenant(session.user.tenantId);
+
+  const ninetyDaysAgo = startOfDay(subDays(new Date(), 90));
+  const now = new Date();
+
+  const athlete = await db.athlete.findUnique({
+    where: { id: athleteId },
+    include: {
+      user: { select: { email: true } },
+      memberships: {
+        where: { status: "ACTIVE" },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        include: { plan: true },
+      },
+      bookings: {
+        where: {
+          status: "ATTENDED",
+          checkedInAt: { gte: ninetyDaysAgo },
+        },
+        select: { checkedInAt: true },
+      },
+      prs: {
+        orderBy: { achievedAt: "desc" },
+        take: 8,
+        include: { movement: { select: { name: true } } },
+      },
+    },
+  });
+  if (!athlete) return null;
+
+  const [paymentsRecent, nextBooking] = await Promise.all([
+    db.payment.findMany({
+      where: { membership: { athleteId: athlete.id } },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+    }),
+    db.booking.findFirst({
+      where: {
+        athleteId: athlete.id,
+        status: { in: ["BOOKED", "WAITLIST"] },
+        class: { startsAt: { gte: now } },
+      },
+      orderBy: { class: { startsAt: "asc" } },
+      include: {
+        class: {
+          select: {
+            id: true,
+            startsAt: true,
+            wod: { select: { name: true } },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const activeMembership = athlete.memberships[0]
+    ? {
+        id: athlete.memberships[0].id,
+        planName: athlete.memberships[0].plan.name,
+        planType: athlete.memberships[0].plan.type,
+        startDate: athlete.memberships[0].startDate,
+        endDate: athlete.memberships[0].endDate,
+        classesUsed: 0,
+      }
+    : null;
+
+  if (activeMembership) {
+    activeMembership.classesUsed = await db.booking.count({
+      where: {
+        athleteId: athlete.id,
+        status: "ATTENDED",
+        class: {
+          startsAt: {
+            gte: athlete.memberships[0].startDate,
+            lte: athlete.memberships[0].endDate ?? new Date(),
+          },
+        },
+      },
+    });
+  }
+
+  return {
+    id: athlete.id,
+    firstName: athlete.firstName,
+    lastName: athlete.lastName,
+    status: athlete.status,
+    phone: athlete.phone,
+    email: athlete.user?.email ?? null,
+    createdAt: athlete.createdAt,
+    activeMembership,
+    attendanceLast90d: athlete.bookings
+      .filter((b) => b.checkedInAt !== null)
+      .map((b) => ({ date: b.checkedInAt as Date })),
+    prsTop: athlete.prs.map((p) => ({
+      id: p.id,
+      movementName: p.movement.name,
+      value: Number(p.value),
+      unit: p.unit,
+      achievedAt: p.achievedAt,
+    })),
+    paymentsRecent: paymentsRecent.map((p) => ({
+      id: p.id,
+      amount: Number(p.amount),
+      currency: p.currency,
+      status: p.status,
+      gateway: p.gateway,
+      paidAt: p.paidAt,
+      createdAt: p.createdAt,
+    })),
+    nextClass: nextBooking
+      ? {
+          id: nextBooking.class.id,
+          startsAt: nextBooking.class.startsAt,
+          wodName: nextBooking.class.wod?.name ?? null,
+        }
+      : null,
+  };
+}
+
+export async function updateAthleteStatus(
+  athleteId: string,
+  status: AthleteStatus,
+) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  const db = withTenant(session.user.tenantId);
+  await db.athlete.update({ where: { id: athleteId }, data: { status } });
+  revalidatePath("/admin/atletas");
+  return { ok: true };
+}
+
 export async function createAthlete(data: unknown) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.tenantId) throw new Error("Unauthorized");

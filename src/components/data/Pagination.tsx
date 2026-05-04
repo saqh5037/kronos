@@ -38,7 +38,7 @@ export function Pagination({
           type="button"
           disabled={page <= 1}
           onClick={() => onPageChange(Math.max(1, page - 1))}
-          className="rounded-lg border border-[var(--line)] bg-[var(--card)] px-2 py-1 hover:border-[var(--line-strong)] disabled:opacity-40"
+          className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--card)] px-2 hover:border-[var(--line-strong)] disabled:opacity-40"
           aria-label="Anterior"
         >
           ‹
@@ -50,7 +50,7 @@ export function Pagination({
           type="button"
           disabled={page >= totalPages}
           onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-          className="rounded-lg border border-[var(--line)] bg-[var(--card)] px-2 py-1 hover:border-[var(--line-strong)] disabled:opacity-40"
+          className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--card)] px-2 hover:border-[var(--line-strong)] disabled:opacity-40"
           aria-label="Siguiente"
         >
           ›
