@@ -1,12 +1,32 @@
-import { getReports, type Reports } from "@/server/actions/reports";
-import { KPI, SimpleCard } from "@/components/kronos/StatCard";
+import {
+  getReports,
+  getRevenueByMonth,
+  getAthletesByMonth,
+  type Reports,
+  type RevenueByMonthPoint,
+  type AthletesByMonthPoint,
+} from "@/server/actions/reports";
+import { MetricDelta } from "@/components/charts/MetricDelta";
+import { ReportesFilters } from "./_components/ReportesFilters";
+import { RevenueLineChart } from "./_components/RevenueLineChart";
+import { NewChurnBarChart } from "./_components/NewChurnBarChart";
 
 export const metadata = { title: "Kronos — Reportes" };
 
+const fmtMoney = (v: number) => `$${v.toLocaleString("es-MX")}`;
+const fmtPct = (v: number) => `${Math.round(v * 100)}%`;
+
 export default async function ReportesPage() {
   let r: Reports | null = null;
+  let revenue12m: RevenueByMonthPoint[] = [];
+  let athletes12m: AthletesByMonthPoint[] = [];
+
   try {
-    r = await getReports();
+    [r, revenue12m, athletes12m] = await Promise.all([
+      getReports(),
+      getRevenueByMonth(12),
+      getAthletesByMonth(12),
+    ]);
   } catch {
     // BD/sesión ausente
   }
@@ -16,14 +36,11 @@ export default async function ReportesPage() {
       <div className="p-8">
         <div className="mb-6">
           <p className="k-eyebrow mb-1">Análisis</p>
-          <h1 className="font-display font-bold text-3xl tracking-tight">
+          <h1 className="font-display text-3xl font-bold tracking-tight">
             Reportes
           </h1>
         </div>
-        <div
-          className="p-6 rounded-xl border text-center"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
-        >
+        <div className="k-card p-6 text-center">
           <p className="text-sm" style={{ color: "var(--text-2)" }}>
             Sin datos disponibles. Verifica que la base esté conectada.
           </p>
@@ -37,16 +54,23 @@ export default async function ReportesPage() {
     year: "numeric",
   });
 
+  const totalRevenue12m = revenue12m.reduce((s, p) => s + p.revenue, 0);
+  const totalNew12m = athletes12m.reduce((s, p) => s + p.newAthletes, 0);
+  const totalChurn12m = athletes12m.reduce(
+    (s, p) => s + p.churnedMemberships,
+    0,
+  );
+
   return (
     <div className="p-8">
-      <div className="mb-6 flex items-end justify-between gap-4 flex-wrap">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="k-eyebrow mb-1">Análisis</p>
-          <h1 className="font-display font-bold text-3xl tracking-tight">
+          <h1 className="font-display text-3xl font-bold tracking-tight">
             Reportes
           </h1>
           <p
-            className="text-sm mt-1 capitalize"
+            className="mt-1 text-sm capitalize"
             style={{ color: "var(--text-2)" }}
           >
             {monthLabel} · actualizado{" "}
@@ -58,28 +82,37 @@ export default async function ReportesPage() {
         </div>
       </div>
 
-      {/* Hero KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <KPI
+      <ReportesFilters />
+
+      {/* Hero KPIs con MetricDelta */}
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <KpiCard
           label="Ingresos del mes"
-          value={`$${r.monthRevenue.toLocaleString("es-MX")}`}
+          value={fmtMoney(r.monthRevenue)}
           tone="recovery"
-          delta={r.revenueDelta}
+          delta={
+            <MetricDelta
+              current={r.monthRevenue}
+              previous={r.prevMonthRevenue}
+              goodWhen="higher"
+              formatter={fmtMoney}
+            />
+          }
         />
-        <KPI
+        <KpiCard
           label="MRR estimado"
-          value={`$${Math.round(r.mrr).toLocaleString("es-MX")}`}
+          value={fmtMoney(Math.round(r.mrr))}
           tone="strain"
           subtitle="por mes equivalente"
         />
-        <KPI
+        <KpiCard
           label="Atletas activos"
           value={String(r.activeAthletes)}
-          subtitle={`+${r.newAthletesMonth} este mes`}
+          subtitle={`+${r.newAthletesMonth} este mes · ${r.pausedAthletes} pausados`}
         />
-        <KPI
+        <KpiCard
           label="Tasa de asistencia"
-          value={`${Math.round(r.attendanceRate * 100)}%`}
+          value={fmtPct(r.attendanceRate)}
           tone={
             r.attendanceRate >= 0.85
               ? "recovery"
@@ -91,24 +124,57 @@ export default async function ReportesPage() {
         />
       </div>
 
-      {/* Comparativo mes vs mes */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-        <ComparisonCard
-          label="Revenue mes vs mes"
-          current={r.monthRevenue}
-          previous={r.prevMonthRevenue}
-          format="currency"
-        />
-        <SimpleCard label="Clases del mes" value={String(r.monthClassesHeld)} />
-        <SimpleCard
+      {/* Revenue 12m chart */}
+      <div className="mb-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <div className="k-card p-4">
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <p className="k-eyebrow">Revenue · últimos 12 meses</p>
+            <span className="font-mono text-xs text-[var(--text-3)]">
+              total {fmtMoney(totalRevenue12m)}
+            </span>
+          </div>
+          {revenue12m.some((p) => p.revenue > 0) ? (
+            <RevenueLineChart data={revenue12m} />
+          ) : (
+            <p className="py-10 text-center text-sm text-[var(--text-3)]">
+              Sin pagos en los últimos 12 meses
+            </p>
+          )}
+        </div>
+        <div className="k-card p-4">
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <p className="k-eyebrow">Nuevos vs bajas · últimos 12 meses</p>
+            <span className="font-mono text-xs text-[var(--text-3)]">
+              +{totalNew12m} / −{totalChurn12m}
+            </span>
+          </div>
+          {athletes12m.some((p) => p.newAthletes + p.churnedMemberships > 0) ? (
+            <NewChurnBarChart data={athletes12m} />
+          ) : (
+            <p className="py-10 text-center text-sm text-[var(--text-3)]">
+              Sin actividad en los últimos 12 meses
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Activity */}
+      <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-3">
+        <SimpleStat label="Clases del mes" value={String(r.monthClassesHeld)} />
+        <SimpleStat
           label="Scores subidos"
           value={String(r.monthScores)}
           subtitle={`${r.monthPRs} PRs nuevos`}
         />
+        <SimpleStat
+          label="Bookings del mes"
+          value={String(r.monthBookings)}
+          subtitle={`${r.monthAttended} asistidos · ${r.monthNoShow} no-show`}
+        />
       </div>
 
       {/* Top tables + plan distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <TopTable
           title="Top WODs del mes"
           subtitle="Por scores subidos"
@@ -133,97 +199,63 @@ export default async function ReportesPage() {
   );
 }
 
-function ComparisonCard({
+function KpiCard({
   label,
-  current,
-  previous,
-  format,
+  value,
+  subtitle,
+  tone,
+  delta,
 }: {
   label: string;
-  current: number;
-  previous: number;
-  format: "currency" | "number";
+  value: string;
+  subtitle?: string;
+  tone?: "recovery" | "strain" | "pr";
+  delta?: React.ReactNode;
 }) {
-  const fmt = (n: number) =>
-    format === "currency"
-      ? `$${n.toLocaleString("es-MX")}`
-      : n.toLocaleString("es-MX");
-  const delta = previous === 0 ? 0 : (current - previous) / previous;
-  const max = Math.max(current, previous, 1);
-
+  const color =
+    tone === "recovery"
+      ? "var(--recovery)"
+      : tone === "strain"
+        ? "var(--strain)"
+        : tone === "pr"
+          ? "var(--pr)"
+          : "var(--text)";
   return (
-    <div
-      className="p-4 rounded-xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
-    >
-      <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
-        {label}
-      </p>
-      <div className="mt-3 flex flex-col gap-2">
-        <BarRow
-          label="Este mes"
-          value={current}
-          max={max}
-          fmt={fmt}
-          color="var(--recovery)"
-        />
-        <BarRow
-          label="Mes anterior"
-          value={previous}
-          max={max}
-          fmt={fmt}
-          color="var(--text-3)"
-        />
-      </div>
-      {delta !== 0 && (
-        <p
-          className="text-xs font-mono mt-2"
-          style={{
-            color:
-              delta > 0
-                ? "var(--recovery)"
-                : delta < 0
-                  ? "var(--pr)"
-                  : "var(--text-3)",
-          }}
-        >
-          {delta > 0 ? "+" : ""}
-          {Math.round(delta * 100)}%
+    <div className="k-card p-3">
+      <div className="flex items-start justify-between gap-2">
+        <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+          {label}
         </p>
-      )}
+        {delta}
+      </div>
+      <p className="font-display mt-1 text-2xl font-bold" style={{ color }}>
+        {value}
+      </p>
+      {subtitle ? (
+        <p className="mt-1 text-xs text-[var(--text-3)]">{subtitle}</p>
+      ) : null}
     </div>
   );
 }
 
-function BarRow({
+function SimpleStat({
   label,
   value,
-  max,
-  fmt,
-  color,
+  subtitle,
 }: {
   label: string;
-  value: number;
-  max: number;
-  fmt: (n: number) => string;
-  color: string;
+  value: string;
+  subtitle?: string;
 }) {
-  const pct = max === 0 ? 0 : (value / max) * 100;
   return (
-    <div>
-      <div className="flex items-center justify-between text-xs mb-1">
-        <span style={{ color: "var(--text-3)" }}>{label}</span>
-        <span className="font-mono">{fmt(value)}</span>
-      </div>
-      <div
-        className="h-1.5 rounded-full overflow-hidden"
-        style={{ background: "rgba(255,255,255,0.06)" }}
-      >
-        <div
-          className="h-full rounded-full transition-all"
-          style={{ width: `${pct}%`, background: color }}
-        />
-      </div>
+    <div className="k-card p-3">
+      <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+        {label}
+      </p>
+      <p className="font-display mt-1 text-2xl font-bold">{value}</p>
+      {subtitle ? (
+        <p className="mt-1 text-xs text-[var(--text-3)]">{subtitle}</p>
+      ) : null}
     </div>
   );
 }
@@ -238,24 +270,21 @@ function TopTable({
   rows: { rank: number; label: string; value: string }[];
 }) {
   return (
-    <div
-      className="rounded-xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
-    >
+    <div className="k-card overflow-hidden">
       <div
-        className="px-4 py-3 border-b"
+        className="border-b px-4 py-3"
         style={{ borderColor: "var(--line)" }}
       >
-        <p className="font-display font-bold text-base">{title}</p>
+        <p className="font-display text-base font-bold">{title}</p>
         {subtitle && (
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-3)" }}>
+          <p className="mt-0.5 text-xs" style={{ color: "var(--text-3)" }}>
             {subtitle}
           </p>
         )}
       </div>
       {rows.length === 0 ? (
         <p
-          className="text-xs p-4 text-center"
+          className="p-4 text-center text-xs"
           style={{ color: "var(--text-3)" }}
         >
           Sin datos este mes.
@@ -265,12 +294,12 @@ function TopTable({
           {rows.map((r) => (
             <li
               key={r.rank}
-              className="px-4 py-2.5 border-b last:border-b-0 flex items-center justify-between"
+              className="flex items-center justify-between border-b px-4 py-2.5 last:border-b-0"
               style={{ borderColor: "var(--line)" }}
             >
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex min-w-0 items-center gap-3">
                 <span
-                  className="font-mono text-xs w-5"
+                  className="w-5 font-mono text-xs"
                   style={{
                     color:
                       r.rank === 1
@@ -282,10 +311,10 @@ function TopTable({
                 >
                   {r.rank}
                 </span>
-                <span className="text-sm truncate">{r.label}</span>
+                <span className="truncate text-sm">{r.label}</span>
               </div>
               <span
-                className="font-mono font-bold text-sm flex-shrink-0"
+                className="flex-shrink-0 font-mono text-sm font-bold"
                 style={{
                   color: r.rank === 1 ? "var(--recovery)" : "var(--text)",
                 }}
@@ -307,44 +336,41 @@ function PlanDistribution({
 }) {
   const totalCount = distribution.reduce((acc, d) => acc + d.count, 0);
   return (
-    <div
-      className="rounded-xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
-    >
+    <div className="k-card overflow-hidden">
       <div
-        className="px-4 py-3 border-b"
+        className="border-b px-4 py-3"
         style={{ borderColor: "var(--line)" }}
       >
-        <p className="font-display font-bold text-base">
+        <p className="font-display text-base font-bold">
           Distribución de planes
         </p>
-        <p className="text-xs mt-0.5" style={{ color: "var(--text-3)" }}>
+        <p className="mt-0.5 text-xs" style={{ color: "var(--text-3)" }}>
           {totalCount} membership{totalCount === 1 ? "" : "s"} activa
           {totalCount === 1 ? "" : "s"}
         </p>
       </div>
       {distribution.length === 0 ? (
         <p
-          className="text-xs p-4 text-center"
+          className="p-4 text-center text-xs"
           style={{ color: "var(--text-3)" }}
         >
           Sin memberships activas.
         </p>
       ) : (
-        <ul className="flex flex-col p-3 gap-3">
+        <ul className="flex flex-col gap-3 p-3">
           {distribution.map((d) => {
             const pct = totalCount === 0 ? 0 : (d.count / totalCount) * 100;
             return (
               <li key={d.type}>
-                <div className="flex items-center justify-between text-xs mb-1">
+                <div className="mb-1 flex items-center justify-between text-xs">
                   <span className="font-mono font-semibold">{d.type}</span>
                   <span style={{ color: "var(--text-3)" }}>
-                    {d.count} · ${d.revenue.toLocaleString("es-MX")}
+                    {d.count} · {fmtMoney(d.revenue)}
                   </span>
                 </div>
                 <div
-                  className="h-2 rounded-full overflow-hidden"
-                  style={{ background: "rgba(255,255,255,0.06)" }}
+                  className="h-2 overflow-hidden rounded-full"
+                  style={{ background: "var(--btn-ghost-bg)" }}
                 >
                   <div
                     className="h-full rounded-full"
