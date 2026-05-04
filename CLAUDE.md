@@ -6,10 +6,11 @@ SaaS multi-tenant para boxes de CrossFit. Next.js 15 + Prisma + NextAuth.
 
 ## Estado actual
 
-**Fase 1 completa** (2026-05-04): 7 vertical slices end-to-end con TDD.
+**Fase 1 al 100%** (2026-05-04): 7 vertical slices end-to-end con TDD + cierre.
 
 Módulos admin con datos reales:
 
+- Dashboard — KPIs día (clases/asistencia/ingreso), próximas clases, alertas, quick links
 - Atletas (Fase 0)
 - Programación — CRUD clases con recurrencia + grid semanal
 - WODs — biblioteca + builder + biblioteca de movimientos
@@ -17,6 +18,8 @@ Módulos admin con datos reales:
 - Asistencia — vista del día con stats + check-in inline
 - PRs — agrupados por movimiento, top 1 highlighted
 - Leaderboards — ranking por WOD + asistencia semanal
+- Pagos · Comunicaciones · Reportes (Fase 1 hardening)
+- Ajustes — config del Box (name, brandColor, logoUrl, locale, currency, timezone, capacity)
 
 App atleta:
 
@@ -24,6 +27,13 @@ App atleta:
 - WOD del día — vista del WOD + ScoreForm con auto-detect PR
 - Reservar — calendario 7 días + estado mis reservas
 - Perfil — PRs + historial scores
+
+Auth:
+
+- Magic link email (NextAuth EmailProvider)
+- Google OAuth (opcional, gateado por env)
+- **Dev login** — CredentialsProvider solo en NODE_ENV=development. UI bajo `NEXT_PUBLIC_DEV_LOGIN=1`.
+  Seed crea `owner@iron-hands.demo`, `coach@iron-hands.demo`, `atleta@iron-hands.demo` (password "dev").
 
 Lógica de dominio (pure helpers + tests):
 
@@ -38,8 +48,9 @@ Stats:
 - Branch: `main`
 - Dev server: `:3000`
 - BD: PostgreSQL en `:5434` (docker compose)
-- Tests: 81/81 passing (`pnpm test`)
-- Commits Fase 1: 7 (uno por slice) — `48fd157`..`<HEAD>`
+- Tests: 138/138 passing (`pnpm test`) — 11 archivos
+- Build: `pnpm build` ✅
+- Commits Fase 1 + cierre: `48fd157`..`<HEAD>` (10+ commits)
 
 ## Comandos
 
