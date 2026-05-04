@@ -47,13 +47,7 @@ export default async function WODsPage() {
             {wods.length === 1 ? "" : "s"}
           </p>
           {wods.length === 0 ? (
-            <div
-              className="p-6 rounded-xl border text-center"
-              style={{
-                borderColor: "var(--line)",
-                background: "var(--card)",
-              }}
-            >
+            <div className="k-card p-6 text-center">
               <p className="text-sm" style={{ color: "var(--text-2)" }}>
                 No hay WODs aún. Crea el primero con el botón de arriba.
               </p>
@@ -75,13 +69,7 @@ export default async function WODsPage() {
             </p>
             <MovementForm />
           </div>
-          <div
-            className="rounded-xl border max-h-[60vh] overflow-y-auto"
-            style={{
-              borderColor: "var(--line)",
-              background: "var(--card)",
-            }}
-          >
+          <div className="k-card overflow-hidden max-h-[60vh] overflow-y-auto">
             {movements.length === 0 ? (
               <p
                 className="text-xs p-4 text-center"
@@ -94,7 +82,7 @@ export default async function WODsPage() {
                 {movements.map((m) => (
                   <li
                     key={m.id}
-                    className="px-4 py-3 border-b last:border-b-0 flex items-center justify-between group hover:bg-white/[0.03] transition-colors"
+                    className="px-4 py-3 border-b last:border-b-0 flex items-center justify-between group hover:bg-hover-subtle transition-colors"
                     style={{ borderColor: "var(--line)" }}
                   >
                     <div>

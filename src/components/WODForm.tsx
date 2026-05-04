@@ -94,8 +94,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-4 rounded-xl border flex flex-col gap-3 w-full max-w-2xl"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      className="k-card p-4 flex flex-col gap-3 w-full max-w-2xl"
     >
       <p className="k-eyebrow">Nuevo WOD</p>
 

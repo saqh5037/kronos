@@ -92,14 +92,9 @@ export default function CollapsibleRoster({ roster }: { roster: ClassRoster }) {
                   Sin reservas todavía.
                 </p>
               ) : (
-                <table className="w-full text-sm">
+                <table className="k-table text-sm">
                   <thead>
-                    <tr
-                      style={{
-                        borderBottom: "1px solid var(--line)",
-                        color: "var(--text-3)",
-                      }}
-                    >
+                    <tr>
                       <th className="text-left pb-2 k-eyebrow">Atleta</th>
                       <th className="text-left pb-2 k-eyebrow">Estado</th>
                       <th className="text-left pb-2 k-eyebrow">Reservó</th>
@@ -108,10 +103,7 @@ export default function CollapsibleRoster({ roster }: { roster: ClassRoster }) {
                   </thead>
                   <tbody>
                     {roster.bookings.map((b) => (
-                      <tr
-                        key={b.bookingId}
-                        style={{ borderBottom: "1px solid var(--line)" }}
-                      >
+                      <tr key={b.bookingId} className="k-row">
                         <td className="py-2 font-medium">
                           {b.firstName} {b.lastName}
                         </td>

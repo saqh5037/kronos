@@ -12,7 +12,7 @@ export default async function AtletaLayout({
   if (!session) redirect("/login");
 
   return (
-    <div className="relative min-h-screen pb-20 bg-bg">
+    <div className="relative min-h-screen pb-28 bg-bg">
       {children}
       <TabBar />
     </div>

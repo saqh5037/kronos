@@ -29,10 +29,7 @@ export default async function PRsPage() {
       </div>
 
       {prs.length === 0 ? (
-        <div
-          className="p-6 rounded-xl border text-center"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
-        >
+        <div className="k-card p-6 text-center">
           <p className="text-sm" style={{ color: "var(--text-2)" }}>
             Aún no hay PRs registrados. Se generan automáticamente al subir
             scores en WODs tipo STRENGTH con un solo movimiento.
@@ -54,7 +51,7 @@ export default async function PRsPage() {
                 <div
                   className="px-4 py-4 relative overflow-hidden"
                   style={{
-                    background: "#101316",
+                    background: "var(--hero-bg)",
                     borderBottom: "1px solid var(--line)",
                   }}
                 >

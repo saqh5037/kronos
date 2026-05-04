@@ -34,10 +34,7 @@ export default async function ReservasPage() {
       </div>
 
       {classes.length === 0 ? (
-        <div
-          className="p-6 rounded-xl border text-center"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
-        >
+        <div className="k-card p-6 text-center">
           <p className="text-sm" style={{ color: "var(--text-2)" }}>
             No hay clases programadas en los próximos 7 días.
           </p>

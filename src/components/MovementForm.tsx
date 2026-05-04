@@ -53,8 +53,7 @@ export default function MovementForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-3 rounded-xl border flex flex-col gap-2 w-full max-w-md"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      className="k-card p-3 flex flex-col gap-2 w-full max-w-md"
     >
       <p className="k-eyebrow">Nuevo movimiento</p>
       <input

@@ -2,26 +2,136 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Kronos design tokens (from styles-kronos.css) ─────────────── */
+/* ─── Kronos Design Tokens ─────────────────────────────────────── */
+
 :root {
-  --bg: #1a1d20;
-  --bg-soft: #23272b;
-  --card: #2a2f33;
-  --card-2: #34393e;
-  --line: rgba(255, 255, 255, 0.08);
-  --text: #fff;
-  --text-2: rgba(255, 255, 255, 0.62);
-  --text-3: rgba(255, 255, 255, 0.4);
+  /* Backgrounds */
+  --bg: #f0f1f3;
+  --bg-soft: #ffffff;
+  --card: #ffffff;
+  --card-2: #f1f3f5;
+  --card-elevated: #ffffff;
+
+  /* Text */
+  --text: #1a1d20;
+  --text-2: rgba(26, 29, 32, 0.62);
+  --text-3: rgba(26, 29, 32, 0.4);
+
+  /* Borders / dividers */
+  --line: rgba(0, 0, 0, 0.07);
+  --line-strong: rgba(0, 0, 0, 0.12);
+
+  /* Accents */
   --recovery: #19f08b;
   --strain: #3aa3ff;
   --pr: #ff5e5e;
+
+  /* Accent soft backgrounds */
+  --recovery-soft: rgba(25, 240, 139, 0.1);
+  --strain-soft: rgba(58, 163, 255, 0.1);
+  --pr-soft: rgba(255, 94, 94, 0.1);
+
+  /* Accent borders */
+  --recovery-line: rgba(25, 240, 139, 0.35);
+  --strain-line: rgba(58, 163, 255, 0.35);
+  --pr-line: rgba(255, 94, 94, 0.35);
+
+  /* Gradients */
   --grad: linear-gradient(95deg, #3aa3ff 0%, #19f08b 100%);
   --grad-soft: linear-gradient(
     95deg,
-    rgba(58, 163, 255, 0.18),
-    rgba(25, 240, 139, 0.18)
+    rgba(58, 163, 255, 0.14),
+    rgba(25, 240, 139, 0.14)
   );
-  --radius: 10px;
+
+  /* Atmospheric glows (light mode — subtle) */
+  --bg-glow: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(58, 163, 255, 0.04),
+    transparent 60%
+  );
+  --card-glow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  --card-glow-hover: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-featured: 0 4px 24px rgba(58, 163, 255, 0.1);
+
+  /* Utility tokens */
+  --radius: 12px;
+  --track: rgba(0, 0, 0, 0.08);
+  --overlay: rgba(0, 0, 0, 0.45);
+  --btn-ghost-bg: rgba(0, 0, 0, 0.04);
+  --input-placeholder: rgba(26, 29, 32, 0.35);
+  --hero-bg: #e8eaec;
+  --hero-line: rgba(0, 0, 0, 0.1);
+  --chart-inactive: rgba(0, 0, 0, 0.08);
+  --hover-subtle: rgba(0, 0, 0, 0.03);
+}
+
+.dark {
+  /* Backgrounds */
+  --bg: #14171a;
+  --bg-soft: #1e2226;
+  --card: #24292e;
+  --card-2: #2d3339;
+  --card-elevated: #2d3339;
+
+  /* Text */
+  --text: #fff;
+  --text-2: rgba(255, 255, 255, 0.62);
+  --text-3: rgba(255, 255, 255, 0.38);
+
+  /* Borders / dividers */
+  --line: rgba(255, 255, 255, 0.06);
+  --line-strong: rgba(255, 255, 255, 0.1);
+
+  /* Accents (same hex values) */
+  --recovery: #19f08b;
+  --strain: #3aa3ff;
+  --pr: #ff5e5e;
+
+  /* Accent soft backgrounds */
+  --recovery-soft: rgba(25, 240, 139, 0.12);
+  --strain-soft: rgba(58, 163, 255, 0.12);
+  --pr-soft: rgba(255, 94, 94, 0.12);
+
+  /* Accent borders */
+  --recovery-line: rgba(25, 240, 139, 0.22);
+  --strain-line: rgba(58, 163, 255, 0.22);
+  --pr-line: rgba(255, 94, 94, 0.22);
+
+  /* Gradients */
+  --grad: linear-gradient(95deg, #3aa3ff 0%, #19f08b 100%);
+  --grad-soft: linear-gradient(
+    95deg,
+    rgba(58, 163, 255, 0.15),
+    rgba(25, 240, 139, 0.15)
+  );
+
+  /* Atmospheric glows (dark mode — pronounced) */
+  --bg-glow:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(58, 163, 255, 0.08),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 100% 100%,
+      rgba(25, 240, 139, 0.04),
+      transparent 50%
+    );
+  --card-glow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --card-glow-hover: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --shadow-featured: 0 4px 32px rgba(58, 163, 255, 0.12);
+
+  /* Utility tokens */
+  --radius: 12px;
+  --track: rgba(255, 255, 255, 0.06);
+  --overlay: rgba(0, 0, 0, 0.65);
+  --btn-ghost-bg: rgba(255, 255, 255, 0.05);
+  --input-placeholder: rgba(255, 255, 255, 0.28);
+  --hero-bg: #0c0f12;
+  --hero-line: rgba(255, 255, 255, 0.08);
+  --chart-inactive: rgba(255, 255, 255, 0.1);
+  --hover-subtle: rgba(255, 255, 255, 0.03);
 }
 
 @layer base {
@@ -38,16 +148,141 @@
     color: var(--text);
     min-height: 100vh;
   }
+
+  /* Atmospheric background glow on body */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: var(--bg-glow);
+  }
+
+  /* Ensure content is above the glow layer */
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
+/* ─── Keyframe Animations ──────────────────────────────────────── */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ring-draw {
+  from {
+    stroke-dashoffset: var(--circumference);
+  }
+  to {
+    stroke-dashoffset: var(--target-offset);
+  }
+}
+
+/* ─── Component Primitives ─────────────────────────────────────── */
+
 @layer components {
-  /* Kronos primitives — available as utility classes */
+  /* KCard — base card with depth */
   .k-card {
     @apply rounded-xl border;
     background: var(--card);
     border-color: var(--line);
+    box-shadow: var(--card-glow);
+    transition:
+      transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+      border-color 0.2s ease;
   }
 
+  .k-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-glow-hover);
+    border-color: var(--line-strong);
+  }
+
+  /* Featured card — for highlighted content */
+  .k-card-featured {
+    @apply rounded-xl border;
+    background: var(--grad-soft);
+    border-color: var(--strain-line);
+    box-shadow: var(--shadow-featured);
+    transition:
+      transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .k-card-featured:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(58, 163, 255, 0.18);
+  }
+
+  /* Ghost card — subtle, sits on bg */
+  .k-card-ghost {
+    @apply rounded-xl border;
+    background: var(--bg-soft);
+    border-color: var(--line);
+    transition:
+      transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+      background 0.2s ease;
+  }
+
+  .k-card-ghost:hover {
+    transform: translateY(-1px);
+    background: var(--card);
+    border-color: var(--line-strong);
+  }
+
+  /* Flat card — no hover lift, for lists */
+  .k-card-flat {
+    @apply rounded-xl border;
+    background: var(--card);
+    border-color: var(--line);
+    transition: background 0.15s ease;
+  }
+
+  .k-card-flat:hover {
+    background: var(--card-2);
+  }
+
+  /* Eyebrow label */
   .k-eyebrow {
     font-family: var(--font-jetbrains-mono), monospace;
     font-size: 10px;
@@ -57,25 +292,55 @@
     color: var(--text-3);
   }
 
+  /* Gradient CTA button */
   .k-btn-grad {
     background: var(--grad);
     color: #0a1a14;
     font-weight: 700;
     border: none;
-    border-radius: 11px;
+    border-radius: 12px;
     cursor: pointer;
     box-shadow: 0 0 24px rgba(25, 240, 139, 0.22);
+    transition:
+      transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 0.15s ease,
+      filter 0.15s ease;
   }
 
+  .k-btn-grad:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 28px rgba(25, 240, 139, 0.35);
+    filter: brightness(1.05);
+  }
+
+  .k-btn-grad:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 0 16px rgba(25, 240, 139, 0.25);
+  }
+
+  /* Ghost button */
   .k-btn-ghost {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--btn-ghost-bg);
     color: var(--text);
     border: none;
     font-weight: 600;
-    border-radius: 11px;
+    border-radius: 12px;
     cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      background 0.15s ease;
   }
 
+  .k-btn-ghost:hover {
+    transform: translateY(-1px);
+    background: var(--hover-subtle);
+  }
+
+  .k-btn-ghost:active {
+    transform: scale(0.98);
+  }
+
+  /* Chips */
   .k-chip {
     display: inline-flex;
     align-items: center;
@@ -87,29 +352,97 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    transition: transform 0.15s ease;
+  }
+
+  .k-chip:hover {
+    transform: scale(1.04);
   }
 
   .k-chip-recovery {
     background: var(--grad-soft);
     color: var(--recovery);
-    border: 1px solid rgba(25, 240, 139, 0.25);
+    border: 1px solid var(--recovery-line);
   }
 
   .k-chip-strain {
-    background: rgba(58, 163, 255, 0.14);
+    background: var(--strain-soft);
     color: var(--strain);
-    border: 1px solid rgba(58, 163, 255, 0.25);
+    border: 1px solid var(--strain-line);
   }
 
   .k-chip-pr {
-    background: rgba(255, 94, 94, 0.14);
+    background: var(--pr-soft);
     color: var(--pr);
-    border: 1px solid rgba(255, 94, 94, 0.25);
+    border: 1px solid var(--pr-line);
   }
 
   .k-chip-ghost {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--btn-ghost-bg);
     color: var(--text-2);
     border: 1px solid var(--line);
+  }
+
+  /* Skeleton shimmer */
+  .k-skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--card) 25%,
+      var(--card-2) 50%,
+      var(--card) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: var(--radius);
+  }
+
+  /* Pulse glow for rings/badges */
+  .k-pulse-glow {
+    animation: pulse-glow 2.5s ease-in-out infinite;
+  }
+
+  /* Interactive row (for tables/lists) */
+  .k-row {
+    transition:
+      background 0.15s ease,
+      transform 0.15s ease;
+  }
+
+  .k-row:hover {
+    background: var(--hover-subtle);
+    transform: translateX(2px);
+  }
+
+  /* Table enhancements */
+  .k-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .k-table thead th {
+    font-family: var(--font-jetbrains-mono), monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .k-table tbody tr {
+    transition: background 0.15s ease;
+  }
+
+  .k-table tbody tr:hover {
+    background: var(--hover-subtle);
+  }
+
+  .k-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
   }
 }

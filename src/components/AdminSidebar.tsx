@@ -4,6 +4,8 @@ import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const modules = [
   { href: "/admin", label: "Dashboard", icon: "dashboard", exact: true },
@@ -330,7 +332,7 @@ export default function AdminSidebar() {
         </div>
 
         {/* Nav items */}
-        <div className="flex flex-col gap-0.5 px-2">
+        <div className="flex flex-col gap-0.5 px-2 flex-1">
           {modules.map((mod) => {
             const isActive = mod.exact
               ? pathname === mod.href
@@ -340,16 +342,37 @@ export default function AdminSidebar() {
               <Link
                 key={mod.href}
                 href={mod.href as Route}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive ? "text-white" : "text-white/50 hover:text-white/80"
+                className={`relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive ? "text-text" : "text-text-3 hover:text-text-2"
                 }`}
-                style={isActive ? { background: "var(--card)" } : {}}
               >
-                <NavIcon icon={mod.icon} active={isActive} />
-                {mod.label}
+                {isActive && (
+                  <motion.div
+                    layoutId="admin-nav-indicator"
+                    className="absolute inset-0 rounded-lg border"
+                    style={{
+                      background: "var(--card)",
+                      borderColor: "var(--strain-line)",
+                      boxShadow: "0 0 12px rgba(58,163,255,0.12)",
+                    }}
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">
+                  <NavIcon icon={mod.icon} active={isActive} />
+                </span>
+                <span className="relative z-10">{mod.label}</span>
               </Link>
             );
           })}
+        </div>
+
+        {/* Footer */}
+        <div
+          className="px-4 pt-3 mt-2 border-t"
+          style={{ borderColor: "var(--line)" }}
+        >
+          <ThemeToggle className="w-full justify-center" />
         </div>
       </nav>
     </>

@@ -211,7 +211,7 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
 }
 
 const inputClass =
-  "w-full px-3 py-2 rounded-lg text-sm border bg-transparent text-white focus:outline-none focus:border-recovery/50 disabled:opacity-60";
+  "w-full px-3 py-2 rounded-lg text-sm border bg-transparent text-text focus:outline-none focus:border-recovery/50 disabled:opacity-60";
 
 function Field({
   label,

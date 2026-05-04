@@ -66,13 +66,7 @@ export default async function LeaderboardsPage({
           </div>
 
           {!board || board.entries.length === 0 ? (
-            <div
-              className="p-6 rounded-xl border text-center"
-              style={{
-                borderColor: "var(--line)",
-                background: "var(--card)",
-              }}
-            >
+            <div className="k-card p-6 text-center">
               <p className="text-sm" style={{ color: "var(--text-2)" }}>
                 {wodOptions.length === 0
                   ? "Sin WODs todavía. Crea uno en /admin/wods."
@@ -100,7 +94,7 @@ export default async function LeaderboardsPage({
               <div className="p-4">
                 <Podium entries={podiumData} />
 
-                <table className="w-full text-sm">
+                <table className="k-table text-sm">
                   <thead>
                     <tr
                       style={{
@@ -118,10 +112,7 @@ export default async function LeaderboardsPage({
                   </thead>
                   <tbody>
                     {board.entries.slice(3).map((e, idx) => (
-                      <tr
-                        key={e.athleteId}
-                        style={{ borderBottom: "1px solid var(--line)" }}
-                      >
+                      <tr key={e.athleteId} className="k-row">
                         <td
                           className="px-4 py-2 font-mono text-xs"
                           style={{ color: "var(--text-3)" }}

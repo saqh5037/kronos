@@ -11,14 +11,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: "#1a1d20",
-        "bg-soft": "#23272b",
-        card: "#2a2f33",
-        "card-2": "#34393e",
-        recovery: "#19f08b",
-        strain: "#3aa3ff",
-        pr: "#ff5e5e",
-        line: "rgba(255,255,255,0.08)",
+        bg: "var(--bg)",
+        "bg-soft": "var(--bg-soft)",
+        card: "var(--card)",
+        "card-2": "var(--card-2)",
+        text: "var(--text)",
+        "text-2": "var(--text-2)",
+        "text-3": "var(--text-3)",
+        line: "var(--line)",
+        recovery: "var(--recovery)",
+        strain: "var(--strain)",
+        pr: "var(--pr)",
+        track: "var(--track)",
+        overlay: "var(--overlay)",
+        "hover-subtle": "var(--hover-subtle)",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],

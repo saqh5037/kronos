@@ -1,5 +1,7 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 interface HaloRingProps {
   size?: number;
   strokeWidth?: number;
@@ -7,6 +9,7 @@ interface HaloRingProps {
   color?: string;
   label?: string;
   displayValue?: string;
+  animate?: boolean;
 }
 
 export default function HaloRing({
@@ -16,11 +19,11 @@ export default function HaloRing({
   color = "#19f08b",
   label,
   displayValue,
+  animate = true,
 }: HaloRingProps) {
   const r = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * r;
-  const strokeDashoffset =
-    circumference * (1 - Math.min(1, Math.max(0, value)));
+  const targetOffset = circumference * (1 - Math.min(1, Math.max(0, value)));
 
   const glowColor =
     color === "#19f08b"
@@ -29,25 +32,35 @@ export default function HaloRing({
         ? "rgba(58,163,255,0.55)"
         : "rgba(255,94,94,0.55)";
 
+  const glowBg = glowColor.replace("0.55", "0.18");
+  const glowShadow = glowColor.replace("0.55", "0.65");
+
   return (
     <div
       className="relative flex items-center justify-center"
       style={{ width: size, height: size }}
     >
       {/* Glow backdrop */}
-      <div
+      <motion.div
         className="absolute rounded-full"
         style={{
-          inset: -6,
-          background: `radial-gradient(circle, ${glowColor.replace("0.55", "0.22")} 0%, transparent 65%)`,
-          filter: "blur(6px)",
+          inset: -8,
+          background: `radial-gradient(circle, ${glowBg} 0%, transparent 65%)`,
+          filter: "blur(8px)",
         }}
+        animate={animate ? { opacity: [0.5, 0.85, 0.5] } : undefined}
+        transition={
+          animate
+            ? { duration: 3, repeat: Infinity, ease: "easeInOut" }
+            : undefined
+        }
       />
+
       {/* SVG ring */}
       <svg
         width={size}
         height={size}
-        style={{ transform: "rotate(-90deg)", position: "relative" }}
+        style={{ transform: "rotate(-90deg)", position: "relative", zIndex: 1 }}
       >
         {/* Track */}
         <circle
@@ -55,11 +68,11 @@ export default function HaloRing({
           cy={size / 2}
           r={r}
           fill="none"
-          stroke="rgba(255,255,255,0.08)"
+          stroke="var(--track)"
           strokeWidth={strokeWidth}
         />
         {/* Progress */}
-        <circle
+        <motion.circle
           cx={size / 2}
           cy={size / 2}
           r={r}
@@ -67,34 +80,56 @@ export default function HaloRing({
           stroke={color}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
-          style={{ filter: `drop-shadow(0 0 6px ${glowColor})` }}
+          style={{ filter: `drop-shadow(0 0 6px ${glowShadow})` }}
+          initial={animate ? { strokeDashoffset: circumference } : false}
+          animate={{ strokeDashoffset: targetOffset }}
+          transition={
+            animate
+              ? {
+                  strokeDashoffset: {
+                    duration: 1.2,
+                    ease: "easeOut",
+                    delay: 0.2,
+                  },
+                }
+              : undefined
+          }
         />
       </svg>
+
       {/* Center content */}
       {(displayValue || label) && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-[2]">
           {displayValue && (
-            <span
+            <motion.span
               className="font-display font-bold"
-              style={{ fontSize: size > 110 ? 22 : 16 }}
+              style={{
+                fontSize: size > 110 ? 24 : 18,
+                letterSpacing: "-0.03em",
+              }}
+              initial={animate ? { opacity: 0, scale: 0.8 } : false}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={animate ? { delay: 0.4, duration: 0.4 } : undefined}
             >
               {displayValue}
-            </span>
+            </motion.span>
           )}
           {label && (
-            <span
+            <motion.span
               className="font-mono"
               style={{
                 fontSize: 8,
                 letterSpacing: "0.14em",
-                color: "rgba(255,255,255,0.5)",
+                color: "var(--text-3)",
                 fontWeight: 700,
               }}
+              initial={animate ? { opacity: 0 } : false}
+              animate={{ opacity: 1 }}
+              transition={animate ? { delay: 0.6, duration: 0.3 } : undefined}
             >
               {label}
-            </span>
+            </motion.span>
           )}
         </div>
       )}

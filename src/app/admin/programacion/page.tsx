@@ -72,12 +72,8 @@ export default async function ProgramacionPage() {
           return (
             <div
               key={dateKey}
-              className="rounded-xl border flex flex-col overflow-hidden"
-              style={{
-                borderColor: isToday ? "var(--strain)" : "var(--line)",
-                background: "var(--card)",
-                minHeight: "240px",
-              }}
+              className={`k-card flex flex-col overflow-hidden ${isToday ? "ring-1 ring-strain/30" : ""}`}
+              style={{ minHeight: "240px" }}
             >
               <div
                 className="px-3 py-2.5 border-b flex items-center justify-between"
@@ -118,10 +114,7 @@ export default async function ProgramacionPage() {
       </div>
 
       {classes.length === 0 && (
-        <div
-          className="mt-6 p-6 rounded-xl border text-center"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
-        >
+        <div className="mt-6 k-card p-6 text-center">
           <p className="text-sm" style={{ color: "var(--text-2)" }}>
             No hay clases programadas esta semana. Crea la primera con el botón
             de arriba.
@@ -143,11 +136,8 @@ function ClassCard({ c }: { c: ClassRow }) {
 
   return (
     <div
-      className="rounded-lg p-2.5 border relative overflow-hidden group"
-      style={{
-        borderColor: "var(--line)",
-        background: "var(--card-2)",
-      }}
+      className="k-card p-2.5 relative overflow-hidden group"
+      style={{ background: "var(--card-2)" }}
     >
       <div
         className="absolute left-0 top-0 bottom-0 w-[3px]"
@@ -185,7 +175,7 @@ function ClassCard({ c }: { c: ClassRow }) {
         <div className="mt-2 flex items-center gap-1.5">
           <div
             className="flex-1 h-1 rounded-full overflow-hidden"
-            style={{ background: "rgba(255,255,255,0.06)" }}
+            style={{ background: "var(--btn-ghost-bg)" }}
           >
             <div
               className="h-full rounded-full"

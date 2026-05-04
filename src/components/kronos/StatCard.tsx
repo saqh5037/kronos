@@ -21,10 +21,7 @@ export function KPI({
 }) {
   const color = tone ? TONE_VAR[tone] : "var(--text)";
   return (
-    <div
-      className="p-4 rounded-xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
-    >
+    <div className="k-card p-4">
       <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
         {label}
       </p>
@@ -66,10 +63,7 @@ export function SimpleCard({
   subtitle?: string;
 }) {
   return (
-    <div
-      className="p-4 rounded-xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
-    >
+    <div className="k-card p-4">
       <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
         {label}
       </p>

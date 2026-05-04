@@ -114,7 +114,7 @@ export default function PaymentResultClient({
         {finalStatus === "PAID" && (
           <div
             className="mx-auto mb-4 w-14 h-14 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(25,240,139,0.18)" }}
+            style={{ background: "var(--recovery-soft)" }}
           >
             <svg
               width="28"
@@ -134,7 +134,7 @@ export default function PaymentResultClient({
         {(finalStatus === "FAILED" || initialStatus === "failure") && (
           <div
             className="mx-auto mb-4 w-14 h-14 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(255,94,94,0.18)" }}
+            style={{ background: "var(--pr-soft)" }}
           >
             <svg
               width="28"

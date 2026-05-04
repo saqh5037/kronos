@@ -20,10 +20,7 @@ export default function LoginForm() {
 
   if (sent) {
     return (
-      <div
-        className="text-center p-6 rounded-xl border"
-        style={{ borderColor: "var(--line)", background: "var(--card)" }}
-      >
+      <div className="k-card p-6 text-center">
         <p className="k-eyebrow mb-2" style={{ color: "var(--recovery)" }}>
           Liga enviada
         </p>
@@ -43,7 +40,7 @@ export default function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="correo@tubox.com"
           required
-          className="w-full px-4 py-3 rounded-xl text-white placeholder-white/30 border focus:outline-none focus:border-recovery/50 transition-colors"
+          className="w-full px-4 py-3 rounded-xl text-text placeholder-text-3/80 border focus:outline-none focus:border-recovery/50 transition-colors"
           style={{ background: "var(--card)", borderColor: "var(--line)" }}
         />
         <button
@@ -99,7 +96,7 @@ function DevLoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="email"
           required
-          className="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-white/30 border focus:outline-none focus:border-strain/50 transition-colors"
+          className="w-full px-4 py-2.5 rounded-xl text-sm text-text placeholder-text-3/80 border focus:outline-none focus:border-strain/50 transition-colors"
           style={{ background: "var(--card)", borderColor: "var(--line)" }}
         />
         <input
@@ -108,7 +105,7 @@ function DevLoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="password"
           required
-          className="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-white/30 border focus:outline-none focus:border-strain/50 transition-colors"
+          className="w-full px-4 py-2.5 rounded-xl text-sm text-text placeholder-text-3/80 border focus:outline-none focus:border-strain/50 transition-colors"
           style={{ background: "var(--card)", borderColor: "var(--line)" }}
         />
         <button

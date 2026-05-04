@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { motion } from "framer-motion";
 import { cancelBooking } from "@/server/actions/bookings";
 
 export default function CancelMyBookingButton({
@@ -22,17 +23,19 @@ export default function CancelMyBookingButton({
   }
 
   return (
-    <button
+    <motion.button
       onClick={handleClick}
       disabled={isPending}
-      className="text-[11px] font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50 transition-opacity"
+      className="text-[11px] font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50"
       style={{
-        background: "transparent",
+        background: "var(--btn-ghost-bg)",
         border: "1px solid var(--line)",
         color: "var(--text-2)",
       }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
     >
       {isPending ? "…" : "Cancelar"}
-    </button>
+    </motion.button>
   );
 }

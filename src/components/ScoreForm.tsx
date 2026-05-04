@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { motion } from "framer-motion";
 import { submitScore } from "@/server/actions/scores";
 import { scalings } from "@/lib/validations/score";
 import { defaultUnit, timeStringToSeconds } from "@/lib/validations/score";
 import type { ScoreType } from "@/lib/validations/wod";
+import KCard from "@/components/kronos/KCard";
 
 export default function ScoreForm({
   wodId,
@@ -31,7 +33,6 @@ export default function ScoreForm({
     if (scoreType === "TIME") {
       parsedValue = timeStringToSeconds(rawValue);
     } else if (scoreType === "ROUNDS_REPS") {
-      // Allow "5+12" or "5.12"
       if (rawValue.includes("+")) {
         const [r, p] = rawValue.split("+");
         const repsPart = Math.min(99, Number(p));
@@ -80,80 +81,93 @@ export default function ScoreForm({
           : "ej. 120";
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-4 rounded-xl border flex flex-col gap-3"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
-    >
-      <p className="k-eyebrow">Subir mi score</p>
+    <KCard variant="featured">
+      <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-3">
+        <p className="k-eyebrow">Subir mi score</p>
 
-      <div className="grid grid-cols-3 gap-2">
-        <label className="col-span-2 flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>
-            Resultado ({scoreType})
-          </span>
-          <input
-            name="value"
-            placeholder={placeholder}
-            required
-            className="px-3 py-2 rounded-lg text-sm border bg-transparent font-mono"
-            style={{ borderColor: "var(--line)" }}
-          />
-        </label>
+        <div className="grid grid-cols-3 gap-2">
+          <label className="col-span-2 flex flex-col gap-1 text-xs">
+            <span style={{ color: "var(--text-2)" }}>
+              Resultado ({scoreType})
+            </span>
+            <input
+              name="value"
+              placeholder={placeholder}
+              required
+              className="px-3 py-2.5 rounded-lg text-sm border bg-transparent font-mono font-bold tracking-tight"
+              style={{
+                borderColor: "var(--line)",
+                fontSize: 16,
+              }}
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs">
+            <span style={{ color: "var(--text-2)" }}>Unidad</span>
+            <input
+              name="unit"
+              defaultValue={defaultUnit(scoreType)}
+              className="px-3 py-2.5 rounded-lg text-sm border bg-transparent font-mono"
+              style={{ borderColor: "var(--line)" }}
+            />
+          </label>
+        </div>
+
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Unidad</span>
-          <input
-            name="unit"
-            defaultValue={defaultUnit(scoreType)}
-            className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)" }}
-          />
+          <span style={{ color: "var(--text-2)" }}>Escalado</span>
+          <select
+            name="scaling"
+            defaultValue="RX"
+            className="px-3 py-2.5 rounded-lg text-sm border bg-transparent"
+            style={{ borderColor: "var(--line)", background: "var(--card)" }}
+          >
+            {scalings.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
         </label>
-      </div>
 
-      <label className="flex flex-col gap-1 text-xs">
-        <span style={{ color: "var(--text-2)" }}>Escalado</span>
-        <select
-          name="scaling"
-          defaultValue="RX"
-          className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
+        <textarea
+          name="notes"
+          placeholder="Notas (opcional)"
+          rows={2}
+          maxLength={500}
+          className="px-3 py-2.5 rounded-lg text-sm border bg-transparent resize-none"
+          style={{ borderColor: "var(--line)" }}
+        />
+
+        {error && (
+          <motion.p
+            className="text-xs font-medium"
+            style={{ color: "var(--pr)" }}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {error}
+          </motion.p>
+        )}
+        {feedback && (
+          <motion.p
+            className="text-xs font-bold"
+            style={{ color: "var(--recovery)" }}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {feedback}
+          </motion.p>
+        )}
+
+        <motion.button
+          type="submit"
+          disabled={isPending}
+          className="k-btn-grad py-3 rounded-xl text-sm font-bold disabled:opacity-50"
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
         >
-          {scalings.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <textarea
-        name="notes"
-        placeholder="Notas (opcional)"
-        rows={2}
-        maxLength={500}
-        className="px-3 py-2 rounded-lg text-sm border bg-transparent resize-none"
-        style={{ borderColor: "var(--line)" }}
-      />
-
-      {error && (
-        <p className="text-xs" style={{ color: "var(--pr)" }}>
-          {error}
-        </p>
-      )}
-      {feedback && (
-        <p className="text-xs" style={{ color: "var(--recovery)" }}>
-          {feedback}
-        </p>
-      )}
-
-      <button
-        type="submit"
-        disabled={isPending}
-        className="k-btn-grad py-2 rounded-lg text-sm disabled:opacity-50"
-      >
-        {isPending ? "Guardando…" : "Guardar score"}
-      </button>
-    </form>
+          {isPending ? "Guardando…" : "Guardar score"}
+        </motion.button>
+      </form>
+    </KCard>
   );
 }

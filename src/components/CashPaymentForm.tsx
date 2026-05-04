@@ -58,8 +58,7 @@ export default function CashPaymentForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-4 rounded-xl border flex flex-col gap-3 w-full max-w-md"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      className="k-card p-4 flex flex-col gap-3 w-full max-w-md"
     >
       <p className="k-eyebrow">Cobro en efectivo</p>
       <label className="flex flex-col gap-1 text-xs">

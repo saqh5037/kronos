@@ -19,6 +19,11 @@ import CancelMyBookingButton from "@/components/kronos/CancelMyBookingButton";
 import { formatScore } from "@/lib/scores";
 import { formatDayMonth, formatTime } from "@/lib/week";
 import type { ScoreType } from "@/lib/validations/wod";
+import {
+  AnimatedSection,
+  AnimatedItem,
+} from "@/components/kronos/AnimatedSection";
+import KCard from "@/components/kronos/KCard";
 
 export const metadata = { title: "Kronos — Inicio" };
 
@@ -53,10 +58,7 @@ export default async function AtletaHomePage() {
       <div className="p-4 pt-16">
         <p className="k-eyebrow mb-2">App del atleta</p>
         <h1 className="font-display font-bold text-3xl">Inicio</h1>
-        <div
-          className="mt-6 p-6 rounded-xl border text-center"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
-        >
+        <div className="mt-6 k-card p-6 text-center">
           <p className="text-sm" style={{ color: "var(--text-2)" }}>
             No tienes perfil de atleta vinculado. Contacta al coach del box.
           </p>
@@ -65,12 +67,10 @@ export default async function AtletaHomePage() {
     );
   }
 
-  // Enrich next booking with class capacity info
   const nextClassDetail = home.nextBooking
     ? classes.find((c) => c.id === home.nextBooking!.classId)
     : null;
 
-  // Week strip data
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const weekDays = Array.from({ length: 7 }, (_, i) => {
@@ -90,7 +90,6 @@ export default async function AtletaHomePage() {
       (c) => c.myBookingStatus === "BOOKED" || c.myBookingStatus === "WAITLIST",
     );
     const hasClasses = dayClasses.length > 0;
-
     if (isToday)
       return {
         state: "today" as const,
@@ -103,18 +102,14 @@ export default async function AtletaHomePage() {
   }
 
   const weekAttendedText = `${home.weekAttendance}/${home.weekGoal} ASISTENCIAS`;
-
-  // Top 4 recent scores for today's WOD leaderboard
   const topScores = wodScores.slice(0, 4);
-
-  // Latest PR for shortcut
   const latestPR = prs[0] ?? null;
 
   return (
-    <div className="pb-24">
+    <div className="pb-28">
       {/* HEADER */}
-      <div className="flex items-center justify-between px-[18px] pt-14 pb-3.5">
-        <div className="flex items-center gap-2.5">
+      <AnimatedSection className="flex items-center justify-between px-[18px] pt-14 pb-3.5">
+        <AnimatedItem className="flex items-center gap-2.5">
           <div
             className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center font-extrabold text-sm text-[#0a1a14] font-display"
             style={{ background: "var(--grad)" }}
@@ -132,31 +127,29 @@ export default async function AtletaHomePage() {
               Hola, {home.athlete?.firstName}
             </div>
           </div>
-        </div>
-        <button
-          className="relative w-[34px] h-[34px] rounded-full flex items-center justify-center"
-          style={{
-            background: "var(--card)",
-            border: "1px solid var(--line)",
-          }}
-          aria-label="Notificaciones"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
+        </AnimatedItem>
+        <AnimatedItem>
+          <button
+            className="relative w-[34px] h-[34px] rounded-full flex items-center justify-center k-card"
+            aria-label="Notificaciones"
           >
-            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" />
-          </svg>
-          <span
-            className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full"
-            style={{ background: "var(--pr)" }}
-          />
-        </button>
-      </div>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" />
+            </svg>
+            <span
+              className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full"
+              style={{ background: "var(--pr)" }}
+            />
+          </button>
+        </AnimatedItem>
+      </AnimatedSection>
 
       {/* HERO STATS — animated HaloRings */}
       <AnimatedStats
@@ -169,65 +162,69 @@ export default async function AtletaHomePage() {
       {/* NEXT BOOKING */}
       <section className="mt-4 px-3.5">
         {home.nextBooking ? (
-          <div className="k-card p-3.5 flex items-center gap-3.5">
-            <div
-              className="text-center px-2.5 py-1.5 rounded-[10px] min-w-[54px]"
-              style={{ background: "var(--bg-soft)" }}
-            >
+          <KCard variant="featured">
+            <div className="p-3.5 flex items-center gap-3.5">
               <div
-                className="font-mono text-[9px] tracking-[0.1em] font-bold"
-                style={{ color: "var(--text-3)" }}
+                className="text-center px-2.5 py-1.5 rounded-[10px] min-w-[54px]"
+                style={{ background: "var(--bg-soft)" }}
               >
-                {home.nextBooking.startsAt.toDateString() ===
-                new Date().toDateString()
-                  ? "HOY"
-                  : formatDayMonth(home.nextBooking.startsAt).toUpperCase()}
+                <div
+                  className="font-mono text-[9px] tracking-[0.1em] font-bold"
+                  style={{ color: "var(--text-3)" }}
+                >
+                  {home.nextBooking.startsAt.toDateString() ===
+                  new Date().toDateString()
+                    ? "HOY"
+                    : formatDayMonth(home.nextBooking.startsAt).toUpperCase()}
+                </div>
+                <div
+                  className="font-display text-xl font-bold"
+                  style={{ color: "var(--recovery)" }}
+                >
+                  {formatTime(home.nextBooking.startsAt)}
+                </div>
               </div>
-              <div
-                className="font-display text-xl font-bold"
-                style={{ color: "var(--recovery)" }}
-              >
-                {formatTime(home.nextBooking.startsAt)}
+              <div className="flex-1 min-w-0">
+                <div className="text-[13px] font-semibold mb-0.5">
+                  Tu próxima clase
+                </div>
+                <div
+                  className="text-[11px] flex gap-2 items-center flex-wrap"
+                  style={{ color: "var(--text-2)" }}
+                >
+                  {home.nextBooking.coachName && (
+                    <span>Coach {home.nextBooking.coachName}</span>
+                  )}
+                  {nextClassDetail && (
+                    <>
+                      <span style={{ opacity: 0.4 }}>·</span>
+                      <span style={{ color: "var(--recovery)" }}>
+                        ● {nextClassDetail.bookedCount}/
+                        {nextClassDetail.capacity}
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
+              <CancelMyBookingButton bookingId={home.nextBooking.bookingId} />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[13px] font-semibold mb-0.5">
-                Tu próxima clase
-              </div>
-              <div
-                className="text-[11px] flex gap-2 items-center flex-wrap"
+          </KCard>
+        ) : (
+          <Link href="/atleta/reservar" className="block">
+            <KCard variant="ghost">
+              <p
+                className="text-sm text-center py-3"
                 style={{ color: "var(--text-2)" }}
               >
-                {home.nextBooking.coachName && (
-                  <span>Coach {home.nextBooking.coachName}</span>
-                )}
-                {nextClassDetail && (
-                  <>
-                    <span style={{ opacity: 0.4 }}>·</span>
-                    <span style={{ color: "var(--recovery)" }}>
-                      ● {nextClassDetail.bookedCount}/{nextClassDetail.capacity}
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-            <CancelMyBookingButton bookingId={home.nextBooking.bookingId} />
-          </div>
-        ) : (
-          <Link
-            href="/atleta/reservar"
-            className="block p-4 rounded-xl border text-center"
-            style={{ borderColor: "var(--line)", background: "var(--card)" }}
-          >
-            <p className="text-sm" style={{ color: "var(--text-2)" }}>
-              Sin reservas activas. Toca para reservar.
-            </p>
+                Sin reservas activas. Toca para reservar.
+              </p>
+            </KCard>
           </Link>
         )}
       </section>
 
       {/* WEEK STRIP */}
-      <section className="mt-5">
+      <AnimatedSection className="mt-5">
         <div className="flex items-baseline justify-between px-[18px] pb-2">
           <div className="k-eyebrow" style={{ color: "var(--text-2)" }}>
             ESTA SEMANA
@@ -239,7 +236,7 @@ export default async function AtletaHomePage() {
             {weekAttendedText}
           </div>
         </div>
-        <div className="px-3.5">
+        <AnimatedItem className="px-3.5">
           <div className="k-card p-4">
             <div className="flex justify-between gap-1.5">
               {weekDays.map((d, i) => {
@@ -262,17 +259,17 @@ export default async function AtletaHomePage() {
                       {label}
                     </div>
                     <div
-                      className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[13px] font-bold"
+                      className="w-9 h-9 rounded-[10px] flex items-center justify-center text-[13px] font-bold transition-all"
                       style={{
                         background: isToday
                           ? "var(--grad)"
                           : booked
-                            ? "rgba(58,163,255,0.18)"
+                            ? "var(--strain-soft)"
                             : "transparent",
                         border: isToday
                           ? "none"
                           : booked
-                            ? "1px solid rgba(58,163,255,0.35)"
+                            ? "1px solid var(--strain-line)"
                             : "1px solid var(--line)",
                         color: isToday
                           ? "#0a1a14"
@@ -281,6 +278,9 @@ export default async function AtletaHomePage() {
                             : rest
                               ? "var(--text-3)"
                               : "var(--text-2)",
+                        boxShadow: isToday
+                          ? "0 0 12px rgba(25,240,139,0.25)"
+                          : "none",
                       }}
                     >
                       {rest ? "·" : dayNum}
@@ -289,7 +289,7 @@ export default async function AtletaHomePage() {
                       className="font-mono text-[8px] font-bold h-2.5"
                       style={{
                         color: isToday
-                          ? "#fff"
+                          ? "var(--text)"
                           : booked
                             ? "var(--strain)"
                             : "var(--text-3)",
@@ -302,187 +302,228 @@ export default async function AtletaHomePage() {
               })}
             </div>
           </div>
-        </div>
-      </section>
+        </AnimatedItem>
+      </AnimatedSection>
 
       {/* LEADERBOARD WOD HOY */}
       {topScores.length > 0 && wod && (
-        <section className="mt-5">
+        <AnimatedSection className="mt-5">
           <div className="flex items-baseline justify-between px-[18px] pb-2">
             <div className="k-eyebrow" style={{ color: "var(--text-2)" }}>
               LEADERBOARD · {wod.wodName.toUpperCase()} HOY
             </div>
             <Link
               href="/atleta/wod"
-              className="font-mono text-[10px] font-bold tracking-[0.08em]"
+              className="font-mono text-[10px] font-bold tracking-[0.08em] hover:text-text-2 transition-colors"
               style={{ color: "var(--text-3)" }}
             >
               VER TODOS →
             </Link>
           </div>
           <div className="px-3.5">
-            <div className="k-card">
+            <div className="k-card overflow-hidden">
               {topScores.map((s, i, a) => {
-                const isMe = false; // TODO: compare athlete id with session
+                const isTop3 = i < 3;
+                const rankGlows = [
+                  "0 0 14px rgba(25,240,139,0.45)",
+                  "0 0 10px rgba(58,163,255,0.35)",
+                  "0 0 8px rgba(255,94,94,0.30)",
+                ];
                 return (
-                  <div
-                    key={s.id}
-                    className="flex items-center gap-3 px-4 py-3"
-                    style={{
-                      borderBottom:
-                        i < a.length - 1 ? "1px solid var(--line)" : "none",
-                      background: isMe ? "var(--grad-soft)" : "transparent",
-                    }}
-                  >
+                  <AnimatedItem key={s.id}>
                     <div
-                      className="font-display text-lg font-bold w-5"
+                      className="flex items-center gap-3 px-4 py-3"
                       style={{
-                        color: i < 3 ? "var(--recovery)" : "var(--text-3)",
+                        borderBottom:
+                          i < a.length - 1 ? "1px solid var(--line)" : "none",
                       }}
                     >
-                      {i + 1}
+                      <div
+                        className="font-display text-lg font-bold w-5 text-center"
+                        style={{
+                          color: isTop3 ? "var(--recovery)" : "var(--text-3)",
+                          textShadow: isTop3 ? rankGlows[i] : "none",
+                        }}
+                      >
+                        {i + 1}
+                      </div>
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold"
+                        style={{
+                          background: isTop3
+                            ? `var(--${["recovery", "strain", "pr"][i]}-soft)`
+                            : "var(--bg-soft)",
+                          border: `1px solid ${isTop3 ? `var(--${["recovery", "strain", "pr"][i]}-line)` : "var(--line)"}`,
+                          color: isTop3
+                            ? `var(--${["recovery", "strain", "pr"][i]})`
+                            : "var(--text-3)",
+                        }}
+                      >
+                        {s.athlete.firstName[0]}
+                      </div>
+                      <div className="flex-1 text-[13px] font-medium">
+                        {s.athlete.firstName} {s.athlete.lastName?.[0]}.
+                      </div>
+                      <span
+                        className={`k-chip ${s.scaling === "RX" ? "k-chip-recovery" : "k-chip-ghost"}`}
+                        style={{ padding: "3px 8px", fontSize: 9 }}
+                      >
+                        {s.scaling}
+                      </span>
+                      <div
+                        className="font-display text-sm font-bold min-w-[54px] text-right"
+                        style={{ color: "var(--text)" }}
+                      >
+                        {formatScore(
+                          Number(s.value),
+                          s.wod.scoreType as ScoreType,
+                        )}
+                      </div>
                     </div>
-                    <div
-                      className="w-7 h-7 rounded-full"
-                      style={{
-                        background: "var(--bg-soft)",
-                        border: "1px solid var(--line)",
-                      }}
-                    />
-                    <div className="flex-1 text-[13px] font-medium">
-                      {s.athlete.firstName} {s.athlete.lastName?.[0]}.
-                    </div>
-                    <span
-                      className={`k-chip ${s.scaling === "RX" ? "k-chip-recovery" : "k-chip-ghost"}`}
-                      style={{ padding: "3px 8px", fontSize: 9 }}
-                    >
-                      {s.scaling}
-                    </span>
-                    <div
-                      className="font-display text-sm font-bold min-w-[54px] text-right"
-                      style={{ color: isMe ? "var(--recovery)" : "#fff" }}
-                    >
-                      {formatScore(
-                        Number(s.value),
-                        s.wod.scoreType as ScoreType,
-                      )}
-                    </div>
-                  </div>
+                  </AnimatedItem>
                 );
               })}
             </div>
           </div>
-        </section>
+        </AnimatedSection>
       )}
 
       {/* LAST SCORE */}
       {home.lastScore && (
-        <section className="mt-4 px-3.5">
-          <div className="k-card p-3.5 flex items-center gap-3.5">
-            <div
-              className="w-[42px] h-[42px] rounded-[11px] flex items-center justify-center"
-              style={{
-                background: "rgba(255,94,94,0.15)",
-                border: "1px solid rgba(255,94,94,0.25)",
-              }}
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--pr)"
-                strokeWidth="2"
-              >
-                <path d="M6 9V5h12v4M5 9h14v4H5zM7 13l1 8h8l1-8" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-2 mb-0.5">
-                <span className="text-[13px] font-semibold">
-                  {home.lastScore.wodName}
-                </span>
+        <AnimatedSection className="mt-4 px-3.5">
+          <AnimatedItem>
+            <KCard>
+              <div className="p-3.5 flex items-center gap-3.5">
+                <div
+                  className="w-[42px] h-[42px] rounded-[11px] flex items-center justify-center"
+                  style={{
+                    background: "var(--pr-soft)",
+                    border: "1px solid var(--pr-line)",
+                  }}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--pr)"
+                    strokeWidth="2"
+                  >
+                    <path d="M6 9V5h12v4M5 9h14v4H5zM7 13l1 8h8l1-8" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 mb-0.5">
+                    <span className="text-[13px] font-semibold">
+                      {home.lastScore.wodName}
+                    </span>
+                  </div>
+                  <div
+                    className="font-mono text-[10px] tracking-[0.06em]"
+                    style={{ color: "var(--text-2)" }}
+                  >
+                    {formatScore(
+                      home.lastScore.value,
+                      home.lastScore.scoreType as ScoreType,
+                    )}{" "}
+                    · {formatDayMonth(home.lastScore.createdAt).toUpperCase()}
+                  </div>
+                </div>
+                <Link
+                  href="/atleta/perfil"
+                  className="text-lg opacity-40 hover:opacity-70 transition-opacity"
+                >
+                  ›
+                </Link>
               </div>
-              <div
-                className="font-mono text-[10px] tracking-[0.06em]"
-                style={{ color: "var(--text-2)" }}
-              >
-                {formatScore(
-                  home.lastScore.value,
-                  home.lastScore.scoreType as ScoreType,
-                )}{" "}
-                · {formatDayMonth(home.lastScore.createdAt).toUpperCase()}
-              </div>
-            </div>
-            <Link
-              href="/atleta/perfil"
-              className="text-lg opacity-40 hover:opacity-70 transition-opacity"
-            >
-              ›
-            </Link>
-          </div>
-        </section>
+            </KCard>
+          </AnimatedItem>
+        </AnimatedSection>
       )}
 
       {/* PR SHORTCUT */}
       {latestPR && (
-        <section className="mt-4 px-3.5">
-          <div className="k-card p-3.5 flex items-center gap-3.5">
-            <div
-              className="w-[42px] h-[42px] rounded-[11px] flex items-center justify-center"
-              style={{
-                background: "rgba(255,94,94,0.15)",
-                border: "1px solid rgba(255,94,94,0.25)",
-              }}
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--pr)"
-                strokeWidth="2"
-              >
-                <path d="M6 9V5h12v4M5 9h14v4H5zM7 13l1 8h8l1-8" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-2 mb-0.5">
-                <span className="text-[13px] font-semibold">
-                  {latestPR.movementName}
-                </span>
-                <span
-                  className="k-chip k-chip-pr"
-                  style={{ padding: "2px 6px", fontSize: 9 }}
+        <AnimatedSection className="mt-4 px-3.5">
+          <AnimatedItem>
+            <KCard>
+              <div className="p-3.5 flex items-center gap-3.5">
+                <div
+                  className="w-[42px] h-[42px] rounded-[11px] flex items-center justify-center"
+                  style={{
+                    background: "var(--pr-soft)",
+                    border: "1px solid var(--pr-line)",
+                  }}
                 >
-                  PR
-                </span>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--pr)"
+                    strokeWidth="2"
+                  >
+                    <path d="M6 9V5h12v4M5 9h14v4H5zM7 13l1 8h8l1-8" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 mb-0.5">
+                    <span className="text-[13px] font-semibold">
+                      {latestPR.movementName}
+                    </span>
+                    <span
+                      className="k-chip k-chip-pr"
+                      style={{ padding: "2px 6px", fontSize: 9 }}
+                    >
+                      PR
+                    </span>
+                  </div>
+                  <div
+                    className="font-mono text-[10px] tracking-[0.06em]"
+                    style={{ color: "var(--text-2)" }}
+                  >
+                    {latestPR.value} {latestPR.unit} ·{" "}
+                    {formatDayMonth(latestPR.achievedAt).toUpperCase()}
+                  </div>
+                </div>
+                <Link
+                  href="/atleta/perfil"
+                  className="text-lg opacity-40 hover:opacity-70 transition-opacity"
+                >
+                  ›
+                </Link>
               </div>
-              <div
-                className="font-mono text-[10px] tracking-[0.06em]"
-                style={{ color: "var(--text-2)" }}
-              >
-                {latestPR.value} {latestPR.unit} ·{" "}
-                {formatDayMonth(latestPR.achievedAt).toUpperCase()}
-              </div>
-            </div>
-            <Link
-              href="/atleta/perfil"
-              className="text-lg opacity-40 hover:opacity-70 transition-opacity"
-            >
-              ›
-            </Link>
-          </div>
-        </section>
+            </KCard>
+          </AnimatedItem>
+        </AnimatedSection>
       )}
 
       {/* QUICK LINKS */}
-      <section className="mt-6 px-4 grid grid-cols-2 gap-3">
-        <QuickLink href="/atleta/wod" label="WOD del día" tone="strain" />
-        <QuickLink href="/atleta/reservar" label="Reservar" tone="recovery" />
-        <QuickLink href="/atleta/pagos" label="Mis pagos" tone="ghost" />
-        <QuickLink href="/atleta/perfil" label="Mi perfil" tone="ghost" />
-      </section>
+      <AnimatedSection className="mt-6 px-4 grid grid-cols-2 gap-3">
+        <QuickLink
+          href="/atleta/wod"
+          label="WOD del día"
+          tone="strain"
+          icon="wod"
+        />
+        <QuickLink
+          href="/atleta/reservar"
+          label="Reservar"
+          tone="recovery"
+          icon="calendar"
+        />
+        <QuickLink
+          href="/atleta/pagos"
+          label="Mis pagos"
+          tone="ghost"
+          icon="card"
+        />
+        <QuickLink
+          href="/atleta/perfil"
+          label="Mi perfil"
+          tone="ghost"
+          icon="user"
+        />
+      </AnimatedSection>
     </div>
   );
 }
@@ -491,10 +532,12 @@ function QuickLink({
   href,
   label,
   tone,
+  icon,
 }: {
   href: string;
   label: string;
   tone: "recovery" | "strain" | "ghost";
+  icon: string;
 }) {
   const color =
     tone === "recovery"
@@ -502,13 +545,80 @@ function QuickLink({
       : tone === "strain"
         ? "var(--strain)"
         : "var(--text-2)";
+
+  const iconSvgs: Record<string, React.ReactNode> = {
+    wod: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12" />
+      </svg>
+    ),
+    calendar: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="5" width="18" height="16" rx="2" />
+        <path d="M3 10h18M8 3v4M16 3v4" />
+      </svg>
+    ),
+    card: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="1" y="4" width="22" height="16" rx="2" />
+        <path d="M1 10h22" />
+      </svg>
+    ),
+    user: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21c1-4.5 4.5-7 8-7s7 2.5 8 7" />
+      </svg>
+    ),
+  };
+
   return (
-    <Link
-      href={href as Route}
-      className="k-card p-4 flex items-center justify-center text-center text-sm font-display font-semibold transition-colors hover:brightness-110"
-      style={{ color }}
-    >
-      {label}
-    </Link>
+    <AnimatedItem>
+      <Link href={href as Route}>
+        <KCard
+          variant="ghost"
+          className="p-4 flex items-center justify-center gap-2 text-center text-sm font-display font-semibold"
+        >
+          <span style={{ color }}>{iconSvgs[icon]}</span>
+          <span style={{ color }}>{label}</span>
+        </KCard>
+      </Link>
+    </AnimatedItem>
   );
 }

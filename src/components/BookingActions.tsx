@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { motion } from "framer-motion";
 import {
   bookClass,
   cancelBooking,
@@ -47,81 +48,99 @@ export function BookButton({
 
   if (myStatus === "BOOKED") {
     return (
-      <button
+      <motion.button
         onClick={handleCancel}
         disabled={isPending}
-        className="k-btn-ghost px-3 py-1.5 rounded-md text-xs disabled:opacity-50"
+        className="k-btn-ghost px-3 py-2 rounded-lg text-xs disabled:opacity-50"
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
       >
         {isPending ? "…" : "Cancelar"}
-      </button>
+      </motion.button>
     );
   }
 
   if (myStatus === "WAITLIST") {
     return (
-      <button
+      <motion.button
         onClick={handleCancel}
         disabled={isPending}
-        className="k-btn-ghost px-3 py-1.5 rounded-md text-xs disabled:opacity-50"
+        className="k-btn-ghost px-3 py-2 rounded-lg text-xs disabled:opacity-50"
         style={{ color: "var(--text-2)" }}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
       >
         {isPending ? "…" : "Quitar de waitlist"}
-      </button>
+      </motion.button>
     );
   }
 
   const full = bookedCount >= capacity;
   return (
-    <button
+    <motion.button
       onClick={handleBook}
       disabled={isPending}
-      className="k-btn-grad px-3 py-1.5 rounded-md text-xs disabled:opacity-50"
+      className="k-btn-grad px-3 py-2 rounded-lg text-xs disabled:opacity-50"
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.96 }}
     >
       {isPending ? "…" : full ? "Unirse a waitlist" : "Reservar"}
-    </button>
+    </motion.button>
   );
 }
 
 export function CheckInButton({ bookingId }: { bookingId: string }) {
   const [isPending, startTransition] = useTransition();
   return (
-    <button
+    <motion.button
       onClick={() =>
         startTransition(async () => {
           await checkInAthlete(bookingId);
         })
       }
       disabled={isPending}
-      className="text-xs px-2 py-1 rounded-md disabled:opacity-50"
-      style={{ color: "var(--recovery)" }}
+      className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-semibold"
+      style={{
+        color: "var(--recovery)",
+        background: "var(--recovery-soft)",
+        border: "1px solid var(--recovery-line)",
+      }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
     >
       {isPending ? "…" : "Check-in"}
-    </button>
+    </motion.button>
   );
 }
 
 export function NoShowButton({ bookingId }: { bookingId: string }) {
   const [isPending, startTransition] = useTransition();
   return (
-    <button
+    <motion.button
       onClick={() =>
         startTransition(async () => {
           await markNoShow(bookingId);
         })
       }
       disabled={isPending}
-      className="text-xs px-2 py-1 rounded-md disabled:opacity-50"
-      style={{ color: "var(--pr)" }}
+      className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-semibold"
+      style={{
+        color: "var(--pr)",
+        background: "var(--pr-soft)",
+        border: "1px solid var(--pr-line)",
+      }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
     >
       {isPending ? "…" : "No-show"}
-    </button>
+    </motion.button>
   );
 }
 
 export function CancelBookingButton({ bookingId }: { bookingId: string }) {
   const [isPending, startTransition] = useTransition();
   return (
-    <button
+    <motion.button
       onClick={() => {
         if (!confirm("¿Cancelar reserva del atleta?")) return;
         startTransition(async () => {
@@ -129,10 +148,16 @@ export function CancelBookingButton({ bookingId }: { bookingId: string }) {
         });
       }}
       disabled={isPending}
-      className="text-xs px-2 py-1 rounded-md disabled:opacity-50"
-      style={{ color: "var(--text-3)" }}
+      className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-medium"
+      style={{
+        color: "var(--text-3)",
+        background: "var(--btn-ghost-bg)",
+        border: "1px solid var(--line)",
+      }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
     >
       {isPending ? "…" : "Quitar"}
-    </button>
+    </motion.button>
   );
 }

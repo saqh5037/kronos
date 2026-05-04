@@ -3,19 +3,21 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const tabs = [
   {
     href: "/atleta",
     label: "Inicio",
-    icon: (
+    icon: (active: boolean) => (
       <svg
         viewBox="0 0 24 24"
         width="22"
         height="22"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.7"
+        strokeWidth={active ? 2.2 : 1.6}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -26,14 +28,14 @@ const tabs = [
   {
     href: "/atleta/reservar",
     label: "Reservar",
-    icon: (
+    icon: (active: boolean) => (
       <svg
         viewBox="0 0 24 24"
         width="22"
         height="22"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.7"
+        strokeWidth={active ? 2.2 : 1.6}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -45,14 +47,14 @@ const tabs = [
   {
     href: "/atleta/wod",
     label: "WOD",
-    icon: (
+    icon: (active: boolean) => (
       <svg
         viewBox="0 0 24 24"
         width="22"
         height="22"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.7"
+        strokeWidth={active ? 2.2 : 1.6}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -63,14 +65,14 @@ const tabs = [
   {
     href: "/atleta/perfil",
     label: "Atleta",
-    icon: (
+    icon: (active: boolean) => (
       <svg
         viewBox="0 0 24 24"
         width="22"
         height="22"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.7"
+        strokeWidth={active ? 2.2 : 1.6}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -84,44 +86,72 @@ const tabs = [
 export default function TabBar() {
   const pathname = usePathname();
 
+  const activeIndex = tabs.findIndex((tab) => {
+    if (tab.href === "/atleta") return pathname === tab.href;
+    return pathname.startsWith(tab.href);
+  });
+
   return (
     <>
       <div
-        className="fixed bottom-0 left-0 right-0 h-20 flex items-center px-3 border-t z-40"
+        className="fixed bottom-0 left-0 right-0 z-40 border-t"
         style={{
           background: "var(--bg)",
           borderColor: "var(--line)",
-          paddingBottom: "8px",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
         }}
       >
-        {tabs.map((tab) => {
-          const isActive =
-            pathname === tab.href ||
-            (tab.href !== "/atleta" && pathname.startsWith(tab.href));
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href as Route}
-              className="flex-1 flex flex-col items-center gap-1.5 py-2 text-xs font-semibold transition-colors"
-              style={{
-                color: isActive ? "var(--text)" : "rgba(255,255,255,0.4)",
-              }}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-            </Link>
-          );
-        })}
-        {/* Spacer for FAB */}
-        <div className="w-14" />
+        <div className="flex items-center h-16 px-2">
+          {tabs.map((tab, i) => {
+            const isActive = i === activeIndex;
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href as Route}
+                className="relative flex-1 flex flex-col items-center gap-1 py-2 text-[10px] font-semibold transition-colors"
+                style={{
+                  color: isActive ? "var(--text)" : "var(--text-3)",
+                }}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="tab-indicator"
+                    className="absolute -top-px left-1/2 -translate-x-1/2 h-[2px] rounded-full"
+                    style={{
+                      width: 20,
+                      background: "var(--grad)",
+                      boxShadow: "0 0 8px rgba(25,240,139,0.5)",
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <motion.span
+                  animate={isActive ? { scale: 1.1 } : { scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  {tab.icon(isActive)}
+                </motion.span>
+                <span>{tab.label}</span>
+              </Link>
+            );
+          })}
+          {/* Theme toggle */}
+          <div className="flex items-center justify-center px-1">
+            <ThemeToggle className="!p-2 !rounded-full !w-9 !h-9" />
+          </div>
+        </div>
       </div>
+
       {/* FAB — K button */}
-      <button
-        className="fixed bottom-6 right-4 w-14 h-14 rounded-full flex items-center justify-center z-50 border-2 border-bg"
+      <motion.button
+        className="fixed bottom-20 right-4 w-14 h-14 rounded-full flex items-center justify-center z-50"
         style={{
           background: "var(--grad)",
-          boxShadow: "0 0 28px rgba(58,163,255,0.35)",
+          boxShadow: "0 4px 24px rgba(58,163,255,0.35), 0 0 0 3px var(--bg)",
         }}
+        whileHover={{ scale: 1.08, y: -2 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => {}}
         aria-label="Acción rápida"
       >
@@ -131,7 +161,7 @@ export default function TabBar() {
         >
           K
         </span>
-      </button>
+      </motion.button>
     </>
   );
 }

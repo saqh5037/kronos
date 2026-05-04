@@ -75,8 +75,8 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
             <div
               className={`w-16 rounded-t-lg ${heightClass}`}
               style={{
-                background: isFirst ? "var(--grad)" : "rgba(255,255,255,0.06)",
-                border: isFirst ? "none" : "1px solid rgba(255,255,255,0.08)",
+                background: isFirst ? "var(--grad)" : "var(--btn-ghost-bg)",
+                border: isFirst ? "none" : "1px solid var(--line)",
                 borderBottom: "none",
               }}
             />

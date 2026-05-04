@@ -59,10 +59,7 @@ export default async function ComunicacionesPage() {
           Historial ({sent.length})
         </p>
         {sent.length === 0 ? (
-          <div
-            className="p-6 rounded-xl border text-center"
-            style={{ borderColor: "var(--line)", background: "var(--card)" }}
-          >
+          <div className="k-card p-6 text-center">
             <p className="text-sm" style={{ color: "var(--text-2)" }}>
               Sin anuncios enviados todavía.
             </p>
@@ -81,10 +78,7 @@ export default async function ComunicacionesPage() {
 
 function Card({ a }: { a: AnnouncementRow }) {
   return (
-    <div
-      className="p-4 rounded-xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
-    >
+    <div className="k-card p-4">
       <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
         <div className="min-w-0 flex-1">
           <h3 className="font-display font-bold text-base">{a.title}</h3>

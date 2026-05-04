@@ -70,8 +70,7 @@ export default function AnnouncementForm() {
   return (
     <form
       onSubmit={submit("send")}
-      className="p-4 rounded-xl border flex flex-col gap-3 w-full max-w-xl"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      className="k-card p-4 flex flex-col gap-3 w-full max-w-xl"
     >
       <p className="k-eyebrow">Nuevo anuncio</p>
       <input
