@@ -373,7 +373,23 @@ async function main() {
     where: { tenantId: box1.id, id: { startsWith: "seed-" } },
   });
 
-  // ─── Coach ──────────────────────────────────────────────────────────────────
+  // ─── Users (Owner + Coach + Athlete) ────────────────────────────────────────
+  // Three demo accounts for dev login (NEXT_PUBLIC_DEV_LOGIN=1, password "dev"):
+  //   owner@iron-hands.demo  → role OWNER  (full admin)
+  //   coach@iron-hands.demo  → role COACH  (admin/coach surface)
+  //   atleta@iron-hands.demo → role ATHLETE (atleta surface, linked to seed-ath-0)
+  await prisma.user.upsert({
+    where: { email: "owner@iron-hands.demo" },
+    update: {},
+    create: {
+      id: `seed-owner-${box1.id}`,
+      email: "owner@iron-hands.demo",
+      name: "Iron Hands Owner",
+      role: "OWNER",
+      tenantId: box1.id,
+    },
+  });
+
   const coach = await prisma.user.upsert({
     where: { email: "coach@iron-hands.demo" },
     update: {},
@@ -415,6 +431,26 @@ async function main() {
     });
   }
   await prisma.athlete.createMany({ data: athleteData });
+
+  // Link first athlete to a demo User with role ATHLETE for dev login
+  const firstAthleteId = athleteIds[0];
+  if (firstAthleteId) {
+    const athleteUser = await prisma.user.upsert({
+      where: { email: "atleta@iron-hands.demo" },
+      update: {},
+      create: {
+        id: `seed-ath-user-${box1.id}`,
+        email: "atleta@iron-hands.demo",
+        name: "Atleta Demo",
+        role: "ATHLETE",
+        tenantId: box1.id,
+      },
+    });
+    await prisma.athlete.update({
+      where: { id: firstAthleteId },
+      data: { userId: athleteUser.id },
+    });
+  }
 
   // Box 2 isolation athlete
   await prisma.athlete.upsert({
