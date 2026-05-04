@@ -5,9 +5,11 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
-    include: ["tests/**/*.test.ts"],
-    // Integration tests need real Postgres — run with `pnpm test:integration`
-    exclude: ["**/node_modules/**", "**/*.integration.test.ts"],
+    include: ["tests/integration/**/*.integration.test.ts"],
+    // Integration tests hit a real DB — run sequentially to avoid contention.
+    pool: "forks",
+    poolOptions: { forks: { singleFork: true } },
+    testTimeout: 15000,
   },
   resolve: {
     alias: {

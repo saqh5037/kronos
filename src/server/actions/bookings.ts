@@ -151,40 +151,48 @@ export async function bookClass(classId: string) {
   const me = await getMyAthlete(session.user.id, tenantId);
   if (!me) throw new Error("No tienes perfil de atleta en este box");
 
-  const db = withTenant(tenantId);
-  const klass = await db.class.findUnique({
-    where: { id: classId },
-    include: {
-      bookings: { select: { athleteId: true, status: true } },
-    },
-  });
-  if (!klass) throw new Error("Clase no encontrada");
+  // Re-fetch class + bookings INSIDE the transaction so two concurrent
+  // requests can't both see the same "1 slot left" state. Serializable
+  // isolation makes the second tx retry or fail.
+  const decision = await rawDb.$transaction(
+    async (tx) => {
+      const klass = await tx.class.findFirst({
+        where: { id: classId, tenantId },
+        include: {
+          bookings: { select: { athleteId: true, status: true } },
+        },
+      });
+      if (!klass) throw new Error("Clase no encontrada");
 
-  const decision = decideBooking(
-    {
-      isActive: klass.isActive,
-      startsAt: klass.startsAt,
-      capacity: klass.capacity,
+      const d = decideBooking(
+        {
+          isActive: klass.isActive,
+          startsAt: klass.startsAt,
+          capacity: klass.capacity,
+        },
+        klass.bookings as BookingSnapshot[],
+        me.id,
+      );
+
+      if ("error" in d) {
+        throw new Error(translateBookingError(d.error));
+      }
+
+      await tx.booking.upsert({
+        where: { classId_athleteId: { classId, athleteId: me.id } },
+        update: { status: d.status, bookedAt: new Date() },
+        create: {
+          tenantId,
+          classId,
+          athleteId: me.id,
+          status: d.status,
+        },
+      });
+
+      return d;
     },
-    klass.bookings as BookingSnapshot[],
-    me.id,
+    { isolationLevel: "Serializable" },
   );
-
-  if ("error" in decision) {
-    throw new Error(translateBookingError(decision.error));
-  }
-
-  // Re-book over a previously CANCELLED booking if it exists, else create.
-  await rawDb.booking.upsert({
-    where: { classId_athleteId: { classId, athleteId: me.id } },
-    update: { status: decision.status, bookedAt: new Date() },
-    create: {
-      tenantId,
-      classId,
-      athleteId: me.id,
-      status: decision.status,
-    },
-  });
 
   revalidatePath("/atleta/reservar");
   revalidatePath("/admin/reservas");
@@ -194,40 +202,49 @@ export async function bookClass(classId: string) {
 export async function cancelBooking(bookingId: string) {
   const session = await requireSession();
   const tenantId = session.user.tenantId;
-  const db = withTenant(tenantId);
 
-  const booking = await db.booking.findUnique({
-    where: { id: bookingId },
-    include: {
-      class: {
-        select: {
-          id: true,
-          bookings: {
-            orderBy: { bookedAt: "asc" },
-            select: { id: true, status: true },
+  await rawDb.$transaction(
+    async (tx) => {
+      const booking = await tx.booking.findFirst({
+        where: { id: bookingId, tenantId },
+        include: {
+          class: {
+            select: {
+              id: true,
+              bookings: {
+                orderBy: { bookedAt: "asc" },
+                select: { id: true, status: true },
+              },
+            },
           },
         },
-      },
-    },
-  });
-  if (!booking) throw new Error("Reserva no encontrada");
-
-  await rawDb.booking.update({
-    where: { id: bookingId },
-    data: { status: "CANCELLED" },
-  });
-
-  // Promote next waitlist if a real BOOKED slot was cancelled
-  if (booking.status === "BOOKED") {
-    const remaining = booking.class.bookings.filter((b) => b.id !== bookingId);
-    const promoteId = nextWaitlistPromotion(remaining);
-    if (promoteId) {
-      await rawDb.booking.update({
-        where: { id: promoteId },
-        data: { status: "BOOKED" },
       });
-    }
-  }
+      if (!booking) throw new Error("Reserva no encontrada");
+
+      // Idempotent: cancelling an already-cancelled booking is a no-op.
+      if (booking.status === "CANCELLED") return;
+
+      await tx.booking.update({
+        where: { id: bookingId },
+        data: { status: "CANCELLED" },
+      });
+
+      // Promote next waitlist atomically — only when freeing a real BOOKED slot
+      if (booking.status === "BOOKED") {
+        const remaining = booking.class.bookings.filter(
+          (b) => b.id !== bookingId,
+        );
+        const promoteId = nextWaitlistPromotion(remaining);
+        if (promoteId) {
+          await tx.booking.update({
+            where: { id: promoteId },
+            data: { status: "BOOKED" },
+          });
+        }
+      }
+    },
+    { isolationLevel: "Serializable" },
+  );
 
   revalidatePath("/atleta/reservar");
   revalidatePath("/admin/reservas");

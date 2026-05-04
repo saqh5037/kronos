@@ -1,9 +1,340 @@
-import { PrismaClient } from "@prisma/client";
+import {
+  PrismaClient,
+  type Prisma,
+  type WODType,
+  type ScoreType,
+} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+const FIRST_NAMES = [
+  "Andrés",
+  "Sofía",
+  "Miguel",
+  "Camila",
+  "Diego",
+  "Valentina",
+  "Mateo",
+  "Renata",
+  "Sebastián",
+  "Isabella",
+  "Lucas",
+  "Emma",
+  "Joaquín",
+  "Lucía",
+  "Daniel",
+  "Mía",
+  "Alejandro",
+  "Romina",
+  "Tomás",
+  "Catalina",
+  "Nicolás",
+  "Antonella",
+  "Emiliano",
+  "Julieta",
+  "Maximiliano",
+  "Constanza",
+  "Iván",
+  "Florencia",
+  "Bruno",
+  "Agustina",
+  "Felipe",
+  "Martina",
+  "Esteban",
+  "Carla",
+  "Gonzalo",
+  "Bárbara",
+  "Rodrigo",
+  "Daniela",
+  "Pablo",
+  "Gabriela",
+  "Hugo",
+  "Ximena",
+  "Leonardo",
+  "Mariana",
+  "Patricio",
+  "Andrea",
+  "Cristian",
+  "Paula",
+  "Manuel",
+  "Verónica",
+];
+
+const LAST_NAMES = [
+  "Vega",
+  "Martínez",
+  "Torres",
+  "Reyes",
+  "Luna",
+  "García",
+  "López",
+  "Hernández",
+  "Pérez",
+  "Rodríguez",
+  "Sánchez",
+  "Ramírez",
+  "Cruz",
+  "Flores",
+  "Gómez",
+  "Díaz",
+  "Castro",
+  "Ortiz",
+  "Romero",
+  "Mendoza",
+  "Aguilar",
+  "Vargas",
+  "Herrera",
+  "Jiménez",
+  "Moreno",
+  "Rojas",
+  "Núñez",
+  "Silva",
+  "Soto",
+  "Chávez",
+];
+
+const MOVEMENT_LIBRARY = [
+  { name: "Back Squat", equipment: ["Barbell", "Plates", "Rack"] },
+  { name: "Front Squat", equipment: ["Barbell", "Plates", "Rack"] },
+  { name: "Deadlift", equipment: ["Barbell", "Plates"] },
+  { name: "Clean", equipment: ["Barbell", "Plates"] },
+  { name: "Snatch", equipment: ["Barbell", "Plates"] },
+  { name: "Power Clean", equipment: ["Barbell", "Plates"] },
+  { name: "Push Press", equipment: ["Barbell", "Plates"] },
+  { name: "Strict Press", equipment: ["Barbell", "Plates"] },
+  { name: "Thruster", equipment: ["Barbell", "Plates"] },
+  { name: "Pull-up", equipment: ["Pull-up bar"] },
+  { name: "Push-up", equipment: [] },
+  { name: "Air Squat", equipment: [] },
+  { name: "Box Jump", equipment: ["Box"] },
+  { name: "Wall Ball", equipment: ["Med ball", "Wall target"] },
+  { name: "Burpee", equipment: [] },
+  { name: "Toes to Bar", equipment: ["Pull-up bar"] },
+  { name: "Kettlebell Swing", equipment: ["Kettlebell"] },
+  { name: "Double Under", equipment: ["Jump rope"] },
+  { name: "Row", equipment: ["Rower"] },
+  { name: "Run", equipment: [] },
+];
+
+type WODRecipe = {
+  name: string;
+  type: WODType;
+  scoreType: ScoreType;
+  description: string;
+  timeCap?: number;
+  movements: { name: string; reps?: number; weight?: number }[];
+};
+
+const WOD_LIBRARY: WODRecipe[] = [
+  {
+    name: "Fran",
+    type: "FORTIME",
+    scoreType: "TIME",
+    description: "21-15-9 reps for time:\nThruster (43kg/30kg)\nPull-up",
+    timeCap: 15,
+    movements: [
+      { name: "Thruster", reps: 21, weight: 43 },
+      { name: "Pull-up", reps: 21 },
+    ],
+  },
+  {
+    name: "Helen",
+    type: "FORTIME",
+    scoreType: "TIME",
+    description:
+      "3 rounds for time:\n400m run\n21 KB swings (24kg)\n12 pull-ups",
+    timeCap: 20,
+    movements: [
+      { name: "Run", reps: 400 },
+      { name: "Kettlebell Swing", reps: 21, weight: 24 },
+      { name: "Pull-up", reps: 12 },
+    ],
+  },
+  {
+    name: "Cindy",
+    type: "AMRAP",
+    scoreType: "ROUNDS_REPS",
+    description: "AMRAP 20 min:\n5 pull-ups\n10 push-ups\n15 air squats",
+    timeCap: 20,
+    movements: [
+      { name: "Pull-up", reps: 5 },
+      { name: "Push-up", reps: 10 },
+      { name: "Air Squat", reps: 15 },
+    ],
+  },
+  {
+    name: "Diane",
+    type: "FORTIME",
+    scoreType: "TIME",
+    description: "21-15-9 for time:\nDeadlift (102kg/70kg)\nHandstand push-up",
+    timeCap: 15,
+    movements: [
+      { name: "Deadlift", reps: 21, weight: 102 },
+      { name: "Push-up", reps: 21 },
+    ],
+  },
+  {
+    name: "Karen",
+    type: "FORTIME",
+    scoreType: "TIME",
+    description: "150 wall balls (9kg/6kg) for time",
+    timeCap: 20,
+    movements: [{ name: "Wall Ball", reps: 150, weight: 9 }],
+  },
+  {
+    name: "Murph",
+    type: "FORTIME",
+    scoreType: "TIME",
+    description:
+      "1 mile run\n100 pull-ups\n200 push-ups\n300 air squats\n1 mile run",
+    timeCap: 60,
+    movements: [
+      { name: "Run", reps: 1600 },
+      { name: "Pull-up", reps: 100 },
+      { name: "Push-up", reps: 200 },
+      { name: "Air Squat", reps: 300 },
+      { name: "Run", reps: 1600 },
+    ],
+  },
+  {
+    name: "Annie",
+    type: "FORTIME",
+    scoreType: "TIME",
+    description: "50-40-30-20-10 for time:\nDouble unders\nSit-ups",
+    timeCap: 15,
+    movements: [
+      { name: "Double Under", reps: 50 },
+      { name: "Push-up", reps: 50 },
+    ],
+  },
+  {
+    name: "Grace",
+    type: "FORTIME",
+    scoreType: "TIME",
+    description: "30 clean & jerks (60kg/43kg) for time",
+    timeCap: 10,
+    movements: [{ name: "Clean", reps: 30, weight: 60 }],
+  },
+  {
+    name: "Isabel",
+    type: "FORTIME",
+    scoreType: "TIME",
+    description: "30 snatches (60kg/43kg) for time",
+    timeCap: 10,
+    movements: [{ name: "Snatch", reps: 30, weight: 60 }],
+  },
+  {
+    name: "EMOM 10 Power Clean",
+    type: "EMOM",
+    scoreType: "WEIGHT",
+    description: "EMOM 10 min: 3 power cleans @ 70% 1RM",
+    movements: [{ name: "Power Clean", reps: 3 }],
+  },
+  {
+    name: "Tabata Squats",
+    type: "TABATA",
+    scoreType: "REPS",
+    description:
+      "Tabata air squats (8 rounds: 20s on / 10s off). Score = total reps",
+    movements: [{ name: "Air Squat" }],
+  },
+  {
+    name: "Death by Burpees",
+    type: "EMOM",
+    scoreType: "REPS",
+    description: "Min 1: 1 burpee, Min 2: 2 burpees… hasta que falles",
+    movements: [{ name: "Burpee" }],
+  },
+  // STRENGTH WODs (1RM-style — disparan PRs)
+  {
+    name: "1RM Back Squat",
+    type: "STRENGTH",
+    scoreType: "WEIGHT",
+    description: "Build to a heavy single in 20 minutes",
+    movements: [{ name: "Back Squat" }],
+  },
+  {
+    name: "1RM Front Squat",
+    type: "STRENGTH",
+    scoreType: "WEIGHT",
+    description: "Build to a heavy single in 15 minutes",
+    movements: [{ name: "Front Squat" }],
+  },
+  {
+    name: "1RM Deadlift",
+    type: "STRENGTH",
+    scoreType: "WEIGHT",
+    description: "Build to a heavy single in 20 minutes",
+    movements: [{ name: "Deadlift" }],
+  },
+  {
+    name: "1RM Clean",
+    type: "STRENGTH",
+    scoreType: "WEIGHT",
+    description: "Build to a heavy single in 20 minutes",
+    movements: [{ name: "Clean" }],
+  },
+  {
+    name: "1RM Snatch",
+    type: "STRENGTH",
+    scoreType: "WEIGHT",
+    description: "Build to a heavy single in 20 minutes",
+    movements: [{ name: "Snatch" }],
+  },
+  {
+    name: "1RM Strict Press",
+    type: "STRENGTH",
+    scoreType: "WEIGHT",
+    description: "Build to a heavy single in 15 minutes",
+    movements: [{ name: "Strict Press" }],
+  },
+  {
+    name: "1RM Push Press",
+    type: "STRENGTH",
+    scoreType: "WEIGHT",
+    description: "Build to a heavy single in 15 minutes",
+    movements: [{ name: "Push Press" }],
+  },
+  {
+    name: "1RM Thruster",
+    type: "STRENGTH",
+    scoreType: "WEIGHT",
+    description: "Build to a heavy single in 15 minutes",
+    movements: [{ name: "Thruster" }],
+  },
+];
+
+function pickRandom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function pickN<T>(arr: T[], n: number): T[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(n, arr.length));
+}
+
+function randomScoreFor(scoreType: ScoreType): { value: number; unit: string } {
+  switch (scoreType) {
+    case "TIME":
+      return { value: 180 + Math.floor(Math.random() * 600), unit: "s" }; // 3-13 min
+    case "REPS":
+      return { value: 80 + Math.floor(Math.random() * 200), unit: "reps" };
+    case "WEIGHT":
+      return { value: 40 + Math.floor(Math.random() * 120), unit: "kg" };
+    case "ROUNDS_REPS": {
+      const rounds = 3 + Math.floor(Math.random() * 12);
+      const reps = Math.floor(Math.random() * 30);
+      return { value: rounds + reps / 100, unit: "rounds" };
+    }
+  }
+}
+
 async function main() {
-  // ─── Box 1: Iron Hands CrossFit Polanco ─────────────────────────────────────
+  console.log(
+    "🌱 Seed extendido — limpiando datos previos del seed (no toca data real)…",
+  );
+
+  // ─── Boxes ────────────────────────────────────────────────────────────────────
   const box1 = await prisma.box.upsert({
     where: { slug: "iron-hands-polanco" },
     update: {},
@@ -16,7 +347,6 @@ async function main() {
     },
   });
 
-  // ─── Box 2: for multi-tenant isolation test ──────────────────────────────────
   const box2 = await prisma.box.upsert({
     where: { slug: "demo-box-b" },
     update: {},
@@ -28,55 +358,65 @@ async function main() {
     },
   });
 
-  // ─── Athletes for Box 1 ───────────────────────────────────────────────────────
-  const athleteData = [
-    {
-      firstName: "Andrés",
-      lastName: "Vega",
-      phone: "5512345678",
-      status: "ACTIVE" as const,
-    },
-    {
-      firstName: "Sofía",
-      lastName: "Martínez",
-      phone: "5598765432",
-      status: "ACTIVE" as const,
-    },
-    {
-      firstName: "Miguel",
-      lastName: "Torres",
-      phone: "5511112233",
-      status: "ACTIVE" as const,
-    },
-    {
-      firstName: "Camila",
-      lastName: "Reyes",
-      phone: "5544445555",
-      status: "PAUSED" as const,
-    },
-    {
-      firstName: "Diego",
-      lastName: "Luna",
-      phone: "5566667777",
-      status: "ACTIVE" as const,
-    },
-  ];
+  // Wipe seed-prefixed data for box1 to make seed idempotent + reproducible
+  await prisma.score.deleteMany({ where: { tenantId: box1.id } });
+  await prisma.pR.deleteMany({ where: { tenantId: box1.id } });
+  await prisma.booking.deleteMany({ where: { tenantId: box1.id } });
+  await prisma.class.deleteMany({ where: { tenantId: box1.id } });
+  await prisma.wODMovement.deleteMany({
+    where: { wod: { tenantId: box1.id } },
+  });
+  await prisma.wOD.deleteMany({ where: { tenantId: box1.id } });
+  await prisma.movement.deleteMany({ where: { tenantId: box1.id } });
+  await prisma.streak.deleteMany({ where: { tenantId: box1.id } });
+  await prisma.athlete.deleteMany({
+    where: { tenantId: box1.id, id: { startsWith: "seed-" } },
+  });
 
-  const athletes = await Promise.all(
-    athleteData.map((data) =>
-      prisma.athlete.upsert({
-        where: { id: `seed-${data.firstName.toLowerCase()}-${box1.id}` },
-        update: {},
-        create: {
-          id: `seed-${data.firstName.toLowerCase()}-${box1.id}`,
-          tenantId: box1.id,
-          ...data,
-        },
-      }),
-    ),
-  );
+  // ─── Coach ──────────────────────────────────────────────────────────────────
+  const coach = await prisma.user.upsert({
+    where: { email: "coach@iron-hands.demo" },
+    update: {},
+    create: {
+      id: `seed-coach-${box1.id}`,
+      email: "coach@iron-hands.demo",
+      name: "Coach Lobo",
+      role: "COACH",
+      tenantId: box1.id,
+    },
+  });
 
-  // ─── Athlete for Box 2 (isolation test) ──────────────────────────────────────
+  // ─── Athletes (50 for box1) ──────────────────────────────────────────────────
+  const athleteIds: string[] = [];
+  const athleteData: Prisma.AthleteCreateManyInput[] = [];
+  const usedNames = new Set<string>();
+  for (let i = 0; i < 50 && athleteData.length < 50; i++) {
+    const firstName = pickRandom(FIRST_NAMES);
+    const lastName = pickRandom(LAST_NAMES);
+    const fullKey = `${firstName} ${lastName}`;
+    if (usedNames.has(fullKey)) continue;
+    usedNames.add(fullKey);
+
+    const id = `seed-ath-${box1.id}-${athleteData.length}`;
+    athleteIds.push(id);
+    const status =
+      athleteData.length < 42
+        ? "ACTIVE"
+        : athleteData.length < 47
+          ? "PAUSED"
+          : "DROPIN";
+    athleteData.push({
+      id,
+      tenantId: box1.id,
+      firstName,
+      lastName,
+      phone: `55${String(10000000 + Math.floor(Math.random() * 90000000))}`,
+      status,
+    });
+  }
+  await prisma.athlete.createMany({ data: athleteData });
+
+  // Box 2 isolation athlete
   await prisma.athlete.upsert({
     where: { id: `seed-isolation-${box2.id}` },
     update: {},
@@ -89,75 +429,193 @@ async function main() {
     },
   });
 
-  // ─── WODs for Box 1 ───────────────────────────────────────────────────────────
-  const cindy = await prisma.wOD.upsert({
-    where: { id: `seed-cindy-${box1.id}` },
-    update: {},
-    create: {
-      id: `seed-cindy-${box1.id}`,
-      tenantId: box1.id,
-      name: "Cindy",
-      type: "AMRAP",
-      description: "AMRAP 20 min: 5 pull-ups, 10 push-ups, 15 air squats",
-      scoreType: "ROUNDS_REPS",
-      timeCap: 1200,
-    },
-  });
+  // ─── Movements ───────────────────────────────────────────────────────────────
+  const movementByName = new Map<string, string>();
+  for (const mv of MOVEMENT_LIBRARY) {
+    const created = await prisma.movement.create({
+      data: {
+        tenantId: box1.id,
+        name: mv.name,
+        equipment: mv.equipment,
+      },
+    });
+    movementByName.set(mv.name, created.id);
+  }
 
-  await prisma.wOD.upsert({
-    where: { id: `seed-emom-${box1.id}` },
-    update: {},
-    create: {
-      id: `seed-emom-${box1.id}`,
-      tenantId: box1.id,
-      name: "EMOM 10 Power Clean",
-      type: "EMOM",
-      description: "EMOM 10 min: 3 power cleans @ 70% 1RM",
-      scoreType: "WEIGHT",
-    },
-  });
+  // ─── WODs ────────────────────────────────────────────────────────────────────
+  const wodIds: { id: string; scoreType: ScoreType; type: WODType }[] = [];
+  for (const recipe of WOD_LIBRARY) {
+    const wod = await prisma.wOD.create({
+      data: {
+        tenantId: box1.id,
+        name: recipe.name,
+        type: recipe.type,
+        scoreType: recipe.scoreType,
+        description: recipe.description,
+        timeCap: recipe.timeCap ?? null,
+        movements: {
+          create: recipe.movements.map((m, idx) => {
+            const movementId = movementByName.get(m.name);
+            if (!movementId) throw new Error(`Movement not seeded: ${m.name}`);
+            return {
+              movementId,
+              reps: m.reps ?? null,
+              weight: m.weight ?? null,
+              order: idx,
+            };
+          }),
+        },
+      },
+    });
+    wodIds.push({
+      id: wod.id,
+      scoreType: recipe.scoreType,
+      type: recipe.type,
+    });
+  }
 
-  // ─── Classes for Box 1 ────────────────────────────────────────────────────────
+  // ─── Classes (4 weeks: 2 past + this week + next) ────────────────────────────
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const dow = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(monday.getDate() - (dow === 0 ? 6 : dow - 1));
+  const weekStart = new Date(monday);
+  weekStart.setDate(weekStart.getDate() - 14); // 2 weeks back
 
-  await Promise.all([
-    prisma.class.upsert({
-      where: { id: `seed-class-morning-${box1.id}` },
-      update: {},
-      create: {
-        id: `seed-class-morning-${box1.id}`,
+  const classRows: Prisma.ClassCreateManyInput[] = [];
+  const classRefs: { id: string; date: Date; wodId: string | null }[] = [];
+
+  for (let dayOffset = 0; dayOffset < 28; dayOffset++) {
+    const day = new Date(weekStart);
+    day.setDate(day.getDate() + dayOffset);
+    if (day.getDay() === 0) continue; // closed Sundays
+
+    const slots = [7, 9, 12, 17, 19]; // hours
+    for (const hour of slots) {
+      const startsAt = new Date(day);
+      startsAt.setHours(hour, 0, 0, 0);
+      const wod = pickRandom(wodIds);
+      const id = `seed-class-${box1.id}-${dayOffset}-${hour}`;
+      classRows.push({
+        id,
         tenantId: box1.id,
-        startsAt: new Date(today.getTime() + 7 * 60 * 60 * 1000),
+        startsAt,
         durationMin: 60,
-        capacity: 12,
-        wodId: cindy.id,
-      },
-    }),
-    prisma.class.upsert({
-      where: { id: `seed-class-noon-${box1.id}` },
-      update: {},
-      create: {
-        id: `seed-class-noon-${box1.id}`,
+        capacity: hour === 19 ? 20 : 14,
+        coachId: coach.id,
+        wodId: wod.id,
+      });
+      classRefs.push({ id, date: startsAt, wodId: wod.id });
+    }
+  }
+  await prisma.class.createMany({ data: classRows });
+
+  // ─── Bookings + Scores (only past classes) ───────────────────────────────────
+  const now = new Date();
+  const bookingRows: Prisma.BookingCreateManyInput[] = [];
+  const scoreRows: Prisma.ScoreCreateManyInput[] = [];
+
+  for (const klass of classRefs) {
+    const isPast = klass.date.getTime() < now.getTime();
+    const klassRow = classRows.find((c) => c.id === klass.id)!;
+    const capacity = klassRow.capacity!;
+    // Fill 60-95% capacity for past classes, 30-70% for future
+    const fillRatio = isPast
+      ? 0.6 + Math.random() * 0.35
+      : 0.3 + Math.random() * 0.4;
+    const target = Math.min(capacity, Math.floor(capacity * fillRatio));
+
+    const attendees = pickN(athleteIds.slice(0, 42), target); // ACTIVE only
+    for (const athleteId of attendees) {
+      const willAttend = isPast && Math.random() < 0.85;
+      const willNoShow = isPast && !willAttend && Math.random() < 0.5;
+      const status = isPast
+        ? willAttend
+          ? "ATTENDED"
+          : willNoShow
+            ? "NOSHOW"
+            : "CANCELLED"
+        : "BOOKED";
+
+      bookingRows.push({
         tenantId: box1.id,
-        startsAt: new Date(today.getTime() + 12 * 60 * 60 * 1000),
-        durationMin: 60,
-        capacity: 16,
-        wodId: cindy.id,
-      },
-    }),
-    prisma.class.upsert({
-      where: { id: `seed-class-evening-${box1.id}` },
-      update: {},
-      create: {
-        id: `seed-class-evening-${box1.id}`,
+        classId: klass.id,
+        athleteId,
+        status,
+        bookedAt: new Date(klass.date.getTime() - 24 * 3600 * 1000),
+        checkedInAt:
+          status === "ATTENDED"
+            ? new Date(klass.date.getTime() + 5 * 60 * 1000)
+            : null,
+      });
+
+      // Score for ATTENDED only, per WOD scoreType
+      if (status === "ATTENDED" && klass.wodId) {
+        const wodMeta = wodIds.find((w) => w.id === klass.wodId)!;
+        const { value, unit } = randomScoreFor(wodMeta.scoreType);
+        scoreRows.push({
+          tenantId: box1.id,
+          wodId: klass.wodId,
+          athleteId,
+          classId: klass.id,
+          value,
+          unit,
+          scaling: Math.random() < 0.7 ? "RX" : "SCALED",
+          createdAt: new Date(klass.date.getTime() + 50 * 60 * 1000),
+        });
+      }
+    }
+  }
+  await prisma.booking.createMany({ data: bookingRows });
+  await prisma.score.createMany({ data: scoreRows });
+
+  // ─── PRs derived from STRENGTH scores ────────────────────────────────────────
+  const strengthWodIds = wodIds
+    .filter((w) => w.type === "STRENGTH")
+    .map((w) => w.id);
+  const strengthScores = scoreRows.filter((s) =>
+    strengthWodIds.includes(s.wodId),
+  );
+
+  // Best score per (athlete, wod's single movement) → PR
+  const prMap = new Map<string, Prisma.PRCreateManyInput>();
+  for (const score of strengthScores) {
+    if (score.scaling === "SCALED") continue;
+    const wodEntry = wodIds.find((w) => w.id === score.wodId)!;
+    if (wodEntry.type !== "STRENGTH") continue;
+    // Find this WOD's single movement
+    const wodMovement = await prisma.wODMovement.findFirst({
+      where: { wodId: score.wodId },
+    });
+    if (!wodMovement) continue;
+    const key = `${score.athleteId}::${wodMovement.movementId}`;
+    const existing = prMap.get(key);
+    if (!existing || Number(score.value) > Number(existing.value)) {
+      prMap.set(key, {
         tenantId: box1.id,
-        startsAt: new Date(today.getTime() + 18.5 * 60 * 60 * 1000),
-        durationMin: 60,
-        capacity: 20,
-      },
-    }),
-  ]);
+        athleteId: score.athleteId,
+        movementId: wodMovement.movementId,
+        value: score.value,
+        unit: score.unit,
+        achievedAt: score.createdAt as Date,
+      });
+    }
+  }
+  if (prMap.size > 0) {
+    await prisma.pR.createMany({ data: Array.from(prMap.values()) });
+  }
+
+  // ─── Streaks (basic — set count to 0, real recompute via app) ────────────────
+  // Initialize ATTENDANCE streak rows for active athletes
+  await prisma.streak.createMany({
+    data: athleteIds.slice(0, 42).map((athleteId) => ({
+      tenantId: box1.id,
+      athleteId,
+      type: "ATTENDANCE" as const,
+      count: 0,
+    })),
+  });
 
   // ─── Badges ───────────────────────────────────────────────────────────────────
   const badgesData = [
@@ -174,6 +632,12 @@ async function main() {
       criteria: { type: "attendance_streak", count: 7 },
     },
     {
+      code: "streak-30",
+      name: "30 días seguidos",
+      description: "30 días de asistencia consecutivos",
+      criteria: { type: "attendance_streak", count: 30 },
+    },
+    {
       code: "first-pr",
       name: "PR desbloqueado",
       description: "Registraste tu primera marca personal",
@@ -185,27 +649,38 @@ async function main() {
       description: "5 WODs completados en RX",
       criteria: { type: "rx_count", count: 5 },
     },
+    {
+      code: "double-bw-deadlift",
+      name: "Double bodyweight DL",
+      description: "Deadlift de 2x tu peso corporal",
+      criteria: { type: "ratio_pr", movement: "Deadlift", ratio: 2 },
+    },
   ];
 
-  await Promise.all(
-    badgesData.map((b) =>
-      prisma.badge.upsert({
-        where: { tenantId_code: { tenantId: box1.id, code: b.code } },
-        update: {},
-        create: { tenantId: box1.id, ...b },
-      }),
-    ),
-  );
+  for (const b of badgesData) {
+    await prisma.badge.upsert({
+      where: { tenantId_code: { tenantId: box1.id, code: b.code } },
+      update: {},
+      create: { tenantId: box1.id, ...b },
+    });
+  }
 
-  console.log(`Seed completo:
-  - Box 1: ${box1.name} (${box1.id})
-  - Box 2: ${box2.name} (${box2.id}) [isolation test]
-  - Atletas Box 1: ${athletes.length}
-  - WODs: 2 (Cindy + EMOM Power Clean)
-  - Clases hoy: 3
-  - Badges: ${badgesData.length}`);
+  console.log(`✅ Seed extendido completo:
+  Box 1: ${box1.name} (${box1.id})
+  Box 2: ${box2.name} (isolation)
+  Atletas Box 1: ${athleteData.length} (42 ACTIVE, 5 PAUSED, 3 DROPIN)
+  Movimientos: ${MOVEMENT_LIBRARY.length}
+  WODs: ${WOD_LIBRARY.length} (incluye 8 STRENGTH 1RMs)
+  Clases: ${classRows.length} (4 semanas: 2 pasadas + esta + próxima)
+  Bookings: ${bookingRows.length}
+  Scores: ${scoreRows.length}
+  PRs: ${prMap.size}
+  Badges: ${badgesData.length}`);
 }
 
 main()
-  .catch(console.error)
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  })
   .finally(() => prisma.$disconnect());
