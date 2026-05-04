@@ -28,3 +28,8 @@ export const cashPaymentSchema = z.object({
 });
 
 export type CashPaymentInput = z.infer<typeof cashPaymentSchema>;
+
+export const initCheckoutSchema = z.object({
+  membershipId: z.string().min(1, "Membership requerida"),
+});
+export type InitCheckoutInput = z.infer<typeof initCheckoutSchema>;

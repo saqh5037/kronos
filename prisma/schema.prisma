@@ -29,6 +29,7 @@ model Box {
   movements       Movement[]
   badges          Badge[]
   payments        Payment[]
+  webhookEvents   WebhookEvent[]
 }
 
 // ─── USERS / AUTH ─────────────────────────────────────────────────────────────
@@ -145,6 +146,7 @@ enum PlanType {
 }
 
 enum MembershipStatus {
+  PENDING
   ACTIVE
   PAUSED
   EXPIRED
@@ -365,21 +367,53 @@ enum PaymentGateway {
 }
 
 model Payment {
-  id           String         @id @default(cuid())
-  tenantId     String
-  membershipId String?
-  amount       Decimal        @db.Decimal(10, 2)
-  currency     String         @default("MXN")
-  gateway      PaymentGateway
-  status       PaymentStatus  @default(PENDING)
-  externalId   String?
-  paidAt       DateTime?
-  createdAt    DateTime       @default(now())
+  id             String         @id @default(cuid())
+  tenantId       String
+  membershipId   String?
+  amount         Decimal        @db.Decimal(10, 2)
+  currency       String         @default("MXN")
+  gateway        PaymentGateway
+  status         PaymentStatus  @default(PENDING)
+  externalId     String?        @unique
+  mpPreferenceId String?        @unique
+  mpStatus       String?
+  mpStatusDetail String?
+  mpPaymentType  String?
+  mpPayerEmail   String?
+  notes          String?
+  paidAt         DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
-  box        Box         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  membership Membership? @relation(fields: [membershipId], references: [id])
+  box           Box            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  membership    Membership?    @relation(fields: [membershipId], references: [id])
+  webhookEvents WebhookEvent[]
 
   @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, gateway])
+}
+
+model WebhookEvent {
+  id               String    @id @default(cuid())
+  tenantId         String?
+  source           String
+  externalId       String?
+  rawPayload       Json
+  rawHeaders       Json?
+  signatureValid   Boolean?
+  processingStatus String
+  errorMsg         String?
+  paymentId        String?
+  receivedAt       DateTime  @default(now())
+  processedAt      DateTime?
+
+  box     Box?     @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  payment Payment? @relation(fields: [paymentId], references: [id])
+
+  @@index([source, receivedAt])
+  @@index([externalId])
+  @@index([processingStatus])
 }
 
 // ─── GAMIFICATION ─────────────────────────────────────────────────────────────
@@ -452,6 +486,10 @@ enum AuditAction {
   MEMBERSHIP_CANCELLED
   PAYMENT_REGISTERED
   PAYMENT_VOIDED
+  PAYMENT_INITIATED
+  PAYMENT_CONFIRMED
+  PAYMENT_FAILED
+  WEBHOOK_RECEIVED
 }
 
 model AuditEvent {

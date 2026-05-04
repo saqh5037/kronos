@@ -11,6 +11,7 @@ export const planTypes = [
 export type PlanType = (typeof planTypes)[number];
 
 export const membershipStatuses = [
+  "PENDING",
   "ACTIVE",
   "PAUSED",
   "EXPIRED",
@@ -52,6 +53,7 @@ export const membershipAssignSchema = z.object({
     .transform((v) => (v instanceof Date ? v : new Date(v)))
     .refine((d) => !Number.isNaN(d.getTime()), "Fecha inválida"),
   autoRenew: z.coerce.boolean().default(true),
+  pendingPayment: z.coerce.boolean().default(false),
 });
 
 export type MembershipAssignInput = z.infer<typeof membershipAssignSchema>;

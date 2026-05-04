@@ -27,6 +27,7 @@ export default function MembershipAssignForm({
       planId: fd.get("planId"),
       startDate: fd.get("startDate"),
       autoRenew: fd.get("autoRenew") === "on",
+      pendingPayment: fd.get("pendingPayment") === "on",
     };
     startTransition(async () => {
       try {
@@ -110,6 +111,16 @@ export default function MembershipAssignForm({
           style={{ accentColor: "var(--recovery)" }}
         />
         <span style={{ color: "var(--text-2)" }}>Renovación automática</span>
+      </label>
+      <label className="flex items-center gap-2 text-xs">
+        <input
+          name="pendingPayment"
+          type="checkbox"
+          style={{ accentColor: "var(--strain)" }}
+        />
+        <span style={{ color: "var(--text-2)" }}>
+          Crear pendiente de pago (atleta paga por MercadoPago)
+        </span>
       </label>
       {error && (
         <p className="text-xs" style={{ color: "var(--pr)" }}>

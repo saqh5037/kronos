@@ -122,10 +122,24 @@ export async function assignMembership(data: unknown) {
       planId: parsed.planId,
       startDate: parsed.startDate,
       endDate,
-      status: "ACTIVE",
+      status: parsed.pendingPayment ? "PENDING" : "ACTIVE",
       autoRenew: parsed.autoRenew,
     },
   });
+
+  // If pendingPayment, create a Payment row in PENDING for MP gateway with plan price.
+  if (parsed.pendingPayment) {
+    await rawDb.payment.create({
+      data: {
+        tenantId,
+        membershipId: membership.id,
+        amount: plan.price,
+        currency: plan.currency,
+        gateway: "MERCADOPAGO",
+        status: "PENDING",
+      },
+    });
+  }
 
   await logAudit({
     tenantId,

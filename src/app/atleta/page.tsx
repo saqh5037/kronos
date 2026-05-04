@@ -480,8 +480,8 @@ export default async function AtletaHomePage() {
       <section className="mt-6 px-4 grid grid-cols-2 gap-3">
         <QuickLink href="/atleta/wod" label="WOD del día" tone="strain" />
         <QuickLink href="/atleta/reservar" label="Reservar" tone="recovery" />
+        <QuickLink href="/atleta/pagos" label="Mis pagos" tone="ghost" />
         <QuickLink href="/atleta/perfil" label="Mi perfil" tone="ghost" />
-        <QuickLink href="/atleta/wod" label="Subir score" tone="ghost" />
       </section>
     </div>
   );
