@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kronos
+      POSTGRES_PASSWORD: kronos_dev
+      POSTGRES_DB: kronos_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - kronos_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kronos -d kronos_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  kronos_pgdata:

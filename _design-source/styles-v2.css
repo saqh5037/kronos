@@ -1,0 +1,206 @@
+/* Kronos v2 — three radical directions */
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Anton&family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Roboto+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@500;600;700;800&family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Roboto+Flex:opsz,wght@8..144,300..900&display=swap");
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #1a1818;
+  color: #fff;
+  font-family: "Inter", system-ui;
+}
+
+/* ───────────── shared phone shell ───────────── */
+.phone {
+  width: 390px;
+  height: 844px;
+  border-radius: 48px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.phone .island {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 34px;
+  border-radius: 22px;
+  background: #000;
+  z-index: 60;
+}
+.phone .home-ind {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 5px;
+  border-radius: 100px;
+  z-index: 70;
+  pointer-events: none;
+}
+.phone .status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px 0;
+  font-weight: 600;
+  font-size: 15px;
+  pointer-events: none;
+}
+.scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+.no-scroll {
+  scrollbar-width: none;
+}
+.no-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ═══════════════ DIRECTION 1: SANGRE — brutalismo deportivo ═══════════════ */
+.dir-sangre {
+  --bg: #0d0807;
+  --bg-2: #1a0d0a;
+  --ink: #f5e6d3;
+  --ink-mute: rgba(245, 230, 211, 0.55);
+  --ink-faint: rgba(245, 230, 211, 0.3);
+  --line: rgba(245, 230, 211, 0.14);
+  --blood: #d22b1f;
+  --blood-deep: #8a1a12;
+  --bone: #f5e6d3;
+}
+.dir-sangre.phone {
+  background: var(--bg);
+  box-shadow:
+    0 0 0 1.5px #2a1816,
+    0 0 0 8px #110806,
+    0 0 0 9px #3a201c,
+    0 60px 120px rgba(0, 0, 0, 0.6);
+}
+.dir-sangre .home-ind {
+  background: rgba(245, 230, 211, 0.65);
+}
+.dir-sangre .status {
+  color: var(--ink);
+}
+.dir-sangre {
+  font-family: "Inter", sans-serif;
+  color: var(--ink);
+}
+.dir-sangre .display {
+  font-family: "Anton", "Inter", sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 0.84;
+  text-transform: uppercase;
+}
+.dir-sangre .mono {
+  font-family: "IBM Plex Mono", monospace;
+}
+
+/* ═══════════════ DIRECTION 2: COBALTO — telemetría / instrumento ═══════════════ */
+.dir-cobalto {
+  --cob: #0028ff;
+  --cob-2: #0a3aff;
+  --cob-deep: #001485;
+  --signal: #ffe600;
+  --bg: #04060d;
+  --bg-2: #0a0e1a;
+  --ink: #ffffff;
+  --ink-mute: rgba(255, 255, 255, 0.55);
+  --line: rgba(255, 255, 255, 0.1);
+}
+.dir-cobalto.phone {
+  background: var(--bg);
+  box-shadow:
+    0 0 0 1.5px #14182a,
+    0 0 0 8px #060810,
+    0 0 0 9px #1c2540,
+    0 60px 120px rgba(0, 0, 0, 0.6);
+}
+.dir-cobalto .home-ind {
+  background: rgba(255, 255, 255, 0.7);
+}
+.dir-cobalto .status {
+  color: #fff;
+}
+.dir-cobalto {
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--ink);
+}
+.dir-cobalto .display {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+}
+.dir-cobalto .ui {
+  font-family: "IBM Plex Mono", monospace;
+}
+
+/* ═══════════════ DIRECTION 3: CAL — print editorial luminoso ═══════════════ */
+.dir-cal {
+  --paper: #f1ebdf;
+  --paper-2: #e8e0d0;
+  --ink: #14110d;
+  --ink-mute: rgba(20, 17, 13, 0.62);
+  --ink-faint: rgba(20, 17, 13, 0.32);
+  --line: rgba(20, 17, 13, 0.2);
+  --hot: #d94327;
+}
+.dir-cal.phone {
+  background: var(--paper);
+  box-shadow:
+    0 0 0 1.5px #d4ccba,
+    0 0 0 8px #c0b89e,
+    0 0 0 9px #d4ccba,
+    0 60px 120px rgba(0, 0, 0, 0.4);
+}
+.dir-cal .home-ind {
+  background: rgba(20, 17, 13, 0.4);
+}
+.dir-cal .status {
+  color: var(--ink);
+}
+.dir-cal {
+  font-family: "Newsreader", serif;
+  color: var(--ink);
+}
+.dir-cal .display {
+  font-family: "Newsreader", serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 0.92;
+}
+.dir-cal .mono {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 500;
+}
+.dir-cal .ui {
+  font-family: "Inter", sans-serif;
+}
+
+/* canvas helpers */
+.dc-host {
+  background: #1a1818;
+}
