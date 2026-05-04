@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { usePathname } from "next/navigation";
 
 const modules = [
@@ -244,8 +245,7 @@ export default function AdminSidebar() {
           return (
             <Link
               key={mod.href}
-              // @ts-expect-error typedRoutes limitation with dynamic href
-              href={mod.href}
+              href={mod.href as Route}
               className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive ? "text-white" : "text-white/50 hover:text-white/80"
               }`}

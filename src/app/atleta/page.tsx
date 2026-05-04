@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import {
   getAthleteHome,
   type AthleteHome,
@@ -503,8 +504,7 @@ function QuickLink({
         : "var(--text-2)";
   return (
     <Link
-      // @ts-expect-error typedRoutes limitation with dynamic href
-      href={href}
+      href={href as Route}
       className="k-card p-4 flex items-center justify-center text-center text-sm font-display font-semibold transition-colors hover:brightness-110"
       style={{ color }}
     >
