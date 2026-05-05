@@ -21,15 +21,18 @@ model Box {
   logoUrl              String?
   createdAt            DateTime @default(now())
 
-  users           User[]
-  athletes        Athlete[]
-  membershipPlans MembershipPlan[]
-  classes         Class[]
-  wods            WOD[]
-  movements       Movement[]
-  badges          Badge[]
-  payments        Payment[]
-  webhookEvents   WebhookEvent[]
+  users                   User[]
+  athletes                Athlete[]
+  membershipPlans         MembershipPlan[]
+  classes                 Class[]
+  wods                    WOD[]
+  movements               Movement[]
+  badges                  Badge[]
+  payments                Payment[]
+  webhookEvents           WebhookEvent[]
+  permissions             Permission[]
+  permissionGrantRequests PermissionGrantRequest[]
+  alertRules              AlertRule[]
 }
 
 // ─── USERS / AUTH ─────────────────────────────────────────────────────────────
@@ -55,6 +58,10 @@ model User {
   sessions     Session[]
   athlete      Athlete?
   coachClasses Class[]
+
+  permissionsUpdated      Permission[]             @relation("PermissionUpdatedBy")
+  grantRequestsCreated    PermissionGrantRequest[] @relation("GrantRequestRequester")
+  grantRequestsReviewed   PermissionGrantRequest[] @relation("GrantRequestReviewer")
 
   @@index([tenantId])
 }
@@ -552,6 +559,92 @@ model Streak {
   athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
 
   @@unique([athleteId, type])
+  @@index([tenantId])
+}
+
+// ─── RBAC PARAMETRIZABLE ──────────────────────────────────────────────────────
+
+enum PermissionAction {
+  REGISTER_CASH_PAYMENT
+  APPLY_DISCOUNT
+  REFUND_PAYMENT
+  EDIT_PLAN_PRICING
+  DELETE_ATHLETE
+  MARK_OVERDUE
+  VIEW_FINANCIAL_REPORTS
+  EDIT_OTHERS_SCORES
+}
+
+model Permission {
+  id                   String           @id @default(cuid())
+  tenantId             String
+  action               PermissionAction
+  allowedRoles         Role[]
+  requiresOwnerApproval Boolean         @default(false)
+  threshold            Decimal?         @db.Decimal(10, 2)
+  updatedAt            DateTime         @updatedAt
+  updatedById          String?
+
+  box         Box   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  updatedBy   User? @relation("PermissionUpdatedBy", fields: [updatedById], references: [id])
+
+  @@unique([tenantId, action])
+  @@index([tenantId])
+}
+
+enum GrantRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+model PermissionGrantRequest {
+  id          String             @id @default(cuid())
+  tenantId    String
+  requesterId String
+  action      PermissionAction
+  targetType  String
+  targetId    String
+  payload     Json
+  status      GrantRequestStatus @default(PENDING)
+  reviewerId  String?
+  reviewedAt  DateTime?
+  reason      String?
+  createdAt   DateTime           @default(now())
+  expiresAt   DateTime
+
+  box       Box   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  requester User  @relation("GrantRequestRequester", fields: [requesterId], references: [id])
+  reviewer  User? @relation("GrantRequestReviewer", fields: [reviewerId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+}
+
+// ─── ALERT RULES ──────────────────────────────────────────────────────────────
+
+enum AlertChannel {
+  EMAIL
+  PUSH
+  IN_APP
+  BOTH
+}
+
+model AlertRule {
+  id           String       @id @default(cuid())
+  tenantId     String
+  action       AuditAction
+  channel      AlertChannel @default(EMAIL)
+  threshold    Decimal?     @db.Decimal(10, 2)
+  enabled      Boolean      @default(true)
+  recipientIds String[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  box Box @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, action])
   @@index([tenantId])
 }
 

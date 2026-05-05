@@ -11,6 +11,7 @@ import {
 import type { PaymentGateway, PaymentStatus } from "@/lib/validations/payment";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
+import { can, createGrantRequest } from "../permissions";
 import { getPreferenceClient, isMpConfigured } from "@/lib/payments/mp-client";
 import { type ListOpts, type ListResult, normalizePagination } from "./types";
 import { eachDayInRange, dayKey } from "@/lib/dates";
@@ -294,11 +295,38 @@ export async function getPaymentStats(): Promise<PaymentStats> {
   };
 }
 
-export async function registerCashPayment(data: unknown) {
+export type PendingApprovalResult = {
+  status: "pending_approval";
+  requestId: string;
+};
+
+export async function registerCashPayment(
+  data: unknown,
+): Promise<{ ok: true } | PendingApprovalResult> {
   const session = await requireSession();
   const tenantId = session.user.tenantId;
   const parsed = cashPaymentSchema.parse(data);
   const db = withTenant(tenantId);
+
+  // RBAC gate — REGISTER_CASH_PAYMENT
+  const perm = await can("REGISTER_CASH_PAYMENT", session);
+  if (!perm.allowed)
+    throw new Error("No tienes permiso para registrar pagos en efectivo");
+  if (perm.requiresApproval) {
+    const requestId = await createGrantRequest({
+      tenantId,
+      requesterId: session.user.id,
+      action: "REGISTER_CASH_PAYMENT",
+      targetType: "Payment",
+      targetId: parsed.membershipId,
+      payload: {
+        amount: parsed.amount,
+        currency: parsed.currency,
+        membershipId: parsed.membershipId,
+      },
+    });
+    return { status: "pending_approval", requestId };
+  }
 
   // Verify membership belongs to this tenant
   const membership = await db.membership.findUnique({
@@ -586,8 +614,27 @@ export async function listAthleteMemberships() {
   });
 }
 
-export async function voidPayment(id: string) {
+export async function voidPayment(
+  id: string,
+): Promise<{ ok: true } | PendingApprovalResult> {
   const session = await requireSession();
+  const tenantId = session.user.tenantId;
+
+  // RBAC gate — REFUND_PAYMENT
+  const perm = await can("REFUND_PAYMENT", session);
+  if (!perm.allowed) throw new Error("No tienes permiso para anular pagos");
+  if (perm.requiresApproval) {
+    const requestId = await createGrantRequest({
+      tenantId,
+      requesterId: session.user.id,
+      action: "REFUND_PAYMENT",
+      targetType: "Payment",
+      targetId: id,
+      payload: { paymentId: id },
+    });
+    return { status: "pending_approval", requestId };
+  }
+
   const db = withTenant(session.user.tenantId);
   await db.payment.update({
     where: { id },

@@ -3,6 +3,9 @@ import {
   type Prisma,
   type WODType,
   type ScoreType,
+  type PermissionAction,
+  type Role,
+  type AuditAction,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -888,6 +891,104 @@ async function main() {
       update: {},
       create: { tenantId: box1.id, ...b },
     });
+  }
+
+  // ─── Permissions (RBAC defaults) ─────────────────────────────────────────────
+  // Default: OWNER always allowed everywhere (enforced in code).
+  // Here we seed the parametrizable rows for Coaches/Staff.
+  const permissionDefaults: {
+    action: PermissionAction;
+    allowedRoles: Role[];
+    requiresOwnerApproval: boolean;
+  }[] = [
+    {
+      action: "REGISTER_CASH_PAYMENT",
+      allowedRoles: ["OWNER", "COACH", "STAFF"],
+      requiresOwnerApproval: false,
+    },
+    {
+      action: "APPLY_DISCOUNT",
+      allowedRoles: ["OWNER"],
+      requiresOwnerApproval: true,
+    },
+    {
+      action: "REFUND_PAYMENT",
+      allowedRoles: ["OWNER"],
+      requiresOwnerApproval: true,
+    },
+    {
+      action: "EDIT_PLAN_PRICING",
+      allowedRoles: ["OWNER"],
+      requiresOwnerApproval: true,
+    },
+    {
+      action: "DELETE_ATHLETE",
+      allowedRoles: ["OWNER"],
+      requiresOwnerApproval: false,
+    },
+    {
+      action: "MARK_OVERDUE",
+      allowedRoles: ["OWNER", "COACH", "STAFF"],
+      requiresOwnerApproval: false,
+    },
+    {
+      action: "VIEW_FINANCIAL_REPORTS",
+      allowedRoles: ["OWNER"],
+      requiresOwnerApproval: false,
+    },
+    {
+      action: "EDIT_OTHERS_SCORES",
+      allowedRoles: ["OWNER", "COACH"],
+      requiresOwnerApproval: false,
+    },
+  ];
+
+  for (const perm of permissionDefaults) {
+    await prisma.permission.upsert({
+      where: { tenantId_action: { tenantId: box1.id, action: perm.action } },
+      update: {},
+      create: {
+        tenantId: box1.id,
+        action: perm.action,
+        allowedRoles: perm.allowedRoles,
+        requiresOwnerApproval: perm.requiresOwnerApproval,
+      },
+    });
+  }
+
+  // ─── AlertRules (defaults por tenant) ─────────────────────────────────────────
+  // 3 reglas default: cash > 1000, descuento > 20%, cualquier refund
+  const ownerUserId = `seed-owner-${box1.id}`;
+  const alertRuleDefaults: {
+    action: AuditAction;
+    threshold: number | null;
+    label: string;
+  }[] = [
+    { action: "PAYMENT_REGISTERED", threshold: 1000, label: "Cash >$1000" },
+    { action: "PAYMENT_VOIDED", threshold: null, label: "Cualquier refund" },
+    {
+      action: "MEMBERSHIP_CANCELLED",
+      threshold: null,
+      label: "Membresía cancelada",
+    },
+  ];
+
+  for (const rule of alertRuleDefaults) {
+    const existing = await prisma.alertRule.findFirst({
+      where: { tenantId: box1.id, action: rule.action },
+    });
+    if (!existing) {
+      await prisma.alertRule.create({
+        data: {
+          tenantId: box1.id,
+          action: rule.action,
+          channel: "EMAIL",
+          threshold: rule.threshold,
+          enabled: true,
+          recipientIds: [ownerUserId],
+        },
+      });
+    }
   }
 
   console.log(`✅ Seed extendido completo:

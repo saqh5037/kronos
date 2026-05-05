@@ -10,6 +10,8 @@ import { computeMembershipEndDate, classesRemaining } from "@/lib/membership";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
 import { type ListOpts, type ListResult, normalizePagination } from "./types";
+import { can, createGrantRequest } from "../permissions";
+import type { PendingApprovalResult } from "./payments";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -292,8 +294,27 @@ export async function resumeMembership(id: string) {
   return { ok: true };
 }
 
-export async function cancelMembership(id: string) {
+export async function cancelMembership(
+  id: string,
+): Promise<{ ok: true } | PendingApprovalResult> {
   const session = await requireSession();
+  const tenantId = session.user.tenantId;
+
+  // RBAC gate — APPLY_DISCOUNT maps to membership cancel (sensitive operation)
+  // Using a direct role check: only OWNER or COACH with permission
+  const perm = await can("REFUND_PAYMENT", session); // reuse sensitive gate
+  if (perm.requiresApproval) {
+    const requestId = await createGrantRequest({
+      tenantId,
+      requesterId: session.user.id,
+      action: "REFUND_PAYMENT",
+      targetType: "Membership",
+      targetId: id,
+      payload: { membershipId: id, operation: "cancel" },
+    });
+    return { status: "pending_approval", requestId };
+  }
+
   const db = withTenant(session.user.tenantId);
   await db.membership.update({
     where: { id },
