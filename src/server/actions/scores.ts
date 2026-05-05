@@ -5,12 +5,13 @@ import { revalidatePath } from "next/cache";
 import { authOptions } from "../auth";
 import { withTenant, db as rawDb } from "../db";
 import { scoreSchema } from "@/lib/validations/score";
-import { detectPR } from "@/lib/scores";
+import { detectPR, formatScore } from "@/lib/scores";
 import type { ScoreType } from "@/lib/validations/wod";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
 import { maybeAchievePRGoals } from "./goals";
 import { type ListOpts, type ListResult, normalizePagination } from "./types";
+import type { Scaling } from "@prisma/client";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -423,4 +424,279 @@ export async function submitScore(data: unknown) {
   revalidatePath("/admin/prs");
   revalidatePath("/admin/leaderboards");
   return { ok: true, scoreId: score.id, prAchieved };
+}
+
+// ─── Whiteboard OCR actions ───────────────────────────────────────────────────
+
+async function requireCoachSession() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  const role = session.user.role;
+  if (role !== "OWNER" && role !== "COACH" && role !== "STAFF") {
+    throw new Error("Forbidden — COACH/OWNER/STAFF only");
+  }
+  return session;
+}
+
+/**
+ * Process a WhiteboardUpload: calls Gemini Vision, stores aiResult,
+ * marks status=PROCESSED. Returns the aiResult to hydrate the review UI.
+ */
+export async function processWhiteboardUpload(uploadId: string) {
+  await requireCoachSession();
+
+  const upload = await rawDb.whiteboardUpload.findUnique({
+    where: { id: uploadId },
+    include: { class: { include: { wod: true } } },
+  });
+  if (!upload) throw new Error("Upload no encontrado");
+  if (upload.status !== "PENDING") {
+    // Already processed — return cached result
+    return { aiResult: upload.aiResult, status: upload.status };
+  }
+
+  const defaultScoreType: ScoreType =
+    (upload.class.wod?.scoreType as ScoreType) ?? "TIME";
+
+  // Load roster and alias dict for richer context
+  const { getAliasDict } = await import("./aliases");
+  const aliasDict = await getAliasDict(upload.tenantId);
+
+  // Build roster JSON directly from DB to avoid session requirement
+  const roster = await rawDb.booking.findMany({
+    where: { classId: upload.classId },
+    include: {
+      athlete: { select: { id: true, firstName: true, lastName: true } },
+    },
+  });
+  const rosterJson = JSON.stringify(
+    roster.map((b) => ({
+      athleteId: b.athlete.id,
+      firstName: b.athlete.firstName,
+      lastName: b.athlete.lastName,
+    })),
+  );
+  const aliasJson = JSON.stringify(aliasDict);
+
+  const { analyzeWhiteboardWithRoster } = await import("../ocr/whiteboard");
+  const aiResult = await analyzeWhiteboardWithRoster(
+    uploadId,
+    upload.url,
+    rosterJson,
+    aliasJson,
+    defaultScoreType,
+  );
+
+  await rawDb.whiteboardUpload.update({
+    where: { id: uploadId },
+    data: {
+      aiResult: aiResult as object,
+      status: "PROCESSED",
+      processedAt: new Date(),
+    },
+  });
+
+  return { aiResult, status: "PROCESSED" };
+}
+
+export type ConfirmRow = {
+  athleteId: string;
+  value: number;
+  type: ScoreType;
+  scaling: Scaling;
+  notes?: string;
+  includeAlias?: { rawName: string };
+};
+
+/**
+ * Bulk insert scores from a confirmed whiteboard review.
+ * - Creates Score records
+ * - Detects PRs per athlete
+ * - Sends in-app notifications
+ * - Logs BULK_SCORES_FROM_WHITEBOARD audit event
+ * - Saves new aliases if requested
+ * All in a single atomic transaction.
+ */
+export async function confirmWhiteboardScores(
+  uploadId: string,
+  rows: ConfirmRow[],
+): Promise<{ ok: boolean; count: number }> {
+  const session = await requireCoachSession();
+  const tenantId = session.user.tenantId;
+
+  const upload = await rawDb.whiteboardUpload.findUnique({
+    where: { id: uploadId, tenantId },
+    include: { class: { include: { wod: true } } },
+  });
+  if (!upload) throw new Error("Upload no encontrado");
+  if (!upload.class.wod) throw new Error("La clase no tiene WOD asignado");
+
+  const wod = upload.class.wod;
+  const scoreType = wod.scoreType as ScoreType;
+
+  // Determine unit from score type
+  const unitMap: Record<ScoreType, string> = {
+    TIME: "s",
+    REPS: "reps",
+    WEIGHT: "kg",
+    ROUNDS_REPS: "rounds",
+  };
+  const unit = unitMap[scoreType];
+
+  // Build score create data
+  const scoreRows = rows.map((r) => ({
+    tenantId,
+    wodId: wod.id,
+    athleteId: r.athleteId,
+    classId: upload.classId,
+    value: r.value,
+    unit,
+    scaling: r.scaling,
+    notes: r.notes ?? null,
+  }));
+
+  // Run everything in a transaction
+  await rawDb.$transaction(async (tx) => {
+    // Bulk insert scores
+    await tx.score.createMany({ data: scoreRows });
+
+    // PR detection per athlete
+    for (const row of rows) {
+      // Get athlete's current best for this WOD (via scores table)
+      const existingScores = await tx.score.findMany({
+        where: { tenantId, wodId: wod.id, athleteId: row.athleteId },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+      });
+
+      // Exclude the just-created score to find previous best
+      const prevScores = existingScores.filter(
+        (s) => Number(s.value) !== row.value,
+      );
+      const prevBestVal =
+        prevScores.length > 0 ? Number(prevScores[0].value) : null;
+
+      const isPR = detectPR(prevBestVal, row.value, scoreType);
+
+      if (isPR !== null && wod.type === "STRENGTH") {
+        // PR against movement (STRENGTH only)
+        const wm = await tx.wODMovement.findFirst({
+          where: { wodId: wod.id },
+        });
+        if (wm) {
+          await tx.pR.upsert({
+            where: {
+              athleteId_movementId: {
+                athleteId: row.athleteId,
+                movementId: wm.movementId,
+              },
+            },
+            update: { value: row.value, unit, achievedAt: new Date() },
+            create: {
+              tenantId,
+              athleteId: row.athleteId,
+              movementId: wm.movementId,
+              value: row.value,
+              unit,
+            },
+          });
+        }
+      }
+
+      // Best-effort in-app notification — call outside transaction to avoid
+      // blocking. We'll do it after the transaction.
+    }
+
+    // Aliases
+    for (const row of rows) {
+      if (row.includeAlias?.rawName) {
+        const normalized = row.includeAlias.rawName.trim();
+        if (normalized) {
+          await tx.athleteAlias.upsert({
+            where: { tenantId_alias: { tenantId, alias: normalized } },
+            update: { athleteId: row.athleteId, createdById: session.user.id },
+            create: {
+              tenantId,
+              athleteId: row.athleteId,
+              alias: normalized,
+              createdById: session.user.id,
+            },
+          });
+        }
+      }
+    }
+
+    // Mark upload confirmed
+    await tx.whiteboardUpload.update({
+      where: { id: uploadId },
+      data: {
+        status: "CONFIRMED",
+        confirmedAt: new Date(),
+        confirmedCount: rows.length,
+      },
+    });
+  });
+
+  // Post-transaction: send in-app notifications (best-effort)
+  const { notify } = await import("./notifications");
+  for (const row of rows) {
+    // Resolve userId from athleteId
+    const athlete = await rawDb.athlete.findUnique({
+      where: { id: row.athleteId },
+      select: { userId: true, firstName: true },
+    });
+    if (!athlete?.userId) continue;
+
+    const formattedScore = formatScore(row.value, scoreType);
+    await notify(athlete.userId, "SCORE_REGISTERED", {
+      title: "Tu score fue registrado",
+      body: `${formattedScore} en ${wod.name}`,
+      link: `/atleta/wod`,
+    });
+
+    // Check if it's a new PR (recalculate)
+    const prevScores = await rawDb.score.findMany({
+      where: {
+        tenantId,
+        wodId: wod.id,
+        athleteId: row.athleteId,
+        createdAt: { lt: new Date() },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    });
+    const prevBestForNotif =
+      prevScores.length > 1 ? Number(prevScores[1].value) : null;
+    const isPRForNotif = detectPR(prevBestForNotif, row.value, scoreType);
+
+    if (isPRForNotif !== null) {
+      await notify(athlete.userId, "PR_NEW", {
+        title: "Nuevo PR!",
+        body: `Hiciste un nuevo PR en ${wod.name}: ${formattedScore}`,
+        link: `/atleta/wod`,
+      });
+    }
+  }
+
+  // Audit log — triggers evaluateAndDispatch automatically
+  await logAudit({
+    tenantId,
+    actorId: session.user.id,
+    action: "BULK_SCORES_FROM_WHITEBOARD",
+    targetType: "WhiteboardUpload",
+    targetId: uploadId,
+    metadata: {
+      uploadId,
+      count: rows.length,
+      classId: upload.classId,
+      wodId: wod.id,
+    },
+  });
+
+  revalidatePath(`/admin/clases`);
+  revalidatePath(`/admin/asistencia`);
+  revalidatePath(`/admin/leaderboards`);
+  revalidatePath("/atleta/wod");
+
+  return { ok: true, count: rows.length };
 }

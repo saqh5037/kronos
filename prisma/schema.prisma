@@ -33,6 +33,8 @@ model Box {
   permissions             Permission[]
   permissionGrantRequests PermissionGrantRequest[]
   alertRules              AlertRule[]
+  whiteboardUploads       WhiteboardUpload[]
+  athleteAliases          AthleteAlias[]
 }
 
 // ─── USERS / AUTH ─────────────────────────────────────────────────────────────
@@ -62,6 +64,9 @@ model User {
   permissionsUpdated      Permission[]             @relation("PermissionUpdatedBy")
   grantRequestsCreated    PermissionGrantRequest[] @relation("GrantRequestRequester")
   grantRequestsReviewed   PermissionGrantRequest[] @relation("GrantRequestReviewer")
+  whiteboardUploads       WhiteboardUpload[]       @relation("WhiteboardUploader")
+  aliasesCreated          AthleteAlias[]           @relation("AliasCreatedBy")
+  inAppNotifications      InAppNotification[]
 
   @@index([tenantId])
 }
@@ -139,6 +144,7 @@ model Athlete {
   streaks      Streak[]
   goals        Goal[]
   bodyMetrics  BodyMetric[]
+  aliases      AthleteAlias[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -222,10 +228,11 @@ model Class {
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
 
-  box      Box       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  coach    User?     @relation(fields: [coachId], references: [id])
-  wod      WOD?      @relation(fields: [wodId], references: [id])
-  bookings Booking[]
+  box               Box                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  coach             User?              @relation(fields: [coachId], references: [id])
+  wod               WOD?               @relation(fields: [wodId], references: [id])
+  bookings          Booking[]
+  whiteboardUploads WhiteboardUpload[]
 
   @@index([tenantId])
   @@index([tenantId, startsAt])
@@ -670,6 +677,8 @@ enum AuditAction {
   PAYMENT_CONFIRMED
   PAYMENT_FAILED
   WEBHOOK_RECEIVED
+  WHITEBOARD_UPLOADED
+  BULK_SCORES_FROM_WHITEBOARD
 }
 
 model AuditEvent {
@@ -686,6 +695,86 @@ model AuditEvent {
   @@index([tenantId, createdAt])
   @@index([tenantId, targetType, targetId])
   @@index([tenantId, actorId])
+}
+
+// ─── WHITEBOARD OCR ───────────────────────────────────────────────────────────
+
+enum WhiteboardStatus {
+  PENDING
+  PROCESSED
+  CONFIRMED
+  EXPIRED
+  FAILED
+}
+
+model WhiteboardUpload {
+  id             String           @id @default(cuid())
+  tenantId       String
+  classId        String
+  uploaderId     String
+  url            String
+  blobPathname   String?
+  status         WhiteboardStatus @default(PENDING)
+  aiResult       Json?
+  confirmedCount Int              @default(0)
+  createdAt      DateTime         @default(now())
+  expiresAt      DateTime
+  processedAt    DateTime?
+  confirmedAt    DateTime?
+
+  box      Box   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  class    Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  uploader User  @relation("WhiteboardUploader", fields: [uploaderId], references: [id])
+
+  @@index([tenantId, classId])
+  @@index([tenantId])
+}
+
+// ─── ATHLETE ALIASES ──────────────────────────────────────────────────────────
+
+model AthleteAlias {
+  id          String   @id @default(cuid())
+  tenantId    String
+  athleteId   String
+  alias       String
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  box       Box     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  athlete   Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation("AliasCreatedBy", fields: [createdById], references: [id])
+
+  @@unique([tenantId, alias])
+  @@index([tenantId, athleteId])
+}
+
+// ─── IN-APP NOTIFICATIONS ─────────────────────────────────────────────────────
+
+enum NotificationKind {
+  SCORE_REGISTERED
+  PR_NEW
+  BOOKING_REMINDER
+  PAYMENT_DUE
+  ANNOUNCEMENT
+  ALERT
+}
+
+model InAppNotification {
+  id        String           @id @default(cuid())
+  tenantId  String
+  userId    String
+  kind      NotificationKind
+  title     String
+  body      String?
+  link      String?
+  payload   Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, userId])
+  @@index([userId, readAt])
 }
 
 // ─── COMMUNICATIONS ───────────────────────────────────────────────────────────

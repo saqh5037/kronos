@@ -79,10 +79,8 @@ async function dispatchAlert(
     const emails = users.map((u) => u.email).filter(Boolean);
     if (emails.length === 0) return;
 
-    const includesEmail =
-      channel === "EMAIL" || channel === "BOTH" || channel === "IN_APP";
-    // IN_APP: TODO Sprint 2 — for now fall through to email if combined
     const shouldEmail = channel === "EMAIL" || channel === "BOTH";
+    const shouldInApp = channel === "IN_APP" || channel === "BOTH";
 
     if (shouldEmail && emails.length > 0) {
       const subject = `[Kronos] Alerta: ${humanizeAction(event.action)}`;
@@ -97,11 +95,16 @@ async function dispatchAlert(
       );
     }
 
-    if (channel === "IN_APP" && !includesEmail) {
-      // TODO Sprint 2 — in-app notification
-      console.log(
-        `[alerts] IN_APP dispatch not implemented yet (rule ${ruleId})`,
-      );
+    if (shouldInApp) {
+      // Send in-app notification to each recipient
+      const { notify } = await import("./notifications");
+      for (const userId of recipientIds) {
+        await notify(userId, "ALERT", {
+          title: `Alerta: ${humanizeAction(event.action)}`,
+          body: buildAlertBody(event),
+          link: "/admin/auditoria",
+        });
+      }
     }
   } catch (err) {
     console.error(`[alerts] dispatch failed for rule ${ruleId}:`, err);
@@ -122,8 +125,20 @@ function humanizeAction(action: AuditAction): string {
     BOOKING_CANCELLED: "Reserva cancelada",
     SCORE_SUBMITTED: "Score registrado",
     PR_ACHIEVED: "PR logrado",
+    WHITEBOARD_UPLOADED: "Pizarra subida",
+    BULK_SCORES_FROM_WHITEBOARD: "Scores cargados desde pizarra",
   };
   return map[action] ?? action;
+}
+
+function buildAlertBody(event: AuditPayload): string {
+  const meta = event.metadata ?? {};
+  const parts: string[] = [];
+  if (meta.amount !== undefined)
+    parts.push(`Monto: $${Number(meta.amount).toFixed(2)}`);
+  if (meta.percentage !== undefined)
+    parts.push(`Porcentaje: ${meta.percentage}%`);
+  return parts.join(" · ") || `Acción detectada en tenant ${event.tenantId}`;
 }
 
 function buildAlertEmail(event: AuditPayload): string {
