@@ -454,6 +454,12 @@
     border: 1px solid var(--line);
   }
 
+  .k-chip-amber {
+    background: var(--amber-soft);
+    color: var(--amber);
+    border: 1px solid var(--amber-line);
+  }
+
   /* Skeleton shimmer */
   .k-skeleton {
     background: linear-gradient(
