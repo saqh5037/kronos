@@ -13,7 +13,7 @@ export function GrowthChart({ data }: { data: AthleteGrowthPoint[] }) {
     <AreaChart
       data={data}
       xKey="day"
-      series={[{ key: "total", label: "Total atletas", color: "#3aa3ff" }]}
+      series={[{ key: "total", label: "Total atletas", color: "#64748b" }]}
       height={220}
       yFormatter={(v) => v.toFixed(0)}
       xFormatter={fmtDay}

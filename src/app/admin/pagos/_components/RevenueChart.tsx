@@ -14,7 +14,7 @@ export function RevenueChart({ data }: { data: RevenueByDayPoint[] }) {
     <AreaChart
       data={data}
       xKey="day"
-      series={[{ key: "revenue", label: "Ingresos", color: "#19f08b" }]}
+      series={[{ key: "revenue", label: "Ingresos", color: "#4a7c59" }]}
       height={220}
       yFormatter={fmtCurrency}
       xFormatter={fmtDayShort}

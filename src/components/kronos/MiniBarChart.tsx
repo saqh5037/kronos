@@ -51,7 +51,7 @@ export default function MiniBarChart({
                     ? "var(--grad)"
                     : (bar.color ?? "var(--chart-inactive)"),
                   boxShadow: bar.isBest
-                    ? "0 0 12px rgba(25,240,139,0.45)"
+                    ? "0 0 12px rgba(220,75,23,0.35)"
                     : "none",
                 }}
                 initial={{ height: 0 }}
@@ -67,7 +67,7 @@ export default function MiniBarChart({
               <span
                 className="font-mono text-[9px] font-bold tracking-[0.04em] text-center truncate w-full"
                 style={{
-                  color: bar.isBest ? "var(--recovery)" : "var(--text-2)",
+                  color: bar.isBest ? "var(--moss)" : "var(--text-2)",
                 }}
               >
                 {bar.label}

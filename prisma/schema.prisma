@@ -127,8 +127,11 @@ model Athlete {
   bookings     Booking[]
   scores       Score[]
   prs          PR[]
+  prAttempts   PRAttempt[]
   achievements Achievement[]
   streaks      Streak[]
+  goals        Goal[]
+  bodyMetrics  BodyMetric[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -294,6 +297,8 @@ model Movement {
   box          Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   wodMovements WODMovement[]
   prs          PR[]
+  prAttempts   PRAttempt[]
+  goals        Goal[]
 
   @@index([tenantId])
 }
@@ -349,6 +354,88 @@ model PR {
   @@index([tenantId])
   @@index([tenantId, athleteId])
   @@unique([athleteId, movementId])
+}
+
+/// Append-only log of every PR improvement.
+/// Each row represents a moment when the athlete beat their previous best
+/// for a movement. Together with `PR` (current best, 1:1) this enables
+/// progression charts, improvers ranking, activity feed and goal tracking.
+model PRAttempt {
+  id            String   @id @default(cuid())
+  tenantId      String
+  athleteId     String
+  movementId    String
+  scoreId       String?  @unique
+  value         Decimal  @db.Decimal(10, 3)
+  unit          String
+  prevBest      Decimal? @db.Decimal(10, 3)
+  isCurrentBest Boolean  @default(true)
+  achievedAt    DateTime @default(now())
+
+  athlete  Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  movement Movement @relation(fields: [movementId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, athleteId])
+  @@index([tenantId, athleteId, movementId, achievedAt])
+}
+
+// ─── GOALS ────────────────────────────────────────────────────────────────────
+
+enum GoalMetric {
+  PR
+  TONNAGE
+  ATTENDANCE
+}
+
+enum GoalStatus {
+  ACTIVE
+  ACHIEVED
+  EXPIRED
+  CANCELLED
+}
+
+model Goal {
+  id          String     @id @default(cuid())
+  tenantId    String
+  athleteId   String
+  movementId  String?
+  metric      GoalMetric
+  targetValue Decimal    @db.Decimal(10, 3)
+  unit        String
+  startValue  Decimal?   @db.Decimal(10, 3)
+  deadline    DateTime
+  status      GoalStatus @default(ACTIVE)
+  achievedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  athlete  Athlete   @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  movement Movement? @relation(fields: [movementId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, athleteId])
+  @@index([tenantId, athleteId, status])
+}
+
+// ─── BODY METRICS ─────────────────────────────────────────────────────────────
+
+model BodyMetric {
+  id         String   @id @default(cuid())
+  tenantId   String
+  athleteId  String
+  type       String   // WEIGHT | BODY_FAT | MUSCLE_MASS | BMI | CUSTOM
+  label      String?  // free text when type=CUSTOM
+  value      Decimal  @db.Decimal(10, 3)
+  unit       String
+  measuredAt DateTime @default(now())
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, athleteId, type, measuredAt])
 }
 
 // ─── PAYMENTS ─────────────────────────────────────────────────────────────────

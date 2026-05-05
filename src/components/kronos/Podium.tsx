@@ -49,8 +49,8 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
               style={{
                 background: isFirst ? "var(--grad)" : "var(--card-2)",
                 border: isFirst ? "none" : "1px solid var(--line)",
-                color: isFirst ? "#0a1a14" : "var(--text)",
-                boxShadow: isFirst ? "0 0 20px rgba(25,240,139,0.3)" : "none",
+                color: isFirst ? "#1c1917" : "var(--text)",
+                boxShadow: isFirst ? "0 0 20px rgba(220,75,23,0.25)" : "none",
               }}
             >
               {e.rank}
@@ -59,15 +59,12 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
               <p className="text-xs font-medium truncate">{e.name}</p>
               <p
                 className="font-mono font-bold text-sm mt-0.5"
-                style={{ color: isFirst ? "var(--recovery)" : "var(--text)" }}
+                style={{ color: isFirst ? "var(--moss)" : "var(--text)" }}
               >
                 {formatScore(e.value, e.scoreType)}
               </p>
               {e.scaling !== "RX" && (
-                <span
-                  className="text-[10px]"
-                  style={{ color: "var(--strain)" }}
-                >
+                <span className="text-[10px]" style={{ color: "var(--steel)" }}>
                   {e.scaling}
                 </span>
               )}

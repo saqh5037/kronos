@@ -33,7 +33,7 @@ export default function KCard({
     return (
       <motion.div
         className={baseClass}
-        whileHover={{ y: -2, scale: 1.005 }}
+        whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.995 }}
         transition={{ type: "spring", stiffness: 400, damping: 25 }}
         onClick={onClick}

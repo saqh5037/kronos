@@ -16,7 +16,7 @@ export default function HaloRing({
   size = 88,
   strokeWidth = 8,
   value = 0.8,
-  color = "#19f08b",
+  color = "#4a7c59",
   label,
   displayValue,
   animate = true,
@@ -25,12 +25,15 @@ export default function HaloRing({
   const circumference = 2 * Math.PI * r;
   const targetOffset = circumference * (1 - Math.min(1, Math.max(0, value)));
 
+  // Derive glow colours from the ring colour
   const glowColor =
-    color === "#19f08b"
-      ? "rgba(25,240,139,0.55)"
-      : color === "#3aa3ff"
-        ? "rgba(58,163,255,0.55)"
-        : "rgba(255,94,94,0.55)";
+    color === "#4a7c59"
+      ? "rgba(74,124,89,0.55)"
+      : color === "#64748b"
+        ? "rgba(100,116,139,0.55)"
+        : color === "#c44536"
+          ? "rgba(196,69,54,0.55)"
+          : "rgba(220,75,23,0.55)";
 
   const glowBg = glowColor.replace("0.55", "0.18");
   const glowShadow = glowColor.replace("0.55", "0.65");

@@ -9,6 +9,8 @@ import { detectPR } from "@/lib/scores";
 import type { ScoreType } from "@/lib/validations/wod";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
+import { maybeAchievePRGoals } from "./goals";
+import { type ListOpts, type ListResult, normalizePagination } from "./types";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -32,6 +34,65 @@ export type MyScoreRow = {
   notes: string | null;
   createdAt: Date;
 };
+
+export type MyScoreSort = "createdAt" | "value";
+
+export async function listMyScoresPaged(
+  opts?: ListOpts<MyScoreSort> & {
+    wodId?: string;
+    scaling?: "RX" | "SCALED" | "RXPLUS";
+  },
+): Promise<ListResult<MyScoreRow>> {
+  const session = await requireSession();
+  const tenantId = session.user.tenantId;
+  const me = await getMyAthlete(session.user.id, tenantId);
+  if (!me) return { rows: [], total: 0, page: 1, pageSize: 0 };
+
+  const db = withTenant(tenantId);
+  const { page, pageSize, skip, take } = normalizePagination(opts);
+
+  const where = {
+    athleteId: me.id,
+    ...(opts?.wodId ? { wodId: opts.wodId } : {}),
+    ...(opts?.scaling ? { scaling: opts.scaling } : {}),
+    ...(opts?.dateFrom || opts?.dateTo
+      ? {
+          createdAt: {
+            ...(opts.dateFrom ? { gte: opts.dateFrom } : {}),
+            ...(opts.dateTo ? { lte: opts.dateTo } : {}),
+          },
+        }
+      : {}),
+  };
+
+  const sortBy = opts?.sortBy ?? "createdAt";
+  const sortDir = opts?.sortDir ?? "desc";
+
+  const [total, scores] = await Promise.all([
+    db.score.count({ where }),
+    db.score.findMany({
+      where,
+      orderBy: { [sortBy]: sortDir },
+      skip,
+      take,
+      include: { wod: { select: { id: true, name: true, scoreType: true } } },
+    }),
+  ]);
+
+  const rows: MyScoreRow[] = scores.map((s) => ({
+    id: s.id,
+    wodId: s.wodId,
+    wodName: s.wod.name,
+    scoreType: s.wod.scoreType as ScoreType,
+    value: Number(s.value),
+    unit: s.unit,
+    scaling: s.scaling,
+    notes: s.notes,
+    createdAt: s.createdAt,
+  }));
+
+  return { rows, total, page, pageSize };
+}
 
 export async function listMyScores(limit = 50): Promise<MyScoreRow[]> {
   const session = await requireSession();
@@ -268,6 +329,7 @@ export async function submitScore(data: unknown) {
     );
 
     if (newPRValue !== null) {
+      const prevBest = existingPR ? Number(existingPR.value) : null;
       await rawDb.pR.upsert({
         where: { athleteId_movementId: { athleteId: me.id, movementId } },
         update: {
@@ -283,6 +345,34 @@ export async function submitScore(data: unknown) {
           unit: parsed.unit,
         },
       });
+
+      // Write-through to append-only PRAttempt log (foundation for
+      // progression charts, improvers ranking, activity feed, goals).
+      // Idempotent per scoreId via @unique on PRAttempt.scoreId.
+      await rawDb.pRAttempt.updateMany({
+        where: {
+          tenantId,
+          athleteId: me.id,
+          movementId,
+          isCurrentBest: true,
+        },
+        data: { isCurrentBest: false },
+      });
+      await rawDb.pRAttempt.create({
+        data: {
+          tenantId,
+          athleteId: me.id,
+          movementId,
+          scoreId: score.id,
+          value: newPRValue,
+          unit: parsed.unit,
+          prevBest,
+          isCurrentBest: true,
+        },
+      });
+      // Auto-mark active PR goals on this movement as ACHIEVED
+      // when the new PR crosses the target.
+      await maybeAchievePRGoals(me.id, tenantId, movementId, newPRValue);
       prAchieved = true;
     }
   }

@@ -23,7 +23,7 @@ const modules = [
 ];
 
 function NavIcon({ icon, active }: { icon: string; active: boolean }) {
-  const color = active ? "var(--recovery)" : "currentColor";
+  const color = active ? "var(--text)" : "currentColor";
   const icons: Record<string, React.ReactNode> = {
     dashboard: (
       <svg
@@ -32,7 +32,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -49,7 +49,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -64,7 +64,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -79,7 +79,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -95,7 +95,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -110,7 +110,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -124,7 +124,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -138,7 +138,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -154,7 +154,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -170,7 +170,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -184,7 +184,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -200,7 +200,7 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         height="14"
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -212,16 +212,39 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
   return <>{icons[icon] ?? null}</>;
 }
 
+function Wordmark({ size = "md" }: { size?: "sm" | "md" }) {
+  const boxSize = size === "sm" ? "w-7 h-7" : "w-8 h-8";
+  const textSize = size === "sm" ? "text-sm" : "text-base";
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className={`${boxSize} rounded-lg flex items-center justify-center font-display font-bold border`}
+        style={{
+          background: "var(--card)",
+          borderColor: "var(--line-strong)",
+          color: "var(--fire)",
+        }}
+      >
+        <span className={`${textSize} leading-none`}>K</span>
+      </div>
+      <span
+        className={`font-display font-bold ${textSize} tracking-[0.04em] uppercase`}
+        style={{ color: "var(--text)" }}
+      >
+        Kronos
+      </span>
+    </div>
+  );
+}
+
 export default function AdminSidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  // Cerrar overlay al cambiar de ruta
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  // Bloquear scroll del body cuando overlay abierto en mobile
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -235,22 +258,12 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {/* Mobile top bar — solo visible <lg */}
+      {/* Mobile top bar */}
       <div
         className="lg:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 h-14 border-b"
         style={{ background: "var(--bg-soft)", borderColor: "var(--line)" }}
       >
-        <div className="flex items-center gap-2">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center font-display font-bold text-sm"
-            style={{ background: "var(--grad)", color: "#0a1a14" }}
-          >
-            K
-          </div>
-          <span className="font-display font-bold text-sm tracking-tight">
-            Kronos
-          </span>
-        </div>
+        <Wordmark size="sm" />
         <button
           type="button"
           aria-label="Abrir menú"
@@ -265,7 +278,7 @@ export default function AdminSidebar() {
             viewBox="0 0 16 16"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.5"
+            strokeWidth="1.8"
             strokeLinecap="round"
           >
             <path d="M2 4h12M2 8h12M2 12h12" />
@@ -273,10 +286,10 @@ export default function AdminSidebar() {
         </button>
       </div>
 
-      {/* Spacer para que el contenido no quede tapado por el top bar mobile */}
+      {/* Spacer for mobile top bar */}
       <div className="lg:hidden h-14 flex-shrink-0" aria-hidden />
 
-      {/* Overlay backdrop — solo cuando abierto en mobile */}
+      {/* Overlay backdrop */}
       {open && (
         <div
           className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
@@ -285,7 +298,7 @@ export default function AdminSidebar() {
         />
       )}
 
-      {/* Sidebar — fijo en lg, drawer en mobile */}
+      {/* Sidebar */}
       <nav
         className={`flex flex-col border-r flex-shrink-0 py-4 overflow-y-auto z-50
           fixed lg:static top-0 left-0 h-screen lg:h-auto w-64 lg:w-56
@@ -299,17 +312,7 @@ export default function AdminSidebar() {
           className="px-4 pb-4 mb-2 border-b flex items-center justify-between"
           style={{ borderColor: "var(--line)" }}
         >
-          <div className="flex items-center gap-2">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center font-display font-bold text-sm"
-              style={{ background: "var(--grad)", color: "#0a1a14" }}
-            >
-              K
-            </div>
-            <span className="font-display font-bold text-sm tracking-tight">
-              Kronos
-            </span>
-          </div>
+          <Wordmark />
           <button
             type="button"
             aria-label="Cerrar menú"
@@ -349,14 +352,19 @@ export default function AdminSidebar() {
                 {isActive && (
                   <motion.div
                     layoutId="admin-nav-indicator"
-                    className="absolute inset-0 rounded-lg border"
+                    className="absolute inset-0 rounded-lg border overflow-hidden"
                     style={{
                       background: "var(--card)",
-                      borderColor: "var(--strain-line)",
-                      boxShadow: "0 0 12px rgba(58,163,255,0.12)",
+                      borderColor: "var(--line-strong)",
                     }}
                     transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
+                  >
+                    <span
+                      aria-hidden
+                      className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-r"
+                      style={{ background: "var(--fire)" }}
+                    />
+                  </motion.div>
                 )}
                 <span className="relative z-10">
                   <NavIcon icon={mod.icon} active={isActive} />

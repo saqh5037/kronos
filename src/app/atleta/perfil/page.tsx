@@ -8,6 +8,10 @@ import {
   type MyAttendanceDay,
   type MyScoreTimelinePoint,
 } from "@/server/actions/athlete-home";
+import {
+  getMyCapabilityProfile,
+  type CapabilityProfile,
+} from "@/server/analytics/capability";
 import { formatScore } from "@/lib/scores";
 import { formatDayMonth } from "@/lib/week";
 import {
@@ -18,6 +22,7 @@ import KCard from "@/components/kronos/KCard";
 import MiniBarChart from "@/components/kronos/MiniBarChart";
 import { MyHeatmap90d } from "./_components/MyHeatmap90d";
 import { ScoresTimeline } from "./_components/ScoresTimeline";
+import { CapabilityRadar } from "@/components/charts/CapabilityRadar";
 
 export const metadata = { title: "Kronos — Perfil" };
 
@@ -27,6 +32,7 @@ export default async function PerfilPage() {
   let scores: MyScoreRow[] = [];
   let attendance90d: MyAttendanceDay[] = [];
   let scoresTimeline: MyScoreTimelinePoint[] = [];
+  let capability: CapabilityProfile | null = null;
 
   try {
     [home, prs, scores, attendance90d, scoresTimeline] = await Promise.all([
@@ -36,6 +42,7 @@ export default async function PerfilPage() {
       getMyAttendanceLast90d(),
       getMyScoresTimeline(90),
     ]);
+    capability = await getMyCapabilityProfile();
   } catch {
     // Sesión ausente
   }
@@ -90,7 +97,7 @@ export default async function PerfilPage() {
                 style={{ background: "var(--bg)" }}
               >
                 <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold text-[#0a1a14]"
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold text-[#1c1917]"
                   style={{
                     background: "var(--recovery)",
                     boxShadow: "0 0 8px rgba(25,240,139,0.4)",
@@ -355,6 +362,32 @@ export default async function PerfilPage() {
                 >
                   Valores normalizados 0–100 para comparar entre WODs.
                 </p>
+              </div>
+            </KCard>
+          </AnimatedItem>
+        </AnimatedSection>
+      )}
+
+      {/* CAPABILITY RADAR */}
+      {capability && capability.categories.length > 0 && (
+        <AnimatedSection className="mt-5 px-3.5">
+          <AnimatedItem>
+            <KCard>
+              <div className="p-4">
+                <p
+                  className="k-eyebrow mb-3"
+                  style={{ color: "var(--text-2)" }}
+                >
+                  PERFIL DE CAPACIDADES
+                </p>
+                <CapabilityRadar
+                  categories={capability.categories}
+                  overallRank={capability.overallRank}
+                  totalAthletes={capability.totalAthletes}
+                  weakestCategory={capability.weakestCategory}
+                  strongestCategory={capability.strongestCategory}
+                  height={240}
+                />
               </div>
             </KCard>
           </AnimatedItem>

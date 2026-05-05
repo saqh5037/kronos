@@ -175,7 +175,7 @@ export default async function PagosPage({
         <KpiCard
           label="Ingresos rango"
           value={fmtMoney(rangeRevenue)}
-          tone="recovery"
+          tone="moss"
           delta={
             <MetricDelta
               current={rangeRevenue}
@@ -187,7 +187,7 @@ export default async function PagosPage({
         <KpiCard
           label="Pagos rango"
           value={String(rangeCount)}
-          tone="strain"
+          tone="steel"
           delta={
             <MetricDelta
               current={rangeCount}
@@ -200,12 +200,12 @@ export default async function PagosPage({
         <KpiCard
           label="Por cobrar"
           value={fmtMoney(stats.pendingRevenue)}
-          tone={stats.pendingCount > 0 ? "pr" : undefined}
+          tone={stats.pendingCount > 0 ? "ember" : undefined}
         />
         <KpiCard
           label="Morosos"
           value={overdue.length === 0 ? "0" : `${overdue.length}`}
-          tone={overdue.length > 0 ? "pr" : undefined}
+          tone={overdue.length > 0 ? "ember" : undefined}
           subtitle={
             overdue.length > 0
               ? `${fmtMoney(overdueAmount)} adeudados`
@@ -244,7 +244,7 @@ export default async function PagosPage({
       {overdue.length > 0 && (
         <section className="mb-6">
           <div className="mb-3 flex items-center justify-between">
-            <p className="k-eyebrow" style={{ color: "var(--pr)" }}>
+            <p className="k-eyebrow" style={{ color: "var(--ember)" }}>
               🚨 Morosos ({overdue.length})
             </p>
           </div>
@@ -277,7 +277,7 @@ export default async function PagosPage({
                     </td>
                     <td
                       className="text-right font-mono font-bold"
-                      style={{ color: "var(--pr)" }}
+                      style={{ color: "var(--ember)" }}
                     >
                       {fmtMoney(m.pendingAmount)}
                     </td>
@@ -379,16 +379,16 @@ function KpiCard({
   label: string;
   value: string;
   subtitle?: string;
-  tone?: "recovery" | "strain" | "pr";
+  tone?: "moss" | "steel" | "ember";
   delta?: React.ReactNode;
 }) {
   const color =
-    tone === "recovery"
-      ? "var(--recovery)"
-      : tone === "strain"
-        ? "var(--strain)"
-        : tone === "pr"
-          ? "var(--pr)"
+    tone === "moss"
+      ? "var(--moss)"
+      : tone === "steel"
+        ? "var(--steel)"
+        : tone === "ember"
+          ? "var(--ember)"
           : "var(--text)";
   return (
     <div className="k-card p-3">

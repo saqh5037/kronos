@@ -33,7 +33,7 @@ export function Heatmap({
   to,
   cellSize = 12,
   cellGap = 3,
-  intensityColor = CHART_COLORS.strain,
+  intensityColor = CHART_COLORS.steel,
   emptyColor = CHART_COLORS.grid,
   ariaLabel = "Heatmap de actividad",
 }: Props) {

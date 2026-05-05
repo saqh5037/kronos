@@ -30,8 +30,8 @@ export function NewChurnBarChart({ data }: { data: AthletesByMonthPoint[] }) {
       data={data}
       xKey="month"
       bars={[
-        { key: "newAthletes", label: "Nuevos", color: "#19f08b" },
-        { key: "churnedMemberships", label: "Bajas", color: "#ff5e5e" },
+        { key: "newAthletes", label: "Nuevos", color: "#4a7c59" },
+        { key: "churnedMemberships", label: "Bajas", color: "#c44536" },
       ]}
       stacked={false}
       showLegend

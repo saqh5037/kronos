@@ -43,7 +43,7 @@ export default async function ComunicacionesPage() {
 
       {drafts.length > 0 && (
         <section className="mb-6">
-          <p className="k-eyebrow mb-2" style={{ color: "var(--strain)" }}>
+          <p className="k-eyebrow mb-2" style={{ color: "var(--steel)" }}>
             Borradores y programados ({drafts.length})
           </p>
           <div className="flex flex-col gap-2">
@@ -87,7 +87,7 @@ function Card({ a }: { a: AnnouncementRow }) {
             style={{ color: "var(--text-3)" }}
           >
             <span className="k-chip k-chip-ghost text-[10px]">{a.channel}</span>
-            <span className="k-chip k-chip-strain text-[10px]">
+            <span className="k-chip k-chip-steel text-[10px]">
               {a.audience}
             </span>
             <span className={`k-chip ${chipForStatus(a.status)} text-[10px]`}>
@@ -127,7 +127,7 @@ function Card({ a }: { a: AnnouncementRow }) {
         {a.scheduledAt && a.status === "SCHEDULED" && (
           <>
             <span>·</span>
-            <span style={{ color: "var(--strain)" }}>
+            <span style={{ color: "var(--steel)" }}>
               Programado para {formatDayMonth(a.scheduledAt)}{" "}
               {formatTime(a.scheduledAt)}
             </span>
@@ -144,11 +144,11 @@ function chipForStatus(status: string): string {
       return "k-chip-ghost";
     case "SCHEDULED":
     case "SENDING":
-      return "k-chip-strain";
+      return "k-chip-steel";
     case "SENT":
-      return "k-chip-recovery";
+      return "k-chip-moss";
     case "FAILED":
-      return "k-chip-pr";
+      return "k-chip-ember";
     default:
       return "k-chip-ghost";
   }

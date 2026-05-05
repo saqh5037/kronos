@@ -15,14 +15,14 @@ const fmtTime = (d: Date) =>
 function chipForStatus(status: string): string {
   switch (status) {
     case "BOOKED":
-      return "k-chip-strain";
+      return "k-chip-steel";
     case "ATTENDED":
-      return "k-chip-recovery";
+      return "k-chip-moss";
     case "WAITLIST":
       return "k-chip-ghost";
     case "NOSHOW":
     case "CANCELLED":
-      return "k-chip-pr";
+      return "k-chip-ember";
     default:
       return "k-chip-ghost";
   }
@@ -66,7 +66,7 @@ export function BulkRoster({ rosters }: { rosters: ClassRoster[] }) {
               type="button"
               disabled={pending}
               onClick={bulkCheckIn}
-              className="rounded-lg border border-[var(--recovery-line)] bg-[var(--recovery-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--recovery)] disabled:opacity-50"
+              className="rounded-lg border border-[var(--moss-line)] bg-[var(--moss-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--moss)] disabled:opacity-50"
             >
               ✓ Check-in
             </button>
@@ -74,7 +74,7 @@ export function BulkRoster({ rosters }: { rosters: ClassRoster[] }) {
               type="button"
               disabled={pending}
               onClick={bulkNoShow}
-              className="rounded-lg border border-[var(--pr-line)] bg-[var(--pr-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--pr)] disabled:opacity-50"
+              className="rounded-lg border border-[var(--ember-line)] bg-[var(--ember-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--ember)] disabled:opacity-50"
             >
               ✕ No-show
             </button>
@@ -144,7 +144,7 @@ export function BulkRoster({ rosters }: { rosters: ClassRoster[] }) {
                 ) : null}
                 <div
                   className="font-mono text-sm font-bold"
-                  style={{ color: "var(--recovery)" }}
+                  style={{ color: "var(--moss)" }}
                 >
                   {attended}/{booked.length}
                 </div>

@@ -1,76 +1,44 @@
-type Tone = "recovery" | "strain" | "pr";
+import { cn } from "@/lib/utils";
 
-const TONE_VAR: Record<Tone, string> = {
-  recovery: "var(--recovery)",
-  strain: "var(--strain)",
-  pr: "var(--pr)",
+type Tone = "moss" | "steel" | "ember" | "fire";
+
+const toneMap: Record<Tone, string> = {
+  moss: "var(--moss)",
+  steel: "var(--steel)",
+  ember: "var(--ember)",
+  fire: "var(--fire)",
 };
 
-export function KPI({
-  label,
-  value,
-  subtitle,
-  tone,
-  delta,
-}: {
+interface StatCardProps {
   label: string;
   value: string;
-  subtitle?: string;
+  delta?: string;
   tone?: Tone;
-  delta?: number;
-}) {
-  const color = tone ? TONE_VAR[tone] : "var(--text)";
-  return (
-    <div className="k-card p-4">
-      <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
-        {label}
-      </p>
-      <p className="font-display font-bold text-3xl mt-1" style={{ color }}>
-        {value}
-      </p>
-      {delta !== undefined && delta !== 0 && (
-        <p
-          className="text-[10px] font-mono mt-1"
-          style={{
-            color:
-              delta > 0
-                ? "var(--recovery)"
-                : delta < 0
-                  ? "var(--pr)"
-                  : "var(--text-3)",
-          }}
-        >
-          {delta > 0 ? "↑" : "↓"} {Math.abs(Math.round(delta * 100))}% vs mes
-          anterior
-        </p>
-      )}
-      {subtitle && (
-        <p className="text-[10px] mt-1" style={{ color: "var(--text-3)" }}>
-          {subtitle}
-        </p>
-      )}
-    </div>
-  );
+  className?: string;
 }
 
-export function SimpleCard({
+export function StatCard({
   label,
   value,
-  subtitle,
-}: {
-  label: string;
-  value: string;
-  subtitle?: string;
-}) {
+  delta,
+  tone,
+  className,
+}: StatCardProps) {
+  const color = tone ? toneMap[tone] : "var(--text)";
   return (
-    <div className="k-card p-4">
-      <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+    <div className={cn("k-card p-4", className)}>
+      <p className="k-eyebrow mb-1" style={{ color: "var(--text-3)" }}>
         {label}
       </p>
-      <p className="font-display font-bold text-2xl mt-1">{value}</p>
-      {subtitle && (
-        <p className="text-xs mt-1" style={{ color: "var(--text-3)" }}>
-          {subtitle}
+      <p
+        className="font-display text-2xl font-bold tracking-tight"
+        style={{ color }}
+      >
+        {value}
+      </p>
+      {delta && (
+        <p className="mt-1 text-xs" style={{ color: "var(--text-2)" }}>
+          {delta}
         </p>
       )}
     </div>

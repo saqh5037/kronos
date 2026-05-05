@@ -112,11 +112,11 @@ function NowPlaying({
       <section
         className="p-8 rounded-2xl border"
         style={{
-          borderColor: "var(--recovery)",
+          borderColor: "var(--moss)",
           background: "var(--card)",
         }}
       >
-        <p className="k-eyebrow" style={{ color: "var(--recovery)" }}>
+        <p className="k-eyebrow" style={{ color: "var(--moss)" }}>
           ● EN VIVO · {formatTime(current.startsAt)} · {current.durationMin}min
         </p>
         <h2 className="font-display font-bold text-5xl mt-2 tracking-tight">
@@ -129,7 +129,7 @@ function NowPlaying({
             </p>
             <p
               className="font-mono font-bold text-4xl mt-1"
-              style={{ color: "var(--recovery)" }}
+              style={{ color: "var(--moss)" }}
             >
               {current.attendedCount}
               <span className="text-2xl" style={{ color: "var(--text-3)" }}>
@@ -171,11 +171,11 @@ function NowPlaying({
       <section
         className="p-8 rounded-2xl border"
         style={{
-          borderColor: "var(--strain)",
+          borderColor: "var(--steel)",
           background: "var(--card)",
         }}
       >
-        <p className="k-eyebrow" style={{ color: "var(--strain)" }}>
+        <p className="k-eyebrow" style={{ color: "var(--steel)" }}>
           PRÓXIMA · en {minutesUntil}min · {formatTime(next.startsAt)}
         </p>
         <h2 className="font-display font-bold text-5xl mt-2 tracking-tight">
@@ -214,10 +214,10 @@ function TodaysWOD({ wod }: { wod: TVWOD | null }) {
           WOD del día
         </p>
         <div className="flex gap-2">
-          <span className="k-chip k-chip-strain">{wod.type}</span>
+          <span className="k-chip k-chip-steel">{wod.type}</span>
           <span className="k-chip k-chip-ghost">{wod.scoreType}</span>
           {wod.timeCap && (
-            <span className="k-chip k-chip-pr">{wod.timeCap}min cap</span>
+            <span className="k-chip k-chip-ember">{wod.timeCap}min cap</span>
           )}
         </div>
       </div>
@@ -244,7 +244,7 @@ function TodaysWOD({ wod }: { wod: TVWOD | null }) {
                 {m.reps && (
                   <span
                     className="font-mono font-bold mr-2"
-                    style={{ color: "var(--strain)" }}
+                    style={{ color: "var(--steel)" }}
                   >
                     {m.reps}
                   </span>
@@ -302,10 +302,10 @@ function UpcomingList({ classes }: { classes: TVClass[] }) {
               <span
                 className={`k-chip ${
                   c.bookedCount >= c.capacity
-                    ? "k-chip-pr"
+                    ? "k-chip-ember"
                     : c.bookedCount / c.capacity >= 0.7
-                      ? "k-chip-strain"
-                      : "k-chip-recovery"
+                      ? "k-chip-steel"
+                      : "k-chip-moss"
                 } text-xs`}
               >
                 {c.bookedCount}/{c.capacity}
@@ -376,7 +376,7 @@ function RecentPRs({ prs }: { prs: TVPRRow[] }) {
       className="p-5 rounded-2xl border"
       style={{ borderColor: "var(--line)", background: "var(--card)" }}
     >
-      <p className="k-eyebrow mb-3" style={{ color: "var(--pr)" }}>
+      <p className="k-eyebrow mb-3" style={{ color: "var(--ember)" }}>
         🏆 PRs recientes
       </p>
       {prs.length === 0 ? (
@@ -393,7 +393,7 @@ function RecentPRs({ prs }: { prs: TVPRRow[] }) {
                 </span>
                 <span
                   className="font-mono font-bold text-sm"
-                  style={{ color: "var(--pr)" }}
+                  style={{ color: "var(--ember)" }}
                 >
                   {p.value}
                   {p.unit}

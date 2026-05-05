@@ -17,7 +17,7 @@ const tabs = [
         height="22"
         fill="none"
         stroke="currentColor"
-        strokeWidth={active ? 2.2 : 1.6}
+        strokeWidth={active ? 2.4 : 1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -35,7 +35,7 @@ const tabs = [
         height="22"
         fill="none"
         stroke="currentColor"
-        strokeWidth={active ? 2.2 : 1.6}
+        strokeWidth={active ? 2.4 : 1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -54,7 +54,7 @@ const tabs = [
         height="22"
         fill="none"
         stroke="currentColor"
-        strokeWidth={active ? 2.2 : 1.6}
+        strokeWidth={active ? 2.4 : 1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -72,7 +72,7 @@ const tabs = [
         height="22"
         fill="none"
         stroke="currentColor"
-        strokeWidth={active ? 2.2 : 1.6}
+        strokeWidth={active ? 2.4 : 1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -92,76 +92,54 @@ export default function TabBar() {
   });
 
   return (
-    <>
-      <div
-        className="fixed bottom-0 left-0 right-0 z-40 border-t"
-        style={{
-          background: "var(--bg)",
-          borderColor: "var(--line)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-        }}
-      >
-        <div className="flex items-center h-16 px-2">
-          {tabs.map((tab, i) => {
-            const isActive = i === activeIndex;
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href as Route}
-                className="relative flex-1 flex flex-col items-center gap-1 py-2 text-[10px] font-semibold transition-colors"
-                style={{
-                  color: isActive ? "var(--text)" : "var(--text-3)",
-                }}
+    <div
+      className="fixed bottom-0 left-0 right-0 z-40 border-t"
+      style={{
+        background: "var(--bg)",
+        borderColor: "var(--line)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+      }}
+    >
+      <div className="flex items-center h-16 px-2">
+        {tabs.map((tab, i) => {
+          const isActive = i === activeIndex;
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href as Route}
+              className="relative flex-1 flex flex-col items-center gap-1 py-2 text-[10px] font-semibold transition-colors"
+              style={{
+                color: isActive ? "var(--text)" : "var(--text-3)",
+              }}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="tab-indicator"
+                  className="absolute -top-px left-1/2 -translate-x-1/2 h-[2px] rounded-full"
+                  style={{
+                    width: 20,
+                    background: "var(--grad)",
+                    boxShadow: "0 0 8px rgba(220,75,23,0.4)",
+                  }}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+              <motion.span
+                animate={isActive ? { scale: 1.1 } : { scale: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="tab-indicator"
-                    className="absolute -top-px left-1/2 -translate-x-1/2 h-[2px] rounded-full"
-                    style={{
-                      width: 20,
-                      background: "var(--grad)",
-                      boxShadow: "0 0 8px rgba(25,240,139,0.5)",
-                    }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <motion.span
-                  animate={isActive ? { scale: 1.1 } : { scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                >
-                  {tab.icon(isActive)}
-                </motion.span>
-                <span>{tab.label}</span>
-              </Link>
-            );
-          })}
-          {/* Theme toggle */}
-          <div className="flex items-center justify-center px-1">
-            <ThemeToggle className="!p-2 !rounded-full !w-9 !h-9" />
-          </div>
+                {tab.icon(isActive)}
+              </motion.span>
+              <span>{tab.label}</span>
+            </Link>
+          );
+        })}
+        {/* Theme toggle */}
+        <div className="flex items-center justify-center px-1">
+          <ThemeToggle className="!p-2 !rounded-full !w-9 !h-9" />
         </div>
       </div>
-
-      {/* FAB — K button */}
-      <motion.button
-        className="fixed bottom-20 right-4 w-14 h-14 rounded-full flex items-center justify-center z-50"
-        style={{
-          background: "var(--grad)",
-          boxShadow: "0 4px 24px rgba(58,163,255,0.35), 0 0 0 3px var(--bg)",
-        }}
-        whileHover={{ scale: 1.08, y: -2 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => {}}
-        aria-label="Acción rápida"
-      >
-        <span
-          className="font-display font-bold text-xl"
-          style={{ color: "#0a1a14" }}
-        >
-          K
-        </span>
-      </motion.button>
-    </>
+    </div>
   );
 }

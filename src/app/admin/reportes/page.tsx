@@ -89,7 +89,7 @@ export default async function ReportesPage() {
         <KpiCard
           label="Ingresos del mes"
           value={fmtMoney(r.monthRevenue)}
-          tone="recovery"
+          tone="moss"
           delta={
             <MetricDelta
               current={r.monthRevenue}
@@ -102,7 +102,7 @@ export default async function ReportesPage() {
         <KpiCard
           label="MRR estimado"
           value={fmtMoney(Math.round(r.mrr))}
-          tone="strain"
+          tone="steel"
           subtitle="por mes equivalente"
         />
         <KpiCard
@@ -115,10 +115,10 @@ export default async function ReportesPage() {
           value={fmtPct(r.attendanceRate)}
           tone={
             r.attendanceRate >= 0.85
-              ? "recovery"
+              ? "moss"
               : r.attendanceRate >= 0.65
-                ? "strain"
-                : "pr"
+                ? "steel"
+                : "ember"
           }
           subtitle={`${r.monthAttended}/${r.monthAttended + r.monthNoShow}`}
         />
@@ -209,16 +209,16 @@ function KpiCard({
   label: string;
   value: string;
   subtitle?: string;
-  tone?: "recovery" | "strain" | "pr";
+  tone?: "moss" | "steel" | "ember";
   delta?: React.ReactNode;
 }) {
   const color =
-    tone === "recovery"
-      ? "var(--recovery)"
-      : tone === "strain"
-        ? "var(--strain)"
-        : tone === "pr"
-          ? "var(--pr)"
+    tone === "moss"
+      ? "var(--moss)"
+      : tone === "steel"
+        ? "var(--steel)"
+        : tone === "ember"
+          ? "var(--ember)"
           : "var(--text)";
   return (
     <div className="k-card p-3">
@@ -303,9 +303,9 @@ function TopTable({
                   style={{
                     color:
                       r.rank === 1
-                        ? "var(--recovery)"
+                        ? "var(--moss)"
                         : r.rank <= 3
-                          ? "var(--strain)"
+                          ? "var(--steel)"
                           : "var(--text-3)",
                   }}
                 >
@@ -316,7 +316,7 @@ function TopTable({
               <span
                 className="flex-shrink-0 font-mono text-sm font-bold"
                 style={{
-                  color: r.rank === 1 ? "var(--recovery)" : "var(--text)",
+                  color: r.rank === 1 ? "var(--moss)" : "var(--text)",
                 }}
               >
                 {r.value}

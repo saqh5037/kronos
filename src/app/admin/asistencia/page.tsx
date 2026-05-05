@@ -125,7 +125,7 @@ export default async function AsistenciaPage({
         <KpiCard
           label="Asistencia rango"
           value={pct(rangeStats.attendanceRate)}
-          tone="recovery"
+          tone="moss"
           delta={
             <MetricDelta
               current={rangeStats.attendanceRate}
@@ -138,7 +138,7 @@ export default async function AsistenciaPage({
         <KpiCard
           label="No-show rate"
           value={pct(rangeStats.noShowRate)}
-          tone={rangeStats.noShowRate > 0.15 ? "pr" : "strain"}
+          tone={rangeStats.noShowRate > 0.15 ? "ember" : "steel"}
           delta={
             <MetricDelta
               current={rangeStats.noShowRate}
@@ -151,13 +151,13 @@ export default async function AsistenciaPage({
         <KpiCard
           label="Capacidad usada"
           value={pct(rangeStats.capacityUtil)}
-          tone="strain"
+          tone="steel"
           subtitle={`${rangeStats.attended}/${rangeStats.capacity}`}
         />
         <KpiCard
           label="No-shows recurrentes"
           value={String(noShows.length)}
-          tone={noShows.length > 0 ? "pr" : undefined}
+          tone={noShows.length > 0 ? "ember" : undefined}
           subtitle={noShows.length > 0 ? "3+ no-shows en 30d" : "Todos al día"}
         />
       </div>
@@ -192,7 +192,7 @@ export default async function AsistenciaPage({
       {/* No-shows recurrentes */}
       {noShows.length > 0 && (
         <section className="mb-6">
-          <p className="k-eyebrow mb-3" style={{ color: "var(--pr)" }}>
+          <p className="k-eyebrow mb-3" style={{ color: "var(--ember)" }}>
             🔁 No-shows recurrentes ({noShows.length})
           </p>
           <div className="k-card overflow-hidden">
@@ -261,16 +261,16 @@ function KpiCard({
   label: string;
   value: string;
   subtitle?: string;
-  tone?: "recovery" | "strain" | "pr";
+  tone?: "moss" | "steel" | "ember";
   delta?: React.ReactNode;
 }) {
   const color =
-    tone === "recovery"
-      ? "var(--recovery)"
-      : tone === "strain"
-        ? "var(--strain)"
-        : tone === "pr"
-          ? "var(--pr)"
+    tone === "moss"
+      ? "var(--moss)"
+      : tone === "steel"
+        ? "var(--steel)"
+        : tone === "ember"
+          ? "var(--ember)"
           : "var(--text)";
   return (
     <div className="k-card p-3">

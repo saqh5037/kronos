@@ -31,7 +31,7 @@ export function RevenueLineChart({ data }: { data: RevenueByMonthPoint[] }) {
     <LineChart
       data={data}
       xKey="month"
-      lines={[{ key: "revenue", label: "Revenue", color: "#19f08b" }]}
+      lines={[{ key: "revenue", label: "Revenue", color: "#4a7c59" }]}
       height={240}
       yFormatter={fmtCurrency}
       xFormatter={fmtMonth}
