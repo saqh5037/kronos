@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { del } from "@vercel/blob";
 import { db as rawDb } from "@/server/db";
+import { getStorage } from "@/server/storage";
 
 /**
  * Cron: clean up expired whiteboard uploads.
- * Deletes blobs from Vercel Blob storage and marks rows EXPIRED.
+ * Deletes files from the configured storage driver and marks rows EXPIRED.
  * Schedule: daily (e.g. "0 3 * * *")
  * Auth: Bearer CRON_SECRET header.
  */
@@ -30,16 +30,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ cleaned: 0 });
   }
 
+  const storage = getStorage();
   let cleaned = 0;
   const errors: string[] = [];
 
   for (const upload of expired) {
     try {
-      // Delete blob if we have the pathname and token
-      if (upload.blobPathname && process.env.BLOB_READ_WRITE_TOKEN) {
-        await del(upload.blobPathname, {
-          token: process.env.BLOB_READ_WRITE_TOKEN,
-        });
+      if (upload.blobPathname) {
+        await storage.delete(upload.blobPathname);
       }
 
       await rawDb.whiteboardUpload.update({

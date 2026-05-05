@@ -7,18 +7,35 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import ThemeToggle from "@/components/ThemeToggle";
 
-const modules = [
+type ModuleEntry = {
+  href: string;
+  label: string;
+  icon: string;
+  exact?: boolean;
+  ownerOnly?: boolean;
+  badgeKey?: "sensitive";
+};
+
+const modules: ModuleEntry[] = [
   { href: "/admin", label: "Dashboard", icon: "dashboard", exact: true },
   { href: "/admin/atletas", label: "Atletas", icon: "athletes" },
   { href: "/admin/programacion", label: "Programación", icon: "schedule" },
   { href: "/admin/reservas", label: "Reservas", icon: "bookings" },
   { href: "/admin/asistencia", label: "Asistencia", icon: "attendance" },
   { href: "/admin/wods", label: "WODs", icon: "wods" },
+  { href: "/admin/movimientos", label: "Movimientos", icon: "wods" },
   { href: "/admin/prs", label: "PRs", icon: "prs" },
   { href: "/admin/leaderboards", label: "Leaderboards", icon: "leaderboards" },
   { href: "/admin/pagos", label: "Pagos", icon: "payments" },
   { href: "/admin/comunicaciones", label: "Comunicaciones", icon: "comms" },
   { href: "/admin/reportes", label: "Reportes", icon: "reports" },
+  {
+    href: "/admin/auditoria",
+    label: "Auditoría",
+    icon: "auditoria",
+    ownerOnly: true,
+    badgeKey: "sensitive",
+  },
   { href: "/admin/ajustes", label: "Ajustes", icon: "settings" },
 ];
 
@@ -208,6 +225,23 @@ function NavIcon({ icon, active }: { icon: string; active: boolean }) {
         <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.1 3.1l1.4 1.4M11.5 11.5l1.4 1.4M3.1 12.9l1.4-1.4M11.5 4.5l1.4-1.4" />
       </svg>
     ),
+    auditoria: (
+      <svg
+        viewBox="0 0 16 16"
+        width="14"
+        height="14"
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M2 3a1 1 0 0 1 1-1h7l3 3v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />
+        <path d="M10 2v3h3" />
+        <circle cx="7.5" cy="9" r="1.5" />
+        <path d="M9 10.5l1.5 1.5" />
+      </svg>
+    ),
   };
   return <>{icons[icon] ?? null}</>;
 }
@@ -237,9 +271,21 @@ function Wordmark({ size = "md" }: { size?: "sm" | "md" }) {
   );
 }
 
-export default function AdminSidebar() {
+type AdminSidebarProps = {
+  sensitiveCount?: number;
+  role?: string;
+};
+
+export default function AdminSidebar({
+  sensitiveCount = 0,
+  role,
+}: AdminSidebarProps = {}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  const visibleModules = modules.filter(
+    (mod) => !mod.ownerOnly || role === "OWNER",
+  );
 
   useEffect(() => {
     setOpen(false);
@@ -336,10 +382,15 @@ export default function AdminSidebar() {
 
         {/* Nav items */}
         <div className="flex flex-col gap-0.5 px-2 flex-1">
-          {modules.map((mod) => {
+          {visibleModules.map((mod) => {
             const isActive = mod.exact
               ? pathname === mod.href
               : pathname.startsWith(mod.href);
+
+            const badgeValue =
+              mod.badgeKey === "sensitive" && sensitiveCount > 0
+                ? sensitiveCount
+                : null;
 
             return (
               <Link
@@ -369,7 +420,19 @@ export default function AdminSidebar() {
                 <span className="relative z-10">
                   <NavIcon icon={mod.icon} active={isActive} />
                 </span>
-                <span className="relative z-10">{mod.label}</span>
+                <span className="relative z-10 flex-1">{mod.label}</span>
+                {badgeValue !== null && (
+                  <span
+                    className="relative z-10 ml-auto text-[10px] font-bold leading-none px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
+                    style={{
+                      background: "var(--fire)",
+                      color: "var(--bg)",
+                    }}
+                    aria-label={`${badgeValue} eventos sensibles hoy`}
+                  >
+                    {badgeValue > 99 ? "99+" : badgeValue}
+                  </span>
+                )}
               </Link>
             );
           })}

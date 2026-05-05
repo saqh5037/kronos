@@ -105,7 +105,7 @@ function parseGeminiResponse(text: string): WhiteboardAIResult {
  */
 export async function analyzeWhiteboard(
   uploadId: string,
-  imageUrl: string,
+  imageInput: { buffer: Buffer; mimeType: string } | { url: string },
   classId: string,
   defaultScoreType: ScoreType = "TIME",
 ): Promise<WhiteboardAIResult> {
@@ -141,7 +141,7 @@ export async function analyzeWhiteboard(
 
   return analyzeWhiteboardWithRoster(
     uploadId,
-    imageUrl,
+    imageInput,
     rosterJson,
     aliasJson,
     defaultScoreType,
@@ -151,10 +151,13 @@ export async function analyzeWhiteboard(
 /**
  * Overload that accepts roster + aliasDict directly (for server-side use
  * where session may not be available).
+ *
+ * Image input: pass `imageBuffer` (preferred — works with any storage driver)
+ * or `imageUrl` (fallback — fetched at runtime, requires public URL).
  */
 export async function analyzeWhiteboardWithRoster(
   uploadId: string,
-  imageUrl: string,
+  imageInput: { buffer: Buffer; mimeType: string } | { url: string },
   rosterJson: string,
   aliasJson: string,
   defaultScoreType: ScoreType = "TIME",
@@ -172,13 +175,18 @@ export async function analyzeWhiteboardWithRoster(
 
   let imageBytes: string;
   let mimeType: string;
-  try {
-    const response = await fetch(imageUrl);
-    const buffer = await response.arrayBuffer();
-    imageBytes = Buffer.from(buffer).toString("base64");
-    mimeType = response.headers.get("content-type") ?? "image/jpeg";
-  } catch (fetchErr) {
-    throw new Error(`No se pudo descargar la imagen: ${fetchErr}`);
+  if ("buffer" in imageInput) {
+    imageBytes = imageInput.buffer.toString("base64");
+    mimeType = imageInput.mimeType;
+  } else {
+    try {
+      const response = await fetch(imageInput.url);
+      const buffer = await response.arrayBuffer();
+      imageBytes = Buffer.from(buffer).toString("base64");
+      mimeType = response.headers.get("content-type") ?? "image/jpeg";
+    } catch (fetchErr) {
+      throw new Error(`No se pudo descargar la imagen: ${fetchErr}`);
+    }
   }
 
   let lastError: Error | null = null;

@@ -479,9 +479,19 @@ export async function processWhiteboardUpload(uploadId: string) {
   const aliasJson = JSON.stringify(aliasDict);
 
   const { analyzeWhiteboardWithRoster } = await import("../ocr/whiteboard");
+  const { getStorage } = await import("../storage");
+  const storage = getStorage();
+
+  const imageInput = upload.blobPathname
+    ? {
+        buffer: await storage.read(upload.blobPathname),
+        mimeType: "image/jpeg",
+      }
+    : { url: upload.url };
+
   const aiResult = await analyzeWhiteboardWithRoster(
     uploadId,
-    upload.url,
+    imageInput,
     rosterJson,
     aliasJson,
     defaultScoreType,
