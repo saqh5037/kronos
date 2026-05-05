@@ -70,6 +70,7 @@ export default async function ScoresFromWhiteboardPage({
     }));
 
     const aiRows = (upload.aiResult as { rows: WhiteboardRow[] }).rows;
+    const wodScoreType = klass.wod?.scoreType ?? "TIME";
 
     return (
       <main className="min-h-screen bg-bg p-4 max-w-4xl mx-auto">
@@ -84,7 +85,9 @@ export default async function ScoresFromWhiteboardPage({
               day: "numeric",
               month: "long",
             })}
-            {klass.wod ? ` · WOD: ${klass.wod.name}` : ""}
+            {klass.wod
+              ? ` · WOD: ${klass.wod.name} · Tipo: ${wodScoreType}`
+              : ""}
           </p>
         </div>
         <Step2Review
@@ -92,6 +95,7 @@ export default async function ScoresFromWhiteboardPage({
           classId={classId}
           aiRows={aiRows}
           roster={roster}
+          wodScoreType={wodScoreType}
         />
       </main>
     );

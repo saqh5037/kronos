@@ -24,6 +24,7 @@ type Props = {
   classId: string;
   aiRows: WhiteboardRow[];
   roster: RosterEntry[];
+  wodScoreType: ScoreType;
 };
 
 function confidenceClass(confidence: number): string {
@@ -43,12 +44,15 @@ export default function Step2Review({
   classId,
   aiRows,
   roster,
+  wodScoreType,
 }: Props) {
   const router = useRouter();
 
+  // The WOD's scoreType is authoritative — override Gemini's guess.
   const [rows, setRows] = useState<RowState[]>(
     aiRows.map((r) => ({
       ...r,
+      scoreType: wodScoreType,
       include: r.confidence >= 0.5,
       editedAthleteId: r.matchedAthleteId,
       editedScore: r.score,
@@ -110,8 +114,8 @@ export default function Step2Review({
     try {
       const confirmRows = included.map((r) => ({
         athleteId: r.editedAthleteId!,
-        value: parseScoreValue(r.editedScore, r.scoreType),
-        type: r.scoreType,
+        value: parseScoreValue(r.editedScore, wodScoreType),
+        type: wodScoreType,
         scaling: r.scaling as Scaling,
         notes: r.notes,
         includeAlias:
