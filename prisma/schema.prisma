@@ -67,6 +67,7 @@ model User {
   whiteboardUploads       WhiteboardUpload[]       @relation("WhiteboardUploader")
   aliasesCreated          AthleteAlias[]           @relation("AliasCreatedBy")
   inAppNotifications      InAppNotification[]
+  pushSubscriptions       PushSubscription[]
 
   @@index([tenantId])
 }
@@ -133,18 +134,19 @@ model Athlete {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
-  box          Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user         User?         @relation(fields: [userId], references: [id])
-  memberships  Membership[]
-  bookings     Booking[]
-  scores       Score[]
-  prs          PR[]
-  prAttempts   PRAttempt[]
-  achievements Achievement[]
-  streaks      Streak[]
-  goals        Goal[]
-  bodyMetrics  BodyMetric[]
-  aliases      AthleteAlias[]
+  box             Box              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user            User?            @relation(fields: [userId], references: [id])
+  memberships     Membership[]
+  bookings        Booking[]
+  scores          Score[]
+  prs             PR[]
+  prAttempts      PRAttempt[]
+  achievements    Achievement[]
+  streaks         Streak[]
+  goals           Goal[]
+  bodyMetrics     BodyMetric[]
+  aliases         AthleteAlias[]
+  surveyResponses SurveyResponse[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -257,6 +259,14 @@ model Booking {
 
 // ─── WODs ─────────────────────────────────────────────────────────────────────
 
+enum MovementCategory {
+  STRENGTH
+  GYMNASTICS
+  MONOSTRUCTURAL
+  OLYMPIC
+  ACCESSORY
+}
+
 enum WODType {
   FORTIME
   AMRAP
@@ -300,13 +310,16 @@ model WOD {
 }
 
 model Movement {
-  id                  String   @id @default(cuid())
+  id                  String           @id @default(cuid())
   tenantId            String
   name                String
+  slug                String
+  category            MovementCategory @default(ACCESSORY)
+  isStandard          Boolean          @default(false)
   videoUrl            String?
   standardDescription String?
   equipment           String[]
-  createdAt           DateTime @default(now())
+  createdAt           DateTime         @default(now())
 
   box          Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   wodMovements WODMovement[]
@@ -314,7 +327,9 @@ model Movement {
   prAttempts   PRAttempt[]
   goals        Goal[]
 
+  @@unique([tenantId, slug])
   @@index([tenantId])
+  @@index([tenantId, category])
 }
 
 model WODMovement {
@@ -775,6 +790,62 @@ model InAppNotification {
 
   @@index([tenantId, userId])
   @@index([userId, readAt])
+}
+
+// ─── PUSH SUBSCRIPTIONS ───────────────────────────────────────────────────────
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, userId])
+}
+
+// ─── SURVEYS ──────────────────────────────────────────────────────────────────
+
+enum SurveyKind {
+  READINESS
+  RPE
+  SATISFACTION
+  CUSTOM
+}
+
+model Survey {
+  id        String     @id @default(cuid())
+  tenantId  String
+  kind      SurveyKind
+  name      String
+  questions Json
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+
+  responses SurveyResponse[]
+
+  @@index([tenantId, kind])
+}
+
+model SurveyResponse {
+  id          String   @id @default(cuid())
+  tenantId    String
+  surveyId    String
+  athleteId   String
+  classId     String?
+  answers     Json
+  completedAt DateTime @default(now())
+
+  survey  Survey  @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, athleteId, completedAt])
+  @@index([tenantId, surveyId])
 }
 
 // ─── COMMUNICATIONS ───────────────────────────────────────────────────────────

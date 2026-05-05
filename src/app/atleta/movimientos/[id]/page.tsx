@@ -4,6 +4,7 @@ import {
   getMyPRProgression,
   type PRProgressionResult,
 } from "@/server/actions/prs";
+import { getMovementById } from "@/server/actions/movements";
 import { PRChart, type PRChartPoint } from "@/components/charts/PRChart";
 import {
   AnimatedSection,
@@ -22,11 +23,13 @@ export default async function MovementDetailPage({
 
   let profile: Awaited<ReturnType<typeof getMyMovementProfile>> = null;
   let progression: PRProgressionResult | null = null;
+  let movementInfo: Awaited<ReturnType<typeof getMovementById>> = null;
 
   try {
-    [profile, progression] = await Promise.all([
+    [profile, progression, movementInfo] = await Promise.all([
       getMyMovementProfile(id),
       getMyPRProgression(id, 180),
+      getMovementById(id),
     ]);
   } catch {
     notFound();
@@ -54,8 +57,64 @@ export default async function MovementDetailPage({
         </AnimatedItem>
       </AnimatedSection>
 
+      {/* VIDEO EMBED */}
+      {movementInfo?.videoUrl && (
+        <AnimatedSection className="px-3.5 mt-3">
+          <AnimatedItem>
+            <div
+              className="rounded-[14px] overflow-hidden"
+              style={{ aspectRatio: "16/9", background: "var(--bg-soft)" }}
+            >
+              <iframe
+                src={movementInfo.videoUrl}
+                title={`Video: ${profile.movementName}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
+          </AnimatedItem>
+        </AnimatedSection>
+      )}
+
+      {/* DESCRIPCION */}
+      {movementInfo?.standardDescription && (
+        <AnimatedSection className="px-3.5 mt-3">
+          <AnimatedItem>
+            <KCard>
+              <div className="p-4">
+                <p
+                  className="k-eyebrow mb-2"
+                  style={{ color: "var(--text-2)" }}
+                >
+                  DESCRIPCIÓN
+                </p>
+                <p
+                  className="text-[13px] leading-relaxed whitespace-pre-line"
+                  style={{ color: "var(--text-2)" }}
+                >
+                  {movementInfo.standardDescription}
+                </p>
+                {movementInfo.equipment.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {movementInfo.equipment.map((eq) => (
+                      <span
+                        key={eq}
+                        className="k-chip k-chip-ghost text-[10px]"
+                      >
+                        {eq}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </KCard>
+          </AnimatedItem>
+        </AnimatedSection>
+      )}
+
       {/* Stats Grid */}
-      <AnimatedSection className="px-3.5 grid grid-cols-2 gap-2">
+      <AnimatedSection className="px-3.5 mt-4 grid grid-cols-2 gap-2">
         <AnimatedItem>
           <KCard variant="flat" className="p-3.5 text-center">
             <div

@@ -7,6 +7,7 @@ import {
   type Role,
   type AuditAction,
 } from "@prisma/client";
+import { seedStandardMovements, STANDARD_MOVEMENTS } from "./seed-movements";
 
 const prisma = new PrismaClient();
 
@@ -96,27 +97,52 @@ const LAST_NAMES = [
   "Chávez",
 ];
 
+// Movement names → slugs (must match STANDARD_MOVEMENTS slugs in seed-movements.ts)
 const MOVEMENT_LIBRARY = [
-  { name: "Back Squat", equipment: ["Barbell", "Plates", "Rack"] },
-  { name: "Front Squat", equipment: ["Barbell", "Plates", "Rack"] },
-  { name: "Deadlift", equipment: ["Barbell", "Plates"] },
-  { name: "Clean", equipment: ["Barbell", "Plates"] },
-  { name: "Snatch", equipment: ["Barbell", "Plates"] },
-  { name: "Power Clean", equipment: ["Barbell", "Plates"] },
-  { name: "Push Press", equipment: ["Barbell", "Plates"] },
-  { name: "Strict Press", equipment: ["Barbell", "Plates"] },
-  { name: "Thruster", equipment: ["Barbell", "Plates"] },
-  { name: "Pull-up", equipment: ["Pull-up bar"] },
-  { name: "Push-up", equipment: [] },
-  { name: "Air Squat", equipment: [] },
-  { name: "Box Jump", equipment: ["Box"] },
-  { name: "Wall Ball", equipment: ["Med ball", "Wall target"] },
-  { name: "Burpee", equipment: [] },
-  { name: "Toes to Bar", equipment: ["Pull-up bar"] },
-  { name: "Kettlebell Swing", equipment: ["Kettlebell"] },
-  { name: "Double Under", equipment: ["Jump rope"] },
-  { name: "Row", equipment: ["Rower"] },
-  { name: "Run", equipment: [] },
+  {
+    name: "Back Squat",
+    slug: "back-squat",
+    equipment: ["Barbell", "Plates", "Rack"],
+  },
+  {
+    name: "Front Squat",
+    slug: "front-squat",
+    equipment: ["Barbell", "Plates", "Rack"],
+  },
+  { name: "Deadlift", slug: "deadlift", equipment: ["Barbell", "Plates"] },
+  { name: "Clean", slug: "clean", equipment: ["Barbell", "Plates"] },
+  { name: "Snatch", slug: "snatch", equipment: ["Barbell", "Plates"] },
+  {
+    name: "Power Clean",
+    slug: "power-clean",
+    equipment: ["Barbell", "Plates"],
+  },
+  { name: "Push Press", slug: "push-press", equipment: ["Barbell", "Plates"] },
+  {
+    name: "Strict Press",
+    slug: "strict-press",
+    equipment: ["Barbell", "Plates"],
+  },
+  { name: "Thruster", slug: "thruster", equipment: ["Barbell", "Plates"] },
+  { name: "Pull-up", slug: "pull-up", equipment: ["Pull-up bar"] },
+  { name: "Push-up", slug: "push-up", equipment: [] },
+  { name: "Air Squat", slug: "air-squat", equipment: [] },
+  { name: "Box Jump", slug: "box-jump", equipment: ["Box"] },
+  {
+    name: "Wall Ball",
+    slug: "wall-ball",
+    equipment: ["Med ball", "Wall target"],
+  },
+  { name: "Burpee", slug: "burpee", equipment: [] },
+  { name: "Toes to Bar", slug: "toes-to-bar", equipment: ["Pull-up bar"] },
+  {
+    name: "Kettlebell Swing",
+    slug: "kettlebell-swing",
+    equipment: ["Kettlebell"],
+  },
+  { name: "Double Under", slug: "double-under", equipment: ["Jump rope"] },
+  { name: "Row", slug: "row", equipment: ["Rower"] },
+  { name: "Run", slug: "run", equipment: [] },
 ];
 
 type WODRecipe = {
@@ -471,17 +497,21 @@ async function main() {
     },
   });
 
-  // ─── Movements ───────────────────────────────────────────────────────────────
+  // ─── Movements (seed standard + WOD library uses same slugs) ────────────────
+  // First seed all 50 standard movements for each box
+  await seedStandardMovements(box1.id);
+  await seedStandardMovements(box2.id);
+
+  // Build movementByName map for WOD creation (use standard slugs from MOVEMENT_LIBRARY)
   const movementByName = new Map<string, string>();
   for (const mv of MOVEMENT_LIBRARY) {
-    const created = await prisma.movement.create({
-      data: {
-        tenantId: box1.id,
-        name: mv.name,
-        equipment: mv.equipment,
-      },
+    const found = await prisma.movement.findUnique({
+      where: { tenantId_slug: { tenantId: box1.id, slug: mv.slug } },
+      select: { id: true },
     });
-    movementByName.set(mv.name, created.id);
+    if (found) {
+      movementByName.set(mv.name, found.id);
+    }
   }
 
   // ─── WODs ────────────────────────────────────────────────────────────────────
@@ -991,11 +1021,85 @@ async function main() {
     }
   }
 
+  // ─── Surveys (READINESS + RPE por box) ───────────────────────────────────────
+  for (const boxId of [box1.id, box2.id]) {
+    // Check if surveys already exist (idempotent)
+    const existingReadiness = await prisma.survey.findFirst({
+      where: { tenantId: boxId, kind: "READINESS" },
+    });
+    if (!existingReadiness) {
+      await prisma.survey.create({
+        data: {
+          tenantId: boxId,
+          kind: "READINESS",
+          name: "Encuesta de Readiness Diaria",
+          isActive: true,
+          questions: [
+            {
+              id: "energy",
+              text: "¿Cómo te sientes hoy?",
+              options: [
+                { value: "low", label: "Bajo", emoji: "😴" },
+                { value: "mid", label: "Normal", emoji: "😐" },
+                { value: "high", label: "Listo", emoji: "💪" },
+              ],
+            },
+            {
+              id: "sleep",
+              text: "¿Dormiste bien?",
+              options: [
+                { value: "bad", label: "Mal", emoji: "😩" },
+                { value: "ok", label: "Más o menos", emoji: "😌" },
+                { value: "great", label: "Excelente", emoji: "🌟" },
+              ],
+            },
+            {
+              id: "soreness",
+              text: "¿Algún dolor?",
+              options: [
+                { value: "none", label: "Ninguno", emoji: "✅" },
+                { value: "some", label: "Algo", emoji: "⚠️" },
+                { value: "much", label: "Bastante", emoji: "🚫" },
+              ],
+            },
+          ],
+        },
+      });
+    }
+
+    const existingRPE = await prisma.survey.findFirst({
+      where: { tenantId: boxId, kind: "RPE" },
+    });
+    if (!existingRPE) {
+      await prisma.survey.create({
+        data: {
+          tenantId: boxId,
+          kind: "RPE",
+          name: "RPE Post-WOD",
+          isActive: true,
+          questions: [
+            {
+              id: "rpe",
+              text: "¿Qué tan duro estuvo?",
+              options: [
+                { value: "1", label: "Muy fácil", emoji: "😎" },
+                { value: "2", label: "Fácil", emoji: "😅" },
+                { value: "3", label: "Moderado", emoji: "🥵" },
+                { value: "4", label: "Duro", emoji: "🥶" },
+                { value: "5", label: "Al límite", emoji: "💀" },
+              ],
+            },
+          ],
+        },
+      });
+    }
+  }
+
   console.log(`✅ Seed extendido completo:
   Box 1: ${box1.name} (${box1.id})
   Box 2: ${box2.name} (isolation)
   Atletas Box 1: ${athleteData.length} (42 ACTIVE, 5 PAUSED, 3 DROPIN)
-  Movimientos: ${MOVEMENT_LIBRARY.length}
+  Movimientos estándar: ${STANDARD_MOVEMENTS.length} por box (isStandard=true)
   WODs: ${WOD_LIBRARY.length} (incluye 8 STRENGTH 1RMs)
   Clases: ${classRows.length} (4 semanas: 2 pasadas + esta + próxima)
   Bookings: ${bookingRows.length}
@@ -1004,7 +1108,8 @@ async function main() {
   PRAttempts: ${prAttemptRows.length} (progresión histórica para charts)
   Goals: ${goalRows.length} (mix ACTIVE + ACHIEVED, PR + ATTENDANCE)
   BodyMetrics: ${bodyMetricRows.length} (~13 weights + 3 body-fat por atleta tracked)
-  Badges: ${badgesData.length}`);
+  Badges: ${badgesData.length}
+  Surveys: READINESS + RPE por box`);
 }
 
 main()

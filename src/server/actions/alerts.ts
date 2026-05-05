@@ -81,6 +81,7 @@ async function dispatchAlert(
 
     const shouldEmail = channel === "EMAIL" || channel === "BOTH";
     const shouldInApp = channel === "IN_APP" || channel === "BOTH";
+    const shouldPush = channel === "PUSH" || channel === "BOTH";
 
     if (shouldEmail && emails.length > 0) {
       const subject = `[Kronos] Alerta: ${humanizeAction(event.action)}`;
@@ -88,11 +89,15 @@ async function dispatchAlert(
       await sendEmail({ to: emails, subject, html });
     }
 
-    if (channel === "PUSH") {
-      // TODO Sprint 3 — web-push integration
-      console.log(
-        `[alerts] PUSH dispatch not implemented yet (rule ${ruleId})`,
-      );
+    if (shouldPush) {
+      const { sendPushToUser } = await import("../push");
+      for (const userId of recipientIds) {
+        await sendPushToUser(userId, {
+          title: `Alerta: ${humanizeAction(event.action)}`,
+          body: buildAlertBody(event),
+          link: "/admin/auditoria",
+        });
+      }
     }
 
     if (shouldInApp) {

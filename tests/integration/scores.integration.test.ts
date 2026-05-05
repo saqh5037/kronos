@@ -48,7 +48,7 @@ describe.skipIf(!process.env.DATABASE_URL)("Scores + PR integration", () => {
         data: { tenantId, firstName: "Test", lastName: "Athlete" },
       });
       const movement = await client.movement.create({
-        data: { tenantId, name: "Back Squat" },
+        data: { tenantId, name: "Back Squat", slug: "back-squat-test" },
       });
       const wod = await client.wOD.create({
         data: {
@@ -115,7 +115,7 @@ describe.skipIf(!process.env.DATABASE_URL)("Scores + PR integration", () => {
         data: { tenantId, firstName: "Test", lastName: "Athlete" },
       });
       const movement = await client.movement.create({
-        data: { tenantId, name: "Deadlift" },
+        data: { tenantId, name: "Deadlift", slug: "deadlift-test" },
       });
 
       await client.pR.create({

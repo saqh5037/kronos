@@ -4,6 +4,7 @@ import {
   listMyMovementsRated,
   type RankedMovement,
 } from "@/server/analytics/movement";
+import { listMovements, type MovementRow } from "@/server/actions/movements";
 import {
   AnimatedSection,
   AnimatedItem,
@@ -12,10 +13,22 @@ import KCard from "@/components/kronos/KCard";
 
 export const metadata = { title: "Kronos — Mis Movimientos" };
 
+const CATEGORY_LABELS: Record<string, string> = {
+  OLYMPIC: "Olímpicos",
+  STRENGTH: "Fuerza",
+  GYMNASTICS: "Gimnasia",
+  MONOSTRUCTURAL: "Cardio",
+  ACCESSORY: "Accesorio",
+};
+
 export default async function MovementsPage() {
   let movements: RankedMovement[] = [];
+  let catalog: MovementRow[] = [];
   try {
-    movements = await listMyMovementsRated(50);
+    [movements, catalog] = await Promise.all([
+      listMyMovementsRated(50),
+      listMovements(),
+    ]);
   } catch {
     // unauthorized
   }
@@ -151,6 +164,95 @@ export default async function MovementsPage() {
           </AnimatedItem>
         ))}
       </AnimatedSection>
+
+      {/* CATÁLOGO COMPLETO */}
+      {catalog.length > 0 && (
+        <AnimatedSection className="px-3.5 mt-6">
+          <div className="flex items-baseline justify-between mb-3">
+            <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+              BIBLIOTECA DE MOVIMIENTOS
+            </p>
+            <span
+              className="font-mono text-[10px] font-bold"
+              style={{ color: "var(--text-3)" }}
+            >
+              {catalog.length} MOVIMIENTOS
+            </span>
+          </div>
+          {Object.entries(CATEGORY_LABELS).map(([cat, label]) => {
+            const items = catalog.filter((m) => m.category === cat);
+            if (items.length === 0) return null;
+            return (
+              <div key={cat} className="mb-4">
+                <p
+                  className="font-mono text-[9px] font-bold tracking-[0.14em] mb-2 px-1"
+                  style={{ color: "var(--text-3)" }}
+                >
+                  {label.toUpperCase()}
+                </p>
+                <div className="k-card overflow-hidden">
+                  {items.map((m, i) => (
+                    <Link
+                      key={m.id}
+                      href={`/atleta/movimientos/${m.id}` as Route}
+                    >
+                      <div
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--hover-subtle)] transition-colors"
+                        style={{
+                          borderBottom:
+                            i < items.length - 1
+                              ? "1px solid var(--line)"
+                              : "none",
+                        }}
+                      >
+                        {m.videoUrl && (
+                          <div
+                            className="w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0"
+                            style={{
+                              background: "var(--strain-soft)",
+                              border: "1px solid var(--strain-line)",
+                            }}
+                          >
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="var(--strain)"
+                              strokeWidth="2"
+                            >
+                              <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[13px] font-semibold truncate">
+                            {m.name}
+                          </div>
+                          {m.equipment.length > 0 && (
+                            <div
+                              className="text-[10px] truncate"
+                              style={{ color: "var(--text-3)" }}
+                            >
+                              {m.equipment.slice(0, 2).join(" · ")}
+                            </div>
+                          )}
+                        </div>
+                        <span
+                          className="text-lg opacity-30"
+                          style={{ color: "var(--text-3)" }}
+                        >
+                          ›
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </AnimatedSection>
+      )}
     </div>
   );
 }

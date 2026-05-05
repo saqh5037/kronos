@@ -14,6 +14,12 @@ import {
   listScoresForWOD,
   type TodayWOD,
 } from "@/server/actions/scores";
+import {
+  getActiveSurvey,
+  hasRespondedToday,
+  type SurveyRow,
+} from "@/server/actions/surveys";
+import QuickSurvey from "@/components/atleta/QuickSurvey";
 import { AnimatedStats } from "@/components/kronos/AnimatedStats";
 import CancelMyBookingButton from "@/components/kronos/CancelMyBookingButton";
 import { formatScore } from "@/lib/scores";
@@ -33,6 +39,8 @@ export default async function AtletaHomePage() {
   let prs: PRRow[] = [];
   let wod: TodayWOD = null;
   let wodScores: Awaited<ReturnType<typeof listScoresForWOD>> = [];
+  let readinessSurvey: SurveyRow | null = null;
+  let alreadyRespondedReadiness = true;
 
   try {
     [home, classes, prs, wod] = await Promise.all([
@@ -50,6 +58,18 @@ export default async function AtletaHomePage() {
       wodScores = await listScoresForWOD(wod.wodId);
     } catch {
       // ignore
+    }
+  }
+
+  // Load readiness survey — only if home loaded (= session exists)
+  if (home) {
+    try {
+      [readinessSurvey, alreadyRespondedReadiness] = await Promise.all([
+        getActiveSurvey("READINESS"),
+        hasRespondedToday("READINESS"),
+      ]);
+    } catch {
+      // Ignore — survey is optional
     }
   }
 
@@ -150,6 +170,11 @@ export default async function AtletaHomePage() {
           </button>
         </AnimatedItem>
       </AnimatedSection>
+
+      {/* READINESS SURVEY — solo si no respondió hoy */}
+      {readinessSurvey && !alreadyRespondedReadiness && (
+        <QuickSurvey survey={readinessSurvey} />
+      )}
 
       {/* HERO STATS — animated HaloRings */}
       <AnimatedStats

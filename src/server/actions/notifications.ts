@@ -56,6 +56,14 @@ export async function notify(
           : Prisma.JsonNull,
       },
     });
+
+    // Also dispatch web push (best-effort, non-blocking)
+    const { sendPushToUser } = await import("../push");
+    await sendPushToUser(userId, {
+      title: payload.title,
+      body: payload.body ?? "",
+      link: payload.link,
+    });
   } catch (err) {
     // Best-effort: notification failure must never break caller
     console.error("[notify] failed to create notification:", err);

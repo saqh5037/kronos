@@ -6,6 +6,10 @@ import {
   type RevenueByMonthPoint,
   type AthletesByMonthPoint,
 } from "@/server/actions/reports";
+import {
+  getReadinessAverage,
+  type ReadinessAverage,
+} from "@/server/actions/surveys";
 import { MetricDelta } from "@/components/charts/MetricDelta";
 import { ReportesFilters } from "./_components/ReportesFilters";
 import { RevenueLineChart } from "./_components/RevenueLineChart";
@@ -20,6 +24,7 @@ export default async function ReportesPage() {
   let r: Reports | null = null;
   let revenue12m: RevenueByMonthPoint[] = [];
   let athletes12m: AthletesByMonthPoint[] = [];
+  let readiness: ReadinessAverage | null = null;
 
   try {
     [r, revenue12m, athletes12m] = await Promise.all([
@@ -27,6 +32,7 @@ export default async function ReportesPage() {
       getRevenueByMonth(12),
       getAthletesByMonth(12),
     ]);
+    readiness = await getReadinessAverage({ sinceDays: 7 });
   } catch {
     // BD/sesión ausente
   }
@@ -157,6 +163,13 @@ export default async function ReportesPage() {
           )}
         </div>
       </div>
+
+      {/* Readiness tile */}
+      {readiness !== null && (
+        <div className="mb-6">
+          <ReadinessTile readiness={readiness} />
+        </div>
+      )}
 
       {/* Activity */}
       <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -385,6 +398,76 @@ function PlanDistribution({
           })}
         </ul>
       )}
+    </div>
+  );
+}
+
+function ReadinessTile({ readiness }: { readiness: ReadinessAverage }) {
+  const scorePct = Math.round(readiness.score * 100);
+  const responsePct =
+    readiness.total > 0
+      ? Math.round((readiness.count / readiness.total) * 100)
+      : 0;
+  const lowEngagement = responsePct < 40;
+
+  const tone =
+    scorePct >= 70
+      ? "var(--moss)"
+      : scorePct >= 40
+        ? "var(--steel)"
+        : "var(--ember)";
+
+  return (
+    <div className="k-card p-4">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <p className="k-eyebrow mb-1" style={{ color: "var(--text-2)" }}>
+            Readiness del box hoy
+          </p>
+          <div className="flex items-baseline gap-2">
+            <span
+              className="font-display text-3xl font-bold"
+              style={{ color: tone }}
+            >
+              {scorePct}%
+            </span>
+            <span className="text-sm" style={{ color: "var(--text-2)" }}>
+              promedio 7 días
+            </span>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-sm font-bold">
+            {readiness.count}
+            <span
+              className="text-[11px] font-normal"
+              style={{ color: "var(--text-2)" }}
+            >
+              /{readiness.total} respondieron
+            </span>
+          </div>
+          {lowEngagement && (
+            <div
+              className="mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
+              style={{
+                background: "var(--ember-soft)",
+                color: "var(--ember)",
+              }}
+            >
+              Engagement bajo
+            </div>
+          )}
+        </div>
+      </div>
+      <div
+        className="mt-3 h-2 rounded-full overflow-hidden"
+        style={{ background: "var(--bg-soft)" }}
+      >
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${scorePct}%`, background: tone }}
+        />
+      </div>
     </div>
   );
 }

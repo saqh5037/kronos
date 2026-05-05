@@ -1,4 +1,5 @@
 import { listMyScores, type MyScoreRow } from "@/server/actions/scores";
+import PushSubscribeButton from "@/components/atleta/PushSubscribeButton";
 import { listMyPRs, type PRRow } from "@/server/actions/prs";
 import {
   getAthleteHome,
@@ -431,6 +432,20 @@ export default async function PerfilPage() {
           </KCard>
         </div>
       )}
+
+      {/* NOTIFICACIONES PUSH */}
+      <AnimatedSection className="mt-5 px-3.5">
+        <AnimatedItem>
+          <KCard>
+            <div className="p-4">
+              <p className="k-eyebrow mb-3" style={{ color: "var(--text-2)" }}>
+                NOTIFICACIONES
+              </p>
+              <PushSubscribeButton />
+            </div>
+          </KCard>
+        </AnimatedItem>
+      </AnimatedSection>
     </div>
   );
 }

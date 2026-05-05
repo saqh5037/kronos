@@ -23,6 +23,7 @@
     "@prisma/client": "^6.9.0",
     "@sentry/nextjs": "^9.0.0",
     "@tanstack/react-table": "^8.21.3",
+    "@types/web-push": "^3.6.4",
     "@vercel/blob": "^2.3.3",
     "canvas-confetti": "^1.9.3",
     "clsx": "^2.1.1",
@@ -38,6 +39,7 @@
     "recharts": "^3.8.1",
     "resend": "^6.12.2",
     "tailwind-merge": "^3.3.0",
+    "web-push": "^3.6.7",
     "zod": "^3.24.4"
   },
   "devDependencies": {
