@@ -423,12 +423,24 @@ export default function AdminSidebar({
                 <span className="relative z-10 flex-1">{mod.label}</span>
                 {badgeValue !== null && (
                   <span
-                    className="relative z-10 ml-auto text-[10px] font-bold leading-none px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
+                    className="relative z-10 ml-auto text-[10px] font-bold leading-none px-1.5 py-0.5 rounded-full min-w-[18px] text-center group/badge"
                     style={{
-                      background: "var(--fire)",
+                      background:
+                        badgeValue >= 10
+                          ? "linear-gradient(95deg, #dc4b17 0%, #e8893a 100%)"
+                          : "var(--fire)",
                       color: "var(--bg)",
+                      boxShadow:
+                        badgeValue > 0
+                          ? "0 0 8px rgba(220, 75, 23, 0.4)"
+                          : undefined,
+                      animation:
+                        badgeValue > 0
+                          ? "pulse-glow 2s ease-in-out infinite"
+                          : undefined,
                     }}
                     aria-label={`${badgeValue} eventos sensibles hoy`}
+                    title={`${badgeValue} eventos sensibles hoy`}
                   >
                     {badgeValue > 99 ? "99+" : badgeValue}
                   </span>
