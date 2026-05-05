@@ -24,7 +24,7 @@ export default function TVLanding() {
         className="mt-2 px-3 py-2 rounded-lg font-mono text-sm"
         style={{
           background: "var(--card)",
-          color: "var(--recovery)",
+          color: "var(--moss)",
           border: "1px solid var(--line)",
         }}
       >

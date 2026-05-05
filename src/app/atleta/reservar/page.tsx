@@ -119,7 +119,7 @@ export default async function ReservarPage() {
                   <div
                     className="font-mono text-[9px] font-bold tracking-[0.1em]"
                     style={{
-                      color: active ? "#0a1a14" : "var(--text-3)",
+                      color: active ? "#1c1917" : "var(--text-3)",
                     }}
                   >
                     {dayLabels[d.getDay() === 0 ? 6 : d.getDay() - 1]}
@@ -127,7 +127,7 @@ export default async function ReservarPage() {
                   <div
                     className="font-display text-lg font-bold"
                     style={{
-                      color: active ? "#0a1a14" : "var(--text)",
+                      color: active ? "#1c1917" : "var(--text)",
                     }}
                   >
                     {d.getDate()}
@@ -136,7 +136,7 @@ export default async function ReservarPage() {
                     <div
                       className="w-1.5 h-1.5 rounded-full"
                       style={{
-                        background: active ? "#0a1a14" : "var(--recovery)",
+                        background: active ? "#1c1917" : "var(--recovery)",
                         boxShadow: !active
                           ? "0 0 6px rgba(25,240,139,0.5)"
                           : "none",

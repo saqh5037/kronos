@@ -115,7 +115,7 @@ function WODCard({ w }: { w: WODSummary }) {
     <AnimatedWODCard>
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-display font-bold text-lg">{w.name}</h3>
-        <span className="k-chip k-chip-strain text-[10px] flex-shrink-0">
+        <span className="k-chip k-chip-steel text-[10px] flex-shrink-0">
           {w.type}
         </span>
       </div>

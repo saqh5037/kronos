@@ -16,20 +16,20 @@ export default async function LoginPage() {
         {/* Wordmark */}
         <div className="text-center mb-8">
           <div
-            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4"
+            className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-4 border"
             style={{
-              background: "var(--grad)",
-              boxShadow: "0 4px 24px rgba(25,240,139,0.25)",
+              background: "var(--card)",
+              borderColor: "var(--line-strong)",
             }}
           >
             <span
               className="font-display font-bold text-2xl"
-              style={{ color: "#0a1a14" }}
+              style={{ color: "var(--fire)" }}
             >
               K
             </span>
           </div>
-          <h1 className="font-display font-bold text-2xl tracking-tight">
+          <h1 className="font-display font-bold text-2xl tracking-[0.02em] uppercase">
             Kronos
           </h1>
           <p className="k-eyebrow mt-1">El tiempo es tu rival</p>

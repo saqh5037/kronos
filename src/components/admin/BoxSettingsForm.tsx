@@ -21,7 +21,7 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
   const [defaultClassCapacity, setDefaultClassCapacity] = useState(
     String(box.defaultClassCapacity),
   );
-  const [brandColor, setBrandColor] = useState(box.brandColor ?? "#19f08b");
+  const [brandColor, setBrandColor] = useState(box.brandColor ?? "#4a7c59");
   const [logoUrl, setLogoUrl] = useState(box.logoUrl ?? "");
 
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +94,7 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
                 type="text"
                 value={brandColor}
                 onChange={(e) => setBrandColor(e.target.value)}
-                placeholder="#19f08b"
+                placeholder="#4a7c59"
                 disabled={!canEdit}
                 pattern="^#[0-9a-fA-F]{6}$"
                 className={`${inputClass} font-mono uppercase`}

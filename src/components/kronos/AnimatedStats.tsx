@@ -48,7 +48,7 @@ export function AnimatedStats({
         <HaloRing
           size={88}
           value={weekRatio}
-          color="#19f08b"
+          color="#4a7c59"
           displayValue={String(weekAttendance)}
           label="ESTA SEM"
         />
@@ -60,7 +60,7 @@ export function AnimatedStats({
         <HaloRing
           size={88}
           value={Math.min(1, streak / 14)}
-          color="#3aa3ff"
+          color="#64748b"
           displayValue={String(streak)}
           label="RACHA"
         />
@@ -72,7 +72,7 @@ export function AnimatedStats({
         <HaloRing
           size={88}
           value={Math.min(1, prCount / 10)}
-          color="#ff5e5e"
+          color="#c44536"
           displayValue={String(prCount)}
           label="PRs"
         />

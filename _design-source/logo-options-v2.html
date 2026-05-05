@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kronos — Logo V2: Comunidad + Progreso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1d20;
+      color: #f0f0f0;
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px 20px;
+    }
+    .manifesto {
+      text-align: center;
+      max-width: 620px;
+      margin-bottom: 50px;
+    }
+    .manifesto h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      margin-bottom: 16px;
+      color: #f0f0f0;
+    }
+    .manifesto p {
+      font-size: 14px;
+      line-height: 1.8;
+      color: #9ca3af;
+    }
+    .manifesto .highlight {
+      color: #dc4b17;
+      font-weight: 600;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      max-width: 1100px;
+      width: 100%;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .option {
+      background: #23272b;
+      border: 1px solid #2a2f33;
+      border-radius: 20px;
+      padding: 44px 28px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .option:hover { border-color: #dc4b17; transform: translateY(-4px); }
+    .icon-wrap {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .option h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      color: #f0f0f0;
+      margin-bottom: 6px;
+    }
+    .option .tag {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #dc4b17;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    .option .desc {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #9ca3af;
+      margin-bottom: 20px;
+    }
+    .option .pillars {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .option .pillars span {
+      background: #1a1d20;
+      color: #6b7280;
+      font-size: 10px;
+      padding: 5px 12px;
+      border-radius: 100px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .option .vibe {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #2a2f33;
+      font-size: 11px;
+      color: #4b5563;
+      font-style: italic;
+    }
+    .divider {
+      width: 40px;
+      height: 2px;
+      background: #dc4b17;
+      margin: 0 auto 40px;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="manifesto">
+    <h1>KRONOS</h1>
+    <div class="divider"></div>
+    <p>
+      No es una app de <span class="highlight">tiempo</span>. Es una app de <span class="highlight">personas</span>.<br>
+      De alumnos que se miden, entrenadores que leen rendimiento,<br>
+      de constancia visible, de cruceros celebrados, de comunidad que mejora junta.<br><br>
+      El logo debe sentirse como un <strong>sello de logro</strong>. Como una <strong>insignia que ganas</strong>.
+    </p>
+  </div>
+
+  <div class="grid">
+
+    <!-- DIRECCIÓN A: THE SUMMIT -->
+    <div class="option">
+      <div class="icon-wrap">
+        <svg width="150" height="150" viewBox="0 0 150 150" fill="none">
+          <!-- círculo base sutil -->
+          <circle cx="75" cy="75" r="70" stroke="#2a2f33" stroke-width="2"/>
+          
+          <!-- K formada por una línea de progreso ascendente -->
+          <!-- Pata izquierda -->
+          <path d="M38 115 L38 55" stroke="#f0f0f0" stroke-width="12" stroke-linecap="round"/>
+          <!-- Diagonal superior -->
+          <path d="M38 85 L80 45" stroke="#f0f0f0" stroke-width="12" stroke-linecap="round"/>
+          <!-- Diagonal inferior que SUBE (la clave: progreso) -->
+          <path d="M38 85 L105 35" stroke="#dc4b17" stroke-width="12" stroke-linecap="round"/>
+          
+          <!-- El "crucero": punto de logro en la cima -->
+          <circle cx="105" cy="35" r="10" fill="#dc4b17"/>
+          <circle cx="105" cy="35" r="5" fill="#e8893a"/>
+          
+          <!-- Línea base: desde donde se mide todo -->
+          <line x1="28" y1="115" x2="122" y2="115" stroke="#34393e" stroke-width="3" stroke-linecap="round"/>
+          
+          <!-- Barras de progreso crecientes (métricas) -->
+          <rect x="48" y="107" width="7" height="8" rx="2" fill="#34393e"/>
+          <rect x="62" y="101" width="7" height="14" rx="2" fill="#34393e"/>
+          <rect x="76" y="93" width="7" height="22" rx="2" fill="#34393e"/>
+          <rect x="90" y="85" width="7" height="30" rx="2" fill="#dc4b17"/>
+          <rect x="104" y="77" width="7" height="38" rx="2" fill="#e8893a" opacity="0.5"/>
+        </svg>
+      </div>
+      <h2>KRONOS</h2>
+      <div class="tag">The Summit</div>
+      <p class="desc">
+        La <strong>K</strong> es una línea de progreso que asciende. Termina en un punto de <strong>logro</strong> (el crucero). 
+        Abajo, barras crecientes: tus métricas mejorando. Dice "empecé aquí, llegué allá".
+      </p>
+      <div class="pillars">
+        <span>Progreso</span>
+        <span>Crucero</span>
+        <span>Métricas</span>
+      </div>
+      <div class="vibe">"De donde empecé a donde estoy"</div>
+    </div>
+
+    <!-- DIRECCIÓN B: THE CREW RING -->
+    <div class="option">
+      <div class="icon-wrap">
+        <svg width="150" height="150" viewBox="0 0 150 150" fill="none">
+          <!-- Anillo de progreso (el seguimiento continuo) -->
+          <!-- Fondo del anillo -->
+          <circle cx="75" cy="75" r="58" fill="none" stroke="#2a2f33" stroke-width="10"/>
+          <!-- Progreso completado (constancia) -->
+          <circle cx="75" cy="75" r="58" fill="none" stroke="#dc4b17" stroke-width="10" 
+                  stroke-linecap="round" stroke-dasharray="273 364" transform="rotate(-90 75 75)"/>
+          <!-- Marcas de datos (como ticks de un gráfico) -->
+          <line x1="75" y1="9" x2="75" y2="17" stroke="#f0f0f0" stroke-width="4" stroke-linecap="round"/>
+          <line x1="141" y1="75" x2="133" y2="75" stroke="#f0f0f0" stroke-width="4" stroke-linecap="round"/>
+          <line x1="75" y1="141" x2="75" y2="133" stroke="#f0f0f0" stroke-width="4" stroke-linecap="round"/>
+          <line x1="9" y1="75" x2="17" y2="75" stroke="#f0f0f0" stroke-width="4" stroke-linecap="round"/>
+          
+          <!-- K en el centro -->
+          <text x="75" y="89" text-anchor="middle" fill="#f0f0f0" font-family="Space Grotesk, Arial Black, sans-serif" font-size="48" font-weight="700">K</text>
+          
+          <!-- Pequeño punto de comunidad (todos miran el mismo anillo) -->
+          <circle cx="75" cy="75" r="4" fill="#dc4b17"/>
+        </svg>
+      </div>
+      <h2>KRONOS</h2>
+      <div class="tag">The Crew Ring</div>
+      <p class="desc">
+        Un <strong>anillo de progreso compartido</strong>. Cada atleta y entrenador mira el mismo círculo de datos. 
+        La K en el centro: <strong>todos caminan hacia el mismo norte</strong>. El anillo incompleto dice "siempre hay siguiente nivel".
+      </p>
+      <div class="pillars">
+        <span>Comunidad</span>
+        <span>Constancia</span>
+        <span>Datos</span>
+      </div>
+      <div class="vibe">"El mismo anillo, tu propio progreso"</div>
+    </div>
+
+    <!-- DIRECCIÓN C: THE CREST -->
+    <div class="option">
+      <div class="icon-wrap">
+        <svg width="150" height="150" viewBox="0 0 150 150" fill="none">
+          <!-- Escudo/Insignia de equipo -->
+          <path d="M75 12 L130 38 L130 82 C130 112 105 132 75 142 C45 132 20 112 20 82 L20 38 Z" 
+                fill="none" stroke="#f0f0f0" stroke-width="4" stroke-linejoin="round"/>
+          
+          <!-- K estilizada dentro del escudo -->
+          <path d="M50 55 L50 105" stroke="#f0f0f0" stroke-width="10" stroke-linecap="round"/>
+          <path d="M50 80 L85 55" stroke="#f0f0f0" stroke-width="10" stroke-linecap="round"/>
+          <path d="M50 80 L85 105" stroke="#f0f0f0" stroke-width="10" stroke-linecap="round"/>
+          
+          <!-- Barras de rendimiento (métricas del atleta) -->
+          <rect x="95" y="88" width="6" height="17" rx="2" fill="#dc4b17"/>
+          <rect x="106" y="78" width="6" height="27" rx="2" fill="#e8893a"/>
+          <rect x="117" y="68" width="6" height="37" rx="2" fill="#dc4b17" opacity="0.4"/>
+          
+          <!-- Estrella de logro (crucero) -->
+          <polygon points="75,22 78,30 86,30 80,35 82,43 75,38 68,43 70,35 64,30 72,30" fill="#dc4b17"/>
+          
+          <!-- Línea base de constancia -->
+          <line x1="35" y1="115" x2="115" y2="115" stroke="#34393e" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2>KRONOS</h2>
+      <div class="tag">The Crest</div>
+      <p class="desc">
+        Una <strong>insignia de equipo</strong>. Como las que usan los boxes competitivos. 
+        La <strong>K</strong> + barras de rendimiento + estrella de logro. 
+        Dice: "perteneces a algo, te miden, mejoras, celebras".
+      </p>
+      <div class="pillars">
+        <span>Pertencencia</span>
+        <span>Rendimiento</span>
+        <span>Logro</span>
+      </div>
+      <div class="vibe">"Parche de equipo que ganas con datos"</div>
+    </div>
+
+  </div>
+
+  <div style="margin-top: 60px; text-align: center; max-width: 700px;">
+    <p style="color: #4b5563; font-size: 12px; line-height: 1.8;">
+      Paleta: <span style="color:#f0f0f0">#f0f0f0</span> (comunidad) · 
+      <span style="color:#dc4b17">#dc4b17</span> (progreso/logro) · 
+      <span style="color:#2a2f33">#2a2f33</span> (base/foundation)
+      <br><br>
+      Todos los íconos son <strong>SVG puro</strong>. Escalan a cualquier tamaño: favicon 16px, app icon 1024px, merch bordado.
+    </p>
+  </div>
+
+</body>
+</html>

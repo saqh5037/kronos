@@ -62,11 +62,11 @@ type Props = {
 function StatusChip({ status }: { status: string }) {
   const cls =
     status === "ACTIVE"
-      ? "k-chip-recovery"
+      ? "k-chip-moss"
       : status === "PAUSED"
-        ? "k-chip-strain"
+        ? "k-chip-steel"
         : status === "CANCELLED"
-          ? "k-chip-pr"
+          ? "k-chip-ember"
           : "k-chip-ghost";
   return <span className={`k-chip ${cls} text-[10px]`}>{status}</span>;
 }
@@ -231,7 +231,7 @@ export function AtletasTable({
           type="button"
           disabled={bulkBusy}
           onClick={() => bulkSetStatus("ACTIVE")}
-          className="rounded-lg border border-[var(--recovery-line)] bg-[var(--recovery-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--recovery)] disabled:opacity-50"
+          className="rounded-lg border border-[var(--moss-line)] bg-[var(--moss-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--moss)] disabled:opacity-50"
         >
           Activar
         </button>
@@ -239,7 +239,7 @@ export function AtletasTable({
           type="button"
           disabled={bulkBusy}
           onClick={() => bulkSetStatus("PAUSED")}
-          className="rounded-lg border border-[var(--strain-line)] bg-[var(--strain-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--strain)] disabled:opacity-50"
+          className="rounded-lg border border-[var(--steel-line)] bg-[var(--steel-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--steel)] disabled:opacity-50"
         >
           Pausar
         </button>
@@ -247,7 +247,7 @@ export function AtletasTable({
           type="button"
           disabled={bulkBusy}
           onClick={() => bulkSetStatus("CANCELLED")}
-          className="rounded-lg border border-[var(--pr-line)] bg-[var(--pr-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--pr)] disabled:opacity-50"
+          className="rounded-lg border border-[var(--ember-line)] bg-[var(--ember-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--ember)] disabled:opacity-50"
         >
           Cancelar
         </button>

@@ -5,11 +5,6 @@ import { useTheme } from "@/components/ThemeProvider";
 
 const BUTTON_CLASS =
   "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors";
-const BUTTON_STYLE: React.CSSProperties = {
-  background: "var(--card)",
-  border: "1px solid var(--line)",
-  color: "var(--text-2)",
-};
 
 export default function ThemeToggle({
   className = "",
@@ -29,7 +24,11 @@ export default function ThemeToggle({
       <button
         type="button"
         className={`${BUTTON_CLASS} ${className}`}
-        style={BUTTON_STYLE}
+        style={{
+          background: "var(--card)",
+          border: "1px solid var(--line)",
+          color: "var(--text-2)",
+        }}
         aria-label="Cambiar tema"
         title="Cambiar tema"
       >
@@ -46,7 +45,11 @@ export default function ThemeToggle({
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className={`${BUTTON_CLASS} ${className}`}
-      style={BUTTON_STYLE}
+      style={{
+        background: "var(--card)",
+        border: "1px solid var(--line)",
+        color: "var(--text-2)",
+      }}
       aria-label={isDark ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
       title={isDark ? "Tema claro" : "Tema oscuro"}
     >

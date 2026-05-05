@@ -20,10 +20,10 @@ export default function CollapsibleRoster({ roster }: { roster: ClassRoster }) {
   const fillRatio = booked.length / roster.capacity;
   const chip =
     fillRatio >= 1
-      ? "k-chip-pr"
+      ? "k-chip-ember"
       : fillRatio >= 0.7
-        ? "k-chip-strain"
-        : "k-chip-recovery";
+        ? "k-chip-steel"
+        : "k-chip-moss";
 
   return (
     <div className="k-card overflow-hidden">
@@ -148,14 +148,14 @@ export default function CollapsibleRoster({ roster }: { roster: ClassRoster }) {
 function chipForStatus(status: string): string {
   switch (status) {
     case "BOOKED":
-      return "k-chip-strain";
+      return "k-chip-steel";
     case "ATTENDED":
-      return "k-chip-recovery";
+      return "k-chip-moss";
     case "WAITLIST":
       return "k-chip-ghost";
     case "NOSHOW":
     case "CANCELLED":
-      return "k-chip-pr";
+      return "k-chip-ember";
     default:
       return "k-chip-ghost";
   }

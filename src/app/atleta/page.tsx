@@ -111,7 +111,7 @@ export default async function AtletaHomePage() {
       <AnimatedSection className="flex items-center justify-between px-[18px] pt-14 pb-3.5">
         <AnimatedItem className="flex items-center gap-2.5">
           <div
-            className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center font-extrabold text-sm text-[#0a1a14] font-display"
+            className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center font-extrabold text-sm text-[#1c1917] font-display"
             style={{ background: "var(--grad)" }}
           >
             K
@@ -145,7 +145,7 @@ export default async function AtletaHomePage() {
             </svg>
             <span
               className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full"
-              style={{ background: "var(--pr)" }}
+              style={{ background: "var(--ember)" }}
             />
           </button>
         </AnimatedItem>
@@ -179,7 +179,7 @@ export default async function AtletaHomePage() {
                 </div>
                 <div
                   className="font-display text-xl font-bold"
-                  style={{ color: "var(--recovery)" }}
+                  style={{ color: "var(--moss)" }}
                 >
                   {formatTime(home.nextBooking.startsAt)}
                 </div>
@@ -198,7 +198,7 @@ export default async function AtletaHomePage() {
                   {nextClassDetail && (
                     <>
                       <span style={{ opacity: 0.4 }}>·</span>
-                      <span style={{ color: "var(--recovery)" }}>
+                      <span style={{ color: "var(--moss)" }}>
                         ● {nextClassDetail.bookedCount}/
                         {nextClassDetail.capacity}
                       </span>
@@ -231,7 +231,7 @@ export default async function AtletaHomePage() {
           </div>
           <div
             className="font-mono text-[10px] font-bold tracking-[0.08em]"
-            style={{ color: "var(--recovery)" }}
+            style={{ color: "var(--moss)" }}
           >
             {weekAttendedText}
           </div>
@@ -272,7 +272,7 @@ export default async function AtletaHomePage() {
                             ? "1px solid var(--strain-line)"
                             : "1px solid var(--line)",
                         color: isToday
-                          ? "#0a1a14"
+                          ? "#1c1917"
                           : booked
                             ? "var(--strain)"
                             : rest
@@ -365,7 +365,7 @@ export default async function AtletaHomePage() {
                         {s.athlete.firstName} {s.athlete.lastName?.[0]}.
                       </div>
                       <span
-                        className={`k-chip ${s.scaling === "RX" ? "k-chip-recovery" : "k-chip-ghost"}`}
+                        className={`k-chip ${s.scaling === "RX" ? "k-chip-moss" : "k-chip-ghost"}`}
                         style={{ padding: "3px 8px", fontSize: 9 }}
                       >
                         {s.scaling}
@@ -406,7 +406,7 @@ export default async function AtletaHomePage() {
                     height="20"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="var(--pr)"
+                    stroke="var(--ember)"
                     strokeWidth="2"
                   >
                     <path d="M6 9V5h12v4M5 9h14v4H5zM7 13l1 8h8l1-8" />
@@ -459,7 +459,7 @@ export default async function AtletaHomePage() {
                     height="20"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="var(--pr)"
+                    stroke="var(--ember)"
                     strokeWidth="2"
                   >
                     <path d="M6 9V5h12v4M5 9h14v4H5zM7 13l1 8h8l1-8" />
@@ -471,7 +471,7 @@ export default async function AtletaHomePage() {
                       {latestPR.movementName}
                     </span>
                     <span
-                      className="k-chip k-chip-pr"
+                      className="k-chip k-chip-ember"
                       style={{ padding: "2px 6px", fontSize: 9 }}
                     >
                       PR
@@ -498,28 +498,35 @@ export default async function AtletaHomePage() {
       )}
 
       {/* QUICK LINKS */}
-      <AnimatedSection className="mt-6 px-4 grid grid-cols-2 gap-3">
-        <QuickLink
-          href="/atleta/wod"
-          label="WOD del día"
-          tone="strain"
-          icon="wod"
-        />
+      <AnimatedSection className="mt-6 px-4 grid grid-cols-3 gap-2">
+        <QuickLink href="/atleta/wod" label="WOD" tone="steel" icon="wod" />
         <QuickLink
           href="/atleta/reservar"
           label="Reservar"
-          tone="recovery"
+          tone="moss"
           icon="calendar"
         />
         <QuickLink
-          href="/atleta/pagos"
-          label="Mis pagos"
+          href="/atleta/movimientos"
+          label="Movimientos"
+          tone="fire"
+          icon="dumbbell"
+        />
+        <QuickLink
+          href="/atleta/leaderboard"
+          label="Ranking"
+          tone="ember"
+          icon="trophy"
+        />
+        <QuickLink
+          href="/atleta/historial"
+          label="Historial"
           tone="ghost"
-          icon="card"
+          icon="history"
         />
         <QuickLink
           href="/atleta/perfil"
-          label="Mi perfil"
+          label="Perfil"
           tone="ghost"
           icon="user"
         />
@@ -536,15 +543,19 @@ function QuickLink({
 }: {
   href: string;
   label: string;
-  tone: "recovery" | "strain" | "ghost";
+  tone: "moss" | "steel" | "ghost" | "fire" | "ember";
   icon: string;
 }) {
   const color =
-    tone === "recovery"
-      ? "var(--recovery)"
-      : tone === "strain"
-        ? "var(--strain)"
-        : "var(--text-2)";
+    tone === "moss"
+      ? "var(--moss)"
+      : tone === "steel"
+        ? "var(--steel)"
+        : tone === "fire"
+          ? "var(--fire)"
+          : tone === "ember"
+            ? "var(--ember)"
+            : "var(--text-2)";
 
   const iconSvgs: Record<string, React.ReactNode> = {
     wod: (
@@ -604,6 +615,56 @@ function QuickLink({
       >
         <circle cx="12" cy="8" r="4" />
         <path d="M4 21c1-4.5 4.5-7 8-7s7 2.5 8 7" />
+      </svg>
+    ),
+    dumbbell: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M6.5 6.5l11 11M21 21l-1-1M3 3l1 1M18 22l4-4M2 6l4-4" />
+        <path d="M6.5 17.5L2 22M22 2l-4.5 4.5M10 5l4 4M5 10l4 4" />
+      </svg>
+    ),
+    trophy: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+        <path d="M4 22h16" />
+        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+        <path d="M18 2H6v7a6 6 0 0 0 12 0V2z" />
+      </svg>
+    ),
+    history: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 3v5h5" />
+        <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
+        <path d="M12 7v5l4 2" />
       </svg>
     ),
   };

@@ -14,9 +14,9 @@ export function AttendanceBarChart({ data }: { data: AttendanceByDayPoint[] }) {
       data={data}
       xKey="day"
       bars={[
-        { key: "attended", label: "Asistidos", color: "#19f08b" },
-        { key: "noShow", label: "No-show", color: "#ff5e5e" },
-        { key: "booked", label: "Reservados", color: "#3aa3ff" },
+        { key: "attended", label: "Asistidos", color: "#4a7c59" },
+        { key: "noShow", label: "No-show", color: "#c44536" },
+        { key: "booked", label: "Reservados", color: "#64748b" },
       ]}
       stacked
       showLegend

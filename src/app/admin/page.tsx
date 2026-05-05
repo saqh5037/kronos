@@ -10,6 +10,7 @@ import type { RevenueByDayPoint } from "@/server/actions/payments";
 import { rangeFromParams, previousRange, formatRange } from "@/lib/dates";
 import { MetricDelta } from "@/components/charts/MetricDelta";
 import Sparkline from "@/components/kronos/Sparkline";
+import CountUp from "@/components/kronos/CountUp";
 import {
   AnimatedSection,
   AnimatedItem,
@@ -133,11 +134,13 @@ export default async function AdminDashboardPage({
       <DashboardFilters />
 
       {/* Hero KPIs con MetricDelta + sparkline */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="k-stagger grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <KpiWithSpark
           label="Ingresos rango"
           value={fmtMoney.format(rangeRevenue)}
-          tone="recovery"
+          numericValue={rangeRevenue}
+          countMoney
+          tone="moss"
           delta={
             <MetricDelta
               current={rangeRevenue}
@@ -147,12 +150,13 @@ export default async function AdminDashboardPage({
             />
           }
           sparkValues={last14.map((p) => p.revenue)}
-          sparkColor="var(--recovery)"
+          sparkColor="var(--moss)"
         />
         <KpiWithSpark
           label="Asistencias rango"
           value={String(rangeAttended)}
-          tone="strain"
+          numericValue={rangeAttended}
+          tone="steel"
           delta={
             <MetricDelta
               current={rangeAttended}
@@ -162,17 +166,19 @@ export default async function AdminDashboardPage({
             />
           }
           sparkValues={last14Attended.map((p) => p.attended)}
-          sparkColor="var(--strain)"
+          sparkColor="var(--steel)"
         />
         <KpiWithSpark
           label="Tasa asistencia"
           value={`${Math.round(rangeAttendanceRate * 100)}%`}
+          numericValue={Math.round(rangeAttendanceRate * 100)}
+          countSuffix="%"
           tone={
             rangeAttendanceRate >= 0.85
-              ? "recovery"
+              ? "moss"
               : rangeAttendanceRate >= 0.65
-                ? "strain"
-                : "pr"
+                ? "steel"
+                : "ember"
           }
           delta={
             <MetricDelta
@@ -191,7 +197,7 @@ export default async function AdminDashboardPage({
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div className="k-stagger grid grid-cols-1 gap-3 lg:grid-cols-2">
         <KCard>
           <div className="p-4">
             <p className="k-eyebrow mb-2">Ingresos · {formatRange(range)}</p>
@@ -228,7 +234,7 @@ export default async function AdminDashboardPage({
                 <Link
                   href="/admin/programacion"
                   className="text-xs font-medium transition-opacity hover:opacity-80"
-                  style={{ color: "var(--strain)" }}
+                  style={{ color: "var(--steel)" }}
                 >
                   Ver todas →
                 </Link>
@@ -246,10 +252,10 @@ export default async function AdminDashboardPage({
                     const hasWaitlist = c.waitlistCount > 0;
                     const fillRatio = occupied / capacity;
                     const barColor = isFull
-                      ? "var(--pr)"
+                      ? "var(--ember)"
                       : fillRatio >= 0.7
-                        ? "var(--strain)"
-                        : "var(--recovery)";
+                        ? "var(--steel)"
+                        : "var(--moss)";
 
                     return (
                       <li
@@ -321,7 +327,7 @@ export default async function AdminDashboardPage({
                 >
                   <p
                     className="flex items-center gap-2 text-sm font-bold"
-                    style={{ color: "var(--recovery)" }}
+                    style={{ color: "var(--moss)" }}
                   >
                     <svg
                       width="16"
@@ -350,7 +356,7 @@ export default async function AdminDashboardPage({
                     <li>
                       <Link
                         href="/admin/pagos"
-                        className="k-card hover:border-pr/50 flex items-center justify-between p-3 transition-colors"
+                        className="k-card hover:border-ember/50 flex items-center justify-between p-3 transition-colors"
                         style={{ borderColor: "var(--line)" }}
                       >
                         <div>
@@ -375,7 +381,7 @@ export default async function AdminDashboardPage({
                     <li>
                       <Link
                         href="/admin/reservas"
-                        className="k-card hover:border-strain/50 flex items-center justify-between p-3 transition-colors"
+                        className="k-card hover:border-steel/50 flex items-center justify-between p-3 transition-colors"
                         style={{ borderColor: "var(--line)" }}
                       >
                         <div>
@@ -422,6 +428,10 @@ export default async function AdminDashboardPage({
 function KpiWithSpark({
   label,
   value,
+  numericValue,
+  countMoney,
+  countSuffix,
+  countDecimals,
   subtitle,
   tone,
   delta,
@@ -430,19 +440,23 @@ function KpiWithSpark({
 }: {
   label: string;
   value: string;
+  numericValue?: number;
+  countMoney?: boolean;
+  countSuffix?: string;
+  countDecimals?: number;
   subtitle?: string;
-  tone?: "recovery" | "strain" | "pr";
+  tone?: "moss" | "steel" | "ember";
   delta?: React.ReactNode;
   sparkValues?: number[];
   sparkColor?: string;
 }) {
   const color =
-    tone === "recovery"
-      ? "var(--recovery)"
-      : tone === "strain"
-        ? "var(--strain)"
-        : tone === "pr"
-          ? "var(--pr)"
+    tone === "moss"
+      ? "var(--moss)"
+      : tone === "steel"
+        ? "var(--steel)"
+        : tone === "ember"
+          ? "var(--ember)"
           : "var(--text)";
   return (
     <div className="k-card p-3">
@@ -453,7 +467,17 @@ function KpiWithSpark({
         {delta}
       </div>
       <p className="font-display mt-1 text-2xl font-bold" style={{ color }}>
-        {value}
+        {typeof numericValue === "number" ? (
+          <CountUp
+            value={numericValue}
+            money={countMoney}
+            suffix={countSuffix}
+            decimals={countDecimals}
+            duration={1000}
+          />
+        ) : (
+          value
+        )}
       </p>
       {subtitle ? (
         <p className="mt-1 text-xs text-[var(--text-3)]">{subtitle}</p>
@@ -462,7 +486,7 @@ function KpiWithSpark({
         <div className="mt-2">
           <Sparkline
             values={sparkValues}
-            color={sparkColor ?? "var(--strain)"}
+            color={sparkColor ?? "var(--steel)"}
             height={28}
             width={140}
           />
@@ -479,7 +503,7 @@ function QuickLink({ href, label }: { href: LinkHref; label: string }) {
     <Link href={href}>
       <KCard
         variant="ghost"
-        className="hover:border-recovery/50 p-4 text-center transition-colors"
+        className="hover:border-moss/50 p-4 text-center transition-colors"
       >
         <p className="text-sm font-semibold">{label}</p>
       </KCard>

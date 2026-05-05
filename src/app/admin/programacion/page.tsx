@@ -93,7 +93,7 @@ export default async function ProgramacionPage() {
                   </p>
                 </div>
                 {isToday && (
-                  <span className="k-chip k-chip-strain text-[9px]">HOY</span>
+                  <span className="k-chip k-chip-steel text-[9px]">HOY</span>
                 )}
               </div>
 
@@ -129,10 +129,10 @@ function ClassCard({ c }: { c: ClassRow }) {
   const fillRatio = c.bookingCount / c.capacity;
   const chipClass =
     fillRatio >= 1
-      ? "k-chip-pr"
+      ? "k-chip-ember"
       : fillRatio >= 0.7
-        ? "k-chip-strain"
-        : "k-chip-recovery";
+        ? "k-chip-steel"
+        : "k-chip-moss";
 
   return (
     <div

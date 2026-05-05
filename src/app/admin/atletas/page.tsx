@@ -148,12 +148,12 @@ export default async function AtletasPage({
         <KpiCard
           label="Activos totales"
           value={String(activeNow)}
-          tone="recovery"
+          tone="moss"
         />
         <KpiCard
           label="Nuevos rango"
           value={String(newInRange)}
-          tone="strain"
+          tone="steel"
           delta={
             <MetricDelta
               current={newInRange}
@@ -171,7 +171,7 @@ export default async function AtletasPage({
         <KpiCard
           label="En riesgo"
           value={String(atRisk.length)}
-          tone={atRisk.length > 0 ? "pr" : undefined}
+          tone={atRisk.length > 0 ? "ember" : undefined}
           subtitle={
             atRisk.length > 0
               ? "Sin asistencia 14d+ o vencidos"
@@ -195,7 +195,7 @@ export default async function AtletasPage({
       {/* En riesgo */}
       {atRisk.length > 0 && (
         <section className="mb-6">
-          <p className="k-eyebrow mb-3" style={{ color: "var(--pr)" }}>
+          <p className="k-eyebrow mb-3" style={{ color: "var(--ember)" }}>
             🔥 Atletas en riesgo ({atRisk.length})
           </p>
           <div className="k-card overflow-hidden">
@@ -263,16 +263,16 @@ function KpiCard({
   label: string;
   value: string;
   subtitle?: string;
-  tone?: "recovery" | "strain" | "pr";
+  tone?: "moss" | "steel" | "ember";
   delta?: React.ReactNode;
 }) {
   const color =
-    tone === "recovery"
-      ? "var(--recovery)"
-      : tone === "strain"
-        ? "var(--strain)"
-        : tone === "pr"
-          ? "var(--pr)"
+    tone === "moss"
+      ? "var(--moss)"
+      : tone === "steel"
+        ? "var(--steel)"
+        : tone === "ember"
+          ? "var(--ember)"
           : "var(--text)";
   return (
     <div className="k-card p-3">

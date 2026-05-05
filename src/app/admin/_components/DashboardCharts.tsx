@@ -15,7 +15,7 @@ export function RevenueArea({ data }: { data: RevenueByDayPoint[] }) {
     <AreaChart
       data={data}
       xKey="day"
-      series={[{ key: "revenue", label: "Ingresos", color: "#19f08b" }]}
+      series={[{ key: "revenue", label: "Ingresos", color: "#4a7c59" }]}
       height={180}
       yFormatter={fmtCurrency}
       xFormatter={fmtDay}
@@ -28,7 +28,7 @@ export function AttendanceArea({ data }: { data: AttendanceByDayPoint[] }) {
     <AreaChart
       data={data}
       xKey="day"
-      series={[{ key: "attended", label: "Asistencias", color: "#3aa3ff" }]}
+      series={[{ key: "attended", label: "Asistencias", color: "#64748b" }]}
       height={180}
       yFormatter={(v) => v.toFixed(0)}
       xFormatter={fmtDay}

@@ -359,6 +359,9 @@ async function main() {
   });
 
   // Wipe seed-prefixed data for box1 to make seed idempotent + reproducible
+  await prisma.bodyMetric.deleteMany({ where: { tenantId: box1.id } });
+  await prisma.goal.deleteMany({ where: { tenantId: box1.id } });
+  await prisma.pRAttempt.deleteMany({ where: { tenantId: box1.id } });
   await prisma.score.deleteMany({ where: { tenantId: box1.id } });
   await prisma.pR.deleteMany({ where: { tenantId: box1.id } });
   await prisma.booking.deleteMany({ where: { tenantId: box1.id } });
@@ -665,6 +668,169 @@ async function main() {
     await prisma.pR.createMany({ data: Array.from(prMap.values()) });
   }
 
+  // ─── PRAttempt log (Tanda 1) ─────────────────────────────────────────────────
+  // For each PR, fabricate 2-5 prior attempts that culminate in the current
+  // best. This gives PRChart real shape (LineChart with progression deltas).
+  const prAttemptRows: Prisma.PRAttemptCreateManyInput[] = [];
+  for (const pr of prMap.values()) {
+    const finalValue = Number(pr.value);
+    const finalAt = pr.achievedAt as Date;
+    const totalAttempts = 2 + Math.floor(Math.random() * 4); // 2-5
+    // start ~5-25% below final
+    const startValue = finalValue * (0.75 + Math.random() * 0.2);
+    let prevBest: number | null = null;
+    for (let i = 0; i < totalAttempts; i++) {
+      const t = i / Math.max(1, totalAttempts - 1); // 0..1
+      // Progressive growth with mild jitter
+      const interp = startValue + (finalValue - startValue) * (0.3 + 0.7 * t);
+      const value =
+        i === totalAttempts - 1 ? finalValue : Math.round(interp * 4) / 4;
+      // Ensure monotonic improvement (filter out non-improvements)
+      if (prevBest !== null && value <= prevBest) continue;
+      // Days back: 0 for last, scale earlier ones over up to 6 months
+      const daysBack =
+        i === totalAttempts - 1 ? 0 : Math.round(180 * (1 - t) + 5);
+      const achievedAt = new Date(finalAt.getTime() - daysBack * 86400000);
+      prAttemptRows.push({
+        tenantId: box1.id,
+        athleteId: pr.athleteId,
+        movementId: pr.movementId,
+        scoreId: null,
+        value,
+        unit: pr.unit,
+        prevBest: prevBest === null ? null : prevBest,
+        isCurrentBest: i === totalAttempts - 1,
+        achievedAt,
+      });
+      prevBest = value;
+    }
+  }
+  if (prAttemptRows.length > 0) {
+    await prisma.pRAttempt.createMany({ data: prAttemptRows });
+  }
+
+  // ─── Goals (Tanda 2) ─────────────────────────────────────────────────────────
+  // Mix per active athlete:
+  //   - 1 ACTIVE PR goal (~10-15% above current best on a movement they PR'd)
+  //   - 1 ACTIVE ATTENDANCE goal (24 classes in next 60 days)
+  //   - 30% chance of an ACHIEVED PR goal (deadline past, target = current PR)
+  const goalRows: Prisma.GoalCreateManyInput[] = [];
+  const activeAthletes = athleteIds.slice(0, 42);
+  const prsByAthlete = new Map<string, Prisma.PRCreateManyInput[]>();
+  for (const pr of prMap.values()) {
+    const arr = prsByAthlete.get(pr.athleteId) ?? [];
+    arr.push(pr);
+    prsByAthlete.set(pr.athleteId, arr);
+  }
+
+  for (const aId of activeAthletes) {
+    const myPRs = prsByAthlete.get(aId) ?? [];
+    if (myPRs.length > 0) {
+      const pr = pickRandom(myPRs);
+      const target =
+        Math.round(Number(pr.value) * (1.1 + Math.random() * 0.05) * 4) / 4;
+      const deadline = new Date();
+      deadline.setDate(
+        deadline.getDate() + 30 + Math.floor(Math.random() * 60),
+      );
+      const created = new Date();
+      created.setDate(created.getDate() - 10 - Math.floor(Math.random() * 30));
+      goalRows.push({
+        tenantId: box1.id,
+        athleteId: aId,
+        movementId: pr.movementId,
+        metric: "PR",
+        targetValue: target,
+        unit: pr.unit,
+        startValue: Number(pr.value),
+        deadline,
+        status: "ACTIVE",
+        createdAt: created,
+      });
+
+      // 30% chance of an achieved historical goal
+      if (Math.random() < 0.3) {
+        const pastDeadline = new Date(created.getTime() - 60 * 86400000);
+        const achievedAt = new Date(pastDeadline.getTime() - 5 * 86400000);
+        goalRows.push({
+          tenantId: box1.id,
+          athleteId: aId,
+          movementId: pr.movementId,
+          metric: "PR",
+          targetValue: Math.round(Number(pr.value) * 0.9 * 4) / 4,
+          unit: pr.unit,
+          startValue: Math.round(Number(pr.value) * 0.7 * 4) / 4,
+          deadline: pastDeadline,
+          status: "ACHIEVED",
+          achievedAt,
+          createdAt: new Date(achievedAt.getTime() - 60 * 86400000),
+        });
+      }
+    }
+
+    // Attendance goal
+    const attDeadline = new Date();
+    attDeadline.setDate(attDeadline.getDate() + 60);
+    goalRows.push({
+      tenantId: box1.id,
+      athleteId: aId,
+      movementId: null,
+      metric: "ATTENDANCE",
+      targetValue: 24,
+      unit: "clases",
+      startValue: 0,
+      deadline: attDeadline,
+      status: "ACTIVE",
+    });
+  }
+  if (goalRows.length > 0) {
+    await prisma.goal.createMany({ data: goalRows });
+  }
+
+  // ─── BodyMetric (post-Tanda 2) ───────────────────────────────────────────────
+  // Weekly weight + monthly body-fat readings over the past 90 days for ~50%
+  // of active athletes. Realistic ranges with mild variance.
+  const bodyMetricRows: Prisma.BodyMetricCreateManyInput[] = [];
+  const trackedAthletes = activeAthletes.filter(() => Math.random() < 0.5);
+  for (const aId of trackedAthletes) {
+    const baseWeight = 60 + Math.random() * 30; // 60-90kg
+    const baseFat = 12 + Math.random() * 13; // 12-25%
+    // 13 weekly weight readings (~90 days)
+    for (let w = 12; w >= 0; w--) {
+      const measuredAt = new Date();
+      measuredAt.setDate(measuredAt.getDate() - w * 7);
+      const trend = (12 - w) * (Math.random() - 0.5) * 0.15; // mild drift
+      const noise = (Math.random() - 0.5) * 0.6;
+      const value = Math.round((baseWeight + trend + noise) * 10) / 10;
+      bodyMetricRows.push({
+        tenantId: box1.id,
+        athleteId: aId,
+        type: "WEIGHT",
+        value,
+        unit: "kg",
+        measuredAt,
+      });
+    }
+    // 3 monthly body-fat readings
+    for (let m = 2; m >= 0; m--) {
+      const measuredAt = new Date();
+      measuredAt.setDate(measuredAt.getDate() - m * 30);
+      const trend = (2 - m) * (Math.random() - 0.6) * 0.5;
+      const value = Math.round((baseFat + trend) * 10) / 10;
+      bodyMetricRows.push({
+        tenantId: box1.id,
+        athleteId: aId,
+        type: "BODY_FAT",
+        value,
+        unit: "%",
+        measuredAt,
+      });
+    }
+  }
+  if (bodyMetricRows.length > 0) {
+    await prisma.bodyMetric.createMany({ data: bodyMetricRows });
+  }
+
   // ─── Streaks (basic — set count to 0, real recompute via app) ────────────────
   // Initialize ATTENDANCE streak rows for active athletes
   await prisma.streak.createMany({
@@ -734,6 +900,9 @@ async function main() {
   Bookings: ${bookingRows.length}
   Scores: ${scoreRows.length}
   PRs: ${prMap.size}
+  PRAttempts: ${prAttemptRows.length} (progresión histórica para charts)
+  Goals: ${goalRows.length} (mix ACTIVE + ACHIEVED, PR + ATTENDANCE)
+  BodyMetrics: ${bodyMetricRows.length} (~13 weights + 3 body-fat por atleta tracked)
   Badges: ${badgesData.length}`);
 }
 

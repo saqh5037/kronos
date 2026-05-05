@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kronos — Opciones de Logo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1d20;
+      color: #f0f0f0;
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px;
+    }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #4b5563;
+      margin-bottom: 60px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      max-width: 1100px;
+      width: 100%;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .option {
+      background: #23272b;
+      border: 1px solid #2a2f33;
+      border-radius: 20px;
+      padding: 50px 30px;
+      text-align: center;
+      transition: border-color 0.3s;
+    }
+    .option:hover { border-color: #dc4b17; }
+    .icon-wrap {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    .option h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      color: #f0f0f0;
+      margin-bottom: 8px;
+    }
+    .option .tag {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+    .option .desc {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #9ca3af;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+    .option .concept {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #2a2f33;
+      font-size: 11px;
+      color: #dc4b17;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .badge {
+      display: inline-block;
+      background: #2a2f33;
+      color: #9ca3af;
+      font-size: 10px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-top: 16px;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Propuestas de Logo</h1>
+  <p class="subtitle">Kronos — App de CrossFit &nbsp;·&nbsp; Dark mode</p>
+
+  <div class="grid">
+
+    <!-- OPCIÓN 1: THE HOUR-K -->
+    <div class="option">
+      <div class="icon-wrap">
+        <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
+          <!-- círculo sutil -->
+          <circle cx="65" cy="65" r="60" stroke="#2a2f33" stroke-width="2"/>
+          <!-- K -->
+          <path d="M38 28 L38 102" stroke="#f0f0f0" stroke-width="11" stroke-linecap="round"/>
+          <path d="M38 65 L78 28" stroke="#f0f0f0" stroke-width="11" stroke-linecap="round"/>
+          <path d="M38 65 L78 102" stroke="#f0f0f0" stroke-width="11" stroke-linecap="round"/>
+          <!-- Reloj de arena integrado en la K derecha -->
+          <path d="M78 45 L92 45 L85 65 L92 85 L78 85 L85 65 Z" fill="#dc4b17"/>
+          <!-- brillo del reloj -->
+          <path d="M78 45 L92 45 L85 65 Z" fill="#e8893a" opacity="0.6"/>
+        </svg>
+      </div>
+      <h2>KRONOS</h2>
+      <div class="tag">Hour-K</div>
+      <p class="desc">
+        La letra <strong>K</strong> incorpora un <strong>reloj de arena</strong> en su estructura.
+        Conecta directamente con el nombre (dios del tiempo) sin ser obvio.
+        El reloj de arena también evoca una kettlebell de perfil.
+      </p>
+      <div class="concept">Concepto: Tiempo + Forma</div>
+      <div class="badge">App icon friendly</div>
+    </div>
+
+    <!-- OPCIÓN 2: THE CHRONO DIAL -->
+    <div class="option">
+      <div class="icon-wrap">
+        <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
+          <!-- esfera exterior -->
+          <circle cx="65" cy="65" r="56" stroke="#f0f0f0" stroke-width="7"/>
+          <!-- marcas de tiempo -->
+          <line x1="65" y1="9" x2="65" y2="21" stroke="#f0f0f0" stroke-width="5" stroke-linecap="round"/>
+          <line x1="121" y1="65" x2="109" y2="65" stroke="#f0f0f0" stroke-width="5" stroke-linecap="round"/>
+          <line x1="65" y1="121" x2="65" y2="109" stroke="#f0f0f0" stroke-width="5" stroke-linecap="round"/>
+          <line x1="9" y1="65" x2="21" y2="65" stroke="#f0f0f0" stroke-width="5" stroke-linecap="round"/>
+          <!-- segundero apuntando a 12 (fire) -->
+          <line x1="65" y1="65" x2="65" y2="18" stroke="#dc4b17" stroke-width="5" stroke-linecap="round"/>
+          <!-- punto central -->
+          <circle cx="65" cy="65" r="6" fill="#dc4b17"/>
+          <!-- K en el centro -->
+          <text x="65" y="82" text-anchor="middle" fill="#f0f0f0" font-family="Space Grotesk, Arial Black, sans-serif" font-size="38" font-weight="700">K</text>
+        </svg>
+      </div>
+      <h2>KRONOS</h2>
+      <div class="tag">Chrono Dial</div>
+      <p class="desc">
+        Un <strong>sello circular</strong> tipo esfera de cronómetro.
+        La <strong>K</strong> en el centro + el segundero en <strong>fire</strong> simboliza
+        "batir el tiempo". Minimalista, memorable, funciona a 16px como favicon.
+      </p>
+      <div class="concept">Concepto: Esfera + Velocidad</div>
+      <div class="badge">Máxima versatilidad</div>
+    </div>
+
+    <!-- OPCIÓN 3: THE KINETIC MARK -->
+    <div class="option">
+      <div class="icon-wrap">
+        <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
+          <!-- hexágono sutil de fondo -->
+          <path d="M65 8 L117 38 L117 98 L65 128 L13 98 L13 38 Z" stroke="#2a2f33" stroke-width="2" fill="none"/>
+          <!-- K con trazos gruesos -->
+          <path d="M40 30 L40 106" stroke="#f0f0f0" stroke-width="13" stroke-linecap="round"/>
+          <path d="M40 68 L80 30" stroke="#f0f0f0" stroke-width="13" stroke-linecap="round"/>
+          <path d="M40 68 L80 106" stroke="#f0f0f0" stroke-width="13" stroke-linecap="round"/>
+          <!-- arco de velocidad / progreso -->
+          <path d="M85 35 A 45 45 0 0 1 85 101" stroke="#dc4b17" stroke-width="6" stroke-linecap="round" fill="none"/>
+          <!-- punto de inicio del arco -->
+          <circle cx="85" cy="35" r="5" fill="#dc4b17"/>
+        </svg>
+      </div>
+      <h2>KRONOS</h2>
+      <div class="tag">Kinetic Mark</div>
+      <p class="desc">
+        La <strong>K</strong> desborda energía con un <strong>arco de progreso</strong>
+        que la rodea. Sugere movimiento, mejora constante, superar marcas.
+        El hexágono de fondo aporta estructura deportiva sin ser pesado.
+      </p>
+      <div class="concept">Concepto: Movimiento + Progreso</div>
+      <div class="badge">Más dinámico</div>
+    </div>
+
+  </div>
+
+  <div style="margin-top: 60px; text-align: center; max-width: 700px;">
+    <p style="color: #4b5563; font-size: 12px; line-height: 1.8;">
+      Paleta usada: <span style="color:#f0f0f0">#f0f0f0</span> (texto) · 
+      <span style="color:#dc4b17">#dc4b17</span> (fire/accent) · 
+      <span style="color:#1a1d20">#1a1d20</span> (bg)
+      <br><br>
+      Tipografía: <strong>Space Grotesk</strong> (display) — consistente con la app.
+    </p>
+  </div>
+
+</body>
+</html>

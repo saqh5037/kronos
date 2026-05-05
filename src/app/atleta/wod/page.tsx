@@ -149,9 +149,7 @@ export default async function WODPage() {
                 </svg>
 
                 <div className="relative p-5 pb-6">
-                  <span className="k-chip k-chip-recovery">
-                    ● {wod.wodType}
-                  </span>
+                  <span className="k-chip k-chip-moss">● {wod.wodType}</span>
 
                   <div
                     className="font-display font-bold mt-3"
@@ -166,7 +164,7 @@ export default async function WODPage() {
                   </div>
                   <div
                     className="font-mono text-[11px] font-bold tracking-[0.18em] mt-2"
-                    style={{ color: "var(--recovery)" }}
+                    style={{ color: "var(--moss)" }}
                   >
                     {wod.scoreType}
                     {wod.timeCap ? ` · ${wod.timeCap}:00 CAP` : ""}
@@ -246,7 +244,7 @@ export default async function WODPage() {
                       <div
                         className="font-display font-bold text-[28px] min-w-[42px] text-center"
                         style={{
-                          color: "var(--strain)",
+                          color: "var(--steel)",
                           letterSpacing: "-0.03em",
                         }}
                       >
@@ -290,7 +288,7 @@ export default async function WODPage() {
                     <span className="k-eyebrow">TU HISTORIAL</span>
                     <span
                       className="font-mono text-[10px] font-bold tracking-[0.08em]"
-                      style={{ color: "var(--recovery)" }}
+                      style={{ color: "var(--moss)" }}
                     >
                       {wodScores.length} INTENTOS
                     </span>
@@ -307,7 +305,7 @@ export default async function WODPage() {
                         className="font-display text-[28px] font-bold"
                         style={{
                           letterSpacing: "-0.02em",
-                          color: "var(--recovery)",
+                          color: "var(--moss)",
                           textShadow: "0 0 14px rgba(25,240,139,0.3)",
                         }}
                       >
@@ -326,9 +324,9 @@ export default async function WODPage() {
                         <span
                           className={`k-chip ${
                             percentile.percentile >= 75
-                              ? "k-chip-recovery"
+                              ? "k-chip-moss"
                               : percentile.percentile >= 50
-                                ? "k-chip-strain"
+                                ? "k-chip-steel"
                                 : "k-chip-ghost"
                           } text-[10px]`}
                           title={`Top ${100 - percentile.percentile}% del box · mejor que ${percentile.betterThan} de ${percentile.totalAthletes - 1} atletas`}
@@ -405,7 +403,7 @@ export default async function WODPage() {
                     </div>
                     <span
                       className="font-mono font-bold text-sm"
-                      style={{ color: "var(--recovery)" }}
+                      style={{ color: "var(--moss)" }}
                     >
                       {formatScore(s.value, s.scoreType)}
                     </span>

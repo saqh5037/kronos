@@ -21,7 +21,7 @@ export default function LoginForm() {
   if (sent) {
     return (
       <div className="k-card p-6 text-center">
-        <p className="k-eyebrow mb-2" style={{ color: "var(--recovery)" }}>
+        <p className="k-eyebrow mb-2" style={{ color: "var(--moss)" }}>
           Liga enviada
         </p>
         <p className="text-sm" style={{ color: "var(--text-2)" }}>
@@ -40,7 +40,7 @@ export default function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="correo@tubox.com"
           required
-          className="w-full px-4 py-3 rounded-xl text-text placeholder-text-3/80 border focus:outline-none focus:border-recovery/50 transition-colors"
+          className="w-full px-4 py-3 rounded-xl text-text placeholder-text-3/80 border focus:outline-none focus:border-moss/50 transition-colors"
           style={{ background: "var(--card)", borderColor: "var(--line)" }}
         />
         <button
@@ -96,7 +96,7 @@ function DevLoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="email"
           required
-          className="w-full px-4 py-2.5 rounded-xl text-sm text-text placeholder-text-3/80 border focus:outline-none focus:border-strain/50 transition-colors"
+          className="w-full px-4 py-2.5 rounded-xl text-sm text-text placeholder-text-3/80 border focus:outline-none focus:border-steel/50 transition-colors"
           style={{ background: "var(--card)", borderColor: "var(--line)" }}
         />
         <input
@@ -116,7 +116,7 @@ function DevLoginForm() {
           {loading ? "Entrando…" : "Entrar (dev)"}
         </button>
         {error && (
-          <p className="text-xs text-center" style={{ color: "var(--pr)" }}>
+          <p className="text-xs text-center" style={{ color: "var(--ember)" }}>
             {error}
           </p>
         )}

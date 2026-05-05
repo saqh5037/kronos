@@ -22,7 +22,7 @@ export function ScoresTimeline({ data }: { data: MyScoreTimelinePoint[] }) {
     <LineChart
       data={series}
       xKey="date"
-      lines={[{ key: "score", label: "Progreso (relativo)", color: "#19f08b" }]}
+      lines={[{ key: "score", label: "Progreso (relativo)", color: "#4a7c59" }]}
       height={180}
       yFormatter={(v) => `${v.toFixed(0)}`}
       xFormatter={fmtDay}

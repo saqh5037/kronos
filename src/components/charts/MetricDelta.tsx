@@ -46,8 +46,8 @@ export function MetricDelta({
     <span
       className={cn(
         "k-chip",
-        tone === "recovery" && "k-chip-recovery",
-        tone === "pr" && "k-chip-pr",
+        tone === "recovery" && "k-chip-moss",
+        tone === "pr" && "k-chip-ember",
         tone === "ghost" && "k-chip-ghost",
         className,
       )}
