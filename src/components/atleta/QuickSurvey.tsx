@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { submitSurveyResponse } from "@/server/actions/surveys";
 import type { SurveyRow } from "@/server/actions/surveys";
 
@@ -10,32 +11,59 @@ type Props = {
   onComplete?: () => void;
 };
 
-/**
- * Tap-friendly survey component.
- * Shows one question at a time. Auto-advances on tap.
- * Total interaction time < 10 seconds.
- */
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 60 : -60,
+    opacity: 0,
+  }),
+  center: { x: 0, opacity: 1 },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 60 : -60,
+    opacity: 0,
+  }),
+};
+
 export default function QuickSurvey({ survey, classId, onComplete }: Props) {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [done, setDone] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [direction, setDirection] = useState(1);
+  const [showThankYou, setShowThankYou] = useState(false);
 
   const questions = survey.questions;
   const currentQuestion = questions[questionIndex];
 
-  if (done) {
+  if (showThankYou) {
     return (
-      <div
-        className="mx-3.5 rounded-[14px] p-4 text-center"
-        style={{ background: "var(--card)", border: "1px solid var(--line)" }}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="mx-3.5 rounded-2xl p-6 text-center border border-[var(--moss-line)]"
+        style={{ background: "var(--moss-soft)" }}
       >
-        <div className="text-2xl mb-1">✅</div>
-        <div className="text-[13px] font-semibold">Gracias!</div>
-        <div className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
-          Encuesta completada
-        </div>
-      </div>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 15 }}
+          className="w-12 h-12 rounded-full bg-[var(--moss)] flex items-center justify-center mx-auto mb-3"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M5 13l4 4L19 7"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </motion.div>
+        <p className="text-sm font-semibold text-[var(--moss)]">
+          ¡Gracias por tu feedback!
+        </p>
+        <p className="text-xs text-white/40 mt-1">
+          Tu opinión nos ayuda a mejorar
+        </p>
+      </motion.div>
     );
   }
 
@@ -45,86 +73,101 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
 
     const next = questionIndex + 1;
     if (next < questions.length) {
+      setDirection(1);
       setQuestionIndex(next);
     } else {
-      // All questions answered — submit
-      setDone(true);
+      setShowThankYou(true);
       startTransition(async () => {
         try {
           await submitSurveyResponse(survey.id, newAnswers, classId);
         } catch {
-          // Best-effort — already showed success
+          // Best-effort
         }
         onComplete?.();
       });
+
+      // Auto-dismiss thank you after 2.5s
+      setTimeout(() => {
+        setShowThankYou(false);
+      }, 2500);
     }
   }
 
-  const progress = (questionIndex / questions.length) * 100;
-
   return (
     <div
-      className="mx-3.5 rounded-[14px] overflow-hidden"
-      style={{
-        background: "var(--card)",
-        border: "1px solid var(--strain-line)",
-      }}
+      className="mx-3.5 rounded-2xl overflow-hidden border border-[var(--line)]"
+      style={{ background: "var(--card)" }}
     >
-      {/* Progress bar */}
-      <div
-        className="h-0.5 transition-all duration-300"
-        style={{
-          background: "var(--bg-soft)",
-        }}
-      >
-        <div
-          className="h-full transition-all duration-300"
-          style={{
-            width: `${progress}%`,
-            background: "var(--grad)",
-          }}
-        />
+      {/* Progress dots */}
+      <div className="flex items-center justify-center gap-2 pt-4 pb-1">
+        {questions.map((_, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <motion.div
+              className={`h-2 rounded-full transition-colors ${
+                i <= questionIndex ? "bg-[var(--fire)]" : "bg-white/10"
+              }`}
+              animate={{
+                width: i === questionIndex ? 24 : 8,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            />
+          </div>
+        ))}
       </div>
 
-      <div className="p-4">
+      <div className="p-4 overflow-hidden">
         {/* Question counter */}
-        <div
-          className="font-mono text-[9px] font-bold tracking-[0.14em] mb-2"
-          style={{ color: "var(--text-3)" }}
-        >
-          {questionIndex + 1} / {questions.length}
-        </div>
+        <p className="text-[10px] font-mono font-bold tracking-wider text-white/30 uppercase mb-2 text-center">
+          {questionIndex + 1} de {questions.length}
+        </p>
 
-        {/* Question text */}
-        <div className="text-[15px] font-semibold mb-4">
-          {currentQuestion.text}
-        </div>
+        {/* Question with slide animation */}
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={questionIndex}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+          >
+            <p className="text-[15px] font-semibold text-white text-center mb-4">
+              {currentQuestion.text}
+            </p>
 
-        {/* Options — big tap targets */}
-        <div className="flex gap-2">
-          {currentQuestion.options.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => handleOption(currentQuestion.id, opt.value)}
-              disabled={isPending}
-              className="flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-[12px] transition-all active:scale-95"
-              style={{
-                background: "var(--bg-soft)",
-                border: "1px solid var(--line)",
-              }}
-            >
-              {opt.emoji && (
-                <span className="text-2xl leading-none">{opt.emoji}</span>
-              )}
-              <span
-                className="text-[11px] font-semibold text-center leading-tight"
-                style={{ color: "var(--text-2)" }}
-              >
-                {opt.label}
-              </span>
-            </button>
-          ))}
-        </div>
+            <div className="flex gap-2">
+              {currentQuestion.options.map((opt) => (
+                <motion.button
+                  key={opt.value}
+                  onClick={() => handleOption(currentQuestion.id, opt.value)}
+                  disabled={isPending}
+                  className="flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl transition-colors border border-[var(--line)] bg-[var(--bg-soft)] hover:bg-[var(--card-2)] disabled:opacity-50"
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.92 }}
+                >
+                  {opt.emoji && (
+                    <motion.span
+                      className="text-2xl leading-none"
+                      whileHover={{
+                        y: [0, -4, 0],
+                        transition: {
+                          duration: 0.4,
+                          repeat: Infinity,
+                        },
+                      }}
+                    >
+                      {opt.emoji}
+                    </motion.span>
+                  )}
+                  <span className="text-[11px] font-semibold text-center leading-tight text-white/70">
+                    {opt.label}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
