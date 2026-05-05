@@ -30,6 +30,12 @@ export default function ConfidenceBadge({
     glowColor = "rgba(217, 119, 6, 0.45)";
     bgClass =
       "bg-[var(--amber-soft)] text-[var(--amber)] border-[var(--amber-line)]";
+  } else if (confidence === 0) {
+    // No match at all — informative, not alarming
+    color = "var(--amber)";
+    glowColor = "rgba(217, 119, 6, 0.35)";
+    bgClass =
+      "bg-[var(--amber-soft)] text-[var(--amber)] border-[var(--amber-line)]";
   } else {
     color = "var(--ember)";
     glowColor = "rgba(196, 69, 54, 0.55)";

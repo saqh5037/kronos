@@ -48,18 +48,15 @@ const rowVariants = {
   },
 };
 
-function getScoreCategoryIcon(scoreType: ScoreType): string {
-  switch (scoreType) {
-    case "WEIGHT":
-      return "🏋️";
-    case "TIME":
-      return "🏃";
-    case "ROUNDS_REPS":
-      return "🤸";
-    default:
-      return "🎯";
-  }
-}
+const cardVariants = {
+  hidden: { opacity: 0, y: 12, scale: 0.98 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 },
+  },
+};
 
 export default function Step2Review({
   uploadId,
@@ -160,7 +157,6 @@ export default function Step2Review({
       return;
     }
 
-    // Validate all included scores
     let hasInvalid = false;
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -222,8 +218,9 @@ export default function Step2Review({
         </p>
       </div>
 
+      {/* ─── DESKTOP TABLE (lg+) ─── */}
       <motion.div
-        className="overflow-x-auto rounded-xl border border-[var(--line)] bg-[var(--card)]"
+        className="hidden lg:block overflow-x-auto rounded-xl border border-[var(--line)] bg-[var(--card)]"
         variants={containerVariants}
         initial="hidden"
         animate="show"
@@ -310,14 +307,9 @@ export default function Step2Review({
 
                   {/* Raw name */}
                   <td className="py-3 pr-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">
-                        {getScoreCategoryIcon(row.scoreType)}
-                      </span>
-                      <span className="font-mono text-white/80">
-                        {row.rawName}
-                      </span>
-                    </div>
+                    <span className="font-mono text-white/80">
+                      {row.rawName}
+                    </span>
                   </td>
 
                   {/* Athlete combobox */}
@@ -329,7 +321,6 @@ export default function Step2Review({
                       placeholder="Buscar atleta..."
                     />
 
-                    {/* Alias prompt */}
                     <AnimatePresence>
                       {row.editedAthleteId !== row.matchedAthleteId &&
                         row.rawName && (
@@ -456,6 +447,215 @@ export default function Step2Review({
             })}
           </tbody>
         </table>
+      </motion.div>
+
+      {/* ─── MOBILE CARDS (<lg) ─── */}
+      <motion.div
+        className="lg:hidden space-y-3"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
+        {rows.map((row, idx) => {
+          const isLowConfidence = row.confidence < 0.5;
+          const isAutoMatch = row.confidence > 0.7;
+          const scoreInvalid =
+            row.include &&
+            row.editedScore &&
+            !validateScore(row.editedScore, wodScoreType);
+
+          return (
+            <motion.div
+              key={idx}
+              variants={cardVariants}
+              className={`rounded-xl border bg-[var(--card)] p-4 space-y-3 ${
+                isLowConfidence
+                  ? "border-l-[3px] border-l-[var(--ember)] border-[var(--line)]"
+                  : "border-[var(--line)]"
+              } ${scoreInvalid ? "bg-[var(--ember-soft)]" : ""}`}
+              animate={row.shake ? { x: [0, -6, 6, -4, 4, 0] } : { x: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              {/* Header: raw name + confidence + include toggle */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-mono text-white/80 text-sm truncate">
+                    {row.rawName}
+                  </p>
+                  <p className="text-[10px] text-white/30 mt-0.5 font-mono uppercase tracking-wider">
+                    Nombre en pizarra
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <ConfidenceBadge
+                    confidence={row.confidence}
+                    showCheck={isAutoMatch}
+                    delay={idx * 0.04}
+                  />
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={row.include}
+                      onChange={(e) =>
+                        updateRow(idx, { include: e.target.checked })
+                      }
+                      className="sr-only peer"
+                    />
+                    <div className="w-5 h-5 rounded border-2 border-white/20 peer-checked:bg-[var(--moss)] peer-checked:border-[var(--moss)] flex items-center justify-center transition-colors">
+                      {row.include && (
+                        <motion.svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 12 12"
+                          fill="none"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 500 }}
+                        >
+                          <path
+                            d="M2.5 6.5L5 9L9.5 3.5"
+                            stroke="white"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </motion.svg>
+                      )}
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Athlete */}
+              <div>
+                <p className="text-[10px] text-white/30 mb-1.5 font-mono uppercase tracking-wider">
+                  Atleta
+                </p>
+                <AthleteCombobox
+                  athletes={roster}
+                  value={row.editedAthleteId}
+                  onChange={(id) => updateRow(idx, { editedAthleteId: id })}
+                  placeholder="Buscar atleta..."
+                />
+                <AnimatePresence>
+                  {row.editedAthleteId !== row.matchedAthleteId &&
+                    row.rawName && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0, y: -4 }}
+                        animate={{ opacity: 1, height: "auto", y: 0 }}
+                        exit={{ opacity: 0, height: 0, y: -4 }}
+                        transition={{ duration: 0.25, ease: "easeOut" }}
+                        className="overflow-hidden"
+                      >
+                        <label className="flex items-center gap-2 mt-2 text-xs text-[var(--steel)] cursor-pointer bg-[var(--steel-soft)] rounded-md px-2 py-1.5 border border-[var(--steel-line)]">
+                          <input
+                            type="checkbox"
+                            checked={row.saveAlias}
+                            onChange={(e) =>
+                              updateRow(idx, {
+                                saveAlias: e.target.checked,
+                              })
+                            }
+                            className="sr-only peer"
+                          />
+                          <div className="w-4 h-4 rounded border border-[var(--steel-line)] peer-checked:bg-[var(--steel)] peer-checked:border-[var(--steel)] flex items-center justify-center transition-colors shrink-0">
+                            {row.saveAlias && (
+                              <svg
+                                width="10"
+                                height="10"
+                                viewBox="0 0 12 12"
+                                fill="none"
+                              >
+                                <path
+                                  d="M2.5 6.5L5 9L9.5 3.5"
+                                  stroke="white"
+                                  strokeWidth="1.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            )}
+                          </div>
+                          <span className="truncate">
+                            Guardar &quot;{row.rawName}&quot; como apodo
+                          </span>
+                        </label>
+                      </motion.div>
+                    )}
+                </AnimatePresence>
+              </div>
+
+              {/* Score + Type + Scaling row */}
+              <div className="flex items-end gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-white/30 mb-1.5 font-mono uppercase tracking-wider">
+                    Score
+                  </p>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={row.editedScore}
+                      onChange={(e) =>
+                        updateRow(idx, { editedScore: e.target.value })
+                      }
+                      className={`w-full bg-[var(--card-2)] text-white text-sm rounded-lg px-3 py-2 border font-mono transition-colors focus:outline-none ${
+                        scoreInvalid
+                          ? "border-[var(--ember)] focus:border-[var(--ember)] shadow-[0_0_8px_rgba(196,69,54,0.3)]"
+                          : "border-white/10 focus:border-[var(--steel)]"
+                      }`}
+                    />
+                    {scoreInvalid && (
+                      <motion.span
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="absolute -right-1 -top-1 text-[var(--ember)] text-xs"
+                      >
+                        ⚠
+                      </motion.span>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/30 mb-1.5 font-mono uppercase tracking-wider">
+                    Tipo
+                  </p>
+                  <select
+                    value={row.scoreType}
+                    onChange={(e) =>
+                      updateRow(idx, {
+                        scoreType: e.target.value as ScoreType,
+                      })
+                    }
+                    className="bg-[var(--card-2)] text-white text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
+                  >
+                    <option value="TIME">TIME</option>
+                    <option value="REPS">REPS</option>
+                    <option value="WEIGHT">WEIGHT</option>
+                    <option value="ROUNDS_REPS">ROUNDS</option>
+                  </select>
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/30 mb-1.5 font-mono uppercase tracking-wider">
+                    Scaling
+                  </p>
+                  <select
+                    value={row.scaling}
+                    onChange={(e) =>
+                      updateRow(idx, {
+                        scaling: e.target.value as Scaling,
+                      })
+                    }
+                    className="bg-[var(--card-2)] text-white text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
+                  >
+                    <option value="RX">RX</option>
+                    <option value="SCALED">SCALED</option>
+                    <option value="RXPLUS">RX+</option>
+                  </select>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       <AnimatePresence>
