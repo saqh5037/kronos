@@ -60,7 +60,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
         <p className="text-sm font-semibold text-[var(--moss)]">
           ¡Gracias por tu feedback!
         </p>
-        <p className="text-xs text-white/40 mt-1">
+        <p className="text-xs text-[var(--text-3)] mt-1">
           Tu opinión nos ayuda a mejorar
         </p>
       </motion.div>
@@ -104,7 +104,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
           <div key={i} className="flex items-center gap-2">
             <motion.div
               className={`h-2 rounded-full transition-colors ${
-                i <= questionIndex ? "bg-[var(--fire)]" : "bg-white/10"
+                i <= questionIndex ? "bg-[var(--red)]" : "bg-[var(--track)]"
               }`}
               animate={{
                 width: i === questionIndex ? 24 : 8,
@@ -117,7 +117,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
 
       <div className="p-4 overflow-hidden">
         {/* Question counter */}
-        <p className="text-[10px] font-mono font-bold tracking-wider text-white/30 uppercase mb-2 text-center">
+        <p className="text-[10px] font-mono font-bold tracking-wider text-[var(--text-3)] uppercase mb-2 text-center">
           {questionIndex + 1} de {questions.length}
         </p>
 
@@ -132,7 +132,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
             exit="exit"
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
           >
-            <p className="text-[15px] font-semibold text-white text-center mb-4">
+            <p className="text-[15px] font-display font-bold text-[var(--text)] text-center mb-4">
               {currentQuestion.text}
             </p>
 
@@ -160,7 +160,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
                       {opt.emoji}
                     </motion.span>
                   )}
-                  <span className="text-[11px] font-semibold text-center leading-tight text-white/70">
+                  <span className="text-[11px] font-semibold text-center leading-tight text-[var(--text-2)]">
                     {opt.label}
                   </span>
                 </motion.button>

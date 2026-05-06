@@ -157,10 +157,15 @@ export default async function PagosPage({
   return (
     <div className="p-8">
       <div className="mb-6">
-        <p className="k-eyebrow mb-1">Operación</p>
-        <h1 className="font-display text-3xl font-bold tracking-tight">
-          Pagos
-        </h1>
+        <span className="k-eyebrow-bar">Operación · Revenue</span>
+        <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+          <h1
+            className="k-h-italic font-display font-extrabold text-[42px] leading-[1] tracking-[-0.02em]"
+            style={{ color: "var(--text)" }}
+          >
+            Pa<em>gos</em>
+          </h1>
+        </div>
         <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
           {formatRange(range)} · revenue, memberships, morosos y cobros
         </p>

@@ -250,9 +250,9 @@ function Wordmark({ size = "md" }: { size?: "sm" | "md" }) {
   const boxSize = size === "sm" ? "w-7 h-7" : "w-8 h-8";
   const textSize = size === "sm" ? "text-sm" : "text-base";
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
       <div
-        className={`${boxSize} rounded-lg flex items-center justify-center font-display font-bold border`}
+        className={`${boxSize} rounded-xl flex items-center justify-center font-display font-bold border`}
         style={{
           background: "var(--card)",
           borderColor: "var(--line-strong)",
@@ -262,7 +262,7 @@ function Wordmark({ size = "md" }: { size?: "sm" | "md" }) {
         <span className={`${textSize} leading-none`}>K</span>
       </div>
       <span
-        className={`font-display font-bold ${textSize} tracking-[0.04em] uppercase`}
+        className={`font-display font-bold ${textSize} tracking-[0.02em]`}
         style={{ color: "var(--text)" }}
       >
         Kronos
@@ -282,6 +282,7 @@ export default function AdminSidebar({
 }: AdminSidebarProps = {}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const visibleModules = modules.filter(
     (mod) => !mod.ownerOnly || role === "OWNER",
@@ -302,12 +303,26 @@ export default function AdminSidebar({
     };
   }, [open]);
 
+  // Scroll shrink effect for desktop sidebar
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <>
-      {/* Mobile top bar */}
+      {/* Mobile top bar — glass premium */}
       <div
         className="lg:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 h-14 border-b"
-        style={{ background: "var(--bg-soft)", borderColor: "var(--line)" }}
+        style={{
+          background: "rgba(var(--bg-rgb, 255,255,255), 0.82)",
+          backdropFilter: "blur(28px) saturate(1.4)",
+          WebkitBackdropFilter: "blur(28px) saturate(1.4)",
+          borderColor: "var(--line)",
+        }}
       >
         <Wordmark size="sm" />
         <button
@@ -315,7 +330,7 @@ export default function AdminSidebar({
           aria-label="Abrir menú"
           aria-expanded={open}
           onClick={() => setOpen(true)}
-          className="w-9 h-9 flex items-center justify-center rounded-lg border"
+          className="w-9 h-9 flex items-center justify-center rounded-xl border"
           style={{ borderColor: "var(--line)", background: "var(--card)" }}
         >
           <svg
@@ -337,20 +352,32 @@ export default function AdminSidebar({
 
       {/* Overlay backdrop */}
       {open && (
-        <div
-          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="lg:hidden fixed inset-0 z-40"
+          style={{ background: "var(--overlay)", backdropFilter: "blur(8px)" }}
           onClick={() => setOpen(false)}
           aria-hidden
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — glass premium */}
       <nav
-        className={`flex flex-col border-r flex-shrink-0 py-4 overflow-y-auto z-50
+        className={`flex flex-col border-r flex-shrink-0 overflow-y-auto z-50
           fixed lg:static top-0 left-0 h-screen lg:h-auto w-64 lg:w-56
-          transform transition-transform duration-200
+          transform transition-transform duration-300
           ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
-        style={{ background: "var(--bg-soft)", borderColor: "var(--line)" }}
+        style={{
+          background: "color-mix(in srgb, var(--bg-soft) 85%, transparent)",
+          backdropFilter: "blur(28px) saturate(1.4)",
+          WebkitBackdropFilter: "blur(28px) saturate(1.4)",
+          borderColor: "var(--line)",
+          paddingTop: scrolled ? "12px" : "18px",
+          paddingBottom: "16px",
+          transition: "padding 0.4s var(--ease-out-expo), transform 0.3s ease",
+        }}
         aria-label="Menú principal"
       >
         {/* Logo + close button (mobile) */}
@@ -363,8 +390,11 @@ export default function AdminSidebar({
             type="button"
             aria-label="Cerrar menú"
             onClick={() => setOpen(false)}
-            className="lg:hidden w-7 h-7 flex items-center justify-center rounded-md"
-            style={{ color: "var(--text-2)" }}
+            className="lg:hidden w-7 h-7 flex items-center justify-center rounded-lg"
+            style={{
+              color: "var(--text-2)",
+              background: "var(--btn-ghost-bg)",
+            }}
           >
             <svg
               width="14"
@@ -396,14 +426,14 @@ export default function AdminSidebar({
               <Link
                 key={mod.href}
                 href={mod.href as Route}
-                className={`relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   isActive ? "text-text" : "text-text-3 hover:text-text-2"
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="admin-nav-indicator"
-                    className="absolute inset-0 rounded-lg border overflow-hidden"
+                    className="absolute inset-0 rounded-xl border overflow-hidden"
                     style={{
                       background: "var(--card)",
                       borderColor: "var(--line-strong)",
@@ -412,8 +442,8 @@ export default function AdminSidebar({
                   >
                     <span
                       aria-hidden
-                      className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-r"
-                      style={{ background: "var(--fire)" }}
+                      className="absolute left-0 top-2 bottom-2 w-[2.5px] rounded-r"
+                      style={{ background: "var(--grad)" }}
                     />
                   </motion.div>
                 )}
@@ -422,28 +452,26 @@ export default function AdminSidebar({
                 </span>
                 <span className="relative z-10 flex-1">{mod.label}</span>
                 {badgeValue !== null && (
-                  <span
-                    className="relative z-10 ml-auto text-[10px] font-bold leading-none px-1.5 py-0.5 rounded-full min-w-[18px] text-center group/badge"
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="relative z-10 ml-auto text-[10px] font-bold leading-none px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
                     style={{
                       background:
                         badgeValue >= 10
-                          ? "linear-gradient(95deg, #dc4b17 0%, #e8893a 100%)"
+                          ? "linear-gradient(95deg, #e60026 0%, #ff4d8a 100%)"
                           : "var(--fire)",
-                      color: "var(--bg)",
+                      color: "#fff",
                       boxShadow:
                         badgeValue > 0
-                          ? "0 0 8px rgba(220, 75, 23, 0.4)"
-                          : undefined,
-                      animation:
-                        badgeValue > 0
-                          ? "pulse-glow 2s ease-in-out infinite"
+                          ? "0 0 8px rgba(230, 0, 38, 0.35)"
                           : undefined,
                     }}
                     aria-label={`${badgeValue} eventos sensibles hoy`}
                     title={`${badgeValue} eventos sensibles hoy`}
                   >
                     {badgeValue > 99 ? "99+" : badgeValue}
-                  </span>
+                  </motion.span>
                 )}
               </Link>
             );

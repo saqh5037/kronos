@@ -30,10 +30,15 @@ export default async function ComunicacionesPage() {
     <div className="p-8">
       <div className="mb-6 flex items-end justify-between gap-4 flex-wrap">
         <div>
-          <p className="k-eyebrow mb-1">Engagement</p>
-          <h1 className="font-display font-bold text-3xl tracking-tight">
-            Comunicaciones
-          </h1>
+          <span className="k-eyebrow-bar">Engagement</span>
+          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+            <h1
+              className="k-h-italic font-display font-extrabold text-[40px] leading-[1] tracking-[-0.02em]"
+              style={{ color: "var(--text)" }}
+            >
+              Comunica<em>ciones</em>
+            </h1>
+          </div>
           <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
             Anuncios al box · email/in-app/push (proveedor mockeado en Fase 1)
           </p>

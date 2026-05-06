@@ -129,10 +129,21 @@ export default async function AtletasPage({
     <div className="p-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="k-eyebrow mb-1">CRM</p>
-          <h1 className="font-display text-3xl font-bold tracking-tight">
-            Atletas
-          </h1>
+          <span className="k-eyebrow-bar">CRM · Atletas</span>
+          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+            <span
+              className="font-script text-[26px] leading-none"
+              style={{ color: "var(--red)" }}
+            >
+              Tus
+            </span>
+            <h1
+              className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
+              style={{ color: "var(--text)" }}
+            >
+              <em>atletas</em>
+            </h1>
+          </div>
           <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
             {formatRange(range)} · {rows.total} en filtro · {activeNow} activos
             totales

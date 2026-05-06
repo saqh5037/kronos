@@ -70,13 +70,39 @@ export default async function AtletaPagosPage() {
   }
 
   return (
-    <div className="pb-28">
-      <AnimatedSection className="px-[18px] pt-14 pb-3">
-        <AnimatedItem>
-          <p className="k-eyebrow">Mis pagos</p>
-          <h1 className="font-display font-bold text-3xl">Membresías</h1>
-        </AnimatedItem>
-      </AnimatedSection>
+    <div className="pb-28 relative">
+      {/* HERO v2.0 */}
+      <header className="relative px-4 pt-14 pb-5 overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at 0% 0%, rgba(230,0,38,0.06), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(0,191,255,0.06), transparent 60%)",
+          }}
+        />
+        <span className="k-corner-tl" aria-hidden />
+        <span className="k-corner-br" aria-hidden />
+        <AnimatedSection className="relative">
+          <AnimatedItem>
+            <span className="k-eyebrow-bar">Mis pagos</span>
+            <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+              <span
+                className="font-script text-[26px] leading-none"
+                style={{ color: "var(--red)" }}
+              >
+                Mis
+              </span>
+              <h1
+                className="k-h-italic font-display font-extrabold text-[34px] leading-[1] tracking-[-0.02em]"
+                style={{ color: "var(--text)" }}
+              >
+                <em>membresías</em>
+              </h1>
+            </div>
+          </AnimatedItem>
+        </AnimatedSection>
+      </header>
 
       {memberships.length === 0 ? (
         <div className="px-3.5">

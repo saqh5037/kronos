@@ -7,6 +7,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import GlobalEffects from "@/components/GlobalEffects";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -61,15 +62,17 @@ export default function RootLayout({
       className={`${inter.variable} ${playfair.variable} ${dancing.variable} ${jetbrainsMono.variable}`}
     >
       <head>
-        <meta name="theme-color" content="#19f08b" />
+        <meta name="theme-color" content="#ffffff" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className="font-sans bg-bg text-text antialiased min-h-screen">
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
+          defaultTheme="light"
+          enableSystem={true}
+          disableTransitionOnChange={false}
         >
+          <GlobalEffects />
           {children}
         </ThemeProvider>
       </body>

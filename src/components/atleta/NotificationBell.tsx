@@ -132,7 +132,7 @@ export default function NotificationBell() {
       <motion.button
         onClick={handleOpen}
         aria-label="Notificaciones"
-        className="relative p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+        className="relative p-2 rounded-full text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--track)] transition-colors"
         animate={shake ? { rotate: [0, -12, 10, -8, 6, 0] } : {}}
         transition={{ duration: 0.5 }}
       >
@@ -180,7 +180,7 @@ export default function NotificationBell() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--line)]">
-              <span className="text-sm font-semibold text-white">
+              <span className="text-sm font-semibold text-[var(--text)]">
                 Notificaciones
               </span>
               {unread > 0 && (
@@ -210,10 +210,10 @@ export default function NotificationBell() {
               ) : notifications.length === 0 ? (
                 <div className="p-8 text-center">
                   <p className="text-3xl mb-2">🔔</p>
-                  <p className="text-sm text-white/60">
+                  <p className="text-sm text-[var(--text-2)]">
                     Sin notificaciones nuevas
                   </p>
-                  <p className="text-xs text-white/30 mt-1">
+                  <p className="text-xs text-[var(--text-3)] mt-1">
                     Te avisamos cuando haya algo importante
                   </p>
                 </div>
@@ -239,18 +239,18 @@ export default function NotificationBell() {
                         <p
                           className={`text-sm leading-snug ${
                             !n.readAt
-                              ? "text-white font-medium"
-                              : "text-white/70"
+                              ? "text-[var(--text)] font-medium"
+                              : "text-[var(--text-2)]"
                           }`}
                         >
                           {n.title}
                         </p>
                         {n.body && (
-                          <p className="text-xs text-white/40 mt-0.5 truncate">
+                          <p className="text-xs text-[var(--text-3)] mt-0.5 truncate">
                             {n.body}
                           </p>
                         )}
-                        <p className="text-xs text-white/20 mt-1 font-mono">
+                        <p className="text-xs text-[var(--text-3)] mt-1 font-mono">
                           {n.createdAt.toLocaleTimeString("es-MX", {
                             hour: "2-digit",
                             minute: "2-digit",

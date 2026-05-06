@@ -12,10 +12,21 @@ export default async function AjustesPage() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <p className="k-eyebrow mb-2">Configuración</p>
-      <h1 className="font-display font-bold text-3xl tracking-tight mb-6">
-        Ajustes
-      </h1>
+      <span className="k-eyebrow-bar">Configuración</span>
+      <div className="mt-2 mb-6 flex items-baseline gap-2 flex-wrap">
+        <span
+          className="font-script text-[26px] leading-none"
+          style={{ color: "var(--red)" }}
+        >
+          Tus
+        </span>
+        <h1
+          className="k-h-italic font-display font-extrabold text-[40px] leading-[1] tracking-[-0.02em]"
+          style={{ color: "var(--text)" }}
+        >
+          <em>ajustes</em>
+        </h1>
+      </div>
       <BoxSettingsForm box={box} canEdit={canEdit} />
     </div>
   );

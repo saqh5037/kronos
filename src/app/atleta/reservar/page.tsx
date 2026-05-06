@@ -7,6 +7,7 @@ import {
   AnimatedSection,
   AnimatedItem,
 } from "@/components/kronos/AnimatedSection";
+import Eyebrow from "@/components/kronos/Eyebrow";
 import { ClassesList } from "./_components/ClassesList";
 
 export const metadata = { title: "Kronos — Reservar" };
@@ -60,38 +61,60 @@ export default async function ReservarPage() {
   ).length;
 
   return (
-    <div className="pb-28">
-      {/* HEADER */}
-      <AnimatedSection className="flex items-center justify-between px-[18px] pt-14 pb-4">
-        <AnimatedItem>
-          <div>
-            <div className="k-eyebrow mb-1" style={{ color: "var(--text-3)" }}>
+    <div className="pb-28 relative">
+      {/* HERO v2.0 */}
+      <header className="relative px-4 pt-14 pb-5 overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at 0% 0%, rgba(230,0,38,0.06), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(0,191,255,0.06), transparent 60%)",
+          }}
+        />
+        <span className="k-corner-tl" aria-hidden />
+        <span className="k-corner-br" aria-hidden />
+
+        <AnimatedSection className="relative flex items-start justify-between">
+          <AnimatedItem className="flex-1 min-w-0">
+            <Eyebrow withBar color="blue">
               SEMANA · {formatDayMonth(weekDays[0]).toUpperCase()} —{" "}
               {formatDayMonth(weekDays[6]).toUpperCase()}
+            </Eyebrow>
+            <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+              <span
+                className="font-script text-[26px] leading-none"
+                style={{ color: "var(--red)" }}
+              >
+                Tu próxima
+              </span>
+              <h1
+                className="k-h-italic font-display font-extrabold text-[32px] leading-[1] tracking-[-0.02em]"
+                style={{ color: "var(--text)" }}
+              >
+                <em>clase</em>
+              </h1>
             </div>
-            <div className="font-display text-2xl font-bold">
-              Reservar clase
-            </div>
-          </div>
-        </AnimatedItem>
-        <AnimatedItem>
-          <button
-            className="w-9 h-9 rounded-[10px] flex items-center justify-center k-card"
-            aria-label="Filtrar"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+          </AnimatedItem>
+          <AnimatedItem>
+            <button
+              className="w-10 h-10 rounded-full flex items-center justify-center k-glass"
+              aria-label="Filtrar"
             >
-              <path d="M3 6h18M6 12h12M10 18h4" />
-            </svg>
-          </button>
-        </AnimatedItem>
-      </AnimatedSection>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M3 6h18M6 12h12M10 18h4" />
+              </svg>
+            </button>
+          </AnimatedItem>
+        </AnimatedSection>
+      </header>
 
       {/* WEEK SCROLL */}
       <AnimatedSection className="px-3.5 pb-4">

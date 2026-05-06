@@ -32,11 +32,22 @@ export default async function AuditoriaPage({
 
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
-      <p className="k-eyebrow mb-2">Control</p>
-      <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight mb-1 text-white">
-        Feed de Auditoría
-      </h1>
-      <p className="text-white/50 mb-6 text-sm">
+      <span className="k-eyebrow-bar">Control · Trazabilidad</span>
+      <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+        <span
+          className="font-script text-[24px] leading-none"
+          style={{ color: "var(--red)" }}
+        >
+          Feed de
+        </span>
+        <h1
+          className="k-h-italic font-display font-extrabold text-[34px] leading-[1] tracking-[-0.02em]"
+          style={{ color: "var(--text)" }}
+        >
+          <em>auditoría</em>
+        </h1>
+      </div>
+      <p className="mb-6 mt-3 text-sm" style={{ color: "var(--text-2)" }}>
         Trazabilidad en tiempo real de todas las acciones del equipo.
       </p>
 

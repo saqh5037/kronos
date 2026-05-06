@@ -23,10 +23,21 @@ export default async function ReservasPage() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <p className="k-eyebrow mb-1">Operación</p>
-        <h1 className="font-display font-bold text-3xl tracking-tight">
-          Reservas
-        </h1>
+        <span className="k-eyebrow-bar">Operación</span>
+        <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+          <span
+            className="font-script text-[26px] leading-none"
+            style={{ color: "var(--red)" }}
+          >
+            Roster de
+          </span>
+          <h1
+            className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
+            style={{ color: "var(--text)" }}
+          >
+            <em>reservas</em>
+          </h1>
+        </div>
         <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
           Roster de clases de los próximos 7 días — check-in, waitlist,
           cancelaciones

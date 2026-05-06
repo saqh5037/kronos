@@ -21,14 +21,14 @@ const config: Config = {
         "text-2": "var(--text-2)",
         "text-3": "var(--text-3)",
         line: "var(--line)",
-        // Brand palette (manual de marca)
-        red: "var(--brand-red)",
-        blue: "var(--brand-blue)",
-        "blue-deep": "var(--brand-blue-deep)",
-        cyan: "var(--brand-cyan)",
-        pink: "var(--brand-pink)",
+        // Brand palette (Manual de Marca v2)
+        red: "var(--red)",
+        blue: "var(--blue)",
+        "blue-deep": "var(--blue-deep)",
+        cyan: "var(--cyan)",
+        pink: "var(--pink)",
         violet: "var(--brand-violet)",
-        // Legacy aliases (transitional, mapped to brand)
+        // Legacy aliases
         fire: "var(--fire)",
         steel: "var(--steel)",
         moss: "var(--moss)",
@@ -47,12 +47,28 @@ const config: Config = {
       backgroundImage: {
         grad: "linear-gradient(135deg, #e60026 0%, #0044ff 50%, #00bfff 100%)",
         "grad-soft":
-          "linear-gradient(135deg, rgba(230,0,38,0.08) 0%, rgba(0,68,255,0.08) 50%, rgba(0,191,255,0.08) 100%)",
+          "linear-gradient(135deg, rgba(230,0,38,0.05) 0%, rgba(0,68,255,0.05) 50%, rgba(0,191,255,0.05) 100%)",
+        "grad-glow":
+          "radial-gradient(circle at 50% 50%, rgba(230,0,38,0.10), rgba(0,68,255,0.07) 40%, transparent 70%)",
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "18px",
+        md: "16px",
+        sm: "12px",
+        xs: "8px",
+      },
+      boxShadow: {
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+        card: "var(--card-glow)",
+        "card-hover": "var(--card-glow-hover)",
+        featured: "var(--shadow-featured)",
+      },
+      transitionTimingFunction: {
+        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "in-out-expo": "cubic-bezier(0.87, 0, 0.13, 1)",
+        elastic: "cubic-bezier(0.68, -0.3, 0.265, 1.3)",
       },
     },
   },

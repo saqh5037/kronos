@@ -19,8 +19,21 @@ export default async function PRsPage() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <p className="k-eyebrow mb-1">Performance</p>
-        <h1 className="font-display font-bold text-3xl tracking-tight">PRs</h1>
+        <span className="k-eyebrow-bar">Performance</span>
+        <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+          <span
+            className="font-script text-[28px] leading-none"
+            style={{ color: "var(--red)" }}
+          >
+            Records
+          </span>
+          <h1
+            className="k-h-italic font-display font-extrabold text-[42px] leading-[1] tracking-[-0.02em]"
+            style={{ color: "var(--text)" }}
+          >
+            <em>personales</em>
+          </h1>
+        </div>
         <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
           {prs.length} PR{prs.length === 1 ? "" : "s"} registrado
           {prs.length === 1 ? "" : "s"} en {byMovement.size} movimiento

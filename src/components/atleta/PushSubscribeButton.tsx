@@ -104,7 +104,7 @@ export default function PushSubscribeButton() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="text-[11px] text-white/40 leading-relaxed"
+          className="text-[11px] text-[var(--text-3)] leading-relaxed"
         >
           <p>Notificaciones bloqueadas.</p>
           <a

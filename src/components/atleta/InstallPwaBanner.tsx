@@ -116,11 +116,11 @@ export default function InstallPwaBanner() {
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="text-[13px] font-semibold text-white mb-0.5">
+            <div className="text-[13px] font-semibold text-[var(--text)] mb-0.5">
               Instalar Kronos
             </div>
             {isIos ? (
-              <div className="text-[11px] leading-relaxed text-white/50">
+              <div className="text-[11px] leading-relaxed text-[var(--text-3)]">
                 Toca{" "}
                 <span className="font-bold text-[var(--strain)]">
                   Compartir
@@ -132,7 +132,7 @@ export default function InstallPwaBanner() {
                 .
               </div>
             ) : (
-              <div className="text-[11px] text-white/50">
+              <div className="text-[11px] text-[var(--text-3)]">
                 Acceso rápido desde tu pantalla de inicio. Funciona sin
                 conexión.
               </div>
@@ -152,7 +152,7 @@ export default function InstallPwaBanner() {
             )}
             <button
               onClick={dismiss}
-              className="w-7 h-7 rounded-full flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors"
+              className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text-2)] hover:bg-[var(--hover-subtle)] transition-colors"
               aria-label="Cerrar"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

@@ -53,10 +53,15 @@ export default async function ProgramacionPage() {
     <div className="p-8">
       <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <p className="k-eyebrow mb-1">Operación</p>
-          <h1 className="font-display font-bold text-3xl tracking-tight">
-            Programación
-          </h1>
+          <span className="k-eyebrow-bar">Operación</span>
+          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+            <h1
+              className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
+              style={{ color: "var(--text)" }}
+            >
+              Programa<em>ción</em>
+            </h1>
+          </div>
           <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
             Semana del {formatDayMonth(weekStart)} al{" "}
             {formatDayMonth(addDays(weekStart, 6))}

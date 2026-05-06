@@ -95,10 +95,10 @@ export default function TabBar() {
     <div
       className="fixed bottom-0 left-0 right-0 z-40 border-t"
       style={{
-        background: "var(--bg)",
+        background: "color-mix(in srgb, var(--bg-soft) 80%, transparent)",
         borderColor: "var(--line)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
+        backdropFilter: "blur(28px) saturate(1.4)",
+        WebkitBackdropFilter: "blur(28px) saturate(1.4)",
       }}
     >
       <div className="flex items-center h-16 px-2">
@@ -116,11 +116,12 @@ export default function TabBar() {
               {isActive && (
                 <motion.div
                   layoutId="tab-indicator"
-                  className="absolute -top-px left-1/2 -translate-x-1/2 h-[2px] rounded-full"
+                  className="absolute -top-px left-1/2 -translate-x-1/2 h-[2.5px] rounded-full"
                   style={{
-                    width: 20,
+                    width: 24,
                     background: "var(--grad)",
-                    boxShadow: "0 0 8px rgba(220,75,23,0.4)",
+                    boxShadow:
+                      "0 0 10px rgba(230, 0, 38, 0.35), 0 0 20px rgba(0, 68, 255, 0.15)",
                   }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
@@ -131,7 +132,7 @@ export default function TabBar() {
               >
                 {tab.icon(isActive)}
               </motion.span>
-              <span>{tab.label}</span>
+              <span className="font-medium tracking-wide">{tab.label}</span>
             </Link>
           );
         })}

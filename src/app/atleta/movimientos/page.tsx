@@ -27,26 +27,52 @@ export default async function MovementsPage() {
   }
 
   return (
-    <div className="pb-28">
-      {/* Header */}
-      <AnimatedSection className="px-[18px] pt-14 pb-3">
-        <AnimatedItem>
-          <p className="k-eyebrow mb-1">MIS MOVIMIENTOS</p>
-          <h1 className="font-display font-bold text-2xl text-white">
-            Movimientos
-          </h1>
-          <p className="text-xs mt-1 text-white/50">
-            {movements.length} movimientos entrenados en los últimos 90 días
-          </p>
-        </AnimatedItem>
-      </AnimatedSection>
+    <div className="pb-28 relative">
+      {/* HERO v2.0 */}
+      <header className="relative px-4 pt-14 pb-5 overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at 0% 0%, rgba(230,0,38,0.06), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(0,191,255,0.06), transparent 60%)",
+          }}
+        />
+        <span className="k-corner-tl" aria-hidden />
+        <span className="k-corner-br" aria-hidden />
+        <AnimatedSection className="relative">
+          <AnimatedItem>
+            <span className="k-eyebrow-bar">Mis movimientos</span>
+            <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+              <span
+                className="font-script text-[26px] leading-none"
+                style={{ color: "var(--red)" }}
+              >
+                Tu biblioteca
+              </span>
+              <h1
+                className="k-h-italic font-display font-extrabold text-[32px] leading-[1] tracking-[-0.02em]"
+                style={{ color: "var(--text)" }}
+              >
+                <em>técnica</em>
+              </h1>
+            </div>
+            <p
+              className="text-xs mt-2 font-mono tracking-[0.06em]"
+              style={{ color: "var(--text-3)" }}
+            >
+              {movements.length} movimientos entrenados en los últimos 90 días
+            </p>
+          </AnimatedItem>
+        </AnimatedSection>
+      </header>
 
       {/* List — personal movements */}
       <AnimatedSection className="px-3.5 mt-2 space-y-2">
         {movements.length === 0 && (
           <AnimatedItem>
             <KCard variant="ghost" className="p-6 text-center">
-              <p className="text-sm text-white/60">
+              <p className="text-sm text-[var(--text-2)]">
                 Aún no has registrado scores. Empieza entrenando y tus
                 movimientos aparecerán aquí.
               </p>
@@ -63,14 +89,14 @@ export default async function MovementsPage() {
                 animate={true}
               >
                 {/* Rank */}
-                <div className="font-display text-sm font-bold w-5 text-center text-white/30">
+                <div className="font-display text-sm font-bold w-5 text-center text-[var(--text-3)]">
                   {i + 1}
                 </div>
 
                 {/* Name + badges */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[13px] font-semibold truncate text-white">
+                    <span className="text-[13px] font-semibold truncate text-[var(--text)]">
                       {m.movementName}
                     </span>
                     {m.isStale && (
@@ -96,12 +122,12 @@ export default async function MovementsPage() {
                           }}
                         />
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-white/30">
+                      <span className="text-[10px] font-mono font-bold text-[var(--text-3)]">
                         {m.frequency90d}×
                       </span>
                     </div>
                     {m.daysSinceLastAttempt !== null && (
-                      <span className="text-[10px] text-white/30">
+                      <span className="text-[10px] text-[var(--text-3)]">
                         Hace {m.daysSinceLastAttempt}d
                       </span>
                     )}
@@ -112,20 +138,22 @@ export default async function MovementsPage() {
                 <div className="text-right shrink-0">
                   {m.currentBest !== null ? (
                     <>
-                      <div className="font-display text-sm font-bold text-white">
+                      <div className="font-display text-sm font-bold text-[var(--text)]">
                         {m.currentBest} {m.unit}
                       </div>
-                      <div className="text-[9px] font-bold tracking-wide mt-1 text-white/30">
+                      <div className="text-[9px] font-bold tracking-wide mt-1 text-[var(--text-3)]">
                         PR ACTUAL
                       </div>
                     </>
                   ) : (
-                    <div className="text-[11px] text-white/30">Sin PR</div>
+                    <div className="text-[11px] text-[var(--text-3)]">
+                      Sin PR
+                    </div>
                   )}
                 </div>
 
                 {/* Arrow */}
-                <div className="text-lg opacity-30 text-white/30">›</div>
+                <div className="text-lg opacity-30 text-[var(--text-3)]">›</div>
               </KCard>
             </Link>
           </AnimatedItem>
@@ -136,8 +164,10 @@ export default async function MovementsPage() {
       {catalog.length > 0 && (
         <AnimatedSection className="px-3.5 mt-8">
           <div className="flex items-baseline justify-between mb-4">
-            <p className="k-eyebrow text-white/60">BIBLIOTECA DE MOVIMIENTOS</p>
-            <span className="font-mono text-[10px] font-bold text-white/30">
+            <p className="k-eyebrow text-[var(--text-2)]">
+              BIBLIOTECA DE MOVIMIENTOS
+            </p>
+            <span className="font-mono text-[10px] font-bold text-[var(--text-3)]">
               {catalog.length} MOVIMIENTOS
             </span>
           </div>

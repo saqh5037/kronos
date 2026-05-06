@@ -11,11 +11,10 @@ import { rangeFromParams, previousRange, formatRange } from "@/lib/dates";
 import { MetricDelta } from "@/components/charts/MetricDelta";
 import Sparkline from "@/components/kronos/Sparkline";
 import CountUp from "@/components/kronos/CountUp";
-import {
-  AnimatedSection,
-  AnimatedItem,
-} from "@/components/kronos/AnimatedSection";
+
 import KCard from "@/components/kronos/KCard";
+import RevealOnScroll from "@/components/kronos/RevealOnScroll";
+import Eyebrow from "@/components/kronos/Eyebrow";
 import { DashboardFilters } from "./_components/DashboardFilters";
 import { RevenueArea, AttendanceArea } from "./_components/DashboardCharts";
 
@@ -64,8 +63,8 @@ export default async function AdminDashboardPage({
   if (!data || !box) {
     return (
       <div className="p-8">
-        <p className="k-eyebrow mb-2">Dashboard</p>
-        <h1 className="font-display text-3xl font-bold tracking-tight">
+        <Eyebrow>Dashboard</Eyebrow>
+        <h1 className="font-display text-3xl font-bold tracking-tight mt-2">
           Panel de control
         </h1>
         <p className="mt-4 text-sm" style={{ color: "var(--text-2)" }}>
@@ -109,7 +108,6 @@ export default async function AdminDashboardPage({
       ? 0
       : attendancePrev.reduce((s, p) => s + p.attended, 0) / prevCompleted;
 
-  // Sparkline data: last 14 days
   const last14 = revenuePoints.slice(-14);
   const last14Attended = attendancePoints.slice(-14);
 
@@ -118,119 +116,143 @@ export default async function AdminDashboardPage({
   const allClear = expiringCount === 0 && waitlistCount === 0;
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 p-8">
-      <AnimatedSection>
-        <AnimatedItem>
-          <p className="k-eyebrow mb-2">Hoy</p>
-          <h1 className="font-display text-3xl font-bold tracking-tight">
-            {box.name}
-          </h1>
-          <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
-            {fmtDate.format(new Date())} · {formatRange(range)}
-          </p>
-        </AnimatedItem>
-      </AnimatedSection>
+    <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 lg:p-8">
+      {/* Header */}
+      <RevealOnScroll variant="fade-up">
+        <Eyebrow>Hoy</Eyebrow>
+        <h1 className="font-display text-3xl lg:text-4xl font-bold tracking-tight mt-1">
+          {box.name}
+        </h1>
+        <p
+          className="mt-1 text-sm font-mono tracking-wide"
+          style={{ color: "var(--text-3)" }}
+        >
+          {fmtDate.format(new Date())} · {formatRange(range)}
+        </p>
+      </RevealOnScroll>
 
       <DashboardFilters />
 
-      {/* Hero KPIs con MetricDelta + sparkline */}
-      <div className="k-stagger grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiWithSpark
-          label="Ingresos rango"
-          value={fmtMoney.format(rangeRevenue)}
-          numericValue={rangeRevenue}
-          countMoney
-          tone="moss"
-          delta={
-            <MetricDelta
-              current={rangeRevenue}
-              previous={rangeRevenuePrev}
-              goodWhen="higher"
-              formatter={(v) => fmtMoney.format(v)}
-            />
-          }
-          sparkValues={last14.map((p) => p.revenue)}
-          sparkColor="var(--moss)"
-        />
-        <KpiWithSpark
-          label="Asistencias rango"
-          value={String(rangeAttended)}
-          numericValue={rangeAttended}
-          tone="steel"
-          delta={
-            <MetricDelta
-              current={rangeAttended}
-              previous={rangeAttendedPrev}
-              goodWhen="higher"
-              formatter={(v) => v.toFixed(0)}
-            />
-          }
-          sparkValues={last14Attended.map((p) => p.attended)}
-          sparkColor="var(--steel)"
-        />
-        <KpiWithSpark
-          label="Tasa asistencia"
-          value={`${Math.round(rangeAttendanceRate * 100)}%`}
-          numericValue={Math.round(rangeAttendanceRate * 100)}
-          countSuffix="%"
-          tone={
-            rangeAttendanceRate >= 0.85
-              ? "moss"
-              : rangeAttendanceRate >= 0.65
-                ? "steel"
-                : "ember"
-          }
-          delta={
-            <MetricDelta
-              current={rangeAttendanceRate}
-              previous={prevAttendanceRate}
-              goodWhen="higher"
-              formatter={(v) => `${(v * 100).toFixed(1)}%`}
-            />
-          }
-        />
-        <KpiWithSpark
-          label="Hoy"
-          value={`${data.todayStats.totalClasses} clases`}
-          subtitle={`${data.todayStats.totalAttended}/${data.todayStats.totalBooked} asistidos · ${fmtMoney.format(data.todayRevenue)}`}
-        />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <RevealOnScroll variant="fade-up" delay={0}>
+          <KpiWithSpark
+            label="Ingresos rango"
+            value={fmtMoney.format(rangeRevenue)}
+            numericValue={rangeRevenue}
+            countMoney
+            tone="moss"
+            delta={
+              <MetricDelta
+                current={rangeRevenue}
+                previous={rangeRevenuePrev}
+                goodWhen="higher"
+                formatter={(v) => fmtMoney.format(v)}
+              />
+            }
+            sparkValues={last14.map((p) => p.revenue)}
+            sparkColor="var(--moss)"
+          />
+        </RevealOnScroll>
+        <RevealOnScroll variant="fade-up" delay={80}>
+          <KpiWithSpark
+            label="Asistencias rango"
+            value={String(rangeAttended)}
+            numericValue={rangeAttended}
+            tone="steel"
+            delta={
+              <MetricDelta
+                current={rangeAttended}
+                previous={rangeAttendedPrev}
+                goodWhen="higher"
+                formatter={(v) => v.toFixed(0)}
+              />
+            }
+            sparkValues={last14Attended.map((p) => p.attended)}
+            sparkColor="var(--steel)"
+          />
+        </RevealOnScroll>
+        <RevealOnScroll variant="fade-up" delay={160}>
+          <KpiWithSpark
+            label="Tasa asistencia"
+            value={`${Math.round(rangeAttendanceRate * 100)}%`}
+            numericValue={Math.round(rangeAttendanceRate * 100)}
+            countSuffix="%"
+            tone={
+              rangeAttendanceRate >= 0.85
+                ? "moss"
+                : rangeAttendanceRate >= 0.65
+                  ? "steel"
+                  : "ember"
+            }
+            delta={
+              <MetricDelta
+                current={rangeAttendanceRate}
+                previous={prevAttendanceRate}
+                goodWhen="higher"
+                formatter={(v) => `${(v * 100).toFixed(1)}%`}
+              />
+            }
+          />
+        </RevealOnScroll>
+        <RevealOnScroll variant="fade-up" delay={240}>
+          <KpiWithSpark
+            label="Hoy"
+            value={`${data.todayStats.totalClasses} clases`}
+            subtitle={`${data.todayStats.totalAttended}/${data.todayStats.totalBooked} asistidos · ${fmtMoney.format(data.todayRevenue)}`}
+          />
+        </RevealOnScroll>
       </div>
 
       {/* Charts */}
-      <div className="k-stagger grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <KCard>
-          <div className="p-4">
-            <p className="k-eyebrow mb-2">Ingresos · {formatRange(range)}</p>
-            {revenuePoints.some((p) => p.revenue > 0) ? (
-              <RevenueArea data={revenuePoints} />
-            ) : (
-              <p className="py-10 text-center text-sm text-[var(--text-3)]">
-                Sin pagos en el rango
-              </p>
-            )}
-          </div>
-        </KCard>
-        <KCard>
-          <div className="p-4">
-            <p className="k-eyebrow mb-2">Asistencias · {formatRange(range)}</p>
-            {attendancePoints.some((p) => p.attended > 0) ? (
-              <AttendanceArea data={attendancePoints} />
-            ) : (
-              <p className="py-10 text-center text-sm text-[var(--text-3)]">
-                Sin actividad en el rango
-              </p>
-            )}
-          </div>
-        </KCard>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <RevealOnScroll variant="fade-up" delay={0}>
+          <KCard>
+            <div className="p-5">
+              <Eyebrow withBar={false} color="text">
+                Ingresos · {formatRange(range)}
+              </Eyebrow>
+              {revenuePoints.some((p) => p.revenue > 0) ? (
+                <RevenueArea data={revenuePoints} />
+              ) : (
+                <p
+                  className="py-10 text-center text-sm"
+                  style={{ color: "var(--text-3)" }}
+                >
+                  Sin pagos en el rango
+                </p>
+              )}
+            </div>
+          </KCard>
+        </RevealOnScroll>
+        <RevealOnScroll variant="fade-up" delay={100}>
+          <KCard>
+            <div className="p-5">
+              <Eyebrow withBar={false} color="text">
+                Asistencias · {formatRange(range)}
+              </Eyebrow>
+              {attendancePoints.some((p) => p.attended > 0) ? (
+                <AttendanceArea data={attendancePoints} />
+              ) : (
+                <p
+                  className="py-10 text-center text-sm"
+                  style={{ color: "var(--text-3)" }}
+                >
+                  Sin actividad en el rango
+                </p>
+              )}
+            </div>
+          </KCard>
+        </RevealOnScroll>
       </div>
 
       {/* Próximas clases + Alerts */}
-      <AnimatedSection className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <AnimatedItem>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <RevealOnScroll variant="fade-up" delay={0}>
           <KCard>
             <div className="p-5">
               <div className="mb-4 flex items-center justify-between">
-                <p className="k-eyebrow">Próximas clases</p>
+                <Eyebrow>Próximas clases</Eyebrow>
                 <Link
                   href="/admin/programacion"
                   className="text-xs font-medium transition-opacity hover:opacity-80"
@@ -273,13 +295,13 @@ export default async function AdminDashboardPage({
                           >
                             {c.coach?.name ?? "Sin coach"}
                           </p>
-                          <div className="mt-1 flex items-center gap-2">
+                          <div className="mt-1.5 flex items-center gap-2">
                             <div
                               className="h-1.5 flex-1 overflow-hidden rounded-full"
                               style={{ background: "var(--btn-ghost-bg)" }}
                             >
                               <div
-                                className="h-full rounded-full"
+                                className="h-full rounded-full transition-all duration-500"
                                 style={{
                                   width: `${Math.min(100, fillRatio * 100)}%`,
                                   background: barColor,
@@ -311,18 +333,18 @@ export default async function AdminDashboardPage({
               )}
             </div>
           </KCard>
-        </AnimatedItem>
+        </RevealOnScroll>
 
-        <AnimatedItem>
+        <RevealOnScroll variant="fade-up" delay={100}>
           <KCard>
             <div className="p-5">
-              <p className="k-eyebrow mb-4">Alertas</p>
+              <Eyebrow>Alertas</Eyebrow>
               {allClear ? (
                 <div
-                  className="rounded-xl p-4"
+                  className="rounded-2xl p-4 mt-4"
                   style={{
-                    background: "var(--recovery-soft)",
-                    border: "1px solid var(--recovery-line)",
+                    background: "var(--moss-soft)",
+                    border: "1px solid var(--moss-line)",
                   }}
                 >
                   <p
@@ -351,7 +373,7 @@ export default async function AdminDashboardPage({
                   </p>
                 </div>
               ) : (
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-2 mt-4">
                   {expiringCount > 0 && (
                     <li>
                       <Link
@@ -406,21 +428,19 @@ export default async function AdminDashboardPage({
               )}
             </div>
           </KCard>
-        </AnimatedItem>
-      </AnimatedSection>
+        </RevealOnScroll>
+      </div>
 
       {/* Quick links */}
-      <AnimatedSection>
-        <AnimatedItem>
-          <p className="k-eyebrow mb-3">Accesos rápidos</p>
-        </AnimatedItem>
+      <RevealOnScroll variant="fade-up">
+        <Eyebrow className="mb-3">Accesos rápidos</Eyebrow>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <QuickLink href="/admin/programacion" label="Crear clase" />
           <QuickLink href="/admin/atletas" label="Atletas" />
           <QuickLink href="/admin/pagos" label="Pagos" />
           <QuickLink href="/admin/reportes" label="Reportes" />
         </div>
-      </AnimatedSection>
+      </RevealOnScroll>
     </div>
   );
 }
@@ -458,15 +478,22 @@ function KpiWithSpark({
         : tone === "ember"
           ? "var(--ember)"
           : "var(--text)";
+
   return (
-    <div className="k-card p-3">
+    <div className="k-card p-4">
       <div className="flex items-start justify-between gap-2">
-        <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+        <p
+          className="font-mono text-[10px] font-semibold tracking-[0.14em] uppercase"
+          style={{ color: "var(--text-3)" }}
+        >
           {label}
         </p>
         {delta}
       </div>
-      <p className="font-display mt-1 text-2xl font-bold" style={{ color }}>
+      <p
+        className="font-display mt-1 text-2xl lg:text-[28px] font-bold"
+        style={{ color }}
+      >
         {typeof numericValue === "number" ? (
           <CountUp
             value={numericValue}
@@ -480,7 +507,9 @@ function KpiWithSpark({
         )}
       </p>
       {subtitle ? (
-        <p className="mt-1 text-xs text-[var(--text-3)]">{subtitle}</p>
+        <p className="mt-1 text-xs" style={{ color: "var(--text-3)" }}>
+          {subtitle}
+        </p>
       ) : null}
       {sparkValues && sparkValues.length >= 2 ? (
         <div className="mt-2">

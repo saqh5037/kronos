@@ -2,23 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "@/components/ThemeProvider";
+import { motion } from "framer-motion";
 
 const BUTTON_CLASS =
-  "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors";
+  "inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors";
 
 export default function ThemeToggle({
   className = "",
 }: {
   className?: string;
 }) {
-  const { theme, setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Pre-hydration shell — identical between server and client to avoid mismatch.
+  // Pre-hydration shell
   if (!mounted) {
     return (
       <button
@@ -38,7 +39,7 @@ export default function ThemeToggle({
     );
   }
 
-  const isDark = theme === "dark";
+  const isDark = resolvedTheme === "dark";
 
   return (
     <button
@@ -53,7 +54,15 @@ export default function ThemeToggle({
       aria-label={isDark ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
       title={isDark ? "Tema claro" : "Tema oscuro"}
     >
-      {isDark ? <SunIcon /> : <MoonIcon />}
+      <motion.div
+        key={isDark ? "sun" : "moon"}
+        initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+        animate={{ rotate: 0, opacity: 1, scale: 1 }}
+        exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {isDark ? <SunIcon /> : <MoonIcon />}
+      </motion.div>
       <span className="hidden sm:inline">{isDark ? "Claro" : "Oscuro"}</span>
     </button>
   );

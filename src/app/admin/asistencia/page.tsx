@@ -109,10 +109,15 @@ export default async function AsistenciaPage({
   return (
     <div className="p-8">
       <div className="mb-6">
-        <p className="k-eyebrow mb-1">Operación</p>
-        <h1 className="font-display text-3xl font-bold tracking-tight">
-          Asistencia
-        </h1>
+        <span className="k-eyebrow-bar">Operación</span>
+        <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+          <h1
+            className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
+            style={{ color: "var(--text)" }}
+          >
+            Asis<em>tencia</em>
+          </h1>
+        </div>
         <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
           {formatRange(range)} · {rangeStats.attended} asistencias en el rango
         </p>

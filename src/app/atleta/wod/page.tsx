@@ -17,6 +17,7 @@ import {
 } from "@/components/kronos/AnimatedSection";
 import KCard from "@/components/kronos/KCard";
 import MiniBarChart from "@/components/kronos/MiniBarChart";
+import Eyebrow from "@/components/kronos/Eyebrow";
 
 export const metadata = { title: "Kronos — WOD del día" };
 
@@ -42,54 +43,62 @@ export default async function WODPage() {
   }
 
   return (
-    <div className="pb-28">
-      {/* HEADER */}
-      <AnimatedSection className="flex items-center justify-between px-4 pt-14 pb-2">
-        <AnimatedItem>
-          <Link
-            href="/atleta"
-            className="w-9 h-9 rounded-[10px] flex items-center justify-center k-card"
-            aria-label="Volver"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
+    <div className="pb-28 relative">
+      {/* HERO v2.0 */}
+      <header className="relative px-4 pt-14 pb-5 overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at 0% 0%, rgba(230,0,38,0.06), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(0,191,255,0.06), transparent 60%)",
+          }}
+        />
+        <span className="k-corner-tl" aria-hidden />
+        <span className="k-corner-tr" aria-hidden />
+
+        <AnimatedSection className="relative flex items-start justify-between">
+          <AnimatedItem className="flex items-center gap-3">
+            <Link
+              href="/atleta"
+              className="w-9 h-9 rounded-full flex items-center justify-center k-glass shrink-0"
+              aria-label="Volver"
             >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </Link>
-        </AnimatedItem>
-        <AnimatedItem>
-          <div className="k-eyebrow" style={{ color: "var(--text-2)" }}>
-            {wod
-              ? `WOD · ${formatDayMonth(wod.startsAt).toUpperCase()}`
-              : "WOD"}
-          </div>
-        </AnimatedItem>
-        <AnimatedItem>
-          <button
-            className="w-9 h-9 rounded-[10px] flex items-center justify-center k-card"
-            aria-label="Más opciones"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="5" cy="12" r="1.5" />
-              <circle cx="12" cy="12" r="1.5" />
-              <circle cx="19" cy="12" r="1.5" />
-            </svg>
-          </button>
-        </AnimatedItem>
-      </AnimatedSection>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </Link>
+            <div className="min-w-0">
+              <Eyebrow withBar color="blue">
+                {wod
+                  ? `WOD · ${formatDayMonth(wod.startsAt).toUpperCase()}`
+                  : "WOD del día"}
+              </Eyebrow>
+              <div className="mt-1.5 flex items-baseline gap-2 flex-wrap">
+                <span
+                  className="font-script text-[24px] leading-none"
+                  style={{ color: "var(--red)" }}
+                >
+                  Hoy,
+                </span>
+                <h1
+                  className="k-h-italic font-display font-extrabold text-[28px] leading-[1] tracking-[-0.02em]"
+                  style={{ color: "var(--text)" }}
+                >
+                  <em>{wod?.wodName ?? "WOD"}</em>
+                </h1>
+              </div>
+            </div>
+          </AnimatedItem>
+        </AnimatedSection>
+      </header>
 
       {!wod ? (
         <div className="px-4 mt-6">

@@ -28,10 +28,21 @@ export default async function WODsPage() {
     <div className="p-8">
       <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <p className="k-eyebrow mb-1">Programación</p>
-          <h1 className="font-display font-bold text-3xl tracking-tight">
-            WODs
-          </h1>
+          <span className="k-eyebrow-bar">Programación · Biblioteca</span>
+          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+            <span
+              className="font-script text-[28px] leading-none"
+              style={{ color: "var(--red)" }}
+            >
+              Tus
+            </span>
+            <h1
+              className="k-h-italic font-display font-extrabold text-[42px] leading-[1] tracking-[-0.02em]"
+              style={{ color: "var(--text)" }}
+            >
+              <em>WODs</em>
+            </h1>
+          </div>
           <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
             Biblioteca de WODs y movimientos del box
           </p>
