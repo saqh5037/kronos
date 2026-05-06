@@ -20,5 +20,7 @@ export function extractYouTubeId(url: string | null): string | null {
 }
 
 export function getYouTubeThumbnail(videoId: string): string {
-  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  // hqdefault.jpg always exists for valid YouTube IDs.
+  // maxresdefault is only generated for videos uploaded in HD or higher.
+  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 }

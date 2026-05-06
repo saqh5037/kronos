@@ -234,6 +234,11 @@ export default function MovementCatalog({
                           alt={m.name}
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                           loading="lazy"
+                          onError={(e) => {
+                            (
+                              e.currentTarget as HTMLImageElement
+                            ).style.display = "none";
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
