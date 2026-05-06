@@ -59,3 +59,11 @@ Thumbs.db
 /.playwright-mcp/
 /tour-*.png
 /tour2-*.png
+
+# Material visual local (capturas de review, smoke checks, mockups locales)
+/demo-*.png
+/forge-*.png
+/forge-v2-*.png
+/kimi-step*.png
+/kimi-review/
+/.claude-context.md
