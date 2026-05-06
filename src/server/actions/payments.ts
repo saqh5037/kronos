@@ -232,7 +232,7 @@ export async function listOverdueMemberships(opts?: {
 
   const memberships = await db.membership.findMany({
     where: {
-      status: { in: ["ACTIVE", "PENDING"] },
+      status: { in: ["ACTIVE", "PENDING", "EXPIRED"] },
       endDate: { lt: cutoff },
     },
     orderBy: { endDate: "asc" },
