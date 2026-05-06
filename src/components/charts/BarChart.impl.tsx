@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  LineChart as RLineChart,
-  Line,
+  BarChart as RBarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { CHART_COLORS, CHART_PALETTE } from "./tokens";
 
-export type LineSeries = {
+export type BarSeries = {
   key: string;
   label?: string;
   color?: string;
@@ -21,28 +21,27 @@ export type LineSeries = {
 type Props<T extends Record<string, unknown>> = {
   data: T[];
   xKey: keyof T & string;
-  lines: LineSeries[];
+  bars: BarSeries[];
   height?: number;
   yFormatter?: (value: number) => string;
   xFormatter?: (value: string) => string;
+  stacked?: boolean;
   showLegend?: boolean;
 };
 
-export function LineChart<T extends Record<string, unknown>>({
+export function BarChart<T extends Record<string, unknown>>({
   data,
   xKey,
-  lines,
+  bars,
   height = 240,
   yFormatter,
   xFormatter,
+  stacked = false,
   showLegend = false,
 }: Props<T>) {
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <RLineChart
-        data={data}
-        margin={{ top: 8, right: 12, left: 0, bottom: 0 }}
-      >
+      <RBarChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
         <CartesianGrid
           stroke={CHART_COLORS.grid}
           strokeDasharray="3 3"
@@ -65,6 +64,7 @@ export function LineChart<T extends Record<string, unknown>>({
           width={48}
         />
         <Tooltip
+          cursor={{ fill: "var(--hover-subtle)" }}
           contentStyle={{
             background: "var(--card-elevated)",
             border: "1px solid var(--line-strong)",
@@ -81,19 +81,17 @@ export function LineChart<T extends Record<string, unknown>>({
         {showLegend ? (
           <Legend wrapperStyle={{ fontSize: 12, color: CHART_COLORS.text2 }} />
         ) : null}
-        {lines.map((line, i) => (
-          <Line
-            key={line.key}
-            type="monotone"
-            dataKey={line.key}
-            name={line.label ?? line.key}
-            stroke={line.color ?? CHART_PALETTE[i % CHART_PALETTE.length]}
-            strokeWidth={2}
-            dot={false}
-            activeDot={{ r: 4 }}
+        {bars.map((b, i) => (
+          <Bar
+            key={b.key}
+            dataKey={b.key}
+            name={b.label ?? b.key}
+            fill={b.color ?? CHART_PALETTE[i % CHART_PALETTE.length]}
+            stackId={stacked ? "1" : undefined}
+            radius={stacked ? [0, 0, 0, 0] : [4, 4, 0, 0]}
           />
         ))}
-      </RLineChart>
+      </RBarChart>
     </ResponsiveContainer>
   );
 }

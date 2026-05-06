@@ -12,16 +12,29 @@ interface PRPoint {
   value: number;
 }
 
-function buildPRSeries(_seed: number): PRPoint[] {
-  void _seed;
+// Mulberry32: PRNG determinística → mismo seed produce mismas series.
+// Evita hydration mismatch (SSR/CSR generan los mismos números).
+function mulberry32(seed: number) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function buildPRSeries(seed: number): PRPoint[] {
+  const rand = mulberry32(seed + 1);
   const today = new Date();
   const points: PRPoint[] = [];
   let v = 60;
   for (let i = 90; i >= 0; i -= 9) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
-    v += Math.random() * 3 + (i < 45 ? 1.2 : 0.6);
-    if (Math.random() > 0.6) v += Math.random() * 4;
+    v += rand() * 3 + (i < 45 ? 1.2 : 0.6);
+    if (rand() > 0.6) v += rand() * 4;
     points.push({
       date: d.toISOString(),
       value: Math.round(v * 10) / 10,
@@ -30,22 +43,22 @@ function buildPRSeries(_seed: number): PRPoint[] {
   return points;
 }
 
-function buildRevenueSeries(_seed: number) {
-  void _seed;
+function buildRevenueSeries(seed: number) {
+  const rand = mulberry32(seed + 2);
   const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago"];
   return months.map((m, i) => ({
     month: m,
-    actual: 38000 + i * 4200 + Math.random() * 8000,
-    anterior: 32000 + i * 3000 + Math.random() * 5000,
+    actual: 38000 + i * 4200 + rand() * 8000,
+    anterior: 32000 + i * 3000 + rand() * 5000,
   }));
 }
 
-function buildAttendance(_seed: number) {
-  void _seed;
+function buildAttendance(seed: number) {
+  const rand = mulberry32(seed + 3);
   const days = ["L", "M", "X", "J", "V", "S", "D"];
   return days.map((d) => ({
     day: d,
-    asistencia: Math.round(58 + Math.random() * 30),
+    asistencia: Math.round(58 + rand() * 30),
   }));
 }
 
