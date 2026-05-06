@@ -24,6 +24,11 @@ import MiniBarChart from "@/components/kronos/MiniBarChart";
 import { MyHeatmap90d } from "./_components/MyHeatmap90d";
 import { ScoresTimeline } from "./_components/ScoresTimeline";
 import { CapabilityRadar } from "@/components/charts/CapabilityRadar";
+import {
+  getTop3PRPredictions,
+  type PRPredictionCard as PRPredictionCardData,
+} from "@/server/actions/ai";
+import PRPredictionCard from "@/components/atleta/PRPredictionCard";
 
 export const metadata = { title: "Kronos — Perfil" };
 
@@ -34,15 +39,18 @@ export default async function PerfilPage() {
   let attendance90d: MyAttendanceDay[] = [];
   let scoresTimeline: MyScoreTimelinePoint[] = [];
   let capability: CapabilityProfile | null = null;
+  let prPredictions: PRPredictionCardData[] = [];
 
   try {
-    [home, prs, scores, attendance90d, scoresTimeline] = await Promise.all([
-      getAthleteHome(),
-      listMyPRs(),
-      listMyScores(30),
-      getMyAttendanceLast90d(),
-      getMyScoresTimeline(90),
-    ]);
+    [home, prs, scores, attendance90d, scoresTimeline, prPredictions] =
+      await Promise.all([
+        getAthleteHome(),
+        listMyPRs(),
+        listMyScores(30),
+        getMyAttendanceLast90d(),
+        getMyScoresTimeline(90),
+        getTop3PRPredictions(),
+      ]);
     capability = await getMyCapabilityProfile();
   } catch {
     // Sesión ausente
@@ -273,6 +281,34 @@ export default async function PerfilPage() {
                   </div>
                 </KCard>
               </AnimatedItem>
+            ))}
+          </div>
+        </AnimatedSection>
+      )}
+
+      {/* PRÓXIMOS PRS — Gemini predictions */}
+      {prPredictions.length > 0 && (
+        <AnimatedSection className="mt-5">
+          <div className="flex items-baseline justify-between px-[18px] pb-2">
+            <div
+              className="k-eyebrow"
+              style={{
+                color: "#ff2bd6",
+                textShadow: "0 0 12px rgba(255,43,214,0.35)",
+              }}
+            >
+              PRÓXIMOS PRS · KRONOS AI
+            </div>
+            <div
+              className="font-mono text-[10px] font-bold tracking-[0.08em]"
+              style={{ color: "var(--text-3)" }}
+            >
+              REGRESIÓN + IA
+            </div>
+          </div>
+          <div className="px-3.5 grid grid-cols-1 gap-2.5">
+            {prPredictions.map((card) => (
+              <PRPredictionCard key={card.movementId} card={card} />
             ))}
           </div>
         </AnimatedSection>

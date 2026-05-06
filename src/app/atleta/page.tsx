@@ -20,6 +20,8 @@ import {
   type SurveyRow,
 } from "@/server/actions/surveys";
 import QuickSurvey from "@/components/atleta/QuickSurvey";
+import PersonalizedGreeting from "@/components/atleta/PersonalizedGreeting";
+import { getDailyGreeting, type DailyGreeting } from "@/server/actions/ai";
 import { AnimatedStats } from "@/components/kronos/AnimatedStats";
 import CancelMyBookingButton from "@/components/kronos/CancelMyBookingButton";
 import { formatScore } from "@/lib/scores";
@@ -41,13 +43,15 @@ export default async function AtletaHomePage() {
   let wodScores: Awaited<ReturnType<typeof listScoresForWOD>> = [];
   let readinessSurvey: SurveyRow | null = null;
   let alreadyRespondedReadiness = true;
+  let greeting: DailyGreeting | null = null;
 
   try {
-    [home, classes, prs, wod] = await Promise.all([
+    [home, classes, prs, wod, greeting] = await Promise.all([
       getAthleteHome(),
       listAvailableClasses(7),
       listMyPRs(),
       getTodayWOD(),
+      getDailyGreeting(),
     ]);
   } catch {
     // Sesión ausente
@@ -170,6 +174,9 @@ export default async function AtletaHomePage() {
           </button>
         </AnimatedItem>
       </AnimatedSection>
+
+      {/* PERSONALIZED GREETING — Gemini-driven, demo de IA del wrap */}
+      <PersonalizedGreeting greeting={greeting} />
 
       {/* READINESS SURVEY — solo si no respondió hoy */}
       {readinessSurvey && !alreadyRespondedReadiness && (
