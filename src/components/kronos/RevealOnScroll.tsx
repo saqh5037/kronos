@@ -29,10 +29,15 @@ export default function RevealOnScroll({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Fallback: if the element starts off-screen and the observer never fires
+    // (e.g. user never scrolls, or device is short), reveal it after 600ms so
+    // content is never permanently hidden.
+    const fallback = setTimeout(() => setVisible(true), 600);
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
+            clearTimeout(fallback);
             setVisible(true);
             if (once) observer.unobserve(el);
           } else if (!once) {
@@ -43,7 +48,10 @@ export default function RevealOnScroll({
       { threshold, rootMargin: "0px 0px -32px 0px" },
     );
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      clearTimeout(fallback);
+      observer.disconnect();
+    };
   }, [once, threshold]);
 
   const baseStyle: React.CSSProperties = {

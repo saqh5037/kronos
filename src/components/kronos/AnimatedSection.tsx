@@ -51,9 +51,8 @@ export function AnimatedSection({
           transition: { staggerChildren: stagger, delayChildren: delay },
         },
       }}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-40px" }}
+      initial={false}
+      animate="show"
     >
       {children}
     </motion.div>
@@ -71,7 +70,7 @@ export function AnimatedItem({
     <motion.div
       className={className}
       variants={itemVariants}
-      initial="hidden"
+      initial={false}
       animate="show"
     >
       {children}
