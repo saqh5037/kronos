@@ -38,10 +38,17 @@ const TIME_BUCKETS: {
   { value: "afternoon", label: "Tarde (17-22)", range: [17, 22] },
 ];
 
-export function ClassesList({ classes }: { classes: AvailableClass[] }) {
+export function ClassesList({
+  classes,
+  usualHours = [],
+}: {
+  classes: AvailableClass[];
+  usualHours?: number[];
+}) {
   const [type, setType] = useState<string>("");
   const [coach, setCoach] = useState<string>("");
   const [bucket, setBucket] = useState<TimeBucket>("all");
+  const [onlyUsual, setOnlyUsual] = useState(false);
 
   const wodTypes = useMemo(() => {
     const set = new Set<string>();
@@ -62,9 +69,11 @@ export function ClassesList({ classes }: { classes: AvailableClass[] }) {
       if (coach && c.coach?.name !== coach) return false;
       const h = new Date(c.startsAt).getHours();
       if (h < range[0] || h >= range[1]) return false;
+      if (onlyUsual && usualHours.length && !usualHours.includes(h))
+        return false;
       return true;
     });
-  }, [classes, type, coach, bucket]);
+  }, [classes, type, coach, bucket, onlyUsual, usualHours]);
 
   const byDay = useMemo(() => {
     const map = new Map<string, AvailableClass[]>();
@@ -120,13 +129,28 @@ export function ClassesList({ classes }: { classes: AvailableClass[] }) {
             </option>
           ))}
         </select>
-        {(type || coach || bucket !== "all") && (
+        {usualHours.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setOnlyUsual((v) => !v)}
+            className="rounded-lg px-2.5 py-1.5 text-[10px] font-bold tracking-wider uppercase transition-all"
+            style={{
+              background: onlyUsual ? "var(--cyan)" : "transparent",
+              color: onlyUsual ? "#0a0a0c" : "var(--cyan)",
+              border: `1px solid var(--cyan)`,
+            }}
+          >
+            Mi horario
+          </button>
+        )}
+        {(type || coach || bucket !== "all" || onlyUsual) && (
           <button
             type="button"
             onClick={() => {
               setType("");
               setCoach("");
               setBucket("all");
+              setOnlyUsual(false);
             }}
             className="rounded-lg px-2 py-1.5 text-[10px] text-[var(--text-3)] hover:text-[var(--text-2)]"
           >
@@ -165,7 +189,13 @@ export function ClassesList({ classes }: { classes: AvailableClass[] }) {
                   </p>
                 )}
                 {dayClasses.map((c) => (
-                  <ClassRow key={c.id} c={c} />
+                  <ClassRow
+                    key={c.id}
+                    c={c}
+                    isUsual={usualHours.includes(
+                      new Date(c.startsAt).getHours(),
+                    )}
+                  />
                 ))}
               </div>
             );
@@ -176,11 +206,18 @@ export function ClassesList({ classes }: { classes: AvailableClass[] }) {
   );
 }
 
-function ClassRow({ c }: { c: AvailableClass }) {
+function ClassRow({
+  c,
+  isUsual = false,
+}: {
+  c: AvailableClass;
+  isUsual?: boolean;
+}) {
   const full = c.bookedCount >= c.capacity;
   const fillRatio = c.bookedCount / c.capacity;
   const past = new Date(c.startsAt) < new Date();
   const isBooked = c.myBookingStatus === "BOOKED";
+  const isOpenBox = c.kind === "OPEN_BOX";
 
   const barColor =
     full || fillRatio >= 0.85
@@ -200,10 +237,29 @@ function ClassRow({ c }: { c: AvailableClass }) {
         className="k-card relative p-3.5"
         style={{
           opacity: past ? 0.45 : 1,
-          borderColor: isBooked ? "var(--recovery-line)" : undefined,
-          boxShadow: isBooked ? "0 0 16px rgba(25,240,139,0.12)" : undefined,
+          borderColor: isBooked
+            ? "var(--recovery-line)"
+            : isUsual
+              ? "var(--cyan)"
+              : undefined,
+          boxShadow: isBooked
+            ? "0 0 16px rgba(25,240,139,0.12)"
+            : isUsual
+              ? "0 0 12px rgba(0,191,255,0.15)"
+              : undefined,
         }}
       >
+        {isUsual && !isBooked && (
+          <span
+            className="absolute -top-2 left-3 px-2 py-0.5 rounded-full font-mono text-[8px] font-bold tracking-wider uppercase"
+            style={{
+              background: "var(--cyan)",
+              color: "#0a0a0c",
+            }}
+          >
+            Tu horario
+          </span>
+        )}
         <div className="flex items-center gap-3.5">
           <div className="flex min-w-[64px] flex-col items-center gap-1">
             <div
@@ -237,8 +293,13 @@ function ClassRow({ c }: { c: AvailableClass }) {
             </div>
           </div>
           <div className="min-w-0 flex-1">
-            <div className="mb-2 truncate text-[13px] font-semibold">
-              {c.wod?.name ?? "WOD por definir"}
+            <div
+              className="mb-2 truncate text-[13px] font-semibold"
+              style={{ color: isOpenBox ? "var(--cyan)" : undefined }}
+            >
+              {isOpenBox
+                ? "Open Box · Acceso libre"
+                : (c.wod?.name ?? "WOD por definir")}
             </div>
             <div className="flex items-center gap-2">
               <div

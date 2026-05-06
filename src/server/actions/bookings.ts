@@ -56,13 +56,14 @@ export type AvailableClass = {
 
 export async function listAvailableClasses(
   daysAhead = 7,
+  fromOverride?: Date,
 ): Promise<AvailableClass[]> {
   const session = await requireSession();
   const db = withTenant(session.user.tenantId);
   const me = await getMyAthlete(session.user.id, session.user.tenantId);
 
-  const from = new Date();
-  const to = new Date(Date.now() + daysAhead * 24 * 60 * 60 * 1000);
+  const from = fromOverride ?? new Date();
+  const to = new Date(from.getTime() + daysAhead * 24 * 60 * 60 * 1000);
 
   const classes = await db.class.findMany({
     where: {
@@ -419,4 +420,40 @@ function formatRelative(target: Date): string {
   if (hours >= 1) return `en ${hours}h`;
   const min = Math.max(1, Math.floor(ms / (1000 * 60)));
   return `en ${min} min`;
+}
+
+export type UsualSlot = { hour: number; count: number };
+
+/**
+ * Compute the athlete's most-reserved hours over the last `daysBack` days.
+ * Returns up to top 3 slots ordered by frequency.
+ * Useful for "tu horario habitual" suggestions in the atleta UI.
+ */
+export async function getAthleteUsualSlots(
+  daysBack = 60,
+): Promise<UsualSlot[]> {
+  const session = await requireSession();
+  const me = await getMyAthlete(session.user.id, session.user.tenantId);
+  if (!me) return [];
+
+  const since = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000);
+  const db = withTenant(session.user.tenantId);
+  const recent = await db.booking.findMany({
+    where: {
+      athleteId: me.id,
+      status: { in: ["BOOKED", "ATTENDED"] },
+      class: { startsAt: { gte: since } },
+    },
+    select: { class: { select: { startsAt: true } } },
+  });
+
+  const counts = new Map<number, number>();
+  for (const b of recent) {
+    const h = b.class.startsAt.getHours();
+    counts.set(h, (counts.get(h) ?? 0) + 1);
+  }
+  return Array.from(counts.entries())
+    .map(([hour, count]) => ({ hour, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
 }
