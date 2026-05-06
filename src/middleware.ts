@@ -3,10 +3,19 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
-    const role = req.nextauth.token?.role as string | undefined;
+    const token = req.nextauth.token;
+    const tokenId = token?.id as string | undefined;
+    const role = token?.role as string | undefined;
     const pathname = req.nextUrl.pathname;
     const isAdminSurface = pathname.startsWith("/admin");
     const isAtletaSurface = pathname.startsWith("/atleta");
+
+    // Stale JWT (user was deleted, e.g. after DB reset) — purge and re-login.
+    if (token && !tokenId) {
+      const url = new URL("/api/auth/signout", req.url);
+      url.searchParams.set("callbackUrl", "/login");
+      return NextResponse.redirect(url);
+    }
 
     if (!role) return NextResponse.next();
 

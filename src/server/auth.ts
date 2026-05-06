@@ -43,6 +43,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        // Initial sign-in: hydrate token from DB
         const dbUser = await db.user.findUnique({
           where: { email: user.email! },
           select: { id: true, role: true, tenantId: true },
@@ -52,11 +53,33 @@ export const authOptions: NextAuthOptions = {
           token.role = dbUser.role;
           token.tenantId = dbUser.tenantId;
         }
+      } else if (token.id) {
+        // Subsequent request: revalidate that the user still exists.
+        // Catches the "DB was reset, JWT points to a deleted user/tenant" case.
+        const exists = await db.user.findUnique({
+          where: { id: token.id as string },
+          select: { id: true, role: true, tenantId: true },
+        });
+        if (!exists) {
+          // User no longer exists — invalidate token to force re-login.
+          return {
+            ...token,
+            id: undefined,
+            role: undefined,
+            tenantId: undefined,
+          };
+        }
+        if (exists.tenantId !== token.tenantId) {
+          token.tenantId = exists.tenantId;
+        }
+        if (exists.role !== token.role) {
+          token.role = exists.role;
+        }
       }
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      if (token && token.id) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
         session.user.tenantId = token.tenantId as string;
