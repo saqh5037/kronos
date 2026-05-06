@@ -138,7 +138,7 @@ export default function TabBar() {
         })}
         {/* Theme toggle */}
         <div className="flex items-center justify-center px-1">
-          <ThemeToggle iconOnly className="!p-2 !rounded-full !w-9 !h-9" />
+          <ThemeToggle iconOnly className="!p-2 !rounded-full !w-11 !h-11" />
         </div>
       </div>
     </div>

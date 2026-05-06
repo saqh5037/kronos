@@ -330,7 +330,7 @@ export default function AdminSidebar({
           aria-label="Abrir menú"
           aria-expanded={open}
           onClick={() => setOpen(true)}
-          className="w-9 h-9 flex items-center justify-center rounded-xl border"
+          className="w-11 h-11 flex items-center justify-center rounded-xl border"
           style={{ borderColor: "var(--line)", background: "var(--card)" }}
         >
           <svg
@@ -390,7 +390,7 @@ export default function AdminSidebar({
             type="button"
             aria-label="Cerrar menú"
             onClick={() => setOpen(false)}
-            className="lg:hidden w-7 h-7 flex items-center justify-center rounded-lg"
+            className="lg:hidden w-11 h-11 flex items-center justify-center rounded-lg"
             style={{
               color: "var(--text-2)",
               background: "var(--btn-ghost-bg)",

@@ -896,6 +896,25 @@
     transform: scale(0.98);
   }
 
+  /* F7: Touch targets — 44px en mobile (Apple HIG / Material) */
+  @media (max-width: 767px) {
+    .k-btn-grad,
+    .k-btn-ghost {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(
+        [type="file"]
+      ):not([type="range"]),
+    select,
+    textarea {
+      min-height: 44px;
+    }
+  }
+
   /* ── Chips ── */
   .k-chip {
     display: inline-flex;
