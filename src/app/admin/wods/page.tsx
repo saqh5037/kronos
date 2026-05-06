@@ -1,8 +1,9 @@
-import { listWODs, type WODSummary } from "@/server/actions/wods";
+import { listWODs } from "@/server/actions/wods";
+import type { WODSummary } from "@/server/actions/wods";
 import { listMovements } from "@/server/actions/movements";
 import WODForm from "@/components/WODForm";
 import MovementForm from "@/components/MovementForm";
-import { AnimatedWODCard } from "@/components/kronos/AnimatedWODCard";
+import { WODHeroCard } from "@/components/kronos/WODHeroCard";
 
 export const metadata = { title: "Kronos — WODs" };
 
@@ -64,9 +65,9 @@ export default async function WODsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {wods.map((w) => (
-                <WODCard key={w.id} w={w} />
+                <WODHeroCard key={w.id} w={w} />
               ))}
             </div>
           )}
@@ -118,40 +119,5 @@ export default async function WODsPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-function WODCard({ w }: { w: WODSummary }) {
-  return (
-    <AnimatedWODCard>
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="font-display font-bold text-lg">{w.name}</h3>
-        <span className="k-chip k-chip-steel text-[10px] flex-shrink-0">
-          {w.type}
-        </span>
-      </div>
-      {w.description && (
-        <p
-          className="text-xs mt-3 line-clamp-3 leading-relaxed"
-          style={{ color: "var(--text-2)" }}
-        >
-          {w.description}
-        </p>
-      )}
-      <div
-        className="flex items-center gap-3 mt-4 text-[10px]"
-        style={{ color: "var(--text-3)" }}
-      >
-        <span className="font-mono font-semibold">{w.movementCount} mov.</span>
-        <span className="opacity-40">·</span>
-        <span className="font-mono font-semibold">{w.scoreType}</span>
-        {w.timeCap && (
-          <>
-            <span className="opacity-40">·</span>
-            <span className="font-mono font-semibold">{w.timeCap}min cap</span>
-          </>
-        )}
-      </div>
-    </AnimatedWODCard>
   );
 }
