@@ -1429,6 +1429,65 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   KRONOS SKELETON — cinematic shimmer
+   ═══════════════════════════════════════════════════════════ */
+
+:root,
+.light {
+  --kronos-skeleton-bg: rgba(58, 163, 255, 0.06);
+  --kronos-skeleton-border: rgba(58, 163, 255, 0.12);
+  --kronos-skeleton-shimmer: rgba(58, 163, 255, 0.16);
+}
+
+.dark {
+  --kronos-skeleton-bg: rgba(58, 163, 255, 0.08);
+  --kronos-skeleton-border: rgba(58, 163, 255, 0.18);
+  --kronos-skeleton-shimmer: rgba(58, 163, 255, 0.28);
+}
+
+.k-skeleton {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.k-skeleton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 30%,
+    var(--kronos-skeleton-shimmer) 50%,
+    transparent 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: 200% 0;
+  animation: k-skeleton-shimmer 1.6s linear infinite;
+  animation-delay: inherit;
+  pointer-events: none;
+}
+
+@keyframes k-skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k-skeleton::before {
+    animation: none;
+    background: var(--kronos-skeleton-shimmer);
+    opacity: 0.3;
+  }
+}
+
 .k-toast::before {
   content: "";
   position: absolute;
