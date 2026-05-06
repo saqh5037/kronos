@@ -81,3 +81,109 @@ export async function updateBox(data: unknown) {
   revalidatePath(`/tv/${updated.slug}`);
   return updated;
 }
+
+export type DaySchedule = { kind: "WOD" | "OPEN_BOX"; hours: number[] } | null;
+export type WeeklySchedule = {
+  mon: DaySchedule;
+  tue: DaySchedule;
+  wed: DaySchedule;
+  thu: DaySchedule;
+  fri: DaySchedule;
+  sat: DaySchedule;
+  sun: DaySchedule;
+};
+
+export type BoxScheduleSettings = {
+  defaultClassCapacity: number;
+  bookingOpenHoursAhead: number;
+  cancelCloseMinBefore: number;
+  weeklySchedule: WeeklySchedule;
+};
+
+const EMPTY_SCHEDULE: WeeklySchedule = {
+  mon: null,
+  tue: null,
+  wed: null,
+  thu: null,
+  fri: null,
+  sat: null,
+  sun: null,
+};
+
+export async function getBoxSchedule(): Promise<BoxScheduleSettings> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+
+  const box = await prismaBase.box.findUnique({
+    where: { id: session.user.tenantId },
+    select: {
+      defaultClassCapacity: true,
+      bookingOpenHoursAhead: true,
+      cancelCloseMinBefore: true,
+      weeklySchedule: true,
+    },
+  });
+  if (!box) throw new Error("Box not found");
+
+  return {
+    defaultClassCapacity: box.defaultClassCapacity,
+    bookingOpenHoursAhead: box.bookingOpenHoursAhead,
+    cancelCloseMinBefore: box.cancelCloseMinBefore,
+    weeklySchedule:
+      (box.weeklySchedule as WeeklySchedule | null) ?? EMPTY_SCHEDULE,
+  };
+}
+
+export async function updateBoxSchedule(input: BoxScheduleSettings) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  if (session.user.role !== "OWNER") {
+    throw new Error("Forbidden: solo OWNER puede modificar horarios");
+  }
+
+  const cap = Math.max(
+    1,
+    Math.min(200, Math.round(input.defaultClassCapacity)),
+  );
+  const open = Math.max(
+    0,
+    Math.min(168, Math.round(input.bookingOpenHoursAhead)),
+  );
+  const close = Math.max(
+    0,
+    Math.min(720, Math.round(input.cancelCloseMinBefore)),
+  );
+
+  // sanitize hours (0-23, dedupe, sort)
+  function clean(d: DaySchedule): DaySchedule {
+    if (!d) return null;
+    const hrs = Array.from(
+      new Set(d.hours.filter((h) => Number.isInteger(h) && h >= 0 && h < 24)),
+    ).sort((a, b) => a - b);
+    if (hrs.length === 0) return null;
+    return { kind: d.kind === "OPEN_BOX" ? "OPEN_BOX" : "WOD", hours: hrs };
+  }
+
+  const ws: WeeklySchedule = {
+    mon: clean(input.weeklySchedule.mon),
+    tue: clean(input.weeklySchedule.tue),
+    wed: clean(input.weeklySchedule.wed),
+    thu: clean(input.weeklySchedule.thu),
+    fri: clean(input.weeklySchedule.fri),
+    sat: clean(input.weeklySchedule.sat),
+    sun: clean(input.weeklySchedule.sun),
+  };
+
+  await prismaBase.box.update({
+    where: { id: session.user.tenantId },
+    data: {
+      defaultClassCapacity: cap,
+      bookingOpenHoursAhead: open,
+      cancelCloseMinBefore: close,
+      weeklySchedule: ws,
+    },
+  });
+
+  revalidatePath("/admin/ajustes/horarios");
+  return { ok: true };
+}
