@@ -1,9 +1,13 @@
 import { describe, it, expect } from "vitest";
 import {
   decideBooking,
+  decideCancel,
   nextWaitlistPromotion,
+  bookingOpensAt,
+  cancelDeadline,
   type ClassSnapshot,
   type BookingSnapshot,
+  type BookingWindow,
 } from "../../src/lib/booking";
 
 const future = new Date(Date.now() + 1000 * 60 * 60 * 24); // tomorrow
@@ -104,6 +108,138 @@ describe("decideBooking", () => {
     ];
     const result = decideBooking(classOpen, bookings, "athlete-1");
     expect(result).toEqual({ status: "BOOKED" });
+  });
+});
+
+describe("decideBooking — 24h opening window", () => {
+  const window: BookingWindow = {
+    openHoursAhead: 24,
+    cancelCloseMinBefore: 30,
+  };
+
+  it("blocks booking when class is more than 24h away", () => {
+    const now = new Date("2026-05-06T10:00:00Z");
+    const startsAt = new Date("2026-05-08T10:00:00Z"); // 48h ahead
+    const result = decideBooking(
+      { isActive: true, startsAt, capacity: 10 },
+      [],
+      "athlete-1",
+      now,
+      window,
+    );
+    expect(result).toMatchObject({ error: "BOOKING_NOT_OPEN_YET" });
+    if ("opensAt" in result) {
+      expect(result.opensAt.toISOString()).toBe("2026-05-07T10:00:00.000Z");
+    }
+  });
+
+  it("allows booking exactly at the 24h opening boundary", () => {
+    const startsAt = new Date("2026-05-07T10:00:00Z");
+    const now = new Date("2026-05-06T10:00:00Z"); // exactly 24h ahead
+    const result = decideBooking(
+      { isActive: true, startsAt, capacity: 10 },
+      [],
+      "athlete-1",
+      now,
+      window,
+    );
+    expect(result).toEqual({ status: "BOOKED" });
+  });
+
+  it("allows booking 1 hour before class start", () => {
+    const startsAt = new Date("2026-05-07T10:00:00Z");
+    const now = new Date("2026-05-07T09:00:00Z"); // 1h before
+    const result = decideBooking(
+      { isActive: true, startsAt, capacity: 10 },
+      [],
+      "athlete-1",
+      now,
+      window,
+    );
+    expect(result).toEqual({ status: "BOOKED" });
+  });
+
+  it("ignores window if openHoursAhead=0 (back-compat)", () => {
+    const startsAt = new Date("2026-05-08T10:00:00Z");
+    const now = new Date("2026-05-06T10:00:00Z");
+    const result = decideBooking(
+      { isActive: true, startsAt, capacity: 10 },
+      [],
+      "athlete-1",
+      now,
+      { openHoursAhead: 0, cancelCloseMinBefore: 30 },
+    );
+    expect(result).toEqual({ status: "BOOKED" });
+  });
+});
+
+describe("decideCancel — 30min closing window", () => {
+  const window: BookingWindow = {
+    openHoursAhead: 24,
+    cancelCloseMinBefore: 30,
+  };
+
+  it("allows cancel when more than 30min before class", () => {
+    const startsAt = new Date("2026-05-07T10:00:00Z");
+    const now = new Date("2026-05-07T09:00:00Z"); // 60min before
+    expect(
+      decideCancel({ startsAt }, { status: "BOOKED" }, now, window),
+    ).toEqual({ ok: true });
+  });
+
+  it("blocks cancel within last 30min", () => {
+    const startsAt = new Date("2026-05-07T10:00:00Z");
+    const now = new Date("2026-05-07T09:45:00Z"); // 15min before
+    const result = decideCancel(
+      { startsAt },
+      { status: "BOOKED" },
+      now,
+      window,
+    );
+    expect(result).toMatchObject({ error: "CANCEL_TOO_LATE" });
+    if ("deadline" in result) {
+      expect(result.deadline.toISOString()).toBe("2026-05-07T09:30:00.000Z");
+    }
+  });
+
+  it("allows cancel exactly at the 30min boundary", () => {
+    const startsAt = new Date("2026-05-07T10:00:00Z");
+    const now = new Date("2026-05-07T09:30:00Z"); // exactly 30min before
+    expect(
+      decideCancel({ startsAt }, { status: "BOOKED" }, now, window),
+    ).toEqual({ ok: true });
+  });
+
+  it("blocks cancel when class is in past", () => {
+    const startsAt = new Date("2026-05-07T10:00:00Z");
+    const now = new Date("2026-05-07T11:00:00Z");
+    expect(
+      decideCancel({ startsAt }, { status: "BOOKED" }, now, window),
+    ).toEqual({ error: "CLASS_IN_PAST" });
+  });
+
+  it("returns ALREADY_CANCELLED for cancelled booking", () => {
+    const startsAt = new Date("2026-05-07T10:00:00Z");
+    const now = new Date("2026-05-07T09:00:00Z");
+    expect(
+      decideCancel({ startsAt }, { status: "CANCELLED" }, now, window),
+    ).toEqual({ error: "ALREADY_CANCELLED" });
+  });
+});
+
+describe("bookingOpensAt / cancelDeadline", () => {
+  it("computes opening moment 24h before class", () => {
+    const startsAt = new Date("2026-05-07T10:00:00Z");
+    expect(bookingOpensAt({ startsAt }).toISOString()).toBe(
+      "2026-05-06T10:00:00.000Z",
+    );
+  });
+
+  it("computes cancel deadline 30min before class", () => {
+    const startsAt = new Date("2026-05-07T10:00:00Z");
+    expect(cancelDeadline({ startsAt }).toISOString()).toBe(
+      "2026-05-07T09:30:00.000Z",
+    );
   });
 });
 

@@ -6,8 +6,10 @@ import { authOptions } from "../auth";
 import { withTenant, db as rawDb } from "../db";
 import {
   decideBooking,
+  decideCancel,
   nextWaitlistPromotion,
   type BookingSnapshot,
+  type BookingWindow,
 } from "@/lib/booking";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
@@ -25,6 +27,17 @@ async function requireSession() {
 async function getMyAthlete(userId: string, tenantId: string) {
   const db = withTenant(tenantId);
   return db.athlete.findFirst({ where: { userId } });
+}
+
+async function getBoxBookingWindow(tenantId: string): Promise<BookingWindow> {
+  const box = await rawDb.box.findUnique({
+    where: { id: tenantId },
+    select: { bookingOpenHoursAhead: true, cancelCloseMinBefore: true },
+  });
+  return {
+    openHoursAhead: box?.bookingOpenHoursAhead ?? 24,
+    cancelCloseMinBefore: box?.cancelCloseMinBefore ?? 30,
+  };
 }
 
 export type AvailableClass = {
@@ -155,6 +168,8 @@ export async function bookClass(classId: string) {
   const me = await getMyAthlete(session.user.id, tenantId);
   if (!me) throw new Error("No tienes perfil de atleta en este box");
 
+  const window = await getBoxBookingWindow(tenantId);
+
   // Re-fetch class + bookings INSIDE the transaction so two concurrent
   // requests can't both see the same "1 slot left" state. Serializable
   // isolation makes the second tx retry or fail.
@@ -176,10 +191,12 @@ export async function bookClass(classId: string) {
         },
         klass.bookings as BookingSnapshot[],
         me.id,
+        new Date(),
+        window,
       );
 
       if ("error" in d) {
-        throw new Error(translateBookingError(d.error));
+        throw new Error(translateBookingError(d));
       }
 
       await tx.booking.upsert({
@@ -227,6 +244,7 @@ export async function bookClass(classId: string) {
 export async function cancelBooking(bookingId: string) {
   const session = await requireSession();
   const tenantId = session.user.tenantId;
+  const window = await getBoxBookingWindow(tenantId);
 
   await rawDb.$transaction(
     async (tx) => {
@@ -236,6 +254,7 @@ export async function cancelBooking(bookingId: string) {
           class: {
             select: {
               id: true,
+              startsAt: true,
               bookings: {
                 orderBy: { bookedAt: "asc" },
                 select: { id: true, status: true },
@@ -245,6 +264,17 @@ export async function cancelBooking(bookingId: string) {
         },
       });
       if (!booking) throw new Error("Reserva no encontrada");
+
+      const cancelDecision = decideCancel(
+        { startsAt: booking.class.startsAt },
+        { status: booking.status },
+        new Date(),
+        window,
+      );
+      if ("error" in cancelDecision) {
+        if (cancelDecision.error === "ALREADY_CANCELLED") return;
+        throw new Error(translateCancelError(cancelDecision));
+      }
 
       // Idempotent: cancelling an already-cancelled booking is a no-op.
       if (booking.status === "CANCELLED") return;
@@ -353,15 +383,40 @@ export async function markNoShow(bookingId: string) {
   return { ok: true };
 }
 
-function translateBookingError(code: string): string {
-  switch (code) {
+function translateBookingError(d: { error: string; opensAt?: Date }): string {
+  switch (d.error) {
     case "CLASS_CANCELLED":
       return "Esta clase fue cancelada";
     case "CLASS_IN_PAST":
       return "Esta clase ya empezó";
     case "ALREADY_BOOKED":
       return "Ya tienes reserva en esta clase";
+    case "BOOKING_NOT_OPEN_YET":
+      return d.opensAt
+        ? `Las reservas abren ${formatRelative(d.opensAt)}`
+        : "Las reservas aún no están abiertas";
     default:
       return "No se pudo reservar";
   }
+}
+
+function translateCancelError(d: { error: string; deadline?: Date }): string {
+  switch (d.error) {
+    case "CLASS_IN_PAST":
+      return "Esta clase ya empezó";
+    case "CANCEL_TOO_LATE":
+      return "Ya no se puede cancelar (cierre 30 min antes)";
+    default:
+      return "No se pudo cancelar";
+  }
+}
+
+function formatRelative(target: Date): string {
+  const ms = target.getTime() - Date.now();
+  if (ms <= 0) return "ahora";
+  const hours = Math.floor(ms / (1000 * 60 * 60));
+  if (hours >= 24) return `en ${Math.floor(hours / 24)}d ${hours % 24}h`;
+  if (hours >= 1) return `en ${hours}h`;
+  const min = Math.max(1, Math.floor(ms / (1000 * 60)));
+  return `en ${min} min`;
 }
