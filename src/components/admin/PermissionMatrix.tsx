@@ -131,23 +131,23 @@ export default function PermissionMatrix({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[var(--line)]">
-              <th className="text-left p-4 text-white/40 font-mono text-[10px] uppercase tracking-wider">
+              <th className="text-left p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider">
                 Acción
               </th>
               {ROLES.map((role) => (
                 <th
                   key={role}
-                  className="text-center p-4 text-white/40 font-mono text-[10px] uppercase tracking-wider w-28"
+                  className="text-center p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider w-28"
                 >
                   {ROLE_LABELS[role]}
                 </th>
               ))}
-              <th className="text-center p-4 text-white/40 font-mono text-[10px] uppercase tracking-wider w-32">
+              <th className="text-center p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider w-32">
                 <span className="inline-flex items-center gap-1">
                   <span>🛡️</span> Aprobación
                 </span>
               </th>
-              <th className="text-center p-4 text-white/40 font-mono text-[10px] uppercase tracking-wider w-36">
+              <th className="text-center p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider w-36">
                 Umbral (MXN)
               </th>
               <th className="w-20 p-4"></th>
@@ -170,7 +170,7 @@ export default function PermissionMatrix({
                       <span className="text-lg">
                         {ACTION_ICONS[action] ?? "⚙️"}
                       </span>
-                      <span className="font-medium text-white text-[13px]">
+                      <span className="font-medium text-text text-[13px]">
                         {ACTION_LABELS[action]}
                       </span>
                     </div>
@@ -261,7 +261,7 @@ export default function PermissionMatrix({
                   {/* Threshold */}
                   <td className="p-4 text-center">
                     <div className="relative inline-block">
-                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30 text-xs">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-3 text-xs">
                         $
                       </span>
                       <input
@@ -269,14 +269,14 @@ export default function PermissionMatrix({
                         defaultValue={state.threshold ?? ""}
                         onBlur={(e) => updateThreshold(action, e.target.value)}
                         placeholder="—"
-                        className="w-24 bg-[var(--card-2)] text-white text-sm rounded-lg pl-6 pr-2 py-1.5 border border-white/10 text-center focus:outline-none focus:border-[var(--steel)] transition-colors"
+                        className="w-24 bg-[var(--card-2)] text-text text-sm rounded-lg pl-6 pr-2 py-1.5 border border-white/10 text-center focus:outline-none focus:border-[var(--steel)] transition-colors"
                         min={0}
                       />
                     </div>
                   </td>
 
                   <td className="p-4 text-right">
-                    <span className="text-[10px] text-white/20 font-mono">
+                    <span className="text-[10px] text-text-3 font-mono">
                       OWNER
                     </span>
                   </td>

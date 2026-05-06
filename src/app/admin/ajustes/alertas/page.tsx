@@ -35,10 +35,10 @@ export default async function AlertasPage() {
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
       <p className="k-eyebrow mb-2">Notificaciones</p>
-      <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight mb-1 text-white">
+      <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight mb-1 text-text">
         Alertas
       </h1>
-      <p className="text-white/50 mb-6 text-sm">
+      <p className="text-text-2 mb-6 text-sm">
         Define cuándo y cómo te notificamos sobre eventos críticos del box.
       </p>
 

@@ -205,10 +205,10 @@ export default function Step2Review({
     <div className="space-y-4">
       <div>
         <p className="k-eyebrow mb-1">Paso 2 de 3</p>
-        <h2 className="text-xl font-display font-bold text-white">
+        <h2 className="text-xl font-display font-bold text-text">
           Revisar scores detectados
         </h2>
-        <p className="text-sm text-white/60 mt-1">
+        <p className="text-sm text-text-2 mt-1">
           {rows.length} filas detectadas{" "}
           {needsReview > 0 && (
             <span className="text-[var(--amber)] font-medium">
@@ -227,7 +227,7 @@ export default function Step2Review({
       >
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-white/40 border-b border-[var(--line)]">
+            <tr className="text-left text-text-3 border-b border-[var(--line)]">
               <th className="pb-3 pt-3 pr-3 pl-4 w-10"></th>
               <th className="pb-3 pt-3 pr-3 font-mono text-[10px] uppercase tracking-wider">
                 Nombre en pizarra
@@ -307,9 +307,7 @@ export default function Step2Review({
 
                   {/* Raw name */}
                   <td className="py-3 pr-3">
-                    <span className="font-mono text-white/80">
-                      {row.rawName}
-                    </span>
+                    <span className="font-mono text-text-2">{row.rawName}</span>
                   </td>
 
                   {/* Athlete combobox */}
@@ -381,7 +379,7 @@ export default function Step2Review({
                         onChange={(e) =>
                           updateRow(idx, { editedScore: e.target.value })
                         }
-                        className={`bg-[var(--card-2)] text-white text-sm rounded-lg px-3 py-2 border w-24 font-mono transition-colors focus:outline-none ${
+                        className={`bg-[var(--card-2)] text-text text-sm rounded-lg px-3 py-2 border w-24 font-mono transition-colors focus:outline-none ${
                           scoreInvalid
                             ? "border-[var(--ember)] focus:border-[var(--ember)] shadow-[0_0_8px_rgba(196,69,54,0.3)]"
                             : "border-white/10 focus:border-[var(--steel)]"
@@ -408,7 +406,7 @@ export default function Step2Review({
                           scoreType: e.target.value as ScoreType,
                         })
                       }
-                      className="bg-[var(--card-2)] text-white text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
+                      className="bg-[var(--card-2)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
                     >
                       <option value="TIME">TIME</option>
                       <option value="REPS">REPS</option>
@@ -426,7 +424,7 @@ export default function Step2Review({
                           scaling: e.target.value as Scaling,
                         })
                       }
-                      className="bg-[var(--card-2)] text-white text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
+                      className="bg-[var(--card-2)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
                     >
                       <option value="RX">RX</option>
                       <option value="SCALED">SCALED</option>
@@ -479,10 +477,10 @@ export default function Step2Review({
               {/* Header: raw name + confidence + include toggle */}
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="font-mono text-white/80 text-sm truncate">
+                  <p className="font-mono text-text-2 text-sm truncate">
                     {row.rawName}
                   </p>
-                  <p className="text-[10px] text-white/30 mt-0.5 font-mono uppercase tracking-wider">
+                  <p className="text-[10px] text-text-3 mt-0.5 font-mono uppercase tracking-wider">
                     Nombre en pizarra
                   </p>
                 </div>
@@ -528,7 +526,7 @@ export default function Step2Review({
 
               {/* Athlete */}
               <div>
-                <p className="text-[10px] text-white/30 mb-1.5 font-mono uppercase tracking-wider">
+                <p className="text-[10px] text-text-3 mb-1.5 font-mono uppercase tracking-wider">
                   Atleta
                 </p>
                 <AthleteCombobox
@@ -588,7 +586,7 @@ export default function Step2Review({
               {/* Score + Type + Scaling row */}
               <div className="flex items-end gap-2">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-white/30 mb-1.5 font-mono uppercase tracking-wider">
+                  <p className="text-[10px] text-text-3 mb-1.5 font-mono uppercase tracking-wider">
                     Score
                   </p>
                   <div className="relative">
@@ -598,7 +596,7 @@ export default function Step2Review({
                       onChange={(e) =>
                         updateRow(idx, { editedScore: e.target.value })
                       }
-                      className={`w-full bg-[var(--card-2)] text-white text-sm rounded-lg px-3 py-2 border font-mono transition-colors focus:outline-none ${
+                      className={`w-full bg-[var(--card-2)] text-text text-sm rounded-lg px-3 py-2 border font-mono transition-colors focus:outline-none ${
                         scoreInvalid
                           ? "border-[var(--ember)] focus:border-[var(--ember)] shadow-[0_0_8px_rgba(196,69,54,0.3)]"
                           : "border-white/10 focus:border-[var(--steel)]"
@@ -616,7 +614,7 @@ export default function Step2Review({
                   </div>
                 </div>
                 <div>
-                  <p className="text-[10px] text-white/30 mb-1.5 font-mono uppercase tracking-wider">
+                  <p className="text-[10px] text-text-3 mb-1.5 font-mono uppercase tracking-wider">
                     Tipo
                   </p>
                   <select
@@ -626,7 +624,7 @@ export default function Step2Review({
                         scoreType: e.target.value as ScoreType,
                       })
                     }
-                    className="bg-[var(--card-2)] text-white text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
+                    className="bg-[var(--card-2)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
                   >
                     <option value="TIME">TIME</option>
                     <option value="REPS">REPS</option>
@@ -635,7 +633,7 @@ export default function Step2Review({
                   </select>
                 </div>
                 <div>
-                  <p className="text-[10px] text-white/30 mb-1.5 font-mono uppercase tracking-wider">
+                  <p className="text-[10px] text-text-3 mb-1.5 font-mono uppercase tracking-wider">
                     Scaling
                   </p>
                   <select
@@ -645,7 +643,7 @@ export default function Step2Review({
                         scaling: e.target.value as Scaling,
                       })
                     }
-                    className="bg-[var(--card-2)] text-white text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
+                    className="bg-[var(--card-2)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
                   >
                     <option value="RX">RX</option>
                     <option value="SCALED">SCALED</option>

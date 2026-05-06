@@ -112,7 +112,7 @@ export default function Step3Confirm({ count, prDetected }: Props) {
 
       <div className="space-y-2">
         <motion.h2
-          className="text-2xl font-display font-bold text-white"
+          className="text-2xl font-display font-bold text-text"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.4 }}
@@ -121,7 +121,7 @@ export default function Step3Confirm({ count, prDetected }: Props) {
           {count !== 1 ? "s" : ""} guardado{count !== 1 ? "s" : ""}
         </motion.h2>
         <motion.p
-          className="text-white/60 text-sm"
+          className="text-text-2 text-sm"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.65, duration: 0.4 }}

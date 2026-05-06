@@ -9,8 +9,10 @@ const BUTTON_CLASS =
 
 export default function ThemeToggle({
   className = "",
+  iconOnly = false,
 }: {
   className?: string;
+  iconOnly?: boolean;
 }) {
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -34,7 +36,7 @@ export default function ThemeToggle({
         title="Cambiar tema"
       >
         <span style={{ width: 14, height: 14, display: "inline-block" }} />
-        <span className="hidden sm:inline">Tema</span>
+        {!iconOnly && <span className="hidden sm:inline">Tema</span>}
       </button>
     );
   }
@@ -63,7 +65,9 @@ export default function ThemeToggle({
       >
         {isDark ? <SunIcon /> : <MoonIcon />}
       </motion.div>
-      <span className="hidden sm:inline">{isDark ? "Claro" : "Oscuro"}</span>
+      {!iconOnly && (
+        <span className="hidden sm:inline">{isDark ? "Claro" : "Oscuro"}</span>
+      )}
     </button>
   );
 }

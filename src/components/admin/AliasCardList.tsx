@@ -43,7 +43,7 @@ export default function AliasCardList({
       {/* Search */}
       <div className="relative">
         <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-text-3"
           width="16"
           height="16"
           viewBox="0 0 16 16"
@@ -62,12 +62,12 @@ export default function AliasCardList({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar apodo o atleta..."
-          className="w-full bg-[var(--card-2)] text-white text-sm rounded-xl pl-10 pr-4 py-2.5 border border-white/10 placeholder:text-white/30 focus:outline-none focus:border-[var(--steel)] transition-colors"
+          className="w-full bg-[var(--card-2)] text-text text-sm rounded-xl pl-10 pr-4 py-2.5 border border-white/10 placeholder:text-text-3 focus:outline-none focus:border-[var(--steel)] transition-colors"
         />
         {search && (
           <button
             onClick={() => setSearch("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-3 hover:text-text-2"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path
@@ -81,7 +81,7 @@ export default function AliasCardList({
         )}
       </div>
 
-      <p className="text-[11px] text-white/30 font-mono uppercase tracking-wider">
+      <p className="text-[11px] text-text-3 font-mono uppercase tracking-wider">
         {filtered.length} apodo{filtered.length !== 1 ? "s" : ""}
       </p>
 
@@ -106,7 +106,7 @@ export default function AliasCardList({
                 height="16"
                 viewBox="0 0 16 16"
                 fill="none"
-                className="text-white/20 shrink-0"
+                className="text-text-3 shrink-0"
               >
                 <path
                   d="M3 8H13M13 8L9 4M13 8L9 12"
@@ -117,11 +117,11 @@ export default function AliasCardList({
                 />
               </svg>
 
-              <span className="text-sm text-white/80 truncate flex-1">
+              <span className="text-sm text-text-2 truncate flex-1">
                 {a.athleteName}
               </span>
 
-              <span className="text-[10px] text-white/20 font-mono shrink-0 hidden sm:block">
+              <span className="text-[10px] text-text-3 font-mono shrink-0 hidden sm:block">
                 {a.createdAt.toLocaleDateString("es-MX")}
               </span>
 
@@ -129,9 +129,7 @@ export default function AliasCardList({
                 <div className="shrink-0">
                   {confirmingId === a.id ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-white/40">
-                        ¿Seguro?
-                      </span>
+                      <span className="text-[11px] text-text-3">¿Seguro?</span>
                       <button
                         onClick={() => handleDelete(a.id)}
                         className="text-[11px] text-[var(--ember)] font-medium hover:underline"
@@ -140,7 +138,7 @@ export default function AliasCardList({
                       </button>
                       <button
                         onClick={() => setConfirmingId(null)}
-                        className="text-[11px] text-white/40 hover:text-white/60"
+                        className="text-[11px] text-text-3 hover:text-text-2"
                       >
                         Cancelar
                       </button>
@@ -148,7 +146,7 @@ export default function AliasCardList({
                   ) : (
                     <button
                       onClick={() => setConfirmingId(a.id)}
-                      className="text-[11px] text-white/30 hover:text-[var(--ember)] transition-colors"
+                      className="text-[11px] text-text-3 hover:text-[var(--ember)] transition-colors"
                     >
                       <svg
                         width="14"
@@ -179,7 +177,7 @@ export default function AliasCardList({
           className="k-card p-8 text-center"
         >
           <p className="text-3xl mb-2">🔍</p>
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-text-2">
             No encontramos apodos con &quot;{search}&quot;
           </p>
         </motion.div>

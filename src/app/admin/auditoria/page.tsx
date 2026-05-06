@@ -56,8 +56,8 @@ export default async function AuditoriaPage({
       {events.length === 0 ? (
         <div className="k-card p-12 text-center">
           <p className="text-4xl mb-3">✨</p>
-          <p className="font-medium text-white">Sin eventos en este período</p>
-          <p className="text-sm text-white/40 mt-1">
+          <p className="font-medium text-text">Sin eventos en este período</p>
+          <p className="text-sm text-text-3 mt-1">
             Todo tranquilo. Amplía el rango de fechas para ver más actividad.
           </p>
         </div>

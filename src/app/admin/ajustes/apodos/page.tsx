@@ -22,10 +22,10 @@ export default async function AliasesPage() {
     <main className="p-4 md:p-6 max-w-3xl mx-auto space-y-6">
       <div>
         <p className="k-eyebrow">Ajustes</p>
-        <h1 className="text-2xl font-display font-bold text-white mt-1">
+        <h1 className="text-2xl font-display font-bold text-text mt-1">
           Apodos de atletas
         </h1>
-        <p className="text-white/50 text-sm mt-1">
+        <p className="text-text-2 text-sm mt-1">
           La app aprende los apodos que usas en la pizarra para mejorar el
           reconocimiento automático.
         </p>
@@ -34,8 +34,8 @@ export default async function AliasesPage() {
       {aliases.length === 0 ? (
         <div className="k-card p-10 text-center">
           <p className="text-4xl mb-3">🏷️</p>
-          <p className="font-medium text-white">Aún no hay apodos</p>
-          <p className="text-sm text-white/40 mt-1 max-w-sm mx-auto">
+          <p className="font-medium text-text">Aún no hay apodos</p>
+          <p className="text-sm text-text-3 mt-1 max-w-sm mx-auto">
             La app aprenderá conforme uses la pizarra OCR y corrijas los matches
             de nombres.
           </p>
@@ -44,7 +44,7 @@ export default async function AliasesPage() {
         <AliasCardList aliases={aliases} isOwner={isOwner} />
       )}
 
-      <p className="text-xs text-white/30">
+      <p className="text-xs text-text-3">
         Los apodos son específicos de tu box. No se comparten entre tenants.
       </p>
     </main>

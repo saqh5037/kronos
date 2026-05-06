@@ -34,8 +34,8 @@ export default function AuditFilters({
             onClick={() => setDays(f.value)}
             className={`relative z-10 px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
               currentDays === f.value
-                ? "text-white"
-                : "text-white/50 hover:text-white/80"
+                ? "text-text"
+                : "text-text-2 hover:text-text-2"
             }`}
           >
             {currentDays === f.value && (

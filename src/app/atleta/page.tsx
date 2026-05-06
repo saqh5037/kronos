@@ -158,48 +158,24 @@ export default async function AtletaHomePage() {
         <span className="k-corner-tl" aria-hidden />
         <span className="k-corner-tr" aria-hidden />
 
-        <div className="relative flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <Eyebrow withBar={true} color="blue">
-              Kronos · Box
-            </Eyebrow>
-            <div className="mt-2.5 flex items-baseline gap-2 flex-wrap">
-              <span
-                className="font-script text-[28px] leading-none"
-                style={{ color: "var(--red)" }}
-              >
-                Hola,
-              </span>
-              <h1
-                className="k-h-italic font-display font-extrabold text-[34px] leading-[1] tracking-[-0.02em]"
-                style={{ color: "var(--text)" }}
-              >
-                <em>{home.athlete?.firstName}</em>
-              </h1>
-            </div>
-          </div>
-          <button
-            className="relative w-10 h-10 rounded-full flex items-center justify-center k-glass"
-            aria-label="Notificaciones"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" />
-            </svg>
+        <div className="relative">
+          <Eyebrow withBar={true} color="blue">
+            Kronos · Box
+          </Eyebrow>
+          <div className="mt-2.5 flex items-baseline gap-2 flex-wrap">
             <span
-              className="absolute top-0 right-0 w-2 h-2 rounded-full"
-              style={{
-                background: "var(--red)",
-                boxShadow: "0 0 8px rgba(230,0,38,0.55)",
-              }}
-            />
-          </button>
+              className="font-script text-[28px] leading-none"
+              style={{ color: "var(--red)" }}
+            >
+              Hola,
+            </span>
+            <h1
+              className="k-h-italic font-display font-extrabold text-[34px] leading-[1] tracking-[-0.02em]"
+              style={{ color: "var(--text)" }}
+            >
+              <em>{home.athlete?.firstName}</em>
+            </h1>
+          </div>
         </div>
       </header>
 

@@ -30,7 +30,7 @@ const CHANNEL_CONFIG: Record<
     icon: "🌟",
     label: "Email + Push",
     chipClass:
-      "bg-gradient-to-r from-[var(--fire)] to-[var(--amber)] text-white border-transparent",
+      "bg-gradient-to-r from-[var(--fire)] to-[var(--amber)] text-text border-transparent",
   },
 };
 
@@ -47,7 +47,7 @@ function AvatarStack({ ids, owners }: { ids: string[]; owners: Owner[] }) {
       {display.map((o, i) => (
         <div
           key={o.id}
-          className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white border-2 border-[var(--card)]"
+          className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-text border-2 border-[var(--card)]"
           style={{
             backgroundColor: hashStringToColor(o.id),
             marginLeft: i > 0 ? -8 : 0,
@@ -60,7 +60,7 @@ function AvatarStack({ ids, owners }: { ids: string[]; owners: Owner[] }) {
       ))}
       {extra > 0 && (
         <div
-          className="w-6 h-6 rounded-full bg-[var(--card-2)] border-2 border-[var(--card)] flex items-center justify-center text-[9px] font-medium text-white/50"
+          className="w-6 h-6 rounded-full bg-[var(--card-2)] border-2 border-[var(--card)] flex items-center justify-center text-[9px] font-medium text-text-2"
           style={{ marginLeft: -8, zIndex: 0 }}
         >
           +{extra}
@@ -109,7 +109,7 @@ export default function AlertRulesPanel({
     <div className="space-y-4">
       {/* Header + Create button */}
       <div className="flex items-center justify-between">
-        <p className="text-[11px] text-white/30 font-mono uppercase tracking-wider">
+        <p className="text-[11px] text-text-3 font-mono uppercase tracking-wider">
           {rules.length} regla{rules.length !== 1 ? "s" : ""}
         </p>
         <button
@@ -140,13 +140,13 @@ export default function AlertRulesPanel({
             <form action={handleCreate} className="k-card p-5 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[11px] font-mono font-bold tracking-wider text-white/30 uppercase block mb-1.5">
+                  <label className="text-[11px] font-mono font-bold tracking-wider text-text-3 uppercase block mb-1.5">
                     Acción
                   </label>
                   <select
                     name="action"
                     required
-                    className="w-full bg-[var(--card-2)] text-white text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)]"
+                    className="w-full bg-[var(--card-2)] text-text text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)]"
                   >
                     {actionOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -157,12 +157,12 @@ export default function AlertRulesPanel({
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono font-bold tracking-wider text-white/30 uppercase block mb-1.5">
+                  <label className="text-[11px] font-mono font-bold tracking-wider text-text-3 uppercase block mb-1.5">
                     Canal
                   </label>
                   <select
                     name="channel"
-                    className="w-full bg-[var(--card-2)] text-white text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)]"
+                    className="w-full bg-[var(--card-2)] text-text text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)]"
                   >
                     <option value="EMAIL">📧 Email</option>
                     <option value="BOTH">🌟 Email + Push</option>
@@ -172,11 +172,11 @@ export default function AlertRulesPanel({
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono font-bold tracking-wider text-white/30 uppercase block mb-1.5">
+                  <label className="text-[11px] font-mono font-bold tracking-wider text-text-3 uppercase block mb-1.5">
                     Umbral mínimo (MXN)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-3 text-sm">
                       $
                     </span>
                     <input
@@ -184,20 +184,20 @@ export default function AlertRulesPanel({
                       name="threshold"
                       placeholder="Opcional"
                       min={0}
-                      className="w-full bg-[var(--card-2)] text-white text-sm rounded-lg pl-7 pr-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)]"
+                      className="w-full bg-[var(--card-2)] text-text text-sm rounded-lg pl-7 pr-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono font-bold tracking-wider text-white/30 uppercase block mb-1.5">
+                  <label className="text-[11px] font-mono font-bold tracking-wider text-text-3 uppercase block mb-1.5">
                     Destinatarios
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {owners.map((u) => (
                       <label
                         key={u.id}
-                        className="flex items-center gap-1.5 text-xs text-white/60 cursor-pointer bg-[var(--card-2)] rounded-lg px-2 py-1.5 border border-white/5"
+                        className="flex items-center gap-1.5 text-xs text-text-2 cursor-pointer bg-[var(--card-2)] rounded-lg px-2 py-1.5 border border-white/5"
                       >
                         <input
                           type="checkbox"
@@ -256,7 +256,7 @@ export default function AlertRulesPanel({
                   <div className="flex-1 min-w-0 space-y-2">
                     {/* Top row: action + channel */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium text-text">
                         {actionLabel}
                       </span>
                       <span
@@ -269,9 +269,9 @@ export default function AlertRulesPanel({
                     {/* Middle row: threshold + recipients */}
                     <div className="flex items-center gap-3 flex-wrap">
                       {rule.threshold !== null && (
-                        <span className="text-xs text-white/40">
+                        <span className="text-xs text-text-3">
                           Si supera{" "}
-                          <strong className="text-white">
+                          <strong className="text-text">
                             ${rule.threshold.toLocaleString("es-MX")} MXN
                           </strong>
                         </span>
@@ -306,7 +306,7 @@ export default function AlertRulesPanel({
                     {/* Delete */}
                     <button
                       onClick={() => handleDelete(rule.id)}
-                      className="text-white/20 hover:text-[var(--ember)] transition-colors p-1"
+                      className="text-text-3 hover:text-[var(--ember)] transition-colors p-1"
                     >
                       <svg
                         width="14"
@@ -333,8 +333,8 @@ export default function AlertRulesPanel({
       {rules.length === 0 && !showForm && (
         <div className="k-card p-10 text-center">
           <p className="text-4xl mb-3">🔔</p>
-          <p className="font-medium text-white">Sin reglas de alerta</p>
-          <p className="text-sm text-white/40 mt-1">
+          <p className="font-medium text-text">Sin reglas de alerta</p>
+          <p className="text-sm text-text-3 mt-1">
             Crea una regla para empezar a recibir notificaciones sobre eventos
             críticos.
           </p>

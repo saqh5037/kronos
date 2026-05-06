@@ -162,77 +162,75 @@ export default function HistorialPage({ wodOptions }: Props) {
       </AnimatedSection>
 
       {/* Scores list */}
-      <AnimatedSection className="px-3.5 mt-3 space-y-2">
+      <div className="px-3.5 mt-3 space-y-2">
         {isPending && scores.length === 0 && (
-          <AnimatedItem>
-            <KCard variant="ghost" className="p-6 text-center">
-              <div className="text-sm" style={{ color: "var(--text-3)" }}>
-                Cargando...
-              </div>
-            </KCard>
-          </AnimatedItem>
+          <KCard variant="ghost" className="p-6 text-center">
+            <div className="text-sm" style={{ color: "var(--text-3)" }}>
+              Cargando...
+            </div>
+          </KCard>
         )}
 
         {!isPending && scores.length === 0 && (
-          <AnimatedItem>
-            <KCard variant="ghost" className="p-6 text-center">
-              <p className="text-sm" style={{ color: "var(--text-2)" }}>
-                No hay scores que coincidan con los filtros.
-              </p>
-            </KCard>
-          </AnimatedItem>
+          <KCard variant="ghost" className="p-6 text-center">
+            <p className="text-sm" style={{ color: "var(--text-2)" }}>
+              No hay scores que coincidan con los filtros.
+            </p>
+          </KCard>
         )}
 
         {scores.map((s) => (
-          <AnimatedItem key={s.id}>
-            <KCard variant="ghost" className="p-3.5 flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
+          <KCard
+            key={s.id}
+            variant="ghost"
+            className="p-3.5 flex items-center gap-3"
+          >
+            <div
+              className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
+              style={{
+                background:
+                  s.scaling === "RX" ? "var(--moss-soft)" : "var(--bg-soft)",
+                border: `1px solid ${s.scaling === "RX" ? "var(--moss-line)" : "var(--line)"}`,
+              }}
+            >
+              <span
+                className="text-[10px] font-bold"
                 style={{
-                  background:
-                    s.scaling === "RX" ? "var(--moss-soft)" : "var(--bg-soft)",
-                  border: `1px solid ${s.scaling === "RX" ? "var(--moss-line)" : "var(--line)"}`,
+                  color: s.scaling === "RX" ? "var(--moss)" : "var(--text-3)",
                 }}
               >
-                <span
-                  className="text-[10px] font-bold"
-                  style={{
-                    color: s.scaling === "RX" ? "var(--moss)" : "var(--text-3)",
-                  }}
-                >
-                  {s.scaling === "RX" ? "RX" : "SC"}
-                </span>
+                {s.scaling === "RX" ? "RX" : "SC"}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] font-semibold truncate">
+                {s.wodName}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[13px] font-semibold truncate">
-                  {s.wodName}
-                </div>
-                <div
-                  className="text-[10px] font-mono"
-                  style={{ color: "var(--text-3)" }}
-                >
-                  {new Date(s.createdAt).toLocaleDateString("es-MX", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </div>
+              <div
+                className="text-[10px] font-mono"
+                style={{ color: "var(--text-3)" }}
+              >
+                {new Date(s.createdAt).toLocaleDateString("es-MX", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
               </div>
-              <div className="text-right shrink-0">
-                <div className="font-display text-sm font-bold">
-                  {formatScore(s.value, s.scoreType)}
-                </div>
-                <div
-                  className="text-[9px] font-bold tracking-wide"
-                  style={{ color: "var(--text-3)" }}
-                >
-                  {s.unit}
-                </div>
+            </div>
+            <div className="text-right shrink-0">
+              <div className="font-display text-sm font-bold">
+                {formatScore(s.value, s.scoreType)}
               </div>
-            </KCard>
-          </AnimatedItem>
+              <div
+                className="text-[9px] font-bold tracking-wide"
+                style={{ color: "var(--text-3)" }}
+              >
+                {s.unit}
+              </div>
+            </div>
+          </KCard>
         ))}
-      </AnimatedSection>
+      </div>
 
       {/* Pagination */}
       {totalPages > 1 && (

@@ -41,7 +41,10 @@ export default function LoginForm() {
           placeholder="correo@tubox.com"
           required
           className="w-full px-4 py-3 rounded-xl text-text placeholder-text-3/80 border focus:outline-none focus:border-moss/50 transition-colors"
-          style={{ background: "var(--card)", borderColor: "var(--line)" }}
+          style={{
+            background: "var(--card)",
+            borderColor: "var(--line-strong)",
+          }}
         />
         <button
           type="submit"
@@ -97,7 +100,10 @@ function DevLoginForm() {
           placeholder="email"
           required
           className="w-full px-4 py-2.5 rounded-xl text-sm text-text placeholder-text-3/80 border focus:outline-none focus:border-steel/50 transition-colors"
-          style={{ background: "var(--card)", borderColor: "var(--line)" }}
+          style={{
+            background: "var(--card)",
+            borderColor: "var(--line-strong)",
+          }}
         />
         <input
           type="password"
@@ -106,7 +112,10 @@ function DevLoginForm() {
           placeholder="password"
           required
           className="w-full px-4 py-2.5 rounded-xl text-sm text-text placeholder-text-3/80 border focus:outline-none focus:border-strain/50 transition-colors"
-          style={{ background: "var(--card)", borderColor: "var(--line)" }}
+          style={{
+            background: "var(--card)",
+            borderColor: "var(--line-strong)",
+          }}
         />
         <button
           type="submit"

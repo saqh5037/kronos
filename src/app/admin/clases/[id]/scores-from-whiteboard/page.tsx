@@ -75,10 +75,10 @@ export default async function ScoresFromWhiteboardPage({
     return (
       <main className="min-h-screen bg-bg p-4 max-w-4xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-display font-bold text-white">
+          <h1 className="text-2xl font-display font-bold text-text">
             Scores desde pizarra
           </h1>
-          <p className="text-white/60 text-sm mt-1">
+          <p className="text-text-2 text-sm mt-1">
             Clase del{" "}
             {klass.startsAt.toLocaleDateString("es-MX", {
               weekday: "long",
@@ -106,10 +106,10 @@ export default async function ScoresFromWhiteboardPage({
     <main className="min-h-screen bg-bg p-4 flex items-start justify-center pt-16">
       <div className="w-full">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-display font-bold text-white">
+          <h1 className="text-2xl font-display font-bold text-text">
             Cargar scores de pizarra
           </h1>
-          <p className="text-white/60 text-sm mt-1">
+          <p className="text-text-2 text-sm mt-1">
             Clase:{" "}
             {klass.startsAt.toLocaleDateString("es-MX", {
               weekday: "long",

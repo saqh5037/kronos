@@ -118,7 +118,7 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
             {/* Date header */}
             <div className="relative flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-[var(--card-2)] border border-[var(--line)] flex items-center justify-center z-10">
-                <span className="text-[10px] font-mono font-bold text-white/50 uppercase">
+                <span className="text-[10px] font-mono font-bold text-text-2 uppercase">
                   {formatDate(dayEvents[0].when)}
                 </span>
               </div>
@@ -154,7 +154,7 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
                         {/* Avatar */}
                         {event.actor ? (
                           <div
-                            className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                            className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-text shrink-0"
                             style={{
                               backgroundColor: hashStringToColor(
                                 event.actor.id,
@@ -174,16 +174,16 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             {event.actor && (
-                              <span className="font-medium text-sm text-white">
+                              <span className="font-medium text-sm text-text">
                                 {event.actor.name}
                               </span>
                             )}
                             {!event.actor && (
-                              <span className="text-sm text-white/50">
+                              <span className="text-sm text-text-2">
                                 Sistema
                               </span>
                             )}
-                            <span className="text-white/40 text-sm">
+                            <span className="text-text-3 text-sm">
                               {ACTION_VERBS[event.action] ?? event.action}
                             </span>
                           </div>
@@ -200,20 +200,20 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
                                 {event.target.label}
                               </a>
                             ) : (
-                              <span className="text-white/40 text-sm truncate">
+                              <span className="text-text-3 text-sm truncate">
                                 {event.target.label}
                               </span>
                             )}
-                            <span className="text-white/20 text-xs font-mono ml-auto">
+                            <span className="text-text-3 text-xs font-mono ml-auto">
                               {formatTime(event.when)}
                             </span>
                           </div>
 
                           {/* Metadata */}
                           {event.metadata?.amount !== undefined && (
-                            <p className="text-xs text-white/40 mt-1.5">
+                            <p className="text-xs text-text-3 mt-1.5">
                               Monto:{" "}
-                              <strong className="text-white">
+                              <strong className="text-text">
                                 ${Number(event.metadata.amount).toFixed(2)}{" "}
                                 {(event.metadata.currency as string) ?? ""}
                               </strong>

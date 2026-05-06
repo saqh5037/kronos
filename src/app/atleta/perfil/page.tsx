@@ -139,7 +139,7 @@ export default async function PerfilPage() {
             </div>
             <div className="flex-1 min-w-0">
               <h1
-                className="k-h-italic font-display font-extrabold text-[26px] leading-[1.05] tracking-[-0.02em] truncate"
+                className="k-h-italic font-display font-extrabold text-xl sm:text-2xl md:text-[26px] leading-[1.1] tracking-[-0.02em] break-words"
                 style={{ color: "var(--text)" }}
               >
                 {home.athlete.firstName} <em>{home.athlete.lastName}</em>

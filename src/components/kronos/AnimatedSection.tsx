@@ -68,7 +68,12 @@ export function AnimatedItem({
   className?: string;
 }) {
   return (
-    <motion.div className={className} variants={itemVariants}>
+    <motion.div
+      className={className}
+      variants={itemVariants}
+      initial="hidden"
+      animate="show"
+    >
       {children}
     </motion.div>
   );

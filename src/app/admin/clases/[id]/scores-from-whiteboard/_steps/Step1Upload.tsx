@@ -69,10 +69,10 @@ export default function Step1Upload({ classId }: Props) {
     <div className="k-card p-6 max-w-lg mx-auto space-y-6 relative overflow-hidden">
       <div>
         <p className="k-eyebrow mb-1">Paso 1 de 3</p>
-        <h2 className="text-xl font-display font-bold text-white">
+        <h2 className="text-xl font-display font-bold text-text">
           Foto de la pizarra
         </h2>
-        <p className="text-sm text-white/60 mt-1">
+        <p className="text-sm text-text-2 mt-1">
           Toma una foto clara de la pizarra con los scores del WOD.
         </p>
       </div>
@@ -163,7 +163,7 @@ export default function Step1Upload({ classId }: Props) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="text-white/40 text-xs mt-3"
+                  className="text-text-3 text-xs mt-3"
                 >
                   Toca para cambiar la imagen
                 </motion.p>
@@ -188,16 +188,16 @@ export default function Step1Upload({ classId }: Props) {
                   📸
                 </motion.div>
                 <div>
-                  <p className="text-white/60 text-sm font-medium">
+                  <p className="text-text-2 text-sm font-medium">
                     {dragOver
                       ? "Suelta la imagen aquí"
                       : "Toca para seleccionar o tomar foto"}
                   </p>
-                  <p className="text-white/40 text-xs mt-1">
+                  <p className="text-text-3 text-xs mt-1">
                     Max 8 MB · JPG, PNG, HEIC
                   </p>
                 </div>
-                <div className="flex items-center justify-center gap-2 text-white/30 text-xs mt-2">
+                <div className="flex items-center justify-center gap-2 text-text-3 text-xs mt-2">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path
                       d="M7 1V13M1 7H13"
