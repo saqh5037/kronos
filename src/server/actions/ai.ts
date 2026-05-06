@@ -11,13 +11,31 @@ import {
   type GreetingContext,
   type GreetingTone,
 } from "@/lib/ai/personalized-greeting";
-import { generateText, runWithCache } from "@/lib/ai/gemini-client";
+import {
+  generateText,
+  getGeminiModel,
+  runWithCache,
+} from "@/lib/ai/gemini-client";
+import {
+  buildFormAnalysisPrompt,
+  fallbackFeedback,
+  parseFormFeedback,
+  type FormFeedback,
+} from "@/lib/ai/form-analysis";
 import {
   predictNextPR,
   buildPRNarrativePrompt,
   type PRDataPoint,
   type PRPrediction,
 } from "@/lib/ai/pr-prediction";
+import {
+  buildFallbackPlan,
+  buildTrainingPlanPrompt,
+  parseGeminiPlan,
+  weeksAvailableUntil,
+  type TrainingPlan,
+  type TrainingPlanInputs,
+} from "@/lib/ai/training-plan";
 
 export type DailyGreeting = {
   text: string;
@@ -336,10 +354,263 @@ async function buildPredictionCard(
   };
 }
 
-// re-exported for tests / debugging
-export const __test = {
-  sanitizeGeminiText,
-  readinessLabelFromScore,
-  buildFallbackText,
-  startOfWeekMon,
+// ─── Training Plan ────────────────────────────────────────────────────────────
+
+export type GoalPlanResult = {
+  plan: TrainingPlan;
+  goal: {
+    id: string;
+    metric: "PR" | "TONNAGE" | "ATTENDANCE";
+    movementName: string | null;
+    targetValue: number;
+    unit: string;
+    deadline: Date;
+  };
 };
+
+export async function generateGoalPlan(
+  goalId: string,
+): Promise<GoalPlanResult | null> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId || !session.user.id) return null;
+
+  const tenantId = session.user.tenantId;
+  const db = withTenant(tenantId);
+
+  const me = await db.athlete.findFirst({
+    where: { userId: session.user.id },
+    select: { id: true, firstName: true },
+  });
+  if (!me) return null;
+
+  const goal = await db.goal.findFirst({
+    where: { id: goalId, athleteId: me.id },
+    include: { movement: { select: { name: true } } },
+  });
+  if (!goal) return null;
+
+  const cacheKey = `goalplan:${goal.id}:${goal.deadline.toISOString().slice(0, 10)}:${goal.targetValue.toString()}`;
+
+  const result = await runWithCache(cacheKey, 7 * 24 * 60 * 60, async () => {
+    const today = new Date();
+    const weeks = weeksAvailableUntil(goal.deadline, today);
+
+    // Last 4 weeks: count weekly training sessions to estimate frequency
+    const fourWeeksAgo = subDays(today, 28);
+    const recentBookings = await db.booking.count({
+      where: {
+        athleteId: me.id,
+        status: "ATTENDED",
+        class: { startsAt: { gte: fourWeeksAgo } },
+      },
+    });
+    const weeklyFrequency = Math.max(
+      2,
+      Math.min(6, Math.round(recentBookings / 4)),
+    );
+
+    const recentPRs = await db.pR.findMany({
+      where: { athleteId: me.id },
+      orderBy: { achievedAt: "desc" },
+      take: 5,
+      include: { movement: { select: { name: true } } },
+    });
+
+    const inputs: TrainingPlanInputs = {
+      athleteFirstName: me.firstName,
+      goalMetric: goal.metric as "PR" | "TONNAGE" | "ATTENDANCE",
+      goalMovementName: goal.movement?.name ?? null,
+      goalTargetValue: Number(goal.targetValue),
+      goalStartValue: goal.startValue === null ? null : Number(goal.startValue),
+      goalUnit: goal.unit,
+      goalDeadline: goal.deadline,
+      weeksAvailable: weeks,
+      weeklyTrainingFrequency: weeklyFrequency,
+      recentPRs: recentPRs.map((p) => ({
+        movementName: p.movement.name,
+        value: Number(p.value),
+        daysAgo: Math.floor(
+          (today.getTime() - p.achievedAt.getTime()) / 86400000,
+        ),
+      })),
+      todayDate: today,
+    };
+
+    const fallback = buildFallbackPlan(inputs);
+    if (!process.env.GEMINI_API_KEY) return fallback;
+
+    try {
+      const prompt = buildTrainingPlanPrompt(inputs);
+      const raw = await generateText(prompt);
+      const parsed = parseGeminiPlan(raw);
+      return parsed ?? fallback;
+    } catch (err) {
+      console.error("[ai.goal-plan] Gemini failed:", err);
+      return fallback;
+    }
+  });
+
+  return {
+    plan: result,
+    goal: {
+      id: goal.id,
+      metric: goal.metric as "PR" | "TONNAGE" | "ATTENDANCE",
+      movementName: goal.movement?.name ?? null,
+      targetValue: Number(goal.targetValue),
+      unit: goal.unit,
+      deadline: goal.deadline,
+    },
+  };
+}
+
+// ─── Form Analysis (Gemini Vision) ────────────────────────────────────────────
+
+export type FormAnalysisResult = {
+  feedback: FormFeedback;
+  movementName: string;
+  athleteName: string | null;
+};
+
+const ALLOWED_IMAGE_MIME = ["image/jpeg", "image/png", "image/webp"] as const;
+const MAX_IMAGE_BYTES = 6 * 1024 * 1024; // 6MB
+
+export async function analyzeMovementForm(
+  formData: FormData,
+): Promise<FormAnalysisResult> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId || !session.user.id) {
+    throw new Error("Unauthorized");
+  }
+  if (session.user.role === "ATHLETE") {
+    throw new Error("Forbidden — coach tool only");
+  }
+
+  const tenantId = session.user.tenantId;
+  const db = withTenant(tenantId);
+
+  const movementId = formData.get("movementId");
+  const athleteId = formData.get("athleteId");
+  const file = formData.get("photo");
+
+  if (typeof movementId !== "string" || !movementId) {
+    throw new Error("Falta el movimiento");
+  }
+  if (!(file instanceof File)) {
+    throw new Error("Falta la foto");
+  }
+  if (file.size === 0) {
+    throw new Error("La foto está vacía");
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error("La foto pesa más de 6MB");
+  }
+  if (
+    !ALLOWED_IMAGE_MIME.includes(
+      file.type as (typeof ALLOWED_IMAGE_MIME)[number],
+    )
+  ) {
+    throw new Error("Formato no soportado (usa JPG, PNG o WEBP)");
+  }
+
+  const movement = await db.movement.findUnique({
+    where: { id: movementId },
+    select: { name: true, category: true },
+  });
+  if (!movement) throw new Error("Movimiento no encontrado");
+
+  let athleteName: string | null = null;
+  let athleteFirstName: string | null = null;
+  if (typeof athleteId === "string" && athleteId) {
+    const athlete = await db.athlete.findUnique({
+      where: { id: athleteId },
+      select: { firstName: true, lastName: true },
+    });
+    if (athlete) {
+      athleteFirstName = athlete.firstName;
+      athleteName = `${athlete.firstName} ${athlete.lastName}`;
+    }
+  }
+
+  if (!process.env.GEMINI_API_KEY) {
+    return {
+      feedback: fallbackFeedback(
+        "GEMINI_API_KEY no configurado. Pídele al admin que lo agregue para activar Vision.",
+      ),
+      movementName: movement.name,
+      athleteName,
+    };
+  }
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
+    const prompt = buildFormAnalysisPrompt({
+      movementName: movement.name,
+      movementCategory: movement.category,
+      athleteFirstName,
+    });
+    const model = getGeminiModel();
+    const response = await model.generateContent([
+      prompt,
+      { inlineData: { data: base64, mimeType: file.type } },
+    ]);
+    const raw = response.response.text();
+    const parsed = parseFormFeedback(raw);
+    return {
+      feedback:
+        parsed ??
+        fallbackFeedback(
+          "Gemini devolvió un formato inesperado. Intenta de nuevo.",
+        ),
+      movementName: movement.name,
+      athleteName,
+    };
+  } catch (err) {
+    console.error("[ai.form-analysis] failed:", err);
+    return {
+      feedback: fallbackFeedback(
+        "Error analizando la foto. Verificá que sea legible y reintentá.",
+      ),
+      movementName: movement.name,
+      athleteName,
+    };
+  }
+}
+
+export async function listAthletesForFormPicker(): Promise<
+  Array<{ id: string; name: string }>
+> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId || !session.user.id) return [];
+  if (session.user.role === "ATHLETE") return [];
+  const db = withTenant(session.user.tenantId);
+  const athletes = await db.athlete.findMany({
+    where: { status: "ACTIVE" },
+    orderBy: { firstName: "asc" },
+    select: { id: true, firstName: true, lastName: true },
+  });
+  return athletes.map((a) => ({
+    id: a.id,
+    name: `${a.firstName} ${a.lastName}`,
+  }));
+}
+
+export async function listMovementsForFormPicker(): Promise<
+  Array<{ id: string; name: string; category: string }>
+> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) return [];
+  if (session.user.role === "ATHLETE") return [];
+  const db = withTenant(session.user.tenantId);
+  const movements = await db.movement.findMany({
+    where: { isStandard: true },
+    orderBy: [{ category: "asc" }, { name: "asc" }],
+    select: { id: true, name: true, category: true },
+  });
+  return movements;
+}
+
+// (helpers internos: sanitizeGeminiText, readinessLabelFromScore, etc.
+//  no se exportan porque "use server" solo permite async functions.
+//  Tests apuntan directo a los pure helpers en src/lib/ai/*.ts)
+void buildFallbackText; // import kept for parallel future expansion

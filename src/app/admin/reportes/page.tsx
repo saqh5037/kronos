@@ -14,6 +14,8 @@ import { MetricDelta } from "@/components/charts/MetricDelta";
 import { ReportesFilters } from "./_components/ReportesFilters";
 import { RevenueLineChart } from "./_components/RevenueLineChart";
 import { NewChurnBarChart } from "./_components/NewChurnBarChart";
+import { getChurnRiskList, type ChurnRiskRow } from "@/server/analytics/churn";
+import ChurnRiskTable from "@/components/admin/ChurnRiskTable";
 
 export const metadata = { title: "Kronos — Reportes" };
 
@@ -25,12 +27,14 @@ export default async function ReportesPage() {
   let revenue12m: RevenueByMonthPoint[] = [];
   let athletes12m: AthletesByMonthPoint[] = [];
   let readiness: ReadinessAverage | null = null;
+  let churnRisk: ChurnRiskRow[] = [];
 
   try {
-    [r, revenue12m, athletes12m] = await Promise.all([
+    [r, revenue12m, athletes12m, churnRisk] = await Promise.all([
       getReports(),
       getRevenueByMonth(12),
       getAthletesByMonth(12),
+      getChurnRiskList(),
     ]);
     readiness = await getReadinessAverage({ sinceDays: 7 });
   } catch {
@@ -170,6 +174,24 @@ export default async function ReportesPage() {
           <ReadinessTile readiness={readiness} />
         </div>
       )}
+
+      {/* Churn risk — atletas en riesgo de abandono */}
+      <div className="mb-6">
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <p
+            className="k-eyebrow"
+            style={{
+              color: "var(--ember)",
+            }}
+          >
+            ⚠ En riesgo de churn
+          </p>
+          <span className="font-mono text-xs text-[var(--text-3)]">
+            {churnRisk.length} atleta{churnRisk.length === 1 ? "" : "s"}
+          </span>
+        </div>
+        <ChurnRiskTable rows={churnRisk} />
+      </div>
 
       {/* Activity */}
       <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-3">

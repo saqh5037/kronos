@@ -29,6 +29,9 @@ import {
   type PRPredictionCard as PRPredictionCardData,
 } from "@/server/actions/ai";
 import PRPredictionCard from "@/components/atleta/PRPredictionCard";
+import { listMyGoals, type GoalRow } from "@/server/actions/goals";
+import Link from "next/link";
+import type { Route } from "next";
 
 export const metadata = { title: "Kronos — Perfil" };
 
@@ -40,9 +43,10 @@ export default async function PerfilPage() {
   let scoresTimeline: MyScoreTimelinePoint[] = [];
   let capability: CapabilityProfile | null = null;
   let prPredictions: PRPredictionCardData[] = [];
+  let myGoals: GoalRow[] = [];
 
   try {
-    [home, prs, scores, attendance90d, scoresTimeline, prPredictions] =
+    [home, prs, scores, attendance90d, scoresTimeline, prPredictions, myGoals] =
       await Promise.all([
         getAthleteHome(),
         listMyPRs(),
@@ -50,11 +54,14 @@ export default async function PerfilPage() {
         getMyAttendanceLast90d(),
         getMyScoresTimeline(90),
         getTop3PRPredictions(),
+        listMyGoals(),
       ]);
     capability = await getMyCapabilityProfile();
   } catch {
     // Sesión ausente
   }
+
+  const activeGoals = myGoals.filter((g) => g.status === "ACTIVE");
 
   if (!home || !home.athlete) {
     return (
@@ -280,6 +287,86 @@ export default async function PerfilPage() {
                     </div>
                   </div>
                 </KCard>
+              </AnimatedItem>
+            ))}
+          </div>
+        </AnimatedSection>
+      )}
+
+      {/* OBJETIVOS — con CTA Generar plan IA */}
+      {activeGoals.length > 0 && (
+        <AnimatedSection className="mt-5">
+          <div className="flex items-baseline justify-between px-[18px] pb-2">
+            <div className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+              MIS OBJETIVOS ACTIVOS
+            </div>
+            <div
+              className="font-mono text-[10px] font-bold tracking-[0.08em]"
+              style={{ color: "var(--text-3)" }}
+            >
+              {activeGoals.length} ACTIVO{activeGoals.length === 1 ? "" : "S"}
+            </div>
+          </div>
+          <div className="px-3.5 grid grid-cols-1 gap-2.5">
+            {activeGoals.slice(0, 3).map((g) => (
+              <AnimatedItem key={g.id}>
+                <div
+                  className="rounded-[14px] p-3.5 relative overflow-hidden"
+                  style={{
+                    background: "var(--card)",
+                    border: "1px solid var(--line-strong)",
+                    boxShadow:
+                      "0 0 0 1px rgba(255,43,214,0.18), 0 4px 14px rgba(255,43,214,0.10)",
+                  }}
+                >
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                      background:
+                        "radial-gradient(circle at 100% 0%, rgba(255,43,214,0.10), transparent 60%)",
+                    }}
+                  />
+                  <div className="relative flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-display text-[14px] font-bold truncate">
+                        {g.movementName ?? g.metric}
+                      </div>
+                      <div
+                        className="font-mono text-[10px] tracking-[0.06em] mt-0.5"
+                        style={{ color: "var(--text-3)" }}
+                      >
+                        Meta: {g.targetValue} {g.unit} ·{" "}
+                        {Math.round(g.progress.pct)}%
+                      </div>
+                    </div>
+                    <Link
+                      href={`/atleta/plan?goalId=${g.id}` as Route}
+                      className="font-mono text-[10px] tracking-[0.14em] font-bold uppercase px-3 py-1.5 rounded-md hover:scale-[1.04] transition-transform inline-flex items-center gap-1.5"
+                      style={{
+                        color: "#1c1917",
+                        background:
+                          "linear-gradient(95deg, #ff2bd6 0%, #6a3bff 50%, #00e5ff 100%)",
+                        boxShadow: "0 0 12px rgba(255,43,214,0.45)",
+                      }}
+                    >
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden
+                      >
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                      </svg>
+                      Plan IA
+                    </Link>
+                  </div>
+                </div>
               </AnimatedItem>
             ))}
           </div>
