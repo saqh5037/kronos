@@ -428,7 +428,7 @@ async function main() {
     create: {
       id: `seed-coach-${box1.id}`,
       email: "coach@iron-hands.demo",
-      name: "Coach Lobo",
+      name: "Lobo Ramírez",
       role: "COACH",
       tenantId: box1.id,
     },
@@ -453,6 +453,22 @@ async function main() {
         : athleteData.length < 47
           ? "PAUSED"
           : "DROPIN";
+
+    // Distribuir createdAt en el tiempo (no todos hoy):
+    //   idx 0-2:   esta semana (alta súper reciente, 1-7 días)
+    //   idx 3-7:   este mes (alta reciente, 8-29 días)
+    //   idx 8-25:  últimos 6 meses (estables)
+    //   idx 26-49: 6-24 meses atrás (veteranos)
+    const idx = athleteData.length;
+    let daysOld: number;
+    if (idx < 3) daysOld = 1 + Math.floor(Math.random() * 7);
+    else if (idx < 8) daysOld = 8 + Math.floor(Math.random() * 22);
+    else if (idx < 26) daysOld = 30 + Math.floor(Math.random() * 150);
+    else daysOld = 180 + Math.floor(Math.random() * 540);
+    const createdAt = new Date();
+    createdAt.setDate(createdAt.getDate() - daysOld);
+    createdAt.setHours(10 + (idx % 8), 0, 0, 0);
+
     athleteData.push({
       id,
       tenantId: box1.id,
@@ -460,6 +476,7 @@ async function main() {
       lastName,
       phone: `55${String(10000000 + Math.floor(Math.random() * 90000000))}`,
       status,
+      createdAt,
     });
   }
   await prisma.athlete.createMany({ data: athleteData });
