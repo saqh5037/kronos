@@ -32,6 +32,7 @@ export type AvailableClass = {
   startsAt: Date;
   durationMin: number;
   capacity: number;
+  kind: "WOD" | "OPEN_BOX";
   bookedCount: number;
   waitlistCount: number;
   coach: { name: string | null } | null;
@@ -80,6 +81,7 @@ export async function listAvailableClasses(
       startsAt: c.startsAt,
       durationMin: c.durationMin,
       capacity: c.capacity,
+      kind: c.kind,
       bookedCount: booked,
       waitlistCount: waitlist,
       coach: c.coach,

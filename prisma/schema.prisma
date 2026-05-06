@@ -10,16 +10,19 @@ datasource db {
 // ─── TENANT ──────────────────────────────────────────────────────────────────
 
 model Box {
-  id                   String   @id @default(cuid())
-  slug                 String   @unique
-  name                 String
-  locale               String   @default("es-MX")
-  currency             String   @default("MXN")
-  timezone             String   @default("America/Mexico_City")
-  defaultClassCapacity Int      @default(16)
-  brandColor           String?
-  logoUrl              String?
-  createdAt            DateTime @default(now())
+  id                    String   @id @default(cuid())
+  slug                  String   @unique
+  name                  String
+  locale                String   @default("es-MX")
+  currency              String   @default("MXN")
+  timezone              String   @default("America/Mexico_City")
+  defaultClassCapacity  Int      @default(10)
+  bookingOpenHoursAhead Int      @default(24)
+  cancelCloseMinBefore  Int      @default(30)
+  weeklySchedule        Json?
+  brandColor            String?
+  logoUrl               String?
+  createdAt             DateTime @default(now())
 
   users                   User[]
   athletes                Athlete[]
@@ -218,17 +221,23 @@ enum BookingStatus {
   CANCELLED
 }
 
+enum ClassKind {
+  WOD
+  OPEN_BOX
+}
+
 model Class {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   tenantId       String
   startsAt       DateTime
-  durationMin    Int      @default(60)
-  capacity       Int      @default(16)
+  durationMin    Int       @default(60)
+  capacity       Int       @default(10)
+  kind           ClassKind @default(WOD)
   coachId        String?
   wodId          String?
   recurrenceRule String?
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
 
   box               Box                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   coach             User?              @relation(fields: [coachId], references: [id])

@@ -23,6 +23,7 @@ export type ClassRow = {
   startsAt: Date;
   durationMin: number;
   capacity: number;
+  kind: "WOD" | "OPEN_BOX";
   isActive: boolean;
   recurrenceRule: string | null;
   coach: { id: string; name: string | null } | null;
@@ -55,6 +56,7 @@ export async function listClassesInRange(
     startsAt: c.startsAt,
     durationMin: c.durationMin,
     capacity: c.capacity,
+    kind: c.kind,
     isActive: c.isActive,
     recurrenceRule: c.recurrenceRule,
     coach: c.coach,

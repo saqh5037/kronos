@@ -364,15 +364,36 @@ async function main() {
   );
 
   // ─── Boxes ────────────────────────────────────────────────────────────────────
+  // Default operating schedule: 6 WOD slots Mon-Fri (3 AM + 3 PM),
+  // 3 Open Box slots Saturday, Sunday closed.
+  const WEEKLY_SCHEDULE_DEFAULT = {
+    mon: { kind: "WOD", hours: [6, 7, 9, 17, 18, 19] },
+    tue: { kind: "WOD", hours: [6, 7, 9, 17, 18, 19] },
+    wed: { kind: "WOD", hours: [6, 7, 9, 17, 18, 19] },
+    thu: { kind: "WOD", hours: [6, 7, 9, 17, 18, 19] },
+    fri: { kind: "WOD", hours: [6, 7, 9, 17, 18, 19] },
+    sat: { kind: "OPEN_BOX", hours: [8, 9, 10] },
+    sun: null,
+  };
+
   const box1 = await prisma.box.upsert({
     where: { slug: "iron-hands-polanco" },
-    update: {},
+    update: {
+      defaultClassCapacity: 10,
+      bookingOpenHoursAhead: 24,
+      cancelCloseMinBefore: 30,
+      weeklySchedule: WEEKLY_SCHEDULE_DEFAULT,
+    },
     create: {
       slug: "iron-hands-polanco",
       name: "Iron Hands CrossFit · Polanco",
       locale: "es-MX",
       currency: "MXN",
       brandColor: "#19f08b",
+      defaultClassCapacity: 10,
+      bookingOpenHoursAhead: 24,
+      cancelCloseMinBefore: 30,
+      weeklySchedule: WEEKLY_SCHEDULE_DEFAULT,
     },
   });
 
@@ -598,27 +619,55 @@ async function main() {
   const classRows: Prisma.ClassCreateManyInput[] = [];
   const classRefs: { id: string; date: Date; wodId: string | null }[] = [];
 
+  // Realistic CrossFit grid:
+  //   Mon-Fri: 6 WOD slots (3 AM + 3 PM) capacity 10
+  //   Sat: 3 Open Box slots (no coach, no WOD) capacity 20
+  //   Sun: closed
+  const WEEKDAY_HOURS = [6, 7, 9, 17, 18, 19];
+  const SATURDAY_HOURS = [8, 9, 10];
+  const WEEKDAY_CAPACITY = 10;
+  const OPEN_BOX_CAPACITY = 20;
+
   for (let dayOffset = 0; dayOffset < 28; dayOffset++) {
     const day = new Date(weekStart);
     day.setDate(day.getDate() + dayOffset);
-    if (day.getDay() === 0) continue; // closed Sundays
+    const dow = day.getDay(); // 0=Sun, 6=Sat
+    if (dow === 0) continue; // closed Sundays
 
-    const slots = [7, 9, 12, 17, 19]; // hours
-    for (const hour of slots) {
+    const isSat = dow === 6;
+    const hours = isSat ? SATURDAY_HOURS : WEEKDAY_HOURS;
+
+    for (const hour of hours) {
       const startsAt = new Date(day);
       startsAt.setHours(hour, 0, 0, 0);
-      const wod = pickRandom(wodIds);
       const id = `seed-class-${box1.id}-${dayOffset}-${hour}`;
-      classRows.push({
-        id,
-        tenantId: box1.id,
-        startsAt,
-        durationMin: 60,
-        capacity: hour === 19 ? 20 : 14,
-        coachId: coach.id,
-        wodId: wod.id,
-      });
-      classRefs.push({ id, date: startsAt, wodId: wod.id });
+
+      if (isSat) {
+        classRows.push({
+          id,
+          tenantId: box1.id,
+          startsAt,
+          durationMin: 90,
+          capacity: OPEN_BOX_CAPACITY,
+          kind: "OPEN_BOX",
+          coachId: null,
+          wodId: null,
+        });
+        classRefs.push({ id, date: startsAt, wodId: null });
+      } else {
+        const wod = pickRandom(wodIds);
+        classRows.push({
+          id,
+          tenantId: box1.id,
+          startsAt,
+          durationMin: 60,
+          capacity: WEEKDAY_CAPACITY,
+          kind: "WOD",
+          coachId: coach.id,
+          wodId: wod.id,
+        });
+        classRefs.push({ id, date: startsAt, wodId: wod.id });
+      }
     }
   }
   await prisma.class.createMany({ data: classRows });

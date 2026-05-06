@@ -168,21 +168,40 @@ function ClassCard({ c }: { c: ClassRow }) {
             {c.bookingCount}/{c.capacity}
           </span>
         </div>
-        {c.wod && (
-          <p
-            className="text-[11px] mt-1 font-semibold truncate leading-tight"
-            title={c.wod.name}
-          >
-            {c.wod.name}
-          </p>
-        )}
-        {c.coach && (
-          <p
-            className="text-[10px] mt-0.5 truncate font-medium"
-            style={{ color: "var(--text-3)" }}
-          >
-            {c.coach.name ?? "Coach"}
-          </p>
+        {c.kind === "OPEN_BOX" ? (
+          <>
+            <p
+              className="text-[11px] mt-1 font-semibold truncate leading-tight"
+              style={{ color: "var(--cyan)" }}
+            >
+              Open Box
+            </p>
+            <p
+              className="text-[10px] mt-0.5 truncate font-medium"
+              style={{ color: "var(--text-3)" }}
+            >
+              Acceso libre
+            </p>
+          </>
+        ) : (
+          <>
+            {c.wod && (
+              <p
+                className="text-[11px] mt-1 font-semibold truncate leading-tight"
+                title={c.wod.name}
+              >
+                {c.wod.name}
+              </p>
+            )}
+            {c.coach && (
+              <p
+                className="text-[10px] mt-0.5 truncate font-medium"
+                style={{ color: "var(--text-3)" }}
+              >
+                {c.coach.name ?? "Coach"}
+              </p>
+            )}
+          </>
         )}
         <div className="mt-1.5 flex items-center gap-1.5">
           <div
