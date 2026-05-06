@@ -14,6 +14,7 @@ import {
   formatTime,
   formatDayMonth,
 } from "@/lib/week";
+import Eyebrow from "@/components/kronos/Eyebrow";
 
 export const metadata = { title: "Kronos — Programación" };
 
@@ -50,19 +51,17 @@ export default async function ProgramacionPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
+    <div className="p-6 lg:p-8">
+      <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
         <div>
-          <span className="k-eyebrow-bar">Operación</span>
-          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
-            <h1
-              className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
-              style={{ color: "var(--text)" }}
-            >
-              Programa<em>ción</em>
-            </h1>
-          </div>
-          <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
+          <Eyebrow>Operación</Eyebrow>
+          <h1 className="k-h-italic font-display font-extrabold text-3xl lg:text-[38px] leading-[1] tracking-[-0.02em] mt-2">
+            Programa<em>ción</em>
+          </h1>
+          <p
+            className="text-sm mt-1 font-medium"
+            style={{ color: "var(--text-2)" }}
+          >
             Semana del {formatDayMonth(weekStart)} al{" "}
             {formatDayMonth(addDays(weekStart, 6))}
           </p>
@@ -70,42 +69,44 @@ export default async function ProgramacionPage() {
         <ClassForm coaches={coaches} wods={wods} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-2">
         {Array.from(byDay.entries()).map(([dateKey, dayClasses]) => {
           const date = new Date(dateKey + "T12:00:00.000Z");
           const isToday = dateKey === today.toISOString().slice(0, 10);
           return (
             <div
               key={dateKey}
-              className={`k-card flex flex-col overflow-hidden ${isToday ? "ring-1 ring-strain/30" : ""}`}
-              style={{ minHeight: "240px" }}
+              className={`k-card flex flex-col overflow-hidden ${isToday ? "ring-1 ring-cyan/30" : ""}`}
             >
               <div
-                className="px-3 py-2.5 border-b flex items-center justify-between"
+                className="px-2.5 py-2 border-b flex items-center justify-between"
                 style={{ borderColor: "var(--line)" }}
               >
-                <div>
+                <div className="flex items-center gap-2">
                   <p
-                    className="k-eyebrow"
-                    style={{
-                      color: isToday ? "var(--strain)" : "var(--text-2)",
-                    }}
+                    className="font-mono text-[9px] font-bold tracking-[0.12em] uppercase"
+                    style={{ color: isToday ? "var(--cyan)" : "var(--text-3)" }}
                   >
                     {formatWeekday(date)}
                   </p>
-                  <p className="font-display font-bold text-lg">
+                  <p className="font-display font-bold text-base leading-none">
                     {date.getUTCDate()}
                   </p>
                 </div>
                 {isToday && (
-                  <span className="k-chip k-chip-steel text-[9px]">HOY</span>
+                  <span className="k-chip k-chip-cyan text-[8px] py-0.5 px-1.5">
+                    HOY
+                  </span>
                 )}
               </div>
 
-              <div className="flex flex-col gap-2 p-2 flex-1">
+              <div className="flex flex-col gap-1.5 p-1.5 flex-1">
                 {dayClasses.length === 0 ? (
-                  <div className="flex-1 flex items-center justify-center">
-                    <p className="text-xs" style={{ color: "var(--text-3)" }}>
+                  <div className="flex-1 flex items-center justify-center py-4">
+                    <p
+                      className="text-[11px] font-medium"
+                      style={{ color: "var(--text-3)" }}
+                    >
                       Sin clases
                     </p>
                   </div>
@@ -120,7 +121,7 @@ export default async function ProgramacionPage() {
 
       {classes.length === 0 && (
         <div className="mt-6 k-card p-6 text-center">
-          <p className="text-sm" style={{ color: "var(--text-2)" }}>
+          <p className="text-sm font-medium" style={{ color: "var(--text-2)" }}>
             No hay clases programadas esta semana. Crea la primera con el botón
             de arriba.
           </p>
@@ -134,69 +135,75 @@ function ClassCard({ c }: { c: ClassRow }) {
   const fillRatio = c.bookingCount / c.capacity;
   const chipClass =
     fillRatio >= 1
-      ? "k-chip-ember"
+      ? "k-chip-red"
       : fillRatio >= 0.7
         ? "k-chip-steel"
         : "k-chip-moss";
 
   return (
     <div
-      className="k-card p-2.5 relative overflow-hidden group"
-      style={{ background: "var(--card-2)" }}
+      className="rounded-xl border p-2 relative overflow-hidden group transition-all hover:border-[var(--line-strong)] hover:shadow-sm"
+      style={{ background: "var(--card-2)", borderColor: "var(--line)" }}
     >
       <div
-        className="absolute left-0 top-0 bottom-0 w-[3px]"
+        className="absolute left-0 top-0 bottom-0 w-[2.5px]"
         style={{
           background:
             fillRatio >= 1
-              ? "var(--pr)"
+              ? "var(--red)"
               : fillRatio >= 0.7
-                ? "var(--strain)"
-                : "var(--recovery)",
+                ? "var(--steel)"
+                : "var(--moss)",
         }}
       />
       <div className="pl-2">
-        <div className="flex items-start justify-between gap-1">
-          <div className="font-mono text-xs font-semibold">
+        <div className="flex items-center justify-between gap-1">
+          <div className="font-mono text-[10px] font-bold tracking-wide">
             {formatTime(c.startsAt)}
           </div>
-          <span className={`k-chip ${chipClass} text-[10px]`}>
+          <span
+            className={`k-chip ${chipClass}`}
+            style={{ padding: "2px 7px", fontSize: 8 }}
+          >
             {c.bookingCount}/{c.capacity}
           </span>
         </div>
         {c.wod && (
-          <p className="text-xs mt-1.5 font-medium truncate" title={c.wod.name}>
+          <p
+            className="text-[11px] mt-1 font-semibold truncate leading-tight"
+            title={c.wod.name}
+          >
             {c.wod.name}
           </p>
         )}
         {c.coach && (
           <p
-            className="text-[10px] mt-0.5 truncate"
+            className="text-[10px] mt-0.5 truncate font-medium"
             style={{ color: "var(--text-3)" }}
           >
             {c.coach.name ?? "Coach"}
           </p>
         )}
-        <div className="mt-2 flex items-center gap-1.5">
+        <div className="mt-1.5 flex items-center gap-1.5">
           <div
-            className="flex-1 h-1 rounded-full overflow-hidden"
+            className="flex-1 h-[3px] rounded-full overflow-hidden"
             style={{ background: "var(--btn-ghost-bg)" }}
           >
             <div
-              className="h-full rounded-full"
+              className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${Math.min(100, fillRatio * 100)}%`,
                 background:
                   fillRatio >= 1
-                    ? "var(--pr)"
+                    ? "var(--red)"
                     : fillRatio >= 0.7
-                      ? "var(--strain)"
-                      : "var(--recovery)",
+                      ? "var(--steel)"
+                      : "var(--moss)",
               }}
             />
           </div>
         </div>
-        <div className="mt-1.5 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="mt-1 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
           <CancelClassButton id={c.id} />
         </div>
       </div>
