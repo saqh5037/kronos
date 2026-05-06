@@ -12,9 +12,13 @@ import { getClassRoster, type ClassRoster } from "@/server/actions/bookings";
 import { rangeFromParams, previousRange, formatRange } from "@/lib/dates";
 import { MetricDelta } from "@/components/charts/MetricDelta";
 import { AsistenciaFilters } from "./_components/AsistenciaFilters";
-import { AttendanceBarChart } from "./_components/AttendanceBarChart";
+import {
+  AttendanceCinematicChart,
+  NoShowCinematicChart,
+} from "./_components/AttendanceCinematicChart";
 import { DayHourHeatmap } from "./_components/DayHourHeatmap";
 import { BulkRoster } from "./_components/BulkRoster";
+import Eyebrow from "@/components/kronos/Eyebrow";
 
 export const metadata = { title: "Kronos — Asistencia" };
 
@@ -107,9 +111,9 @@ export default async function AsistenciaPage({
   const pct = (v: number) => `${Math.round(v * 100)}%`;
 
   return (
-    <div className="p-8">
+    <div className="p-6 lg:p-8">
       <div className="mb-6">
-        <span className="k-eyebrow-bar">Operación</span>
+        <Eyebrow>Operación</Eyebrow>
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
           <h1
             className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
@@ -123,7 +127,16 @@ export default async function AsistenciaPage({
         </p>
       </div>
 
-      <AsistenciaFilters />
+      {/* Sticky filter bar */}
+      <div
+        className="sticky top-0 z-10 -mx-6 lg:-mx-8 px-6 lg:px-8 py-3 mb-4 backdrop-blur-md"
+        style={{
+          background: "var(--bg)",
+          borderBottom: "1px solid var(--line)",
+        }}
+      >
+        <AsistenciaFilters />
+      </div>
 
       {/* KPIs rango */}
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -167,30 +180,48 @@ export default async function AsistenciaPage({
         />
       </div>
 
-      {/* Charts */}
-      <div className="mb-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <div className="k-card p-4">
-          <p className="k-eyebrow mb-2">
-            Asistencia diaria · {formatRange(range)}
-          </p>
+      {/* Charts — homologadas con dashboard (cinematic) */}
+      <div className="mb-6 grid grid-cols-1 gap-4">
+        <div className="k-card p-5">
+          <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
+            <p className="k-eyebrow">Asistencia diaria</p>
+            <p
+              className="font-mono text-[10px] font-bold"
+              style={{ color: "var(--text-3)" }}
+            >
+              {formatRange(range)}
+            </p>
+          </div>
           {rangePoints.length > 0 &&
           rangePoints.some((p) => p.attended + p.noShow + p.booked > 0) ? (
-            <AttendanceBarChart data={rangePoints} />
+            <AttendanceCinematicChart data={rangePoints} />
           ) : (
             <p className="py-10 text-center text-sm text-[var(--text-3)]">
               Sin actividad en el rango
             </p>
           )}
         </div>
-        <div className="k-card p-4">
-          <p className="k-eyebrow mb-2">Utilización por día y hora</p>
-          {heatmap.length > 0 ? (
-            <DayHourHeatmap cells={heatmap} />
-          ) : (
-            <p className="py-10 text-center text-sm text-[var(--text-3)]">
-              Sin datos en el rango
-            </p>
-          )}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="k-card p-5">
+            <p className="k-eyebrow mb-3">No-shows diarios</p>
+            {rangePoints.length > 0 && rangePoints.some((p) => p.noShow > 0) ? (
+              <NoShowCinematicChart data={rangePoints} />
+            ) : (
+              <p className="py-10 text-center text-sm text-[var(--text-3)]">
+                Sin no-shows en el rango ✓
+              </p>
+            )}
+          </div>
+          <div className="k-card p-5">
+            <p className="k-eyebrow mb-3">Utilización por día y hora</p>
+            {heatmap.length > 0 ? (
+              <DayHourHeatmap cells={heatmap} />
+            ) : (
+              <p className="py-10 text-center text-sm text-[var(--text-3)]">
+                Sin datos en el rango
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
