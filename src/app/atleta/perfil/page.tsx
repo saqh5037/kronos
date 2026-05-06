@@ -277,7 +277,7 @@ export default async function PerfilPage() {
             </div>
           </div>
           <div className="px-3.5 grid grid-cols-2 gap-2">
-            {prs.slice(0, 4).map((pr, i) => (
+            {prs.slice(0, 6).map((pr, i) => (
               <AnimatedItem key={pr.id}>
                 <KCard>
                   <div className="p-3 relative">
