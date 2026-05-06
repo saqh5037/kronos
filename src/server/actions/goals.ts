@@ -39,6 +39,7 @@ async function resolveCurrentValue(
   tenantId: string,
   metric: "PR" | "TONNAGE" | "ATTENDANCE",
   movementId: string | null,
+  since: Date | null = null,
 ): Promise<number> {
   const db = withTenant(tenantId);
   if (metric === "PR" && movementId) {
@@ -49,7 +50,11 @@ async function resolveCurrentValue(
   }
   if (metric === "ATTENDANCE") {
     return db.booking.count({
-      where: { athleteId, status: "ATTENDED" },
+      where: {
+        athleteId,
+        status: "ATTENDED",
+        ...(since ? { class: { startsAt: { gte: since } } } : {}),
+      },
     });
   }
   return 0;
@@ -65,12 +70,14 @@ export async function createGoal(input: unknown): Promise<{ id: string }> {
 
   const startValue =
     parsed.startValue ??
-    (await resolveCurrentValue(
-      me.id,
-      tenantId,
-      parsed.metric,
-      parsed.movementId ?? null,
-    ));
+    (parsed.metric === "ATTENDANCE"
+      ? 0
+      : await resolveCurrentValue(
+          me.id,
+          tenantId,
+          parsed.metric,
+          parsed.movementId ?? null,
+        ));
 
   const goal = await rawDb.goal.create({
     data: {
@@ -111,6 +118,7 @@ export async function listMyGoals(): Promise<GoalRow[]> {
         tenantId,
         g.metric as "PR" | "TONNAGE" | "ATTENDANCE",
         g.movementId,
+        g.metric === "ATTENDANCE" ? g.createdAt : null,
       );
       const progress = computeGoalProgress(
         {
@@ -158,6 +166,7 @@ export async function getGoalProgress(goalId: string): Promise<GoalRow | null> {
     tenantId,
     g.metric as "PR" | "TONNAGE" | "ATTENDANCE",
     g.movementId,
+    g.metric === "ATTENDANCE" ? g.createdAt : null,
   );
   const progress = computeGoalProgress(
     {
