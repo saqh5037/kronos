@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { motion } from "framer-motion";
 import { cancelBooking } from "@/server/actions/bookings";
+import { kToast } from "@/lib/toast";
 
 export default function CancelMyBookingButton({
   bookingId,
@@ -16,8 +17,9 @@ export default function CancelMyBookingButton({
     startTransition(async () => {
       try {
         await cancelBooking(bookingId);
+        kToast.info("Reserva cancelada");
       } catch (err) {
-        alert(err instanceof Error ? err.message : "Error");
+        kToast.error(err instanceof Error ? err.message : "Error");
       }
     });
   }

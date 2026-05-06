@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { kToast } from "@/lib/toast";
 
 const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEV_LOGIN === "1";
 
@@ -13,9 +14,17 @@ export default function LoginForm() {
   async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    await signIn("email", { email, redirect: false });
-    setSent(true);
-    setLoading(false);
+    try {
+      await signIn("email", { email, redirect: false });
+      kToast.success("Liga enviada", {
+        description: "Revisa tu bandeja de entrada.",
+      });
+      setSent(true);
+    } catch {
+      kToast.error("No se pudo enviar la liga");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (sent) {
@@ -77,9 +86,11 @@ function DevLoginForm() {
     });
     if (res?.error) {
       setError("Credenciales inválidas");
+      kToast.error("Credenciales inválidas");
       setLoading(false);
       return;
     }
+    kToast.success("Sesión iniciada");
     window.location.href = "/admin";
   }
 

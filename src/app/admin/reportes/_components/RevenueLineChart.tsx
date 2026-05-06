@@ -1,6 +1,6 @@
 "use client";
 
-import { LineChart } from "@/components/charts/LineChart";
+import { KronosLineChart } from "@/components/charts/kronos-chart";
 import type { RevenueByMonthPoint } from "@/server/actions/reports";
 
 const MONTHS_ES = [
@@ -18,7 +18,8 @@ const MONTHS_ES = [
   "Dic",
 ];
 
-const fmtMonth = (k: string) => {
+const fmtMonth = (k: unknown) => {
+  if (typeof k !== "string") return String(k ?? "");
   const [, m] = k.split("-");
   const idx = parseInt(m, 10) - 1;
   return MONTHS_ES[idx] ?? k;
@@ -28,13 +29,16 @@ const fmtCurrency = (v: number) => `$${(v / 1000).toFixed(1)}k`;
 
 export function RevenueLineChart({ data }: { data: RevenueByMonthPoint[] }) {
   return (
-    <LineChart
+    <KronosLineChart
       data={data}
       xKey="month"
-      lines={[{ key: "revenue", label: "Revenue", color: "#4a7c59" }]}
-      height={240}
-      yFormatter={fmtCurrency}
-      xFormatter={fmtMonth}
+      yKey="revenue"
+      variant="cinematic"
+      height={260}
+      gradient
+      formatY={fmtCurrency}
+      formatX={fmtMonth}
+      ariaLabel="Ingresos por mes"
     />
   );
 }

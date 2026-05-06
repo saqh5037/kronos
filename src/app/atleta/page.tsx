@@ -23,6 +23,10 @@ import QuickSurvey from "@/components/atleta/QuickSurvey";
 import PersonalizedGreeting from "@/components/atleta/PersonalizedGreeting";
 import { getDailyGreeting, type DailyGreeting } from "@/server/actions/ai";
 import { AnimatedStats } from "@/components/kronos/AnimatedStats";
+import {
+  AnimatedSection,
+  AnimatedItem,
+} from "@/components/kronos/AnimatedSection";
 import ParticleMesh from "@/components/kronos/ParticleMesh";
 import CancelMyBookingButton from "@/components/kronos/CancelMyBookingButton";
 import { formatScore } from "@/lib/scores";
@@ -358,66 +362,69 @@ export default async function AtletaHomePage() {
           </div>
           <div className="px-3.5">
             <div className="k-card overflow-hidden">
-              {topScores.map((s, i, a) => {
-                const isTop3 = i < 3;
-                const rankGlows = [
-                  "0 0 14px rgba(0, 191, 255, 0.35)",
-                  "0 0 10px rgba(0, 68, 255, 0.30)",
-                  "0 0 8px rgba(255, 31, 71, 0.25)",
-                ];
-                return (
-                  <div
-                    key={s.id}
-                    className="flex items-center gap-3 px-4 py-3"
-                    style={{
-                      borderBottom:
-                        i < a.length - 1 ? "1px solid var(--line)" : "none",
-                    }}
-                  >
-                    <div
-                      className="font-display text-lg font-bold w-5 text-center"
-                      style={{
-                        color: isTop3 ? "var(--moss)" : "var(--text-3)",
-                        textShadow: isTop3 ? rankGlows[i] : "none",
-                      }}
-                    >
-                      {i + 1}
-                    </div>
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold"
-                      style={{
-                        background: isTop3
-                          ? `var(--${["recovery", "strain", "pr"][i]}-soft)`
-                          : "var(--bg-soft)",
-                        border: `1px solid ${isTop3 ? `var(--${["recovery", "strain", "pr"][i]}-line)` : "var(--line)"}`,
-                        color: isTop3
-                          ? `var(--${["recovery", "strain", "pr"][i]})`
-                          : "var(--text-3)",
-                      }}
-                    >
-                      {s.athlete.firstName[0]}
-                    </div>
-                    <div className="flex-1 text-[13px] font-medium">
-                      {s.athlete.firstName} {s.athlete.lastName?.[0]}.
-                    </div>
-                    <span
-                      className={`k-chip ${s.scaling === "RX" ? "k-chip-moss" : "k-chip-ghost"}`}
-                      style={{ padding: "3px 8px", fontSize: 9 }}
-                    >
-                      {s.scaling}
-                    </span>
-                    <div
-                      className="font-display text-sm font-bold min-w-[54px] text-right"
-                      style={{ color: "var(--text)" }}
-                    >
-                      {formatScore(
-                        Number(s.value),
-                        s.wod.scoreType as ScoreType,
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+              <AnimatedSection>
+                {topScores.map((s, i, a) => {
+                  const isTop3 = i < 3;
+                  const rankGlows = [
+                    "0 0 14px rgba(0, 191, 255, 0.35)",
+                    "0 0 10px rgba(0, 68, 255, 0.30)",
+                    "0 0 8px rgba(255, 31, 71, 0.25)",
+                  ];
+                  return (
+                    <AnimatedItem key={s.id}>
+                      <div
+                        className="flex items-center gap-3 px-4 py-3"
+                        style={{
+                          borderBottom:
+                            i < a.length - 1 ? "1px solid var(--line)" : "none",
+                        }}
+                      >
+                        <div
+                          className="font-display text-lg font-bold w-5 text-center"
+                          style={{
+                            color: isTop3 ? "var(--moss)" : "var(--text-3)",
+                            textShadow: isTop3 ? rankGlows[i] : "none",
+                          }}
+                        >
+                          {i + 1}
+                        </div>
+                        <div
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold"
+                          style={{
+                            background: isTop3
+                              ? `var(--${["recovery", "strain", "pr"][i]}-soft)`
+                              : "var(--bg-soft)",
+                            border: `1px solid ${isTop3 ? `var(--${["recovery", "strain", "pr"][i]}-line)` : "var(--line)"}`,
+                            color: isTop3
+                              ? `var(--${["recovery", "strain", "pr"][i]})`
+                              : "var(--text-3)",
+                          }}
+                        >
+                          {s.athlete.firstName[0]}
+                        </div>
+                        <div className="flex-1 text-[13px] font-medium">
+                          {s.athlete.firstName} {s.athlete.lastName?.[0]}.
+                        </div>
+                        <span
+                          className={`k-chip ${s.scaling === "RX" ? "k-chip-moss" : "k-chip-ghost"}`}
+                          style={{ padding: "3px 8px", fontSize: 9 }}
+                        >
+                          {s.scaling}
+                        </span>
+                        <div
+                          className="font-display text-sm font-bold min-w-[54px] text-right"
+                          style={{ color: "var(--text)" }}
+                        >
+                          {formatScore(
+                            Number(s.value),
+                            s.wod.scoreType as ScoreType,
+                          )}
+                        </div>
+                      </div>
+                    </AnimatedItem>
+                  );
+                })}
+              </AnimatedSection>
             </div>
           </div>
         </RevealOnScroll>

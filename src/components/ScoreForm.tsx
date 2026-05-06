@@ -7,6 +7,7 @@ import { scalings } from "@/lib/validations/score";
 import { defaultUnit, timeStringToSeconds } from "@/lib/validations/score";
 import type { ScoreType } from "@/lib/validations/wod";
 import KCard from "@/components/kronos/KCard";
+import { kToast } from "@/lib/toast";
 
 export default function ScoreForm({
   wodId,
@@ -62,11 +63,20 @@ export default function ScoreForm({
       try {
         const res = await submitScore(data);
         form.reset();
-        setFeedback(
-          res.prAchieved ? "🏆 ¡Nuevo PR registrado!" : "Score guardado",
-        );
+        if (res.prAchieved) {
+          kToast.success("🏆 ¡Nuevo PR registrado!", {
+            description: "Tu mejor marca personal ha sido actualizada.",
+            duration: 5000,
+          });
+          setFeedback("🏆 ¡Nuevo PR registrado!");
+        } else {
+          kToast.success("Score guardado");
+          setFeedback("Score guardado");
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al guardar");
+        const msg = err instanceof Error ? err.message : "Error al guardar";
+        kToast.error(msg);
+        setError(msg);
       }
     });
   }

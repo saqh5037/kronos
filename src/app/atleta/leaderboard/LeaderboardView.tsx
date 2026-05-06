@@ -197,15 +197,18 @@ export default function LeaderboardPage({
       {!isPending && tab === "wod" && wodData && (
         <div className="px-3.5 mt-3">
           <KCard className="overflow-hidden">
-            {wodData.entries.map((e, i, arr) => (
-              <LeaderboardRow
-                key={e.athleteId}
-                rank={i + 1}
-                entry={e}
-                scoreType={wodData.scoreType}
-                isLast={i === arr.length - 1}
-              />
-            ))}
+            <AnimatedSection key={`wod-${wodId}`}>
+              {wodData.entries.map((e, i, arr) => (
+                <AnimatedItem key={e.athleteId}>
+                  <LeaderboardRow
+                    rank={i + 1}
+                    entry={e}
+                    scoreType={wodData.scoreType}
+                    isLast={i === arr.length - 1}
+                  />
+                </AnimatedItem>
+              ))}
+            </AnimatedSection>
             {wodData.entries.length === 0 && (
               <div
                 className="p-6 text-center text-sm"
@@ -222,15 +225,18 @@ export default function LeaderboardPage({
       {!isPending && tab === "movement" && movementData && (
         <div className="px-3.5 mt-3">
           <KCard className="overflow-hidden">
-            {movementData.entries.map((e, i, arr) => (
-              <LeaderboardRow
-                key={e.athleteId}
-                rank={i + 1}
-                entry={e}
-                scoreType="WEIGHT"
-                isLast={i === arr.length - 1}
-              />
-            ))}
+            <AnimatedSection key={`mov-${movementId}`}>
+              {movementData.entries.map((e, i, arr) => (
+                <AnimatedItem key={e.athleteId}>
+                  <LeaderboardRow
+                    rank={i + 1}
+                    entry={e}
+                    scoreType="WEIGHT"
+                    isLast={i === arr.length - 1}
+                  />
+                </AnimatedItem>
+              ))}
+            </AnimatedSection>
             {movementData.entries.length === 0 && (
               <div
                 className="p-6 text-center text-sm"
@@ -247,14 +253,17 @@ export default function LeaderboardPage({
       {!isPending && tab === "attendance" && (
         <div className="px-3.5 mt-3">
           <KCard className="overflow-hidden">
-            {attendanceData.map((e, i, arr) => (
-              <AttendanceRow
-                key={e.athleteId}
-                rank={i + 1}
-                entry={e}
-                isLast={i === arr.length - 1}
-              />
-            ))}
+            <AnimatedSection>
+              {attendanceData.map((e, i, arr) => (
+                <AnimatedItem key={e.athleteId}>
+                  <AttendanceRow
+                    rank={i + 1}
+                    entry={e}
+                    isLast={i === arr.length - 1}
+                  />
+                </AnimatedItem>
+              ))}
+            </AnimatedSection>
             {attendanceData.length === 0 && (
               <div
                 className="p-6 text-center text-sm"

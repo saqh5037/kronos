@@ -8,6 +8,7 @@ import {
   checkInAthlete,
   markNoShow,
 } from "@/server/actions/bookings";
+import { kToast } from "@/lib/toast";
 
 export function BookButton({
   classId,
@@ -28,8 +29,9 @@ export function BookButton({
     startTransition(async () => {
       try {
         await bookClass(classId);
+        kToast.success("Reserva confirmada");
       } catch (err) {
-        alert(err instanceof Error ? err.message : "Error al reservar");
+        kToast.error(err instanceof Error ? err.message : "Error al reservar");
       }
     });
   }
@@ -40,8 +42,9 @@ export function BookButton({
     startTransition(async () => {
       try {
         await cancelBooking(myBookingId);
+        kToast.info("Reserva cancelada");
       } catch (err) {
-        alert(err instanceof Error ? err.message : "Error");
+        kToast.error(err instanceof Error ? err.message : "Error");
       }
     });
   }
@@ -95,7 +98,14 @@ export function CheckInButton({ bookingId }: { bookingId: string }) {
     <motion.button
       onClick={() =>
         startTransition(async () => {
-          await checkInAthlete(bookingId);
+          try {
+            await checkInAthlete(bookingId);
+            kToast.success("Check-in registrado");
+          } catch (err) {
+            kToast.error(
+              err instanceof Error ? err.message : "Error en check-in",
+            );
+          }
         })
       }
       disabled={isPending}
@@ -119,7 +129,12 @@ export function NoShowButton({ bookingId }: { bookingId: string }) {
     <motion.button
       onClick={() =>
         startTransition(async () => {
-          await markNoShow(bookingId);
+          try {
+            await markNoShow(bookingId);
+            kToast.warning("Marcado como no-show");
+          } catch (err) {
+            kToast.error(err instanceof Error ? err.message : "Error");
+          }
         })
       }
       disabled={isPending}
@@ -144,7 +159,12 @@ export function CancelBookingButton({ bookingId }: { bookingId: string }) {
       onClick={() => {
         if (!confirm("¿Cancelar reserva del atleta?")) return;
         startTransition(async () => {
-          await cancelBooking(bookingId);
+          try {
+            await cancelBooking(bookingId);
+            kToast.info("Reserva cancelada");
+          } catch (err) {
+            kToast.error(err instanceof Error ? err.message : "Error");
+          }
         });
       }}
       disabled={isPending}

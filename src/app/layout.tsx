@@ -8,6 +8,7 @@ import {
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import GlobalEffects from "@/components/GlobalEffects";
+import { KronosToaster } from "@/components/kronos/KronosToaster";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -74,6 +75,7 @@ export default function RootLayout({
         >
           <GlobalEffects />
           {children}
+          <KronosToaster />
         </ThemeProvider>
       </body>
     </html>

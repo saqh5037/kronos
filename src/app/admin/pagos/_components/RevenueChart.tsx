@@ -1,23 +1,26 @@
 "use client";
 
-import { AreaChart } from "@/components/charts/AreaChart";
+import { KronosAreaChart } from "@/components/charts/kronos-chart";
 import type { RevenueByDayPoint } from "@/server/actions/payments";
 
 const fmtCurrency = (v: number) => `$${v.toLocaleString("es-MX")}`;
-const fmtDayShort = (k: string) => {
+const fmtDayShort = (k: unknown) => {
+  if (typeof k !== "string") return String(k ?? "");
   const [, m, d] = k.split("-");
   return `${d}/${m}`;
 };
 
 export function RevenueChart({ data }: { data: RevenueByDayPoint[] }) {
   return (
-    <AreaChart
+    <KronosAreaChart
       data={data}
       xKey="day"
-      series={[{ key: "revenue", label: "Ingresos", color: "#4a7c59" }]}
-      height={220}
-      yFormatter={fmtCurrency}
-      xFormatter={fmtDayShort}
+      yKey="revenue"
+      variant="cinematic"
+      height={240}
+      formatY={fmtCurrency}
+      formatX={fmtDayShort}
+      ariaLabel="Ingresos por día"
     />
   );
 }

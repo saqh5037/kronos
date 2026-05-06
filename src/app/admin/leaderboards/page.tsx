@@ -121,7 +121,7 @@ export default async function LeaderboardsPage({
                       <th className="text-left px-4 py-2 k-eyebrow">Logrado</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="k-stagger">
                     {board.entries.slice(3).map((e, idx) => (
                       <tr key={e.athleteId} className="k-row">
                         <td
@@ -175,7 +175,7 @@ export default async function LeaderboardsPage({
                 Sin check-ins esta semana.
               </p>
             ) : (
-              <ul className="flex flex-col">
+              <ul className="flex flex-col k-stagger">
                 {attendanceLeaders.slice(0, 5).map((a, idx) => (
                   <li
                     key={a.athleteId}

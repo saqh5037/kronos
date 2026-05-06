@@ -5,6 +5,7 @@ import {
   sendAnnouncement,
   deleteAnnouncement,
 } from "@/server/actions/announcements";
+import { kToast } from "@/lib/toast";
 
 export function SendButton({ id }: { id: string }) {
   const [isPending, startTransition] = useTransition();
@@ -14,8 +15,9 @@ export function SendButton({ id }: { id: string }) {
         startTransition(async () => {
           try {
             await sendAnnouncement(id);
+            kToast.success("Anuncio enviado");
           } catch (err) {
-            alert(err instanceof Error ? err.message : "Error");
+            kToast.error(err instanceof Error ? err.message : "Error");
           }
         })
       }
@@ -35,7 +37,12 @@ export function DeleteAnnouncementButton({ id }: { id: string }) {
       onClick={() => {
         if (!confirm("¿Borrar este anuncio?")) return;
         startTransition(async () => {
-          await deleteAnnouncement(id);
+          try {
+            await deleteAnnouncement(id);
+            kToast.info("Anuncio borrado");
+          } catch (err) {
+            kToast.error(err instanceof Error ? err.message : "Error");
+          }
         });
       }}
       disabled={isPending}

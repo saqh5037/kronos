@@ -1,15 +1,16 @@
 "use client";
 
-import { LineChart } from "@/components/charts/LineChart";
+import { KronosLineChart } from "@/components/charts/kronos-chart";
 import type { MyScoreTimelinePoint } from "@/server/actions/athlete-home";
 
-const fmtDay = (k: string) => {
+const fmtDay = (k: unknown) => {
+  if (typeof k !== "string") return String(k ?? "");
   const [, m, d] = k.split("-");
   return `${d}/${m}`;
 };
 
 export function ScoresTimeline({ data }: { data: MyScoreTimelinePoint[] }) {
-  // Normalize to 0..1 for visual consistency across mixed score types
+  // Normalize to 0..100 for visual consistency across mixed score types
   const max = Math.max(...data.map((d) => d.value), 1);
   const min = Math.min(...data.map((d) => d.value), 0);
   const range = max - min || 1;
@@ -19,13 +20,16 @@ export function ScoresTimeline({ data }: { data: MyScoreTimelinePoint[] }) {
   }));
 
   return (
-    <LineChart
+    <KronosLineChart
       data={series}
       xKey="date"
-      lines={[{ key: "score", label: "Progreso (relativo)", color: "#4a7c59" }]}
-      height={180}
-      yFormatter={(v) => `${v.toFixed(0)}`}
-      xFormatter={fmtDay}
+      yKey="score"
+      variant="cinematic"
+      height={200}
+      gradient
+      formatY={(v) => `${v.toFixed(0)}`}
+      formatX={fmtDay}
+      ariaLabel="Progreso de scores en el tiempo"
     />
   );
 }

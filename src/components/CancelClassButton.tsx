@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { cancelClass } from "@/server/actions/classes";
+import { kToast } from "@/lib/toast";
 
 export default function CancelClassButton({ id }: { id: string }) {
   const [isPending, startTransition] = useTransition();
@@ -14,7 +15,12 @@ export default function CancelClassButton({ id }: { id: string }) {
     )
       return;
     startTransition(async () => {
-      await cancelClass(id);
+      try {
+        await cancelClass(id);
+        kToast.info("Clase cancelada — atletas notificados");
+      } catch (err) {
+        kToast.error(err instanceof Error ? err.message : "Error");
+      }
     });
   }
 

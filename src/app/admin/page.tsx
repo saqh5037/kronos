@@ -266,7 +266,7 @@ export default async function AdminDashboardPage({
                   No hay clases en las próximas 48 horas.
                 </p>
               ) : (
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-2 k-stagger">
                   {data.nextClasses.map((c) => {
                     const occupied = c.bookedCount;
                     const capacity = c.capacity;
