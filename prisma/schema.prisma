@@ -317,6 +317,7 @@ model Movement {
   category            MovementCategory @default(ACCESSORY)
   isStandard          Boolean          @default(false)
   videoUrl            String?
+  videoUrlCues        String?
   standardDescription String?
   equipment           String[]
   createdAt           DateTime         @default(now())
