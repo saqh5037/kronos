@@ -1,32 +1,10 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/server/auth";
-import { listAliasesForTenant, removeAlias } from "@/server/actions/aliases";
+import { listAliasesForTenant } from "@/server/actions/aliases";
+import AliasCardList from "@/components/admin/AliasCardList";
 
 export const metadata = { title: "Apodos de atletas — Kronos" };
-
-async function DeleteAliasButton({
-  aliasId,
-  isOwner,
-}: {
-  aliasId: string;
-  isOwner: boolean;
-}) {
-  if (!isOwner) return null;
-
-  async function handleDelete() {
-    "use server";
-    await removeAlias(aliasId);
-  }
-
-  return (
-    <form action={handleDelete}>
-      <button type="submit" className="text-xs text-[--pr] hover:underline">
-        Eliminar
-      </button>
-    </form>
-  );
-}
 
 export default async function AliasesPage() {
   const session = await getServerSession(authOptions);
@@ -41,69 +19,29 @@ export default async function AliasesPage() {
   const aliases = await listAliasesForTenant();
 
   return (
-    <main className="p-6 max-w-3xl mx-auto space-y-6">
+    <main className="p-4 md:p-6 max-w-3xl mx-auto space-y-6">
       <div>
         <p className="k-eyebrow">Ajustes</p>
         <h1 className="text-2xl font-display font-bold text-white mt-1">
           Apodos de atletas
         </h1>
-        <p className="text-white/60 text-sm mt-1">
-          El sistema de OCR aprende los apodos que usas en la pizarra para
-          mejorar el reconocimiento automático.
+        <p className="text-white/50 text-sm mt-1">
+          La app aprende los apodos que usas en la pizarra para mejorar el
+          reconocimiento automático.
         </p>
       </div>
 
       {aliases.length === 0 ? (
-        <div className="k-card p-8 text-center text-white/40">
+        <div className="k-card p-10 text-center">
           <p className="text-4xl mb-3">🏷️</p>
-          <p className="font-medium">Sin apodos registrados</p>
-          <p className="text-sm mt-1">
-            Los apodos se aprenden automáticamente al cargar pizarras y corregir
-            los matches.
+          <p className="font-medium text-white">Aún no hay apodos</p>
+          <p className="text-sm text-white/40 mt-1 max-w-sm mx-auto">
+            La app aprenderá conforme uses la pizarra OCR y corrijas los matches
+            de nombres.
           </p>
         </div>
       ) : (
-        <div className="k-card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10">
-                <th className="px-4 py-3 text-left text-white/40 font-normal">
-                  Apodo en pizarra
-                </th>
-                <th className="px-4 py-3 text-left text-white/40 font-normal">
-                  Atleta
-                </th>
-                <th className="px-4 py-3 text-left text-white/40 font-normal">
-                  Registrado
-                </th>
-                {isOwner && (
-                  <th className="px-4 py-3 text-left text-white/40 font-normal">
-                    Acciones
-                  </th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {aliases.map((a) => (
-                <tr
-                  key={a.id}
-                  className="border-b border-white/5 last:border-0 hover:bg-white/2"
-                >
-                  <td className="px-4 py-3 font-mono text-white">{a.alias}</td>
-                  <td className="px-4 py-3 text-white/80">{a.athleteName}</td>
-                  <td className="px-4 py-3 text-white/40">
-                    {a.createdAt.toLocaleDateString("es-MX")}
-                  </td>
-                  {isOwner && (
-                    <td className="px-4 py-3">
-                      <DeleteAliasButton aliasId={a.id} isOwner={isOwner} />
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <AliasCardList aliases={aliases} isOwner={isOwner} />
       )}
 
       <p className="text-xs text-white/30">
