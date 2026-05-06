@@ -50,6 +50,7 @@ export function DataTable<T>({
           checked={table.getIsAllPageRowsSelected()}
           onChange={table.getToggleAllPageRowsSelectedHandler()}
           aria-label="Seleccionar todo"
+          className="accent-[var(--blue)]"
         />
       ),
       cell: ({ row }) => (
@@ -59,6 +60,7 @@ export function DataTable<T>({
           onChange={row.getToggleSelectedHandler()}
           onClick={(e) => e.stopPropagation()}
           aria-label="Seleccionar fila"
+          className="accent-[var(--blue)]"
         />
       ),
     };
@@ -107,13 +109,16 @@ export function DataTable<T>({
                       <button
                         type="button"
                         onClick={header.column.getToggleSortingHandler()}
-                        className="inline-flex min-h-8 items-center gap-1 py-1 hover:text-[var(--text-2)]"
+                        className="inline-flex min-h-8 items-center gap-1 py-1 hover:text-[var(--text)] transition-colors"
                       >
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
-                        <span aria-hidden className="text-[var(--text-3)]">
+                        <span
+                          aria-hidden
+                          className="text-[var(--text-3)] text-xs"
+                        >
                           {dir === "asc" ? "↑" : dir === "desc" ? "↓" : "↕"}
                         </span>
                       </button>
@@ -136,7 +141,7 @@ export function DataTable<T>({
               onClick={onRowClick ? () => onRowClick(row.original) : undefined}
               className={cn(
                 onRowClick && "cursor-pointer",
-                row.getIsSelected() && "bg-[var(--strain-soft)]",
+                row.getIsSelected() && "bg-[var(--blue-soft)]",
               )}
             >
               {row.getVisibleCells().map((cell) => (

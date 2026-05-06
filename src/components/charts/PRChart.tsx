@@ -51,7 +51,7 @@ export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
           ? [
               {
                 y: currentBest,
-                color: CHART_COLORS.cinematicBright,
+                color: CHART_COLORS.primaryBright,
                 label: "PR ACTUAL",
               },
             ]
@@ -70,7 +70,7 @@ export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
             <div className="mt-1 flex items-center gap-2">
               <span
                 className="font-display text-sm font-bold"
-                style={{ color: CHART_COLORS.cinematicBright }}
+                style={{ color: CHART_COLORS.primaryBright }}
               >
                 {p.value} {unit}
               </span>

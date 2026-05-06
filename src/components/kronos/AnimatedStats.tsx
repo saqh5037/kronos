@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { CHART_COLORS } from "@/components/charts/tokens";
 import HaloRing from "./HaloRing";
 
 const container = {
@@ -36,43 +37,43 @@ export function AnimatedStats({
 
   return (
     <motion.div
-      className="grid grid-cols-3 gap-3 mt-6 px-4"
+      className="grid grid-cols-3 gap-2 sm:gap-3 mt-6 px-3 sm:px-4"
       variants={container}
-      initial="hidden"
+      initial={false}
       animate="show"
     >
       <motion.div
-        className="k-card p-3 flex items-center justify-center"
+        className="k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
         variants={item}
       >
         <HaloRing
-          size={88}
+          size={72}
           value={weekRatio}
-          color="#4a7c59"
+          color={CHART_COLORS.moss}
           displayValue={String(weekAttendance)}
           label="ESTA SEM"
         />
       </motion.div>
       <motion.div
-        className="k-card p-3 flex items-center justify-center"
+        className="k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
         variants={item}
       >
         <HaloRing
-          size={88}
+          size={72}
           value={Math.min(1, streak / 14)}
-          color="#64748b"
+          color={CHART_COLORS.steel}
           displayValue={String(streak)}
           label="RACHA"
         />
       </motion.div>
       <motion.div
-        className="k-card p-3 flex items-center justify-center"
+        className="k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
         variants={item}
       >
         <HaloRing
-          size={88}
+          size={72}
           value={Math.min(1, prCount / 10)}
-          color="#c44536"
+          color={CHART_COLORS.ember}
           displayValue={String(prCount)}
           label="PRs"
         />

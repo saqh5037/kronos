@@ -118,7 +118,7 @@ export function KronosLineChart<T>({
 }: KronosLineChartProps<T>) {
   const isCinematic = variant === "cinematic";
   const resolvedColor =
-    color ?? (isCinematic ? CHART_COLORS.cinematic : CHART_COLORS.fire);
+    color ?? (isCinematic ? CHART_COLORS.primary : CHART_COLORS.fire);
   const showBars = bars ?? isCinematic;
   const reduce = useReducedMotion() ?? false;
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -299,7 +299,7 @@ export function KronosLineChart<T>({
               animate={showAnim}
               reduceMotion={reduce}
               cinematic={isCinematic}
-              cinematicColor={CHART_COLORS.cinematic}
+              cinematicColor={CHART_COLORS.primary}
             />
           )}
 

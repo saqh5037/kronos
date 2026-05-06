@@ -1,5 +1,6 @@
 "use client";
 
+import { CHART_COLORS } from "@/components/charts/tokens";
 import type { AttendanceHeatmapCell } from "@/server/actions/attendance";
 
 const DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -82,7 +83,10 @@ export function DayHourHeatmap({ cells }: { cells: AttendanceHeatmapCell[] }) {
               const fill =
                 !cell || cell.capacity === 0
                   ? "rgba(127,127,127,0.06)"
-                  : hexAlpha("#4a7c59", Math.min(1, 0.18 + util * 0.82));
+                  : hexAlpha(
+                      CHART_COLORS.moss,
+                      Math.min(1, 0.18 + util * 0.82),
+                    );
               const titleStr = `${day} ${h}:00 — ${cell?.attended ?? 0}/${cell?.capacity ?? 0} (${Math.round(util * 100)}%)`;
               return (
                 <rect

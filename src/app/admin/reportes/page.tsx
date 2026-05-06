@@ -45,10 +45,18 @@ export default async function ReportesPage() {
     return (
       <div className="p-8">
         <div className="mb-6">
-          <p className="k-eyebrow mb-1">Análisis</p>
-          <h1 className="font-display text-3xl font-bold tracking-tight">
-            Reportes
-          </h1>
+          <span className="k-eyebrow-bar">Análisis</span>
+          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+            <h1
+              className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
+              style={{ color: "var(--text)" }}
+            >
+              Re<em>portes</em>
+            </h1>
+          </div>
+          <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
+            Sin datos disponibles. Verifica que la base esté conectada.
+          </p>
         </div>
         <div className="k-card p-6 text-center">
           <p className="text-sm" style={{ color: "var(--text-2)" }}>
@@ -75,10 +83,15 @@ export default async function ReportesPage() {
     <div className="p-8">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="k-eyebrow mb-1">Análisis</p>
-          <h1 className="font-display text-3xl font-bold tracking-tight">
-            Reportes
-          </h1>
+          <span className="k-eyebrow-bar">Análisis</span>
+          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+            <h1
+              className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
+              style={{ color: "var(--text)" }}
+            >
+              Re<em>portes</em>
+            </h1>
+          </div>
           <p
             className="mt-1 text-sm capitalize"
             style={{ color: "var(--text-2)" }}

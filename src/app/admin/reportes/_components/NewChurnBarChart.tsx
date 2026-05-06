@@ -1,6 +1,7 @@
 "use client";
 
 import { BarChart } from "@/components/charts/BarChart";
+import { CHART_COLORS } from "@/components/charts/tokens";
 import type { AthletesByMonthPoint } from "@/server/actions/reports";
 
 const MONTHS_ES = [
@@ -30,8 +31,12 @@ export function NewChurnBarChart({ data }: { data: AthletesByMonthPoint[] }) {
       data={data}
       xKey="month"
       bars={[
-        { key: "newAthletes", label: "Nuevos", color: "#4a7c59" },
-        { key: "churnedMemberships", label: "Bajas", color: "#c44536" },
+        { key: "newAthletes", label: "Nuevos", color: CHART_COLORS.moss },
+        {
+          key: "churnedMemberships",
+          label: "Bajas",
+          color: CHART_COLORS.ember,
+        },
       ]}
       stacked={false}
       showLegend

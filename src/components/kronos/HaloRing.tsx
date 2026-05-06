@@ -1,6 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { CHART_COLORS } from "@/components/charts/tokens";
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
 
 interface HaloRingProps {
   size?: number;
@@ -16,7 +24,7 @@ export default function HaloRing({
   size = 88,
   strokeWidth = 8,
   value = 0.8,
-  color = "#4a7c59",
+  color = CHART_COLORS.moss,
   label,
   displayValue,
   animate = true,
@@ -25,18 +33,11 @@ export default function HaloRing({
   const circumference = 2 * Math.PI * r;
   const targetOffset = circumference * (1 - Math.min(1, Math.max(0, value)));
 
-  // Derive glow colours from the ring colour
-  const glowColor =
-    color === "#4a7c59"
-      ? "rgba(74,124,89,0.55)"
-      : color === "#64748b"
-        ? "rgba(100,116,139,0.55)"
-        : color === "#c44536"
-          ? "rgba(196,69,54,0.55)"
-          : "rgba(220,75,23,0.55)";
-
-  const glowBg = glowColor.replace("0.55", "0.18");
-  const glowShadow = glowColor.replace("0.55", "0.65");
+  // Derive glow tones from the ring hex so they always match.
+  const rgb = hexToRgb(color) ?? hexToRgb(CHART_COLORS.moss)!;
+  const rgba = (a: number) => `rgba(${rgb.r},${rgb.g},${rgb.b},${a})`;
+  const glowBg = rgba(0.18);
+  const glowShadow = rgba(0.65);
 
   return (
     <div

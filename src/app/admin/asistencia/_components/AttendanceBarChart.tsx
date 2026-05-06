@@ -1,6 +1,7 @@
 "use client";
 
 import { BarChart } from "@/components/charts/BarChart";
+import { CHART_COLORS } from "@/components/charts/tokens";
 import type { AttendanceByDayPoint } from "@/server/actions/attendance";
 
 const fmtDay = (k: string) => {
@@ -14,9 +15,9 @@ export function AttendanceBarChart({ data }: { data: AttendanceByDayPoint[] }) {
       data={data}
       xKey="day"
       bars={[
-        { key: "attended", label: "Asistidos", color: "#4a7c59" },
-        { key: "noShow", label: "No-show", color: "#c44536" },
-        { key: "booked", label: "Reservados", color: "#64748b" },
+        { key: "attended", label: "Asistidos", color: CHART_COLORS.moss },
+        { key: "noShow", label: "No-show", color: CHART_COLORS.ember },
+        { key: "booked", label: "Reservados", color: CHART_COLORS.steel },
       ]}
       stacked
       showLegend
