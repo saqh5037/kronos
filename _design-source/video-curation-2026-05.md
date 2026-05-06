@@ -28,28 +28,30 @@
   - **MONOSTRUCTURAL**: CrossFit oficial, Concept2 oficial (row/ski), Rogue (assault)
   - **ACCESSORY**: CrossFit oficial, Wodify, Rogue Fitness
 
-## Tabla de búsqueda — los 18 faltantes
+## Tabla de los 18 faltantes — IDs canónicos asignados (2026-05-05)
 
-| Slug            | Nombre          | Query sugerida en YouTube                | Canal preferido             | URL candidata (validar) |
-| --------------- | --------------- | ---------------------------------------- | --------------------------- | ----------------------- |
-| dumbbell-clean  | Dumbbell Clean  | "dumbbell clean crossfit demo"           | CrossFit oficial            | TBD                     |
-| farmers-carry   | Farmers Carry   | "farmers carry technique"                | Squat University / Catalyst | TBD                     |
-| handstand-walk  | Handstand Walk  | "handstand walk crossfit progression"    | GymnasticBodies             | TBD                     |
-| bar-dip         | Bar Dip         | "bar dip parallel bars demo"             | CrossFit oficial            | TBD                     |
-| hollow-rock     | Hollow Rock     | "hollow rock crossfit standard"          | CrossFit oficial            | TBD                     |
-| jumping-pull-up | Jumping Pull-up | "jumping pull up crossfit"               | CrossFit oficial            | TBD                     |
-| knee-raise      | Knee Raise      | "hanging knee raise demo"                | CrossFit oficial            | TBD                     |
-| run             | Run             | "running technique crossfit pose method" | CrossFit Endurance          | TBD                     |
-| bike            | Bike (Assault)  | "assault bike technique"                 | Rogue Fitness               | TBD                     |
-| ski-erg         | Ski Erg         | "ski erg technique concept2"             | Concept2 oficial            | TBD                     |
-| single-under    | Single Under    | "single under jump rope basic"           | CrossFit oficial            | TBD                     |
-| lunge           | Lunge           | "walking lunge crossfit"                 | CrossFit oficial            | TBD                     |
-| sit-up          | Sit-up          | "abmat sit up crossfit"                  | CrossFit oficial            | TBD                     |
-| ghd-sit-up      | GHD Sit-up      | "ghd sit up crossfit standard"           | CrossFit oficial            | TBD                     |
-| sled-push       | Sled Push       | "sled push technique"                    | Rogue Fitness               | TBD                     |
-| sled-pull       | Sled Pull       | "sled pull harness technique"            | Rogue Fitness               | TBD                     |
-| devils-press    | Devil's Press   | "devils press dumbbell crossfit"         | CrossFit oficial            | TBD                     |
-| man-maker       | Man Maker       | "man maker dumbbell crossfit"            | CrossFit oficial            | TBD                     |
+| Slug            | Nombre          | YouTube ID    | Fuente                                                |
+| --------------- | --------------- | ------------- | ----------------------------------------------------- |
+| dumbbell-clean  | Dumbbell Clean  | `CUaxieWW0tw` | The Dumbbell Clean — James Hobart, CrossFit oficial   |
+| farmers-carry   | Farmers Carry   | `cBv3NcxqhPM` | The Farmer's Carry                                    |
+| handstand-walk  | Handstand Walk  | `FdgJ9jZIT-Q` | The Handstand Walk — CrossFit oficial                 |
+| bar-dip         | Bar Dip         | `eERwCQHZqfA` | The Bar Dip — James Hobart, CrossFit oficial          |
+| hollow-rock     | Hollow Rock     | `SfkuOb_1GK8` | The Hollow Rock                                       |
+| jumping-pull-up | Jumping Pull-up | `oBIFjk3cSQ4` | Jumping Pull-up — CrossFit oficial                    |
+| knee-raise      | Knee Raise      | `lW4onyuCkzA` | Strict Hanging Knee Raise — CrossFit Movement Demo    |
+| run             | Run             | `y1wnFWIisq8` | CrossFit — Running Fundamentals (Doug Katona)         |
+| bike            | Bike (Assault)  | `mY9ihujdkc0` | Assault Bike Tips and Tricks for Efficiency and Power |
+| ski-erg         | Ski Erg         | `B0lIgT5PHc8` | SkiErg Technique — Concept2 oficial                   |
+| single-under    | Single Under    | `EwrFMvxMSkk` | Jump Rope — Single Unders                             |
+| lunge           | Lunge           | `JRh6_4rq-b8` | Reebok CrossFit ONE — Walking Lunge                   |
+| sit-up          | Sit-up          | `VIZX2Ru9qU8` | The AbMat Sit-Up — CrossFit oficial                   |
+| ghd-sit-up      | GHD Sit-up      | `1pbZ8mX2D1U` | The GHD Sit-up — Julie Foucher, CrossFit oficial      |
+| sled-push       | Sled Push       | `F7otn_5JdqA` | Sled Push — CrossFit Invictus                         |
+| sled-pull       | Sled Pull       | `cy1gCkC6InY` | Equipment Demo — Westside/Dog Sled Push Pull, Rogue   |
+| devils-press    | Devil's Press   | `cBGQrgovLFM` | Devil Press Demo — How to do Devil Presses            |
+| man-maker       | Man Maker       | `iMNnvhg1JcM` | Reebok CrossFit ONE — Man Maker oficial               |
+
+Los 18 cargados al `seed-movements.ts` el 2026-05-05. Validación visual pendiente (smoke en `/atleta/movimientos/[slug]`).
 
 ## Auditoría de los 32 actuales
 

@@ -73,7 +73,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "OLYMPIC",
     standardDescription:
       "Clean con mancuernas (ambas manos). Score: reps o weight. Tips RX: mismo patrón que barbell clean, mantener core.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/CUaxieWW0tw",
     equipment: ["Dumbbell"],
   },
   {
@@ -165,7 +165,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "STRENGTH",
     standardDescription:
       "Caminata cargando peso en ambas manos. Score: distance (m) o weight (kg). Tips RX: hombros atrás y abajo, pasos cortos y rápidos.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/cBv3NcxqhPM",
     equipment: ["Kettlebell", "Dumbbell"],
   },
 
@@ -239,7 +239,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "GYMNASTICS",
     standardDescription:
       "Caminata en posición invertida. Score: distance (m). Tips RX: hombros abiertos, mira al frente, pasos pequeños.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/FdgJ9jZIT-Q",
     equipment: [],
   },
   {
@@ -257,7 +257,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "GYMNASTICS",
     standardDescription:
       "Dip en barras paralelas. Score: reps. Tips RX: full ROM — shoulder below elbow al bottom.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/eERwCQHZqfA",
     equipment: ["Parallel bars"],
   },
   {
@@ -284,7 +284,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "GYMNASTICS",
     standardDescription:
       "Posición hollow mantenida mientras se balancea. Score: reps. Tips RX: lower back pegada al suelo, piernas y brazos extendidos.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/SfkuOb_1GK8",
     equipment: [],
   },
   {
@@ -293,7 +293,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "GYMNASTICS",
     standardDescription:
       "Pull-up con impulso de piernas desde el suelo. Score: reps. Tips RX: chin clearly over bar, control en el descenso.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/oBIFjk3cSQ4",
     equipment: ["Pull-up bar"],
   },
   {
@@ -302,7 +302,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "GYMNASTICS",
     standardDescription:
       "Desde colgado en barra, llevar las rodillas al pecho. Score: reps. Escalada de toes-to-bar.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/lW4onyuCkzA",
     equipment: ["Pull-up bar"],
   },
   {
@@ -322,7 +322,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "MONOSTRUCTURAL",
     standardDescription:
       "Carrera. Score: time (s) o distance (m). Tips RX: midfoot strike, cadencia alta, hombros relajados.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/y1wnFWIisq8",
     equipment: [],
   },
   {
@@ -340,7 +340,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "MONOSTRUCTURAL",
     standardDescription:
       "Bike ergómetro (Assault/Echo). Score: calories o time. Tips RX: 80-85 rpm, empuja y jala los handlebars.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/mY9ihujdkc0",
     equipment: ["Assault Bike"],
   },
   {
@@ -349,7 +349,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "MONOSTRUCTURAL",
     standardDescription:
       "Ski ergómetro. Score: calories o time. Tips RX: empujar con el cuerpo hacia abajo, no solo los brazos.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/B0lIgT5PHc8",
     equipment: ["Ski Erg"],
   },
   {
@@ -367,7 +367,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "MONOSTRUCTURAL",
     standardDescription:
       "Salto de cuerda estándar (una vuelta por salto). Score: reps. Escalada de double-under.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/EwrFMvxMSkk",
     equipment: ["Jump rope"],
   },
 
@@ -432,7 +432,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "ACCESSORY",
     standardDescription:
       "Zancada (peso corporal o cargado). Score: reps o distance. Tips RX: rodilla trasera cerca del suelo, torso vertical.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/JRh6_4rq-b8",
     equipment: [],
   },
   {
@@ -441,7 +441,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "ACCESSORY",
     standardDescription:
       "Abdominal. Score: reps. Tips RX: mariposa position (soles de los pies juntos), manos tocan el suelo tras la cabeza.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/VIZX2Ru9qU8",
     equipment: [],
   },
   {
@@ -450,7 +450,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "ACCESSORY",
     standardDescription:
       "Abdominal en máquina GHD (Glute Ham Developer). Score: reps. Tips RX: hiperextensión controlada, manos a los tobillos.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/1pbZ8mX2D1U",
     equipment: ["GHD"],
   },
   {
@@ -459,7 +459,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "ACCESSORY",
     standardDescription:
       "Empuje de trineo cargado. Score: distance (m) o time. Tips RX: inclinación 45°, pasos cortos y explosivos.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/F7otn_5JdqA",
     equipment: ["Sled"],
   },
   {
@@ -468,7 +468,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "ACCESSORY",
     standardDescription:
       "Jalón de trineo cargado. Score: distance (m). Tips RX: lean atrás, pasos potentes.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/cy1gCkC6InY",
     equipment: ["Sled", "Harness"],
   },
   {
@@ -477,7 +477,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "ACCESSORY",
     standardDescription:
       "Burpee + dumbbell snatch (ambos brazos simultáneamente). Score: reps. Tips RX: snatch explosivo desde el burpee.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/cBGQrgovLFM",
     equipment: ["Dumbbell"],
   },
   {
@@ -486,7 +486,7 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
     category: "ACCESSORY",
     standardDescription:
       "Push-up + row + row + thruster con mancuernas. Score: reps. Tips RX: movimiento fluido, core activo durante el push-up.",
-    videoUrl: null,
+    videoUrl: "https://www.youtube.com/embed/iMNnvhg1JcM",
     equipment: ["Dumbbell"],
   },
 ];
