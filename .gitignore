@@ -67,3 +67,7 @@ Thumbs.db
 /kimi-step*.png
 /kimi-review/
 /.claude-context.md
+
+# Inspiración / source assets pesados — quedan local
+/Imspiracion/
+/_design-source/logo/
