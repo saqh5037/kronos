@@ -23,6 +23,7 @@ import QuickSurvey from "@/components/atleta/QuickSurvey";
 import PersonalizedGreeting from "@/components/atleta/PersonalizedGreeting";
 import { getDailyGreeting, type DailyGreeting } from "@/server/actions/ai";
 import { AnimatedStats } from "@/components/kronos/AnimatedStats";
+import ParticleMesh from "@/components/kronos/ParticleMesh";
 import CancelMyBookingButton from "@/components/kronos/CancelMyBookingButton";
 import { formatScore } from "@/lib/scores";
 import { formatDayMonth, formatTime } from "@/lib/week";
@@ -130,52 +131,79 @@ export default async function AtletaHomePage() {
   const latestPR = prs[0] ?? null;
 
   return (
-    <div className="pb-28">
-      {/* HEADER */}
-      <AnimatedSection className="flex items-center justify-between px-[18px] pt-14 pb-3.5">
-        <AnimatedItem className="flex items-center gap-2.5">
-          <div
-            className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center font-extrabold text-sm text-[#1c1917] font-display"
-            style={{ background: "var(--grad)" }}
-          >
-            K
-          </div>
-          <div>
-            <div
-              className="font-mono text-[9px] tracking-[0.14em] font-bold"
-              style={{ color: "var(--text-3)" }}
-            >
-              BOX
-            </div>
-            <div className="text-[13px] font-bold">
-              Hola, {home.athlete?.firstName}
-            </div>
-          </div>
-        </AnimatedItem>
-        <AnimatedItem>
-          <button
-            className="relative w-[34px] h-[34px] rounded-full flex items-center justify-center k-card"
-            aria-label="Notificaciones"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" />
-            </svg>
-            <span
-              className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full"
-              style={{ background: "var(--ember)" }}
-            />
-          </button>
-        </AnimatedItem>
-      </AnimatedSection>
+    <div className="pb-28 relative">
+      {/* HERO — radical brand redesign con ParticleMesh background */}
+      <header className="relative px-4 pt-14 pb-5 overflow-hidden">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ opacity: 0.18 }}
+          aria-hidden
+        >
+          <ParticleMesh
+            density={50}
+            colorPrimary="#e60026"
+            colorSecondary="#00bfff"
+            connectionDistance={140}
+            mobileBehavior="static-gradient"
+          />
+        </div>
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at 50% 0%, rgba(0,68,255,0.12), transparent 65%)",
+          }}
+        />
+        <span className="k-corner-tl" aria-hidden />
+        <span className="k-corner-tr" aria-hidden />
 
-      {/* PERSONALIZED GREETING — Gemini-driven, demo de IA del wrap */}
+        <AnimatedSection className="relative flex items-start justify-between">
+          <AnimatedItem className="flex-1 min-w-0">
+            <span className="k-eyebrow-bar">Kronos · Box</span>
+            <div className="mt-2.5 flex items-baseline gap-2 flex-wrap">
+              <span
+                className="font-script text-[28px] leading-none"
+                style={{ color: "var(--brand-red)" }}
+              >
+                Hola,
+              </span>
+              <h1
+                className="k-h-italic font-display font-extrabold text-[34px] leading-[1] tracking-[-0.02em]"
+                style={{ color: "var(--text)" }}
+              >
+                <em>{home.athlete?.firstName}</em>
+              </h1>
+            </div>
+          </AnimatedItem>
+          <AnimatedItem>
+            <button
+              className="relative w-10 h-10 rounded-full flex items-center justify-center k-glass"
+              aria-label="Notificaciones"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" />
+              </svg>
+              <span
+                className="absolute top-0 right-0 w-2 h-2 rounded-full"
+                style={{
+                  background: "var(--brand-red)",
+                  boxShadow: "0 0 8px rgba(230,0,38,0.55)",
+                }}
+              />
+            </button>
+          </AnimatedItem>
+        </AnimatedSection>
+      </header>
+
+      {/* PERSONALIZED GREETING — Gemini-driven */}
       <PersonalizedGreeting greeting={greeting} />
 
       {/* READINESS SURVEY — solo si no respondió hoy */}

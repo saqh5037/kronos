@@ -88,21 +88,35 @@ export default async function PerfilPage() {
   }
 
   return (
-    <div className="pb-28">
-      {/* HEADER + AVATAR */}
-      <AnimatedSection className="px-[18px] pt-14 pb-4">
-        <AnimatedItem>
-          <div className="flex items-center gap-3.5">
-            <div className="relative">
+    <div className="pb-28 relative">
+      {/* HERO PERFIL — radical brand redesign */}
+      <header className="relative px-4 pt-14 pb-5 overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at 0% 50%, rgba(230,0,38,0.10), transparent 60%), radial-gradient(ellipse at 100% 50%, rgba(0,191,255,0.10), transparent 60%)",
+          }}
+        />
+        <span className="k-corner-tl" aria-hidden />
+        <span className="k-corner-br" aria-hidden />
+
+        <AnimatedSection className="relative">
+          <AnimatedItem>
+            <span className="k-eyebrow-bar">Mi perfil · Atleta</span>
+          </AnimatedItem>
+          <AnimatedItem className="mt-3 flex items-center gap-3.5">
+            <div className="relative shrink-0">
               <div
-                className="w-[68px] h-[68px] rounded-full p-[2px]"
+                className="w-[72px] h-[72px] rounded-full p-[2px]"
                 style={{
                   background: "var(--grad)",
-                  boxShadow: "0 0 20px rgba(25,240,139,0.25)",
+                  boxShadow: "0 0 24px rgba(0,68,255,0.32)",
                 }}
               >
                 <div
-                  className="w-full h-full rounded-full flex items-center justify-center font-display font-bold text-[24px]"
+                  className="w-full h-full rounded-full flex items-center justify-center font-display font-bold text-[26px] tracking-[-0.02em]"
                   style={{ background: "var(--card)" }}
                 >
                   {initials}
@@ -113,10 +127,10 @@ export default async function PerfilPage() {
                 style={{ background: "var(--bg)" }}
               >
                 <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold text-[#1c1917]"
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold text-white"
                   style={{
-                    background: "var(--recovery)",
-                    boxShadow: "0 0 8px rgba(25,240,139,0.4)",
+                    background: "var(--brand-blue)",
+                    boxShadow: "0 0 8px rgba(0,68,255,0.55)",
                   }}
                 >
                   ✓
@@ -124,18 +138,18 @@ export default async function PerfilPage() {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-display text-[22px] font-bold truncate">
-                {home.athlete.firstName} {home.athlete.lastName}
-              </div>
-              <div
-                className="font-mono text-[10px] font-bold tracking-[0.1em]"
-                style={{ color: "var(--text-3)" }}
+              <h1
+                className="k-h-italic font-display font-extrabold text-[26px] leading-[1.05] tracking-[-0.02em] truncate"
+                style={{ color: "var(--text)" }}
               >
-                ATLETA · ACTIVO
+                {home.athlete.firstName} <em>{home.athlete.lastName}</em>
+              </h1>
+              <div className="mt-1.5">
+                <span className="k-chip k-chip-blue">ACTIVO · ATLETA</span>
               </div>
             </div>
             <button
-              className="w-9 h-9 rounded-[10px] flex items-center justify-center k-card"
+              className="w-10 h-10 rounded-full flex items-center justify-center k-glass shrink-0"
               aria-label="Ajustes"
             >
               <svg
@@ -150,48 +164,61 @@ export default async function PerfilPage() {
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.68 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
             </button>
-          </div>
-        </AnimatedItem>
-      </AnimatedSection>
+          </AnimatedItem>
+        </AnimatedSection>
+      </header>
 
-      {/* RACHA HERO */}
+      {/* RACHA HERO — brand radical */}
       <AnimatedSection className="px-3.5 pb-3.5">
         <AnimatedItem>
-          <KCard variant="featured">
-            <div className="p-4 relative overflow-hidden">
+          <div className="k-card-brand relative">
+            <span className="k-corner-tl" aria-hidden />
+            <span className="k-corner-br" aria-hidden />
+            <div
+              className="absolute inset-0 pointer-events-none"
+              aria-hidden
+              style={{
+                background: "var(--grad-soft)",
+                opacity: 0.7,
+              }}
+            />
+            <div className="relative flex items-center gap-4 p-2">
               <div
-                className="absolute inset-0"
+                className="k-h-italic font-display font-extrabold leading-none"
                 style={{
-                  background: "var(--grad-soft)",
-                  opacity: 0.6,
+                  fontSize: "76px",
+                  letterSpacing: "-0.04em",
+                  background: "var(--grad)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  color: "transparent",
+                  filter: "drop-shadow(0 4px 18px rgba(230,0,38,0.25))",
                 }}
-              />
-              <div className="relative flex items-center gap-4">
-                <div
-                  className="font-display font-bold text-6xl leading-none"
-                  style={{
-                    letterSpacing: "-0.04em",
-                    background: "var(--grad)",
-                    WebkitBackgroundClip: "text",
-                    backgroundClip: "text",
-                    color: "transparent",
-                    filter: "drop-shadow(0 0 8px rgba(25,240,139,0.3))",
-                  }}
+              >
+                <em>{home.streak}</em>
+              </div>
+              <div className="flex-1">
+                <span
+                  className="font-script text-[22px] leading-none"
+                  style={{ color: "var(--brand-red)" }}
                 >
-                  {home.streak}
+                  Días de
+                </span>
+                <div
+                  className="font-display font-bold text-[18px] tracking-[-0.01em] mt-0.5"
+                  style={{ color: "var(--text)" }}
+                >
+                  racha consecutiva
                 </div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold mb-1">Días de racha</div>
-                  <div
-                    className="text-[11px] leading-relaxed"
-                    style={{ color: "var(--text-2)" }}
-                  >
-                    Vas por buen camino — no rompas hoy.
-                  </div>
+                <div
+                  className="text-[12px] leading-[1.5] mt-2"
+                  style={{ color: "var(--text-2)" }}
+                >
+                  Vas por buen camino — no rompas hoy.
                 </div>
               </div>
             </div>
-          </KCard>
+          </div>
         </AnimatedItem>
       </AnimatedSection>
 
@@ -293,15 +320,13 @@ export default async function PerfilPage() {
         </AnimatedSection>
       )}
 
-      {/* OBJETIVOS — con CTA Generar plan IA */}
+      {/* OBJETIVOS — Plan IA brand */}
       {activeGoals.length > 0 && (
-        <AnimatedSection className="mt-5">
-          <div className="flex items-baseline justify-between px-[18px] pb-2">
-            <div className="k-eyebrow" style={{ color: "var(--text-2)" }}>
-              MIS OBJETIVOS ACTIVOS
-            </div>
+        <AnimatedSection className="mt-6">
+          <div className="flex items-baseline justify-between px-[18px] pb-2.5">
+            <span className="k-eyebrow-bar">Mis objetivos</span>
             <div
-              className="font-mono text-[10px] font-bold tracking-[0.08em]"
+              className="font-mono text-[10px] font-bold tracking-[0.12em]"
               style={{ color: "var(--text-3)" }}
             >
               {activeGoals.length} ACTIVO{activeGoals.length === 1 ? "" : "S"}
@@ -310,44 +335,44 @@ export default async function PerfilPage() {
           <div className="px-3.5 grid grid-cols-1 gap-2.5">
             {activeGoals.slice(0, 3).map((g) => (
               <AnimatedItem key={g.id}>
-                <div
-                  className="rounded-[14px] p-3.5 relative overflow-hidden"
-                  style={{
-                    background: "var(--card)",
-                    border: "1px solid var(--line-strong)",
-                    boxShadow:
-                      "0 0 0 1px rgba(255,43,214,0.18), 0 4px 14px rgba(255,43,214,0.10)",
-                  }}
-                >
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0"
-                    style={{
-                      background:
-                        "radial-gradient(circle at 100% 0%, rgba(255,43,214,0.10), transparent 60%)",
-                    }}
-                  />
+                <div className="k-card-brand relative">
+                  <span className="k-corner-tr" aria-hidden />
                   <div className="relative flex items-center gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="font-display text-[14px] font-bold truncate">
-                        {g.movementName ?? g.metric}
-                      </div>
                       <div
-                        className="font-mono text-[10px] tracking-[0.06em] mt-0.5"
-                        style={{ color: "var(--text-3)" }}
+                        className="k-h-italic font-display font-bold text-[18px] tracking-[-0.01em] truncate"
+                        style={{ color: "var(--text)" }}
                       >
-                        Meta: {g.targetValue} {g.unit} ·{" "}
-                        {Math.round(g.progress.pct)}%
+                        {g.movementName ? <em>{g.movementName}</em> : g.metric}
+                      </div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span
+                          className="font-mono text-[10px] tracking-[0.08em] font-bold"
+                          style={{ color: "var(--brand-blue)" }}
+                        >
+                          META {g.targetValue} {g.unit}
+                        </span>
+                        <span
+                          aria-hidden
+                          className="h-1 w-1 rounded-full"
+                          style={{ background: "var(--text-3)" }}
+                        />
+                        <span
+                          className="font-mono text-[10px] tracking-[0.08em] font-bold"
+                          style={{ color: "var(--text-2)" }}
+                        >
+                          {Math.round(g.progress.pct)}%
+                        </span>
                       </div>
                     </div>
                     <Link
                       href={`/atleta/plan?goalId=${g.id}` as Route}
-                      className="font-mono text-[10px] tracking-[0.14em] font-bold uppercase px-3 py-1.5 rounded-md hover:scale-[1.04] transition-transform inline-flex items-center gap-1.5"
+                      className="k-btn-brand"
                       style={{
-                        color: "#1c1917",
-                        background:
-                          "linear-gradient(95deg, #ff2bd6 0%, #6a3bff 50%, #00e5ff 100%)",
-                        boxShadow: "0 0 12px rgba(255,43,214,0.45)",
+                        padding: "10px 18px",
+                        fontSize: 11,
+                        letterSpacing: "0.16em",
+                        textTransform: "uppercase",
                       }}
                     >
                       <svg
@@ -375,19 +400,11 @@ export default async function PerfilPage() {
 
       {/* PRÓXIMOS PRS — Gemini predictions */}
       {prPredictions.length > 0 && (
-        <AnimatedSection className="mt-5">
-          <div className="flex items-baseline justify-between px-[18px] pb-2">
+        <AnimatedSection className="mt-6">
+          <div className="flex items-baseline justify-between px-[18px] pb-2.5">
+            <span className="k-eyebrow-bar">Próximos PRs · Kronos AI</span>
             <div
-              className="k-eyebrow"
-              style={{
-                color: "#ff2bd6",
-                textShadow: "0 0 12px rgba(255,43,214,0.35)",
-              }}
-            >
-              PRÓXIMOS PRS · KRONOS AI
-            </div>
-            <div
-              className="font-mono text-[10px] font-bold tracking-[0.08em]"
+              className="font-mono text-[10px] font-bold tracking-[0.12em]"
               style={{ color: "var(--text-3)" }}
             >
               REGRESIÓN + IA

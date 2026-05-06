@@ -7,8 +7,8 @@ import {
 } from "@/server/actions/ai";
 import { FORM_ANALYSIS_DISCLAIMER } from "@/lib/ai/form-analysis";
 
-const AI_PRIMARY = "#ff2bd6";
-const AI_SECONDARY = "#00e5ff";
+const AI_PRIMARY = "#e60026";
+const AI_SECONDARY = "#00bfff";
 
 const SCORE_LABEL: Record<
   FormAnalysisResult["feedback"]["overallScore"],
@@ -137,11 +137,12 @@ export default function FormAnalyzerClient({
         <button
           type="submit"
           disabled={loading}
-          className="w-full font-mono text-[11px] tracking-[0.16em] font-bold uppercase px-4 py-2.5 rounded-md transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+          className="w-full k-btn-brand disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
-            color: "#1c1917",
-            background: `linear-gradient(95deg, ${AI_PRIMARY} 0%, #6a3bff 50%, ${AI_SECONDARY} 100%)`,
-            boxShadow: `0 0 14px ${AI_PRIMARY}55`,
+            padding: "12px 20px",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            fontSize: 11,
           }}
         >
           {loading ? "Analizando con Gemini Vision…" : "Analizar postura"}

@@ -178,14 +178,7 @@ export default async function ReportesPage() {
       {/* Churn risk — atletas en riesgo de abandono */}
       <div className="mb-6">
         <div className="mb-3 flex items-baseline justify-between gap-3">
-          <p
-            className="k-eyebrow"
-            style={{
-              color: "var(--ember)",
-            }}
-          >
-            ⚠ En riesgo de churn
-          </p>
+          <span className="k-eyebrow-bar">En riesgo de churn</span>
           <span className="font-mono text-xs text-[var(--text-3)]">
             {churnRisk.length} atleta{churnRisk.length === 1 ? "" : "s"}
           </span>

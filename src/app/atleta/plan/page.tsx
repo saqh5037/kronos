@@ -7,9 +7,6 @@ import {
 
 export const metadata = { title: "Kronos — Plan IA" };
 
-const AI_PRIMARY = "#ff2bd6";
-const AI_SECONDARY = "#00e5ff";
-
 export default async function AtletaPlanPage(props: {
   searchParams: Promise<{ goalId?: string }>;
 }) {
@@ -60,6 +57,7 @@ export default async function AtletaPlanPage(props: {
   }
 
   const { plan, goal } = result;
+  const isAI = plan.source === "ai";
   const fmtDeadline = goal.deadline.toLocaleDateString("es-MX", {
     day: "numeric",
     month: "long",
@@ -67,73 +65,81 @@ export default async function AtletaPlanPage(props: {
   });
 
   return (
-    <div className="px-4 pt-14 pb-28">
+    <div className="px-4 pt-14 pb-28 relative">
+      {/* HERO PLAN — radical brand */}
+      <div className="relative pb-6 overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at 0% 0%, rgba(230,0,38,0.10), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(0,191,255,0.10), transparent 60%)",
+          }}
+        />
+        <span className="k-corner-tl" aria-hidden />
+        <span className="k-corner-tr" aria-hidden />
+
+        <AnimatedSection className="relative">
+          <AnimatedItem>
+            <Link
+              href="/atleta/perfil"
+              className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase text-[var(--text-3)] hover:text-[var(--text-2)] transition-colors"
+            >
+              ← Mi perfil
+            </Link>
+          </AnimatedItem>
+          <AnimatedItem className="mt-3">
+            <span className="k-eyebrow-bar">
+              Kronos AI · Plan personalizado
+            </span>
+          </AnimatedItem>
+          <AnimatedItem className="mt-2">
+            <div className="flex flex-col gap-1">
+              <span
+                className="font-script text-[28px] leading-none"
+                style={{ color: "var(--brand-red)" }}
+              >
+                Tu objetivo,
+              </span>
+              <h1
+                className="k-h-italic font-display font-extrabold text-[40px] leading-[1.05] tracking-[-0.025em]"
+                style={{ color: "var(--text)" }}
+              >
+                {goal.movementName ?? "objetivo"}{" "}
+                <em>
+                  {goal.targetValue} {goal.unit}
+                </em>
+              </h1>
+            </div>
+            <p className="text-[12px] mt-3" style={{ color: "var(--text-2)" }}>
+              Para el {fmtDeadline} · {plan.weeks.length} semanas · fuente:{" "}
+              <span
+                className="font-mono uppercase tracking-[0.12em] font-bold"
+                style={{
+                  color: isAI ? "var(--brand-red)" : "var(--text-3)",
+                }}
+              >
+                {isAI ? "Gemini" : "fallback"}
+              </span>
+            </p>
+          </AnimatedItem>
+        </AnimatedSection>
+      </div>
+
       <AnimatedSection>
         <AnimatedItem>
-          <Link
-            href="/atleta/perfil"
-            className="font-mono text-[10px] tracking-[0.12em] font-bold uppercase text-[var(--text-3)] hover:text-[var(--text-2)] transition-colors"
-          >
-            ← Mi perfil
-          </Link>
-        </AnimatedItem>
-        <AnimatedItem className="mt-2 mb-3">
-          <p
-            className="font-mono text-[10px] tracking-[0.18em] font-bold uppercase"
-            style={{ color: AI_PRIMARY }}
-          >
-            Kronos AI · Plan personalizado
-          </p>
-          <h1 className="font-display text-[28px] font-extrabold leading-tight tracking-tight mt-1">
-            {goal.movementName ?? "Plan"}
-            {goal.metric === "PR" && goal.movementName ? " — " : ""}
-            <span style={{ color: AI_PRIMARY }}>
-              {goal.targetValue} {goal.unit}
-            </span>
-          </h1>
-          <p className="text-[12px] mt-1.5" style={{ color: "var(--text-2)" }}>
-            Para el {fmtDeadline} · {plan.weeks.length} semanas · fuente:{" "}
-            <span
-              style={{
-                color: plan.source === "ai" ? AI_PRIMARY : "var(--text-3)",
-              }}
-            >
-              {plan.source === "ai" ? "Gemini" : "fallback determinístico"}
-            </span>
-          </p>
-        </AnimatedItem>
-
-        <AnimatedItem className="mt-4">
-          <div
-            className="rounded-[14px] p-4 relative overflow-hidden"
-            style={{
-              background: "var(--card)",
-              border: "1px solid var(--line-strong)",
-              boxShadow:
-                plan.source === "ai"
-                  ? `0 0 0 1px ${AI_PRIMARY}33, 0 4px 18px ${AI_PRIMARY}1f`
-                  : "var(--card-glow)",
-            }}
-          >
+          <div className="k-card-brand relative">
+            <span className="k-corner-bl" aria-hidden />
+            <span className="k-corner-br" aria-hidden />
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0"
-              style={{
-                background:
-                  plan.source === "ai"
-                    ? `radial-gradient(circle at 0% 100%, ${AI_PRIMARY}1a, transparent 60%), radial-gradient(circle at 100% 0%, ${AI_SECONDARY}14, transparent 55%)`
-                    : "transparent",
-              }}
+              style={{ background: "var(--grad-soft)", opacity: 0.55 }}
             />
             <div className="relative">
+              <span className="k-eyebrow-bar mb-2">Estrategia</span>
               <p
-                className="font-mono text-[10px] tracking-[0.16em] uppercase font-bold mb-1.5"
-                style={{ color: "var(--text-3)" }}
-              >
-                Estrategia
-              </p>
-              <p
-                className="text-[14px] leading-[1.5]"
+                className="text-[15px] leading-[1.6] mt-2 font-medium"
                 style={{ color: "var(--text)" }}
               >
                 {plan.overview}
@@ -142,36 +148,44 @@ export default async function AtletaPlanPage(props: {
           </div>
         </AnimatedItem>
 
-        <div className="mt-4 space-y-2.5">
+        <div className="mt-5 space-y-2.5">
           {plan.weeks.map((w) => (
             <AnimatedItem key={w.weekNumber}>
               <details
-                className="group rounded-[14px] overflow-hidden"
+                className="group rounded-[16px] overflow-hidden relative"
                 style={{
                   background: "var(--card)",
                   border: "1px solid var(--line-strong)",
                 }}
               >
-                <summary className="flex items-center gap-3 px-4 py-3.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <summary className="flex items-center gap-3.5 px-4 py-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                   <div
-                    className="font-display font-extrabold text-[20px] w-10 text-center"
-                    style={{ color: AI_PRIMARY }}
+                    className="k-h-italic font-display font-extrabold text-[28px] w-12 text-center leading-none"
+                    style={{
+                      background: "var(--grad)",
+                      WebkitBackgroundClip: "text",
+                      backgroundClip: "text",
+                      color: "transparent",
+                    }}
                   >
-                    {w.weekNumber}
+                    <em>{w.weekNumber}</em>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-display font-bold text-[14px]">
-                      Semana {w.weekNumber} · {w.focus}
+                    <div
+                      className="font-display font-bold text-[15px] tracking-[-0.01em]"
+                      style={{ color: "var(--text)" }}
+                    >
+                      Semana {w.weekNumber}
                     </div>
                     <div
-                      className="font-mono text-[10px] tracking-[0.06em] mt-0.5"
-                      style={{ color: "var(--text-3)" }}
+                      className="font-mono text-[10px] tracking-[0.08em] mt-1 uppercase font-bold"
+                      style={{ color: "var(--brand-blue)" }}
                     >
-                      {w.sessions.length} sesiones
+                      {w.focus} · {w.sessions.length} sesiones
                     </div>
                   </div>
                   <span
-                    className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase opacity-50 group-open:rotate-180 transition-transform"
+                    className="font-mono text-[12px] tracking-[0.16em] font-bold opacity-50 group-open:rotate-180 transition-transform"
                     style={{ color: "var(--text-2)" }}
                     aria-hidden
                   >
@@ -179,28 +193,29 @@ export default async function AtletaPlanPage(props: {
                   </span>
                 </summary>
                 <div
-                  className="px-4 pb-4 pt-1"
+                  className="px-4 pb-4 pt-2"
                   style={{
                     borderTop: "1px solid var(--line)",
                   }}
                 >
-                  <ul className="space-y-1.5 mt-2">
+                  <ul className="space-y-2 mt-2">
                     {w.sessions.map((s, i) => (
                       <li
                         key={i}
-                        className="grid grid-cols-[40px_70px_1fr] gap-2 text-[12px] items-baseline"
+                        className="grid grid-cols-[40px_72px_1fr] gap-3 text-[13px] items-baseline"
                       >
                         <span
-                          className="font-mono font-bold tracking-[0.06em]"
+                          className="font-mono font-bold tracking-[0.06em] text-[11px]"
                           style={{ color: "var(--text-3)" }}
                         >
                           {s.day}
                         </span>
                         <span
-                          className="font-mono text-[10px] font-bold tracking-[0.08em] uppercase px-1.5 py-0.5 rounded inline-block"
+                          className="font-mono text-[10px] font-bold tracking-[0.1em] uppercase px-2 py-0.5 rounded inline-block text-center"
                           style={{
-                            color: "var(--text-2)",
-                            background: "var(--bg-soft)",
+                            color: "var(--brand-blue)",
+                            background: "var(--blue-soft)",
+                            border: "1px solid var(--blue-line)",
                           }}
                         >
                           {s.type}
@@ -213,10 +228,10 @@ export default async function AtletaPlanPage(props: {
                   </ul>
                   {w.notes && (
                     <p
-                      className="mt-3 text-[11px] leading-[1.45] italic pl-2 border-l-2"
+                      className="mt-3.5 text-[12px] leading-[1.5] italic pl-3 border-l-2"
                       style={{
                         color: "var(--text-2)",
-                        borderColor: "var(--line-strong)",
+                        borderColor: "var(--brand-red)",
                       }}
                     >
                       {w.notes}
@@ -228,9 +243,10 @@ export default async function AtletaPlanPage(props: {
           ))}
         </div>
 
-        <AnimatedItem className="mt-5">
+        <AnimatedItem className="mt-6">
+          <div className="k-divider mb-4" />
           <p
-            className="text-[10px] leading-[1.5] text-center px-4"
+            className="text-[11px] leading-[1.6] text-center px-4 italic"
             style={{ color: "var(--text-3)" }}
           >
             Plan generado a partir de tu historial. Es una guía — adaptá con tu

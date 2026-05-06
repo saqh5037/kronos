@@ -1,9 +1,6 @@
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
 import type { PRPredictionCard as PRPredictionCardData } from "@/server/actions/ai";
 
-const AI_PRIMARY = "#ff2bd6";
-const AI_SECONDARY = "#00e5ff";
-
 type StatusStyle = {
   accent: string;
   glow: string;
@@ -12,23 +9,23 @@ type StatusStyle = {
 
 const STATUS_STYLES: Record<PRPredictionCardData["status"], StatusStyle> = {
   improving: {
-    accent: "#4a7c59",
-    glow: "rgba(74, 124, 89, 0.32)",
+    accent: "var(--brand-blue)",
+    glow: "rgba(0, 68, 255, 0.22)",
     label: "EN ALZA",
   },
   plateau: {
-    accent: "#d97706",
-    glow: "rgba(217, 119, 6, 0.30)",
+    accent: "var(--brand-violet)",
+    glow: "rgba(124, 58, 237, 0.20)",
     label: "PLATEAU",
   },
   declining: {
-    accent: "#c44536",
-    glow: "rgba(196, 69, 54, 0.30)",
+    accent: "var(--brand-red)",
+    glow: "rgba(230, 0, 38, 0.22)",
     label: "BAJANDO",
   },
   insufficient: {
-    accent: "#64748b",
-    glow: "rgba(100, 116, 139, 0.20)",
+    accent: "var(--text-3)",
+    glow: "rgba(100, 116, 139, 0.14)",
     label: "POCOS DATOS",
   },
 };
@@ -42,38 +39,33 @@ export default function PRPredictionCard({
   const showPrediction =
     card.status === "improving" || card.status === "plateau";
   const confidencePct = Math.round(card.confidence * 100);
+  const isAI = card.source === "ai";
 
   return (
     <AnimatedItem>
       <div
-        className="relative overflow-hidden rounded-[14px] p-4"
+        className="k-card-brand relative"
         style={{
-          background: "var(--card)",
-          border: "1px solid var(--line-strong)",
-          boxShadow:
-            card.source === "ai"
-              ? `0 0 0 1px ${AI_PRIMARY}33, 0 6px 22px ${AI_PRIMARY}1a`
-              : `0 0 0 1px ${status.glow}, 0 4px 16px ${status.glow}`,
+          boxShadow: isAI
+            ? `0 0 0 1px var(--blue-line), 0 12px 36px ${status.glow}`
+            : `0 0 0 1px ${status.glow}, 0 6px 22px ${status.glow}`,
         }}
       >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              card.source === "ai"
-                ? `radial-gradient(circle at 0% 100%, ${AI_PRIMARY}1a 0%, transparent 60%), radial-gradient(circle at 100% 0%, ${AI_SECONDARY}14 0%, transparent 55%)`
-                : "transparent",
-          }}
-        />
+        <span className="k-corner-tl" aria-hidden />
+        <span className="k-corner-br" aria-hidden />
+
         <div className="relative">
-          <div className="flex items-baseline justify-between gap-2 mb-2">
-            <div className="font-display text-[15px] font-bold tracking-tight">
+          <div className="flex items-baseline justify-between gap-2 mb-2.5">
+            <div className="font-display text-[18px] font-bold tracking-[-0.01em]">
               {card.movementName}
             </div>
             <span
-              className="font-mono text-[9px] tracking-[0.16em] font-bold uppercase"
-              style={{ color: status.accent }}
+              className="font-mono text-[9px] tracking-[0.18em] font-bold uppercase px-2 py-0.5 rounded-md inline-block"
+              style={{
+                color: status.accent,
+                background: "var(--bg-soft)",
+                border: `1px solid ${status.accent}55`,
+              }}
             >
               {status.label}
             </span>
@@ -82,52 +74,55 @@ export default function PRPredictionCard({
           {showPrediction ? (
             <div className="flex items-baseline gap-2 mb-1">
               <span
-                className="font-display text-[28px] font-extrabold leading-none"
+                className="font-display font-extrabold text-[36px] leading-none tracking-[-0.02em] k-h-italic"
                 style={{
-                  color: card.source === "ai" ? AI_PRIMARY : "var(--text)",
+                  color: isAI ? "transparent" : "var(--text)",
+                  background: isAI ? "var(--grad)" : "transparent",
+                  WebkitBackgroundClip: isAI ? "text" : "border-box",
+                  backgroundClip: isAI ? "text" : "border-box",
                 }}
               >
-                {card.predictedKg}
+                <em>{card.predictedKg}</em>
               </span>
               <span
-                className="font-mono text-[10px] font-bold tracking-[0.1em]"
+                className="font-mono text-[11px] font-bold tracking-[0.1em] uppercase"
                 style={{ color: "var(--text-2)" }}
               >
-                {card.unit.toUpperCase()}
+                {card.unit}
               </span>
               <span
                 className="font-mono text-[10px] font-bold tracking-[0.08em]"
                 style={{ color: "var(--text-3)" }}
               >
-                · EN {card.weeksFromNow} SEM
+                · en {card.weeksFromNow} sem
               </span>
             </div>
           ) : (
             <div className="flex items-baseline gap-2 mb-1">
               <span
-                className="font-display text-[24px] font-extrabold leading-none"
+                className="font-display text-[28px] font-extrabold leading-none"
                 style={{ color: "var(--text-2)" }}
               >
                 —
               </span>
               <span
-                className="font-mono text-[10px] font-bold tracking-[0.1em]"
+                className="font-mono text-[10px] font-bold tracking-[0.1em] uppercase"
                 style={{ color: "var(--text-3)" }}
               >
-                ACTUAL {card.currentBest} {card.unit.toUpperCase()}
+                actual {card.currentBest} {card.unit}
               </span>
             </div>
           )}
 
           <p
-            className="text-[12px] leading-[1.45] mt-2"
+            className="text-[13px] leading-[1.5] mt-2.5"
             style={{ color: "var(--text-2)" }}
           >
             {card.narrative}
           </p>
 
           {showPrediction && card.confidence > 0 && (
-            <div className="flex items-center gap-2 mt-3">
+            <div className="flex items-center gap-2.5 mt-3.5">
               <div
                 className="h-1 flex-1 rounded-full overflow-hidden"
                 style={{ background: "var(--track)" }}
@@ -136,35 +131,32 @@ export default function PRPredictionCard({
                   className="h-full rounded-full transition-all"
                   style={{
                     width: `${confidencePct}%`,
-                    background:
-                      card.source === "ai"
-                        ? `linear-gradient(90deg, ${AI_PRIMARY}, ${AI_SECONDARY})`
-                        : status.accent,
+                    background: isAI ? "var(--grad)" : status.accent,
                   }}
                 />
               </div>
               <span
-                className="font-mono text-[9px] tracking-[0.12em] font-bold"
+                className="font-mono text-[9px] tracking-[0.14em] font-bold uppercase"
                 style={{ color: "var(--text-3)" }}
               >
-                {confidencePct}% CONFIANZA
+                {confidencePct}% confianza
               </span>
             </div>
           )}
 
-          {card.source === "ai" && (
-            <div className="mt-2.5 flex items-center gap-1.5">
+          {isAI && (
+            <div className="mt-3 flex items-center gap-2">
               <span
-                className="font-mono text-[8px] tracking-[0.18em] font-bold uppercase"
-                style={{ color: AI_PRIMARY }}
+                aria-hidden
+                className="inline-block h-[1.5px] w-5"
+                style={{ background: "var(--grad)" }}
+              />
+              <span
+                className="font-mono text-[8px] tracking-[0.22em] font-bold uppercase"
+                style={{ color: "var(--brand-red)" }}
               >
                 Kronos AI
               </span>
-              <span
-                aria-hidden
-                className="h-0.5 w-0.5 rounded-full"
-                style={{ background: AI_SECONDARY }}
-              />
             </div>
           )}
         </div>

@@ -19,21 +19,27 @@ export default async function FormaPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-6">
+    <div className="p-8 relative">
+      <div className="mb-7 relative">
+        <span className="k-eyebrow-bar">Kronos AI · Vision</span>
+        <div className="mt-3 flex items-baseline gap-3 flex-wrap">
+          <span
+            className="font-script text-[34px] leading-none"
+            style={{ color: "var(--brand-red)" }}
+          >
+            Análisis de
+          </span>
+          <h1
+            className="k-h-italic font-display font-extrabold text-[44px] leading-[1.05] tracking-[-0.02em]"
+            style={{ color: "var(--text)" }}
+          >
+            <em>forma</em>
+          </h1>
+        </div>
         <p
-          className="k-eyebrow mb-1"
-          style={{
-            color: "#ff2bd6",
-            textShadow: "0 0 12px rgba(255,43,214,0.35)",
-          }}
+          className="mt-3 text-[14px] leading-[1.6] max-w-[560px]"
+          style={{ color: "var(--text-2)" }}
         >
-          Kronos AI · Vision
-        </p>
-        <h1 className="font-display text-3xl font-bold tracking-tight">
-          Análisis de forma
-        </h1>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
           Subí una foto de un atleta ejecutando un movimiento. Gemini Vision te
           devuelve fortalezas, áreas de mejora y banderas de seguridad — todo
           informativo, no diagnóstico médico.

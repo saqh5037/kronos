@@ -53,13 +53,41 @@
   --ember-line: rgba(196, 69, 54, 0.35);
   --amber-line: rgba(217, 119, 6, 0.35);
 
-  /* ── Gradients ── */
-  --grad: linear-gradient(95deg, #dc4b17 0%, #e8893a 100%);
+  /* ── Brand palette (manual de marca v1) ── */
+  --brand-red: #e60026;
+  --brand-blue: #0044ff;
+  --brand-blue-deep: #001a99;
+  --brand-cyan: #00bfff;
+  --brand-pink: #ff4d8a;
+  --brand-violet: #7c3aed;
+  --red-soft: rgba(230, 0, 38, 0.07);
+  --red-line: rgba(230, 0, 38, 0.18);
+  --blue-soft: rgba(0, 68, 255, 0.07);
+  --blue-line: rgba(0, 68, 255, 0.18);
+  --cyan-soft: rgba(0, 191, 255, 0.07);
+  --cyan-line: rgba(0, 191, 255, 0.18);
+  --pink-soft: rgba(255, 77, 138, 0.08);
+  --bg-warm: #faf9f7;
+  --bg-cool: #f0f4f8;
+
+  /* ── Gradients (brand signature 135deg red → blue → cyan) ── */
+  --grad: linear-gradient(135deg, #e60026 0%, #0044ff 50%, #00bfff 100%);
   --grad-soft: linear-gradient(
-    95deg,
-    rgba(220, 75, 23, 0.14),
-    rgba(232, 137, 58, 0.14)
+    135deg,
+    rgba(230, 0, 38, 0.06) 0%,
+    rgba(0, 68, 255, 0.06) 50%,
+    rgba(0, 191, 255, 0.06) 100%
   );
+  --grad-glow: radial-gradient(
+    circle at 50% 50%,
+    rgba(230, 0, 38, 0.12),
+    rgba(0, 68, 255, 0.08) 40%,
+    transparent 70%
+  );
+
+  /* AI accent (premium — magenta + cyan para features de IA) */
+  --ai-primary: #e60026;
+  --ai-secondary: #00bfff;
 
   /* ── Atmospheric glows (light mode — very subtle) ── */
   --bg-glow: radial-gradient(
@@ -132,13 +160,40 @@
   --ember-line: rgba(196, 69, 54, 0.25);
   --amber-line: rgba(217, 119, 6, 0.25);
 
-  /* ── Gradients ── */
-  --grad: linear-gradient(95deg, #dc4b17 0%, #e8893a 100%);
+  /* ── Brand palette (dark — same hex, slightly punchier soft layers) ── */
+  --brand-red: #ff1f47;
+  --brand-blue: #2e63ff;
+  --brand-blue-deep: #001a99;
+  --brand-cyan: #2bd4ff;
+  --brand-pink: #ff4d8a;
+  --brand-violet: #9061ff;
+  --red-soft: rgba(255, 31, 71, 0.14);
+  --red-line: rgba(255, 31, 71, 0.32);
+  --blue-soft: rgba(46, 99, 255, 0.14);
+  --blue-line: rgba(46, 99, 255, 0.32);
+  --cyan-soft: rgba(43, 212, 255, 0.14);
+  --cyan-line: rgba(43, 212, 255, 0.32);
+  --pink-soft: rgba(255, 77, 138, 0.16);
+  --bg-warm: #1a1a1d;
+  --bg-cool: #131419;
+
+  /* ── Gradients (brand signature 135deg) ── */
+  --grad: linear-gradient(135deg, #ff1f47 0%, #2e63ff 50%, #2bd4ff 100%);
   --grad-soft: linear-gradient(
-    95deg,
-    rgba(220, 75, 23, 0.15),
-    rgba(232, 137, 58, 0.15)
+    135deg,
+    rgba(255, 31, 71, 0.16) 0%,
+    rgba(46, 99, 255, 0.16) 50%,
+    rgba(43, 212, 255, 0.16) 100%
   );
+  --grad-glow: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 31, 71, 0.22),
+    rgba(46, 99, 255, 0.16) 40%,
+    transparent 70%
+  );
+
+  --ai-primary: #ff1f47;
+  --ai-secondary: #2bd4ff;
 
   /* ── Atmospheric glows (dark mode — pronounced) ── */
   --bg-glow:
@@ -559,5 +614,202 @@
     .k-card:hover {
       transform: none;
     }
+  }
+
+  /* ─── Brand Utilities (manual de marca v1) ─────────────────── */
+
+  /* Eyebrow with leading bar */
+  .k-eyebrow-bar {
+    font-family: var(--font-jetbrains-mono), monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--brand-blue);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+  }
+  .k-eyebrow-bar::before {
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 1.5px;
+    background: var(--grad);
+  }
+
+  /* Script accent — Dancing Script gradient */
+  .k-script {
+    font-family: var(--font-dancing), cursive;
+    font-weight: 600;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1;
+  }
+  .k-script-red {
+    font-family: var(--font-dancing), cursive;
+    font-weight: 600;
+    color: var(--brand-red);
+    line-height: 1;
+  }
+
+  /* Italic em with gradient — para headings premium */
+  .k-h-italic em,
+  .k-h-italic i {
+    font-style: italic;
+    font-weight: 400;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Glass card — backdrop blur + saturate */
+  .k-glass {
+    background: color-mix(in srgb, var(--card) 70%, transparent);
+    backdrop-filter: blur(24px) saturate(1.3);
+    -webkit-backdrop-filter: blur(24px) saturate(1.3);
+    border: 1px solid var(--line-strong);
+    border-radius: 16px;
+  }
+
+  /* Brand chips */
+  .k-chip-red {
+    @apply k-chip;
+    background: var(--red-soft);
+    color: var(--brand-red);
+    border: 1px solid var(--red-line);
+  }
+  .k-chip-blue {
+    @apply k-chip;
+    background: var(--blue-soft);
+    color: var(--brand-blue);
+    border: 1px solid var(--blue-line);
+  }
+  .k-chip-cyan {
+    @apply k-chip;
+    background: var(--cyan-soft);
+    color: var(--brand-cyan);
+    border: 1px solid var(--cyan-line);
+  }
+
+  /* Brand gradient button — premium CTA */
+  .k-btn-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-family: var(--font-inter), sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    background: var(--grad);
+    box-shadow: 0 4px 18px rgba(230, 0, 38, 0.25);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    border: none;
+  }
+  .k-btn-brand:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 28px rgba(230, 0, 38, 0.35);
+  }
+
+  /* Brand featured card — soft gradient bg + red border */
+  .k-card-brand {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .k-card-brand::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2.5px;
+    background: var(--grad);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .k-card-brand:hover::before {
+    transform: scaleX(1);
+  }
+  .k-card-brand:hover {
+    transform: translateY(-4px);
+    border-color: var(--blue-line);
+    box-shadow: 0 20px 56px rgba(0, 68, 255, 0.08);
+  }
+
+  /* Corner decorations — thin colored corners */
+  .k-corner-tl,
+  .k-corner-tr,
+  .k-corner-bl,
+  .k-corner-br {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .k-corner-tl {
+    top: 0;
+    left: 0;
+    border-top: 1px solid var(--red-line);
+    border-left: 1px solid var(--red-line);
+  }
+  .k-corner-tr {
+    top: 0;
+    right: 0;
+    border-top: 1px solid var(--blue-line);
+    border-right: 1px solid var(--blue-line);
+  }
+  .k-corner-bl {
+    bottom: 0;
+    left: 0;
+    border-bottom: 1px solid var(--cyan-line);
+    border-left: 1px solid var(--cyan-line);
+  }
+  .k-corner-br {
+    bottom: 0;
+    right: 0;
+    border-bottom: 1px solid var(--brand-pink);
+    border-right: 1px solid var(--brand-pink);
+    opacity: 0.32;
+  }
+
+  /* Section divider — gradient horizontal line */
+  .k-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--line-strong),
+      transparent
+    );
+    margin: 0 auto;
+  }
+
+  /* Floating animation — for logo / hero accents */
+  @keyframes float-y {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+  .k-float {
+    animation: float-y 6s ease-in-out infinite;
   }
 }

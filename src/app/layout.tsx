@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, Oswald, JetBrains_Mono } from "next/font/google";
+import {
+  Inter,
+  Playfair_Display,
+  Dancing_Script,
+  JetBrains_Mono,
+} from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
@@ -9,9 +14,17 @@ const inter = Inter({
   display: "swap",
 });
 
-const oswald = Oswald({
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-oswald",
+  variable: "--font-playfair",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+});
+
+const dancing = Dancing_Script({
+  subsets: ["latin"],
+  variable: "--font-dancing",
   display: "swap",
   weight: ["500", "600", "700"],
 });
@@ -45,7 +58,7 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      className={`${inter.variable} ${oswald.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${playfair.variable} ${dancing.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         <meta name="theme-color" content="#19f08b" />

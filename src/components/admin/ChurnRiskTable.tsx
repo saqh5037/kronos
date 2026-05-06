@@ -3,9 +3,9 @@ import type { Route } from "next";
 import type { ChurnRiskRow } from "@/server/analytics/churn";
 
 const SEVERITY_COLOR: Record<ChurnRiskRow["severity"], string> = {
-  high: "var(--ember)",
-  med: "var(--amber)",
-  low: "var(--steel)",
+  high: "var(--brand-red)",
+  med: "var(--brand-violet)",
+  low: "var(--brand-blue)",
 };
 
 const SEVERITY_LABEL: Record<ChurnRiskRow["severity"], string> = {

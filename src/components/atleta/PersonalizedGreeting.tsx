@@ -7,36 +7,34 @@ type ToneStyle = {
   label: string;
 };
 
+// Paleta brand v1 (manual de marca)
 const TONE_STYLES: Record<DailyGreeting["tone"], ToneStyle> = {
   push: {
-    accent: "#dc4b17",
-    glow: "rgba(220, 75, 23, 0.32)",
+    accent: "var(--brand-red)",
+    glow: "rgba(230, 0, 38, 0.32)",
     label: "PUSH",
   },
   maintain: {
-    accent: "#64748b",
-    glow: "rgba(100, 116, 139, 0.28)",
+    accent: "var(--brand-blue)",
+    glow: "rgba(0, 68, 255, 0.28)",
     label: "MANTÉN",
   },
   recover: {
-    accent: "#4a7c59",
-    glow: "rgba(74, 124, 89, 0.28)",
+    accent: "var(--brand-cyan)",
+    glow: "rgba(0, 191, 255, 0.28)",
     label: "RECOVERY",
   },
   comeback: {
-    accent: "#d97706",
-    glow: "rgba(217, 119, 6, 0.30)",
+    accent: "var(--brand-violet)",
+    glow: "rgba(124, 58, 237, 0.30)",
     label: "VUELVE",
   },
   celebrate: {
-    accent: "#c44536",
-    glow: "rgba(196, 69, 54, 0.32)",
+    accent: "var(--brand-pink)",
+    glow: "rgba(255, 77, 138, 0.32)",
     label: "PR",
   },
 };
-
-const AI_PRIMARY = "#ff2bd6";
-const AI_SECONDARY = "#00e5ff";
 
 export default function PersonalizedGreeting({
   greeting,
@@ -50,34 +48,46 @@ export default function PersonalizedGreeting({
     <section className="px-3.5 mt-3">
       <AnimatedItem>
         <div
-          className="relative overflow-hidden rounded-[14px] p-3.5"
+          className="relative overflow-hidden rounded-[16px] p-4"
           style={{
             background: "var(--card)",
             border: "1px solid var(--line-strong)",
-            boxShadow: `0 0 0 1px ${style.glow}, 0 8px 28px ${style.glow}`,
+            boxShadow: `0 0 0 1px ${style.glow}, 0 12px 36px ${style.glow}`,
           }}
         >
+          {/* Top gradient accent bar — brand signature */}
+          <div
+            aria-hidden
+            className="absolute top-0 left-0 right-0 h-[2.5px]"
+            style={{ background: "var(--grad)" }}
+          />
+          {/* Soft gradient glow background */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
             style={{
-              background: `radial-gradient(circle at 0% 100%, ${AI_PRIMARY}1f 0%, transparent 50%), radial-gradient(circle at 100% 0%, ${AI_SECONDARY}1a 0%, transparent 55%)`,
+              background: "var(--grad-soft)",
+              opacity: 0.5,
             }}
           />
-          <div className="relative flex items-start gap-3">
+          {/* Corner decorations */}
+          <span className="k-corner-tl" aria-hidden />
+          <span className="k-corner-br" aria-hidden />
+
+          <div className="relative flex items-start gap-3.5">
             <div
-              className="flex-shrink-0 h-9 w-9 rounded-[10px] flex items-center justify-center"
+              className="flex-shrink-0 h-10 w-10 rounded-[12px] flex items-center justify-center"
               style={{
-                background: `linear-gradient(135deg, ${AI_PRIMARY} 0%, ${AI_SECONDARY} 100%)`,
-                boxShadow: `0 0 14px ${AI_PRIMARY}55`,
+                background: "var(--grad)",
+                boxShadow: `0 4px 16px ${style.glow}`,
               }}
             >
               <svg
-                width="16"
-                height="16"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#0a0f1f"
+                stroke="#ffffff"
                 strokeWidth="2.4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -87,11 +97,15 @@ export default function PersonalizedGreeting({
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center gap-2 mb-2">
                 <span
-                  className="font-mono text-[9px] tracking-[0.18em] font-bold uppercase"
-                  style={{ color: AI_PRIMARY }}
+                  className="font-mono text-[10px] tracking-[0.22em] font-bold uppercase inline-flex items-center gap-2"
+                  style={{ color: "var(--brand-red)" }}
                 >
+                  <span
+                    className="inline-block h-[1.5px] w-5"
+                    style={{ background: "var(--grad)" }}
+                  />
                   Kronos AI
                 </span>
                 <span
@@ -100,7 +114,7 @@ export default function PersonalizedGreeting({
                   style={{ background: "var(--text-3)" }}
                 />
                 <span
-                  className="font-mono text-[9px] tracking-[0.16em] font-bold uppercase"
+                  className="font-mono text-[9px] tracking-[0.18em] font-bold uppercase"
                   style={{ color: style.accent }}
                 >
                   {style.label}
@@ -108,7 +122,7 @@ export default function PersonalizedGreeting({
                 {greeting.source === "fallback" && (
                   <span
                     title="Modo offline — texto local"
-                    className="font-mono text-[8px] tracking-[0.16em] font-bold uppercase"
+                    className="font-mono text-[8px] tracking-[0.16em] font-bold uppercase ml-1"
                     style={{ color: "var(--text-3)" }}
                   >
                     · OFFLINE
@@ -116,7 +130,7 @@ export default function PersonalizedGreeting({
                 )}
               </div>
               <p
-                className="font-display text-[15px] leading-[1.45] font-semibold"
+                className="font-display text-[16px] leading-[1.45] font-semibold"
                 style={{ color: "var(--text)" }}
               >
                 {greeting.text}
