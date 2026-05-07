@@ -49,19 +49,24 @@ export async function GET(req: Request) {
 
   const now = new Date();
 
-  // Solo Boxes con suscripción no terminal
+  // Solo Boxes con suscripción no terminal Y opt-in al digest
   const boxes = await rawDb.box.findMany({
     where: {
       subscriptionStatus: { in: ["ACTIVE", "TRIAL", "PAST_DUE"] },
     },
-    select: { id: true },
+    select: { id: true, weeklyDigestEnabled: true },
   });
 
   let sent = 0;
   let skipped = 0;
+  let optedOut = 0;
   let failed = 0;
 
   for (const box of boxes) {
+    if (!box.weeklyDigestEnabled) {
+      optedOut++;
+      continue;
+    }
     try {
       const lastSentAt = await getLastDigestSentAt(box.id);
       if (!shouldSendOwnerDigest({ lastSentAt, now })) {
@@ -86,6 +91,6 @@ export async function GET(req: Request) {
 
   return NextResponse.json({
     ok: true,
-    counts: { sent, skipped, failed, total: boxes.length },
+    counts: { sent, skipped, optedOut, failed, total: boxes.length },
   });
 }

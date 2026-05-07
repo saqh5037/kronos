@@ -23,6 +23,14 @@ async function getOwnerOfTenant(tenantId: string): Promise<{
   };
 }
 
+async function isTransactionalOptIn(tenantId: string): Promise<boolean> {
+  const box = await prismaBase.box.findUnique({
+    where: { id: tenantId },
+    select: { transactionalEmailsEnabled: true },
+  });
+  return box?.transactionalEmailsEnabled ?? true;
+}
+
 function baseUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? "";
 }
@@ -57,6 +65,7 @@ async function safeSend(args: {
 }
 
 export async function notifyPaymentFailed(tenantId: string): Promise<void> {
+  if (!(await isTransactionalOptIn(tenantId))) return;
   const owner = await getOwnerOfTenant(tenantId);
   if (!owner) return;
   await safeSend({
@@ -76,6 +85,7 @@ export async function notifyPaymentFailed(tenantId: string): Promise<void> {
 export async function notifySubscriptionExpired(
   tenantId: string,
 ): Promise<void> {
+  if (!(await isTransactionalOptIn(tenantId))) return;
   const owner = await getOwnerOfTenant(tenantId);
   if (!owner) return;
   await safeSend({
@@ -95,6 +105,7 @@ export async function notifyTrialExpiring(
   tenantId: string,
   daysRemaining: number,
 ): Promise<void> {
+  if (!(await isTransactionalOptIn(tenantId))) return;
   const owner = await getOwnerOfTenant(tenantId);
   if (!owner) return;
   await safeSend({

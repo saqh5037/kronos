@@ -1,27 +1,36 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
-import { getBox } from "@/server/actions/box";
-import BoxSettingsForm from "@/components/admin/BoxSettingsForm";
+import { getBoxNotifications } from "@/server/actions/box-notifications";
+import { NotificationsForm } from "./_components/NotificationsForm";
 
-export const metadata = { title: "Kronos — Ajustes" };
+export const metadata = { title: "Kronos — Notificaciones" };
+export const dynamic = "force-dynamic";
 
 const TABS = [
-  { href: "/admin/ajustes" as const, label: "Box", active: true },
+  { href: "/admin/ajustes" as const, label: "Box" },
   { href: "/admin/ajustes/horarios" as const, label: "Horarios" },
-  { href: "/admin/ajustes/notificaciones" as const, label: "Notificaciones" },
+  {
+    href: "/admin/ajustes/notificaciones" as const,
+    label: "Notificaciones",
+    active: true,
+  },
   { href: "/admin/ajustes/alertas" as const, label: "Alertas" },
   { href: "/admin/ajustes/apodos" as const, label: "Apodos" },
   { href: "/admin/ajustes/permisos" as const, label: "Permisos" },
 ];
 
-export default async function AjustesPage() {
+export default async function NotificacionesPage() {
   const session = await getServerSession(authOptions);
-  const canEdit = session?.user?.role === "OWNER";
-  const box = await getBox();
+  if (!session?.user?.tenantId) redirect("/login");
+  if (session.user.role !== "OWNER") redirect("/admin/ajustes");
+
+  const settings = await getBoxNotifications();
+  if (!settings) redirect("/admin");
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-6 lg:p-8 max-w-4xl mx-auto">
       <span className="k-eyebrow-bar">Configuración</span>
       <div className="mt-2 mb-6 flex items-baseline gap-2 flex-wrap">
         <span
@@ -31,10 +40,10 @@ export default async function AjustesPage() {
           Tus
         </span>
         <h1
-          className="k-h-italic font-display font-extrabold text-[40px] leading-[1] tracking-[-0.02em]"
+          className="k-h-italic font-display font-extrabold text-[32px] md:text-[40px] leading-[1] tracking-[-0.02em]"
           style={{ color: "var(--text)" }}
         >
-          <em>ajustes</em>
+          <em>notificaciones</em>
         </h1>
       </div>
       <nav className="flex gap-1 mb-6 overflow-x-auto pb-1">
@@ -53,7 +62,14 @@ export default async function AjustesPage() {
           </Link>
         ))}
       </nav>
-      <BoxSettingsForm box={box} canEdit={canEdit} />
+
+      <p className="text-sm text-[var(--text-2)] mb-6 max-w-2xl">
+        Controla qué emails recibís de Kronos. Los avisos críticos del cobro
+        (cargos fallidos, suscripción expirada) y el resumen semanal se pueden
+        desactivar individualmente.
+      </p>
+
+      <NotificationsForm initial={settings} />
     </div>
   );
 }
