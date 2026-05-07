@@ -28,43 +28,53 @@ export default async function MovementsPage() {
 
   return (
     <div className="pb-28 relative">
-      {/* HERO v2.0 */}
-      <header className="relative px-4 pt-14 pb-5 overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
+      {/* HERO V3 — limpio */}
+      <header
+        style={{
+          padding: "56px 20px 20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        <span
           style={{
-            background:
-              "radial-gradient(ellipse at 0% 0%, rgba(230,0,38,0.06), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(0,191,255,0.06), transparent 60%)",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            color: "var(--k-t3)",
+            textTransform: "uppercase",
           }}
-        />
-        <span className="k-corner-tl" aria-hidden />
-        <span className="k-corner-br" aria-hidden />
-        <AnimatedSection className="relative">
-          <AnimatedItem>
-            <span className="k-eyebrow-bar">Mis movimientos</span>
-            <div className="mt-2 flex items-baseline gap-2 flex-wrap">
-              <span
-                className="font-script text-[26px] leading-none"
-                style={{ color: "var(--red)" }}
-              >
-                Tu biblioteca
-              </span>
-              <h1
-                className="k-h-italic font-display font-extrabold text-[32px] leading-[1] tracking-[-0.02em]"
-                style={{ color: "var(--text)" }}
-              >
-                <em>técnica</em>
-              </h1>
-            </div>
-            <p
-              className="text-xs mt-2 font-mono tracking-[0.06em]"
-              style={{ color: "var(--text-3)" }}
-            >
-              {movements.length} movimientos entrenados en los últimos 90 días
-            </p>
-          </AnimatedItem>
-        </AnimatedSection>
+        >
+          MOVIMIENTOS · ATLETA
+        </span>
+        <h1
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 32,
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
+            color: "var(--k-t1)",
+            margin: 0,
+            lineHeight: 1.05,
+          }}
+        >
+          Tu biblioteca técnica
+        </h1>
+        <p
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "var(--k-accent)",
+            margin: "4px 0 0",
+          }}
+        >
+          {movements.length} entrenados · 90 días
+        </p>
       </header>
 
       {/* List — personal movements */}

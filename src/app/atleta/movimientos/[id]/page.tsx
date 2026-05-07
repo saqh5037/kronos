@@ -13,7 +13,6 @@ import {
   AnimatedSection,
   AnimatedItem,
 } from "@/components/kronos/AnimatedSection";
-import KCard from "@/components/kronos/KCard";
 import { getEquipmentIcon } from "@/lib/equipment-icons";
 
 export const metadata = { title: "Kronos — Movimiento" };
@@ -56,29 +55,40 @@ export default async function MovementDetailPage({
 
   return (
     <div className="pb-28 relative">
-      {/* HERO v2.0 */}
-      <header className="relative px-4 pt-14 pb-5 overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
+      {/* HERO V3 — limpio */}
+      <header
+        style={{
+          padding: "56px 20px 20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        <span
           style={{
-            background:
-              "radial-gradient(ellipse at 0% 0%, rgba(230,0,38,0.06), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(0,191,255,0.06), transparent 60%)",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            color: "var(--k-t3)",
+            textTransform: "uppercase",
           }}
-        />
-        <span className="k-corner-tl" aria-hidden />
-        <span className="k-corner-br" aria-hidden />
-        <AnimatedSection className="relative">
-          <AnimatedItem>
-            <span className="k-eyebrow-bar">Movimiento</span>
-            <h1
-              className="k-h-italic font-display font-extrabold text-[34px] mt-2 leading-[1] tracking-[-0.02em]"
-              style={{ color: "var(--text)" }}
-            >
-              <em>{profile.movementName}</em>
-            </h1>
-          </AnimatedItem>
-        </AnimatedSection>
+        >
+          MOVIMIENTO · ATLETA
+        </span>
+        <h1
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 32,
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
+            color: "var(--k-t1)",
+            margin: 0,
+            lineHeight: 1.05,
+          }}
+        >
+          {profile.movementName}
+        </h1>
       </header>
 
       {/* Two-column layout on desktop */}
@@ -90,57 +100,112 @@ export default async function MovementDetailPage({
             <AnimatedSection>
               <AnimatedItem>
                 <div
-                  className="rounded-2xl overflow-hidden border border-[var(--line)]"
-                  style={{ aspectRatio: "16/9", background: "var(--bg-soft)" }}
+                  style={{
+                    aspectRatio: "16/9",
+                    background: "var(--k-elevated)",
+                    border: "1px solid var(--k-line)",
+                    borderRadius: 16,
+                    overflow: "hidden",
+                  }}
                 >
                   <iframe
                     src={movementInfo.videoUrl}
                     title={`Video: ${profile.movementName}`}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
-                    className="w-full h-full"
+                    style={{ width: "100%", height: "100%", border: 0 }}
                   />
                 </div>
               </AnimatedItem>
             </AnimatedSection>
           )}
 
-          {/* DESCRIPCION */}
+          {/* DESCRIPCION V3 */}
           {movementInfo?.standardDescription && (
             <AnimatedSection>
               <AnimatedItem>
-                <KCard>
-                  <div className="p-4">
-                    <p className="k-eyebrow mb-2 text-[var(--text-2)]">
-                      DESCRIPCIÓN
-                    </p>
-                    <p className="text-[13px] leading-relaxed whitespace-pre-line text-[var(--text-2)]">
-                      {movementInfo.standardDescription}
-                    </p>
+                <div
+                  style={{
+                    padding: 16,
+                    background: "var(--k-surface)",
+                    border: "1px solid var(--k-line)",
+                    borderRadius: 16,
+                  }}
+                >
+                  <p
+                    style={{
+                      fontFamily: "var(--k-font-display)",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: "var(--k-t3)",
+                      margin: "0 0 10px",
+                    }}
+                  >
+                    Descripción
+                  </p>
+                  <p
+                    style={{
+                      fontSize: 13,
+                      lineHeight: 1.5,
+                      whiteSpace: "pre-line",
+                      color: "var(--k-t2)",
+                      fontFamily: "var(--k-font-body)",
+                      margin: 0,
+                    }}
+                  >
+                    {movementInfo.standardDescription}
+                  </p>
 
-                    {/* Equipment */}
-                    {movementInfo.equipment.length > 0 && (
-                      <div className="mt-4">
-                        <p className="text-[10px] font-mono font-bold tracking-wider text-[var(--text-3)] uppercase mb-2">
-                          Equipo necesario
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {movementInfo.equipment.map((eq) => (
-                            <span
-                              key={eq}
-                              className="inline-flex items-center gap-1.5 bg-[var(--card-2)] border border-[var(--line)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text-2)]"
-                            >
-                              <span className="text-sm">
-                                {getEquipmentIcon(eq)}
-                              </span>
-                              {eq}
+                  {movementInfo.equipment.length > 0 && (
+                    <div style={{ marginTop: 16 }}>
+                      <p
+                        style={{
+                          fontFamily: "var(--k-font-display)",
+                          fontSize: 10,
+                          fontWeight: 700,
+                          letterSpacing: "0.16em",
+                          textTransform: "uppercase",
+                          color: "var(--k-t3)",
+                          margin: "0 0 8px",
+                        }}
+                      >
+                        Equipo necesario
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: 8,
+                        }}
+                      >
+                        {movementInfo.equipment.map((eq) => (
+                          <span
+                            key={eq}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                              padding: "6px 10px",
+                              borderRadius: 10,
+                              background: "var(--k-elevated)",
+                              border: "1px solid var(--k-line)",
+                              color: "var(--k-t2)",
+                              fontFamily: "var(--k-font-body)",
+                              fontSize: 12,
+                            }}
+                          >
+                            <span style={{ fontSize: 14 }}>
+                              {getEquipmentIcon(eq)}
                             </span>
-                          ))}
-                        </div>
+                            {eq}
+                          </span>
+                        ))}
                       </div>
-                    )}
-                  </div>
-                </KCard>
+                    </div>
+                  )}
+                </div>
               </AnimatedItem>
             </AnimatedSection>
           )}
@@ -148,69 +213,83 @@ export default async function MovementDetailPage({
 
         {/* Right column — stats + chart */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Stats Grid */}
+          {/* Stats Grid V3 */}
           <AnimatedSection className="grid grid-cols-2 gap-2">
             <AnimatedItem>
-              <KCard variant="flat" className="p-3.5 text-center">
-                <div className="font-display text-xl font-bold text-[var(--fire)]">
-                  {profile.currentBest !== null
+              <V3StatCard
+                value={
+                  profile.currentBest !== null
                     ? `${profile.currentBest}${profile.unit ? ` ${profile.unit}` : ""}`
-                    : "—"}
-                </div>
-                <div className="text-[10px] font-bold tracking-wide mt-1 text-[var(--text-3)]">
-                  PR ACTUAL{" "}
-                  {profile.currentBest
-                    ? profile.lastPR?.achievedAt
-                      ? `· ${new Date(profile.lastPR.achievedAt).toLocaleDateString("es-MX", { month: "short", day: "numeric" })}`
-                      : ""
-                    : ""}
-                </div>
-              </KCard>
+                    : "—"
+                }
+                label={
+                  profile.currentBest && profile.lastPR?.achievedAt
+                    ? `PR ACTUAL · ${new Date(profile.lastPR.achievedAt).toLocaleDateString("es-MX", { month: "short", day: "numeric" })}`
+                    : "PR ACTUAL"
+                }
+                accent
+              />
             </AnimatedItem>
-
             <AnimatedItem>
-              <KCard variant="flat" className="p-3.5 text-center">
-                <div className="font-display text-xl font-bold text-[var(--moss)]">
-                  {profile.percentileInBox}%
-                </div>
-                <div className="text-[10px] font-bold tracking-wide mt-1 text-[var(--text-3)]">
-                  PERCENTIL EN BOX
-                </div>
-              </KCard>
+              <V3StatCard
+                value={`${profile.percentileInBox}%`}
+                label="PERCENTIL EN BOX"
+              />
             </AnimatedItem>
-
             <AnimatedItem>
-              <KCard variant="flat" className="p-3.5 text-center">
-                <div className="font-display text-xl font-bold text-[var(--steel)]">
-                  #{profile.rankInBox}
-                </div>
-                <div className="text-[10px] font-bold tracking-wide mt-1 text-[var(--text-3)]">
-                  RANK DE {profile.totalAthletesInBox}
-                </div>
-              </KCard>
+              <V3StatCard
+                value={`#${profile.rankInBox}`}
+                label={`RANK DE ${profile.totalAthletesInBox}`}
+              />
             </AnimatedItem>
-
             <AnimatedItem>
-              <KCard variant="flat" className="p-3.5 text-center">
-                <div className="font-display text-xl font-bold text-[var(--amber)]">
-                  {profile.frequency90d}
-                </div>
-                <div className="text-[10px] font-bold tracking-wide mt-1 text-[var(--text-3)]">
-                  ENTRENOS 90D
-                </div>
-              </KCard>
+              <V3StatCard
+                value={String(profile.frequency90d)}
+                label="ENTRENOS 90D"
+              />
             </AnimatedItem>
           </AnimatedSection>
 
-          {/* Progression Chart */}
+          {/* Progression Chart V3 */}
           <AnimatedSection>
             <AnimatedItem>
-              <KCard className="p-4">
-                <div className="flex items-baseline justify-between mb-3">
-                  <span className="text-[13px] font-semibold text-[var(--text)]">
+              <div
+                style={{
+                  padding: 16,
+                  background: "var(--k-surface)",
+                  border: "1px solid var(--k-line)",
+                  borderRadius: 16,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    marginBottom: 12,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--k-font-display)",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "var(--k-t1)",
+                    }}
+                  >
                     Progresión de PRs
                   </span>
-                  <span className="text-[10px] font-bold tracking-wide text-[var(--text-3)]">
+                  <span
+                    style={{
+                      fontFamily: "var(--k-font-display)",
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: "0.16em",
+                      color: "var(--k-t3)",
+                    }}
+                  >
                     ÚLTIMOS 6 MESES
                   </span>
                 </div>
@@ -221,40 +300,84 @@ export default async function MovementDetailPage({
                   height={200}
                 />
                 {progression && progression.totalAttempts > 0 && (
-                  <div className="flex items-center justify-center gap-4 mt-3">
-                    <div className="text-center">
-                      <div className="font-display text-sm font-bold text-[var(--text)]">
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 24,
+                      marginTop: 14,
+                    }}
+                  >
+                    <div style={{ textAlign: "center" }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--k-font-display)",
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: "var(--k-t1)",
+                        }}
+                      >
                         {progression.totalAttempts}
                       </div>
-                      <div className="text-[9px] font-bold tracking-wide text-[var(--text-3)]">
+                      <div
+                        style={{
+                          fontFamily: "var(--k-font-display)",
+                          fontSize: 9,
+                          fontWeight: 700,
+                          letterSpacing: "0.16em",
+                          color: "var(--k-t3)",
+                          marginTop: 3,
+                        }}
+                      >
                         INTENTOS
                       </div>
                     </div>
                     {progression.daysSinceLast !== null && (
-                      <div className="text-center">
-                        <div className="font-display text-sm font-bold text-[var(--text)]">
+                      <div style={{ textAlign: "center" }}>
+                        <div
+                          style={{
+                            fontFamily: "var(--k-font-display)",
+                            fontSize: 14,
+                            fontWeight: 700,
+                            color: "var(--k-t1)",
+                          }}
+                        >
                           {progression.daysSinceLast}d
                         </div>
-                        <div className="text-[9px] font-bold tracking-wide text-[var(--text-3)]">
+                        <div
+                          style={{
+                            fontFamily: "var(--k-font-display)",
+                            fontSize: 9,
+                            fontWeight: 700,
+                            letterSpacing: "0.16em",
+                            color: "var(--k-t3)",
+                            marginTop: 3,
+                          }}
+                        >
                           ÚLTIMO
                         </div>
                       </div>
                     )}
                   </div>
                 )}
-              </KCard>
+              </div>
             </AnimatedItem>
           </AnimatedSection>
 
-          {/* Stale warning */}
+          {/* Stale warning V3 */}
           {profile.isStale && (
             <AnimatedSection>
               <AnimatedItem>
                 <div
-                  className="k-card-ghost p-4 flex items-center gap-3 rounded-xl"
                   style={{
-                    borderColor: "var(--ember-line)",
-                    background: "var(--ember-soft)",
+                    padding: 16,
+                    borderRadius: 14,
+                    background: "var(--k-elevated)",
+                    border: "1px dashed var(--k-line-2)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
                   }}
                 >
                   <svg
@@ -262,16 +385,32 @@ export default async function MovementDetailPage({
                     height="20"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="var(--ember)"
+                    stroke="var(--k-t2)"
                     strokeWidth="2"
                   >
                     <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                   </svg>
                   <div>
-                    <div className="text-[13px] font-semibold text-[var(--ember)]">
+                    <div
+                      style={{
+                        fontFamily: "var(--k-font-display)",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "var(--k-t1)",
+                      }}
+                    >
                       Movimiento sin entrenar
                     </div>
-                    <div className="text-[11px] text-[var(--text-2)]">
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: "var(--k-t2)",
+                        fontFamily: "var(--k-font-body)",
+                        marginTop: 2,
+                      }}
+                    >
                       Hace más de 30 días que no registras un PR. ¡Ponle foco!
                     </div>
                   </div>
@@ -282,48 +421,119 @@ export default async function MovementDetailPage({
         </div>
       </div>
 
-      {/* Sticky bottom bar — Today's WOD CTA */}
+      {/* Sticky bottom bar V3 — Today's WOD CTA */}
       {isInTodayWod && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-3 bg-[var(--bg)]/90 backdrop-blur-lg border-t border-[var(--line)] lg:hidden">
-          <Link href={`/atleta` as Route}>
-            <div className="k-btn-grad w-full py-3 text-sm font-semibold text-center flex items-center justify-center gap-2">
-              <span>🔥</span>
-              Vamos a hacerlo
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </div>
+        <div
+          className="lg:hidden"
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 50,
+            padding: 12,
+            background: "rgba(8,8,10,0.92)",
+            backdropFilter: "blur(12px)",
+            borderTop: "1px solid var(--k-line)",
+          }}
+        >
+          <Link
+            href={`/atleta` as Route}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              width: "100%",
+              padding: "13px 16px",
+              borderRadius: 12,
+              background: "var(--k-accent)",
+              color: "var(--k-accent-on)",
+              fontFamily: "var(--k-font-display)",
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              boxShadow: "var(--k-accent-glow)",
+            }}
+          >
+            Vamos a hacerlo
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
           </Link>
         </div>
       )}
 
-      {/* Desktop CTA if in today's WOD */}
+      {/* Desktop CTA V3 si in today's WOD */}
       {isInTodayWod && (
         <AnimatedSection className="px-3.5 mt-4 hidden lg:block">
           <AnimatedItem>
-            <Link href={`/atleta` as Route}>
-              <div className="k-card-featured p-4 flex items-center justify-between cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🔥</span>
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--fire)]">
-                      Este movimiento está en tu WOD de hoy
-                    </p>
-                    <p className="text-xs text-[var(--text-3)]">
-                      {todayWod?.wodName} · Empieza a entrenar
-                    </p>
-                  </div>
+            <Link href={`/atleta` as Route} style={{ textDecoration: "none" }}>
+              <div
+                style={{
+                  padding: 16,
+                  borderRadius: 16,
+                  background: "var(--k-surface)",
+                  border: "1px solid var(--k-accent-line)",
+                  boxShadow: "0 0 14px rgba(200, 255, 45, 0.16)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                }}
+              >
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 2 }}
+                >
+                  <p
+                    style={{
+                      fontFamily: "var(--k-font-display)",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                      color: "var(--k-accent)",
+                      margin: 0,
+                    }}
+                  >
+                    En tu WOD de hoy
+                  </p>
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: "var(--k-t1)",
+                      fontFamily: "var(--k-font-body)",
+                      fontWeight: 600,
+                      margin: 0,
+                    }}
+                  >
+                    {todayWod?.wodName} · Empieza a entrenar
+                  </p>
                 </div>
-                <span className="k-btn-grad px-4 py-2 text-xs font-semibold">
+                <span
+                  style={{
+                    padding: "9px 14px",
+                    borderRadius: 10,
+                    background: "var(--k-accent)",
+                    color: "var(--k-accent-on)",
+                    fontFamily: "var(--k-font-display)",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                  }}
+                >
                   Vamos →
                 </span>
               </div>
@@ -331,6 +541,53 @@ export default async function MovementDetailPage({
           </AnimatedItem>
         </AnimatedSection>
       )}
+    </div>
+  );
+}
+
+function V3StatCard({
+  value,
+  label,
+  accent = false,
+}: {
+  value: string;
+  label: string;
+  accent?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        padding: 14,
+        borderRadius: 14,
+        background: "var(--k-surface)",
+        border: "1px solid var(--k-line)",
+        textAlign: "center",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 20,
+          fontWeight: 700,
+          letterSpacing: "-0.02em",
+          color: accent ? "var(--k-accent)" : "var(--k-t1)",
+        }}
+      >
+        {value}
+      </div>
+      <div
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          color: "var(--k-t3)",
+          marginTop: 6,
+        }}
+      >
+        {label}
+      </div>
     </div>
   );
 }

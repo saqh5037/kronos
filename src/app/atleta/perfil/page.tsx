@@ -377,7 +377,18 @@ export default async function PerfilPage() {
       {activeGoals.length > 0 && (
         <AnimatedSection className="mt-6">
           <div className="flex items-baseline justify-between px-[18px] pb-2.5">
-            <span className="k-eyebrow-bar">Mis objetivos</span>
+            <span
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: "0.18em",
+                color: "var(--k-t3)",
+                textTransform: "uppercase",
+              }}
+            >
+              Mis objetivos
+            </span>
             <div
               className="font-mono text-[10px] font-bold tracking-[0.12em]"
               style={{ color: "var(--text-3)" }}
@@ -393,15 +404,36 @@ export default async function PerfilPage() {
                   <div className="relative flex items-center gap-3">
                     <div className="flex-1 min-w-0">
                       <div
-                        className="k-h-italic font-display font-bold text-[18px] tracking-[-0.01em] truncate"
-                        style={{ color: "var(--text)" }}
+                        style={{
+                          fontFamily: "var(--k-font-display)",
+                          fontWeight: 700,
+                          fontSize: 18,
+                          letterSpacing: "-0.01em",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          color: "var(--k-t1)",
+                        }}
                       >
-                        {g.movementName ? <em>{g.movementName}</em> : g.metric}
+                        {g.movementName ?? g.metric}
                       </div>
-                      <div className="mt-1 flex items-center gap-2">
+                      <div
+                        style={{
+                          marginTop: 4,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                        }}
+                      >
                         <span
-                          className="font-mono text-[10px] tracking-[0.08em] font-bold"
-                          style={{ color: "var(--brand-blue)" }}
+                          style={{
+                            fontFamily: "var(--k-font-display)",
+                            fontSize: 10,
+                            fontWeight: 700,
+                            letterSpacing: "0.12em",
+                            color: "var(--k-accent)",
+                            textTransform: "uppercase",
+                          }}
                         >
                           META {g.targetValue} {g.unit}
                         </span>
@@ -455,7 +487,18 @@ export default async function PerfilPage() {
       {prPredictions.length > 0 && (
         <AnimatedSection className="mt-6">
           <div className="flex items-baseline justify-between px-[18px] pb-2.5">
-            <span className="k-eyebrow-bar">Próximos PRs · Kronos AI</span>
+            <span
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: "0.18em",
+                color: "var(--k-t3)",
+                textTransform: "uppercase",
+              }}
+            >
+              Próximos PRs · Kronos AI
+            </span>
             <div
               className="font-mono text-[10px] font-bold tracking-[0.12em]"
               style={{ color: "var(--text-3)" }}

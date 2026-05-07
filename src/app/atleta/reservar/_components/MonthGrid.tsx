@@ -38,19 +38,47 @@ export function MonthGrid({
   const labels = ["L", "M", "M", "J", "V", "S", "D"];
 
   return (
-    <div className="k-card p-3">
-      <div className="grid grid-cols-7 gap-1 mb-1.5">
+    <div
+      style={{
+        padding: 12,
+        background: "var(--k-surface)",
+        border: "1px solid var(--k-line)",
+        borderRadius: 16,
+      }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: 4,
+          marginBottom: 6,
+        }}
+      >
         {labels.map((l, i) => (
           <p
             key={i}
-            className="font-mono text-[10px] font-bold text-center py-1"
-            style={{ color: "var(--text-3)" }}
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textAlign: "center",
+              padding: "4px 0",
+              color: "var(--k-t3)",
+              margin: 0,
+            }}
           >
             {l}
           </p>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-1">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: 4,
+        }}
+      >
         {days.map(({ date, inMonth }, i) => {
           const k = ymd(date);
           const dayClasses = byDay.get(k) ?? [];
@@ -60,6 +88,11 @@ export function MonthGrid({
               c.myBookingStatus === "BOOKED" ||
               c.myBookingStatus === "WAITLIST",
           ).length;
+          const numColor = isToday
+            ? "var(--k-accent-on)"
+            : inMonth
+              ? "var(--k-t1)"
+              : "var(--k-t3)";
 
           return (
             <Link
@@ -68,43 +101,67 @@ export function MonthGrid({
                 pathname: "/atleta/reservar",
                 query: { view: "day", date: k },
               }}
-              className="rounded-lg p-1.5 min-h-[60px] flex flex-col items-center justify-center transition-all"
               style={{
+                borderRadius: 10,
+                padding: 6,
+                minHeight: 60,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
                 background: isToday
-                  ? "var(--grad)"
+                  ? "var(--k-accent)"
                   : inMonth
-                    ? "var(--card-2)"
+                    ? "var(--k-elevated)"
                     : "transparent",
-                border: `1px solid ${isToday ? "transparent" : "var(--line)"}`,
-                opacity: inMonth ? 1 : 0.35,
+                border: isToday
+                  ? "none"
+                  : `1px solid ${inMonth ? "var(--k-line)" : "transparent"}`,
+                opacity: inMonth ? 1 : 0.45,
+                textDecoration: "none",
+                boxShadow: isToday ? "var(--k-accent-glow)" : "none",
+                transition: "background 150ms ease",
               }}
             >
               <p
-                className="font-display text-base font-bold"
                 style={{
-                  color: isToday ? "#0a0a0c" : "var(--text)",
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 16,
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                  color: numColor,
+                  margin: 0,
                 }}
               >
                 {date.getDate()}
               </p>
               {myBookings > 0 ? (
                 <span
-                  className="mt-0.5 w-1.5 h-1.5 rounded-full"
                   style={{
-                    background: isToday ? "#0a0a0c" : "var(--recovery)",
+                    marginTop: 4,
+                    width: 6,
+                    height: 6,
+                    borderRadius: 999,
+                    background: isToday
+                      ? "var(--k-accent-on)"
+                      : "var(--k-accent)",
                   }}
                 />
               ) : dayClasses.length > 0 ? (
                 <span
-                  className="mt-0.5 font-mono text-[8px]"
                   style={{
-                    color: isToday ? "#0a0a0c" : "var(--text-3)",
+                    marginTop: 4,
+                    fontFamily: "var(--k-font-display)",
+                    fontSize: 9,
+                    fontWeight: 700,
+                    letterSpacing: "0.06em",
+                    color: isToday ? "var(--k-accent-on)" : "var(--k-t3)",
                   }}
                 >
                   {dayClasses.length}
                 </span>
               ) : (
-                <span className="mt-0.5 h-1.5" />
+                <span style={{ marginTop: 4, height: 6, display: "block" }} />
               )}
             </Link>
           );

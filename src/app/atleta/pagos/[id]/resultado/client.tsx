@@ -20,6 +20,7 @@ type PaymentStatusResponse = {
 
 const POLL_INTERVAL_MS = 2_000;
 const POLL_TIMEOUT_MS = 30_000;
+const ERROR_RED = "#ff5e5e";
 
 export default function PaymentResultClient({
   paymentId,
@@ -75,53 +76,75 @@ export default function PaymentResultClient({
   const showSpinner =
     polling && finalStatus !== "PAID" && finalStatus !== "FAILED";
 
-  // Decide visual state
+  const isPaid = finalStatus === "PAID";
+  const isFailed = finalStatus === "FAILED" || initialStatus === "failure";
+
   let title = "Procesando pago…";
   let subtitle = "Esperamos confirmación de Mercado Pago.";
-  let color = "var(--strain)";
+  let titleColor: string = "var(--k-t1)";
 
-  if (finalStatus === "PAID") {
+  if (isPaid) {
     title = "¡Pago confirmado!";
     subtitle = "Tu membresía está activa.";
-    color = "var(--recovery)";
-  } else if (finalStatus === "FAILED" || initialStatus === "failure") {
+    titleColor = "var(--k-accent)";
+  } else if (isFailed) {
     title = "Pago rechazado";
     subtitle = payment?.mpStatusDetail
       ? `Detalle: ${payment.mpStatusDetail}`
       : "Intentá con otro método o tarjeta.";
-    color = "var(--pr)";
+    titleColor = ERROR_RED;
   } else if (!polling && finalStatus === "PENDING") {
     title = "Pago en proceso";
     subtitle =
       "Mercado Pago aún no confirmó. Te avisaremos por email cuando esté listo.";
-    color = "var(--strain)";
+    titleColor = "var(--k-t1)";
   }
 
   return (
-    <div className="px-3.5 pt-16 pb-24">
-      <div className="k-card p-6 text-center">
+    <div style={{ padding: "64px 16px 96px" }}>
+      <div
+        style={{
+          padding: 24,
+          background: "var(--k-surface)",
+          border: "1px solid var(--k-line)",
+          borderRadius: 16,
+          textAlign: "center",
+        }}
+      >
         {showSpinner && (
           <div
-            className="mx-auto mb-4 w-12 h-12 rounded-full border-4"
             style={{
-              borderColor: "var(--bg-soft)",
-              borderTopColor: "var(--strain)",
+              margin: "0 auto 16px",
+              width: 48,
+              height: 48,
+              borderRadius: 999,
+              border: "4px solid var(--k-line)",
+              borderTopColor: "var(--k-accent)",
               animation: "spin 0.9s linear infinite",
             }}
           />
         )}
 
-        {finalStatus === "PAID" && (
+        {isPaid && (
           <div
-            className="mx-auto mb-4 w-14 h-14 rounded-full flex items-center justify-center"
-            style={{ background: "var(--recovery-soft)" }}
+            style={{
+              margin: "0 auto 16px",
+              width: 56,
+              height: 56,
+              borderRadius: 999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "var(--k-accent-soft)",
+              border: "1px solid var(--k-accent-line)",
+            }}
           >
             <svg
               width="28"
               height="28"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="var(--recovery)"
+              stroke="var(--k-accent)"
               strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -131,17 +154,26 @@ export default function PaymentResultClient({
           </div>
         )}
 
-        {(finalStatus === "FAILED" || initialStatus === "failure") && (
+        {isFailed && (
           <div
-            className="mx-auto mb-4 w-14 h-14 rounded-full flex items-center justify-center"
-            style={{ background: "var(--pr-soft)" }}
+            style={{
+              margin: "0 auto 16px",
+              width: 56,
+              height: 56,
+              borderRadius: 999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(255, 94, 94, 0.12)",
+              border: "1px solid rgba(255, 94, 94, 0.32)",
+            }}
           >
             <svg
               width="28"
               height="28"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="var(--pr)"
+              stroke={ERROR_RED}
               strokeWidth="3"
               strokeLinecap="round"
             >
@@ -150,19 +182,44 @@ export default function PaymentResultClient({
           </div>
         )}
 
-        <h1 className="font-display font-bold text-2xl mb-2" style={{ color }}>
+        <h1
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontWeight: 700,
+            fontSize: 24,
+            letterSpacing: "-0.02em",
+            margin: "0 0 8px",
+            color: titleColor,
+          }}
+        >
           {title}
         </h1>
-        <p className="text-sm" style={{ color: "var(--text-2)" }}>
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--k-t2)",
+            fontFamily: "var(--k-font-body)",
+            margin: 0,
+            lineHeight: 1.5,
+          }}
+        >
           {subtitle}
         </p>
 
         {payment && (
           <div
-            className="mt-5 mx-auto inline-block px-4 py-2 rounded-md font-mono text-xs"
             style={{
-              background: "var(--bg-soft)",
-              color: "var(--text-2)",
+              marginTop: 20,
+              display: "inline-block",
+              padding: "8px 14px",
+              borderRadius: 8,
+              fontFamily: "var(--k-font-display)",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              background: "var(--k-elevated)",
+              border: "1px solid var(--k-line)",
+              color: "var(--k-t2)",
             }}
           >
             {payment.amount.toLocaleString()} {payment.currency} ·{" "}
@@ -170,20 +227,63 @@ export default function PaymentResultClient({
           </div>
         )}
 
-        <div className="mt-6 flex flex-col gap-2">
+        <div
+          style={{
+            marginTop: 24,
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
           <Link
             href="/atleta/pagos"
-            className="k-btn-grad text-sm font-display font-bold"
+            style={{
+              display: "block",
+              padding: "13px 16px",
+              borderRadius: 12,
+              background: "var(--k-accent)",
+              color: "var(--k-accent-on)",
+              fontFamily: "var(--k-font-display)",
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              boxShadow: "var(--k-accent-glow)",
+            }}
           >
             Volver a Mis pagos
           </Link>
-          <Link href="/atleta" className="k-btn-ghost text-sm font-display">
+          <Link
+            href="/atleta"
+            style={{
+              display: "block",
+              padding: "11px 16px",
+              borderRadius: 12,
+              background: "transparent",
+              color: "var(--k-t2)",
+              fontFamily: "var(--k-font-display)",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              border: "1px solid var(--k-line-2)",
+            }}
+          >
             Ir al inicio
           </Link>
         </div>
 
         {showSpinner && elapsed > 10_000 && (
-          <p className="mt-4 text-xs" style={{ color: "var(--text-3)" }}>
+          <p
+            style={{
+              marginTop: 16,
+              fontSize: 11,
+              color: "var(--k-t3)",
+              fontFamily: "var(--k-font-body)",
+            }}
+          >
             Esto está tardando un poco más de lo normal. Si pagaste, te
             avisaremos por email.
           </p>

@@ -7,6 +7,93 @@ import {
 
 export const metadata = { title: "Kronos — Plan IA" };
 
+const eyebrowStyle: React.CSSProperties = {
+  fontFamily: "var(--k-font-display)",
+  fontSize: 10,
+  fontWeight: 600,
+  letterSpacing: "0.2em",
+  color: "var(--k-t3)",
+  textTransform: "uppercase",
+};
+
+const backLinkStyle: React.CSSProperties = {
+  fontFamily: "var(--k-font-display)",
+  fontSize: 10,
+  fontWeight: 700,
+  letterSpacing: "0.16em",
+  textTransform: "uppercase",
+  color: "var(--k-t3)",
+  textDecoration: "none",
+};
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div
+      style={{
+        padding: "56px 16px 96px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+      }}
+    >
+      <span style={eyebrowStyle}>PLAN · ATLETA</span>
+      <h1
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 28,
+          fontWeight: 700,
+          letterSpacing: "-0.03em",
+          color: "var(--k-t1)",
+          margin: 0,
+        }}
+      >
+        Plan personalizado
+      </h1>
+      <div
+        style={{
+          marginTop: 12,
+          padding: 24,
+          background: "var(--k-surface)",
+          border: "1px solid var(--k-line)",
+          borderRadius: 16,
+          textAlign: "center",
+        }}
+      >
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--k-t2)",
+            fontFamily: "var(--k-font-body)",
+            margin: 0,
+          }}
+        >
+          {message}
+        </p>
+        <Link
+          href="/atleta/perfil"
+          style={{
+            marginTop: 14,
+            display: "inline-block",
+            padding: "8px 14px",
+            borderRadius: 10,
+            background: "transparent",
+            border: "1px solid var(--k-line-2)",
+            color: "var(--k-t2)",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            textDecoration: "none",
+          }}
+        >
+          ← A perfil
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default async function AtletaPlanPage(props: {
   searchParams: Promise<{ goalId?: string }>;
 }) {
@@ -15,45 +102,13 @@ export default async function AtletaPlanPage(props: {
 
   if (!goalId) {
     return (
-      <div className="px-4 pt-14 pb-28">
-        <h1 className="font-display text-2xl font-bold mb-3">
-          Plan personalizado
-        </h1>
-        <div className="k-card p-6 text-center">
-          <p className="text-sm" style={{ color: "var(--text-2)" }}>
-            Falta el goal. Volvé a tu perfil y elegí un objetivo activo.
-          </p>
-          <Link
-            href="/atleta/perfil"
-            className="mt-3 inline-block k-chip-ghost px-3 py-1.5 text-xs"
-          >
-            ← A perfil
-          </Link>
-        </div>
-      </div>
+      <EmptyState message="Falta el goal. Volvé a tu perfil y elegí un objetivo activo." />
     );
   }
 
   const result = await generateGoalPlan(goalId);
   if (!result) {
-    return (
-      <div className="px-4 pt-14 pb-28">
-        <h1 className="font-display text-2xl font-bold mb-3">
-          Plan personalizado
-        </h1>
-        <div className="k-card p-6 text-center">
-          <p className="text-sm" style={{ color: "var(--text-2)" }}>
-            No encontramos ese objetivo o no es tuyo.
-          </p>
-          <Link
-            href="/atleta/perfil"
-            className="mt-3 inline-block k-chip-ghost px-3 py-1.5 text-xs"
-          >
-            ← A perfil
-          </Link>
-        </div>
-      </div>
-    );
+    return <EmptyState message="No encontramos ese objetivo o no es tuyo." />;
   }
 
   const { plan, goal } = result;
@@ -65,162 +120,250 @@ export default async function AtletaPlanPage(props: {
   });
 
   return (
-    <div className="px-4 pt-14 pb-28 relative">
-      {/* HERO PLAN — radical brand */}
-      <div className="relative pb-6 overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse at 0% 0%, rgba(230,0,38,0.10), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(0,191,255,0.10), transparent 60%)",
-          }}
-        />
-        <span className="k-corner-tl" aria-hidden />
-        <span className="k-corner-tr" aria-hidden />
-
-        <AnimatedSection className="relative">
-          <AnimatedItem>
-            <Link
-              href="/atleta/perfil"
-              className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase text-[var(--text-3)] hover:text-[var(--text-2)] transition-colors"
+    <div style={{ padding: "56px 16px 96px" }}>
+      {/* HERO V3 — limpio */}
+      <AnimatedSection>
+        <AnimatedItem>
+          <Link href="/atleta/perfil" style={backLinkStyle}>
+            ← Mi perfil
+          </Link>
+        </AnimatedItem>
+        <AnimatedItem>
+          <div style={{ marginTop: 12 }}>
+            <span style={eyebrowStyle}>KRONOS AI · PLAN PERSONALIZADO</span>
+          </div>
+        </AnimatedItem>
+        <AnimatedItem>
+          <div
+            style={{
+              marginTop: 8,
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 14,
+                fontWeight: 600,
+                letterSpacing: "0.06em",
+                color: "var(--k-accent)",
+                textTransform: "uppercase",
+              }}
             >
-              ← Mi perfil
-            </Link>
-          </AnimatedItem>
-          <AnimatedItem className="mt-3">
-            <span className="k-eyebrow-bar">
-              Kronos AI · Plan personalizado
+              Tu objetivo
             </span>
-          </AnimatedItem>
-          <AnimatedItem className="mt-2">
-            <div className="flex flex-col gap-1">
-              <span
-                className="font-script text-[28px] leading-none"
-                style={{ color: "var(--brand-red)" }}
-              >
-                Tu objetivo,
+            <h1
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 36,
+                fontWeight: 700,
+                letterSpacing: "-0.03em",
+                color: "var(--k-t1)",
+                margin: 0,
+                lineHeight: 1.05,
+              }}
+            >
+              {goal.movementName ?? "objetivo"}{" "}
+              <span style={{ color: "var(--k-accent)" }}>
+                {goal.targetValue} {goal.unit}
               </span>
-              <h1
-                className="k-h-italic font-display font-extrabold text-[40px] leading-[1.05] tracking-[-0.025em]"
-                style={{ color: "var(--text)" }}
-              >
-                {goal.movementName ?? "objetivo"}{" "}
-                <em>
-                  {goal.targetValue} {goal.unit}
-                </em>
-              </h1>
-            </div>
-            <p className="text-[12px] mt-3" style={{ color: "var(--text-2)" }}>
-              Para el {fmtDeadline} · {plan.weeks.length} semanas · fuente:{" "}
-              <span
-                className="font-mono uppercase tracking-[0.12em] font-bold"
-                style={{
-                  color: isAI ? "var(--brand-red)" : "var(--text-3)",
-                }}
-              >
-                {isAI ? "Gemini" : "fallback"}
-              </span>
-            </p>
-          </AnimatedItem>
-        </AnimatedSection>
-      </div>
+            </h1>
+          </div>
+          <p
+            style={{
+              fontSize: 12,
+              marginTop: 12,
+              color: "var(--k-t2)",
+              fontFamily: "var(--k-font-body)",
+            }}
+          >
+            Para el {fmtDeadline} · {plan.weeks.length} semanas · fuente:{" "}
+            <span
+              style={{
+                fontFamily: "var(--k-font-display)",
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+                fontWeight: 700,
+                color: isAI ? "var(--k-accent)" : "var(--k-t3)",
+              }}
+            >
+              {isAI ? "Gemini" : "fallback"}
+            </span>
+          </p>
+        </AnimatedItem>
+      </AnimatedSection>
 
       <AnimatedSection>
         <AnimatedItem>
-          <div className="k-card-brand relative">
-            <span className="k-corner-bl" aria-hidden />
-            <span className="k-corner-br" aria-hidden />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0"
-              style={{ background: "var(--grad-soft)", opacity: 0.55 }}
-            />
-            <div className="relative">
-              <span className="k-eyebrow-bar mb-2">Estrategia</span>
-              <p
-                className="text-[15px] leading-[1.6] mt-2 font-medium"
-                style={{ color: "var(--text)" }}
-              >
-                {plan.overview}
-              </p>
-            </div>
+          <div
+            style={{
+              marginTop: 20,
+              padding: 18,
+              background: "var(--k-surface)",
+              border: "1px solid var(--k-accent-line)",
+              borderRadius: 16,
+              boxShadow: "0 0 14px rgba(200, 255, 45, 0.08)",
+            }}
+          >
+            <span style={eyebrowStyle}>Estrategia</span>
+            <p
+              style={{
+                fontSize: 15,
+                lineHeight: 1.6,
+                marginTop: 8,
+                fontWeight: 500,
+                color: "var(--k-t1)",
+                fontFamily: "var(--k-font-body)",
+                marginBottom: 0,
+              }}
+            >
+              {plan.overview}
+            </p>
           </div>
         </AnimatedItem>
 
-        <div className="mt-5 space-y-2.5">
+        <div
+          style={{
+            marginTop: 20,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+          }}
+        >
           {plan.weeks.map((w) => (
             <AnimatedItem key={w.weekNumber}>
               <details
-                className="group rounded-[16px] overflow-hidden relative"
                 style={{
-                  background: "var(--card)",
-                  border: "1px solid var(--line-strong)",
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  background: "var(--k-surface)",
+                  border: "1px solid var(--k-line)",
                 }}
               >
-                <summary className="flex items-center gap-3.5 px-4 py-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <summary
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    padding: 16,
+                    cursor: "pointer",
+                    listStyle: "none",
+                  }}
+                >
                   <div
-                    className="k-h-italic font-display font-extrabold text-[28px] w-12 text-center leading-none"
                     style={{
-                      background: "var(--grad)",
-                      WebkitBackgroundClip: "text",
-                      backgroundClip: "text",
-                      color: "transparent",
+                      fontFamily: "var(--k-font-display)",
+                      fontWeight: 700,
+                      fontSize: 28,
+                      width: 48,
+                      textAlign: "center",
+                      lineHeight: 1,
+                      color: "var(--k-accent)",
+                      letterSpacing: "-0.02em",
                     }}
                   >
-                    <em>{w.weekNumber}</em>
+                    {w.weekNumber}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div
-                      className="font-display font-bold text-[15px] tracking-[-0.01em]"
-                      style={{ color: "var(--text)" }}
+                      style={{
+                        fontFamily: "var(--k-font-display)",
+                        fontWeight: 700,
+                        fontSize: 15,
+                        letterSpacing: "-0.01em",
+                        color: "var(--k-t1)",
+                      }}
                     >
                       Semana {w.weekNumber}
                     </div>
                     <div
-                      className="font-mono text-[10px] tracking-[0.08em] mt-1 uppercase font-bold"
-                      style={{ color: "var(--brand-blue)" }}
+                      style={{
+                        fontFamily: "var(--k-font-display)",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        letterSpacing: "0.14em",
+                        marginTop: 4,
+                        textTransform: "uppercase",
+                        color: "var(--k-t2)",
+                      }}
                     >
                       {w.focus} · {w.sessions.length} sesiones
                     </div>
                   </div>
                   <span
-                    className="font-mono text-[12px] tracking-[0.16em] font-bold opacity-50 group-open:rotate-180 transition-transform"
-                    style={{ color: "var(--text-2)" }}
                     aria-hidden
+                    style={{
+                      fontFamily: "var(--k-font-display)",
+                      fontSize: 14,
+                      fontWeight: 700,
+                      opacity: 0.5,
+                      color: "var(--k-t2)",
+                    }}
                   >
                     ▾
                   </span>
                 </summary>
                 <div
-                  className="px-4 pb-4 pt-2"
                   style={{
-                    borderTop: "1px solid var(--line)",
+                    padding: "8px 16px 16px",
+                    borderTop: "1px solid var(--k-line)",
                   }}
                 >
-                  <ul className="space-y-2 mt-2">
+                  <ul
+                    style={{
+                      listStyle: "none",
+                      padding: 0,
+                      margin: "8px 0 0",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                    }}
+                  >
                     {w.sessions.map((s, i) => (
                       <li
                         key={i}
-                        className="grid grid-cols-[40px_72px_1fr] gap-3 text-[13px] items-baseline"
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "40px 80px 1fr",
+                          gap: 12,
+                          alignItems: "baseline",
+                          fontSize: 13,
+                          fontFamily: "var(--k-font-body)",
+                          color: "var(--k-t1)",
+                        }}
                       >
                         <span
-                          className="font-mono font-bold tracking-[0.06em] text-[11px]"
-                          style={{ color: "var(--text-3)" }}
+                          style={{
+                            fontFamily: "var(--k-font-display)",
+                            fontWeight: 700,
+                            letterSpacing: "0.06em",
+                            fontSize: 11,
+                            color: "var(--k-t3)",
+                          }}
                         >
                           {s.day}
                         </span>
                         <span
-                          className="font-mono text-[10px] font-bold tracking-[0.1em] uppercase px-2 py-0.5 rounded inline-block text-center"
                           style={{
-                            color: "var(--brand-blue)",
-                            background: "var(--blue-soft)",
-                            border: "1px solid var(--blue-line)",
+                            display: "inline-block",
+                            textAlign: "center",
+                            padding: "3px 8px",
+                            borderRadius: 6,
+                            fontFamily: "var(--k-font-display)",
+                            fontSize: 10,
+                            fontWeight: 700,
+                            letterSpacing: "0.1em",
+                            textTransform: "uppercase",
+                            color: "var(--k-accent)",
+                            background: "var(--k-accent-soft)",
+                            border: "1px solid var(--k-accent-line)",
                           }}
                         >
                           {s.type}
                         </span>
-                        <span style={{ color: "var(--text)" }}>
+                        <span style={{ color: "var(--k-t1)" }}>
                           {s.description}
                         </span>
                       </li>
@@ -228,10 +371,15 @@ export default async function AtletaPlanPage(props: {
                   </ul>
                   {w.notes && (
                     <p
-                      className="mt-3.5 text-[12px] leading-[1.5] italic pl-3 border-l-2"
                       style={{
-                        color: "var(--text-2)",
-                        borderColor: "var(--brand-red)",
+                        marginTop: 14,
+                        fontSize: 12,
+                        lineHeight: 1.5,
+                        fontStyle: "italic",
+                        paddingLeft: 12,
+                        borderLeft: "2px solid var(--k-accent)",
+                        color: "var(--k-t2)",
+                        fontFamily: "var(--k-font-body)",
                       }}
                     >
                       {w.notes}
@@ -243,16 +391,31 @@ export default async function AtletaPlanPage(props: {
           ))}
         </div>
 
-        <AnimatedItem className="mt-6">
-          <div className="k-divider mb-4" />
-          <p
-            className="text-[11px] leading-[1.6] text-center px-4 italic"
-            style={{ color: "var(--text-3)" }}
+        <AnimatedItem>
+          <div
+            style={{
+              marginTop: 24,
+              borderTop: "1px solid var(--k-line)",
+              paddingTop: 16,
+            }}
           >
-            Plan generado a partir de tu historial. Es una guía — adaptá con tu
-            coach según fatiga, lesiones y disponibilidad. No reemplaza la
-            programación oficial del box.
-          </p>
+            <p
+              style={{
+                fontSize: 11,
+                lineHeight: 1.6,
+                textAlign: "center",
+                padding: "0 16px",
+                fontStyle: "italic",
+                color: "var(--k-t3)",
+                fontFamily: "var(--k-font-body)",
+                margin: 0,
+              }}
+            >
+              Plan generado a partir de tu historial. Es una guía — adaptá con
+              tu coach según fatiga, lesiones y disponibilidad. No reemplaza la
+              programación oficial del box.
+            </p>
+          </div>
         </AnimatedItem>
       </AnimatedSection>
     </div>

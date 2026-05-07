@@ -1,48 +1,21 @@
 import { listAthleteMemberships } from "@/server/actions/payments";
 import PayMembershipButton from "@/components/atleta/PayMembershipButton";
-import {
-  AnimatedSection,
-  AnimatedItem,
-} from "@/components/kronos/AnimatedSection";
-import KCard from "@/components/kronos/KCard";
+import { AnimatedItem } from "@/components/kronos/AnimatedSection";
 
 export const metadata = { title: "Kronos — Mis pagos" };
 export const dynamic = "force-dynamic";
 
-const STATUS_LABEL: Record<
-  string,
-  { label: string; color: string; bg: string; border: string }
-> = {
-  PENDING: {
-    label: "Pendiente de pago",
-    color: "var(--pr)",
-    bg: "var(--pr-soft)",
-    border: "var(--pr-line)",
-  },
-  ACTIVE: {
-    label: "Activa",
-    color: "var(--recovery)",
-    bg: "var(--recovery-soft)",
-    border: "var(--recovery-line)",
-  },
-  PAUSED: {
-    label: "Pausada",
-    color: "var(--text-2)",
-    bg: "var(--btn-ghost-bg)",
-    border: "var(--line)",
-  },
-  EXPIRED: {
-    label: "Vencida",
-    color: "var(--text-3)",
-    bg: "var(--btn-ghost-bg)",
-    border: "var(--line)",
-  },
-  CANCELLED: {
-    label: "Cancelada",
-    color: "var(--text-3)",
-    bg: "var(--btn-ghost-bg)",
-    border: "var(--line)",
-  },
+type StatusVisual = {
+  label: string;
+  variant: "active" | "pending" | "muted";
+};
+
+const STATUS_LABEL: Record<string, StatusVisual> = {
+  PENDING: { label: "Pendiente de pago", variant: "pending" },
+  ACTIVE: { label: "Activa", variant: "active" },
+  PAUSED: { label: "Pausada", variant: "muted" },
+  EXPIRED: { label: "Vencida", variant: "muted" },
+  CANCELLED: { label: "Cancelada", variant: "muted" },
 };
 
 const PAYMENT_STATUS_LABEL: Record<string, string> = {
@@ -61,6 +34,43 @@ function fmtDate(d: Date | null) {
   });
 }
 
+function statusChipStyle(
+  variant: StatusVisual["variant"],
+): React.CSSProperties {
+  const base: React.CSSProperties = {
+    display: "inline-block",
+    padding: "3px 9px",
+    borderRadius: 999,
+    fontFamily: "var(--k-font-display)",
+    fontSize: 9,
+    fontWeight: 700,
+    letterSpacing: "0.16em",
+    textTransform: "uppercase",
+  };
+  if (variant === "active") {
+    return {
+      ...base,
+      color: "var(--k-accent)",
+      background: "var(--k-accent-soft)",
+      border: "1px solid var(--k-accent-line)",
+    };
+  }
+  if (variant === "pending") {
+    return {
+      ...base,
+      color: "var(--k-warning)",
+      background: "rgba(255, 176, 32, 0.12)",
+      border: "1px solid rgba(255, 176, 32, 0.32)",
+    };
+  }
+  return {
+    ...base,
+    color: "var(--k-t3)",
+    background: "var(--k-elevated)",
+    border: "1px solid var(--k-line)",
+  };
+}
+
 export default async function AtletaPagosPage() {
   let memberships: Awaited<ReturnType<typeof listAthleteMemberships>> = [];
   try {
@@ -70,151 +80,250 @@ export default async function AtletaPagosPage() {
   }
 
   return (
-    <div className="pb-28 relative">
-      {/* HERO v2.0 */}
-      <header className="relative px-4 pt-14 pb-5 overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
+    <div style={{ paddingBottom: 96 }}>
+      {/* HERO V3 — limpio */}
+      <header
+        style={{
+          padding: "56px 20px 20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        <span
           style={{
-            background:
-              "radial-gradient(ellipse at 0% 0%, rgba(230,0,38,0.06), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(0,191,255,0.06), transparent 60%)",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            color: "var(--k-t3)",
+            textTransform: "uppercase",
           }}
-        />
-        <span className="k-corner-tl" aria-hidden />
-        <span className="k-corner-br" aria-hidden />
-        <AnimatedSection className="relative">
-          <AnimatedItem>
-            <span className="k-eyebrow-bar">Mis pagos</span>
-            <div className="mt-2 flex items-baseline gap-2 flex-wrap">
-              <span
-                className="font-script text-[26px] leading-none"
-                style={{ color: "var(--red)" }}
-              >
-                Mis
-              </span>
-              <h1
-                className="k-h-italic font-display font-extrabold text-[34px] leading-[1] tracking-[-0.02em]"
-                style={{ color: "var(--text)" }}
-              >
-                <em>membresías</em>
-              </h1>
-            </div>
-          </AnimatedItem>
-        </AnimatedSection>
+        >
+          PAGOS · ATLETA
+        </span>
+        <h1
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 32,
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
+            color: "var(--k-t1)",
+            margin: 0,
+            lineHeight: 1.05,
+          }}
+        >
+          Mis membresías
+        </h1>
       </header>
 
       {memberships.length === 0 ? (
-        <div className="px-3.5">
-          <KCard>
+        <div style={{ padding: "0 16px" }}>
+          <div
+            style={{
+              padding: "32px 24px",
+              background: "var(--k-surface)",
+              border: "1px dashed var(--k-line)",
+              borderRadius: 16,
+              textAlign: "center",
+            }}
+          >
             <p
-              className="text-sm text-center py-6"
-              style={{ color: "var(--text-2)" }}
+              style={{
+                fontSize: 13,
+                color: "var(--k-t2)",
+                fontFamily: "var(--k-font-body)",
+                margin: 0,
+              }}
             >
               No tienes membresías asignadas. Pídele a tu coach que te asigne un
               plan.
             </p>
-          </KCard>
+          </div>
         </div>
       ) : (
-        <div className="px-3.5 flex flex-col gap-3">
+        <div
+          style={{
+            padding: "0 16px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+          }}
+        >
           {memberships.map((m) => {
             const statusInfo = STATUS_LABEL[m.status] ?? STATUS_LABEL.PENDING;
             return (
               <AnimatedItem key={m.id}>
-                <KCard>
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="min-w-0">
-                        <div className="text-[15px] font-semibold mb-1">
-                          {m.planName}
-                        </div>
-                        <div
-                          className="font-mono text-[10px] tracking-[0.06em]"
-                          style={{ color: "var(--text-2)" }}
-                        >
-                          {m.planType} · {fmtDate(m.startDate)}
-                          {m.endDate ? ` → ${fmtDate(m.endDate)}` : ""}
-                        </div>
-                      </div>
-                      <span
-                        className="k-chip"
+                <div
+                  style={{
+                    padding: 16,
+                    background: "var(--k-surface)",
+                    border: "1px solid var(--k-line)",
+                    borderRadius: 16,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      justifyContent: "space-between",
+                      gap: 12,
+                      marginBottom: 14,
+                    }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <div
                         style={{
-                          color: statusInfo.color,
-                          background: statusInfo.bg,
-                          border: `1px solid ${statusInfo.border}`,
-                          padding: "3px 8px",
-                          fontSize: 9,
-                          fontWeight: 700,
+                          fontSize: 15,
+                          fontWeight: 600,
+                          marginBottom: 4,
+                          color: "var(--k-t1)",
+                          fontFamily: "var(--k-font-body)",
                         }}
                       >
-                        {statusInfo.label.toUpperCase()}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between mb-3">
+                        {m.planName}
+                      </div>
                       <div
-                        className="font-mono text-[11px]"
-                        style={{ color: "var(--text-2)" }}
+                        style={{
+                          fontFamily: "var(--k-font-display)",
+                          fontSize: 10,
+                          fontWeight: 600,
+                          letterSpacing: "0.14em",
+                          textTransform: "uppercase",
+                          color: "var(--k-t2)",
+                        }}
                       >
-                        Monto
-                      </div>
-                      <div className="font-display text-lg font-bold">
-                        {m.planPrice.toLocaleString()} {m.planCurrency}
+                        {m.planType} · {fmtDate(m.startDate)}
+                        {m.endDate ? ` → ${fmtDate(m.endDate)}` : ""}
                       </div>
                     </div>
-
-                    {m.status === "PENDING" && m.pendingPaymentId && (
-                      <PayMembershipButton
-                        paymentId={m.pendingPaymentId}
-                        amount={m.planPrice}
-                        currency={m.planCurrency}
-                      />
-                    )}
-
-                    {m.payments.length > 0 && (
-                      <details className="mt-4">
-                        <summary
-                          className="cursor-pointer text-xs font-medium"
-                          style={{ color: "var(--text-2)" }}
-                        >
-                          Historial ({m.payments.length})
-                        </summary>
-                        <div className="mt-2 space-y-1.5">
-                          {m.payments.map((p) => (
-                            <div
-                              key={p.id}
-                              className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-lg k-row"
-                              style={{ background: "var(--bg-soft)" }}
-                            >
-                              <span style={{ color: "var(--text-2)" }}>
-                                {fmtDate(p.paidAt ?? p.createdAt)} · {p.gateway}
-                              </span>
-                              <span className="flex items-center gap-2">
-                                <span
-                                  style={{
-                                    color:
-                                      p.status === "PAID"
-                                        ? "var(--recovery)"
-                                        : p.status === "FAILED"
-                                          ? "var(--pr)"
-                                          : "var(--text-2)",
-                                    fontWeight: p.status === "PAID" ? 700 : 400,
-                                  }}
-                                >
-                                  {PAYMENT_STATUS_LABEL[p.status] ?? p.status}
-                                </span>
-                                <span className="font-mono font-bold">
-                                  {p.amount.toLocaleString()} {p.currency}
-                                </span>
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </details>
-                    )}
+                    <span style={statusChipStyle(statusInfo.variant)}>
+                      {statusInfo.label}
+                    </span>
                   </div>
-                </KCard>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginBottom: 14,
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: "var(--k-font-display)",
+                        fontSize: 11,
+                        fontWeight: 600,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "var(--k-t3)",
+                      }}
+                    >
+                      Monto
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "var(--k-font-display)",
+                        fontSize: 20,
+                        fontWeight: 700,
+                        color: "var(--k-t1)",
+                        letterSpacing: "-0.02em",
+                      }}
+                    >
+                      {m.planPrice.toLocaleString()} {m.planCurrency}
+                    </div>
+                  </div>
+
+                  {m.status === "PENDING" && m.pendingPaymentId && (
+                    <PayMembershipButton
+                      paymentId={m.pendingPaymentId}
+                      amount={m.planPrice}
+                      currency={m.planCurrency}
+                    />
+                  )}
+
+                  {m.payments.length > 0 && (
+                    <details style={{ marginTop: 16 }}>
+                      <summary
+                        style={{
+                          cursor: "pointer",
+                          fontFamily: "var(--k-font-display)",
+                          fontSize: 10,
+                          fontWeight: 700,
+                          letterSpacing: "0.16em",
+                          textTransform: "uppercase",
+                          color: "var(--k-t2)",
+                        }}
+                      >
+                        Historial ({m.payments.length})
+                      </summary>
+                      <div
+                        style={{
+                          marginTop: 10,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 6,
+                        }}
+                      >
+                        {m.payments.map((p) => (
+                          <div
+                            key={p.id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              padding: "8px 12px",
+                              borderRadius: 10,
+                              background: "var(--k-elevated)",
+                              border: "1px solid var(--k-line)",
+                              fontSize: 12,
+                              fontFamily: "var(--k-font-body)",
+                            }}
+                          >
+                            <span style={{ color: "var(--k-t2)" }}>
+                              {fmtDate(p.paidAt ?? p.createdAt)} · {p.gateway}
+                            </span>
+                            <span
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                              }}
+                            >
+                              <span
+                                style={{
+                                  color:
+                                    p.status === "PAID"
+                                      ? "var(--k-accent)"
+                                      : p.status === "FAILED"
+                                        ? "#ff5e5e"
+                                        : "var(--k-t2)",
+                                  fontWeight: p.status === "PAID" ? 700 : 500,
+                                  fontFamily: "var(--k-font-display)",
+                                  fontSize: 10,
+                                  letterSpacing: "0.12em",
+                                  textTransform: "uppercase",
+                                }}
+                              >
+                                {PAYMENT_STATUS_LABEL[p.status] ?? p.status}
+                              </span>
+                              <span
+                                style={{
+                                  fontFamily: "var(--k-font-display)",
+                                  fontWeight: 700,
+                                  color: "var(--k-t1)",
+                                }}
+                              >
+                                {p.amount.toLocaleString()} {p.currency}
+                              </span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                </div>
               </AnimatedItem>
             );
           })}
