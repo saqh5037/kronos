@@ -14,9 +14,11 @@
 import { NextResponse } from "next/server";
 import { db as rawDb } from "@/server/db";
 import { logAudit } from "@/server/audit";
+import { isMockMode } from "@/lib/saas-billing";
 import {
   evaluateLifecycle,
   evaluateTrialLifecycle,
+  evaluateRenewal,
   shouldNotifyTrialExpiring,
 } from "@/server/saas-billing/lifecycle";
 import {
@@ -25,6 +27,7 @@ import {
   notifyTrialExpiring,
   getLastTrialExpiringNotification,
 } from "@/server/saas-billing/notifications";
+import { renewSubscriptionMock } from "@/server/saas-billing/renewal";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -58,8 +61,10 @@ export async function GET(req: Request) {
   const now = new Date();
   let toPastDue = 0;
   let toExpired = 0;
+  let renewedMock = 0;
   let trialToExpired = 0;
   let trialExpiringNotified = 0;
+  const mockMode = isMockMode();
 
   // ─── SaasSubscriptions ACTIVE / PAST_DUE ─────────────────────────────────────
   const subs = await rawDb.saasSubscription.findMany({
@@ -73,6 +78,25 @@ export async function GET(req: Request) {
   });
 
   for (const sub of subs) {
+    // En mock mode, intentar renovar ACTIVE expirada antes de marcar PAST_DUE.
+    // En real mode, MP preapproval dispara el cobro vía webhook (TODO sprint 4.x).
+    if (mockMode && sub.status === "ACTIVE") {
+      const renewal = evaluateRenewal({
+        status: "ACTIVE",
+        currentPeriodEnd: sub.currentPeriodEnd,
+        now,
+      });
+      if (renewal.shouldRenew) {
+        const r = await renewSubscriptionMock(sub.id, now);
+        if (r.ok) {
+          renewedMock++;
+          continue;
+        }
+        // Si falló la renovación mock por alguna razón, dejar que el flujo
+        // legacy de PAST_DUE se ejecute abajo.
+      }
+    }
+
     const result = evaluateLifecycle(
       {
         status: sub.status as "ACTIVE" | "PAST_DUE",
@@ -174,7 +198,7 @@ export async function GET(req: Request) {
 
   return NextResponse.json({
     ok: true,
-    transitions: { toPastDue, toExpired, trialToExpired },
+    transitions: { toPastDue, toExpired, trialToExpired, renewedMock },
     notifications: { trialExpiring: trialExpiringNotified },
     checked: { subs: subs.length, trialBoxes: trialBoxes.length },
   });

@@ -77,6 +77,11 @@ const KIND_MAP: Record<
     category: "billing",
     severity: "sensitive",
   },
+  SAAS_RENEWED_MOCK: {
+    label: "Renovación automática (modo demo)",
+    category: "billing",
+    severity: "info",
+  },
 
   // Email
   EMAIL_SENT_OWNER_DIGEST: {

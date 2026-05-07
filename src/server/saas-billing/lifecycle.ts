@@ -83,6 +83,35 @@ export function evaluateTrialLifecycle(
  * Ventana: trial vence entre +1d y +3d desde ahora. Idempotente: si lastNotifiedAt
  * está dentro de las últimas 24h, no re-notifica.
  */
+/**
+ * Decide si una SaasSubscription debe renovar automáticamente.
+ *
+ * Solo ACTIVE con currentPeriodEnd <= now califica. CANCELLED/EXPIRED/PAST_DUE/PENDING
+ * no se renuevan (PAST_DUE entra al lifecycle de grace + EXPIRED por separado).
+ *
+ * El consumidor decide CÓMO renovar (mock vs MP preapproval real). Este helper
+ * solo dice "sí debe" + cuál sería el siguiente periodo.
+ */
+export function evaluateRenewal(input: {
+  status: SaasSubLifecycleStatus;
+  currentPeriodEnd: Date | null;
+  now?: Date;
+}): { shouldRenew: boolean; nextPeriodEnd: Date | null } {
+  const now = input.now ?? new Date();
+
+  if (input.status !== "ACTIVE" || !input.currentPeriodEnd) {
+    return { shouldRenew: false, nextPeriodEnd: null };
+  }
+
+  if (input.currentPeriodEnd.getTime() > now.getTime()) {
+    return { shouldRenew: false, nextPeriodEnd: null };
+  }
+
+  const next = new Date(input.currentPeriodEnd);
+  next.setMonth(next.getMonth() + 1);
+  return { shouldRenew: true, nextPeriodEnd: next };
+}
+
 export function shouldNotifyTrialExpiring(input: {
   trialEndsAt: Date | null;
   lastNotifiedAt: Date | null;

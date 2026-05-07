@@ -51,6 +51,16 @@ describe("humanizeAuditEvent", () => {
       expect(r.label).toBe("Trial expirado");
       expect(r.severity).toBe("warning");
     });
+
+    it("SAAS_RENEWED_MOCK → billing info", () => {
+      const r = humanizeAuditEvent({
+        action: "PAYMENT_CONFIRMED",
+        metadata: { kind: "SAAS_RENEWED_MOCK" },
+      });
+      expect(r.category).toBe("billing");
+      expect(r.severity).toBe("info");
+      expect(r.label).toContain("demo");
+    });
   });
 
   describe("email kinds", () => {

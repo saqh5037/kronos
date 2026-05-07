@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   evaluateLifecycle,
   evaluateTrialLifecycle,
+  evaluateRenewal,
   shouldNotifyTrialExpiring,
   SAAS_GRACE_PERIOD_DAYS,
 } from "@/server/saas-billing/lifecycle";
@@ -150,6 +151,93 @@ describe("evaluateTrialLifecycle", () => {
         NOW,
       ),
     ).toEqual({ nextStatus: "EXPIRED", changed: false });
+  });
+});
+
+describe("evaluateRenewal", () => {
+  it("ACTIVE expirada → shouldRenew true con period +1 mes", () => {
+    const r = evaluateRenewal({
+      status: "ACTIVE",
+      currentPeriodEnd: YESTERDAY,
+      now: NOW,
+    });
+    expect(r.shouldRenew).toBe(true);
+    expect(r.nextPeriodEnd).not.toBeNull();
+    if (r.nextPeriodEnd) {
+      // YESTERDAY + 1 mes
+      const expected = new Date(YESTERDAY);
+      expected.setMonth(expected.getMonth() + 1);
+      expect(r.nextPeriodEnd.getTime()).toBe(expected.getTime());
+    }
+  });
+
+  it("ACTIVE en el límite exacto → shouldRenew true", () => {
+    const r = evaluateRenewal({
+      status: "ACTIVE",
+      currentPeriodEnd: NOW,
+      now: NOW,
+    });
+    expect(r.shouldRenew).toBe(true);
+  });
+
+  it("ACTIVE con period futuro → shouldRenew false", () => {
+    expect(
+      evaluateRenewal({
+        status: "ACTIVE",
+        currentPeriodEnd: FUTURE,
+        now: NOW,
+      }),
+    ).toEqual({ shouldRenew: false, nextPeriodEnd: null });
+  });
+
+  it("PAST_DUE no se renueva (lifecycle maneja eso)", () => {
+    expect(
+      evaluateRenewal({
+        status: "PAST_DUE",
+        currentPeriodEnd: YESTERDAY,
+        now: NOW,
+      }),
+    ).toEqual({ shouldRenew: false, nextPeriodEnd: null });
+  });
+
+  it("CANCELLED no se renueva", () => {
+    expect(
+      evaluateRenewal({
+        status: "CANCELLED",
+        currentPeriodEnd: YESTERDAY,
+        now: NOW,
+      }),
+    ).toEqual({ shouldRenew: false, nextPeriodEnd: null });
+  });
+
+  it("EXPIRED no se renueva", () => {
+    expect(
+      evaluateRenewal({
+        status: "EXPIRED",
+        currentPeriodEnd: YESTERDAY,
+        now: NOW,
+      }),
+    ).toEqual({ shouldRenew: false, nextPeriodEnd: null });
+  });
+
+  it("PENDING no se renueva", () => {
+    expect(
+      evaluateRenewal({
+        status: "PENDING",
+        currentPeriodEnd: YESTERDAY,
+        now: NOW,
+      }),
+    ).toEqual({ shouldRenew: false, nextPeriodEnd: null });
+  });
+
+  it("ACTIVE sin currentPeriodEnd → shouldRenew false", () => {
+    expect(
+      evaluateRenewal({
+        status: "ACTIVE",
+        currentPeriodEnd: null,
+        now: NOW,
+      }),
+    ).toEqual({ shouldRenew: false, nextPeriodEnd: null });
   });
 });
 
