@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   listAthletesPaged,
   getAthleteGrowthByDay,
@@ -6,6 +7,7 @@ import {
   type AthleteGrowthPoint,
   type AtRiskAthlete,
 } from "@/server/actions/athletes";
+import { listPendingInvitations } from "@/server/actions/athlete-invitations";
 import AthleteForm from "@/components/AthleteForm";
 import { rangeFromParams, previousRange, formatRange } from "@/lib/dates";
 import { MetricDelta } from "@/components/charts/MetricDelta";
@@ -77,6 +79,7 @@ export default async function AtletasPage({
   let activeNow = 0;
   let newInRange = 0;
   let newPrev = 0;
+  let pendingInvitationsCount = 0;
 
   try {
     const [
@@ -121,6 +124,14 @@ export default async function AtletasPage({
     activeNow = allActive.total;
     newInRange = newInRangeData.total;
     newPrev = newPrevData.total;
+    try {
+      const pending = await listPendingInvitations();
+      pendingInvitationsCount = pending.filter(
+        (p) => p.status === "PENDING",
+      ).length;
+    } catch {
+      // tabla nueva, ignorar
+    }
   } catch {
     // BD/sesión ausente
   }
@@ -149,7 +160,20 @@ export default async function AtletasPage({
             totales
           </p>
         </div>
-        <AthleteForm />
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/admin/atletas/invitar"
+            className="k-btn-ghost text-sm relative"
+          >
+            Invitar atletas
+            {pendingInvitationsCount > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-[var(--strain)] text-[var(--bg)]">
+                {pendingInvitationsCount}
+              </span>
+            )}
+          </Link>
+          <AthleteForm />
+        </div>
       </div>
 
       <AtletasFilters />

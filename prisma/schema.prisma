@@ -50,6 +50,7 @@ model Box {
   alertRules              AlertRule[]
   whiteboardUploads       WhiteboardUpload[]
   athleteAliases          AthleteAlias[]
+  athleteInvitations      AthleteInvitation[]
 }
 
 // ─── USERS / AUTH ─────────────────────────────────────────────────────────────
@@ -767,6 +768,29 @@ model WhiteboardUpload {
 
   @@index([tenantId, classId])
   @@index([tenantId])
+}
+
+// ─── ATHLETE INVITATIONS ──────────────────────────────────────────────────────
+
+model AthleteInvitation {
+  id          String    @id @default(cuid())
+  tenantId    String
+  email       String
+  firstName   String?
+  lastName    String?
+  phone       String?
+  token       String    @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  createdById String?
+  createdAt   DateTime  @default(now())
+
+  box Box @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, email])
+  @@index([tenantId, acceptedAt, revokedAt])
 }
 
 // ─── ATHLETE ALIASES ──────────────────────────────────────────────────────────

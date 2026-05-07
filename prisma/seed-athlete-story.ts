@@ -308,7 +308,6 @@ async function main() {
     if (attendedClassIds.has(klass.id) || noshowClassIds.has(klass.id))
       continue;
     attendedClassIds.add(klass.id);
-    recentAttendedCount++;
     bookingRows.push({
       tenantId,
       classId: klass.id,
