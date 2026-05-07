@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/server/auth";
@@ -5,6 +6,8 @@ import { db as prismaBase } from "@/server/db";
 import KCard from "@/components/kronos/KCard";
 import Eyebrow from "@/components/kronos/Eyebrow";
 import type { SubscriptionStatus } from "@/lib/subscription";
+import { getCurrentSubscription } from "@/server/actions/saas-billing";
+import { formatPriceMxn } from "@/lib/saas-billing";
 
 export const metadata = { title: "Kronos — Suscripción" };
 
@@ -98,39 +101,42 @@ export default async function BillingPage() {
   if (!session?.user?.tenantId) redirect("/login");
   if (session.user.role !== "OWNER") redirect("/admin");
 
-  const box = await prismaBase.box.findUnique({
-    where: { id: session.user.tenantId },
-    select: {
-      name: true,
-      subscriptionStatus: true,
-      trialStartedAt: true,
-      trialEndsAt: true,
-    },
-  });
+  const [box, currentSub] = await Promise.all([
+    prismaBase.box.findUnique({
+      where: { id: session.user.tenantId },
+      select: {
+        name: true,
+        subscriptionStatus: true,
+        trialStartedAt: true,
+        trialEndsAt: true,
+      },
+    }),
+    getCurrentSubscription(),
+  ]);
   if (!box) redirect("/login");
 
   const status = box.subscriptionStatus as SubscriptionStatus;
   const copy = copyForStatus(status, box.trialEndsAt);
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
+    <div className="p-6 md:p-8 max-w-3xl mx-auto">
       <Eyebrow color={copy.tone === "danger" ? "red" : "blue"}>
         {copy.eyebrow}
       </Eyebrow>
       <h1
-        className="mt-3 mb-2 font-display font-extrabold text-[40px] leading-[1.05] tracking-[-0.02em]"
+        className="mt-3 mb-2 font-display font-extrabold text-[32px] md:text-[40px] leading-[1.05] tracking-[-0.02em]"
         style={{ color: "var(--text)" }}
       >
         {copy.title}
       </h1>
       <p
-        className="mb-8 text-base leading-relaxed"
+        className="mb-6 md:mb-8 text-base leading-relaxed"
         style={{ color: "var(--text-2)" }}
       >
         {copy.body}
       </p>
 
-      <KCard animate={false} className="p-6 space-y-4">
+      <KCard animate={false} className="p-5 md:p-6 space-y-4">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <div
@@ -168,20 +174,40 @@ export default async function BillingPage() {
           ) : null}
         </div>
 
+        {currentSub ? (
+          <div className="pt-2 border-t border-[var(--border)]">
+            <div className="text-xs font-mono uppercase tracking-wider text-[var(--text-3)] mb-1">
+              Plan actual
+            </div>
+            <div className="flex items-baseline justify-between gap-3 flex-wrap">
+              <div className="font-display text-xl font-bold">
+                {currentSub.plan.name}
+              </div>
+              <div className="text-sm text-[var(--text-2)]">
+                {formatPriceMxn(currentSub.plan.priceMxnCents)} / mes
+              </div>
+            </div>
+            {currentSub.currentPeriodEnd && (
+              <p className="mt-2 text-xs text-[var(--text-3)]">
+                Próxima facturación:{" "}
+                {currentSub.currentPeriodEnd.toLocaleDateString("es-MX", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+            )}
+          </div>
+        ) : null}
+
         {copy.cta ? (
           <div className="pt-2">
-            <button
-              type="button"
-              className="k-btn-grad px-5 py-3 rounded-full font-bold text-sm"
-              disabled
-              title="Cobro recurrente llega en Sprint 3 (MercadoPago)"
+            <Link
+              href="/admin/billing/checkout"
+              className="inline-block k-btn-grad px-5 py-3 rounded-full font-bold text-sm"
             >
               {copy.cta.label}
-            </button>
-            <p className="mt-3 text-xs" style={{ color: "var(--text-3)" }}>
-              Próximamente: cobro con MercadoPago. Mientras tanto contactá a
-              soporte para activar tu plan.
-            </p>
+            </Link>
           </div>
         ) : null}
       </KCard>

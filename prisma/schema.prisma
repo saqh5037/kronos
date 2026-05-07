@@ -52,6 +52,7 @@ model Box {
   athleteAliases          AthleteAlias[]
   athleteInvitations      AthleteInvitation[]
   staffInvitations        StaffInvitation[]
+  saasSubscriptions       SaasSubscription[]
 }
 
 // ─── USERS / AUTH ─────────────────────────────────────────────────────────────
@@ -812,6 +813,50 @@ model StaffInvitation {
   @@index([tenantId])
   @@index([tenantId, email])
   @@index([tenantId, acceptedAt, revokedAt])
+}
+
+// ─── SAAS BILLING ─────────────────────────────────────────────────────────────
+
+enum SaasSubscriptionStatus {
+  PENDING
+  ACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+model SaasPlan {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  priceMxnCents Int      @default(0)
+  maxAthletes   Int?
+  maxCoaches    Int?
+  features      Json
+  isActive      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  subscriptions SaasSubscription[]
+}
+
+model SaasSubscription {
+  id                String                 @id @default(cuid())
+  tenantId          String
+  planId            String
+  status            SaasSubscriptionStatus @default(PENDING)
+  startsAt          DateTime?
+  currentPeriodEnd  DateTime?
+  cancelledAt       DateTime?
+  mpPreferenceId    String?                @unique
+  mpSubscriptionId  String?                @unique
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  box  Box      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan SaasPlan @relation(fields: [planId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
 }
 
 // ─── ATHLETE ALIASES ──────────────────────────────────────────────────────────

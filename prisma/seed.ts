@@ -363,6 +363,113 @@ async function main() {
     "🌱 Seed extendido — limpiando datos previos del seed (no toca data real)…",
   );
 
+  // ─── SaaS plans (catálogo global) ────────────────────────────────────────────
+  await prisma.saasPlan.upsert({
+    where: { slug: "free" },
+    update: {
+      name: "Free",
+      priceMxnCents: 0,
+      maxAthletes: 5,
+      maxCoaches: 1,
+      features: {
+        bookings: true,
+        wods: true,
+        leaderboard: true,
+        analytics: false,
+        ocr: false,
+        ai: false,
+      },
+      isActive: true,
+      sortOrder: 1,
+    },
+    create: {
+      slug: "free",
+      name: "Free",
+      priceMxnCents: 0,
+      maxAthletes: 5,
+      maxCoaches: 1,
+      features: {
+        bookings: true,
+        wods: true,
+        leaderboard: true,
+        analytics: false,
+        ocr: false,
+        ai: false,
+      },
+      sortOrder: 1,
+    },
+  });
+  await prisma.saasPlan.upsert({
+    where: { slug: "pro" },
+    update: {
+      name: "Pro",
+      priceMxnCents: 49900,
+      maxAthletes: 50,
+      maxCoaches: 5,
+      features: {
+        bookings: true,
+        wods: true,
+        leaderboard: true,
+        analytics: true,
+        ocr: false,
+        ai: false,
+      },
+      isActive: true,
+      sortOrder: 2,
+    },
+    create: {
+      slug: "pro",
+      name: "Pro",
+      priceMxnCents: 49900,
+      maxAthletes: 50,
+      maxCoaches: 5,
+      features: {
+        bookings: true,
+        wods: true,
+        leaderboard: true,
+        analytics: true,
+        ocr: false,
+        ai: false,
+      },
+      sortOrder: 2,
+    },
+  });
+  await prisma.saasPlan.upsert({
+    where: { slug: "premium" },
+    update: {
+      name: "Premium",
+      priceMxnCents: 99900,
+      maxAthletes: null,
+      maxCoaches: null,
+      features: {
+        bookings: true,
+        wods: true,
+        leaderboard: true,
+        analytics: true,
+        ocr: true,
+        ai: true,
+      },
+      isActive: true,
+      sortOrder: 3,
+    },
+    create: {
+      slug: "premium",
+      name: "Premium",
+      priceMxnCents: 99900,
+      maxAthletes: null,
+      maxCoaches: null,
+      features: {
+        bookings: true,
+        wods: true,
+        leaderboard: true,
+        analytics: true,
+        ocr: true,
+        ai: true,
+      },
+      sortOrder: 3,
+    },
+  });
+
   // ─── Boxes ────────────────────────────────────────────────────────────────────
   // Default operating schedule: 6 WOD slots Mon-Fri (3 AM + 3 PM),
   // 3 Open Box slots Saturday, Sunday closed.
