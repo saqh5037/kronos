@@ -16,20 +16,20 @@ export default async function SignupPage() {
   return (
     <main
       className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: "var(--bg)" }}
+      style={{ background: "var(--k-bg)" }}
     >
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <div
             className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-4 border"
             style={{
-              background: "var(--card)",
-              borderColor: "var(--line-strong)",
+              background: "var(--k-surface)",
+              borderColor: "var(--k-line-2)",
             }}
           >
             <span
               className="font-display font-bold text-2xl"
-              style={{ color: "var(--fire)" }}
+              style={{ color: "var(--k-accent)" }}
             >
               K
             </span>
@@ -37,7 +37,7 @@ export default async function SignupPage() {
           <h1 className="font-display font-bold text-3xl tracking-[-0.01em]">
             Empezá tu trial
           </h1>
-          <p className="mt-2 text-sm" style={{ color: "var(--text-2)" }}>
+          <p className="mt-2 text-sm" style={{ color: "var(--k-t2)" }}>
             14 días gratis. Sin tarjeta. Tu box operando hoy mismo.
           </p>
         </div>
@@ -50,13 +50,13 @@ export default async function SignupPage() {
 
         <p
           className="text-center text-xs mt-6"
-          style={{ color: "var(--text-3)" }}
+          style={{ color: "var(--k-t3)" }}
         >
           ¿Ya tenés cuenta?{" "}
           <Link
             href="/login"
             className="underline"
-            style={{ color: "var(--text-2)" }}
+            style={{ color: "var(--k-t2)" }}
           >
             Iniciar sesión
           </Link>

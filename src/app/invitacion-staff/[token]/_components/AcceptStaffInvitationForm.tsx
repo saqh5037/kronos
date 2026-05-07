@@ -36,13 +36,13 @@ export function AcceptStaffInvitationForm({
   if (success) {
     return (
       <div className="space-y-4">
-        <div className="rounded-lg border border-[var(--moss)]/40 bg-[var(--moss)]/10 p-4">
-          <p className="font-bold text-[var(--moss)]">✓ ¡Listo!</p>
+        <div className="rounded-lg border border-[var(--k-accent-line)] bg-[var(--k-accent-soft)] p-4">
+          <p className="font-bold text-[var(--k-accent)]">✓ ¡Listo!</p>
           <p className="text-sm mt-1">
             Tu cuenta para <strong>{email}</strong> quedó activa.
           </p>
         </div>
-        <p className="text-sm text-[var(--text-2)]">
+        <p className="text-sm text-[var(--k-t2)]">
           Iniciá sesión con tu email para entrar al admin del Box:
         </p>
         <Link
@@ -63,7 +63,7 @@ export function AcceptStaffInvitationForm({
           type="email"
           value={email}
           disabled
-          className="w-full rounded-lg p-2.5 bg-[var(--bg-soft)] border border-[var(--border)] text-[var(--text-2)] text-sm"
+          className="w-full rounded-lg p-2.5 bg-[var(--k-surface)] border border-[var(--k-line-2)] text-[var(--k-t2)] text-sm"
         />
       </div>
 
@@ -79,12 +79,12 @@ export function AcceptStaffInvitationForm({
           required
           minLength={2}
           maxLength={80}
-          className="w-full rounded-lg p-2.5 bg-[var(--bg-soft)] border border-[var(--border)] text-[var(--text)] text-sm focus:outline-none focus:border-[var(--strain)]"
+          className="w-full rounded-lg p-2.5 bg-[var(--k-surface)] border border-[var(--k-line-2)] text-[var(--k-t1)] text-sm focus:outline-none focus:border-[var(--k-accent-line)]"
         />
       </div>
 
       {error && (
-        <p className="rounded-lg border border-[var(--pr)]/50 bg-[var(--pr)]/10 p-3 text-sm text-[var(--pr)]">
+        <p className="rounded-lg border border-[var(--k-danger)]/50 bg-[var(--k-danger)]/10 p-3 text-sm text-[var(--k-danger)]">
           {error}
         </p>
       )}

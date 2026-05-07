@@ -28,8 +28,8 @@ export function SignOutButton({
         disabled={isPending}
         aria-label="Cerrar sesión"
         title="Cerrar sesión"
-        className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-[var(--card-2)] disabled:opacity-50 ${className ?? ""}`}
-        style={{ color: "var(--text-2)" }}
+        className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-[var(--k-elevated)] disabled:opacity-50 ${className ?? ""}`}
+        style={{ color: "var(--k-t2)" }}
       >
         <LogOutIcon />
       </button>
@@ -44,9 +44,9 @@ export function SignOutButton({
         disabled={isPending}
         className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 ${className ?? ""}`}
         style={{
-          background: "var(--pr-soft)",
-          color: "var(--pr)",
-          border: "1px solid var(--pr-line)",
+          background: "rgba(255, 90, 90, 0.1)",
+          color: "var(--k-danger)",
+          border: "1px solid rgba(255, 90, 90, 0.3)",
         }}
       >
         <LogOutIcon />
@@ -61,8 +61,8 @@ export function SignOutButton({
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-[var(--card-2)] disabled:opacity-50 ${className ?? ""}`}
-      style={{ color: "var(--text-2)" }}
+      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-[var(--k-elevated)] disabled:opacity-50 ${className ?? ""}`}
+      style={{ color: "var(--k-t2)" }}
     >
       <LogOutIcon />
       <span>{isPending ? "Cerrando sesión…" : "Cerrar sesión"}</span>

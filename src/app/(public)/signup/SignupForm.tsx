@@ -72,24 +72,24 @@ export default function SignupForm() {
       <div className="space-y-4 text-center">
         <div
           className="inline-flex items-center justify-center w-12 h-12 rounded-full"
-          style={{ background: "var(--grad-soft)" }}
+          style={{ background: "var(--k-accent-soft)" }}
         >
           <span
             className="font-display font-bold text-xl"
-            style={{ color: "var(--moss)" }}
+            style={{ color: "var(--k-accent)" }}
           >
             ✓
           </span>
         </div>
         <h2 className="font-display font-bold text-xl">¡Tu box está creado!</h2>
-        <p className="text-sm" style={{ color: "var(--text-2)" }}>
+        <p className="text-sm" style={{ color: "var(--k-t2)" }}>
           Te enviamos un enlace mágico a{" "}
-          <strong style={{ color: "var(--text)" }}>{success.email}</strong> para
+          <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong> para
           activar tu cuenta.
         </p>
         <div
           className="text-xs px-3 py-2 rounded-lg"
-          style={{ background: "var(--card-2)", color: "var(--text-3)" }}
+          style={{ background: "var(--k-elevated)", color: "var(--k-t3)" }}
         >
           Slug: <strong>{success.slug}</strong> · Trial hasta{" "}
           {success.trialEndsAt.toLocaleDateString("es-MX", {
@@ -99,7 +99,7 @@ export default function SignupForm() {
           })}
         </div>
         {DEV_LOGIN_ENABLED ? (
-          <p className="text-xs" style={{ color: "var(--text-3)" }}>
+          <p className="text-xs" style={{ color: "var(--k-t3)" }}>
             (Dev: si no llega email, podés entrar con tu email + password{" "}
             <code>dev</code> en{" "}
             <a href="/login?dev=1" className="underline">
@@ -149,7 +149,7 @@ export default function SignupForm() {
       <div className="flex flex-col gap-1">
         <label
           className="text-xs font-mono uppercase tracking-wider"
-          style={{ color: "var(--text-3)" }}
+          style={{ color: "var(--k-t3)" }}
         >
           Slug (URL única)
         </label>
@@ -160,17 +160,19 @@ export default function SignupForm() {
             onChange={(e) => onSlugChange(e.target.value)}
             placeholder="iron-hands"
             required
-            className="flex-1 px-4 py-3 rounded-xl text-sm border focus:outline-none focus:border-moss/50 transition-colors"
+            className="flex-1 px-4 py-3 rounded-xl text-sm border focus:outline-none transition-colors"
             style={{
-              background: "var(--card)",
-              borderColor: errors.slug ? "var(--red)" : "var(--line-strong)",
-              color: "var(--text)",
+              background: "var(--k-surface)",
+              borderColor: errors.slug ? "var(--k-danger)" : "var(--k-line-2)",
+              color: "var(--k-t1)",
             }}
           />
         </div>
         <p
           className="text-[11px] mt-0.5"
-          style={{ color: errors.slug ? "var(--red)" : "var(--text-3)" }}
+          style={{
+            color: errors.slug ? "var(--k-danger)" : "var(--k-t3)",
+          }}
         >
           {errors.slug ?? "Solo minúsculas, números y guiones. Editable."}
         </p>
@@ -186,7 +188,7 @@ export default function SignupForm() {
 
       <p
         className="text-center text-[11px] mt-1"
-        style={{ color: "var(--text-3)" }}
+        style={{ color: "var(--k-t3)" }}
       >
         Sin tarjeta de crédito. Cancelás cuando quieras.
       </p>
@@ -222,7 +224,7 @@ function Field({
       <label
         htmlFor={name}
         className="text-xs font-mono uppercase tracking-wider"
-        style={{ color: "var(--text-3)" }}
+        style={{ color: "var(--k-t3)" }}
       >
         {label}
       </label>
@@ -235,15 +237,15 @@ function Field({
         placeholder={placeholder}
         autoComplete={autoComplete}
         required={required}
-        className="w-full px-4 py-3 rounded-xl text-sm border focus:outline-none focus:border-moss/50 transition-colors"
+        className="w-full px-4 py-3 rounded-xl text-sm border focus:outline-none transition-colors"
         style={{
-          background: "var(--card)",
-          borderColor: error ? "var(--red)" : "var(--line-strong)",
-          color: "var(--text)",
+          background: "var(--k-surface)",
+          borderColor: error ? "var(--k-danger)" : "var(--k-line-2)",
+          color: "var(--k-t1)",
         }}
       />
       {error ? (
-        <p className="text-[11px] mt-0.5" style={{ color: "var(--red)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "var(--k-danger)" }}>
           {error}
         </p>
       ) : null}

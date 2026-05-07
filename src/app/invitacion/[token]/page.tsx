@@ -20,7 +20,7 @@ export default async function InvitationPage({
         <h1 className="font-display text-2xl font-bold mb-3">
           Invitación no encontrada
         </h1>
-        <p className="text-[var(--text-2)] mb-6">
+        <p className="text-[var(--k-t2)] mb-6">
           Este link no coincide con ninguna invitación. Pedile a tu Box que te
           envíe uno nuevo.
         </p>
@@ -36,11 +36,13 @@ export default async function InvitationPage({
     if (check.reason === "ACCEPTED") {
       return (
         <Layout boxName={inv.box.name} brandColor={inv.box.brandColor ?? null}>
-          <p className="font-bold text-[var(--moss)] text-lg mb-2">✓ ¡Listo!</p>
+          <p className="font-bold text-[var(--k-accent)] text-lg mb-2">
+            ✓ ¡Listo!
+          </p>
           <h1 className="font-display text-2xl font-bold mb-3">
             Tu cuenta ya está creada
           </h1>
-          <p className="text-[var(--text-2)] mb-6">
+          <p className="text-[var(--k-t2)] mb-6">
             Iniciá sesión con tu email <strong>{inv.email}</strong> para entrar
             a la app.
           </p>
@@ -64,7 +66,7 @@ export default async function InvitationPage({
             ? "Invitación expirada"
             : "Invitación revocada"}
         </h1>
-        <p className="text-[var(--text-2)] mb-6">{message}</p>
+        <p className="text-[var(--k-t2)] mb-6">{message}</p>
         <Link href="/login" className="k-btn-ghost">
           Ir al login
         </Link>
@@ -74,12 +76,12 @@ export default async function InvitationPage({
 
   return (
     <Layout boxName={inv.box.name} brandColor={inv.box.brandColor ?? null}>
-      <p className="k-eyebrow text-[var(--text-3)] mb-1">Invitación</p>
+      <p className="k-eyebrow text-[var(--k-t3)] mb-1">Invitación</p>
       <h1 className="font-display text-3xl font-bold mb-2">
         Te invitaron a{" "}
-        <span style={{ color: "var(--strain)" }}>{inv.box.name}</span>
+        <span style={{ color: "var(--k-accent)" }}>{inv.box.name}</span>
       </h1>
-      <p className="text-[var(--text-2)] mb-6">
+      <p className="text-[var(--k-t2)] mb-6">
         Confirmá tus datos para entrar a la app del atleta.
       </p>
 
@@ -104,20 +106,23 @@ function Layout({
   brandColor?: string | null;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--bg)]">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--k-bg)]">
       <div className="w-full max-w-md">
         {boxName && (
           <p
             className="k-eyebrow text-center mb-6"
-            style={{ color: brandColor ?? "var(--text-3)" }}
+            style={{ color: brandColor ?? "var(--k-t3)" }}
           >
             {boxName}
           </p>
         )}
         <div className="k-card p-6">{children}</div>
-        <p className="mt-4 text-xs text-center text-[var(--text-3)]">
+        <p className="mt-4 text-xs text-center text-[var(--k-t3)]">
           ¿Ya tenés cuenta?{" "}
-          <Link href="/login" className="text-[var(--strain)] hover:underline">
+          <Link
+            href="/login"
+            className="text-[var(--k-accent)] hover:underline"
+          >
             Iniciar sesión
           </Link>
         </p>

@@ -18,20 +18,23 @@ export default async function LoginPage() {
   if (session) redirect("/admin");
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-bg p-4">
+    <main
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: "var(--k-bg)" }}
+    >
       <div className="w-full max-w-sm">
         {/* Wordmark */}
         <div className="text-center mb-8">
           <div
             className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-4 border"
             style={{
-              background: "var(--card)",
-              borderColor: "var(--line-strong)",
+              background: "var(--k-surface)",
+              borderColor: "var(--k-line-2)",
             }}
           >
             <span
               className="font-display font-bold text-2xl"
-              style={{ color: "var(--fire)" }}
+              style={{ color: "var(--k-accent)" }}
             >
               K
             </span>
@@ -50,13 +53,13 @@ export default async function LoginPage() {
 
         <p
           className="text-center text-xs mt-6"
-          style={{ color: "var(--text-3)" }}
+          style={{ color: "var(--k-t3)" }}
         >
           ¿Aún no tenés box?{" "}
           <Link
             href="/signup"
             className="underline"
-            style={{ color: "var(--text-2)" }}
+            style={{ color: "var(--k-t2)" }}
           >
             Empezá tu trial de 14 días
           </Link>
