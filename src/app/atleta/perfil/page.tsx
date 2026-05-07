@@ -282,7 +282,7 @@ export default async function PerfilPage() {
             label="ASISTENCIAS"
             value={String(home.weekAttendance)}
             detail="ESTA SEMANA"
-            color="var(--recovery)"
+            color="var(--k-accent)"
             size="lg"
           />
         </AnimatedItem>
@@ -291,7 +291,7 @@ export default async function PerfilPage() {
             label="PRs"
             value={String(home.prCount)}
             detail="TOTALES"
-            color="var(--pr)"
+            color="var(--k-accent)"
             size="lg"
           />
         </AnimatedItem>
@@ -300,7 +300,7 @@ export default async function PerfilPage() {
             label="RACHA"
             value={String(home.streak)}
             detail="DÍAS"
-            color="var(--strain)"
+            color="var(--k-t1)"
             size="sm"
           />
         </AnimatedItem>
@@ -309,7 +309,7 @@ export default async function PerfilPage() {
             label="SCORES"
             value={String(scores.length)}
             detail="REGISTRADOS"
-            color="var(--text-2)"
+            color="var(--k-t2)"
             size="sm"
           />
         </AnimatedItem>
@@ -399,8 +399,16 @@ export default async function PerfilPage() {
           <div className="px-3.5 grid grid-cols-1 gap-2.5">
             {activeGoals.slice(0, 3).map((g) => (
               <AnimatedItem key={g.id}>
-                <div className="k-card-brand relative">
-                  <span className="k-corner-tr" aria-hidden />
+                <div
+                  style={{
+                    position: "relative",
+                    padding: 14,
+                    background: "var(--k-surface)",
+                    border: "1px solid var(--k-accent-line)",
+                    borderRadius: 16,
+                    boxShadow: "0 0 14px rgba(200, 255, 45, 0.10)",
+                  }}
+                >
                   <div className="relative flex items-center gap-3">
                     <div className="flex-1 min-w-0">
                       <div
@@ -439,12 +447,22 @@ export default async function PerfilPage() {
                         </span>
                         <span
                           aria-hidden
-                          className="h-1 w-1 rounded-full"
-                          style={{ background: "var(--text-3)" }}
+                          style={{
+                            width: 4,
+                            height: 4,
+                            borderRadius: 999,
+                            background: "var(--k-t3)",
+                            display: "inline-block",
+                          }}
                         />
                         <span
-                          className="font-mono text-[10px] tracking-[0.08em] font-bold"
-                          style={{ color: "var(--text-2)" }}
+                          style={{
+                            fontFamily: "var(--k-font-display)",
+                            fontSize: 10,
+                            fontWeight: 700,
+                            letterSpacing: "0.12em",
+                            color: "var(--k-t2)",
+                          }}
                         >
                           {Math.round(g.progress.pct)}%
                         </span>
@@ -452,12 +470,21 @@ export default async function PerfilPage() {
                     </div>
                     <Link
                       href={`/atleta/plan?goalId=${g.id}` as Route}
-                      className="k-btn-brand"
                       style={{
-                        padding: "10px 18px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        padding: "10px 16px",
+                        background: "var(--k-accent)",
+                        color: "var(--k-accent-on)",
+                        fontFamily: "var(--k-font-display)",
                         fontSize: 11,
+                        fontWeight: 700,
                         letterSpacing: "0.16em",
                         textTransform: "uppercase",
+                        textDecoration: "none",
+                        borderRadius: 10,
+                        boxShadow: "var(--k-accent-glow)",
                       }}
                     >
                       <svg
