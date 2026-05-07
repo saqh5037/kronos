@@ -21,6 +21,9 @@ import RevealOnScroll from "@/components/kronos/RevealOnScroll";
 import Eyebrow from "@/components/kronos/Eyebrow";
 import { DashboardFilters } from "./_components/DashboardFilters";
 import { RevenueArea, AttendanceArea } from "./_components/DashboardCharts";
+import { AtRiskCard } from "./_components/AtRiskCard";
+import { UpcomingBillingCard } from "./_components/UpcomingBillingCard";
+import { getOwnerDashboardSnapshot } from "@/server/actions/owner-dashboard";
 
 export const metadata = { title: "Kronos — Dashboard" };
 
@@ -121,12 +124,19 @@ export default async function AdminDashboardPage({
 
   const session = await getServerSession(authOptions);
   let showOnboardingBanner = false;
+  let ownerSnapshot: Awaited<
+    ReturnType<typeof getOwnerDashboardSnapshot>
+  > | null = null;
   if (session?.user?.role === "OWNER" && session.user.tenantId) {
-    const flag = await prismaBase.box.findUnique({
-      where: { id: session.user.tenantId },
-      select: { onboardingCompletedAt: true },
-    });
+    const [flag, snapshot] = await Promise.all([
+      prismaBase.box.findUnique({
+        where: { id: session.user.tenantId },
+        select: { onboardingCompletedAt: true },
+      }),
+      getOwnerDashboardSnapshot(),
+    ]);
     showOnboardingBanner = !flag?.onboardingCompletedAt;
+    ownerSnapshot = snapshot;
   }
 
   return (
@@ -218,6 +228,16 @@ export default async function AdminDashboardPage({
           />
         </RevealOnScroll>
       </div>
+
+      {/* Owner-focused cards: at-risk + upcoming billing */}
+      {ownerSnapshot && (
+        <RevealOnScroll variant="fade-up">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <AtRiskCard rows={ownerSnapshot.athletesAtRisk} />
+            <UpcomingBillingCard nextBilling={ownerSnapshot.nextBilling} />
+          </div>
+        </RevealOnScroll>
+      )}
 
       {/* Charts */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
