@@ -1,32 +1,17 @@
-import Link from "next/link";
-import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { getServerSession, type Session } from "next-auth";
 import { authOptions } from "@/server/auth";
-import { db as prismaBase } from "@/server/db";
 import { getDashboardData } from "@/server/actions/dashboard";
 import { getBox } from "@/server/actions/box";
-import OnboardingBanner from "@/components/admin/OnboardingBanner";
 import { getRevenueByDay } from "@/server/actions/payments";
-import {
-  getAttendanceByDay,
-  type AttendanceByDayPoint,
-} from "@/server/actions/attendance";
-import type { RevenueByDayPoint } from "@/server/actions/payments";
-import { rangeFromParams, previousRange, formatRange } from "@/lib/dates";
-import { MetricDelta } from "@/components/charts/MetricDelta";
-import Sparkline from "@/components/kronos/Sparkline";
-import CountUp from "@/components/kronos/CountUp";
-
-import KCard from "@/components/kronos/KCard";
-import RevealOnScroll from "@/components/kronos/RevealOnScroll";
-import Eyebrow from "@/components/kronos/Eyebrow";
-import { DashboardFilters } from "./_components/DashboardFilters";
-import { RevenueArea, AttendanceArea } from "./_components/DashboardCharts";
-import { AtRiskCard } from "./_components/AtRiskCard";
-import { UpcomingBillingCard } from "./_components/UpcomingBillingCard";
-import { CoachClassesTodayCard } from "./_components/CoachClassesTodayCard";
-import { CoachAttendanceTodayCard } from "./_components/CoachAttendanceTodayCard";
+import { getAttendanceByDay } from "@/server/actions/attendance";
+import { rangeFromParams, previousRange } from "@/lib/dates";
 import { getOwnerDashboardSnapshot } from "@/server/actions/owner-dashboard";
-import { getCoachDashboardSnapshot } from "@/server/actions/coach-dashboard";
+import AdminDashboardV3, {
+  type AdminDashboardV3Props,
+  type ClassRowData,
+  type AlertRowData,
+} from "@/components/kronos/v3/AdminDashboardV3";
 
 export const metadata = { title: "Kronos — Dashboard" };
 
@@ -36,11 +21,56 @@ type SearchParams = {
   to?: string;
 };
 
+const RANGE_LABELS: Record<string, string> = {
+  today: "HOY",
+  yesterday: "AYER",
+  last7: "ÚLTIMOS 7 DÍAS",
+  last30: "ÚLTIMOS 30 DÍAS",
+  last90: "ÚLTIMOS 90 DÍAS",
+  thisMonth: "ESTE MES",
+  lastMonth: "MES PASADO",
+  thisYear: "ESTE AÑO",
+  custom: "RANGO CUSTOM",
+};
+
+function fmtMoney(box: { locale: string; currency: string }) {
+  return new Intl.NumberFormat(box.locale, {
+    style: "currency",
+    currency: box.currency,
+    maximumFractionDigits: 0,
+  });
+}
+
+function pct(part: number, whole: number): number {
+  if (whole === 0) return 0;
+  return Math.round((part / whole) * 100);
+}
+
+function deltaPctLabel(current: number, previous: number): string | undefined {
+  if (previous === 0) {
+    if (current === 0) return undefined;
+    return "+100%";
+  }
+  const diff = ((current - previous) / previous) * 100;
+  const sign = diff >= 0 ? "+" : "";
+  return `${sign}${diff.toFixed(1)}%`;
+}
+
 export default async function AdminDashboardPage({
   searchParams,
 }: {
   searchParams?: Promise<SearchParams>;
 }) {
+  let session: Session | null = null;
+  try {
+    session = await getServerSession(authOptions);
+  } catch {
+    // cookie corrupta — forzar re-login
+  }
+  if (!session?.user?.tenantId) {
+    redirect("/login?callbackUrl=/admin");
+  }
+
   const sp = (await searchParams) ?? {};
   const range = rangeFromParams({
     preset: sp.preset ?? "last30",
@@ -51,51 +81,82 @@ export default async function AdminDashboardPage({
 
   let data: Awaited<ReturnType<typeof getDashboardData>> | null = null;
   let box: Awaited<ReturnType<typeof getBox>> | null = null;
-  let revenuePoints: RevenueByDayPoint[] = [];
-  let revenuePrev: RevenueByDayPoint[] = [];
-  let attendancePoints: AttendanceByDayPoint[] = [];
-  let attendancePrev: AttendanceByDayPoint[] = [];
+  let revenuePoints: Awaited<ReturnType<typeof getRevenueByDay>> = [];
+  let attendancePoints: Awaited<ReturnType<typeof getAttendanceByDay>> = [];
+  let revenuePrev: Awaited<ReturnType<typeof getRevenueByDay>> = [];
+  let attendancePrev: Awaited<ReturnType<typeof getAttendanceByDay>> = [];
+  let snapshot: Awaited<ReturnType<typeof getOwnerDashboardSnapshot>> = null;
 
   try {
-    [data, box, revenuePoints, revenuePrev, attendancePoints, attendancePrev] =
-      await Promise.all([
-        getDashboardData(),
-        getBox(),
-        getRevenueByDay({ dateFrom: range.from, dateTo: range.to }),
-        getRevenueByDay({ dateFrom: prev.from, dateTo: prev.to }),
-        getAttendanceByDay({ dateFrom: range.from, dateTo: range.to }),
-        getAttendanceByDay({ dateFrom: prev.from, dateTo: prev.to }),
-      ]);
+    [
+      data,
+      box,
+      revenuePoints,
+      revenuePrev,
+      attendancePoints,
+      attendancePrev,
+      snapshot,
+    ] = await Promise.all([
+      getDashboardData(),
+      getBox(),
+      getRevenueByDay({ dateFrom: range.from, dateTo: range.to }),
+      getRevenueByDay({ dateFrom: prev.from, dateTo: prev.to }),
+      getAttendanceByDay({ dateFrom: range.from, dateTo: range.to }),
+      getAttendanceByDay({ dateFrom: prev.from, dateTo: prev.to }),
+      getOwnerDashboardSnapshot(),
+    ]);
   } catch {
     // BD/sesión ausente — fallback en render
   }
 
   if (!data || !box) {
     return (
-      <div className="p-8">
-        <Eyebrow>Dashboard</Eyebrow>
-        <h1 className="font-display text-3xl font-bold tracking-tight mt-2">
-          Panel de control
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "var(--k-bg)",
+          color: "var(--k-t1)",
+          padding: 48,
+          fontFamily: "var(--k-font-body)",
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 11,
+            letterSpacing: "0.2em",
+            color: "var(--k-t3)",
+            marginBottom: 12,
+          }}
+        >
+          DASHBOARD
+        </p>
+        <h1
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 32,
+            fontWeight: 700,
+            letterSpacing: "-0.04em",
+            margin: 0,
+          }}
+        >
+          Sin datos
         </h1>
-        <p className="mt-4 text-sm" style={{ color: "var(--text-2)" }}>
-          No se pudo cargar el dashboard. Verifica conexión con la BD.
+        <p style={{ marginTop: 12, color: "var(--k-t2)", fontSize: 14 }}>
+          No se pudo cargar el dashboard. Verificá conexión con la BD.
         </p>
       </div>
     );
   }
 
-  const fmtMoney = new Intl.NumberFormat(box.locale, {
-    style: "currency",
-    currency: box.currency,
-    maximumFractionDigits: 0,
-  });
-  const fmtDate = new Intl.DateTimeFormat(box.locale, {
-    weekday: "short",
+  const money = fmtMoney(box);
+  const dateLabel = new Intl.DateTimeFormat(box.locale, {
+    weekday: "long",
     day: "numeric",
-    month: "short",
+    month: "long",
     timeZone: box.timezone,
-  });
-  const fmtTime = new Intl.DateTimeFormat(box.locale, {
+  }).format(new Date());
+  const timeFmt = new Intl.DateTimeFormat(box.locale, {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: box.timezone,
@@ -106,517 +167,158 @@ export default async function AdminDashboardPage({
   const rangeRevenuePrev = revenuePrev.reduce((s, p) => s + p.revenue, 0);
   const rangeAttended = attendancePoints.reduce((s, p) => s + p.attended, 0);
   const rangeAttendedPrev = attendancePrev.reduce((s, p) => s + p.attended, 0);
-  const rangeNoShow = attendancePoints.reduce((s, p) => s + p.noShow, 0);
-  const rangeCompleted = rangeAttended + rangeNoShow;
-  const rangeAttendanceRate =
-    rangeCompleted === 0 ? 0 : rangeAttended / rangeCompleted;
-  const prevCompleted =
-    attendancePrev.reduce((s, p) => s + p.attended, 0) +
-    attendancePrev.reduce((s, p) => s + p.noShow, 0);
-  const prevAttendanceRate =
-    prevCompleted === 0
-      ? 0
-      : attendancePrev.reduce((s, p) => s + p.attended, 0) / prevCompleted;
+  const revenueDelta = deltaPctLabel(rangeRevenue, rangeRevenuePrev);
+  const attendanceDelta = deltaPctLabel(rangeAttended, rangeAttendedPrev);
 
-  const last14 = revenuePoints.slice(-14);
-  const last14Attended = attendancePoints.slice(-14);
+  // MRR — uso revenue de los últimos 30 días como proxy si no hay snapshot
+  const mrrCents =
+    (snapshot?.monthlyRevenueCents ?? 0) > 0
+      ? snapshot!.monthlyRevenueCents
+      : Math.round(rangeRevenue * 100);
+  const mrrPrev = Math.round(rangeRevenuePrev * 100);
+  const mrrDeltaAbs =
+    mrrCents > 0 && mrrPrev > 0
+      ? `${money.format((mrrCents - mrrPrev) / 100)} vs período anterior`
+      : undefined;
 
-  const expiringCount = data.expiringMemberships.length;
-  const waitlistCount = data.waitlistedClassesToday;
-  const allClear = expiringCount === 0 && waitlistCount === 0;
+  const session_ = session;
 
-  const session = await getServerSession(authOptions);
-  const role = session?.user?.role;
-  const isOwner = role === "OWNER";
-  const isCoachOrStaff = role === "COACH" || role === "STAFF";
+  // Owner info
+  const ownerName = session_.user?.name ?? "Owner";
+  const ownerInitial = ownerName.trim().charAt(0).toUpperCase() || "O";
+  const ownerFirstName = ownerName.split(" ")[0] || ownerName;
+  const greeting = `Buenos días, ${ownerFirstName}`;
 
-  let showOnboardingBanner = false;
-  let ownerSnapshot: Awaited<
-    ReturnType<typeof getOwnerDashboardSnapshot>
-  > | null = null;
-  let coachSnapshot: Awaited<
-    ReturnType<typeof getCoachDashboardSnapshot>
-  > | null = null;
-
-  if (isOwner && session?.user?.tenantId) {
-    const [flag, snapshot] = await Promise.all([
-      prismaBase.box.findUnique({
-        where: { id: session.user.tenantId },
-        select: { onboardingCompletedAt: true },
-      }),
-      getOwnerDashboardSnapshot(),
-    ]);
-    showOnboardingBanner = !flag?.onboardingCompletedAt;
-    ownerSnapshot = snapshot;
-  } else if (isCoachOrStaff) {
-    coachSnapshot = await getCoachDashboardSnapshot();
+  // Alerts
+  const alerts: AlertRowData[] = [];
+  if (data.expiringMemberships.length > 0) {
+    alerts.push({
+      severity: "warning",
+      text: `${data.expiringMemberships.length} membresía${
+        data.expiringMemberships.length === 1 ? "" : "s"
+      } por vencer en los próximos 7 días`,
+      cta: "Revisar pagos",
+      href: "/admin/pagos",
+    });
+  }
+  if (data.waitlistedClassesToday > 0) {
+    alerts.push({
+      severity: "warning",
+      text: `${data.waitlistedClassesToday} clase${
+        data.waitlistedClassesToday === 1 ? "" : "s"
+      } con waitlist hoy · revisá promociones`,
+      cta: "Ver reservas",
+      href: "/admin/reservas",
+    });
+  }
+  if (snapshot && snapshot.athletesAtRisk.length > 0) {
+    alerts.push({
+      severity: "warning",
+      text: `${snapshot.athletesAtRisk.length} atleta${
+        snapshot.athletesAtRisk.length === 1 ? "" : "s"
+      } sin asistir hace 14+ días`,
+      cta: "Ver atletas",
+      href: "/admin/atletas?at_risk=1",
+    });
   }
 
-  // Coach/Staff dashboard: layout limitado sin billing/revenue
-  if (isCoachOrStaff && coachSnapshot) {
-    return (
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 lg:p-8">
-        <RevealOnScroll variant="fade-up">
-          <Eyebrow>Hoy</Eyebrow>
-          <h1 className="font-display text-3xl lg:text-4xl font-bold tracking-tight mt-1">
-            {box.name}
-          </h1>
-          <p
-            className="mt-1 text-sm font-mono tracking-wide"
-            style={{ color: "var(--text-3)" }}
-          >
-            {fmtDate.format(new Date())}
-          </p>
-        </RevealOnScroll>
+  // Next classes (table)
+  const nextClasses: ClassRowData[] = data.nextClasses.map((c) => ({
+    hora: timeFmt.format(c.startsAt),
+    clase: c.wod?.name ?? "Open Box",
+    coach: c.coach?.name ?? "—",
+    taken: c.bookedCount,
+    capacity: c.capacity,
+    waitlist: c.waitlistCount,
+    action:
+      c.bookedCount === c.capacity && c.waitlistCount > 0
+        ? "Promover"
+        : "Roster",
+  }));
 
-        <RevealOnScroll variant="fade-up">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <CoachClassesTodayCard classes={coachSnapshot.classesToday} />
-            <CoachAttendanceTodayCard
-              totals={coachSnapshot.attendanceTodayTotal}
-            />
-          </div>
-        </RevealOnScroll>
+  // Box initials (2 chars)
+  const boxInitials =
+    box.name
+      .split(/\s+/)
+      .map((w) => w.charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "BX";
 
-        <RevealOnScroll variant="fade-up">
-          <AtRiskCard rows={coachSnapshot.athletesAtRisk} />
-        </RevealOnScroll>
-      </div>
-    );
-  }
+  const props: AdminDashboardV3Props = {
+    boxName: box.name,
+    boxLocation: undefined,
+    boxInitials,
+    ownerName,
+    ownerInitial,
+    ownerRole: `${session_.user?.role ?? "OWNER"} · ${box.name.toUpperCase()}`,
+    rangeLabel: RANGE_LABELS[range.preset ?? "last30"] ?? "RANGO CUSTOM",
+    greeting,
+    dateLabel,
 
-  return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 lg:p-8">
-      <OnboardingBanner show={showOnboardingBanner} />
-      {/* Header */}
-      <RevealOnScroll variant="fade-up">
-        <Eyebrow>Hoy</Eyebrow>
-        <h1 className="font-display text-3xl lg:text-4xl font-bold tracking-tight mt-1">
-          {box.name}
-        </h1>
-        <p
-          className="mt-1 text-sm font-mono tracking-wide"
-          style={{ color: "var(--text-3)" }}
-        >
-          {fmtDate.format(new Date())} · {formatRange(range)}
-        </p>
-      </RevealOnScroll>
+    mrr: money.format(mrrCents / 100),
+    mrrDelta: revenueDelta,
+    mrrDeltaAbs,
+    mrrSpark: revenuePoints.map((p) => p.revenue),
 
-      <DashboardFilters />
+    activeAthletes: String(
+      data.todayStats.totalBooked > 0
+        ? Math.max(data.todayStats.totalBooked, 1)
+        : 0,
+    ),
+    arpu:
+      mrrCents > 0 && data.todayStats.totalBooked > 0
+        ? money.format(
+            mrrCents / 100 / Math.max(1, data.todayStats.totalBooked),
+          )
+        : "—",
+    churn30d: "—",
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <RevealOnScroll variant="fade-up" delay={0}>
-          <KpiWithSpark
-            label="Ingresos rango"
-            value={fmtMoney.format(rangeRevenue)}
-            numericValue={rangeRevenue}
-            countMoney
-            tone="moss"
-            delta={
-              <MetricDelta
-                current={rangeRevenue}
-                previous={rangeRevenuePrev}
-                goodWhen="higher"
-                formatter={(v) => fmtMoney.format(v)}
-              />
-            }
-            sparkValues={last14.map((p) => p.revenue)}
-            sparkColor="var(--moss)"
-          />
-        </RevealOnScroll>
-        <RevealOnScroll variant="fade-up" delay={80}>
-          <KpiWithSpark
-            label="Asistencias rango"
-            value={String(rangeAttended)}
-            numericValue={rangeAttended}
-            tone="steel"
-            delta={
-              <MetricDelta
-                current={rangeAttended}
-                previous={rangeAttendedPrev}
-                goodWhen="higher"
-                formatter={(v) => v.toFixed(0)}
-              />
-            }
-            sparkValues={last14Attended.map((p) => p.attended)}
-            sparkColor="var(--steel)"
-          />
-        </RevealOnScroll>
-        <RevealOnScroll variant="fade-up" delay={160}>
-          <KpiWithSpark
-            label="Tasa asistencia"
-            value={`${Math.round(rangeAttendanceRate * 100)}%`}
-            numericValue={Math.round(rangeAttendanceRate * 100)}
-            countSuffix="%"
-            tone={
-              rangeAttendanceRate >= 0.85
-                ? "moss"
-                : rangeAttendanceRate >= 0.65
-                  ? "steel"
-                  : "ember"
-            }
-            delta={
-              <MetricDelta
-                current={rangeAttendanceRate}
-                previous={prevAttendanceRate}
-                goodWhen="higher"
-                formatter={(v) => `${(v * 100).toFixed(1)}%`}
-              />
-            }
-          />
-        </RevealOnScroll>
-        <RevealOnScroll variant="fade-up" delay={240}>
-          <KpiWithSpark
-            label="Hoy"
-            value={`${data.todayStats.totalClasses} clases`}
-            subtitle={`${data.todayStats.totalAttended}/${data.todayStats.totalBooked} asistidos · ${fmtMoney.format(data.todayRevenue)}`}
-          />
-        </RevealOnScroll>
-      </div>
+    attendanceToday: {
+      taken: data.todayStats.totalAttended,
+      capacity: Math.max(
+        data.todayStats.totalBooked,
+        data.todayStats.totalAttended,
+        1,
+      ),
+      pct: pct(
+        data.todayStats.totalAttended,
+        Math.max(data.todayStats.totalBooked, 1),
+      ),
+    },
+    classesProgrammed: data.todayStats.totalClasses,
+    classesWithWaitlist: data.waitlistedClassesToday,
 
-      {/* Owner-focused cards: at-risk + upcoming billing */}
-      {ownerSnapshot && (
-        <RevealOnScroll variant="fade-up">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <AtRiskCard rows={ownerSnapshot.athletesAtRisk} />
-            <UpcomingBillingCard nextBilling={ownerSnapshot.nextBilling} />
-          </div>
-        </RevealOnScroll>
-      )}
+    newAthletes30d: 0,
+    newAthletesDelta: undefined,
+    newAthletesBreakdown: undefined,
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <RevealOnScroll variant="fade-up" delay={0}>
-          <KCard>
-            <div className="p-5">
-              <Eyebrow withBar={false} color="text">
-                Ingresos · {formatRange(range)}
-              </Eyebrow>
-              {revenuePoints.some((p) => p.revenue > 0) ? (
-                <RevenueArea data={revenuePoints} />
-              ) : (
-                <p
-                  className="py-10 text-center text-sm"
-                  style={{ color: "var(--text-3)" }}
-                >
-                  Sin pagos en el rango
-                </p>
-              )}
-            </div>
-          </KCard>
-        </RevealOnScroll>
-        <RevealOnScroll variant="fade-up" delay={100}>
-          <KCard>
-            <div className="p-5">
-              <Eyebrow withBar={false} color="text">
-                Asistencias · {formatRange(range)}
-              </Eyebrow>
-              {attendancePoints.some((p) => p.attended > 0) ? (
-                <AttendanceArea data={attendancePoints} />
-              ) : (
-                <p
-                  className="py-10 text-center text-sm"
-                  style={{ color: "var(--text-3)" }}
-                >
-                  Sin actividad en el rango
-                </p>
-              )}
-            </div>
-          </KCard>
-        </RevealOnScroll>
-      </div>
+    atRiskCount: snapshot?.athletesAtRisk.length ?? 0,
+    atRiskTotal: snapshot?.athletesAtRisk.length
+      ? Math.max(snapshot.athletesAtRisk.length, data.todayStats.totalBooked)
+      : 0,
+    atRiskNote:
+      snapshot && snapshot.athletesAtRisk.length > 0
+        ? "Sin asistir hace 14+ días"
+        : undefined,
 
-      {/* Próximas clases + Alerts */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <RevealOnScroll variant="fade-up" delay={0}>
-          <KCard>
-            <div className="p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <Eyebrow>Próximas clases</Eyebrow>
-                <Link
-                  href="/admin/programacion"
-                  className="text-xs font-medium transition-opacity hover:opacity-80"
-                  style={{ color: "var(--steel)" }}
-                >
-                  Ver todas →
-                </Link>
-              </div>
-              {data.nextClasses.length === 0 ? (
-                <p className="text-sm" style={{ color: "var(--text-3)" }}>
-                  No hay clases en las próximas 48 horas.
-                </p>
-              ) : (
-                <ul className="flex flex-col gap-2 k-stagger">
-                  {data.nextClasses.map((c) => {
-                    const occupied = c.bookedCount;
-                    const capacity = c.capacity;
-                    const isFull = occupied >= capacity;
-                    const hasWaitlist = c.waitlistCount > 0;
-                    const fillRatio = occupied / capacity;
-                    const barColor = isFull
-                      ? "var(--ember)"
-                      : fillRatio >= 0.7
-                        ? "var(--steel)"
-                        : "var(--moss)";
+    revenueChart: {
+      data: revenuePoints.map((p) => p.revenue),
+      total: money.format(rangeRevenue),
+      delta: revenueDelta,
+    },
+    attendanceChart: {
+      data: attendancePoints.map((p) => p.attended),
+      total: String(rangeAttended),
+      delta: attendanceDelta,
+    },
 
-                    return (
-                      <li
-                        key={c.id}
-                        className="k-card flex items-center justify-between p-3"
-                      >
-                        <div className="mr-3 flex min-w-0 flex-1 flex-col gap-0.5">
-                          <p className="text-sm font-semibold">
-                            {fmtTime.format(c.startsAt)} ·{" "}
-                            {c.wod?.name ?? "Sin WOD"}
-                          </p>
-                          <p
-                            className="truncate text-xs"
-                            style={{ color: "var(--text-3)" }}
-                          >
-                            {c.coach?.name ?? "Sin coach"}
-                          </p>
-                          <div className="mt-1.5 flex items-center gap-2">
-                            <div
-                              className="h-1.5 flex-1 overflow-hidden rounded-full"
-                              style={{ background: "var(--btn-ghost-bg)" }}
-                            >
-                              <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{
-                                  width: `${Math.min(100, fillRatio * 100)}%`,
-                                  background: barColor,
-                                  boxShadow:
-                                    fillRatio > 0.6
-                                      ? `0 0 6px ${barColor}`
-                                      : "none",
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <span
-                          className={
-                            isFull
-                              ? "k-chip k-chip-pr"
-                              : hasWaitlist
-                                ? "k-chip k-chip-strain"
-                                : "k-chip k-chip-ghost"
-                          }
-                        >
-                          {occupied}/{capacity}
-                          {hasWaitlist ? ` · +${c.waitlistCount}` : ""}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          </KCard>
-        </RevealOnScroll>
+    nextClasses,
+    alerts,
+    classesTodayLabel: `${data.todayStats.totalClasses} clase${
+      data.todayStats.totalClasses === 1 ? "" : "s"
+    } programadas`,
+  };
 
-        <RevealOnScroll variant="fade-up" delay={100}>
-          <KCard>
-            <div className="p-5">
-              <Eyebrow>Alertas</Eyebrow>
-              {allClear ? (
-                <div
-                  className="rounded-2xl p-4 mt-4"
-                  style={{
-                    background: "var(--moss-soft)",
-                    border: "1px solid var(--moss-line)",
-                  }}
-                >
-                  <p
-                    className="flex items-center gap-2 text-sm font-bold"
-                    style={{ color: "var(--moss)" }}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    Todo en orden hoy
-                  </p>
-                  <p
-                    className="mt-1 text-xs"
-                    style={{ color: "var(--text-3)" }}
-                  >
-                    Sin membresías por vencer ni waitlists activas.
-                  </p>
-                </div>
-              ) : (
-                <ul className="flex flex-col gap-2 mt-4">
-                  {expiringCount > 0 && (
-                    <li>
-                      <Link
-                        href="/admin/pagos"
-                        className="k-card hover:border-ember/50 flex items-center justify-between p-3 transition-colors"
-                        style={{ borderColor: "var(--line)" }}
-                      >
-                        <div>
-                          <p className="text-sm font-semibold">
-                            {expiringCount} membresía
-                            {expiringCount === 1 ? "" : "s"} por vencer
-                          </p>
-                          <p
-                            className="mt-0.5 text-xs"
-                            style={{ color: "var(--text-3)" }}
-                          >
-                            Próximos 7 días
-                          </p>
-                        </div>
-                        <span className="k-chip k-chip-pr">
-                          {expiringCount}
-                        </span>
-                      </Link>
-                    </li>
-                  )}
-                  {waitlistCount > 0 && (
-                    <li>
-                      <Link
-                        href="/admin/reservas"
-                        className="k-card hover:border-steel/50 flex items-center justify-between p-3 transition-colors"
-                        style={{ borderColor: "var(--line)" }}
-                      >
-                        <div>
-                          <p className="text-sm font-semibold">
-                            {waitlistCount} clase
-                            {waitlistCount === 1 ? "" : "s"} con waitlist hoy
-                          </p>
-                          <p
-                            className="mt-0.5 text-xs"
-                            style={{ color: "var(--text-3)" }}
-                          >
-                            Revisa promociones disponibles
-                          </p>
-                        </div>
-                        <span className="k-chip k-chip-strain">
-                          {waitlistCount}
-                        </span>
-                      </Link>
-                    </li>
-                  )}
-                </ul>
-              )}
-            </div>
-          </KCard>
-        </RevealOnScroll>
-      </div>
-
-      {/* Quick links */}
-      <RevealOnScroll variant="fade-up">
-        <Eyebrow className="mb-3">Accesos rápidos</Eyebrow>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <QuickLink href="/admin/programacion" label="Crear clase" />
-          <QuickLink href="/admin/atletas" label="Atletas" />
-          <QuickLink href="/admin/pagos" label="Pagos" />
-          <QuickLink href="/admin/reportes" label="Reportes" />
-        </div>
-      </RevealOnScroll>
-    </div>
-  );
-}
-
-function KpiWithSpark({
-  label,
-  value,
-  numericValue,
-  countMoney,
-  countSuffix,
-  countDecimals,
-  subtitle,
-  tone,
-  delta,
-  sparkValues,
-  sparkColor,
-}: {
-  label: string;
-  value: string;
-  numericValue?: number;
-  countMoney?: boolean;
-  countSuffix?: string;
-  countDecimals?: number;
-  subtitle?: string;
-  tone?: "moss" | "steel" | "ember";
-  delta?: React.ReactNode;
-  sparkValues?: number[];
-  sparkColor?: string;
-}) {
-  const color =
-    tone === "moss"
-      ? "var(--moss)"
-      : tone === "steel"
-        ? "var(--steel)"
-        : tone === "ember"
-          ? "var(--ember)"
-          : "var(--text)";
-
-  return (
-    <div className="k-card p-4">
-      <div className="flex items-start justify-between gap-2">
-        <p
-          className="font-mono text-[10px] font-semibold tracking-[0.14em] uppercase"
-          style={{ color: "var(--text-3)" }}
-        >
-          {label}
-        </p>
-        {delta}
-      </div>
-      <p
-        className="font-display mt-1 text-2xl lg:text-[28px] font-bold"
-        style={{ color }}
-      >
-        {typeof numericValue === "number" ? (
-          <CountUp
-            value={numericValue}
-            money={countMoney}
-            suffix={countSuffix}
-            decimals={countDecimals}
-            duration={1000}
-          />
-        ) : (
-          value
-        )}
-      </p>
-      {subtitle ? (
-        <p className="mt-1 text-xs" style={{ color: "var(--text-3)" }}>
-          {subtitle}
-        </p>
-      ) : null}
-      {sparkValues && sparkValues.length >= 2 ? (
-        <div className="mt-2">
-          <Sparkline
-            values={sparkValues}
-            color={sparkColor ?? "var(--steel)"}
-            height={28}
-            width={140}
-          />
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-type LinkHref = React.ComponentProps<typeof Link>["href"];
-
-function QuickLink({ href, label }: { href: LinkHref; label: string }) {
-  return (
-    <Link href={href}>
-      <KCard
-        variant="ghost"
-        className="hover:border-moss/50 p-4 text-center transition-colors"
-      >
-        <p className="text-sm font-semibold">{label}</p>
-      </KCard>
-    </Link>
-  );
+  return <AdminDashboardV3 {...props} />;
 }

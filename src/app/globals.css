@@ -835,45 +835,34 @@
     color: var(--text-3);
   }
 
-  /* ── Gradient CTA button ── */
+  /* ── Primary CTA button (Kronos v3 — lima neon sólido) ── */
   .k-btn-grad {
-    background: var(--grad);
-    color: #ffffff;
+    background: var(--k-accent);
+    color: var(--k-accent-on);
+    font-family: var(--k-font-body);
     font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     border: none;
-    border-radius: 12px;
+    border-radius: var(--k-r-cta);
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(230, 0, 38, 0.18);
     transition:
-      transform 0.25s var(--ease-out-expo),
-      box-shadow 0.25s ease,
+      transform var(--k-tap-dur) ease-out,
+      background var(--k-tap-dur) ease-out,
       filter 0.2s ease;
     position: relative;
     overflow: hidden;
   }
-  .k-btn-grad::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-      circle at var(--mx, 50%) var(--my, 50%),
-      rgba(255, 255, 255, 0.2),
-      transparent 50%
-    );
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  .k-btn-grad:hover::before {
-    opacity: 1;
-  }
   .k-btn-grad:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 28px rgba(230, 0, 38, 0.28);
-    filter: brightness(1.05);
+    filter: brightness(1.04);
   }
   .k-btn-grad:active {
-    transform: translateY(0) scale(0.98);
-    box-shadow: 0 0 16px rgba(230, 0, 38, 0.22);
+    transform: scale(var(--k-tap-scale));
+    background: var(--k-accent-press);
+  }
+  .k-btn-grad:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
   /* Ghost button */
@@ -1611,4 +1600,233 @@
     animation: none !important;
     opacity: 0.7 !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   KRONOS · DESIGN TOKENS V3 — "CUARTO OSCURO" (lima neon)
+   Sistema cerrado v1.0 — del bundle Claude Design 2026-05-07.
+   El acento es la única variable que el Box puede sobreescribir.
+   ═══════════════════════════════════════════════════════════ */
+:root,
+.dark {
+  /* — NEGROS (fijos) — */
+  --k-bg: #08080a;
+  --k-surface: #0f1014;
+  --k-elevated: #14141a;
+  --k-line: #1c1c24;
+  --k-line-2: #26262e;
+
+  /* — TEXTO (fijo) — */
+  --k-t1: #f5f5f7;
+  --k-t2: #8a8a94;
+  --k-t3: #54545c;
+  --k-t4: #36363c;
+
+  /* — ACENTO (default Kronos = lima · sobreescribible por Box) — */
+  --k-accent: #c8ff2d;
+  --k-accent-press: #a8d726;
+  --k-accent-on: #08080a;
+  --k-accent-soft: rgba(200, 255, 45, 0.1);
+  --k-accent-line: rgba(200, 255, 45, 0.3);
+  --k-accent-glow: 0 0 16px rgba(200, 255, 45, 0.18);
+
+  /* — SEMÁNTICOS — */
+  --k-warning: #ffb020;
+  --k-danger: #ff5a5a;
+
+  /* — SPACING — */
+  --k-s-1: 4px;
+  --k-s-2: 8px;
+  --k-s-3: 12px;
+  --k-s-4: 16px;
+  --k-s-5: 20px;
+  --k-s-6: 24px;
+  --k-s-7: 32px;
+  --k-s-8: 48px;
+
+  /* — RADIUS — */
+  --k-r-hero: 20px;
+  --k-r-wod: 16px;
+  --k-r-cta: 12px;
+  --k-r-stat: 12px;
+  --k-r-pill: 999px;
+
+  /* — TIPOGRAFÍA — */
+  --k-font-display:
+    var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+  --k-font-body: var(--font-inter), "Inter", system-ui, sans-serif;
+
+  /* — INTERACCIÓN — */
+  --k-tap-scale: 0.97;
+  --k-tap-dur: 80ms;
+  --k-pulse-dur: 1400ms;
+
+  /* — STRUCTURE — */
+  --k-gutter: 20px;
+  --k-section-gap: 20px;
+  --k-cta-h: 54px;
+  --k-tab-h: 84px;
+  --k-tab-safe: 24px;
+  --k-header-h: 56px;
+
+  /* — STROKES — */
+  --k-stroke: 1.5px;
+  --k-border: 1px;
+}
+
+/* En kronos forzamos dark global con la nueva paleta */
+html.dark,
+html {
+  background: var(--k-bg);
+  color: var(--k-t1);
+}
+html.dark body,
+body {
+  background: var(--k-bg);
+  color: var(--k-t1);
+}
+
+/* — UTILITY CLASSES K — */
+.k-mono {
+  font-family: var(--k-font-display);
+  font-feature-settings:
+    "tnum" 1,
+    "zero" 1;
+}
+.k-body {
+  font-family: var(--k-font-body);
+}
+
+/* film grain — solo cards elevated · 4% */
+.k-grain {
+  position: relative;
+}
+.k-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: screen;
+  opacity: 0.5;
+}
+
+/* skeleton pulse */
+@keyframes k-pulse {
+  0%,
+  100% {
+    background: var(--k-surface);
+  }
+  50% {
+    background: var(--k-elevated);
+  }
+}
+.k-skeleton {
+  animation: k-pulse var(--k-pulse-dur) ease-in-out infinite;
+  border-radius: var(--k-r-stat);
+}
+
+/* tap helper */
+.k-tap {
+  transition:
+    transform var(--k-tap-dur) ease-out,
+    background var(--k-tap-dur) ease-out;
+}
+.k-tap:active {
+  transform: scale(var(--k-tap-scale));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COMPATIBILIDAD V3 — sobreescribe tokens legacy en dark mode
+   para que pantallas viejas tomen automáticamente el look V3.
+   ═══════════════════════════════════════════════════════════ */
+:root,
+.dark {
+  /* Backgrounds */
+  --bg: var(--k-bg);
+  --bg-soft: var(--k-bg);
+  --bg-warm: var(--k-bg);
+  --bg-cool: var(--k-bg);
+  --card: var(--k-surface);
+  --card-2: var(--k-surface);
+  --card-elevated: var(--k-elevated);
+  --hero-bg: var(--k-bg);
+
+  /* Text */
+  --text: var(--k-t1);
+  --text-2: var(--k-t2);
+  --text-3: var(--k-t3);
+
+  /* Borders */
+  --line: var(--k-line);
+  --line-strong: var(--k-line-2);
+  --hero-line: var(--k-line);
+
+  /* Brand → todos al acento lima (un solo color) */
+  --red: var(--k-accent);
+  --red-soft: var(--k-accent-soft);
+  --red-line: var(--k-accent-line);
+  --blue: var(--k-accent);
+  --blue-deep: var(--k-accent-press);
+  --blue-soft: var(--k-accent-soft);
+  --blue-line: var(--k-accent-line);
+  --cyan: var(--k-accent);
+  --cyan-soft: var(--k-accent-soft);
+  --cyan-line: var(--k-accent-line);
+  --pink: var(--k-warning);
+  --pink-soft: rgba(255, 176, 32, 0.14);
+  --brand-red: var(--k-accent);
+  --brand-blue: var(--k-accent);
+  --brand-cyan: var(--k-accent);
+  --brand-pink: var(--k-warning);
+  --brand-violet: var(--k-accent);
+  --brand-blue-deep: var(--k-accent-press);
+
+  /* Semantics */
+  --fire: var(--k-accent);
+  --fire-soft: var(--k-accent-soft);
+  --fire-line: var(--k-accent-line);
+  --moss: var(--k-accent);
+  --moss-soft: var(--k-accent-soft);
+  --moss-line: var(--k-accent-line);
+  --recovery: var(--k-accent);
+  --recovery-soft: var(--k-accent-soft);
+  --recovery-line: var(--k-accent-line);
+  --steel: var(--k-t2);
+  --steel-soft: rgba(138, 138, 148, 0.12);
+  --steel-line: var(--k-line-2);
+  --strain: var(--k-t2);
+  --strain-soft: rgba(138, 138, 148, 0.12);
+  --strain-line: var(--k-line-2);
+  --ember: var(--k-warning);
+  --ember-soft: rgba(255, 176, 32, 0.14);
+  --ember-line: rgba(255, 176, 32, 0.28);
+  --pr: var(--k-warning);
+  --pr-soft: rgba(255, 176, 32, 0.14);
+  --pr-line: rgba(255, 176, 32, 0.28);
+  --amber: var(--k-warning);
+  --amber-soft: rgba(255, 176, 32, 0.14);
+  --amber-line: rgba(255, 176, 32, 0.28);
+
+  /* Gradient brand → reemplazo por lima neon sólido (sin gradient multi-color) */
+  --grad: var(--k-accent);
+  --grad-soft: var(--k-accent-soft);
+  --grad-glow: radial-gradient(
+    circle at 50% 50%,
+    var(--k-accent-soft),
+    transparent 70%
+  );
+
+  /* Utility */
+  --btn-ghost-bg: rgba(255, 255, 255, 0.05);
+  --hover-subtle: rgba(255, 255, 255, 0.04);
+  --track: var(--k-line);
+  --overlay: rgba(0, 0, 0, 0.65);
+  --chart-inactive: var(--k-line);
+}
+
+/* Forzar fuente del body al k-font-body para todas las pantallas */
+body {
+  font-family: var(--k-font-body);
 }

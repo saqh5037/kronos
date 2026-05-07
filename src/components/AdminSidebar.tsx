@@ -1,273 +1,173 @@
 "use client";
 
 import Link from "next/link";
-import type { Route } from "next";
+import type { ComponentProps } from "react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import ThemeToggle from "@/components/ThemeToggle";
+import { Icon } from "@/components/kronos/v3/icons";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 
+type LinkHref = ComponentProps<typeof Link>["href"];
+
+type IconKey =
+  | "dashboard"
+  | "users"
+  | "calendar"
+  | "pin"
+  | "check"
+  | "card"
+  | "mail"
+  | "chart"
+  | "settings"
+  | "history"
+  | "bolt"
+  | "share";
+
 type ModuleEntry = {
-  href: string;
+  href: LinkHref;
   label: string;
-  icon: string;
+  icon: IconKey;
   exact?: boolean;
   ownerOnly?: boolean;
   badgeKey?: "sensitive";
 };
 
-const modules: ModuleEntry[] = [
-  { href: "/admin", label: "Dashboard", icon: "dashboard", exact: true },
-  { href: "/admin/atletas", label: "Atletas", icon: "athletes" },
-  { href: "/admin/programacion", label: "Programación", icon: "schedule" },
-  { href: "/admin/reservas", label: "Reservas", icon: "bookings" },
-  { href: "/admin/asistencia", label: "Asistencia", icon: "attendance" },
-  { href: "/admin/wods", label: "WODs", icon: "wods" },
-  { href: "/admin/movimientos", label: "Movimientos", icon: "wods" },
-  { href: "/admin/prs", label: "PRs", icon: "prs" },
-  { href: "/admin/leaderboards", label: "Leaderboards", icon: "leaderboards" },
-  { href: "/admin/pagos", label: "Pagos", icon: "payments" },
-  { href: "/admin/comunicaciones", label: "Comunicaciones", icon: "comms" },
-  { href: "/admin/reportes", label: "Reportes", icon: "reports" },
+type ModuleGroup = {
+  title: string;
+  items: ModuleEntry[];
+};
+
+const groups: ModuleGroup[] = [
   {
-    href: "/admin/auditoria",
-    label: "Auditoría",
-    icon: "auditoria",
-    ownerOnly: true,
-    badgeKey: "sensitive",
+    title: "PRINCIPAL",
+    items: [
+      { href: "/admin", label: "Dashboard", icon: "dashboard", exact: true },
+      { href: "/admin/atletas", label: "Atletas", icon: "users" },
+      { href: "/admin/programacion", label: "Programación", icon: "pin" },
+      { href: "/admin/reservas", label: "Reservas", icon: "calendar" },
+    ],
   },
-  { href: "/admin/ajustes", label: "Ajustes", icon: "settings" },
+  {
+    title: "ENTRENAMIENTO",
+    items: [
+      { href: "/admin/wods", label: "WODs", icon: "bolt" },
+      { href: "/admin/movimientos", label: "Movimientos", icon: "bolt" },
+      { href: "/admin/prs", label: "PRs", icon: "chart" },
+      { href: "/admin/leaderboards", label: "Leaderboards", icon: "chart" },
+    ],
+  },
+  {
+    title: "GESTIÓN",
+    items: [
+      { href: "/admin/asistencia", label: "Asistencia", icon: "check" },
+      { href: "/admin/pagos", label: "Pagos", icon: "card" },
+      { href: "/admin/comunicaciones", label: "Comunicaciones", icon: "mail" },
+      { href: "/admin/reportes", label: "Reportes", icon: "chart" },
+    ],
+  },
+  {
+    title: "CONFIG",
+    items: [
+      { href: "/admin/ajustes", label: "Ajustes del Box", icon: "settings" },
+      {
+        href: "/admin/auditoria",
+        label: "Auditoría",
+        icon: "history",
+        ownerOnly: true,
+        badgeKey: "sensitive",
+      },
+    ],
+  },
 ];
 
-function NavIcon({ icon, active }: { icon: string; active: boolean }) {
-  const color = active ? "var(--text)" : "currentColor";
-  const icons: Record<string, React.ReactNode> = {
-    dashboard: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="1" y="1" width="6" height="6" rx="1" />
-        <rect x="9" y="1" width="6" height="6" rx="1" />
-        <rect x="1" y="9" width="6" height="6" rx="1" />
-        <rect x="9" y="9" width="6" height="6" rx="1" />
-      </svg>
-    ),
-    athletes: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="8" cy="5" r="3" />
-        <path d="M2 14c.8-3 3-5 6-5s5.2 2 6 5" />
-      </svg>
-    ),
-    schedule: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="1" y="3" width="14" height="12" rx="1.5" />
-        <path d="M1 7h14M5 1v4M11 1v4" />
-      </svg>
-    ),
-    bookings: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M11 2h2.5A1.5 1.5 0 0 1 15 3.5v10A1.5 1.5 0 0 1 13.5 15h-11A1.5 1.5 0 0 1 1 13.5v-10A1.5 1.5 0 0 1 2.5 2H5" />
-        <rect x="5" y="1" width="6" height="3" rx="1" />
-        <path d="M5 9l2 2 4-4" />
-      </svg>
-    ),
-    attendance: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8z" />
-        <path d="M5 8l2.5 2.5L11 5" />
-      </svg>
-    ),
-    wods: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M4 5v6M12 5v6M2 7v2M14 7v2M4 8h8" />
-      </svg>
-    ),
-    prs: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M8 2l1.8 3.6L14 6.3l-3 2.9.7 4.1L8 11.3l-3.7 1.9.7-4.1L2 6.3l4.2-.7z" />
-      </svg>
-    ),
-    leaderboards: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="1" y="9" width="4" height="6" rx="0.5" />
-        <rect x="6" y="5" width="4" height="10" rx="0.5" />
-        <rect x="11" y="1" width="4" height="14" rx="0.5" />
-      </svg>
-    ),
-    payments: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="1" y="4" width="14" height="9" rx="1.5" />
-        <path d="M1 7h14" />
-        <path d="M4 10.5h2" />
-      </svg>
-    ),
-    comms: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M14 10.67A2 2 0 0 1 12 12H5l-3 3V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v6.67z" />
-      </svg>
-    ),
-    reports: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 1h7l3 3v11H3z" />
-        <path d="M10 1v3h3" />
-        <path d="M5 8h6M5 11h4" />
-      </svg>
-    ),
-    settings: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="8" cy="8" r="2.5" />
-        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.1 3.1l1.4 1.4M11.5 11.5l1.4 1.4M3.1 12.9l1.4-1.4M11.5 4.5l1.4-1.4" />
-      </svg>
-    ),
-    auditoria: (
-      <svg
-        viewBox="0 0 16 16"
-        width="14"
-        height="14"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M2 3a1 1 0 0 1 1-1h7l3 3v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />
-        <path d="M10 2v3h3" />
-        <circle cx="7.5" cy="9" r="1.5" />
-        <path d="M9 10.5l1.5 1.5" />
-      </svg>
-    ),
-  };
-  return <>{icons[icon] ?? null}</>;
+function NavIcon({ kind, active }: { kind: IconKey; active: boolean }) {
+  const color = active ? "var(--k-accent)" : "var(--k-t3)";
+  const props = { width: 16, height: 16, style: { color } };
+  switch (kind) {
+    case "dashboard":
+      return <Icon.Dashboard {...props} />;
+    case "users":
+      return <Icon.Users {...props} />;
+    case "calendar":
+      return <Icon.Calendar {...props} />;
+    case "pin":
+      return <Icon.Pin {...props} />;
+    case "check":
+      return <Icon.Check {...props} />;
+    case "card":
+      return <Icon.Card {...props} />;
+    case "mail":
+      return <Icon.Mail {...props} />;
+    case "chart":
+      return <Icon.Chart {...props} />;
+    case "settings":
+      return <Icon.Settings {...props} />;
+    case "history":
+      return <Icon.History {...props} />;
+    case "bolt":
+      return <Icon.Bolt {...props} />;
+    case "share":
+      return <Icon.Share {...props} />;
+    default:
+      return null;
+  }
 }
 
-function Wordmark({ size = "md" }: { size?: "sm" | "md" }) {
-  const boxSize = size === "sm" ? "w-7 h-7" : "w-8 h-8";
-  const textSize = size === "sm" ? "text-sm" : "text-base";
+function KronosMark() {
   return (
-    <div className="flex items-center gap-2.5">
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "20px 24px",
+      }}
+    >
       <div
-        className={`${boxSize} rounded-xl flex items-center justify-center font-display font-bold border`}
         style={{
-          background: "var(--card)",
-          borderColor: "var(--line-strong)",
-          color: "var(--fire)",
+          width: 30,
+          height: 30,
+          borderRadius: 8,
+          background: "var(--k-bg)",
+          border: "1.5px solid var(--k-accent)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--k-font-display)",
+          fontSize: 15,
+          fontWeight: 700,
+          color: "var(--k-accent)",
+          letterSpacing: "-0.04em",
+          boxShadow: "var(--k-accent-glow)",
         }}
       >
-        <span className={`${textSize} leading-none`}>K</span>
+        K
       </div>
-      <span
-        className={`font-display font-bold ${textSize} tracking-[0.02em]`}
-        style={{ color: "var(--text)" }}
-      >
-        Kronos
-      </span>
+      <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+        <span
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 14,
+            fontWeight: 700,
+            letterSpacing: "-0.02em",
+            color: "var(--k-t1)",
+          }}
+        >
+          KRONOS
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 8,
+            fontWeight: 500,
+            letterSpacing: "0.2em",
+            color: "var(--k-t3)",
+            marginTop: 3,
+          }}
+        >
+          ADMIN · v1.0
+        </span>
+      </div>
     </div>
   );
 }
@@ -283,11 +183,13 @@ export default function AdminSidebar({
 }: AdminSidebarProps = {}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
 
-  const visibleModules = modules.filter(
-    (mod) => !mod.ownerOnly || role === "OWNER",
-  );
+  const visibleGroups = groups
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((it) => !it.ownerOnly || role === "OWNER"),
+    }))
+    .filter((g) => g.items.length > 0);
 
   useEffect(() => {
     setOpen(false);
@@ -304,35 +206,75 @@ export default function AdminSidebar({
     };
   }, [open]);
 
-  // Scroll shrink effect for desktop sidebar
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <>
-      {/* Mobile top bar — glass premium */}
+      {/* Mobile top bar */}
       <div
-        className="lg:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 h-14 border-b"
+        className="lg:hidden flex"
         style={{
-          background: "rgba(var(--bg-rgb, 255,255,255), 0.82)",
-          backdropFilter: "blur(28px) saturate(1.4)",
-          WebkitBackdropFilter: "blur(28px) saturate(1.4)",
-          borderColor: "var(--line)",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 30,
+          height: 56,
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 16px",
+          background: "rgba(8,8,10,0.85)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          borderBottom: "1px solid var(--k-line)",
         }}
       >
-        <Wordmark size="sm" />
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div
+            style={{
+              width: 26,
+              height: 26,
+              borderRadius: 7,
+              border: "1.5px solid var(--k-accent)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: "var(--k-font-display)",
+              fontSize: 13,
+              fontWeight: 700,
+              color: "var(--k-accent)",
+              letterSpacing: "-0.04em",
+            }}
+          >
+            K
+          </div>
+          <span
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+              color: "var(--k-t1)",
+            }}
+          >
+            KRONOS
+          </span>
+        </div>
         <button
           type="button"
           aria-label="Abrir menú"
           aria-expanded={open}
           onClick={() => setOpen(true)}
-          className="w-11 h-11 flex items-center justify-center rounded-xl border"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 8,
+            border: "1px solid var(--k-line)",
+            background: "var(--k-surface)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--k-t1)",
+            cursor: "pointer",
+          }}
         >
           <svg
             width="16"
@@ -347,147 +289,167 @@ export default function AdminSidebar({
           </svg>
         </button>
       </div>
+      {/* Spacer mobile */}
+      <div
+        className="lg:hidden"
+        style={{ height: 56, flexShrink: 0 }}
+        aria-hidden
+      />
 
-      {/* Spacer for mobile top bar */}
-      <div className="lg:hidden h-14 flex-shrink-0" aria-hidden />
-
-      {/* Overlay backdrop */}
+      {/* Backdrop */}
       {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="lg:hidden fixed inset-0 z-40"
-          style={{ background: "var(--overlay)", backdropFilter: "blur(8px)" }}
+        <div
+          className="lg:hidden"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 40,
+            background: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(8px)",
+          }}
           onClick={() => setOpen(false)}
           aria-hidden
         />
       )}
 
-      {/* Sidebar — glass premium */}
+      {/* Sidebar */}
       <nav
-        className={`flex flex-col border-r flex-shrink-0 overflow-y-auto z-50
-          fixed lg:static top-0 left-0 h-screen lg:h-auto w-64 lg:w-56
-          transform transition-transform duration-300
-          ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
-        style={{
-          background: "color-mix(in srgb, var(--bg-soft) 85%, transparent)",
-          backdropFilter: "blur(28px) saturate(1.4)",
-          WebkitBackdropFilter: "blur(28px) saturate(1.4)",
-          borderColor: "var(--line)",
-          paddingTop: scrolled ? "12px" : "18px",
-          paddingBottom: "16px",
-          transition: "padding 0.4s var(--ease-out-expo), transform 0.3s ease",
-        }}
         aria-label="Menú principal"
+        className={`${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+        style={{
+          width: 240,
+          background: "var(--k-surface)",
+          borderRight: "1px solid var(--k-line)",
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          zIndex: 50,
+          overflowY: "auto",
+          transition: "transform 0.3s ease",
+        }}
       >
-        {/* Logo + close button (mobile) */}
-        <div
-          className="px-4 pb-4 mb-2 border-b flex items-center justify-between"
-          style={{ borderColor: "var(--line)" }}
-        >
-          <Wordmark />
-          <button
-            type="button"
-            aria-label="Cerrar menú"
-            onClick={() => setOpen(false)}
-            className="lg:hidden w-11 h-11 flex items-center justify-center rounded-lg"
-            style={{
-              color: "var(--text-2)",
-              background: "var(--btn-ghost-bg)",
-            }}
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-            >
-              <path d="M3 3l10 10M13 3L3 13" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Nav items */}
-        <div className="flex flex-col gap-0.5 px-2 flex-1">
-          {visibleModules.map((mod) => {
-            const isActive = mod.exact
-              ? pathname === mod.href
-              : pathname.startsWith(mod.href);
-
-            const badgeValue =
-              mod.badgeKey === "sensitive" && sensitiveCount > 0
-                ? sensitiveCount
-                : null;
-
-            return (
-              <Link
-                key={mod.href}
-                href={mod.href as Route}
-                className={`relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  isActive ? "text-text" : "text-text-3 hover:text-text-2"
-                }`}
+        <KronosMark />
+        <div style={{ flex: 1, overflowY: "auto", paddingTop: 4 }}>
+          {visibleGroups.map((g) => (
+            <div key={g.title} style={{ marginBottom: 14 }}>
+              <div
+                style={{
+                  padding: "10px 28px 6px",
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 9,
+                  fontWeight: 600,
+                  letterSpacing: "0.18em",
+                  color: "var(--k-t4)",
+                }}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="admin-nav-indicator"
-                    className="absolute inset-0 rounded-xl border overflow-hidden"
+                {g.title}
+              </div>
+              {g.items.map((it) => {
+                const hrefStr =
+                  typeof it.href === "string"
+                    ? it.href
+                    : ((it.href as { pathname?: string }).pathname ?? "");
+                const isActive = it.exact
+                  ? pathname === hrefStr
+                  : pathname.startsWith(hrefStr);
+                const badgeValue =
+                  it.badgeKey === "sensitive" && sensitiveCount > 0
+                    ? sensitiveCount
+                    : null;
+                return (
+                  <Link
+                    key={hrefStr}
+                    href={it.href}
+                    className="k-tap"
                     style={{
-                      background: "var(--card)",
-                      borderColor: "var(--line-strong)",
+                      height: 38,
+                      padding: "0 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      background: isActive
+                        ? "var(--k-elevated)"
+                        : "transparent",
+                      color: isActive ? "var(--k-t1)" : "var(--k-t2)",
+                      cursor: "pointer",
+                      margin: "0 12px",
+                      borderRadius: 8,
+                      position: "relative",
+                      textDecoration: "none",
                     }}
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   >
+                    {isActive && (
+                      <span
+                        style={{
+                          position: "absolute",
+                          left: -12,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          width: 3,
+                          height: 18,
+                          borderRadius: "0 2px 2px 0",
+                          background: "var(--k-accent)",
+                          boxShadow: "0 0 10px rgba(200,255,45,0.6)",
+                        }}
+                      />
+                    )}
+                    <NavIcon kind={it.icon} active={isActive} />
                     <span
-                      aria-hidden
-                      className="absolute left-0 top-2 bottom-2 w-[2.5px] rounded-r"
-                      style={{ background: "var(--grad)" }}
-                    />
-                  </motion.div>
-                )}
-                <span className="relative z-10">
-                  <NavIcon icon={mod.icon} active={isActive} />
-                </span>
-                <span className="relative z-10 flex-1">{mod.label}</span>
-                {badgeValue !== null && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="relative z-10 ml-auto text-[10px] font-bold leading-none px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
-                    style={{
-                      background:
-                        badgeValue >= 10
-                          ? "linear-gradient(95deg, #e60026 0%, #ff4d8a 100%)"
-                          : "var(--fire)",
-                      color: "#fff",
-                      boxShadow:
-                        badgeValue > 0
-                          ? "0 0 8px rgba(230, 0, 38, 0.35)"
-                          : undefined,
-                    }}
-                    aria-label={`${badgeValue} eventos sensibles hoy`}
-                    title={`${badgeValue} eventos sensibles hoy`}
-                  >
-                    {badgeValue > 99 ? "99+" : badgeValue}
-                  </motion.span>
-                )}
-              </Link>
-            );
-          })}
+                      style={{
+                        flex: 1,
+                        fontFamily: "var(--k-font-body)",
+                        fontSize: 13,
+                        fontWeight: isActive ? 600 : 500,
+                        letterSpacing: "-0.005em",
+                      }}
+                    >
+                      {it.label}
+                    </span>
+                    {badgeValue !== null && (
+                      <span
+                        style={{
+                          fontFamily: "var(--k-font-display)",
+                          fontSize: 9,
+                          fontWeight: 600,
+                          color: "var(--k-warning)",
+                          background: "rgba(255,176,32,0.12)",
+                          padding: "2px 7px",
+                          borderRadius: 999,
+                          letterSpacing: "0.04em",
+                          border: "1px solid rgba(255,176,32,0.35)",
+                        }}
+                      >
+                        {badgeValue > 99 ? "99+" : badgeValue}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </div>
-
-        {/* Footer */}
         <div
-          className="px-4 pt-3 mt-2 border-t flex flex-col gap-2"
-          style={{ borderColor: "var(--line)" }}
+          style={{
+            borderTop: "1px solid var(--k-line)",
+            padding: "12px 16px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
         >
-          <ThemeToggle className="w-full justify-center" />
           <SignOutButton variant="menu" />
         </div>
       </nav>
+
+      {/* Static placeholder for layout flow on desktop (sidebar is fixed) */}
+      <div
+        className="hidden lg:block"
+        style={{ width: 240, flexShrink: 0 }}
+        aria-hidden
+      />
     </>
   );
 }

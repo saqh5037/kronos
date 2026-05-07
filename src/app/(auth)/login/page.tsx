@@ -8,7 +8,13 @@ import KCard from "@/components/kronos/KCard";
 export const metadata = { title: "Kronos — Iniciar sesión" };
 
 export default async function LoginPage() {
-  const session = await getServerSession(authOptions);
+  let session = null;
+  try {
+    session = await getServerSession(authOptions);
+  } catch {
+    // Cookie corrupta (otro app NextAuth en mismo host, secret rotado, etc.)
+    // — dejarla pasar al form; al loguearse se sobrescribe.
+  }
   if (session) redirect("/admin");
 
   return (

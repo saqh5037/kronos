@@ -15,13 +15,22 @@ export default async function AtletaLayout({
   if (!session) redirect("/login");
 
   return (
-    <div className="relative min-h-screen pb-28 bg-bg">
+    <div
+      className="relative min-h-screen"
+      style={{ background: "var(--k-bg)", paddingBottom: 96 }}
+    >
       <PwaRegister />
-      {/* Header with notification bell */}
-      <header className="flex items-center justify-end px-4 pt-4 pb-0">
+      {/* Notification bell flota top-right, sin header bar */}
+      <div
+        style={{
+          position: "fixed",
+          top: 12,
+          right: 12,
+          zIndex: 30,
+        }}
+      >
         <NotificationBell />
-      </header>
-      {/* PWA Install Banner */}
+      </div>
       <InstallPwaBanner />
       {children}
       <TabBar />

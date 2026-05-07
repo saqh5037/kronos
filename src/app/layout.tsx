@@ -4,6 +4,7 @@ import {
   Playfair_Display,
   Dancing_Script,
   JetBrains_Mono,
+  IBM_Plex_Mono,
 } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -38,6 +39,13 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  variable: "--font-plex-mono",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "Kronos",
   description: "El sistema operativo de tu box.",
@@ -49,6 +57,7 @@ export const metadata: Metadata = {
   },
   other: {
     "mobile-web-app-capable": "yes",
+    "format-detection": "telephone=no, date=no, address=no, email=no",
   },
 };
 
@@ -61,18 +70,19 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      className={`${inter.variable} ${playfair.variable} ${dancing.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${playfair.variable} ${dancing.variable} ${jetbrainsMono.variable} ${plexMono.variable}`}
     >
       <head>
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#08080A" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className="font-sans bg-bg text-text antialiased min-h-screen">
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
-          enableSystem={true}
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange={false}
+          forcedTheme="dark"
         >
           <GlobalEffects />
           <ConfirmProvider>

@@ -4,7 +4,6 @@ import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import ThemeToggle from "@/components/ThemeToggle";
 
 const tabs = [
   {
@@ -93,53 +92,50 @@ export default function TabBar() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-40 border-t"
+      className="fixed bottom-0 left-0 right-0 z-40"
       style={{
-        background: "color-mix(in srgb, var(--bg-soft) 80%, transparent)",
-        borderColor: "var(--line)",
-        backdropFilter: "blur(28px) saturate(1.4)",
-        WebkitBackdropFilter: "blur(28px) saturate(1.4)",
+        background: "rgba(8,8,10,0.92)",
+        borderTop: "1px solid var(--k-line)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        height: 84,
+        paddingBottom: 24,
+        paddingTop: 12,
       }}
     >
-      <div className="flex items-center h-16 px-2">
+      <div className="flex items-stretch h-full px-1">
         {tabs.map((tab, i) => {
           const isActive = i === activeIndex;
           return (
             <Link
               key={tab.href}
               href={tab.href as Route}
-              className="relative flex-1 flex flex-col items-center gap-1 py-2 text-[10px] font-semibold transition-colors"
+              className="relative flex-1 flex flex-col items-center justify-center gap-[5px]"
               style={{
-                color: isActive ? "var(--text)" : "var(--text-3)",
+                color: isActive ? "var(--k-accent)" : "var(--k-t3)",
+                textDecoration: "none",
               }}
             >
-              {isActive && (
-                <motion.div
-                  layoutId="tab-indicator"
-                  className="absolute -top-px left-1/2 -translate-x-1/2 h-[2.5px] rounded-full"
-                  style={{
-                    width: 24,
-                    background: "var(--grad)",
-                    boxShadow:
-                      "0 0 10px rgba(230, 0, 38, 0.35), 0 0 20px rgba(0, 68, 255, 0.15)",
-                  }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
               <motion.span
-                animate={isActive ? { scale: 1.1 } : { scale: 1 }}
+                animate={isActive ? { scale: 1.05 } : { scale: 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 {tab.icon(isActive)}
               </motion.span>
-              <span className="font-medium tracking-wide">{tab.label}</span>
+              <span
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 8,
+                  fontWeight: 600,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {tab.label}
+              </span>
             </Link>
           );
         })}
-        {/* Theme toggle */}
-        <div className="flex items-center justify-center px-1">
-          <ThemeToggle iconOnly className="!p-2 !rounded-full !w-11 !h-11" />
-        </div>
       </div>
     </div>
   );

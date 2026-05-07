@@ -1,37 +1,41 @@
+import Link from "next/link";
 import {
   listAvailableClasses,
-  getAthleteUsualSlots,
   type AvailableClass,
-  type UsualSlot,
 } from "@/server/actions/bookings";
-import { formatDayMonth, startOfWeek, addDays } from "@/lib/week";
-import {
-  AnimatedSection,
-  AnimatedItem,
-} from "@/components/kronos/AnimatedSection";
-import Eyebrow from "@/components/kronos/Eyebrow";
 import { ClassesList } from "./_components/ClassesList";
-import { ScheduleViewSwitch } from "@/app/admin/programacion/_components/ScheduleViewSwitch";
-import { ScheduleNav } from "@/app/admin/programacion/_components/ScheduleNav";
-import { MonthGrid } from "./_components/MonthGrid";
+import { Icon } from "@/components/kronos/v3/icons";
 
 export const metadata = { title: "Kronos — Reservar" };
 
-type View = "day" | "week" | "month";
-type SearchParams = { view?: string; date?: string };
+type SearchParams = { date?: string };
 
-function parseView(v: string | undefined): View {
-  if (v === "day" || v === "month") return v;
-  return "week";
-}
+const DAY_ABBR = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
+
 function parseDate(s: string | undefined): Date {
   if (s) {
     const [y, m, d] = s.split("-").map(Number);
-    if (y && m && d) return new Date(y, m - 1, d);
+    if (y && m && d) {
+      const dt = new Date(y, m - 1, d);
+      dt.setHours(0, 0, 0, 0);
+      return dt;
+    }
   }
   const t = new Date();
   t.setHours(0, 0, 0, 0);
   return t;
+}
+
+function formatDateParam(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function sameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
 }
 
 export default async function ReservarPage({
@@ -40,145 +44,271 @@ export default async function ReservarPage({
   searchParams?: Promise<SearchParams>;
 }) {
   const sp = (await searchParams) ?? {};
-  const view = parseView(sp.view);
-  const anchor = parseDate(sp.date);
-
-  let from: Date;
-  let daysAhead: number;
-  if (view === "day") {
-    from = new Date(anchor);
-    from.setHours(0, 0, 0, 0);
-    daysAhead = 1;
-  } else if (view === "month") {
-    from = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
-    const lastDay = new Date(
-      anchor.getFullYear(),
-      anchor.getMonth() + 1,
-      0,
-    ).getDate();
-    daysAhead = lastDay;
-  } else {
-    from = startOfWeek(anchor);
-    daysAhead = 7;
-  }
-
-  let classes: AvailableClass[] = [];
-  let usual: UsualSlot[] = [];
-  try {
-    [classes, usual] = await Promise.all([
-      listAvailableClasses(daysAhead, from),
-      getAthleteUsualSlots(60),
-    ]);
-  } catch {
-    // Sesión ausente
-  }
-
-  const todayClasses = classes.filter((c) => {
-    const t = new Date();
-    t.setHours(0, 0, 0, 0);
-    const e = new Date(t);
-    e.setHours(23, 59, 59, 999);
-    return c.startsAt >= t && c.startsAt <= e;
-  });
-  const todayBookedCount = todayClasses.filter(
-    (c) => c.myBookingStatus === "BOOKED",
-  ).length;
-
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const usualLabel = usual.length
-    ? usual
-        .slice(0, 2)
-        .map((s) => `${String(s.hour).padStart(2, "0")}:00`)
-        .join(" · ")
-    : null;
+  const selected = parseDate(sp.date);
+
+  // 7 days starting today
+  const days: Date[] = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    return d;
+  });
+
+  // Fetch classes for selected day
+  let dayClasses: AvailableClass[] = [];
+  let weekClasses: AvailableClass[] = [];
+  try {
+    const all = await listAvailableClasses(7, today);
+    weekClasses = all;
+    dayClasses = all.filter((c) => sameDay(c.startsAt, selected));
+  } catch {
+    // sin sesión
+  }
+
+  const hasReservedOn = (d: Date) =>
+    weekClasses.some(
+      (c) => sameDay(c.startsAt, d) && c.myBookingStatus === "BOOKED",
+    );
+
+  const dayLabel = new Intl.DateTimeFormat("es-MX", {
+    weekday: "long",
+    day: "numeric",
+  }).format(selected);
 
   return (
-    <div className="pb-28 relative">
-      <header className="relative px-4 pt-10 pb-3 overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse at 0% 0%, rgba(230,0,38,0.06), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(0,191,255,0.06), transparent 60%)",
-          }}
-        />
-        <span className="k-corner-tl" aria-hidden />
-        <span className="k-corner-br" aria-hidden />
-
-        <AnimatedSection className="relative">
-          <AnimatedItem>
-            <Eyebrow withBar color="blue">
-              RESERVAR
-            </Eyebrow>
-            <div className="mt-2 flex items-baseline gap-2 flex-wrap">
-              <span
-                className="font-script text-[24px] leading-none"
-                style={{ color: "var(--red)" }}
-              >
-                Tu próxima
-              </span>
-              <h1
-                className="k-h-italic font-display font-extrabold text-[28px] leading-[1] tracking-[-0.02em]"
-                style={{ color: "var(--text)" }}
-              >
-                <em>clase</em>
-              </h1>
-            </div>
-            {usualLabel && (
-              <p
-                className="font-mono text-[10px] mt-2 font-bold tracking-wider uppercase"
-                style={{ color: "var(--cyan)" }}
-              >
-                Tu horario habitual · {usualLabel}
-              </p>
-            )}
-          </AnimatedItem>
-        </AnimatedSection>
-      </header>
-
-      {/* Sticky filter bar */}
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--k-bg)",
+        color: "var(--k-t1)",
+        fontFamily: "var(--k-font-body)",
+        paddingBottom: 96,
+      }}
+    >
+      {/* Header */}
       <div
-        className="sticky top-0 z-20 px-3 py-2.5 backdrop-blur-md flex items-center justify-between gap-2 flex-wrap"
         style={{
-          background: "rgba(10,10,12,0.85)",
-          borderBottom: "1px solid var(--line)",
+          height: 48,
+          padding: "0 16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingTop: 8,
         }}
       >
-        <ScheduleNav view={view} date={anchor} basePath="/atleta/reservar" />
-        <ScheduleViewSwitch
-          view={view}
-          date={anchor}
-          basePath="/atleta/reservar"
-        />
+        <Link
+          href="/atleta"
+          aria-label="Volver"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            background: "transparent",
+            border: 0,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--k-t1)",
+            textDecoration: "none",
+          }}
+        >
+          <Icon.Back width={20} height={20} />
+        </Link>
+        <span
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            color: "var(--k-t2)",
+          }}
+        >
+          RESERVAR
+        </span>
+        <button
+          type="button"
+          aria-label="Filtros"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            background: "transparent",
+            border: 0,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--k-t1)",
+          }}
+        >
+          <Icon.Filter width={20} height={20} />
+        </button>
       </div>
 
-      {todayClasses.length > 0 && view !== "month" && (
-        <div className="flex items-baseline justify-between px-[18px] pb-2 pt-3">
-          <div className="k-eyebrow" style={{ color: "var(--text-2)" }}>
-            HOY · {formatDayMonth(today).toUpperCase()} · {todayClasses.length}{" "}
-            CLASE{todayClasses.length !== 1 ? "S" : ""}
-          </div>
-          <div
-            className="font-mono text-[10px] font-bold"
-            style={{ color: "var(--recovery)" }}
-          >
-            {todayBookedCount} RESERVADA{todayBookedCount !== 1 ? "S" : ""}
-          </div>
-        </div>
-      )}
+      {/* Week strip */}
+      <div
+        style={{
+          padding: "0 20px",
+          display: "flex",
+          gap: 8,
+          overflowX: "auto",
+          marginTop: 12,
+        }}
+      >
+        {days.map((d) => {
+          const isSel = sameDay(d, selected);
+          const isToday = sameDay(d, today);
+          const reserved = hasReservedOn(d);
+          return (
+            <Link
+              key={d.toISOString()}
+              href={
+                {
+                  pathname: "/atleta/reservar",
+                  query: { date: formatDateParam(d) },
+                } as unknown as React.ComponentProps<typeof Link>["href"]
+              }
+              className="k-tap"
+              style={{
+                flexShrink: 0,
+                width: 54,
+                height: 74,
+                borderRadius: 14,
+                background: isSel ? "var(--k-elevated)" : "var(--k-surface)",
+                border:
+                  !isSel && isToday
+                    ? "1px dashed var(--k-accent)"
+                    : `1px solid ${isSel ? "var(--k-line-2)" : "var(--k-line)"}`,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 4,
+                position: "relative",
+                textDecoration: "none",
+                color: "inherit",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 9,
+                  fontWeight: 600,
+                  letterSpacing: "0.14em",
+                  color: "var(--k-t3)",
+                }}
+              >
+                {DAY_ABBR[d.getDay()]}
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 22,
+                  fontWeight: 700,
+                  letterSpacing: "-0.03em",
+                  color: isSel ? "var(--k-accent)" : "var(--k-t1)",
+                  lineHeight: 1,
+                }}
+              >
+                {d.getDate()}
+              </span>
+              {reserved && (
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: 8,
+                    width: 4,
+                    height: 4,
+                    borderRadius: "50%",
+                    background: "var(--k-accent)",
+                  }}
+                />
+              )}
+            </Link>
+          );
+        })}
+      </div>
 
-      {view === "month" ? (
-        <div className="px-3 pt-3">
-          <MonthGrid monthAnchor={anchor} classes={classes} />
-        </div>
-      ) : (
-        <ClassesList classes={classes} usualHours={usual.map((s) => s.hour)} />
-      )}
+      {/* Eyebrow del día */}
+      <div style={{ padding: "0 20px", marginTop: 16 }}>
+        <span
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.18em",
+            color: "var(--k-t3)",
+            textTransform: "uppercase",
+          }}
+        >
+          {dayLabel} · {dayClasses.length} CLASE
+          {dayClasses.length === 1 ? "" : "S"}
+        </span>
+      </div>
+
+      {/* Lista de clases del día */}
+      <div style={{ marginTop: 14 }}>
+        {dayClasses.length === 0 ? (
+          <div
+            style={{
+              margin: "12px 20px 0",
+              padding: "48px 24px",
+              background: "var(--k-surface)",
+              border: "1px dashed var(--k-line)",
+              borderRadius: 16,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 18,
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 14,
+                background: "var(--k-elevated)",
+                border: "1px solid var(--k-line)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--k-t3)",
+              }}
+            >
+              <Icon.CalX width={28} height={28} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <span
+                style={{
+                  fontFamily: "var(--k-font-body)",
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: "var(--k-t1)",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Sin clases programadas
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 10,
+                  fontWeight: 500,
+                  color: "var(--k-t3)",
+                  letterSpacing: "0.14em",
+                }}
+              >
+                ELEGÍ OTRO DÍA EN LA SEMANA
+              </span>
+            </div>
+          </div>
+        ) : (
+          <ClassesList classes={dayClasses} usualHours={[]} />
+        )}
+      </div>
     </div>
   );
 }
-
-void formatDayMonth;
-void addDays;

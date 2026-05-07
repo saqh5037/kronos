@@ -4,49 +4,49 @@
  * Light mode uses the base hex values; dark mode equivalents are brighter.
  */
 
-// Base brand colors (light mode)
+// Kronos v3 — Cuarto Oscuro (lima neon como acento único)
 const BRAND = {
-  red: "#e60026",
-  blue: "#0044ff",
-  cyan: "#00bfff",
-  pink: "#ff4d8a",
-  blueDeep: "#001a99",
+  red: "#C8FF2D",
+  blue: "#C8FF2D",
+  cyan: "#C8FF2D",
+  pink: "#FFB020",
+  blueDeep: "#A8D726",
 } as const;
 
 export const CHART_COLORS = {
-  // Brand primary spectrum
+  // Brand primary spectrum — todo lima neon, sólo varía intensidad
   primary: BRAND.cyan,
-  primaryBright: "#33ccff",
+  primaryBright: "#D9FF66",
   secondary: BRAND.blue,
-  secondaryBright: "#4d79ff",
+  secondaryBright: "#D9FF66",
   tertiary: BRAND.red,
-  tertiaryBright: "#ff3355",
+  tertiaryBright: "#D9FF66",
   accent: BRAND.pink,
 
   // Semantic data colors
-  positive: "#00bfff", // cyan — asistidos, success
-  negative: "#e60026", // red — no-shows, errors
-  neutral: "#0044ff", // blue — reservados, info
-  warning: "#ff4d8a", // pink — warnings
+  positive: "#C8FF2D", // lima — asistidos, success
+  negative: "#FF5A5A", // rojo brasa — no-shows, errors
+  neutral: "#8A8A94", // gris medio — reservados, info
+  warning: "#FFB020", // naranja — warnings
 
   // Supporting
-  steel: "#4a4a5a",
-  moss: "#00a8a8",
-  ember: "#ff4d8a",
-  fire: "#e60026",
-  amber: "#d97706",
+  steel: "#8A8A94",
+  moss: "#C8FF2D",
+  ember: "#FFB020",
+  fire: "#FF5A5A",
+  amber: "#FFB020",
 
   // Grids & reference lines
-  grid: "rgba(127, 127, 127, 0.10)",
-  gridStrong: "rgba(127, 127, 127, 0.18)",
-  text2: "rgba(127, 127, 127, 0.9)",
-  text3: "rgba(127, 127, 127, 0.55)",
+  grid: "rgba(255, 255, 255, 0.06)",
+  gridStrong: "rgba(255, 255, 255, 0.10)",
+  text2: "rgba(245, 245, 247, 0.65)",
+  text3: "rgba(245, 245, 247, 0.35)",
 
-  // Gradient stops (for area fills)
-  primaryFillStart: "rgba(0, 191, 255, 0.25)",
-  primaryFillEnd: "rgba(0, 191, 255, 0.02)",
-  secondaryFillStart: "rgba(0, 68, 255, 0.20)",
-  secondaryFillEnd: "rgba(0, 68, 255, 0.02)",
+  // Gradient stops (for area fills) — lima neon
+  primaryFillStart: "rgba(200, 255, 45, 0.18)",
+  primaryFillEnd: "rgba(200, 255, 45, 0.0)",
+  secondaryFillStart: "rgba(200, 255, 45, 0.12)",
+  secondaryFillEnd: "rgba(200, 255, 45, 0.0)",
 } as const;
 
 export type ChartTone =
