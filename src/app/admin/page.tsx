@@ -23,7 +23,10 @@ import { DashboardFilters } from "./_components/DashboardFilters";
 import { RevenueArea, AttendanceArea } from "./_components/DashboardCharts";
 import { AtRiskCard } from "./_components/AtRiskCard";
 import { UpcomingBillingCard } from "./_components/UpcomingBillingCard";
+import { CoachClassesTodayCard } from "./_components/CoachClassesTodayCard";
+import { CoachAttendanceTodayCard } from "./_components/CoachAttendanceTodayCard";
 import { getOwnerDashboardSnapshot } from "@/server/actions/owner-dashboard";
+import { getCoachDashboardSnapshot } from "@/server/actions/coach-dashboard";
 
 export const metadata = { title: "Kronos — Dashboard" };
 
@@ -123,11 +126,19 @@ export default async function AdminDashboardPage({
   const allClear = expiringCount === 0 && waitlistCount === 0;
 
   const session = await getServerSession(authOptions);
+  const role = session?.user?.role;
+  const isOwner = role === "OWNER";
+  const isCoachOrStaff = role === "COACH" || role === "STAFF";
+
   let showOnboardingBanner = false;
   let ownerSnapshot: Awaited<
     ReturnType<typeof getOwnerDashboardSnapshot>
   > | null = null;
-  if (session?.user?.role === "OWNER" && session.user.tenantId) {
+  let coachSnapshot: Awaited<
+    ReturnType<typeof getCoachDashboardSnapshot>
+  > | null = null;
+
+  if (isOwner && session?.user?.tenantId) {
     const [flag, snapshot] = await Promise.all([
       prismaBase.box.findUnique({
         where: { id: session.user.tenantId },
@@ -137,6 +148,41 @@ export default async function AdminDashboardPage({
     ]);
     showOnboardingBanner = !flag?.onboardingCompletedAt;
     ownerSnapshot = snapshot;
+  } else if (isCoachOrStaff) {
+    coachSnapshot = await getCoachDashboardSnapshot();
+  }
+
+  // Coach/Staff dashboard: layout limitado sin billing/revenue
+  if (isCoachOrStaff && coachSnapshot) {
+    return (
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 lg:p-8">
+        <RevealOnScroll variant="fade-up">
+          <Eyebrow>Hoy</Eyebrow>
+          <h1 className="font-display text-3xl lg:text-4xl font-bold tracking-tight mt-1">
+            {box.name}
+          </h1>
+          <p
+            className="mt-1 text-sm font-mono tracking-wide"
+            style={{ color: "var(--text-3)" }}
+          >
+            {fmtDate.format(new Date())}
+          </p>
+        </RevealOnScroll>
+
+        <RevealOnScroll variant="fade-up">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <CoachClassesTodayCard classes={coachSnapshot.classesToday} />
+            <CoachAttendanceTodayCard
+              totals={coachSnapshot.attendanceTodayTotal}
+            />
+          </div>
+        </RevealOnScroll>
+
+        <RevealOnScroll variant="fade-up">
+          <AtRiskCard rows={coachSnapshot.athletesAtRisk} />
+        </RevealOnScroll>
+      </div>
+    );
   }
 
   return (
