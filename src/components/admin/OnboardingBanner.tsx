@@ -10,14 +10,14 @@ export default function OnboardingBanner({ show }: Props) {
     <div
       className="rounded-2xl p-4 md:p-5 flex items-center justify-between gap-4 flex-wrap"
       style={{
-        background: "var(--grad-soft)",
-        border: "1px solid var(--line-strong)",
+        background: "var(--k-accent-soft)",
+        border: "1px solid var(--k-line-2)",
       }}
     >
       <div className="flex-1 min-w-0">
         <div
           className="text-[10px] font-mono uppercase tracking-[0.22em]"
-          style={{ color: "var(--blue)" }}
+          style={{ color: "var(--k-accent)" }}
         >
           Configurá tu box
         </div>

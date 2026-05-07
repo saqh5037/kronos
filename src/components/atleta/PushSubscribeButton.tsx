@@ -76,13 +76,13 @@ export default function PushSubscribeButton() {
           className="flex items-center gap-2"
         >
           <div className="relative">
-            <div className="w-8 h-8 rounded-full bg-[var(--moss-soft)] border border-[var(--moss-line)] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-[var(--k-accent-soft)] border border-[var(--k-accent-line)] flex items-center justify-center">
               <svg
                 width="14"
                 height="14"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="var(--moss)"
+                stroke="var(--k-accent)"
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -90,9 +90,9 @@ export default function PushSubscribeButton() {
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
-            <span className="absolute inset-0 rounded-full border border-[var(--moss)] opacity-30 animate-ping" />
+            <span className="absolute inset-0 rounded-full border border-[var(--k-accent)] opacity-30 animate-ping" />
           </div>
-          <span className="text-xs font-semibold text-[var(--moss)]">
+          <span className="text-xs font-semibold text-[var(--k-accent)]">
             Notificaciones activadas
           </span>
         </motion.div>
@@ -104,7 +104,7 @@ export default function PushSubscribeButton() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="text-[11px] text-[var(--text-3)] leading-relaxed"
+          className="text-[11px] text-[var(--k-t3)] leading-relaxed"
         >
           <p>Notificaciones bloqueadas.</p>
           <a
@@ -115,7 +115,7 @@ export default function PushSubscribeButton() {
                 "Habilita las notificaciones en los ajustes de tu navegador (icono 🔒 en la barra de dirección).",
               );
             }}
-            className="text-[var(--strain)] hover:underline"
+            className="text-[var(--k-warning)] hover:underline"
           >
             ¿Cómo habilitar?
           </a>

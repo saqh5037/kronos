@@ -48,7 +48,7 @@ export default function MiniBarChart({
                 className="w-full rounded-[3px]"
                 style={{
                   background: bar.isBest
-                    ? "var(--grad)"
+                    ? "var(--k-accent)"
                     : (bar.color ?? "var(--chart-inactive)"),
                   boxShadow: bar.isBest
                     ? "0 0 12px rgba(220,75,23,0.35)"
@@ -67,7 +67,7 @@ export default function MiniBarChart({
               <span
                 className="font-mono text-[9px] font-bold tracking-[0.04em] text-center truncate w-full"
                 style={{
-                  color: bar.isBest ? "var(--moss)" : "var(--text-2)",
+                  color: bar.isBest ? "var(--k-accent)" : "var(--k-t2)",
                 }}
               >
                 {bar.label}
@@ -76,7 +76,7 @@ export default function MiniBarChart({
             {bar.sublabel && (
               <span
                 className="font-mono text-[8px] tracking-[0.02em] text-center truncate w-full"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 {bar.sublabel}
               </span>

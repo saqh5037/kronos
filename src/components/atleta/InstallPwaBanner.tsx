@@ -88,7 +88,7 @@ export default function InstallPwaBanner() {
           className="mx-3.5 mt-3 mb-1 rounded-2xl p-3.5 flex items-start gap-3 overflow-hidden"
           style={{
             background:
-              "linear-gradient(135deg, var(--card) 0%, var(--card-2) 100%)",
+              "linear-gradient(135deg, var(--card) 0%, var(--k-elevated) 100%)",
             border: "1px solid var(--line)",
           }}
         >
@@ -96,7 +96,7 @@ export default function InstallPwaBanner() {
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{
-              background: "var(--grad-soft)",
+              background: "var(--k-accent-soft)",
               border: "1px solid var(--fire-line)",
             }}
           >
@@ -105,7 +105,7 @@ export default function InstallPwaBanner() {
               height="18"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="var(--fire)"
+              stroke="var(--k-accent)"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -120,19 +120,19 @@ export default function InstallPwaBanner() {
               Instalar Kronos
             </div>
             {isIos ? (
-              <div className="text-[11px] leading-relaxed text-[var(--text-3)]">
+              <div className="text-[11px] leading-relaxed text-[var(--k-t3)]">
                 Toca{" "}
-                <span className="font-bold text-[var(--strain)]">
+                <span className="font-bold text-[var(--k-warning)]">
                   Compartir
                 </span>{" "}
                 (icono cuadrado con flecha) y luego{" "}
-                <span className="font-bold text-[var(--strain)]">
+                <span className="font-bold text-[var(--k-warning)]">
                   Agregar a inicio
                 </span>
                 .
               </div>
             ) : (
-              <div className="text-[11px] text-[var(--text-3)]">
+              <div className="text-[11px] text-[var(--k-t3)]">
                 Acceso rápido desde tu pantalla de inicio. Funciona sin
                 conexión.
               </div>
@@ -152,7 +152,7 @@ export default function InstallPwaBanner() {
             )}
             <button
               onClick={dismiss}
-              className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text-2)] hover:bg-[var(--hover-subtle)] transition-colors"
+              className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--k-t3)] hover:text-[var(--k-t2)] hover:bg-[var(--k-elevated)] transition-colors"
               aria-label="Cerrar"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

@@ -10,7 +10,7 @@ type ToneStyle = {
 // Paleta brand v1 (manual de marca)
 const TONE_STYLES: Record<DailyGreeting["tone"], ToneStyle> = {
   push: {
-    accent: "var(--brand-red)",
+    accent: "var(--k-accent)",
     glow: "rgba(230, 0, 38, 0.32)",
     label: "PUSH",
   },
@@ -51,7 +51,7 @@ export default function PersonalizedGreeting({
           className="relative overflow-hidden rounded-[16px] p-4"
           style={{
             background: "var(--card)",
-            border: "1px solid var(--line-strong)",
+            border: "1px solid var(--k-line-2)",
             boxShadow: `0 0 0 1px ${style.glow}, 0 12px 36px ${style.glow}`,
           }}
         >
@@ -59,14 +59,14 @@ export default function PersonalizedGreeting({
           <div
             aria-hidden
             className="absolute top-0 left-0 right-0 h-[2.5px]"
-            style={{ background: "var(--grad)" }}
+            style={{ background: "var(--k-accent)" }}
           />
           {/* Soft gradient glow background */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
             style={{
-              background: "var(--grad-soft)",
+              background: "var(--k-accent-soft)",
               opacity: 0.5,
             }}
           />
@@ -78,7 +78,7 @@ export default function PersonalizedGreeting({
             <div
               className="flex-shrink-0 h-10 w-10 rounded-[12px] flex items-center justify-center"
               style={{
-                background: "var(--grad)",
+                background: "var(--k-accent)",
                 boxShadow: `0 4px 16px ${style.glow}`,
               }}
             >
@@ -100,18 +100,18 @@ export default function PersonalizedGreeting({
               <div className="flex items-center gap-2 mb-2">
                 <span
                   className="font-mono text-[10px] tracking-[0.22em] font-bold uppercase inline-flex items-center gap-2"
-                  style={{ color: "var(--brand-red)" }}
+                  style={{ color: "var(--k-accent)" }}
                 >
                   <span
                     className="inline-block h-[1.5px] w-5"
-                    style={{ background: "var(--grad)" }}
+                    style={{ background: "var(--k-accent)" }}
                   />
                   Kronos AI
                 </span>
                 <span
                   aria-hidden
                   className="h-1 w-1 rounded-full"
-                  style={{ background: "var(--text-3)" }}
+                  style={{ background: "var(--k-t3)" }}
                 />
                 <span
                   className="font-mono text-[9px] tracking-[0.18em] font-bold uppercase"
@@ -123,7 +123,7 @@ export default function PersonalizedGreeting({
                   <span
                     title="Modo offline — texto local"
                     className="font-mono text-[8px] tracking-[0.16em] font-bold uppercase ml-1"
-                    style={{ color: "var(--text-3)" }}
+                    style={{ color: "var(--k-t3)" }}
                   >
                     · OFFLINE
                   </span>

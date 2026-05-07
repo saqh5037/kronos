@@ -38,14 +38,14 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="mx-3.5 rounded-2xl p-6 text-center border border-[var(--moss-line)]"
-        style={{ background: "var(--moss-soft)" }}
+        className="mx-3.5 rounded-2xl p-6 text-center border border-[var(--k-accent-line)]"
+        style={{ background: "var(--k-accent-soft)" }}
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 15 }}
-          className="w-12 h-12 rounded-full bg-[var(--moss)] flex items-center justify-center mx-auto mb-3"
+          className="w-12 h-12 rounded-full bg-[var(--k-accent)] flex items-center justify-center mx-auto mb-3"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path
@@ -57,10 +57,10 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
             />
           </svg>
         </motion.div>
-        <p className="text-sm font-semibold text-[var(--moss)]">
+        <p className="text-sm font-semibold text-[var(--k-accent)]">
           ¡Gracias por tu feedback!
         </p>
-        <p className="text-xs text-[var(--text-3)] mt-1">
+        <p className="text-xs text-[var(--k-t3)] mt-1">
           Tu opinión nos ayuda a mejorar
         </p>
       </motion.div>
@@ -104,7 +104,9 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
           <div key={i} className="flex items-center gap-2">
             <motion.div
               className={`h-2 rounded-full transition-colors ${
-                i <= questionIndex ? "bg-[var(--red)]" : "bg-[var(--track)]"
+                i <= questionIndex
+                  ? "bg-[var(--k-accent)]"
+                  : "bg-[var(--track)]"
               }`}
               animate={{
                 width: i === questionIndex ? 24 : 8,
@@ -117,7 +119,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
 
       <div className="p-4 overflow-hidden">
         {/* Question counter */}
-        <p className="text-[10px] font-mono font-bold tracking-wider text-[var(--text-3)] uppercase mb-2 text-center">
+        <p className="text-[10px] font-mono font-bold tracking-wider text-[var(--k-t3)] uppercase mb-2 text-center">
           {questionIndex + 1} de {questions.length}
         </p>
 
@@ -142,7 +144,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
                   key={opt.value}
                   onClick={() => handleOption(currentQuestion.id, opt.value)}
                   disabled={isPending}
-                  className="flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl transition-colors border border-[var(--line)] bg-[var(--bg-soft)] hover:bg-[var(--card-2)] disabled:opacity-50"
+                  className="flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl transition-colors border border-[var(--line)] bg-[var(--k-surface)] hover:bg-[var(--k-elevated)] disabled:opacity-50"
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.92 }}
                 >
@@ -160,7 +162,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
                       {opt.emoji}
                     </motion.span>
                   )}
-                  <span className="text-[11px] font-semibold text-center leading-tight text-[var(--text-2)]">
+                  <span className="text-[11px] font-semibold text-center leading-tight text-[var(--k-t2)]">
                     {opt.label}
                   </span>
                 </motion.button>

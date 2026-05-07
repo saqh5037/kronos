@@ -62,7 +62,7 @@ export default function AliasCardList({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar apodo o atleta..."
-          className="w-full bg-[var(--card-2)] text-text text-sm rounded-xl pl-10 pr-4 py-2.5 border border-white/10 placeholder:text-text-3 focus:outline-none focus:border-[var(--steel)] transition-colors"
+          className="w-full bg-[var(--k-elevated)] text-text text-sm rounded-xl pl-10 pr-4 py-2.5 border border-white/10 placeholder:text-text-3 focus:outline-none focus:border-[var(--k-t2)] transition-colors"
         />
         {search && (
           <button
@@ -132,7 +132,7 @@ export default function AliasCardList({
                       <span className="text-[11px] text-text-3">¿Seguro?</span>
                       <button
                         onClick={() => handleDelete(a.id)}
-                        className="text-[11px] text-[var(--ember)] font-medium hover:underline"
+                        className="text-[11px] text-[var(--k-warning)] font-medium hover:underline"
                       >
                         Sí, borrar
                       </button>
@@ -146,7 +146,7 @@ export default function AliasCardList({
                   ) : (
                     <button
                       onClick={() => setConfirmingId(a.id)}
-                      className="text-[11px] text-text-3 hover:text-[var(--ember)] transition-colors"
+                      className="text-[11px] text-text-3 hover:text-[var(--k-warning)] transition-colors"
                     >
                       <svg
                         width="14"

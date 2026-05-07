@@ -30,7 +30,7 @@ const CHANNEL_CONFIG: Record<
     icon: "🌟",
     label: "Email + Push",
     chipClass:
-      "bg-gradient-to-r from-[var(--fire)] to-[var(--amber)] text-text border-transparent",
+      "bg-gradient-to-r from-[var(--k-accent)] to-[var(--k-warning)] text-text border-transparent",
   },
 };
 
@@ -60,7 +60,7 @@ function AvatarStack({ ids, owners }: { ids: string[]; owners: Owner[] }) {
       ))}
       {extra > 0 && (
         <div
-          className="w-6 h-6 rounded-full bg-[var(--card-2)] border-2 border-[var(--card)] flex items-center justify-center text-[9px] font-medium text-text-2"
+          className="w-6 h-6 rounded-full bg-[var(--k-elevated)] border-2 border-[var(--card)] flex items-center justify-center text-[9px] font-medium text-text-2"
           style={{ marginLeft: -8, zIndex: 0 }}
         >
           +{extra}
@@ -146,7 +146,7 @@ export default function AlertRulesPanel({
                   <select
                     name="action"
                     required
-                    className="w-full bg-[var(--card-2)] text-text text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)]"
+                    className="w-full bg-[var(--k-elevated)] text-text text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)]"
                   >
                     {actionOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -162,7 +162,7 @@ export default function AlertRulesPanel({
                   </label>
                   <select
                     name="channel"
-                    className="w-full bg-[var(--card-2)] text-text text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)]"
+                    className="w-full bg-[var(--k-elevated)] text-text text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)]"
                   >
                     <option value="EMAIL">📧 Email</option>
                     <option value="BOTH">🌟 Email + Push</option>
@@ -184,7 +184,7 @@ export default function AlertRulesPanel({
                       name="threshold"
                       placeholder="Opcional"
                       min={0}
-                      className="w-full bg-[var(--card-2)] text-text text-sm rounded-lg pl-7 pr-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)]"
+                      className="w-full bg-[var(--k-elevated)] text-text text-sm rounded-lg pl-7 pr-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)]"
                     />
                   </div>
                 </div>
@@ -197,14 +197,14 @@ export default function AlertRulesPanel({
                     {owners.map((u) => (
                       <label
                         key={u.id}
-                        className="flex items-center gap-1.5 text-xs text-text-2 cursor-pointer bg-[var(--card-2)] rounded-lg px-2 py-1.5 border border-white/5"
+                        className="flex items-center gap-1.5 text-xs text-text-2 cursor-pointer bg-[var(--k-elevated)] rounded-lg px-2 py-1.5 border border-white/5"
                       >
                         <input
                           type="checkbox"
                           name="recipientIds"
                           value={u.id}
                           defaultChecked
-                          className="accent-[var(--moss)]"
+                          className="accent-[var(--k-accent)]"
                         />
                         <span>{u.name ?? u.email}</span>
                       </label>
@@ -288,7 +288,7 @@ export default function AlertRulesPanel({
                       className="relative w-11 h-6 rounded-full transition-colors"
                       style={{
                         background: rule.enabled
-                          ? "var(--moss)"
+                          ? "var(--k-accent)"
                           : "var(--track)",
                       }}
                     >
@@ -306,7 +306,7 @@ export default function AlertRulesPanel({
                     {/* Delete */}
                     <button
                       onClick={() => handleDelete(rule.id)}
-                      className="text-text-3 hover:text-[var(--ember)] transition-colors p-1"
+                      className="text-text-3 hover:text-[var(--k-warning)] transition-colors p-1"
                     >
                       <svg
                         width="14"

@@ -54,7 +54,11 @@ export default function PayMembershipButton({
           : `Pagar ${amount.toLocaleString()} ${currency}`}
       </button>
       {error && (
-        <p className="mt-2 text-xs" style={{ color: "var(--pr)" }} role="alert">
+        <p
+          className="mt-2 text-xs"
+          style={{ color: "var(--k-danger)" }}
+          role="alert"
+        >
           {error}
         </p>
       )}

@@ -23,11 +23,11 @@ export function EmptyState({
         className,
       )}
     >
-      {icon ? <div className="text-[var(--text-3)]">{icon}</div> : null}
+      {icon ? <div className="text-[var(--k-t3)]">{icon}</div> : null}
       <div className="space-y-1">
         <p className="text-sm font-semibold text-[var(--text)]">{title}</p>
         {description ? (
-          <p className="text-xs text-[var(--text-2)]">{description}</p>
+          <p className="text-xs text-[var(--k-t2)]">{description}</p>
         ) : null}
       </div>
       {action}

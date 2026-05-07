@@ -40,7 +40,7 @@ export function AxisTicks({
               fontSize: 10,
               fontFamily: "var(--font-mono, ui-monospace), monospace",
               letterSpacing: "0.04em",
-              fill: "var(--text-3)",
+              fill: "var(--k-t3)",
             }}
             initial={skipMotion ? false : { opacity: 0, x: padding.left - 14 }}
             animate={{ opacity: 0.85, x: padding.left - 8 }}
@@ -74,7 +74,7 @@ export function AxisTicks({
               fontSize: 10,
               fontFamily: "var(--font-mono, ui-monospace), monospace",
               letterSpacing: "0.04em",
-              fill: "var(--text-3)",
+              fill: "var(--k-t3)",
             }}
             initial={
               skipMotion

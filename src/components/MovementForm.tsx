@@ -86,7 +86,7 @@ export default function MovementForm() {
         style={{ borderColor: "var(--line)" }}
       />
       {error && (
-        <p className="text-xs" style={{ color: "var(--pr)" }}>
+        <p className="text-xs" style={{ color: "var(--k-danger)" }}>
           {error}
         </p>
       )}

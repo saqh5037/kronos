@@ -47,7 +47,7 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-sm"
               style={{
-                background: isFirst ? "var(--grad)" : "var(--card-2)",
+                background: isFirst ? "var(--k-accent)" : "var(--k-elevated)",
                 border: isFirst ? "none" : "1px solid var(--line)",
                 color: isFirst ? "#1c1917" : "var(--text)",
                 boxShadow: isFirst ? "0 0 20px rgba(220,75,23,0.25)" : "none",
@@ -59,12 +59,12 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
               <p className="text-xs font-medium truncate">{e.name}</p>
               <p
                 className="font-mono font-bold text-sm mt-0.5"
-                style={{ color: isFirst ? "var(--moss)" : "var(--text)" }}
+                style={{ color: isFirst ? "var(--k-accent)" : "var(--text)" }}
               >
                 {formatScore(e.value, e.scoreType)}
               </p>
               {e.scaling !== "RX" && (
-                <span className="text-[10px]" style={{ color: "var(--steel)" }}>
+                <span className="text-[10px]" style={{ color: "var(--k-t2)" }}>
                   {e.scaling}
                 </span>
               )}
@@ -72,7 +72,7 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
             <div
               className={`w-16 rounded-t-lg ${heightClass}`}
               style={{
-                background: isFirst ? "var(--grad)" : "var(--btn-ghost-bg)",
+                background: isFirst ? "var(--k-accent)" : "var(--btn-ghost-bg)",
                 border: isFirst ? "none" : "1px solid var(--line)",
                 borderBottom: "none",
               }}

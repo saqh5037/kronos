@@ -46,7 +46,7 @@ export function CapabilityRadar({
     return (
       <div
         className="flex items-center justify-center text-xs"
-        style={{ height, color: "var(--text-3)" }}
+        style={{ height, color: "var(--k-t3)" }}
       >
         Sin datos de capacidades
       </div>
@@ -91,13 +91,13 @@ export function CapabilityRadar({
           <div className="text-center">
             <div
               className="font-display text-lg font-bold"
-              style={{ color: "var(--fire)" }}
+              style={{ color: "var(--k-accent)" }}
             >
               #{overallRank}
             </div>
             <div
               className="text-[10px] font-bold tracking-wide"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               DE {totalAthletes}
             </div>
@@ -107,13 +107,13 @@ export function CapabilityRadar({
           <div className="text-center">
             <div
               className="font-display text-lg font-bold"
-              style={{ color: "var(--moss)" }}
+              style={{ color: "var(--k-accent)" }}
             >
               {strongestCategory}
             </div>
             <div
               className="text-[10px] font-bold tracking-wide"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               MÁS FUERTE
             </div>
@@ -123,13 +123,13 @@ export function CapabilityRadar({
           <div className="text-center">
             <div
               className="font-display text-lg font-bold"
-              style={{ color: "var(--ember)" }}
+              style={{ color: "var(--k-warning)" }}
             >
               {weakestCategory}
             </div>
             <div
               className="text-[10px] font-bold tracking-wide"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               A MEJORAR
             </div>
@@ -143,7 +143,7 @@ export function CapabilityRadar({
           <div key={c.category} className="flex items-center gap-3">
             <div
               className="w-16 text-[11px] font-semibold truncate"
-              style={{ color: "var(--text-2)" }}
+              style={{ color: "var(--k-t2)" }}
             >
               {c.name}
             </div>
@@ -157,10 +157,10 @@ export function CapabilityRadar({
                   width: `${Math.min(100, Math.max(0, c.score))}%`,
                   background:
                     c.score >= 70
-                      ? "var(--moss)"
+                      ? "var(--k-accent)"
                       : c.score >= 40
-                        ? "var(--amber)"
-                        : "var(--ember)",
+                        ? "var(--k-warning)"
+                        : "var(--k-warning)",
                 }}
               />
             </div>

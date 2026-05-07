@@ -40,7 +40,7 @@ export default function CancelMyBookingButton({
       style={{
         background: "var(--btn-ghost-bg)",
         border: "1px solid var(--line)",
-        color: "var(--text-2)",
+        color: "var(--k-t2)",
       }}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}

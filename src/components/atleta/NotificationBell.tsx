@@ -132,7 +132,7 @@ export default function NotificationBell() {
       <motion.button
         onClick={handleOpen}
         aria-label="Notificaciones"
-        className="relative p-2 rounded-full text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--track)] transition-colors"
+        className="relative p-2 rounded-full text-[var(--k-t2)] hover:text-[var(--text)] hover:bg-[var(--track)] transition-colors"
         animate={shake ? { rotate: [0, -12, 10, -8, 6, 0] } : {}}
         transition={{ duration: 0.5 }}
       >
@@ -157,11 +157,11 @@ export default function NotificationBell() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-[var(--ember)] text-white text-[10px] font-bold flex items-center justify-center"
+              className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-[var(--k-warning)] text-white text-[10px] font-bold flex items-center justify-center"
             >
               <span className="relative flex h-full w-full items-center justify-center">
                 {unread > 9 ? "9+" : unread}
-                <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--ember)] opacity-75 animate-ping" />
+                <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--k-warning)] opacity-75 animate-ping" />
               </span>
             </motion.span>
           )}
@@ -186,7 +186,7 @@ export default function NotificationBell() {
               {unread > 0 && (
                 <button
                   onClick={handleMarkAll}
-                  className="text-xs text-[var(--steel)] hover:text-[var(--strain)] transition-colors"
+                  className="text-xs text-[var(--k-t2)] hover:text-[var(--k-warning)] transition-colors"
                 >
                   Marcar todo leído
                 </button>
@@ -199,10 +199,10 @@ export default function NotificationBell() {
                 <div className="p-6 space-y-3">
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[var(--card-2)] shrink-0 animate-pulse" />
+                      <div className="w-8 h-8 rounded-full bg-[var(--k-elevated)] shrink-0 animate-pulse" />
                       <div className="flex-1 space-y-2">
-                        <div className="h-3 bg-[var(--card-2)] rounded w-3/4 animate-pulse" />
-                        <div className="h-2 bg-[var(--card-2)] rounded w-1/2 animate-pulse" />
+                        <div className="h-3 bg-[var(--k-elevated)] rounded w-3/4 animate-pulse" />
+                        <div className="h-2 bg-[var(--k-elevated)] rounded w-1/2 animate-pulse" />
                       </div>
                     </div>
                   ))}
@@ -210,10 +210,10 @@ export default function NotificationBell() {
               ) : notifications.length === 0 ? (
                 <div className="p-8 text-center">
                   <p className="text-3xl mb-2">🔔</p>
-                  <p className="text-sm text-[var(--text-2)]">
+                  <p className="text-sm text-[var(--k-t2)]">
                     Sin notificaciones nuevas
                   </p>
-                  <p className="text-xs text-[var(--text-3)] mt-1">
+                  <p className="text-xs text-[var(--k-t3)] mt-1">
                     Te avisamos cuando haya algo importante
                   </p>
                 </div>
@@ -228,8 +228,8 @@ export default function NotificationBell() {
                       key={n.id}
                       variants={itemAnim}
                       onClick={() => !n.readAt && handleRead(n.id)}
-                      className={`flex gap-3 px-4 py-3 border-b border-[var(--line)] last:border-0 cursor-pointer hover:bg-[var(--hover-subtle)] transition-colors ${
-                        !n.readAt ? "bg-[var(--steel-soft)]" : ""
+                      className={`flex gap-3 px-4 py-3 border-b border-[var(--line)] last:border-0 cursor-pointer hover:bg-[var(--k-elevated)] transition-colors ${
+                        !n.readAt ? "bg-[var(--k-elevated)]" : ""
                       }`}
                     >
                       <span className="text-lg mt-0.5 shrink-0">
@@ -240,17 +240,17 @@ export default function NotificationBell() {
                           className={`text-sm leading-snug ${
                             !n.readAt
                               ? "text-[var(--text)] font-medium"
-                              : "text-[var(--text-2)]"
+                              : "text-[var(--k-t2)]"
                           }`}
                         >
                           {n.title}
                         </p>
                         {n.body && (
-                          <p className="text-xs text-[var(--text-3)] mt-0.5 truncate">
+                          <p className="text-xs text-[var(--k-t3)] mt-0.5 truncate">
                             {n.body}
                           </p>
                         )}
-                        <p className="text-xs text-[var(--text-3)] mt-1 font-mono">
+                        <p className="text-xs text-[var(--k-t3)] mt-1 font-mono">
                           {n.createdAt.toLocaleTimeString("es-MX", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -258,7 +258,7 @@ export default function NotificationBell() {
                         </p>
                       </div>
                       {!n.readAt && (
-                        <span className="w-2 h-2 rounded-full bg-[var(--strain)] mt-1.5 flex-shrink-0" />
+                        <span className="w-2 h-2 rounded-full bg-[var(--k-warning)] mt-1.5 flex-shrink-0" />
                       )}
                     </motion.div>
                   ))}

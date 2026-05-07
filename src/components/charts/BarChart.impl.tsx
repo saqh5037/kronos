@@ -64,14 +64,14 @@ export function BarChart<T extends Record<string, unknown>>({
           width={48}
         />
         <Tooltip
-          cursor={{ fill: "var(--hover-subtle)" }}
+          cursor={{ fill: "var(--k-elevated)" }}
           contentStyle={{
-            background: "var(--card-elevated)",
-            border: "1px solid var(--line-strong)",
+            background: "var(--k-elevated)",
+            border: "1px solid var(--k-line-2)",
             borderRadius: 8,
             fontSize: 12,
           }}
-          labelStyle={{ color: "var(--text-2)" }}
+          labelStyle={{ color: "var(--k-t2)" }}
           formatter={
             yFormatter
               ? (((v: unknown) => yFormatter(Number(v))) as never)

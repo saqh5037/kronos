@@ -46,7 +46,7 @@ export function DateRangePicker({ className }: { className?: string }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 py-1.5 text-sm text-[var(--text)] hover:border-[var(--line-strong)]"
+        className="inline-flex items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 py-1.5 text-sm text-[var(--text)] hover:border-[var(--k-line-2)]"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
           <rect
@@ -86,8 +86,8 @@ export function DateRangePicker({ className }: { className?: string }) {
                 className={cn(
                   "rounded-lg px-2 py-1.5 text-left text-xs",
                   range.preset === p
-                    ? "bg-[var(--strain-soft)] text-[var(--strain)]"
-                    : "hover:bg-[var(--hover-subtle)] text-[var(--text-2)]",
+                    ? "bg-[var(--strain-soft)] text-[var(--k-warning)]"
+                    : "hover:bg-[var(--k-elevated)] text-[var(--k-t2)]",
                 )}
               >
                 {RANGE_PRESET_LABELS[p]}
@@ -106,9 +106,9 @@ export function DateRangePicker({ className }: { className?: string }) {
                     setRange({ from, to: range.to });
                   }
                 }}
-                className="flex-1 rounded-lg border border-[var(--line)] bg-[var(--bg-soft)] px-2 py-1 text-xs text-[var(--text)]"
+                className="flex-1 rounded-lg border border-[var(--line)] bg-[var(--k-surface)] px-2 py-1 text-xs text-[var(--text)]"
               />
-              <span className="text-[var(--text-3)]">–</span>
+              <span className="text-[var(--k-t3)]">–</span>
               <input
                 type="date"
                 defaultValue={toInputValue(range.to)}
@@ -118,7 +118,7 @@ export function DateRangePicker({ className }: { className?: string }) {
                     setRange({ from: range.from, to });
                   }
                 }}
-                className="flex-1 rounded-lg border border-[var(--line)] bg-[var(--bg-soft)] px-2 py-1 text-xs text-[var(--text)]"
+                className="flex-1 rounded-lg border border-[var(--line)] bg-[var(--k-surface)] px-2 py-1 text-xs text-[var(--text)]"
               />
             </div>
           </div>

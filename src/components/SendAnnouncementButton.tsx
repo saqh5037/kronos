@@ -24,7 +24,7 @@ export function SendButton({ id }: { id: string }) {
       }
       disabled={isPending}
       className="text-xs px-2 py-1 rounded-md disabled:opacity-50"
-      style={{ color: "var(--recovery)" }}
+      style={{ color: "var(--k-accent)" }}
     >
       {isPending ? "Enviando…" : "Enviar ahora"}
     </button>
@@ -56,7 +56,7 @@ export function DeleteAnnouncementButton({ id }: { id: string }) {
       onClick={handleClick}
       disabled={isPending}
       className="text-xs px-2 py-1 rounded-md disabled:opacity-50"
-      style={{ color: "var(--text-3)" }}
+      style={{ color: "var(--k-t3)" }}
     >
       {isPending ? "…" : "Borrar"}
     </button>

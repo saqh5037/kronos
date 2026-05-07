@@ -58,9 +58,9 @@ function severityColor(sev: FeedSeverity): string {
     case "info":
       return "bg-white/20";
     case "warning":
-      return "bg-[var(--amber)]";
+      return "bg-[var(--k-warning)]";
     case "sensitive":
-      return "bg-[var(--ember)]";
+      return "bg-[var(--k-warning)]";
   }
 }
 
@@ -117,7 +117,7 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
           <div key={dateKey}>
             {/* Date header */}
             <div className="relative flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-[var(--card-2)] border border-[var(--line)] flex items-center justify-center z-10">
+              <div className="w-10 h-10 rounded-full bg-[var(--k-elevated)] border border-[var(--line)] flex items-center justify-center z-10">
                 <span className="text-[10px] font-mono font-bold text-text-2 uppercase">
                   {formatDate(dayEvents[0].when)}
                 </span>
@@ -149,7 +149,7 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
 
                   {/* Card */}
                   <div className="flex-1 min-w-0">
-                    <div className="k-card-flat p-4 hover:bg-[var(--card-2)] transition-colors">
+                    <div className="k-card-flat p-4 hover:bg-[var(--k-elevated)] transition-colors">
                       <div className="flex items-start gap-3">
                         {/* Avatar */}
                         {event.actor ? (
@@ -165,7 +165,7 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
                             {getInitials(event.actor.name)}
                           </div>
                         ) : (
-                          <div className="w-9 h-9 rounded-full bg-[var(--card-2)] border border-[var(--line)] flex items-center justify-center text-sm shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-[var(--k-elevated)] border border-[var(--line)] flex items-center justify-center text-sm shrink-0">
                             🤖
                           </div>
                         )}
@@ -197,7 +197,7 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
                             {event.target.link ? (
                               <a
                                 href={event.target.link}
-                                className="text-[var(--steel)] hover:text-[var(--strain)] hover:underline text-sm truncate transition-colors"
+                                className="text-[var(--k-t2)] hover:text-[var(--k-warning)] hover:underline text-sm truncate transition-colors"
                               >
                                 {event.target.label}
                               </a>
@@ -224,10 +224,10 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
 
                           {event.severity === "sensitive" && (
                             <div className="mt-2 inline-flex">
-                              <span className="k-chip text-[var(--ember)] bg-[var(--ember-soft)] border-[var(--ember-line)] text-[10px]">
+                              <span className="k-chip text-[var(--k-warning)] bg-[rgba(255, 90, 90, 0.1)] border-[rgba(255, 90, 90, 0.3)] text-[10px]">
                                 <span className="relative flex h-1.5 w-1.5 mr-1">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--ember)] opacity-75" />
-                                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[var(--ember)]" />
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--k-warning)] opacity-75" />
+                                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[var(--k-warning)]" />
                                 </span>
                                 Sensible
                               </span>

@@ -21,26 +21,26 @@ export default function ConfidenceBadge({
   let pulse = false;
 
   if (confidence >= 0.85) {
-    color = "var(--moss)";
+    color = "var(--k-accent)";
     glowColor = "rgba(74, 124, 89, 0.55)";
     bgClass =
-      "bg-[var(--moss-soft)] text-[var(--moss)] border-[var(--moss-line)]";
+      "bg-[var(--k-accent-soft)] text-[var(--k-accent)] border-[var(--k-accent-line)]";
   } else if (confidence >= 0.5) {
-    color = "var(--amber)";
+    color = "var(--k-warning)";
     glowColor = "rgba(217, 119, 6, 0.45)";
     bgClass =
-      "bg-[var(--amber-soft)] text-[var(--amber)] border-[var(--amber-line)]";
+      "bg-[var(--amber-soft)] text-[var(--k-warning)] border-[var(--amber-line)]";
   } else if (confidence === 0) {
     // No match at all — informative, not alarming
-    color = "var(--amber)";
+    color = "var(--k-warning)";
     glowColor = "rgba(217, 119, 6, 0.35)";
     bgClass =
-      "bg-[var(--amber-soft)] text-[var(--amber)] border-[var(--amber-line)]";
+      "bg-[var(--amber-soft)] text-[var(--k-warning)] border-[var(--amber-line)]";
   } else {
-    color = "var(--ember)";
+    color = "var(--k-warning)";
     glowColor = "rgba(196, 69, 54, 0.55)";
     bgClass =
-      "bg-[var(--ember-soft)] text-[var(--ember)] border-[var(--ember-line)]";
+      "bg-[rgba(255, 90, 90, 0.1)] text-[var(--k-warning)] border-[rgba(255, 90, 90, 0.3)]";
     pulse = true;
   }
 

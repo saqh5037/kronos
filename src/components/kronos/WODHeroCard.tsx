@@ -1,12 +1,12 @@
 import type { WODSummary } from "@/server/actions/wods";
 
 const TYPE_COLOR: Record<string, string> = {
-  STRENGTH: "var(--strain)",
-  AMRAP: "var(--strain)",
-  EMOM: "var(--pr)",
+  STRENGTH: "var(--k-warning)",
+  AMRAP: "var(--k-warning)",
+  EMOM: "var(--k-danger)",
   TABATA: "#f5a623",
-  FORTIME: "var(--recovery)",
-  METCON: "var(--recovery)",
+  FORTIME: "var(--k-accent)",
+  METCON: "var(--k-accent)",
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -83,8 +83,8 @@ export function WODHeroCard({ w }: { w: WODSummary }) {
             <span
               className="rounded-full px-2.5 py-0.5 font-mono text-[10px] font-bold tracking-wider uppercase"
               style={{
-                background: "var(--card-2)",
-                color: "var(--text-2)",
+                background: "var(--k-elevated)",
+                color: "var(--k-t2)",
                 border: "1px solid var(--line)",
               }}
             >
@@ -101,7 +101,7 @@ export function WODHeroCard({ w }: { w: WODSummary }) {
           />
           <p
             className="font-mono text-[10px] font-bold uppercase tracking-wider"
-            style={{ color: "var(--text-2)" }}
+            style={{ color: "var(--k-t2)" }}
           >
             {scoreLabel}
           </p>
@@ -122,7 +122,7 @@ export function WODHeroCard({ w }: { w: WODSummary }) {
           className="flex items-center gap-3 pt-3 border-t font-mono text-[10px] font-bold uppercase tracking-wider"
           style={{
             borderColor: "var(--line)",
-            color: "var(--text-3)",
+            color: "var(--k-t3)",
           }}
         >
           <span>

@@ -36,7 +36,7 @@ export default function GradientButton({
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className={`relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl font-semibold text-white cursor-pointer border-none ${sizeClasses[size]} ${className}`}
       style={{
-        background: "var(--grad)",
+        background: "var(--k-accent)",
         boxShadow: "0 4px 18px rgba(230, 0, 38, 0.20)",
       }}
     >

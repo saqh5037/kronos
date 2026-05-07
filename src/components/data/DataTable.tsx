@@ -50,7 +50,7 @@ export function DataTable<T>({
           checked={table.getIsAllPageRowsSelected()}
           onChange={table.getToggleAllPageRowsSelectedHandler()}
           aria-label="Seleccionar todo"
-          className="accent-[var(--blue)]"
+          className="accent-[var(--k-accent)]"
         />
       ),
       cell: ({ row }) => (
@@ -60,7 +60,7 @@ export function DataTable<T>({
           onChange={row.getToggleSelectedHandler()}
           onClick={(e) => e.stopPropagation()}
           aria-label="Seleccionar fila"
-          className="accent-[var(--blue)]"
+          className="accent-[var(--k-accent)]"
         />
       ),
     };
@@ -117,7 +117,7 @@ export function DataTable<T>({
                         )}
                         <span
                           aria-hidden
-                          className="text-[var(--text-3)] text-xs"
+                          className="text-[var(--k-t3)] text-xs"
                         >
                           {dir === "asc" ? "↑" : dir === "desc" ? "↓" : "↕"}
                         </span>

@@ -203,9 +203,7 @@ export function KronosLineChart<T>({
         style={{ width: "100%", height }}
         className={`flex items-center justify-center text-xs ${className ?? ""}`}
       >
-        {emptyState ?? (
-          <span style={{ color: "var(--text-3)" }}>Sin datos</span>
-        )}
+        {emptyState ?? <span style={{ color: "var(--k-t3)" }}>Sin datos</span>}
       </div>
     );
   }
@@ -469,7 +467,7 @@ function DefaultTooltipContent<T>({
     <div>
       <div
         className="font-mono text-[10px] uppercase tracking-wider"
-        style={{ color: "var(--text-3)" }}
+        style={{ color: "var(--k-t3)" }}
       >
         {xLabel}
       </div>
@@ -489,10 +487,7 @@ function DefaultTooltipContent<T>({
                 {formatY ? formatY(value) : value}
               </span>
               {series.length > 1 && (
-                <span
-                  className="text-[10px]"
-                  style={{ color: "var(--text-3)" }}
-                >
+                <span className="text-[10px]" style={{ color: "var(--k-t3)" }}>
                   {s.label}
                 </span>
               )}

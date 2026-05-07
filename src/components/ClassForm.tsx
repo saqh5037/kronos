@@ -78,7 +78,7 @@ export default function ClassForm({
 
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Fecha</span>
+          <span style={{ color: "var(--k-t2)" }}>Fecha</span>
           <input
             name="date"
             type="date"
@@ -89,7 +89,7 @@ export default function ClassForm({
           />
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Hora</span>
+          <span style={{ color: "var(--k-t2)" }}>Hora</span>
           <input
             name="time"
             type="time"
@@ -103,7 +103,7 @@ export default function ClassForm({
 
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Duración (min)</span>
+          <span style={{ color: "var(--k-t2)" }}>Duración (min)</span>
           <input
             name="durationMin"
             type="number"
@@ -116,7 +116,7 @@ export default function ClassForm({
           />
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Capacidad</span>
+          <span style={{ color: "var(--k-t2)" }}>Capacidad</span>
           <input
             name="capacity"
             type="number"
@@ -131,7 +131,7 @@ export default function ClassForm({
       </div>
 
       <label className="flex flex-col gap-1 text-xs">
-        <span style={{ color: "var(--text-2)" }}>Coach</span>
+        <span style={{ color: "var(--k-t2)" }}>Coach</span>
         <select
           name="coachId"
           className="px-3 py-2 rounded-lg text-sm border bg-transparent"
@@ -147,7 +147,7 @@ export default function ClassForm({
       </label>
 
       <label className="flex flex-col gap-1 text-xs">
-        <span style={{ color: "var(--text-2)" }}>WOD</span>
+        <span style={{ color: "var(--k-t2)" }}>WOD</span>
         <select
           name="wodId"
           className="px-3 py-2 rounded-lg text-sm border bg-transparent"
@@ -164,7 +164,7 @@ export default function ClassForm({
 
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Recurrencia</span>
+          <span style={{ color: "var(--k-t2)" }}>Recurrencia</span>
           <select
             name="recFreq"
             defaultValue="NONE"
@@ -177,7 +177,7 @@ export default function ClassForm({
           </select>
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Repeticiones</span>
+          <span style={{ color: "var(--k-t2)" }}>Repeticiones</span>
           <input
             name="recCount"
             type="number"
@@ -191,7 +191,7 @@ export default function ClassForm({
       </div>
 
       {error && (
-        <p className="text-xs" style={{ color: "var(--pr)" }}>
+        <p className="text-xs" style={{ color: "var(--k-danger)" }}>
           {error}
         </p>
       )}

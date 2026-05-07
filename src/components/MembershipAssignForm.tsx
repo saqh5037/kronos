@@ -60,7 +60,7 @@ export default function MembershipAssignForm({
     >
       <p className="k-eyebrow">Asignar membership</p>
       <label className="flex flex-col gap-1 text-xs">
-        <span style={{ color: "var(--text-2)" }}>Atleta</span>
+        <span style={{ color: "var(--k-t2)" }}>Atleta</span>
         <select
           name="athleteId"
           required
@@ -76,7 +76,7 @@ export default function MembershipAssignForm({
         </select>
       </label>
       <label className="flex flex-col gap-1 text-xs">
-        <span style={{ color: "var(--text-2)" }}>Plan</span>
+        <span style={{ color: "var(--k-t2)" }}>Plan</span>
         <select
           name="planId"
           required
@@ -92,7 +92,7 @@ export default function MembershipAssignForm({
         </select>
       </label>
       <label className="flex flex-col gap-1 text-xs">
-        <span style={{ color: "var(--text-2)" }}>Fecha de inicio</span>
+        <span style={{ color: "var(--k-t2)" }}>Fecha de inicio</span>
         <input
           name="startDate"
           type="date"
@@ -107,22 +107,22 @@ export default function MembershipAssignForm({
           name="autoRenew"
           type="checkbox"
           defaultChecked
-          style={{ accentColor: "var(--recovery)" }}
+          style={{ accentColor: "var(--k-accent)" }}
         />
-        <span style={{ color: "var(--text-2)" }}>Renovación automática</span>
+        <span style={{ color: "var(--k-t2)" }}>Renovación automática</span>
       </label>
       <label className="flex items-center gap-2 text-xs">
         <input
           name="pendingPayment"
           type="checkbox"
-          style={{ accentColor: "var(--strain)" }}
+          style={{ accentColor: "var(--k-warning)" }}
         />
-        <span style={{ color: "var(--text-2)" }}>
+        <span style={{ color: "var(--k-t2)" }}>
           Crear pendiente de pago (atleta paga por MercadoPago)
         </span>
       </label>
       {error && (
-        <p className="text-xs" style={{ color: "var(--pr)" }}>
+        <p className="text-xs" style={{ color: "var(--k-danger)" }}>
           {error}
         </p>
       )}

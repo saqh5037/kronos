@@ -59,7 +59,7 @@ export default function AnnouncementForm() {
           + Nuevo anuncio
         </button>
         {feedback && (
-          <p className="text-xs" style={{ color: "var(--recovery)" }}>
+          <p className="text-xs" style={{ color: "var(--k-accent)" }}>
             {feedback}
           </p>
         )}
@@ -92,7 +92,7 @@ export default function AnnouncementForm() {
       />
       <div className="grid grid-cols-3 gap-2">
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Audiencia</span>
+          <span style={{ color: "var(--k-t2)" }}>Audiencia</span>
           <select
             name="audience"
             defaultValue="ALL"
@@ -107,7 +107,7 @@ export default function AnnouncementForm() {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Canal</span>
+          <span style={{ color: "var(--k-t2)" }}>Canal</span>
           <select
             name="channel"
             defaultValue="IN_APP"
@@ -122,7 +122,7 @@ export default function AnnouncementForm() {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Programar (opcional)</span>
+          <span style={{ color: "var(--k-t2)" }}>Programar (opcional)</span>
           <input
             name="scheduledAt"
             type="datetime-local"
@@ -132,7 +132,7 @@ export default function AnnouncementForm() {
         </label>
       </div>
       {error && (
-        <p className="text-xs" style={{ color: "var(--pr)" }}>
+        <p className="text-xs" style={{ color: "var(--k-danger)" }}>
           {error}
         </p>
       )}

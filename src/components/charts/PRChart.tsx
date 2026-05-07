@@ -29,7 +29,7 @@ export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
     return (
       <div
         className="flex items-center justify-center text-xs"
-        style={{ height, color: "var(--text-3)" }}
+        style={{ height, color: "var(--k-t3)" }}
       >
         Sin datos de progresión
       </div>
@@ -63,7 +63,7 @@ export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
           <div>
             <div
               className="font-mono text-[10px] uppercase tracking-wider"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               {formatDate(p.date)}
             </div>
@@ -78,8 +78,8 @@ export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
                 <span
                   className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                   style={{
-                    background: "var(--moss-soft)",
-                    color: "var(--moss)",
+                    background: "var(--k-accent-soft)",
+                    color: "var(--k-accent)",
                   }}
                 >
                   +{p.delta.toFixed(1)}%
@@ -89,7 +89,7 @@ export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
             {p.isCurrentBest && (
               <div
                 className="mt-1 text-[10px] font-bold tracking-wide"
-                style={{ color: "var(--ember)" }}
+                style={{ color: "var(--k-warning)" }}
               >
                 ★ PR ACTUAL
               </div>

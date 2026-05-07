@@ -33,7 +33,7 @@ export default function CancelClassButton({ id }: { id: string }) {
       onClick={handleClick}
       disabled={isPending}
       className="text-xs px-2 py-1 rounded-md disabled:opacity-50"
-      style={{ color: "var(--pr)" }}
+      style={{ color: "var(--k-danger)" }}
       title="Cancelar clase"
     >
       {isPending ? "…" : "Cancelar"}

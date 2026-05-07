@@ -63,7 +63,7 @@ export function ExportCSVButton<T>({
         {busy ? "Exportando…" : label}
       </button>
       {error ? (
-        <span className="text-[10px] text-[var(--pr)]">{error}</span>
+        <span className="text-[10px] text-[var(--k-danger)]">{error}</span>
       ) : null}
     </div>
   );

@@ -62,7 +62,7 @@ export default function CashPaymentForm({
     >
       <p className="k-eyebrow">Cobro en efectivo</p>
       <label className="flex flex-col gap-1 text-xs">
-        <span style={{ color: "var(--text-2)" }}>Membership</span>
+        <span style={{ color: "var(--k-t2)" }}>Membership</span>
         <select
           name="membershipId"
           required
@@ -79,7 +79,7 @@ export default function CashPaymentForm({
       </label>
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Monto</span>
+          <span style={{ color: "var(--k-t2)" }}>Monto</span>
           <input
             name="amount"
             type="number"
@@ -91,7 +91,7 @@ export default function CashPaymentForm({
           />
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Fecha de pago</span>
+          <span style={{ color: "var(--k-t2)" }}>Fecha de pago</span>
           <input
             name="paidAt"
             type="date"
@@ -110,7 +110,7 @@ export default function CashPaymentForm({
         style={{ borderColor: "var(--line)" }}
       />
       {error && (
-        <p className="text-xs" style={{ color: "var(--pr)" }}>
+        <p className="text-xs" style={{ color: "var(--k-danger)" }}>
           {error}
         </p>
       )}

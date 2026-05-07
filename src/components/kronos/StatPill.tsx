@@ -15,7 +15,7 @@ export default function StatPill({
   icon,
   value,
   label,
-  color = "var(--text-2)",
+  color = "var(--k-t2)",
   className = "",
 }: StatPillProps) {
   return (
@@ -40,7 +40,7 @@ export default function StatPill({
       </span>
       <span
         className="font-mono text-[9px] font-bold tracking-[0.1em] uppercase"
-        style={{ color: "var(--text-3)" }}
+        style={{ color: "var(--k-t3)" }}
       >
         {label}
       </span>

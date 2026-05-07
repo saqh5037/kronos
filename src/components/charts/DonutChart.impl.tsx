@@ -46,8 +46,8 @@ export function DonutChart({
         </Pie>
         <Tooltip
           contentStyle={{
-            background: "var(--card-elevated)",
-            border: "1px solid var(--line-strong)",
+            background: "var(--k-elevated)",
+            border: "1px solid var(--k-line-2)",
             borderRadius: 8,
             fontSize: 12,
           }}

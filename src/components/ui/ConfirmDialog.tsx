@@ -14,9 +14,9 @@ export type ConfirmOptions = {
 };
 
 const TONE_COLOR: Record<ConfirmTone, string> = {
-  danger: "var(--pr)",
-  warning: "var(--steel)",
-  info: "var(--cyan)",
+  danger: "var(--k-danger)",
+  warning: "var(--k-t2)",
+  info: "var(--k-warning)",
 };
 
 export function ConfirmDialog({
@@ -92,7 +92,7 @@ export function ConfirmDialog({
             {options.message && (
               <p
                 className="mt-2 text-sm leading-relaxed"
-                style={{ color: "var(--text-2)" }}
+                style={{ color: "var(--k-t2)" }}
               >
                 {options.message}
               </p>
@@ -103,8 +103,8 @@ export function ConfirmDialog({
                 onClick={onCancel}
                 className="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
                 style={{
-                  background: "var(--card-2)",
-                  color: "var(--text-2)",
+                  background: "var(--k-elevated)",
+                  color: "var(--k-t2)",
                   border: "1px solid var(--line)",
                 }}
                 autoFocus

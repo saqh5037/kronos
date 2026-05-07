@@ -109,7 +109,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
 
       <div className="grid grid-cols-3 gap-2">
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Tipo</span>
+          <span style={{ color: "var(--k-t2)" }}>Tipo</span>
           <select
             name="type"
             defaultValue="FORTIME"
@@ -124,7 +124,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Score</span>
+          <span style={{ color: "var(--k-t2)" }}>Score</span>
           <select
             name="scoreType"
             defaultValue="TIME"
@@ -139,7 +139,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Time cap (min)</span>
+          <span style={{ color: "var(--k-t2)" }}>Time cap (min)</span>
           <input
             name="timeCap"
             type="number"
@@ -217,7 +217,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
               onClick={() => removeLine(idx)}
               disabled={lines.length === 1}
               className="col-span-1 text-xs disabled:opacity-30"
-              style={{ color: "var(--pr)" }}
+              style={{ color: "var(--k-danger)" }}
               aria-label="Quitar movimiento"
             >
               ×
@@ -234,14 +234,14 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
         </button>
 
         {movements.length === 0 && (
-          <p className="text-xs" style={{ color: "var(--text-3)" }}>
+          <p className="text-xs" style={{ color: "var(--k-t3)" }}>
             No hay movimientos en la biblioteca. Crea uno primero abajo.
           </p>
         )}
       </div>
 
       {error && (
-        <p className="text-xs" style={{ color: "var(--pr)" }}>
+        <p className="text-xs" style={{ color: "var(--k-danger)" }}>
           {error}
         </p>
       )}

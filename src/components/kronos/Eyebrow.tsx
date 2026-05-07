@@ -14,9 +14,9 @@ export default function Eyebrow({
   withBar = true,
 }: EyebrowProps) {
   const colorMap = {
-    blue: "var(--blue)",
-    red: "var(--red)",
-    text: "var(--text-3)",
+    blue: "var(--k-accent)",
+    red: "var(--k-accent)",
+    text: "var(--k-t3)",
   };
 
   return (
@@ -27,7 +27,7 @@ export default function Eyebrow({
       {withBar && (
         <span
           className="inline-block w-6 h-[1.5px]"
-          style={{ background: "var(--grad)" }}
+          style={{ background: "var(--k-accent)" }}
         />
       )}
       <span>{children}</span>

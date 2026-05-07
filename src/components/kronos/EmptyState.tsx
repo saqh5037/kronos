@@ -12,10 +12,10 @@ export type EmptyStateProps = {
 };
 
 const TONE_COLOR: Record<EmptyStateTone, string> = {
-  neutral: "var(--text-3)",
-  info: "var(--cyan)",
-  warning: "var(--steel)",
-  danger: "var(--pr)",
+  neutral: "var(--k-t3)",
+  info: "var(--k-warning)",
+  warning: "var(--k-t2)",
+  danger: "var(--k-danger)",
 };
 
 export function EmptyState({
@@ -50,7 +50,7 @@ export function EmptyState({
       {description && (
         <p
           className="text-sm max-w-sm leading-relaxed"
-          style={{ color: "var(--text-2)" }}
+          style={{ color: "var(--k-t2)" }}
         >
           {description}
         </p>

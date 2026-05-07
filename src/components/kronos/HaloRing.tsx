@@ -125,7 +125,7 @@ export default function HaloRing({
               style={{
                 fontSize: 8,
                 letterSpacing: "0.14em",
-                color: "var(--text-3)",
+                color: "var(--k-t3)",
                 fontWeight: 700,
               }}
               initial={animate ? { opacity: 0 } : false}

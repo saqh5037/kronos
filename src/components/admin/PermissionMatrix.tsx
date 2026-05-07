@@ -163,7 +163,7 @@ export default function PermissionMatrix({
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.03 }}
-                  className="hover:bg-[var(--hover-subtle)] transition-colors"
+                  className="hover:bg-[var(--k-elevated)] transition-colors"
                 >
                   <td className="p-4">
                     <div className="flex items-center gap-2.5">
@@ -187,7 +187,7 @@ export default function PermissionMatrix({
                           <div
                             className={`w-5 h-5 rounded border-2 transition-colors flex items-center justify-center ${
                               checked
-                                ? "bg-[var(--moss)] border-[var(--moss)]"
+                                ? "bg-[var(--k-accent)] border-[var(--k-accent)]"
                                 : "border-white/20 bg-transparent hover:border-white/40"
                             }`}
                           >
@@ -228,7 +228,7 @@ export default function PermissionMatrix({
                       <div
                         className={`w-5 h-5 rounded border-2 transition-colors flex items-center justify-center ${
                           state.requiresOwnerApproval
-                            ? "bg-[var(--amber)] border-[var(--amber)]"
+                            ? "bg-[var(--k-warning)] border-[var(--k-warning)]"
                             : "border-white/20 bg-transparent hover:border-white/40"
                         }`}
                       >
@@ -269,7 +269,7 @@ export default function PermissionMatrix({
                         defaultValue={state.threshold ?? ""}
                         onBlur={(e) => updateThreshold(action, e.target.value)}
                         placeholder="—"
-                        className="w-24 bg-[var(--card-2)] text-text text-sm rounded-lg pl-6 pr-2 py-1.5 border border-white/10 text-center focus:outline-none focus:border-[var(--steel)] transition-colors"
+                        className="w-24 bg-[var(--k-elevated)] text-text text-sm rounded-lg pl-6 pr-2 py-1.5 border border-white/10 text-center focus:outline-none focus:border-[var(--k-t2)] transition-colors"
                         min={0}
                       />
                     </div>

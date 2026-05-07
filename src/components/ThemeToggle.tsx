@@ -30,7 +30,7 @@ export default function ThemeToggle({
         style={{
           background: "var(--card)",
           border: "1px solid var(--line)",
-          color: "var(--text-2)",
+          color: "var(--k-t2)",
         }}
         aria-label="Cambiar tema"
         title="Cambiar tema"
@@ -51,7 +51,7 @@ export default function ThemeToggle({
       style={{
         background: "var(--card)",
         border: "1px solid var(--line)",
-        color: "var(--text-2)",
+        color: "var(--k-t2)",
       }}
       aria-label={isDark ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
       title={isDark ? "Tema claro" : "Tema oscuro"}

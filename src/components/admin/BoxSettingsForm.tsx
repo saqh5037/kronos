@@ -180,12 +180,12 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
       </section>
 
       {error && (
-        <p className="text-sm" style={{ color: "var(--pr)" }}>
+        <p className="text-sm" style={{ color: "var(--k-danger)" }}>
           {error}
         </p>
       )}
       {success && (
-        <p className="text-sm" style={{ color: "var(--recovery)" }}>
+        <p className="text-sm" style={{ color: "var(--k-accent)" }}>
           Ajustes guardados correctamente.
         </p>
       )}
@@ -202,7 +202,7 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
         </div>
       )}
       {!canEdit && (
-        <p className="text-xs" style={{ color: "var(--text-2)" }}>
+        <p className="text-xs" style={{ color: "var(--k-t2)" }}>
           Solo el OWNER del box puede modificar estos ajustes.
         </p>
       )}
@@ -224,7 +224,7 @@ function Field({
     <label className="flex flex-col gap-1.5">
       <span
         className="text-xs uppercase tracking-wider"
-        style={{ color: "var(--text-2)" }}
+        style={{ color: "var(--k-t2)" }}
       >
         {label}
       </span>

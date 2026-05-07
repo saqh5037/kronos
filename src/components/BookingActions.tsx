@@ -142,7 +142,7 @@ export function CheckInButton({ bookingId }: { bookingId: string }) {
       disabled={isPending}
       className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-semibold"
       style={{
-        color: "var(--recovery)",
+        color: "var(--k-accent)",
         background: "var(--recovery-soft)",
         border: "1px solid var(--recovery-line)",
       }}
@@ -181,9 +181,9 @@ export function NoShowButton({ bookingId }: { bookingId: string }) {
       disabled={isPending}
       className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-semibold"
       style={{
-        color: "var(--pr)",
-        background: "var(--pr-soft)",
-        border: "1px solid var(--pr-line)",
+        color: "var(--k-danger)",
+        background: "rgba(255, 90, 90, 0.1)",
+        border: "1px solid rgba(255, 90, 90, 0.3)",
       }}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -219,7 +219,7 @@ export function CancelBookingButton({ bookingId }: { bookingId: string }) {
       disabled={isPending}
       className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-medium"
       style={{
-        color: "var(--text-3)",
+        color: "var(--k-t3)",
         background: "var(--btn-ghost-bg)",
         border: "1px solid var(--line)",
       }}

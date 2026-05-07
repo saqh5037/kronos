@@ -44,7 +44,7 @@ export default function CollapsibleRoster({ roster }: { roster: ClassRoster }) {
               {roster.wodName ?? "Sin WOD asignado"}
             </h3>
             {roster.coachName && (
-              <p className="text-xs mt-0.5" style={{ color: "var(--text-3)" }}>
+              <p className="text-xs mt-0.5" style={{ color: "var(--k-t3)" }}>
                 Coach: {roster.coachName}
               </p>
             )}
@@ -69,7 +69,7 @@ export default function CollapsibleRoster({ roster }: { roster: ClassRoster }) {
             className="transition-transform"
             style={{
               transform: open ? "rotate(180deg)" : "rotate(0deg)",
-              color: "var(--text-3)",
+              color: "var(--k-t3)",
             }}
           >
             <path d="M6 9l6 6 6-6" />
@@ -88,7 +88,7 @@ export default function CollapsibleRoster({ roster }: { roster: ClassRoster }) {
           >
             <div className="p-4">
               {roster.bookings.length === 0 ? (
-                <p className="text-xs" style={{ color: "var(--text-3)" }}>
+                <p className="text-xs" style={{ color: "var(--k-t3)" }}>
                   Sin reservas todavía.
                 </p>
               ) : (
@@ -114,7 +114,7 @@ export default function CollapsibleRoster({ roster }: { roster: ClassRoster }) {
                         </td>
                         <td
                           className="py-2 font-mono text-xs"
-                          style={{ color: "var(--text-3)" }}
+                          style={{ color: "var(--k-t3)" }}
                         >
                           {formatTime(b.bookedAt)}
                         </td>

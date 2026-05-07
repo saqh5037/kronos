@@ -31,7 +31,7 @@ function categoryChipClass(cat: string): string {
     case "GYMNASTICS":
       return "k-chip-moss";
     case "OLYMPIC":
-      return "bg-gradient-to-r from-[var(--fire)] to-[var(--amber)] text-white border-transparent";
+      return "bg-gradient-to-r from-[var(--k-accent)] to-[var(--k-warning)] text-white border-transparent";
     case "MONOSTRUCTURAL":
       return "k-chip-amber";
     case "ACCESSORY":
@@ -116,7 +116,7 @@ export default function MovementCatalog({
         {/* Search bar */}
         <div className="relative">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-3)]"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--k-t3)]"
             width="16"
             height="16"
             viewBox="0 0 16 16"
@@ -141,12 +141,12 @@ export default function MovementCatalog({
             value={search}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder="Buscar movimiento..."
-            className="w-full bg-[var(--card-2)] text-[var(--text)] text-sm rounded-xl pl-10 pr-4 py-2.5 border border-[var(--line)] placeholder:text-[var(--text-3)] focus:outline-none focus:border-[var(--steel)] transition-colors"
+            className="w-full bg-[var(--k-elevated)] text-[var(--text)] text-sm rounded-xl pl-10 pr-4 py-2.5 border border-[var(--line)] placeholder:text-[var(--k-t3)] focus:outline-none focus:border-[var(--k-t2)] transition-colors"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-3)] hover:text-[var(--text-2)] transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--k-t3)] hover:text-[var(--k-t2)] transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path
@@ -169,13 +169,13 @@ export default function MovementCatalog({
               className={`relative px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
                 activeCategory === cat.key
                   ? "text-[var(--text)]"
-                  : "text-[var(--text-3)] hover:text-[var(--text-2)]"
+                  : "text-[var(--k-t3)] hover:text-[var(--k-t2)]"
               }`}
             >
               {activeCategory === cat.key && (
                 <motion.div
                   layoutId="movement-cat-pill"
-                  className="absolute inset-0 bg-[var(--card-elevated)] border border-[var(--line-strong)] rounded-full"
+                  className="absolute inset-0 bg-[var(--k-elevated)] border border-[var(--k-line-2)] rounded-full"
                   transition={{
                     type: "spring",
                     stiffness: 350,
@@ -190,7 +190,7 @@ export default function MovementCatalog({
       </div>
 
       {/* Results count */}
-      <p className="text-[11px] text-[var(--text-3)] font-mono uppercase tracking-wider">
+      <p className="text-[11px] text-[var(--k-t3)] font-mono uppercase tracking-wider">
         {filtered.length} movimiento{filtered.length !== 1 ? "s" : ""}
       </p>
 
@@ -226,7 +226,7 @@ export default function MovementCatalog({
                     }}
                   >
                     {/* Thumbnail */}
-                    <div className="relative aspect-video bg-[var(--bg-soft)] overflow-hidden">
+                    <div className="relative aspect-video bg-[var(--k-surface)] overflow-hidden">
                       {thumbnail ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -247,7 +247,7 @@ export default function MovementCatalog({
                             height="24"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="var(--text-3)"
+                            stroke="var(--k-t3)"
                             strokeWidth="1.5"
                           >
                             <polygon points="5 3 19 12 5 21 5 3" />
@@ -284,7 +284,7 @@ export default function MovementCatalog({
                           {categoryLabel(m.category)}
                         </span>
                         {m.equipment.length > 0 && (
-                          <span className="text-[10px] text-[var(--text-3)] truncate">
+                          <span className="text-[10px] text-[var(--k-t3)] truncate">
                             {m.equipment.slice(0, 2).join(" · ")}
                           </span>
                         )}
@@ -306,10 +306,10 @@ export default function MovementCatalog({
           className="k-card p-8 text-center"
         >
           <p className="text-3xl mb-2">🔍</p>
-          <p className="text-sm text-[var(--text-2)]">
+          <p className="text-sm text-[var(--k-t2)]">
             No encontramos movimientos con &quot;{search}&quot;
           </p>
-          <p className="text-xs text-[var(--text-3)] mt-1">
+          <p className="text-xs text-[var(--k-t3)] mt-1">
             Prueba con otro término o cambia el filtro de categoría
           </p>
         </motion.div>

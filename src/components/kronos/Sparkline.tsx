@@ -13,7 +13,7 @@ interface SparklineProps {
 
 export default function Sparkline({
   values,
-  color = "var(--steel)",
+  color = "var(--k-t2)",
   height = 28,
   width = 140,
   animate = true,

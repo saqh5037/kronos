@@ -44,7 +44,7 @@ export default function AuditFilters({
   return (
     <div className="space-y-3 mb-6">
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex items-center bg-[var(--card-2)] rounded-full p-1 border border-[var(--line)]">
+        <div className="relative flex items-center bg-[var(--k-elevated)] rounded-full p-1 border border-[var(--line)]">
           {DAYS_FILTERS.map((f) => (
             <button
               key={f.value}
@@ -58,7 +58,7 @@ export default function AuditFilters({
               {currentDays === f.value && (
                 <motion.div
                   layoutId="audit-filter-pill"
-                  className="absolute inset-0 bg-[var(--steel)] rounded-full"
+                  className="absolute inset-0 bg-[var(--k-t2)] rounded-full"
                   transition={{
                     type: "spring",
                     stiffness: 350,
@@ -75,11 +75,11 @@ export default function AuditFilters({
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="k-chip text-[var(--ember)] bg-[var(--ember-soft)] border-[var(--ember-line)]"
+            className="k-chip text-[var(--k-warning)] bg-[rgba(255, 90, 90, 0.1)] border-[rgba(255, 90, 90, 0.3)]"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--ember)] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--ember)]" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--k-warning)] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--k-warning)]" />
             </span>
             {sensitiveCount} sensible{sensitiveCount !== 1 ? "s" : ""}
           </motion.div>
@@ -92,8 +92,10 @@ export default function AuditFilters({
           onClick={() => setCategory(null)}
           className="px-3 py-1 rounded-full text-xs font-bold transition-colors"
           style={{
-            background: !currentCategory ? "var(--grad)" : "var(--card-2)",
-            color: !currentCategory ? "#0a0a0c" : "var(--text-2)",
+            background: !currentCategory
+              ? "var(--k-accent)"
+              : "var(--k-elevated)",
+            color: !currentCategory ? "#0a0a0c" : "var(--k-t2)",
             border: !currentCategory ? "none" : "1px solid var(--line)",
           }}
         >
@@ -107,8 +109,10 @@ export default function AuditFilters({
             className="px-3 py-1 rounded-full text-xs font-bold transition-colors"
             style={{
               background:
-                currentCategory === cat ? "var(--grad)" : "var(--card-2)",
-              color: currentCategory === cat ? "#0a0a0c" : "var(--text-2)",
+                currentCategory === cat
+                  ? "var(--k-accent)"
+                  : "var(--k-elevated)",
+              color: currentCategory === cat ? "#0a0a0c" : "var(--k-t2)",
               border:
                 currentCategory === cat ? "none" : "1px solid var(--line)",
             }}

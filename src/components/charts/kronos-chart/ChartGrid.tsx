@@ -53,7 +53,7 @@ export function ChartGrid({
             strokeWidth={1}
             strokeDasharray={dash}
             style={{
-              color: "var(--text-3)",
+              color: "var(--k-t3)",
               pointerEvents: "none",
               transformOrigin: `${x1}px ${y}px`,
             }}

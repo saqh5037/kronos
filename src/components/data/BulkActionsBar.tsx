@@ -15,12 +15,12 @@ export function BulkActionsBar({ count, onClear, children, className }: Props) {
   return (
     <div
       className={cn(
-        "sticky bottom-4 z-10 mx-auto flex w-fit items-center gap-3 rounded-xl border border-[var(--line-strong)] bg-[var(--card-elevated)] px-4 py-2 shadow-lg",
+        "sticky bottom-4 z-10 mx-auto flex w-fit items-center gap-3 rounded-xl border border-[var(--k-line-2)] bg-[var(--k-elevated)] px-4 py-2 shadow-lg",
         className,
       )}
       style={{ boxShadow: "var(--card-glow-hover)" }}
     >
-      <span className="k-eyebrow text-[var(--text-2)]">
+      <span className="k-eyebrow text-[var(--k-t2)]">
         {count} seleccionado{count === 1 ? "" : "s"}
       </span>
       <div className="h-4 w-px bg-[var(--line)]" />
@@ -31,7 +31,7 @@ export function BulkActionsBar({ count, onClear, children, className }: Props) {
           <button
             type="button"
             onClick={onClear}
-            className="text-xs text-[var(--text-3)] hover:text-[var(--text-2)]"
+            className="text-xs text-[var(--k-t3)] hover:text-[var(--k-t2)]"
           >
             Limpiar
           </button>

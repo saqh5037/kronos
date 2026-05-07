@@ -53,7 +53,7 @@ export default function PlanForm() {
       />
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Tipo</span>
+          <span style={{ color: "var(--k-t2)" }}>Tipo</span>
           <select
             name="type"
             defaultValue="MONTHLY"
@@ -68,7 +68,7 @@ export default function PlanForm() {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Precio</span>
+          <span style={{ color: "var(--k-t2)" }}>Precio</span>
           <input
             name="price"
             type="number"
@@ -82,7 +82,7 @@ export default function PlanForm() {
       </div>
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Clases/mes</span>
+          <span style={{ color: "var(--k-t2)" }}>Clases/mes</span>
           <input
             name="classesPerMonth"
             type="number"
@@ -93,7 +93,7 @@ export default function PlanForm() {
           />
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Duración (días)</span>
+          <span style={{ color: "var(--k-t2)" }}>Duración (días)</span>
           <input
             name="durationDays"
             type="number"
@@ -105,7 +105,7 @@ export default function PlanForm() {
         </label>
       </div>
       {error && (
-        <p className="text-xs" style={{ color: "var(--pr)" }}>
+        <p className="text-xs" style={{ color: "var(--k-danger)" }}>
           {error}
         </p>
       )}

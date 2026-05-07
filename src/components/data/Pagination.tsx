@@ -24,7 +24,7 @@ export function Pagination({
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-3 text-xs text-[var(--text-2)]",
+        "flex items-center justify-between gap-3 text-xs text-[var(--k-t2)]",
         className,
       )}
     >
@@ -38,7 +38,7 @@ export function Pagination({
           type="button"
           disabled={page <= 1}
           onClick={() => onPageChange(Math.max(1, page - 1))}
-          className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--card)] px-2 hover:border-[var(--line-strong)] disabled:opacity-40"
+          className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--card)] px-2 hover:border-[var(--k-line-2)] disabled:opacity-40"
           aria-label="Anterior"
         >
           ‹
@@ -50,7 +50,7 @@ export function Pagination({
           type="button"
           disabled={page >= totalPages}
           onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-          className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--card)] px-2 hover:border-[var(--line-strong)] disabled:opacity-40"
+          className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--card)] px-2 hover:border-[var(--k-line-2)] disabled:opacity-40"
           aria-label="Siguiente"
         >
           ›

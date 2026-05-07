@@ -25,7 +25,7 @@ export function SelectFilter({
   return (
     <label
       className={cn(
-        "flex items-center gap-2 text-xs text-[var(--text-2)]",
+        "flex items-center gap-2 text-xs text-[var(--k-t2)]",
         className,
       )}
     >

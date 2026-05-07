@@ -16,7 +16,7 @@ export default function WODSelector({
   return (
     <label
       className="flex items-center gap-2 text-xs"
-      style={{ color: "var(--text-2)" }}
+      style={{ color: "var(--k-t2)" }}
     >
       <span className="k-eyebrow">WOD</span>
       <select
