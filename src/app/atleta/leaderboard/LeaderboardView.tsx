@@ -20,6 +20,25 @@ type Tab = "wod" | "movement" | "attendance";
 type WODOption = { id: string; name: string; scoreType: ScoreType };
 type MovementOption = { id: string; name: string };
 
+const v3SelectStyle: React.CSSProperties = {
+  width: "100%",
+  background: "var(--k-elevated)",
+  color: "var(--k-t1)",
+  border: "1px solid var(--k-line)",
+  borderRadius: 12,
+  padding: "10px 36px 10px 14px",
+  fontFamily: "var(--k-font-body)",
+  fontSize: 13,
+  fontWeight: 500,
+  appearance: "none",
+  WebkitAppearance: "none",
+  backgroundImage:
+    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a94' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>\")",
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 12px center",
+  cursor: "pointer",
+};
+
 export default function LeaderboardPage({
   wodOptions,
   movementOptions,
@@ -77,54 +96,74 @@ export default function LeaderboardPage({
 
   return (
     <div className="pb-28 relative">
-      <header className="relative px-4 pt-14 pb-5 overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
+      {/* HERO V3 — limpio */}
+      <header
+        style={{
+          padding: "56px 20px 20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        <span
           style={{
-            background:
-              "radial-gradient(ellipse at 0% 0%, rgba(230,0,38,0.06), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(0,191,255,0.06), transparent 60%)",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            color: "var(--k-t3)",
+            textTransform: "uppercase",
           }}
-        />
-        <span className="k-corner-tl" aria-hidden />
-        <span className="k-corner-br" aria-hidden />
-        <AnimatedSection className="relative">
-          <AnimatedItem>
-            <span className="k-eyebrow-bar">Leaderboards</span>
-            <div className="mt-2 flex items-baseline gap-2 flex-wrap">
-              <span
-                className="font-script text-[26px] leading-none"
-                style={{ color: "var(--red)" }}
-              >
-                Tabla de
-              </span>
-              <h1
-                className="k-h-italic font-display font-extrabold text-[32px] leading-[1] tracking-[-0.02em]"
-                style={{ color: "var(--text)" }}
-              >
-                <em>rankings</em>
-              </h1>
-            </div>
-          </AnimatedItem>
-        </AnimatedSection>
+        >
+          LEADERBOARDS · ATLETA
+        </span>
+        <h1
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 32,
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
+            color: "var(--k-t1)",
+            margin: 0,
+            lineHeight: 1.05,
+          }}
+        >
+          Tabla de rankings
+        </h1>
       </header>
 
       {/* Tabs */}
       <AnimatedSection className="px-3.5">
         <AnimatedItem>
           <div
-            className="flex gap-1 p-1 rounded-xl"
-            style={{ background: "var(--bg-soft)" }}
+            style={{
+              display: "flex",
+              gap: 4,
+              padding: 4,
+              borderRadius: 12,
+              background: "var(--k-elevated)",
+              border: "1px solid var(--k-line)",
+            }}
           >
             {tabs.map((t) => (
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
-                className="flex-1 py-2 rounded-lg text-[11px] font-bold tracking-wide transition-all"
                 style={{
-                  background: tab === t.key ? "var(--card)" : "transparent",
-                  color: tab === t.key ? "var(--text)" : "var(--text-3)",
-                  boxShadow: tab === t.key ? "var(--card-glow)" : "none",
+                  flex: 1,
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  transition: "all 150ms ease",
+                  background: tab === t.key ? "var(--k-accent)" : "transparent",
+                  color: tab === t.key ? "var(--k-accent-on)" : "var(--k-t2)",
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: tab === t.key ? "var(--k-accent-glow)" : "none",
                 }}
               >
                 {t.label}
@@ -144,12 +183,7 @@ export default function LeaderboardPage({
                 setWodId(e.target.value);
                 loadWOD(e.target.value);
               }}
-              className="w-full k-card px-3 py-2.5 text-[13px] font-medium rounded-xl appearance-none"
-              style={{
-                background: "var(--card)",
-                border: "1px solid var(--line)",
-                color: "var(--text)",
-              }}
+              style={v3SelectStyle}
             >
               {wodOptions.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -165,12 +199,7 @@ export default function LeaderboardPage({
                 setMovementId(e.target.value);
                 loadMovement(e.target.value);
               }}
-              className="w-full k-card px-3 py-2.5 text-[13px] font-medium rounded-xl appearance-none"
-              style={{
-                background: "var(--card)",
-                border: "1px solid var(--line)",
-                color: "var(--text)",
-              }}
+              style={v3SelectStyle}
             >
               {movementOptions.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -291,57 +320,93 @@ function LeaderboardRow({
   isLast: boolean;
 }) {
   const isTop3 = rank <= 3;
-  const rankGlows = [
-    "0 0 14px rgba(25,240,139,0.45)",
-    "0 0 10px rgba(58,163,255,0.35)",
-    "0 0 8px rgba(255,94,94,0.30)",
-  ];
+  const isFirst = rank === 1;
+  const rankColor = isTop3 ? "var(--k-accent)" : "var(--k-t3)";
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3"
       style={{
-        borderBottom: isLast ? "none" : "1px solid var(--line)",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "12px 16px",
+        borderBottom: isLast ? "none" : "1px solid var(--k-line)",
       }}
     >
       <div
-        className="font-display text-lg font-bold w-5 text-center"
         style={{
-          color: isTop3 ? "var(--recovery)" : "var(--text-3)",
-          textShadow: isTop3 ? rankGlows[rank - 1] : "none",
+          fontFamily: "var(--k-font-display)",
+          fontSize: 18,
+          fontWeight: 700,
+          width: 20,
+          textAlign: "center",
+          color: rankColor,
+          textShadow: isFirst ? "var(--k-accent-glow)" : "none",
         }}
       >
         {rank}
       </div>
       <div
-        className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold"
         style={{
-          background: isTop3
-            ? `var(--${["moss", "steel", "ember"][rank - 1]}-soft)`
-            : "var(--bg-soft)",
-          border: `1px solid ${isTop3 ? `var(--${["moss", "steel", "ember"][rank - 1]}-line)` : "var(--line)"}`,
-          color: isTop3
-            ? `var(--${["moss", "steel", "ember"][rank - 1]})`
-            : "var(--text-3)",
+          width: 28,
+          height: 28,
+          borderRadius: 999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--k-font-display)",
+          fontSize: 10,
+          fontWeight: 700,
+          background: isTop3 ? "var(--k-accent-soft)" : "var(--k-elevated)",
+          border: `1px solid ${isTop3 ? "var(--k-accent-line)" : "var(--k-line)"}`,
+          color: isTop3 ? "var(--k-accent)" : "var(--k-t3)",
         }}
       >
         {entry.athleteName[0]}
       </div>
-      <div className="flex-1 text-[13px] font-medium truncate">
+      <div
+        style={{
+          flex: 1,
+          fontSize: 13,
+          fontFamily: "var(--k-font-body)",
+          fontWeight: 500,
+          color: "var(--k-t1)",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
         {entry.athleteName}
       </div>
       <span
-        className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
         style={{
+          flexShrink: 0,
+          padding: "3px 8px",
+          borderRadius: 999,
+          fontFamily: "var(--k-font-display)",
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: "0.1em",
           background:
-            entry.scaling === "RX" ? "var(--moss-soft)" : "var(--bg-soft)",
-          color: entry.scaling === "RX" ? "var(--moss)" : "var(--text-3)",
-          border: `1px solid ${entry.scaling === "RX" ? "var(--moss-line)" : "var(--line)"}`,
+            entry.scaling === "RX"
+              ? "var(--k-accent-soft)"
+              : "var(--k-elevated)",
+          color: entry.scaling === "RX" ? "var(--k-accent)" : "var(--k-t3)",
+          border: `1px solid ${entry.scaling === "RX" ? "var(--k-accent-line)" : "var(--k-line)"}`,
         }}
       >
         {entry.scaling}
       </span>
-      <div className="font-display text-sm font-bold min-w-[54px] text-right">
+      <div
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 14,
+          fontWeight: 700,
+          minWidth: 54,
+          textAlign: "right",
+          color: "var(--k-t1)",
+        }}
+      >
         {formatScore(entry.value, scoreType)}
       </div>
     </div>
@@ -360,34 +425,80 @@ function AttendanceRow({
   const isTop3 = rank <= 3;
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3"
       style={{
-        borderBottom: isLast ? "none" : "1px solid var(--line)",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "12px 16px",
+        borderBottom: isLast ? "none" : "1px solid var(--k-line)",
       }}
     >
       <div
-        className="font-display text-lg font-bold w-5 text-center"
-        style={{ color: isTop3 ? "var(--moss)" : "var(--text-3)" }}
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 18,
+          fontWeight: 700,
+          width: 20,
+          textAlign: "center",
+          color: isTop3 ? "var(--k-accent)" : "var(--k-t3)",
+        }}
       >
         {rank}
       </div>
       <div
-        className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold"
         style={{
-          background: isTop3 ? "var(--moss-soft)" : "var(--bg-soft)",
-          border: `1px solid ${isTop3 ? "var(--moss-line)" : "var(--line)"}`,
-          color: isTop3 ? "var(--moss)" : "var(--text-3)",
+          width: 28,
+          height: 28,
+          borderRadius: 999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--k-font-display)",
+          fontSize: 10,
+          fontWeight: 700,
+          background: isTop3 ? "var(--k-accent-soft)" : "var(--k-elevated)",
+          border: `1px solid ${isTop3 ? "var(--k-accent-line)" : "var(--k-line)"}`,
+          color: isTop3 ? "var(--k-accent)" : "var(--k-t3)",
         }}
       >
         {entry.athleteName[0]}
       </div>
-      <div className="flex-1 text-[13px] font-medium truncate">
+      <div
+        style={{
+          flex: 1,
+          fontSize: 13,
+          fontFamily: "var(--k-font-body)",
+          fontWeight: 500,
+          color: "var(--k-t1)",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
         {entry.athleteName}
       </div>
-      <div className="font-display text-sm font-bold min-w-[54px] text-right">
+      <div
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 14,
+          fontWeight: 700,
+          minWidth: 54,
+          textAlign: "right",
+          color: "var(--k-t1)",
+        }}
+      >
         {entry.attendedCount}
       </div>
-      <div className="text-[10px] font-bold" style={{ color: "var(--text-3)" }}>
+      <div
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.1em",
+          color: "var(--k-t3)",
+          textTransform: "uppercase",
+        }}
+      >
         clases
       </div>
     </div>

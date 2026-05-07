@@ -27,7 +27,6 @@ import {
   AnimatedSection,
   AnimatedItem,
 } from "@/components/kronos/AnimatedSection";
-import ParticleMesh from "@/components/kronos/ParticleMesh";
 import CancelMyBookingButton from "@/components/kronos/CancelMyBookingButton";
 import { formatScore } from "@/lib/scores";
 import { formatDayMonth, formatTime } from "@/lib/week";
@@ -35,8 +34,6 @@ import type { ScoreType } from "@/lib/validations/wod";
 
 import KCard from "@/components/kronos/KCard";
 import RevealOnScroll from "@/components/kronos/RevealOnScroll";
-import Eyebrow from "@/components/kronos/Eyebrow";
-import AuroraBackground from "@/components/kronos/AuroraBackground";
 
 export const metadata = { title: "Kronos — Inicio" };
 
@@ -83,11 +80,49 @@ export default async function AtletaHomePage() {
 
   if (!home) {
     return (
-      <div className="p-4 pt-16">
-        <Eyebrow>App del atleta</Eyebrow>
-        <h1 className="font-display font-bold text-3xl mt-2">Inicio</h1>
-        <div className="mt-6 k-card p-6 text-center">
-          <p className="text-sm" style={{ color: "var(--text-2)" }}>
+      <div style={{ padding: "64px 16px 24px" }}>
+        <span
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            color: "var(--k-t3)",
+            textTransform: "uppercase",
+          }}
+        >
+          INICIO · ATLETA
+        </span>
+        <h1
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 32,
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
+            color: "var(--k-t1)",
+            margin: "8px 0 0",
+          }}
+        >
+          Sin perfil
+        </h1>
+        <div
+          style={{
+            marginTop: 24,
+            padding: 24,
+            background: "var(--k-surface)",
+            border: "1px solid var(--k-line)",
+            borderRadius: 16,
+            textAlign: "center",
+          }}
+        >
+          <p
+            style={{
+              fontSize: 13,
+              color: "var(--k-t2)",
+              fontFamily: "var(--k-font-body)",
+              margin: 0,
+            }}
+          >
             No tienes perfil de atleta vinculado. Contacta al coach del box.
           </p>
         </div>
@@ -135,52 +170,40 @@ export default async function AtletaHomePage() {
 
   return (
     <div className="pb-28 relative">
-      {/* HERO — with Aurora + ParticleMesh */}
-      <header className="relative px-4 pt-14 pb-6 overflow-hidden">
-        <AuroraBackground intensity="low" className="opacity-40" />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ opacity: 0.15 }}
-          aria-hidden
-        >
-          <ParticleMesh
-            density={40}
-            colorPrimary="#e60026"
-            colorSecondary="#00bfff"
-            connectionDistance={140}
-            mobileBehavior="static-gradient"
-          />
-        </div>
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
+      {/* HERO V3 — limpio, sin particles ni gradients hardcoded */}
+      <header
+        style={{
+          padding: "56px 20px 24px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        <span
           style={{
-            background:
-              "radial-gradient(ellipse at 50% 0%, rgba(0,68,255,0.10), transparent 65%)",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            color: "var(--k-t3)",
+            textTransform: "uppercase",
           }}
-        />
-        <span className="k-corner-tl" aria-hidden />
-        <span className="k-corner-tr" aria-hidden />
-
-        <div className="relative">
-          <Eyebrow withBar={true} color="blue">
-            Kronos · Box
-          </Eyebrow>
-          <div className="mt-2.5 flex items-baseline gap-2 flex-wrap">
-            <span
-              className="font-script text-[28px] leading-none"
-              style={{ color: "var(--red)" }}
-            >
-              Hola,
-            </span>
-            <h1
-              className="k-h-italic font-display font-extrabold text-[34px] leading-[1] tracking-[-0.02em]"
-              style={{ color: "var(--text)" }}
-            >
-              <em>{home.athlete?.firstName}</em>
-            </h1>
-          </div>
-        </div>
+        >
+          INICIO · ATLETA
+        </span>
+        <h1
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 36,
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
+            color: "var(--k-t1)",
+            margin: 0,
+            lineHeight: 1.05,
+          }}
+        >
+          Hola, {home.athlete?.firstName}
+        </h1>
       </header>
 
       {/* PERSONALIZED GREETING */}
@@ -265,19 +288,47 @@ export default async function AtletaHomePage() {
 
       {/* WEEK STRIP */}
       <RevealOnScroll variant="fade-up" className="mt-5">
-        <div className="flex items-baseline justify-between px-[18px] pb-2">
-          <Eyebrow withBar={false} color="text">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "space-between",
+            padding: "0 18px 8px",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: "0.18em",
+              color: "var(--k-t3)",
+              textTransform: "uppercase",
+            }}
+          >
             Esta semana
-          </Eyebrow>
+          </span>
           <div
-            className="font-mono text-[10px] font-bold tracking-[0.08em]"
-            style={{ color: "var(--moss)" }}
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              color: "var(--k-accent)",
+            }}
           >
             {weekAttendedText}
           </div>
         </div>
         <div className="px-3.5">
-          <div className="k-card p-4">
+          <div
+            style={{
+              padding: 16,
+              background: "var(--k-surface)",
+              border: "1px solid var(--k-line)",
+              borderRadius: 16,
+            }}
+          >
             <div className="flex justify-between gap-1.5">
               {weekDays.map((d, i) => {
                 const { state, hour } = getDayState(d);
@@ -293,46 +344,62 @@ export default async function AtletaHomePage() {
                     className="flex-1 flex flex-col items-center gap-1.5"
                   >
                     <div
-                      className="font-mono text-[9px] tracking-[0.1em] font-bold"
-                      style={{ color: "var(--text-3)" }}
+                      style={{
+                        fontFamily: "var(--k-font-display)",
+                        fontSize: 9,
+                        fontWeight: 700,
+                        letterSpacing: "0.14em",
+                        color: "var(--k-t3)",
+                      }}
                     >
                       {label}
                     </div>
                     <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-[13px] font-bold transition-all duration-300"
                       style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 12,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontFamily: "var(--k-font-display)",
+                        fontSize: 13,
+                        fontWeight: 700,
+                        transition: "all 200ms ease",
                         background: isToday
-                          ? "var(--grad)"
+                          ? "var(--k-accent)"
                           : booked
-                            ? "var(--strain-soft)"
+                            ? "var(--k-accent-soft)"
                             : "transparent",
                         border: isToday
                           ? "none"
                           : booked
-                            ? "1px solid var(--strain-line)"
-                            : "1px solid var(--line)",
+                            ? "1px solid var(--k-accent-line)"
+                            : "1px solid var(--k-line)",
                         color: isToday
-                          ? "#0a0a0f"
+                          ? "var(--k-accent-on)"
                           : booked
-                            ? "var(--strain)"
+                            ? "var(--k-accent)"
                             : rest
-                              ? "var(--text-3)"
-                              : "var(--text-2)",
-                        boxShadow: isToday
-                          ? "0 0 14px rgba(230, 0, 38, 0.20), 0 0 28px rgba(0, 68, 255, 0.10)"
-                          : "none",
+                              ? "var(--k-t3)"
+                              : "var(--k-t2)",
+                        boxShadow: isToday ? "var(--k-accent-glow)" : "none",
                       }}
                     >
                       {rest ? "·" : dayNum}
                     </div>
                     <div
-                      className="font-mono text-[8px] font-bold h-2.5"
                       style={{
+                        fontFamily: "var(--k-font-display)",
+                        fontSize: 8,
+                        fontWeight: 700,
+                        letterSpacing: "0.12em",
+                        height: 10,
                         color: isToday
-                          ? "var(--text)"
+                          ? "var(--k-t1)"
                           : booked
-                            ? "var(--strain)"
-                            : "var(--text-3)",
+                            ? "var(--k-accent)"
+                            : "var(--k-t3)",
                       }}
                     >
                       {isToday ? "HOY" : booked ? hour : rest ? "OFF" : "—"}
@@ -348,72 +415,140 @@ export default async function AtletaHomePage() {
       {/* LEADERBOARD WOD HOY */}
       {topScores.length > 0 && wod && (
         <RevealOnScroll variant="fade-up" className="mt-5">
-          <div className="flex items-baseline justify-between px-[18px] pb-2">
-            <Eyebrow withBar={false} color="text">
-              Leaderboard · {wod.wodName.toUpperCase()} hoy
-            </Eyebrow>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+              padding: "0 18px 8px",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: "0.18em",
+                color: "var(--k-t3)",
+                textTransform: "uppercase",
+              }}
+            >
+              Leaderboard · {wod.wodName.toUpperCase()} HOY
+            </span>
             <Link
               href="/atleta/wod"
-              className="font-mono text-[10px] font-bold tracking-[0.08em] hover:text-text-2 transition-colors"
-              style={{ color: "var(--text-3)" }}
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.16em",
+                color: "var(--k-accent)",
+                textDecoration: "none",
+              }}
             >
               VER TODOS →
             </Link>
           </div>
           <div className="px-3.5">
-            <div className="k-card overflow-hidden">
+            <div
+              style={{
+                background: "var(--k-surface)",
+                border: "1px solid var(--k-line)",
+                borderRadius: 16,
+                overflow: "hidden",
+              }}
+            >
               <AnimatedSection>
                 {topScores.map((s, i, a) => {
                   const isTop3 = i < 3;
-                  const rankGlows = [
-                    "0 0 14px rgba(0, 191, 255, 0.35)",
-                    "0 0 10px rgba(0, 68, 255, 0.30)",
-                    "0 0 8px rgba(255, 31, 71, 0.25)",
-                  ];
+                  const rankColor = isTop3 ? "var(--k-accent)" : "var(--k-t3)";
                   return (
                     <AnimatedItem key={s.id}>
                       <div
-                        className="flex items-center gap-3 px-4 py-3"
                         style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          padding: "12px 16px",
                           borderBottom:
-                            i < a.length - 1 ? "1px solid var(--line)" : "none",
+                            i < a.length - 1
+                              ? "1px solid var(--k-line)"
+                              : "none",
                         }}
                       >
                         <div
-                          className="font-display text-lg font-bold w-5 text-center"
                           style={{
-                            color: isTop3 ? "var(--moss)" : "var(--text-3)",
-                            textShadow: isTop3 ? rankGlows[i] : "none",
+                            fontFamily: "var(--k-font-display)",
+                            fontSize: 18,
+                            fontWeight: 700,
+                            width: 20,
+                            textAlign: "center",
+                            color: rankColor,
                           }}
                         >
                           {i + 1}
                         </div>
                         <div
-                          className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold"
                           style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 999,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontFamily: "var(--k-font-display)",
+                            fontSize: 10,
+                            fontWeight: 700,
                             background: isTop3
-                              ? `var(--${["recovery", "strain", "pr"][i]}-soft)`
-                              : "var(--bg-soft)",
-                            border: `1px solid ${isTop3 ? `var(--${["recovery", "strain", "pr"][i]}-line)` : "var(--line)"}`,
-                            color: isTop3
-                              ? `var(--${["recovery", "strain", "pr"][i]})`
-                              : "var(--text-3)",
+                              ? "var(--k-accent-soft)"
+                              : "var(--k-elevated)",
+                            border: `1px solid ${isTop3 ? "var(--k-accent-line)" : "var(--k-line)"}`,
+                            color: isTop3 ? "var(--k-accent)" : "var(--k-t3)",
                           }}
                         >
                           {s.athlete.firstName[0]}
                         </div>
-                        <div className="flex-1 text-[13px] font-medium">
+                        <div
+                          style={{
+                            flex: 1,
+                            fontSize: 13,
+                            fontFamily: "var(--k-font-body)",
+                            fontWeight: 500,
+                            color: "var(--k-t1)",
+                          }}
+                        >
                           {s.athlete.firstName} {s.athlete.lastName?.[0]}.
                         </div>
                         <span
-                          className={`k-chip ${s.scaling === "RX" ? "k-chip-moss" : "k-chip-ghost"}`}
-                          style={{ padding: "3px 8px", fontSize: 9 }}
+                          style={{
+                            padding: "3px 8px",
+                            borderRadius: 999,
+                            fontFamily: "var(--k-font-display)",
+                            fontSize: 9,
+                            fontWeight: 700,
+                            letterSpacing: "0.1em",
+                            background:
+                              s.scaling === "RX"
+                                ? "var(--k-accent-soft)"
+                                : "var(--k-elevated)",
+                            color:
+                              s.scaling === "RX"
+                                ? "var(--k-accent)"
+                                : "var(--k-t3)",
+                            border: `1px solid ${s.scaling === "RX" ? "var(--k-accent-line)" : "var(--k-line)"}`,
+                          }}
                         >
                           {s.scaling}
                         </span>
                         <div
-                          className="font-display text-sm font-bold min-w-[54px] text-right"
-                          style={{ color: "var(--text)" }}
+                          style={{
+                            fontFamily: "var(--k-font-display)",
+                            fontSize: 14,
+                            fontWeight: 700,
+                            minWidth: 54,
+                            textAlign: "right",
+                            color: "var(--k-t1)",
+                          }}
                         >
                           {formatScore(
                             Number(s.value),
