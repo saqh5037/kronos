@@ -34,14 +34,14 @@ export default async function NotificacionesPage() {
       <span className="k-eyebrow-bar">Configuración</span>
       <div className="mt-2 mb-6 flex items-baseline gap-2 flex-wrap">
         <span
-          className="font-script text-[26px] leading-none"
-          style={{ color: "var(--red)" }}
+          className="font-display text-[26px] leading-none"
+          style={{ color: "var(--k-accent)" }}
         >
           Tus
         </span>
         <h1
           className="k-h-italic font-display font-extrabold text-[32px] md:text-[40px] leading-[1] tracking-[-0.02em]"
-          style={{ color: "var(--text)" }}
+          style={{ color: "var(--k-t1)" }}
         >
           <em>notificaciones</em>
         </h1>
@@ -53,9 +53,9 @@ export default async function NotificacionesPage() {
             href={t.href}
             className="px-3.5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all"
             style={{
-              background: t.active ? "var(--grad)" : "var(--card)",
-              color: t.active ? "#0a0a0c" : "var(--text-2)",
-              border: t.active ? "none" : "1px solid var(--line)",
+              background: t.active ? "var(--k-accent)" : "var(--k-surface)",
+              color: t.active ? "var(--k-accent-on)" : "var(--k-t2)",
+              border: t.active ? "none" : "1px solid var(--k-line-2)",
             }}
           >
             {t.label}
@@ -63,7 +63,7 @@ export default async function NotificacionesPage() {
         ))}
       </nav>
 
-      <p className="text-sm text-[var(--text-2)] mb-6 max-w-2xl">
+      <p className="text-sm text-[var(--k-t2)] mb-6 max-w-2xl">
         Controla qué emails recibís de Kronos. Los avisos críticos del cobro
         (cargos fallidos, suscripción expirada) y el resumen semanal se pueden
         desactivar individualmente.

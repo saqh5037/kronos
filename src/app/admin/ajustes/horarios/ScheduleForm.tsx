@@ -147,8 +147,8 @@ export function ScheduleForm({
                 key={key}
                 className="rounded-xl p-3 border"
                 style={{
-                  background: day ? "var(--card-2)" : "transparent",
-                  borderColor: "var(--line)",
+                  background: day ? "var(--k-elevated)" : "transparent",
+                  borderColor: "var(--k-line-2)",
                 }}
               >
                 <div className="flex items-center justify-between gap-3 mb-2">
@@ -174,7 +174,7 @@ export function ScheduleForm({
                     {!day && (
                       <span
                         className="text-xs"
-                        style={{ color: "var(--text-3)" }}
+                        style={{ color: "var(--k-t3)" }}
                       >
                         cerrado
                       </span>
@@ -215,11 +215,11 @@ export function ScheduleForm({
                             height: 30,
                             background: on
                               ? day.kind === "OPEN_BOX"
-                                ? "var(--cyan)"
-                                : "var(--grad)"
-                              : "var(--btn-ghost-bg)",
-                            color: on ? "#0a0a0c" : "var(--text-3)",
-                            border: `1px solid ${on ? "transparent" : "var(--line)"}`,
+                                ? "var(--k-warning)"
+                                : "var(--k-accent)"
+                              : "var(--k-elevated)",
+                            color: on ? "var(--k-accent-on)" : "var(--k-t3)",
+                            border: `1px solid ${on ? "transparent" : "var(--k-line)"}`,
                             cursor: canEdit ? "pointer" : "not-allowed",
                             opacity: canEdit ? 1 : 0.7,
                           }}
@@ -244,8 +244,8 @@ export function ScheduleForm({
               className="text-sm font-medium"
               style={{
                 color: msg.startsWith("Error")
-                  ? "var(--red)"
-                  : "var(--recovery)",
+                  ? "var(--k-danger)"
+                  : "var(--k-accent)",
               }}
             >
               {msg}
@@ -286,7 +286,7 @@ function NumberField({
     <label className="flex flex-col gap-1.5">
       <span
         className="font-mono text-[10px] font-bold uppercase tracking-wider"
-        style={{ color: "var(--text-3)" }}
+        style={{ color: "var(--k-t3)" }}
       >
         {label}
       </span>
@@ -297,11 +297,11 @@ function NumberField({
         max={max}
         disabled={disabled}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="rounded-lg border bg-[var(--card-2)] px-3 py-2 text-sm"
-        style={{ borderColor: "var(--line)" }}
+        className="rounded-lg border bg-[var(--k-elevated)] px-3 py-2 text-sm"
+        style={{ borderColor: "var(--k-line-2)", color: "var(--k-t1)" }}
       />
       {help && (
-        <span className="text-[10px]" style={{ color: "var(--text-3)" }}>
+        <span className="text-[10px]" style={{ color: "var(--k-t3)" }}>
           {help}
         </span>
       )}
@@ -327,9 +327,9 @@ function KindToggle({
       disabled={disabled}
       className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase transition-all"
       style={{
-        background: active ? "var(--card)" : "transparent",
-        color: active ? "var(--text)" : "var(--text-3)",
-        border: `1px solid ${active ? "var(--line-strong)" : "var(--line)"}`,
+        background: active ? "var(--k-surface)" : "transparent",
+        color: active ? "var(--k-t1)" : "var(--k-t3)",
+        border: `1px solid ${active ? "var(--k-line-2)" : "var(--k-line)"}`,
         cursor: disabled ? "not-allowed" : "pointer",
       }}
     >

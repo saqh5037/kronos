@@ -19,7 +19,7 @@ export default async function HorariosPage() {
       </h1>
       <p
         className="text-sm mt-2 mb-6 font-medium"
-        style={{ color: "var(--text-2)" }}
+        style={{ color: "var(--k-t2)" }}
       >
         Define qué días opera el box y a qué horas. La grilla de Programación se
         renderiza en base a esto.

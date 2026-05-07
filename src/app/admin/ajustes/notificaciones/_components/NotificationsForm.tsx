@@ -73,7 +73,7 @@ export function NotificationsForm({ initial }: Props) {
               setTransactional(initial.transactionalEmailsEnabled);
             }}
             disabled={pending}
-            className="text-sm text-[var(--text-3)] hover:text-[var(--text-2)] disabled:opacity-50"
+            className="text-sm text-[var(--k-t3)] hover:text-[var(--k-t2)] disabled:opacity-50"
           >
             Descartar
           </button>
@@ -108,9 +108,9 @@ function SwitchRow({
     <div className="flex items-start justify-between gap-4">
       <div className="flex-1 min-w-0">
         <p className="font-bold text-base">{label}</p>
-        <p className="text-sm text-[var(--text-2)] mt-1">{description}</p>
+        <p className="text-sm text-[var(--k-t2)] mt-1">{description}</p>
         {warning && (
-          <p className="text-xs text-[var(--pr)] mt-2">
+          <p className="text-xs text-[var(--k-warning)] mt-2">
             ⚠ Si lo desactivas, no recibirás avisos cuando un cobro falle.
           </p>
         )}
@@ -123,8 +123,8 @@ function SwitchRow({
         onClick={() => onChange(!checked)}
         className="relative shrink-0 inline-flex h-7 w-12 items-center rounded-full transition-colors"
         style={{
-          background: checked ? "var(--moss)" : "var(--card-2)",
-          border: "1px solid var(--line)",
+          background: checked ? "var(--k-accent)" : "var(--k-elevated)",
+          border: "1px solid var(--k-line-2)",
         }}
       >
         <span
