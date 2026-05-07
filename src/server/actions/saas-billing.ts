@@ -358,6 +358,68 @@ export async function exportSaasInvoicesCsv(
   );
 }
 
+export type OwnerSaasSpendMetrics = {
+  currentMrrCents: number;
+  arrProjectedCents: number;
+  lifetimeSpentCents: number;
+  totalInvoiceCount: number;
+  monthlyHistory: { month: string; cents: number; count: number }[];
+};
+
+export async function getOwnerSaasSpendMetrics(): Promise<OwnerSaasSpendMetrics | null> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) return null;
+  if (session.user.role !== "OWNER") return null;
+
+  const tenantId = session.user.tenantId;
+  const {
+    groupInvoicesByMonth,
+    computeArrProjectedCents,
+    computeLifetimeSpent,
+    fillMonthlyHistory,
+  } = await import("@/server/saas-billing/metrics");
+
+  const [activeSub, invoices] = await Promise.all([
+    prismaBase.saasSubscription.findFirst({
+      where: { tenantId, status: "ACTIVE" },
+      orderBy: { createdAt: "desc" },
+      select: { plan: { select: { priceMxnCents: true } } },
+    }),
+    prismaBase.saasInvoice.findMany({
+      where: { tenantId },
+      select: { paidAt: true, amountMxnCents: true, status: true },
+    }),
+  ]);
+
+  const currentMrrCents = activeSub?.plan.priceMxnCents ?? 0;
+  const arrProjectedCents = computeArrProjectedCents(currentMrrCents);
+  const lifetimeSpentCents = computeLifetimeSpent(
+    invoices.map((i) => ({
+      paidAt: i.paidAt,
+      amountMxnCents: i.amountMxnCents,
+      status: i.status as "PAID" | "REFUNDED",
+    })),
+  );
+  const monthlyHistory = fillMonthlyHistory(
+    groupInvoicesByMonth(
+      invoices.map((i) => ({
+        paidAt: i.paidAt,
+        amountMxnCents: i.amountMxnCents,
+        status: i.status as "PAID" | "REFUNDED",
+      })),
+    ),
+    12,
+  );
+
+  return {
+    currentMrrCents,
+    arrProjectedCents,
+    lifetimeSpentCents,
+    totalInvoiceCount: invoices.filter((i) => i.status === "PAID").length,
+    monthlyHistory,
+  };
+}
+
 export async function cancelSaasSubscription(): Promise<
   { ok: true } | { ok: false; message: string }
 > {

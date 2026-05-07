@@ -6,9 +6,13 @@ import { db as prismaBase } from "@/server/db";
 import KCard from "@/components/kronos/KCard";
 import Eyebrow from "@/components/kronos/Eyebrow";
 import type { SubscriptionStatus } from "@/lib/subscription";
-import { getCurrentSubscription } from "@/server/actions/saas-billing";
+import {
+  getCurrentSubscription,
+  getOwnerSaasSpendMetrics,
+} from "@/server/actions/saas-billing";
 import { formatPriceMxn } from "@/lib/saas-billing";
 import { CancelSubscriptionButton } from "./_components/CancelSubscriptionButton";
+import { SpendMetricsCard } from "./_components/SpendMetricsCard";
 
 export const metadata = { title: "Kronos — Suscripción" };
 export const dynamic = "force-dynamic";
@@ -103,7 +107,7 @@ export default async function BillingPage() {
   if (!session?.user?.tenantId) redirect("/login");
   if (session.user.role !== "OWNER") redirect("/admin");
 
-  const [box, currentSub] = await Promise.all([
+  const [box, currentSub, spendMetrics] = await Promise.all([
     prismaBase.box.findUnique({
       where: { id: session.user.tenantId },
       select: {
@@ -114,6 +118,7 @@ export default async function BillingPage() {
       },
     }),
     getCurrentSubscription(),
+    getOwnerSaasSpendMetrics(),
   ]);
   if (!box) redirect("/login");
 
@@ -236,6 +241,12 @@ export default async function BillingPage() {
           </div>
         ) : null}
       </KCard>
+
+      {spendMetrics && (
+        <div className="mt-4">
+          <SpendMetricsCard metrics={spendMetrics} />
+        </div>
+      )}
     </div>
   );
 }
