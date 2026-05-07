@@ -127,24 +127,7 @@ export default async function ReservarPage({
         >
           RESERVAR
         </span>
-        <button
-          type="button"
-          aria-label="Filtros"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            background: "transparent",
-            border: 0,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "var(--k-t1)",
-          }}
-        >
-          <Icon.Filter width={20} height={20} />
-        </button>
+        <span aria-hidden style={{ width: 36, height: 36 }} />
       </div>
 
       {/* Week strip */}

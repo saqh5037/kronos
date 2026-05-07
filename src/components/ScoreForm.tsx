@@ -1,13 +1,36 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { motion } from "framer-motion";
 import { submitScore } from "@/server/actions/scores";
 import { scalings } from "@/lib/validations/score";
 import { defaultUnit, timeStringToSeconds } from "@/lib/validations/score";
 import type { ScoreType } from "@/lib/validations/wod";
-import KCard from "@/components/kronos/KCard";
 import { kToast } from "@/lib/toast";
+
+const ERROR_RED = "#ff5e5e";
+
+const labelStyle: React.CSSProperties = {
+  fontFamily: "var(--k-font-display)",
+  fontSize: 9,
+  fontWeight: 600,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  color: "var(--k-t3)",
+};
+
+const inputStyle: React.CSSProperties = {
+  background: "var(--k-elevated)",
+  border: "1px solid var(--k-line)",
+  borderRadius: 10,
+  color: "var(--k-t1)",
+  fontFamily: "var(--k-font-display)",
+  fontSize: 16,
+  fontWeight: 600,
+  letterSpacing: "-0.01em",
+  padding: "10px 12px",
+  outline: "none",
+  width: "100%",
+};
 
 export default function ScoreForm({
   wodId,
@@ -68,10 +91,10 @@ export default function ScoreForm({
             description: "Tu mejor marca personal ha sido actualizada.",
             duration: 5000,
           });
-          setFeedback("🏆 ¡Nuevo PR registrado!");
+          setFeedback("NUEVO PR REGISTRADO");
         } else {
           kToast.success("Score guardado");
-          setFeedback("Score guardado");
+          setFeedback("SCORE GUARDADO");
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Error al guardar";
@@ -91,44 +114,96 @@ export default function ScoreForm({
           : "ej. 120";
 
   return (
-    <KCard variant="featured">
-      <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-3">
-        <p className="k-eyebrow">Subir mi score</p>
+    <div
+      style={{
+        background: "var(--k-surface)",
+        border: "1px solid var(--k-line)",
+        borderRadius: 16,
+        padding: 16,
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 10,
+          fontWeight: 600,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "var(--k-accent)",
+        }}
+      >
+        Subir mi score
+      </span>
 
-        <div className="grid grid-cols-3 gap-2">
-          <label className="col-span-2 flex flex-col gap-1 text-xs">
-            <span style={{ color: "var(--text-2)" }}>
-              Resultado ({scoreType})
-            </span>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: 12 }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "2fr 1fr",
+            gap: 8,
+          }}
+        >
+          <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={labelStyle}>Resultado · {scoreType}</span>
             <input
               name="value"
               placeholder={placeholder}
               required
-              className="px-3 py-2.5 rounded-lg text-sm border bg-transparent font-mono font-bold tracking-tight"
-              style={{
-                borderColor: "var(--line)",
-                fontSize: 16,
+              autoComplete="off"
+              style={inputStyle}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = "var(--k-accent)";
+                e.currentTarget.style.boxShadow = "var(--k-accent-glow)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = "var(--k-line)";
+                e.currentTarget.style.boxShadow = "none";
               }}
             />
           </label>
-          <label className="flex flex-col gap-1 text-xs">
-            <span style={{ color: "var(--text-2)" }}>Unidad</span>
+          <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={labelStyle}>Unidad</span>
             <input
               name="unit"
               defaultValue={defaultUnit(scoreType)}
-              className="px-3 py-2.5 rounded-lg text-sm border bg-transparent font-mono"
-              style={{ borderColor: "var(--line)" }}
+              autoComplete="off"
+              style={inputStyle}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = "var(--k-accent)";
+                e.currentTarget.style.boxShadow = "var(--k-accent-glow)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = "var(--k-line)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
             />
           </label>
         </div>
 
-        <label className="flex flex-col gap-1 text-xs">
-          <span style={{ color: "var(--text-2)" }}>Escalado</span>
+        <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <span style={labelStyle}>Escalado</span>
           <select
             name="scaling"
             defaultValue="RX"
-            className="px-3 py-2.5 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)", background: "var(--card)" }}
+            style={{
+              ...inputStyle,
+              fontFamily: "var(--k-font-body)",
+              fontWeight: 500,
+              fontSize: 14,
+              appearance: "none",
+              WebkitAppearance: "none",
+              backgroundImage:
+                "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a94' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>\")",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 12px center",
+              paddingRight: 32,
+            }}
           >
             {scalings.map((s) => (
               <option key={s} value={s}>
@@ -138,46 +213,85 @@ export default function ScoreForm({
           </select>
         </label>
 
-        <textarea
-          name="notes"
-          placeholder="Notas (opcional)"
-          rows={2}
-          maxLength={500}
-          className="px-3 py-2.5 rounded-lg text-sm border bg-transparent resize-none"
-          style={{ borderColor: "var(--line)" }}
-        />
+        <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <span style={labelStyle}>Notas (opcional)</span>
+          <textarea
+            name="notes"
+            placeholder="Cómo se sintió, qué falta…"
+            rows={2}
+            maxLength={500}
+            style={{
+              ...inputStyle,
+              fontFamily: "var(--k-font-body)",
+              fontWeight: 400,
+              fontSize: 13,
+              resize: "none",
+              lineHeight: 1.4,
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = "var(--k-accent)";
+              e.currentTarget.style.boxShadow = "var(--k-accent-glow)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = "var(--k-line)";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          />
+        </label>
 
         {error && (
-          <motion.p
-            className="text-xs font-medium"
-            style={{ color: "var(--pr)" }}
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
+          <p
+            role="alert"
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: "0.06em",
+              color: ERROR_RED,
+              margin: 0,
+            }}
           >
             {error}
-          </motion.p>
+          </p>
         )}
         {feedback && (
-          <motion.p
-            className="text-xs font-bold"
-            style={{ color: "var(--recovery)" }}
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
+          <p
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "var(--k-accent)",
+              margin: 0,
+            }}
           >
             {feedback}
-          </motion.p>
+          </p>
         )}
 
-        <motion.button
+        <button
           type="submit"
           disabled={isPending}
-          className="k-btn-grad py-3 rounded-xl text-sm font-bold disabled:opacity-50"
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
+          style={{
+            background: isPending ? "var(--k-elevated)" : "var(--k-accent)",
+            color: isPending ? "var(--k-t2)" : "var(--k-accent-on)",
+            border: "none",
+            borderRadius: 12,
+            padding: "13px 16px",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            cursor: isPending ? "wait" : "pointer",
+            transition: "background 120ms ease, box-shadow 120ms ease",
+            boxShadow: isPending ? "none" : "var(--k-accent-glow)",
+          }}
         >
           {isPending ? "Guardando…" : "Guardar score"}
-        </motion.button>
+        </button>
       </form>
-    </KCard>
+    </div>
   );
 }

@@ -7,15 +7,6 @@ import { BookButton } from "@/components/BookingActions";
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
 import { EmptyState } from "@/components/kronos/EmptyState";
 
-const WOD_TYPE_ICONS: Record<string, { color: string; label: string }> = {
-  STRENGTH: { color: "var(--strain)", label: "F" },
-  METCON: { color: "var(--recovery)", label: "M" },
-  EMOM: { color: "var(--pr)", label: "E" },
-  TABATA: { color: "#f5a623", label: "T" },
-  FORTIME: { color: "var(--recovery)", label: "F" },
-  AMRAP: { color: "var(--strain)", label: "A" },
-};
-
 const formatTime = (d: Date) =>
   new Date(d).toLocaleTimeString("es-MX", {
     hour: "2-digit",
@@ -34,10 +25,28 @@ const TIME_BUCKETS: {
   range: [number, number];
 }[] = [
   { value: "all", label: "Todo el día", range: [0, 24] },
-  { value: "morning", label: "Mañana (5-12)", range: [5, 12] },
-  { value: "midday", label: "Mediodía (12-17)", range: [12, 17] },
-  { value: "afternoon", label: "Tarde (17-22)", range: [17, 22] },
+  { value: "morning", label: "Mañana 5–12", range: [5, 12] },
+  { value: "midday", label: "Mediodía 12–17", range: [12, 17] },
+  { value: "afternoon", label: "Tarde 17–22", range: [17, 22] },
 ];
+
+const selectStyle: React.CSSProperties = {
+  background: "var(--k-elevated)",
+  color: "var(--k-t1)",
+  border: "1px solid var(--k-line)",
+  borderRadius: 10,
+  padding: "8px 30px 8px 12px",
+  fontFamily: "var(--k-font-body)",
+  fontSize: 12,
+  fontWeight: 500,
+  appearance: "none",
+  WebkitAppearance: "none",
+  backgroundImage:
+    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a94' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>\")",
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 10px center",
+  cursor: "pointer",
+};
 
 export function ClassesList({
   classes,
@@ -50,7 +59,6 @@ export function ClassesList({
   const pathname = usePathname();
   const params = useSearchParams();
 
-  // Read initial state from URL
   const type = params.get("type") ?? "";
   const coach = params.get("coach") ?? "";
   const bucket = (params.get("bucket") as TimeBucket) || "all";
@@ -121,14 +129,24 @@ export function ClassesList({
     return Array.from(map.entries());
   }, [filtered]);
 
+  const hasFilters = type || coach || bucket !== "all" || onlyUsual;
+
   return (
-    <div className="px-3.5">
+    <div style={{ padding: "0 16px" }}>
       {/* Filtros */}
-      <div className="mb-3 flex flex-wrap items-center gap-2">
+      <div
+        style={{
+          marginBottom: 12,
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
         <select
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="rounded-lg border border-[var(--line)] bg-[var(--card)] px-2 py-1.5 text-xs text-[var(--text)]"
+          style={selectStyle}
           aria-label="Filtrar por tipo"
         >
           <option value="">Todos los tipos</option>
@@ -142,7 +160,7 @@ export function ClassesList({
           <select
             value={coach}
             onChange={(e) => setCoach(e.target.value)}
-            className="rounded-lg border border-[var(--line)] bg-[var(--card)] px-2 py-1.5 text-xs text-[var(--text)]"
+            style={selectStyle}
             aria-label="Filtrar por coach"
           >
             <option value="">Todos los coaches</option>
@@ -156,7 +174,7 @@ export function ClassesList({
         <select
           value={bucket}
           onChange={(e) => setBucket(e.target.value as TimeBucket)}
-          className="rounded-lg border border-[var(--line)] bg-[var(--card)] px-2 py-1.5 text-xs text-[var(--text)]"
+          style={selectStyle}
           aria-label="Filtrar por hora"
         >
           {TIME_BUCKETS.map((b) => (
@@ -170,51 +188,93 @@ export function ClassesList({
             type="button"
             onClick={() => setOnlyUsual(!onlyUsual)}
             aria-pressed={onlyUsual}
-            className="rounded-lg px-2.5 py-1.5 text-[10px] font-bold tracking-wider uppercase transition-all"
             style={{
-              background: onlyUsual ? "var(--cyan)" : "transparent",
-              color: onlyUsual ? "#0a0a0c" : "var(--cyan)",
-              border: `1px solid var(--cyan)`,
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              padding: "8px 12px",
+              borderRadius: 10,
+              background: onlyUsual ? "var(--k-accent)" : "transparent",
+              color: onlyUsual ? "var(--k-accent-on)" : "var(--k-accent)",
+              border: onlyUsual ? "none" : "1px solid var(--k-accent-line)",
+              cursor: "pointer",
+              boxShadow: onlyUsual ? "var(--k-accent-glow)" : "none",
             }}
           >
             Mi horario
           </button>
         )}
-        {(type || coach || bucket !== "all" || onlyUsual) && (
+        {hasFilters && (
           <button
             type="button"
             onClick={clearAll}
-            className="rounded-lg px-2 py-1.5 text-[10px] text-[var(--text-3)] hover:text-[var(--text-2)]"
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              padding: "8px 10px",
+              borderRadius: 8,
+              background: "transparent",
+              border: "none",
+              color: "var(--k-t3)",
+              cursor: "pointer",
+            }}
           >
             Limpiar
           </button>
         )}
-        <span className="ml-auto font-mono text-[10px] text-[var(--text-3)]">
+        <span
+          style={{
+            marginLeft: "auto",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.14em",
+            color: "var(--k-t3)",
+            textTransform: "uppercase",
+          }}
+        >
           {filtered.length} clase{filtered.length === 1 ? "" : "s"}
         </span>
       </div>
 
       {/* Lista */}
-      <div className="flex flex-col gap-2">
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {filtered.length === 0 ? (
           <EmptyState
             tone="info"
             title={
-              type || coach || bucket !== "all" || onlyUsual
+              hasFilters
                 ? "No hay clases con estos filtros"
                 : "Sin clases en este rango"
             }
             description={
-              type || coach || bucket !== "all" || onlyUsual
+              hasFilters
                 ? "Probá ampliar el rango de horas o cambiar el tipo."
                 : "Cambiá la fecha o vista para ver más opciones."
             }
             action={
-              type || coach || bucket !== "all" || onlyUsual ? (
+              hasFilters ? (
                 <button
                   type="button"
                   onClick={clearAll}
-                  className="k-btn-ghost px-4 py-2 text-xs font-bold"
+                  style={{
+                    fontFamily: "var(--k-font-display)",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    padding: "9px 14px",
+                    borderRadius: 10,
+                    background: "transparent",
+                    color: "var(--k-accent)",
+                    border: "1px solid var(--k-accent-line)",
+                    cursor: "pointer",
+                  }}
                 >
                   Limpiar filtros
                 </button>
@@ -228,11 +288,25 @@ export function ClassesList({
               now !== null &&
               new Date(dateKey).toDateString() === new Date(now).toDateString();
             return (
-              <div key={dateKey} className="flex flex-col gap-2">
+              <div
+                key={dateKey}
+                style={{ display: "flex", flexDirection: "column", gap: 10 }}
+              >
                 {!isToday && (
                   <p
-                    className="font-display sticky top-0 z-10 px-1 pb-1 pt-3 text-sm font-semibold"
-                    style={{ color: "var(--text-2)" }}
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 10,
+                      margin: 0,
+                      padding: "12px 4px 6px",
+                      fontFamily: "var(--k-font-display)",
+                      fontSize: 10,
+                      fontWeight: 600,
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: "var(--k-t2)",
+                    }}
                   >
                     {formatDayMonth(date)}
                   </p>
@@ -271,156 +345,232 @@ function ClassRow({
   const isBooked = c.myBookingStatus === "BOOKED";
   const isOpenBox = c.kind === "OPEN_BOX";
 
-  const barColor =
-    full || fillRatio >= 0.85
-      ? "var(--pr)"
-      : fillRatio >= 0.6
-        ? "var(--strain)"
-        : "var(--recovery)";
+  // Escala monocromática lima — la opacidad indica presión sobre el cupo
+  let barColor = "var(--k-line-2)";
+  let barGlow = "none";
+  if (fillRatio >= 0.85) {
+    barColor = "var(--k-accent)";
+    barGlow = "0 0 8px rgba(200, 255, 45, 0.45)";
+  } else if (fillRatio >= 0.6) {
+    barColor = "rgba(200, 255, 45, 0.6)";
+  } else if (fillRatio > 0) {
+    barColor = "rgba(200, 255, 45, 0.32)";
+  }
 
-  const typeInfo = WOD_TYPE_ICONS[c.wod?.type ?? ""] ?? {
-    color: "var(--text-3)",
-    label: "?",
-  };
+  const typeInitial =
+    (c.wod?.type ?? "?").trim().charAt(0).toUpperCase() || "?";
+
+  const cardBorder = isBooked
+    ? "var(--k-accent-line)"
+    : isUsual
+      ? "var(--k-accent-line)"
+      : "var(--k-line)";
+  const cardShadow = isBooked ? "0 0 14px rgba(200, 255, 45, 0.16)" : "none";
 
   return (
     <AnimatedItem>
       <div
-        className="k-card relative p-3.5"
         style={{
-          opacity: past ? 0.45 : 1,
-          borderColor: isBooked
-            ? "var(--recovery-line)"
-            : isUsual
-              ? "var(--cyan)"
-              : undefined,
-          boxShadow: isBooked
-            ? "0 0 16px rgba(25,240,139,0.12)"
-            : isUsual
-              ? "0 0 12px rgba(0,191,255,0.15)"
-              : undefined,
+          position: "relative",
+          background: "var(--k-surface)",
+          border: `1px solid ${cardBorder}`,
+          borderRadius: 16,
+          padding: 14,
+          opacity: past ? 0.4 : 1,
+          boxShadow: cardShadow,
         }}
       >
         {isUsual && !isBooked && (
           <span
-            className="absolute -top-2 left-3 px-2 py-0.5 rounded-full font-mono text-[8px] font-bold tracking-wider uppercase"
             style={{
-              background: "var(--cyan)",
-              color: "#0a0a0c",
+              position: "absolute",
+              top: -8,
+              left: 14,
+              padding: "2px 8px",
+              borderRadius: 999,
+              background: "var(--k-accent)",
+              color: "var(--k-accent-on)",
+              fontFamily: "var(--k-font-display)",
+              fontSize: 8,
+              fontWeight: 700,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
             }}
           >
             Tu horario
           </span>
         )}
-        <div className="flex items-center gap-3.5">
-          <div className="flex min-w-[64px] flex-col items-center gap-1">
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {/* Hora + duración + tipo */}
+          <div
+            style={{
+              minWidth: 64,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
             <div
-              className="font-display text-[22px] font-bold"
               style={{
-                color: isBooked
-                  ? "var(--recovery)"
-                  : past
-                    ? "var(--text-3)"
-                    : "var(--text)",
+                fontFamily: "var(--k-font-display)",
+                fontSize: 22,
+                fontWeight: 700,
                 letterSpacing: "-0.03em",
+                color: isBooked
+                  ? "var(--k-accent)"
+                  : past
+                    ? "var(--k-t3)"
+                    : "var(--k-t1)",
+                lineHeight: 1,
               }}
             >
               {formatTime(c.startsAt)}
             </div>
             <div
-              className="font-mono text-[9px] font-bold tracking-[0.08em]"
-              style={{ color: "var(--text-3)" }}
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 9,
+                fontWeight: 600,
+                letterSpacing: "0.14em",
+                color: "var(--k-t3)",
+              }}
             >
               {c.durationMin} MIN
             </div>
-            <div
-              className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-bold"
-              style={{
-                background: `${typeInfo.color}18`,
-                color: typeInfo.color,
-                border: `1px solid ${typeInfo.color}30`,
-              }}
-            >
-              {typeInfo.label}
-            </div>
+            {c.wod?.type && (
+              <div
+                style={{
+                  marginTop: 2,
+                  width: 24,
+                  height: 24,
+                  borderRadius: 8,
+                  background: "var(--k-elevated)",
+                  border: "1px solid var(--k-line)",
+                  color: "var(--k-accent)",
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                title={c.wod.type}
+              >
+                {typeInitial}
+              </div>
+            )}
           </div>
-          <div className="min-w-0 flex-1">
+
+          {/* Body */}
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div
-              className="mb-2 truncate text-[13px] font-semibold"
-              style={{ color: isOpenBox ? "var(--cyan)" : undefined }}
+              style={{
+                marginBottom: 8,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                fontFamily: "var(--k-font-body)",
+                fontSize: 13,
+                fontWeight: 600,
+                color: isOpenBox ? "var(--k-accent)" : "var(--k-t1)",
+                letterSpacing: "-0.01em",
+              }}
             >
               {isOpenBox
                 ? "Open Box · Acceso libre"
                 : (c.wod?.name ?? "WOD por definir")}
             </div>
-            <div className="flex items-center gap-2">
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div
-                className="h-2 flex-1 overflow-hidden rounded-full"
-                style={{ background: "var(--btn-ghost-bg)" }}
+                style={{
+                  height: 4,
+                  flex: 1,
+                  overflow: "hidden",
+                  borderRadius: 999,
+                  background: "var(--k-line)",
+                }}
               >
                 <div
-                  className="h-full rounded-full transition-all duration-500"
                   style={{
+                    height: "100%",
                     width: `${Math.min(100, fillRatio * 100)}%`,
                     background: barColor,
-                    boxShadow: fillRatio > 0.5 ? `0 0 8px ${barColor}` : "none",
+                    boxShadow: barGlow,
+                    borderRadius: 999,
+                    transition: "width 500ms ease, background 200ms ease",
                   }}
                 />
               </div>
               <div
-                className="min-w-[40px] text-right font-mono text-[10px] font-bold"
-                style={{ color: "var(--text-2)" }}
+                style={{
+                  minWidth: 44,
+                  textAlign: "right",
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  color: full ? "var(--k-accent)" : "var(--k-t2)",
+                }}
               >
                 {c.bookedCount}/{c.capacity}
               </div>
             </div>
             <div
-              className="mt-1.5 flex items-center gap-1.5 text-[10px]"
-              style={{ color: "var(--text-3)" }}
+              style={{
+                marginTop: 6,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontFamily: "var(--k-font-display)",
+                fontSize: 9,
+                fontWeight: 600,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--k-t3)",
+              }}
             >
               {c.coach?.name && <span>Coach {c.coach.name}</span>}
-              {c.coach?.name && c.wod?.type && (
-                <span className="opacity-40">·</span>
-              )}
-              {c.wod?.type && (
-                <span
-                  className="k-chip"
-                  style={{
-                    fontSize: 8,
-                    padding: "2px 6px",
-                    background: `${typeInfo.color}15`,
-                    color: typeInfo.color,
-                    border: `1px solid ${typeInfo.color}25`,
-                  }}
-                >
-                  {c.wod.type}
-                </span>
-              )}
+              {c.coach?.name && c.wod?.type && <span aria-hidden>·</span>}
+              {c.wod?.type && <span>{c.wod.type}</span>}
               {past && (
                 <span
-                  className="k-chip k-chip-ghost"
-                  style={{ fontSize: 8, padding: "2px 6px" }}
+                  style={{
+                    padding: "2px 6px",
+                    borderRadius: 6,
+                    background: "var(--k-elevated)",
+                    border: "1px solid var(--k-line)",
+                    color: "var(--k-t3)",
+                  }}
                 >
-                  PASADA
+                  Pasada
                 </span>
               )}
             </div>
           </div>
-          <div className="flex-shrink-0">
+
+          {/* CTA */}
+          <div style={{ flexShrink: 0 }}>
             {isBooked ? (
               <div
-                className="flex h-10 w-10 items-center justify-center rounded-full"
                 style={{
-                  background: "var(--recovery-soft)",
-                  border: "1px solid var(--recovery-line)",
+                  display: "flex",
+                  width: 40,
+                  height: 40,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 999,
+                  background: "var(--k-accent-soft)",
+                  border: "1px solid var(--k-accent-line)",
                 }}
+                aria-label="Reservada"
               >
                 <svg
                   width="18"
                   height="18"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="var(--recovery)"
+                  stroke="var(--k-accent)"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"

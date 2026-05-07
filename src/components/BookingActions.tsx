@@ -58,46 +58,68 @@ export function BookButton({
     });
   }
 
+  const v3Base: React.CSSProperties = {
+    fontFamily: "var(--k-font-display)",
+    fontSize: 10,
+    fontWeight: 700,
+    letterSpacing: "0.16em",
+    textTransform: "uppercase",
+    padding: "9px 14px",
+    borderRadius: 10,
+    cursor: isPending ? "wait" : "pointer",
+    opacity: isPending ? 0.5 : 1,
+    transition: "background 120ms ease, box-shadow 120ms ease",
+  };
+
   if (myStatus === "BOOKED") {
     return (
-      <motion.button
+      <button
         onClick={handleCancel}
         disabled={isPending}
-        className="k-btn-ghost px-3 py-2 rounded-lg text-xs disabled:opacity-50"
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
+        style={{
+          ...v3Base,
+          background: "transparent",
+          color: "var(--k-t2)",
+          border: "1px solid var(--k-line-2)",
+        }}
       >
         {isPending ? "…" : "Cancelar"}
-      </motion.button>
+      </button>
     );
   }
 
   if (myStatus === "WAITLIST") {
     return (
-      <motion.button
+      <button
         onClick={handleCancel}
         disabled={isPending}
-        className="k-btn-ghost px-3 py-2 rounded-lg text-xs disabled:opacity-50"
-        style={{ color: "var(--text-2)" }}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
+        style={{
+          ...v3Base,
+          background: "transparent",
+          color: "var(--k-t2)",
+          border: "1px solid var(--k-line-2)",
+        }}
       >
-        {isPending ? "…" : "Quitar de waitlist"}
-      </motion.button>
+        {isPending ? "…" : "Quitar"}
+      </button>
     );
   }
 
   const full = bookedCount >= capacity;
   return (
-    <motion.button
+    <button
       onClick={handleBook}
       disabled={isPending}
-      className="k-btn-grad px-3 py-2 rounded-lg text-xs disabled:opacity-50"
-      whileHover={{ scale: 1.04 }}
-      whileTap={{ scale: 0.96 }}
+      style={{
+        ...v3Base,
+        background: full ? "var(--k-elevated)" : "var(--k-accent)",
+        color: full ? "var(--k-t1)" : "var(--k-accent-on)",
+        border: full ? "1px solid var(--k-line-2)" : "none",
+        boxShadow: full || isPending ? "none" : "var(--k-accent-glow)",
+      }}
     >
-      {isPending ? "…" : full ? "Unirse a waitlist" : "Reservar"}
-    </motion.button>
+      {isPending ? "…" : full ? "Waitlist" : "Reservar"}
+    </button>
   );
 }
 
