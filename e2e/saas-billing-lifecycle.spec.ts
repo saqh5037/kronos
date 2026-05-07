@@ -163,4 +163,54 @@ test.describe.serial("Cron saas-billing-lifecycle", () => {
     expect(body.transitions.toExpired).toBe(0);
     expect(body.transitions.trialToExpired).toBe(0);
   });
+
+  test("PAST_DUE genera audit log EMAIL_SENT_PAYMENT_FAILED", async ({
+    request,
+  }) => {
+    await resetForLifecycle();
+    const tenantId = await getSeedBoxId();
+    const plan = await db().saasPlan.findUniqueOrThrow({
+      where: { slug: "pro" },
+    });
+    await db().saasSubscription.create({
+      data: {
+        tenantId,
+        planId: plan.id,
+        status: "ACTIVE",
+        startsAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        currentPeriodEnd: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      },
+    });
+    await db().box.update({
+      where: { id: tenantId },
+      data: { subscriptionStatus: "ACTIVE" },
+    });
+
+    // Limpiar audits previos del kind
+    await db().auditEvent.deleteMany({
+      where: {
+        tenantId,
+        targetType: "Box",
+        metadata: {
+          path: ["kind"],
+          equals: "EMAIL_SENT_PAYMENT_FAILED",
+        },
+      },
+    });
+
+    const res = await fetchCron(request, CRON_SECRET);
+    expect(res.status()).toBe(200);
+
+    const audit = await db().auditEvent.findFirst({
+      where: {
+        tenantId,
+        targetType: "Box",
+        metadata: {
+          path: ["kind"],
+          equals: "EMAIL_SENT_PAYMENT_FAILED",
+        },
+      },
+    });
+    expect(audit).toBeTruthy();
+  });
 });

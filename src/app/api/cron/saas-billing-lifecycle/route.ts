@@ -17,7 +17,14 @@ import { logAudit } from "@/server/audit";
 import {
   evaluateLifecycle,
   evaluateTrialLifecycle,
+  shouldNotifyTrialExpiring,
 } from "@/server/saas-billing/lifecycle";
+import {
+  notifyPaymentFailed,
+  notifySubscriptionExpired,
+  notifyTrialExpiring,
+  getLastTrialExpiringNotification,
+} from "@/server/saas-billing/notifications";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -52,6 +59,7 @@ export async function GET(req: Request) {
   let toPastDue = 0;
   let toExpired = 0;
   let trialToExpired = 0;
+  let trialExpiringNotified = 0;
 
   // ─── SaasSubscriptions ACTIVE / PAST_DUE ─────────────────────────────────────
   const subs = await rawDb.saasSubscription.findMany({
@@ -93,6 +101,7 @@ export async function GET(req: Request) {
         targetId: sub.id,
         metadata: { kind: "SAAS_LIFECYCLE_PAST_DUE" },
       });
+      await notifyPaymentFailed(sub.tenantId);
       toPastDue++;
     } else if (result.nextStatus === "EXPIRED") {
       await rawDb.$transaction([
@@ -113,6 +122,7 @@ export async function GET(req: Request) {
         targetId: sub.id,
         metadata: { kind: "SAAS_LIFECYCLE_EXPIRED" },
       });
+      await notifySubscriptionExpired(sub.tenantId);
       toExpired++;
     }
   }
@@ -131,26 +141,41 @@ export async function GET(req: Request) {
       },
       now,
     );
-    if (!result.changed) continue;
+    if (result.changed) {
+      await rawDb.box.update({
+        where: { id: box.id },
+        data: { subscriptionStatus: "EXPIRED" },
+      });
+      await logAudit({
+        tenantId: box.id,
+        actorId: null,
+        action: "MEMBERSHIP_CANCELLED",
+        targetType: "Box",
+        targetId: box.id,
+        metadata: { kind: "TRIAL_EXPIRED" },
+      });
+      await notifySubscriptionExpired(box.id);
+      trialToExpired++;
+      continue;
+    }
 
-    await rawDb.box.update({
-      where: { id: box.id },
-      data: { subscriptionStatus: "EXPIRED" },
+    // Trial vigente: ¿avisar que termina pronto?
+    const lastNotifiedAt = await getLastTrialExpiringNotification(box.id);
+    const decision = shouldNotifyTrialExpiring({
+      trialEndsAt: box.trialEndsAt,
+      lastNotifiedAt,
+      now,
     });
-    await logAudit({
-      tenantId: box.id,
-      actorId: null,
-      action: "MEMBERSHIP_CANCELLED",
-      targetType: "Box",
-      targetId: box.id,
-      metadata: { kind: "TRIAL_EXPIRED" },
-    });
-    trialToExpired++;
+    if (decision.notify && decision.daysRemaining) {
+      await notifyTrialExpiring(box.id, decision.daysRemaining);
+      trialExpiringNotified++;
+    }
   }
 
   return NextResponse.json({
     ok: true,
     transitions: { toPastDue, toExpired, trialToExpired },
+    notifications: { trialExpiring: trialExpiringNotified },
     checked: { subs: subs.length, trialBoxes: trialBoxes.length },
   });
 }

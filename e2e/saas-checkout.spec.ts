@@ -115,4 +115,28 @@ test.describe.serial("SaaS checkout", () => {
     await expect(page.getByText(/^Pro$/).first()).toBeVisible();
     await expect(page.getByText(/Próxima facturación/i)).toBeVisible();
   });
+
+  test("owner cancela sub ACTIVE → DB queda CANCELLED", async ({ page }) => {
+    await loginAs(page, "owner");
+    await page.goto("/admin/billing");
+
+    await expect(
+      page.getByRole("link", { name: /Cambiar de plan/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Cancelar suscripción/i }),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: /Cancelar suscripción/i }).click();
+    await expect(page.getByText(/¿Cancelar suscripción\?/)).toBeVisible();
+    await page.getByRole("button", { name: /Sí, cancelar/i }).click();
+
+    await page.waitForTimeout(800);
+
+    const tenantId = await getSeedBoxId();
+    const subs = await db().saasSubscription.findMany({
+      where: { tenantId, status: "CANCELLED" },
+    });
+    expect(subs.length).toBeGreaterThanOrEqual(1);
+  });
 });

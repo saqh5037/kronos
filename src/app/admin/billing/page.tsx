@@ -8,6 +8,7 @@ import Eyebrow from "@/components/kronos/Eyebrow";
 import type { SubscriptionStatus } from "@/lib/subscription";
 import { getCurrentSubscription } from "@/server/actions/saas-billing";
 import { formatPriceMxn } from "@/lib/saas-billing";
+import { CancelSubscriptionButton } from "./_components/CancelSubscriptionButton";
 
 export const metadata = { title: "Kronos — Suscripción" };
 export const dynamic = "force-dynamic";
@@ -202,13 +203,25 @@ export default async function BillingPage() {
         ) : null}
 
         {copy.cta ? (
-          <div className="pt-2">
+          <div className="pt-2 flex flex-wrap gap-3 items-center">
             <Link
               href="/admin/billing/checkout"
               className="inline-block k-btn-grad px-5 py-3 rounded-full font-bold text-sm"
             >
               {copy.cta.label}
             </Link>
+          </div>
+        ) : null}
+
+        {currentSub && status === "ACTIVE" ? (
+          <div className="pt-2 flex flex-wrap gap-3 items-center">
+            <Link
+              href="/admin/billing/checkout"
+              className="inline-block k-btn-ghost px-5 py-2.5 rounded-full font-bold text-sm"
+            >
+              Cambiar de plan
+            </Link>
+            <CancelSubscriptionButton />
           </div>
         ) : null}
       </KCard>

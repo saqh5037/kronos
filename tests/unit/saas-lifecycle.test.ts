@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   evaluateLifecycle,
   evaluateTrialLifecycle,
+  shouldNotifyTrialExpiring,
   SAAS_GRACE_PERIOD_DAYS,
 } from "@/server/saas-billing/lifecycle";
 
@@ -149,5 +150,86 @@ describe("evaluateTrialLifecycle", () => {
         NOW,
       ),
     ).toEqual({ nextStatus: "EXPIRED", changed: false });
+  });
+});
+
+describe("shouldNotifyTrialExpiring", () => {
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  it("notify true cuando trial vence en 2 días sin notificación previa", () => {
+    const trialEndsAt = new Date(NOW.getTime() + 2 * dayMs);
+    const result = shouldNotifyTrialExpiring({
+      trialEndsAt,
+      lastNotifiedAt: null,
+      now: NOW,
+    });
+    expect(result.notify).toBe(true);
+    expect(result.daysRemaining).toBe(2);
+  });
+
+  it("notify false cuando trial vence en 5 días (fuera de ventana)", () => {
+    const trialEndsAt = new Date(NOW.getTime() + 5 * dayMs);
+    expect(
+      shouldNotifyTrialExpiring({
+        trialEndsAt,
+        lastNotifiedAt: null,
+        now: NOW,
+      }),
+    ).toEqual({ notify: false });
+  });
+
+  it("notify false cuando trial ya venció", () => {
+    const trialEndsAt = new Date(NOW.getTime() - dayMs);
+    expect(
+      shouldNotifyTrialExpiring({
+        trialEndsAt,
+        lastNotifiedAt: null,
+        now: NOW,
+      }),
+    ).toEqual({ notify: false });
+  });
+
+  it("notify false cuando ya se notificó en últimas 24h", () => {
+    const trialEndsAt = new Date(NOW.getTime() + 2 * dayMs);
+    const lastNotifiedAt = new Date(NOW.getTime() - 12 * 60 * 60 * 1000);
+    expect(
+      shouldNotifyTrialExpiring({
+        trialEndsAt,
+        lastNotifiedAt,
+        now: NOW,
+      }),
+    ).toEqual({ notify: false });
+  });
+
+  it("notify true cuando última notificación fue hace > 24h", () => {
+    const trialEndsAt = new Date(NOW.getTime() + 1 * dayMs);
+    const lastNotifiedAt = new Date(NOW.getTime() - 25 * 60 * 60 * 1000);
+    expect(
+      shouldNotifyTrialExpiring({
+        trialEndsAt,
+        lastNotifiedAt,
+        now: NOW,
+      }),
+    ).toEqual({ notify: true, daysRemaining: 1 });
+  });
+
+  it("notify false sin trialEndsAt", () => {
+    expect(
+      shouldNotifyTrialExpiring({
+        trialEndsAt: null,
+        lastNotifiedAt: null,
+        now: NOW,
+      }),
+    ).toEqual({ notify: false });
+  });
+
+  it("daysRemaining redondea hacia arriba (1.4 → 2)", () => {
+    const trialEndsAt = new Date(NOW.getTime() + 1.4 * dayMs);
+    const result = shouldNotifyTrialExpiring({
+      trialEndsAt,
+      lastNotifiedAt: null,
+      now: NOW,
+    });
+    expect(result.daysRemaining).toBe(2);
   });
 });

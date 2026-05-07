@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/cleanup-uploads",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/saas-billing-lifecycle",
+      "schedule": "0 * * * *"
     }
   ]
 }

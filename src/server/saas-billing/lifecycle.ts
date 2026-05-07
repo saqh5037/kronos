@@ -77,3 +77,32 @@ export function evaluateTrialLifecycle(
   }
   return { nextStatus: "TRIAL", changed: false };
 }
+
+/**
+ * Decide si enviar el email "Trial por terminar" para un Box en estado TRIAL.
+ * Ventana: trial vence entre +1d y +3d desde ahora. Idempotente: si lastNotifiedAt
+ * está dentro de las últimas 24h, no re-notifica.
+ */
+export function shouldNotifyTrialExpiring(input: {
+  trialEndsAt: Date | null;
+  lastNotifiedAt: Date | null;
+  now?: Date;
+}): { notify: boolean; daysRemaining?: number } {
+  const now = input.now ?? new Date();
+  if (!input.trialEndsAt) return { notify: false };
+
+  const msUntilEnd = input.trialEndsAt.getTime() - now.getTime();
+  const dayMs = 24 * 60 * 60 * 1000;
+  const daysUntilEnd = msUntilEnd / dayMs;
+
+  // Ventana: vence en (0, 3] días
+  if (daysUntilEnd <= 0 || daysUntilEnd > 3) return { notify: false };
+
+  if (input.lastNotifiedAt) {
+    const sinceNotified = now.getTime() - input.lastNotifiedAt.getTime();
+    if (sinceNotified < dayMs) return { notify: false };
+  }
+
+  const daysRemaining = Math.max(1, Math.ceil(daysUntilEnd));
+  return { notify: true, daysRemaining };
+}
