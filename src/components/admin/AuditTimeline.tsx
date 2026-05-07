@@ -184,7 +184,9 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
                               </span>
                             )}
                             <span className="text-text-3 text-sm">
-                              {ACTION_VERBS[event.action] ?? event.action}
+                              {event.label ??
+                                ACTION_VERBS[event.action] ??
+                                event.action}
                             </span>
                           </div>
 

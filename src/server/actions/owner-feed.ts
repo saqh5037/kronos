@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
 import { db as rawDb } from "../db";
 import type { AuditAction } from "@prisma/client";
+import { humanizeAuditEvent, type AuditCategory } from "@/lib/audit-humanize";
 
 async function requireOwnerSession() {
   const session = await getServerSession(authOptions);
@@ -34,35 +35,16 @@ export type FeedEvent = {
   target: FeedTarget;
   metadata: Record<string, unknown>;
   severity: FeedSeverity;
+  label: string;
+  category: AuditCategory;
 };
 
-// Actions that are considered sensitive for the owner feed
+// Actions usadas para count del badge en sidebar (sin metadata.kind context)
 const SENSITIVE_ACTIONS: AuditAction[] = [
   "PAYMENT_VOIDED",
   "PAYMENT_REGISTERED",
   "MEMBERSHIP_CANCELLED",
 ];
-
-const WARNING_ACTIONS: AuditAction[] = [
-  "MEMBERSHIP_PAUSED",
-  "PLAN_ARCHIVED",
-  "WOD_ARCHIVED",
-];
-
-function classifySeverity(
-  action: AuditAction,
-  metadata: Record<string, unknown>,
-): FeedSeverity {
-  if (SENSITIVE_ACTIONS.includes(action)) {
-    // PAYMENT_REGISTERED is only sensitive when it's a cash payment
-    if (action === "PAYMENT_REGISTERED" && metadata?.gateway !== "CASH") {
-      return "info";
-    }
-    return "sensitive";
-  }
-  if (WARNING_ACTIONS.includes(action)) return "warning";
-  return "info";
-}
 
 /**
  * Resolves a readable label for an AuditEvent target.
@@ -161,6 +143,62 @@ async function resolveTargetLabel(
         link: `${baseLink}/prs`,
       };
     }
+
+    if (targetType === "SaasSubscription") {
+      const sub = await rawDb.saasSubscription.findFirst({
+        where: { id: targetId, tenantId },
+        select: { plan: { select: { name: true } } },
+      });
+      if (sub) {
+        return {
+          type: targetType,
+          label: `Suscripción · plan ${sub.plan.name}`,
+          link: `${baseLink}/billing`,
+        };
+      }
+    }
+
+    if (targetType === "Box") {
+      return {
+        type: targetType,
+        label: "Configuración del Box",
+        link: `${baseLink}/ajustes`,
+      };
+    }
+
+    if (targetType === "AthleteInvitation") {
+      const inv = await rawDb.athleteInvitation.findFirst({
+        where: { id: targetId, tenantId },
+        select: { email: true, firstName: true, lastName: true },
+      });
+      if (inv) {
+        const fullName = [inv.firstName, inv.lastName]
+          .filter(Boolean)
+          .join(" ");
+        return {
+          type: targetType,
+          label: fullName ? `${fullName} · ${inv.email}` : inv.email,
+          link: `${baseLink}/atletas/invitar`,
+        };
+      }
+    }
+
+    if (targetType === "StaffInvitation") {
+      const inv = await rawDb.staffInvitation.findFirst({
+        where: { id: targetId, tenantId },
+        select: { email: true, name: true, role: true },
+      });
+      if (inv) {
+        const roleLabel = inv.role === "COACH" ? "Coach" : "Staff";
+        return {
+          type: targetType,
+          label: inv.name
+            ? `${inv.name} · ${roleLabel} · ${inv.email}`
+            : `${roleLabel} · ${inv.email}`,
+          link: `${baseLink}/onboarding`,
+        };
+      }
+    }
   } catch {
     // Best-effort — fall through to default
   }
@@ -176,6 +214,7 @@ export type OwnerFeedOpts = {
   limit?: number;
   actorId?: string;
   action?: AuditAction;
+  category?: AuditCategory;
 };
 
 export async function getOwnerLiveFeed(
@@ -233,6 +272,14 @@ export async function getOwnerLiveFeed(
       tenantId,
     );
 
+    const humanized = humanizeAuditEvent({
+      action: event.action,
+      metadata,
+      targetType: event.targetType,
+    });
+
+    if (opts?.category && humanized.category !== opts.category) continue;
+
     result.push({
       id: event.id,
       when: event.createdAt,
@@ -240,7 +287,9 @@ export async function getOwnerLiveFeed(
       action: event.action,
       target,
       metadata,
-      severity: classifySeverity(event.action, metadata),
+      severity: humanized.severity,
+      label: humanized.label,
+      category: humanized.category,
     });
   }
 

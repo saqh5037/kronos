@@ -4,13 +4,19 @@ import { authOptions } from "@/server/auth";
 import { getOwnerLiveFeed } from "@/server/actions/owner-feed";
 import AuditTimeline from "@/components/admin/AuditTimeline";
 import AuditFilters from "@/components/admin/AuditFilters";
+import { AUDIT_CATEGORIES, type AuditCategory } from "@/lib/audit-humanize";
 
 export const metadata = { title: "Kronos — Auditoría" };
+export const dynamic = "force-dynamic";
 
 export default async function AuditoriaPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ days?: string; action?: string }>;
+  searchParams?: Promise<{
+    days?: string;
+    action?: string;
+    category?: string;
+  }>;
 }) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "OWNER") {
@@ -20,10 +26,16 @@ export default async function AuditoriaPage({
   const params = searchParams ? await searchParams : {};
   const days = Number(params?.days ?? 1);
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const categoryParam =
+    params?.category &&
+    AUDIT_CATEGORIES.includes(params.category as AuditCategory)
+      ? (params.category as AuditCategory)
+      : undefined;
 
   const events = await getOwnerLiveFeed({
     since,
     limit: 100,
+    category: categoryParam,
   });
 
   const sensitiveCount = events.filter(
