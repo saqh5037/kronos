@@ -211,7 +211,7 @@ export default function Step2Review({
         <p className="text-sm text-text-2 mt-1">
           {rows.length} filas detectadas{" "}
           {needsReview > 0 && (
-            <span className="text-[var(--amber)] font-medium">
+            <span className="text-[var(--k-warning)] font-medium">
               · {needsReview} requieren revisión
             </span>
           )}
@@ -220,14 +220,14 @@ export default function Step2Review({
 
       {/* ─── DESKTOP TABLE (lg+) ─── */}
       <motion.div
-        className="hidden lg:block overflow-x-auto rounded-xl border border-[var(--line)] bg-[var(--card)]"
+        className="hidden lg:block overflow-x-auto rounded-xl border border-[var(--k-line)] bg-[var(--k-surface)]"
         variants={containerVariants}
         initial="hidden"
         animate="show"
       >
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-text-3 border-b border-[var(--line)]">
+            <tr className="text-left text-text-3 border-b border-[var(--k-line)]">
               <th className="pb-3 pt-3 pr-3 pl-4 w-10"></th>
               <th className="pb-3 pt-3 pr-3 font-mono text-[10px] uppercase tracking-wider">
                 Nombre en pizarra
@@ -262,11 +262,11 @@ export default function Step2Review({
                 <motion.tr
                   key={idx}
                   variants={rowVariants}
-                  className={`border-b border-[var(--line)] transition-colors hover:bg-[var(--hover-subtle)] ${
+                  className={`border-b border-[var(--k-line)] transition-colors hover:bg-[var(--k-elevated)] ${
                     isLowConfidence
-                      ? "border-l-[3px] border-l-[var(--ember)]"
+                      ? "border-l-[3px] border-l-[var(--k-warning)]"
                       : "border-l-[3px] border-l-transparent"
-                  } ${scoreInvalid ? "bg-[var(--ember-soft)]" : ""}`}
+                  } ${scoreInvalid ? "bg-[rgba(255, 90, 90, 0.1)]" : ""}`}
                   animate={row.shake ? { x: [0, -6, 6, -4, 4, 0] } : { x: 0 }}
                   transition={{ duration: 0.4 }}
                 >
@@ -281,7 +281,7 @@ export default function Step2Review({
                         }
                         className="sr-only peer"
                       />
-                      <div className="w-5 h-5 rounded border-2 border-white/20 peer-checked:bg-[var(--moss)] peer-checked:border-[var(--moss)] flex items-center justify-center transition-colors">
+                      <div className="w-5 h-5 rounded border-2 border-white/20 peer-checked:bg-[var(--k-accent)] peer-checked:border-[var(--k-accent)] flex items-center justify-center transition-colors">
                         {row.include && (
                           <motion.svg
                             width="12"
@@ -332,7 +332,7 @@ export default function Step2Review({
                             }}
                             className="overflow-hidden"
                           >
-                            <label className="flex items-center gap-2 mt-2 text-xs text-[var(--steel)] cursor-pointer bg-[var(--steel-soft)] rounded-md px-2 py-1.5 border border-[var(--steel-line)]">
+                            <label className="flex items-center gap-2 mt-2 text-xs text-[var(--k-t2)] cursor-pointer bg-[var(--k-elevated)] rounded-md px-2 py-1.5 border border-[var(--k-line-2)]">
                               <input
                                 type="checkbox"
                                 checked={row.saveAlias}
@@ -343,7 +343,7 @@ export default function Step2Review({
                                 }
                                 className="sr-only peer"
                               />
-                              <div className="w-4 h-4 rounded border border-[var(--steel-line)] peer-checked:bg-[var(--steel)] peer-checked:border-[var(--steel)] flex items-center justify-center transition-colors shrink-0">
+                              <div className="w-4 h-4 rounded border border-[var(--k-line-2)] peer-checked:bg-[var(--k-t2)] peer-checked:border-[var(--k-t2)] flex items-center justify-center transition-colors shrink-0">
                                 {row.saveAlias && (
                                   <svg
                                     width="10"
@@ -379,17 +379,17 @@ export default function Step2Review({
                         onChange={(e) =>
                           updateRow(idx, { editedScore: e.target.value })
                         }
-                        className={`bg-[var(--card-2)] text-text text-sm rounded-lg px-3 py-2 border w-24 font-mono transition-colors focus:outline-none ${
+                        className={`bg-[var(--k-elevated)] text-text text-sm rounded-lg px-3 py-2 border w-24 font-mono transition-colors focus:outline-none ${
                           scoreInvalid
-                            ? "border-[var(--ember)] focus:border-[var(--ember)] shadow-[0_0_8px_rgba(196,69,54,0.3)]"
-                            : "border-white/10 focus:border-[var(--steel)]"
+                            ? "border-[var(--k-warning)] focus:border-[var(--k-warning)] shadow-[0_0_8px_rgba(196,69,54,0.3)]"
+                            : "border-white/10 focus:border-[var(--k-t2)]"
                         }`}
                       />
                       {scoreInvalid && (
                         <motion.span
                           initial={{ opacity: 0, scale: 0.5 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="absolute -right-1 -top-1 text-[var(--ember)] text-xs"
+                          className="absolute -right-1 -top-1 text-[var(--k-warning)] text-xs"
                         >
                           ⚠
                         </motion.span>
@@ -406,7 +406,7 @@ export default function Step2Review({
                           scoreType: e.target.value as ScoreType,
                         })
                       }
-                      className="bg-[var(--card-2)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
+                      className="bg-[var(--k-elevated)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)] transition-colors"
                     >
                       <option value="TIME">TIME</option>
                       <option value="REPS">REPS</option>
@@ -424,7 +424,7 @@ export default function Step2Review({
                           scaling: e.target.value as Scaling,
                         })
                       }
-                      className="bg-[var(--card-2)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
+                      className="bg-[var(--k-elevated)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)] transition-colors"
                     >
                       <option value="RX">RX</option>
                       <option value="SCALED">SCALED</option>
@@ -466,11 +466,11 @@ export default function Step2Review({
             <motion.div
               key={idx}
               variants={cardVariants}
-              className={`rounded-xl border bg-[var(--card)] p-4 space-y-3 ${
+              className={`rounded-xl border bg-[var(--k-surface)] p-4 space-y-3 ${
                 isLowConfidence
-                  ? "border-l-[3px] border-l-[var(--ember)] border-[var(--line)]"
-                  : "border-[var(--line)]"
-              } ${scoreInvalid ? "bg-[var(--ember-soft)]" : ""}`}
+                  ? "border-l-[3px] border-l-[var(--k-warning)] border-[var(--k-line)]"
+                  : "border-[var(--k-line)]"
+              } ${scoreInvalid ? "bg-[rgba(255, 90, 90, 0.1)]" : ""}`}
               animate={row.shake ? { x: [0, -6, 6, -4, 4, 0] } : { x: 0 }}
               transition={{ duration: 0.4 }}
             >
@@ -499,7 +499,7 @@ export default function Step2Review({
                       }
                       className="sr-only peer"
                     />
-                    <div className="w-5 h-5 rounded border-2 border-white/20 peer-checked:bg-[var(--moss)] peer-checked:border-[var(--moss)] flex items-center justify-center transition-colors">
+                    <div className="w-5 h-5 rounded border-2 border-white/20 peer-checked:bg-[var(--k-accent)] peer-checked:border-[var(--k-accent)] flex items-center justify-center transition-colors">
                       {row.include && (
                         <motion.svg
                           width="12"
@@ -545,7 +545,7 @@ export default function Step2Review({
                         transition={{ duration: 0.25, ease: "easeOut" }}
                         className="overflow-hidden"
                       >
-                        <label className="flex items-center gap-2 mt-2 text-xs text-[var(--steel)] cursor-pointer bg-[var(--steel-soft)] rounded-md px-2 py-1.5 border border-[var(--steel-line)]">
+                        <label className="flex items-center gap-2 mt-2 text-xs text-[var(--k-t2)] cursor-pointer bg-[var(--k-elevated)] rounded-md px-2 py-1.5 border border-[var(--k-line-2)]">
                           <input
                             type="checkbox"
                             checked={row.saveAlias}
@@ -556,7 +556,7 @@ export default function Step2Review({
                             }
                             className="sr-only peer"
                           />
-                          <div className="w-4 h-4 rounded border border-[var(--steel-line)] peer-checked:bg-[var(--steel)] peer-checked:border-[var(--steel)] flex items-center justify-center transition-colors shrink-0">
+                          <div className="w-4 h-4 rounded border border-[var(--k-line-2)] peer-checked:bg-[var(--k-t2)] peer-checked:border-[var(--k-t2)] flex items-center justify-center transition-colors shrink-0">
                             {row.saveAlias && (
                               <svg
                                 width="10"
@@ -596,17 +596,17 @@ export default function Step2Review({
                       onChange={(e) =>
                         updateRow(idx, { editedScore: e.target.value })
                       }
-                      className={`w-full bg-[var(--card-2)] text-text text-sm rounded-lg px-3 py-2 border font-mono transition-colors focus:outline-none ${
+                      className={`w-full bg-[var(--k-elevated)] text-text text-sm rounded-lg px-3 py-2 border font-mono transition-colors focus:outline-none ${
                         scoreInvalid
-                          ? "border-[var(--ember)] focus:border-[var(--ember)] shadow-[0_0_8px_rgba(196,69,54,0.3)]"
-                          : "border-white/10 focus:border-[var(--steel)]"
+                          ? "border-[var(--k-warning)] focus:border-[var(--k-warning)] shadow-[0_0_8px_rgba(196,69,54,0.3)]"
+                          : "border-white/10 focus:border-[var(--k-t2)]"
                       }`}
                     />
                     {scoreInvalid && (
                       <motion.span
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="absolute -right-1 -top-1 text-[var(--ember)] text-xs"
+                        className="absolute -right-1 -top-1 text-[var(--k-warning)] text-xs"
                       >
                         ⚠
                       </motion.span>
@@ -624,7 +624,7 @@ export default function Step2Review({
                         scoreType: e.target.value as ScoreType,
                       })
                     }
-                    className="bg-[var(--card-2)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
+                    className="bg-[var(--k-elevated)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)] transition-colors"
                   >
                     <option value="TIME">TIME</option>
                     <option value="REPS">REPS</option>
@@ -643,7 +643,7 @@ export default function Step2Review({
                         scaling: e.target.value as Scaling,
                       })
                     }
-                    className="bg-[var(--card-2)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--steel)] transition-colors"
+                    className="bg-[var(--k-elevated)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)] transition-colors"
                   >
                     <option value="RX">RX</option>
                     <option value="SCALED">SCALED</option>
@@ -662,7 +662,7 @@ export default function Step2Review({
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="text-sm text-[var(--ember)] bg-[var(--ember-soft)] rounded-lg px-4 py-3 border border-[var(--ember-line)] flex items-center gap-2"
+            className="text-sm text-[var(--k-warning)] bg-[rgba(255, 90, 90, 0.1)] rounded-lg px-4 py-3 border border-[rgba(255, 90, 90, 0.3)] flex items-center gap-2"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle

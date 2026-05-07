@@ -82,7 +82,7 @@ export default function Step3Confirm({ count, prDetected }: Props) {
       {/* Animated checkmark */}
       <div className="relative flex justify-center">
         <motion.div
-          className="w-20 h-20 rounded-full bg-[var(--moss-soft)] border border-[var(--moss-line)] flex items-center justify-center"
+          className="w-20 h-20 rounded-full bg-[var(--k-accent-soft)] border border-[var(--k-accent-line)] flex items-center justify-center"
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 15 }}
@@ -98,7 +98,7 @@ export default function Step3Confirm({ count, prDetected }: Props) {
           >
             <motion.path
               d="M10 20L17 27L30 13"
-              stroke="var(--moss)"
+              stroke="var(--k-accent)"
               strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -117,7 +117,7 @@ export default function Step3Confirm({ count, prDetected }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.4 }}
         >
-          <span className="text-[var(--moss)]">{animatedCount}</span> score
+          <span className="text-[var(--k-accent)]">{animatedCount}</span> score
           {count !== 1 ? "s" : ""} guardado{count !== 1 ? "s" : ""}
         </motion.h2>
         <motion.p
@@ -135,12 +135,12 @@ export default function Step3Confirm({ count, prDetected }: Props) {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.8, type: "spring" }}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--fire-soft)] to-[var(--amber-soft)] text-[var(--fire)] border border-[var(--fire-line)] rounded-full px-4 py-1.5 text-sm font-bold mt-2"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--fire-soft)] to-[var(--amber-soft)] text-[var(--k-accent)] border border-[var(--fire-line)] rounded-full px-4 py-1.5 text-sm font-bold mt-2"
           >
             <span className="text-lg">🏆</span>
             PR detectado
             <motion.span
-              className="inline-block w-2 h-2 rounded-full bg-[var(--fire)]"
+              className="inline-block w-2 h-2 rounded-full bg-[var(--k-accent)]"
               animate={{ opacity: [1, 0.4, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             />

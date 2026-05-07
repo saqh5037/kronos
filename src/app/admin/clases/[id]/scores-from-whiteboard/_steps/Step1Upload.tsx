@@ -81,7 +81,7 @@ export default function Step1Upload({ classId }: Props) {
         <motion.div
           className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors overflow-hidden ${
             dragOver
-              ? "border-[var(--moss)] bg-[var(--moss-soft)]"
+              ? "border-[var(--k-accent)] bg-[var(--k-accent-soft)]"
               : preview
                 ? "border-white/20"
                 : "border-white/20 hover:border-white/40"
@@ -228,7 +228,7 @@ export default function Step1Upload({ classId }: Props) {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="text-sm text-[var(--ember)] bg-[var(--ember-soft)] rounded-lg px-4 py-3 border border-[var(--ember-line)] flex items-center gap-2"
+              className="text-sm text-[var(--k-warning)] bg-[rgba(255, 90, 90, 0.1)] rounded-lg px-4 py-3 border border-[rgba(255, 90, 90, 0.3)] flex items-center gap-2"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <circle
