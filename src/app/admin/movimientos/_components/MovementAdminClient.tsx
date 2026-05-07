@@ -118,7 +118,7 @@ export default function MovementAdminClient({
             placeholder="Buscar movimiento..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-xl text-sm bg-[var(--card)] border border-[var(--line)] focus:outline-none focus:border-[var(--steel)] text-text placeholder:text-text-3"
+            className="w-full pl-10 pr-4 py-2 rounded-xl text-sm bg-[var(--card)] border border-[var(--line)] focus:outline-none focus:border-[var(--k-t2)] text-text placeholder:text-text-3"
           />
           {search && (
             <button
@@ -144,7 +144,7 @@ export default function MovementAdminClient({
               onClick={() => setActiveCategory(cat.key)}
               className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
                 activeCategory === cat.key
-                  ? "bg-[var(--card-elevated)] text-text border border-[var(--line-strong)]"
+                  ? "bg-[var(--k-elevated)] text-text border border-[var(--k-line-2)]"
                   : "text-text-3 hover:text-text-2"
               }`}
             >
@@ -187,11 +187,11 @@ export default function MovementAdminClient({
               return (
                 <tr
                   key={m.id}
-                  className="hover:bg-[var(--hover-subtle)] transition-colors cursor-pointer group"
+                  className="hover:bg-[var(--k-elevated)] transition-colors cursor-pointer group"
                   onClick={() => openEdit(m)}
                 >
                   <td className="p-3">
-                    <div className="w-12 h-8 rounded-lg bg-[var(--bg-soft)] overflow-hidden border border-[var(--line)]">
+                    <div className="w-12 h-8 rounded-lg bg-[var(--k-surface)] overflow-hidden border border-[var(--line)]">
                       {thumbnail ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -207,7 +207,7 @@ export default function MovementAdminClient({
                             height="12"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="var(--text-3)"
+                            stroke="var(--k-t3)"
                             strokeWidth="1.5"
                           >
                             <polygon points="5 3 19 12 5 21 5 3" />
@@ -304,7 +304,10 @@ export default function MovementAdminClient({
               {selected.videoUrl && (
                 <div
                   className="rounded-xl overflow-hidden mb-4 border border-[var(--line)]"
-                  style={{ aspectRatio: "16/9", background: "var(--bg-soft)" }}
+                  style={{
+                    aspectRatio: "16/9",
+                    background: "var(--k-surface)",
+                  }}
                 >
                   <iframe
                     src={selected.videoUrl}
@@ -323,7 +326,7 @@ export default function MovementAdminClient({
                 value={editVideoUrl}
                 onChange={(e) => setEditVideoUrl(e.target.value)}
                 placeholder="https://www.youtube.com/embed/..."
-                className="w-full px-3 py-2.5 rounded-xl text-sm bg-[var(--card-2)] border border-[var(--line)] focus:outline-none focus:border-[var(--steel)] text-text placeholder:text-text-3 mb-4"
+                className="w-full px-3 py-2.5 rounded-xl text-sm bg-[var(--k-elevated)] border border-[var(--line)] focus:outline-none focus:border-[var(--k-t2)] text-text placeholder:text-text-3 mb-4"
               />
 
               <AnimatePresence>
@@ -334,8 +337,8 @@ export default function MovementAdminClient({
                     exit={{ opacity: 0 }}
                     className={`text-[12px] mb-3 font-semibold ${
                       message.includes("Error")
-                        ? "text-[var(--ember)]"
-                        : "text-[var(--moss)]"
+                        ? "text-[var(--k-warning)]"
+                        : "text-[var(--k-accent)]"
                     }`}
                   >
                     {message}

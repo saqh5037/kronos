@@ -215,7 +215,7 @@ export default function LeaderboardPage({
       {isPending && (
         <div className="px-3.5 mt-4">
           <KCard variant="ghost" className="p-6 text-center">
-            <div className="text-sm" style={{ color: "var(--text-3)" }}>
+            <div className="text-sm" style={{ color: "var(--k-t3)" }}>
               Cargando...
             </div>
           </KCard>
@@ -241,7 +241,7 @@ export default function LeaderboardPage({
             {wodData.entries.length === 0 && (
               <div
                 className="p-6 text-center text-sm"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 Sin scores registrados para este WOD.
               </div>
@@ -269,7 +269,7 @@ export default function LeaderboardPage({
             {movementData.entries.length === 0 && (
               <div
                 className="p-6 text-center text-sm"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 Sin PRs registrados para este movimiento.
               </div>
@@ -296,7 +296,7 @@ export default function LeaderboardPage({
             {attendanceData.length === 0 && (
               <div
                 className="p-6 text-center text-sm"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 Sin datos de asistencia esta semana.
               </div>

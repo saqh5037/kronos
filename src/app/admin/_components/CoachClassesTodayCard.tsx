@@ -27,7 +27,7 @@ export function CoachClassesTodayCard({ classes }: Props) {
         <h2 className="font-display text-xl font-bold">Tus clases hoy</h2>
         <Link
           href="/admin/programacion"
-          className="text-sm text-[var(--strain)] hover:underline"
+          className="text-sm text-[var(--k-warning)] hover:underline"
         >
           Ver semana →
         </Link>
@@ -35,10 +35,10 @@ export function CoachClassesTodayCard({ classes }: Props) {
 
       {classes.length === 0 ? (
         <div className="py-2">
-          <p className="text-sm text-[var(--text-2)]">
+          <p className="text-sm text-[var(--k-t2)]">
             No tenés clases asignadas hoy.
           </p>
-          <p className="text-xs text-[var(--text-3)] mt-1">
+          <p className="text-xs text-[var(--k-t3)] mt-1">
             Revisá la programación si esperabas alguna.
           </p>
         </div>
@@ -47,18 +47,18 @@ export function CoachClassesTodayCard({ classes }: Props) {
           {classes.map((c) => (
             <li
               key={c.id}
-              className="flex items-center justify-between gap-3 p-3 rounded-lg bg-[var(--card-2)]/40 hover:bg-[var(--card-2)]/70 transition-colors"
+              className="flex items-center justify-between gap-3 p-3 rounded-lg bg-[var(--k-elevated)]/40 hover:bg-[var(--k-elevated)]/70 transition-colors"
             >
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm">
-                  <span style={{ color: "var(--strain)" }}>
+                  <span style={{ color: "var(--k-warning)" }}>
                     {formatTime(c.startsAt)}
                   </span>
                   {c.wodName ? (
                     <span className="ml-2 text-[var(--text)]">{c.wodName}</span>
                   ) : null}
                 </p>
-                <p className="text-xs text-[var(--text-3)] mt-0.5">
+                <p className="text-xs text-[var(--k-t3)] mt-0.5">
                   {c.durationMin} min · {c.attendedCount}/{c.bookedCount}{" "}
                   asistidos
                 </p>
@@ -67,7 +67,7 @@ export function CoachClassesTodayCard({ classes }: Props) {
                 <span className="k-chip k-chip-strain">
                   {c.bookedCount}/{c.capacity}
                 </span>
-                <p className="text-xs text-[var(--text-3)] mt-1">
+                <p className="text-xs text-[var(--k-t3)] mt-1">
                   {fillRatio(c.bookedCount, c.capacity)} lleno
                 </p>
               </div>

@@ -28,7 +28,7 @@ export function UpcomingBillingCard({ nextBilling }: Props) {
     return (
       <KCard animate={false} className="p-5 md:p-6">
         <h2 className="font-display text-xl font-bold mb-3">Suscripción</h2>
-        <p className="text-sm text-[var(--text-2)] mb-4">
+        <p className="text-sm text-[var(--k-t2)] mb-4">
           Tu Box no tiene una suscripción activa. Activá un plan para mantener
           el servicio sin interrupciones.
         </p>
@@ -48,7 +48,7 @@ export function UpcomingBillingCard({ nextBilling }: Props) {
     <KCard animate={false} className="p-5 md:p-6">
       <div className="flex items-baseline justify-between gap-3 mb-4">
         <h2 className="font-display text-xl font-bold">Próxima facturación</h2>
-        <span className="text-xs font-mono uppercase tracking-wider text-[var(--text-3)]">
+        <span className="text-xs font-mono uppercase tracking-wider text-[var(--k-t3)]">
           {nextBilling.planName}
         </span>
       </div>
@@ -58,18 +58,18 @@ export function UpcomingBillingCard({ nextBilling }: Props) {
           <p className="text-2xl font-display font-extrabold">
             {formatPriceMxn(nextBilling.amountMxnCents)}
           </p>
-          <p className="text-xs text-[var(--text-3)] mt-0.5">
+          <p className="text-xs text-[var(--k-t3)] mt-0.5">
             {formatDate(nextBilling.date)}
           </p>
         </div>
         <div className="text-right">
           <p
             className="text-2xl font-display font-extrabold"
-            style={{ color: "var(--strain)" }}
+            style={{ color: "var(--k-warning)" }}
           >
             {days}
           </p>
-          <p className="text-xs text-[var(--text-3)]">
+          <p className="text-xs text-[var(--k-t3)]">
             día{days === 1 ? "" : "s"}
           </p>
         </div>
@@ -78,13 +78,13 @@ export function UpcomingBillingCard({ nextBilling }: Props) {
       <div className="pt-3 border-t border-[var(--border)] flex flex-wrap gap-3 text-sm">
         <Link
           href="/admin/billing/historial"
-          className="text-[var(--strain)] hover:underline"
+          className="text-[var(--k-warning)] hover:underline"
         >
           Ver historial →
         </Link>
         <Link
           href="/admin/billing"
-          className="text-[var(--text-2)] hover:text-[var(--text)]"
+          className="text-[var(--k-t2)] hover:text-[var(--text)]"
         >
           Gestionar suscripción
         </Link>

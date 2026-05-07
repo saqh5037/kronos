@@ -229,11 +229,11 @@ export default async function AtletaHomePage() {
             <div className="p-3.5 flex items-center gap-3.5">
               <div
                 className="text-center px-2.5 py-1.5 rounded-xl min-w-[54px]"
-                style={{ background: "var(--bg-soft)" }}
+                style={{ background: "var(--k-surface)" }}
               >
                 <div
                   className="font-mono text-[9px] tracking-[0.1em] font-bold"
-                  style={{ color: "var(--text-3)" }}
+                  style={{ color: "var(--k-t3)" }}
                 >
                   {home.nextBooking.startsAt.toDateString() ===
                   new Date().toDateString()
@@ -242,7 +242,7 @@ export default async function AtletaHomePage() {
                 </div>
                 <div
                   className="font-display text-xl font-bold"
-                  style={{ color: "var(--moss)" }}
+                  style={{ color: "var(--k-accent)" }}
                 >
                   {formatTime(home.nextBooking.startsAt)}
                 </div>
@@ -253,7 +253,7 @@ export default async function AtletaHomePage() {
                 </div>
                 <div
                   className="text-[11px] flex gap-2 items-center flex-wrap"
-                  style={{ color: "var(--text-2)" }}
+                  style={{ color: "var(--k-t2)" }}
                 >
                   {home.nextBooking.coachName && (
                     <span>Coach {home.nextBooking.coachName}</span>
@@ -261,7 +261,7 @@ export default async function AtletaHomePage() {
                   {nextClassDetail && (
                     <>
                       <span style={{ opacity: 0.4 }}>·</span>
-                      <span style={{ color: "var(--moss)" }}>
+                      <span style={{ color: "var(--k-accent)" }}>
                         ● {nextClassDetail.bookedCount}/
                         {nextClassDetail.capacity}
                       </span>
@@ -277,7 +277,7 @@ export default async function AtletaHomePage() {
             <KCard variant="ghost">
               <p
                 className="text-sm text-center py-3"
-                style={{ color: "var(--text-2)" }}
+                style={{ color: "var(--k-t2)" }}
               >
                 Sin reservas activas. Toca para reservar.
               </p>
@@ -573,8 +573,8 @@ export default async function AtletaHomePage() {
               <div
                 className="w-[42px] h-[42px] rounded-xl flex items-center justify-center"
                 style={{
-                  background: "var(--pr-soft)",
-                  border: "1px solid var(--pr-line)",
+                  background: "rgba(255, 90, 90, 0.1)",
+                  border: "1px solid rgba(255, 90, 90, 0.3)",
                 }}
               >
                 <svg
@@ -582,7 +582,7 @@ export default async function AtletaHomePage() {
                   height="20"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="var(--ember)"
+                  stroke="var(--k-warning)"
                   strokeWidth="2"
                 >
                   <path d="M6 9V5h12v4M5 9h14v4H5zM7 13l1 8h8l1-8" />
@@ -596,7 +596,7 @@ export default async function AtletaHomePage() {
                 </div>
                 <div
                   className="font-mono text-[10px] tracking-[0.06em]"
-                  style={{ color: "var(--text-2)" }}
+                  style={{ color: "var(--k-t2)" }}
                 >
                   {formatScore(
                     home.lastScore.value,
@@ -624,8 +624,8 @@ export default async function AtletaHomePage() {
               <div
                 className="w-[42px] h-[42px] rounded-xl flex items-center justify-center"
                 style={{
-                  background: "var(--pr-soft)",
-                  border: "1px solid var(--pr-line)",
+                  background: "rgba(255, 90, 90, 0.1)",
+                  border: "1px solid rgba(255, 90, 90, 0.3)",
                 }}
               >
                 <svg
@@ -633,7 +633,7 @@ export default async function AtletaHomePage() {
                   height="20"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="var(--ember)"
+                  stroke="var(--k-warning)"
                   strokeWidth="2"
                 >
                   <path d="M6 9V5h12v4M5 9h14v4H5zM7 13l1 8h8l1-8" />
@@ -653,7 +653,7 @@ export default async function AtletaHomePage() {
                 </div>
                 <div
                   className="font-mono text-[10px] tracking-[0.06em]"
-                  style={{ color: "var(--text-2)" }}
+                  style={{ color: "var(--k-t2)" }}
                 >
                   {latestPR.value} {latestPR.unit} ·{" "}
                   {formatDayMonth(latestPR.achievedAt).toUpperCase()}

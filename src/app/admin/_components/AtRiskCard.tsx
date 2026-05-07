@@ -25,7 +25,7 @@ export function AtRiskCard({ rows }: Props) {
       <div className="flex items-baseline justify-between gap-3 mb-4">
         <h2 className="font-display text-xl font-bold">Atletas en riesgo</h2>
         {rows.length > 0 && (
-          <span className="text-xs font-mono uppercase tracking-wider text-[var(--text-3)]">
+          <span className="text-xs font-mono uppercase tracking-wider text-[var(--k-t3)]">
             Top {rows.length}
           </span>
         )}
@@ -33,10 +33,10 @@ export function AtRiskCard({ rows }: Props) {
 
       {rows.length === 0 ? (
         <div className="py-2">
-          <p className="text-sm text-[var(--moss)]">
+          <p className="text-sm text-[var(--k-accent)]">
             ✓ Ningún atleta en riesgo esta semana.
           </p>
-          <p className="text-xs text-[var(--text-3)] mt-1">
+          <p className="text-xs text-[var(--k-t3)] mt-1">
             Tu equipo viene parejo. Mantené el tono.
           </p>
         </div>
@@ -50,7 +50,7 @@ export function AtRiskCard({ rows }: Props) {
               <div className="flex items-center justify-between gap-2">
                 <Link
                   href={`/admin/atletas/${r.athleteId}` as Route}
-                  className="font-bold text-sm hover:text-[var(--strain)] transition-colors"
+                  className="font-bold text-sm hover:text-[var(--k-warning)] transition-colors"
                 >
                   {r.name}
                 </Link>
@@ -58,7 +58,7 @@ export function AtRiskCard({ rows }: Props) {
                   {SEVERITY_LABEL[r.severity]}
                 </span>
               </div>
-              <p className="text-xs text-[var(--text-3)]">
+              <p className="text-xs text-[var(--k-t3)]">
                 {r.reasons.join(" · ")}
               </p>
             </li>

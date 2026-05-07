@@ -69,7 +69,7 @@ export default async function PerfilPage() {
         <p className="k-eyebrow mb-2">Atleta</p>
         <h1 className="font-display font-bold text-3xl">Mi perfil</h1>
         <div className="mt-6 k-card p-6 text-center">
-          <p className="text-sm" style={{ color: "var(--text-2)" }}>
+          <p className="text-sm" style={{ color: "var(--k-t2)" }}>
             Perfil no disponible.
           </p>
         </div>
@@ -319,12 +319,12 @@ export default async function PerfilPage() {
       {prs.length > 0 && (
         <AnimatedSection className="mt-2">
           <div className="flex items-baseline justify-between px-[18px] pb-2">
-            <div className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+            <div className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
               RECORDS PERSONALES
             </div>
             <div
               className="font-mono text-[10px] font-bold tracking-[0.08em]"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               VER TODOS →
             </div>
@@ -336,7 +336,7 @@ export default async function PerfilPage() {
                   <div className="p-3 relative">
                     <div
                       className="text-[11px] font-semibold mb-1.5 truncate"
-                      style={{ color: "var(--text-2)" }}
+                      style={{ color: "var(--k-t2)" }}
                     >
                       {pr.movementName}
                     </div>
@@ -345,7 +345,7 @@ export default async function PerfilPage() {
                         className="font-display font-bold text-2xl"
                         style={{
                           letterSpacing: "-0.02em",
-                          color: i === 0 ? "var(--recovery)" : "var(--text)",
+                          color: i === 0 ? "var(--k-accent)" : "var(--text)",
                           textShadow:
                             i === 0 ? "0 0 10px rgba(25,240,139,0.3)" : "none",
                         }}
@@ -354,14 +354,14 @@ export default async function PerfilPage() {
                       </span>
                       <span
                         className="font-mono text-[11px] font-bold"
-                        style={{ color: "var(--text-3)" }}
+                        style={{ color: "var(--k-t3)" }}
                       >
                         {pr.unit}
                       </span>
                     </div>
                     <div
                       className="font-mono text-[9px] font-bold tracking-[0.06em]"
-                      style={{ color: "var(--text-3)" }}
+                      style={{ color: "var(--k-t3)" }}
                     >
                       {formatDayMonth(pr.achievedAt).toUpperCase()}
                     </div>
@@ -391,7 +391,7 @@ export default async function PerfilPage() {
             </span>
             <div
               className="font-mono text-[10px] font-bold tracking-[0.12em]"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               {activeGoals.length} ACTIVO{activeGoals.length === 1 ? "" : "S"}
             </div>
@@ -528,7 +528,7 @@ export default async function PerfilPage() {
             </span>
             <div
               className="font-mono text-[10px] font-bold tracking-[0.12em]"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               REGRESIÓN + IA
             </div>
@@ -544,7 +544,7 @@ export default async function PerfilPage() {
       {/* HISTORIAL */}
       {scores.length > 0 && (
         <AnimatedSection className="mt-5 px-3.5">
-          <p className="k-eyebrow mb-2" style={{ color: "var(--text-2)" }}>
+          <p className="k-eyebrow mb-2" style={{ color: "var(--k-t2)" }}>
             HISTORIAL DE SCORES
           </p>
           <div className="flex flex-col gap-2">
@@ -558,7 +558,7 @@ export default async function PerfilPage() {
                       </p>
                       <p
                         className="text-[10px] mt-0.5"
-                        style={{ color: "var(--text-3)" }}
+                        style={{ color: "var(--k-t3)" }}
                       >
                         {formatDayMonth(s.createdAt)} · {s.scaling}
                       </p>
@@ -613,16 +613,13 @@ export default async function PerfilPage() {
           <AnimatedItem>
             <KCard>
               <div className="p-4">
-                <p
-                  className="k-eyebrow mb-3"
-                  style={{ color: "var(--text-2)" }}
-                >
+                <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
                   PROGRESO · ÚLTIMOS 90 DÍAS
                 </p>
                 <ScoresTimeline data={scoresTimeline} />
                 <p
                   className="mt-2 text-[10px]"
-                  style={{ color: "var(--text-3)" }}
+                  style={{ color: "var(--k-t3)" }}
                 >
                   Valores normalizados 0–100 para comparar entre WODs.
                 </p>
@@ -638,10 +635,7 @@ export default async function PerfilPage() {
           <AnimatedItem>
             <KCard>
               <div className="p-4">
-                <p
-                  className="k-eyebrow mb-3"
-                  style={{ color: "var(--text-2)" }}
-                >
+                <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
                   PERFIL DE CAPACIDADES
                 </p>
                 <CapabilityRadar
@@ -665,12 +659,12 @@ export default async function PerfilPage() {
             <KCard>
               <div className="p-4">
                 <div className="mb-3 flex items-baseline justify-between">
-                  <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+                  <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
                     ASISTENCIA · ÚLTIMOS 90 DÍAS
                   </p>
                   <span
                     className="font-mono text-[10px] font-bold"
-                    style={{ color: "var(--recovery)" }}
+                    style={{ color: "var(--k-accent)" }}
                   >
                     {attendance90d.length} clases
                   </span>
@@ -687,7 +681,7 @@ export default async function PerfilPage() {
           <KCard>
             <p
               className="text-sm text-center py-6"
-              style={{ color: "var(--text-2)" }}
+              style={{ color: "var(--k-t2)" }}
             >
               Aún no tienes scores ni PRs. Empieza subiendo tu primer score en
               /atleta/wod.
@@ -701,7 +695,7 @@ export default async function PerfilPage() {
         <AnimatedItem>
           <KCard>
             <div className="p-4">
-              <p className="k-eyebrow mb-3" style={{ color: "var(--text-2)" }}>
+              <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
                 NOTIFICACIONES
               </p>
               <PushSubscribeButton />
@@ -745,7 +739,7 @@ function StatCard({
       </div>
       <div
         className="font-mono text-[9px] font-bold tracking-[0.08em]"
-        style={{ color: "var(--text-3)" }}
+        style={{ color: "var(--k-t3)" }}
       >
         {detail}
       </div>

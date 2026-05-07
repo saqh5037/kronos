@@ -82,7 +82,7 @@ export default async function MovementsPage() {
         {movements.length === 0 && (
           <AnimatedItem>
             <KCard variant="ghost" className="p-6 text-center">
-              <p className="text-sm text-[var(--text-2)]">
+              <p className="text-sm text-[var(--k-t2)]">
                 Aún no has registrado scores. Empieza entrenando y tus
                 movimientos aparecerán aquí.
               </p>
@@ -99,7 +99,7 @@ export default async function MovementsPage() {
                 animate={true}
               >
                 {/* Rank */}
-                <div className="font-display text-sm font-bold w-5 text-center text-[var(--text-3)]">
+                <div className="font-display text-sm font-bold w-5 text-center text-[var(--k-t3)]">
                   {i + 1}
                 </div>
 
@@ -127,17 +127,17 @@ export default async function MovementsPage() {
                           style={{
                             width: `${Math.min(100, (m.frequency90d / 20) * 100)}%`,
                             background: m.isStale
-                              ? "var(--ember)"
-                              : "var(--moss)",
+                              ? "var(--k-warning)"
+                              : "var(--k-accent)",
                           }}
                         />
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-[var(--text-3)]">
+                      <span className="text-[10px] font-mono font-bold text-[var(--k-t3)]">
                         {m.frequency90d}×
                       </span>
                     </div>
                     {m.daysSinceLastAttempt !== null && (
-                      <span className="text-[10px] text-[var(--text-3)]">
+                      <span className="text-[10px] text-[var(--k-t3)]">
                         Hace {m.daysSinceLastAttempt}d
                       </span>
                     )}
@@ -151,19 +151,17 @@ export default async function MovementsPage() {
                       <div className="font-display text-sm font-bold text-[var(--text)]">
                         {m.currentBest} {m.unit}
                       </div>
-                      <div className="text-[9px] font-bold tracking-wide mt-1 text-[var(--text-3)]">
+                      <div className="text-[9px] font-bold tracking-wide mt-1 text-[var(--k-t3)]">
                         PR ACTUAL
                       </div>
                     </>
                   ) : (
-                    <div className="text-[11px] text-[var(--text-3)]">
-                      Sin PR
-                    </div>
+                    <div className="text-[11px] text-[var(--k-t3)]">Sin PR</div>
                   )}
                 </div>
 
                 {/* Arrow */}
-                <div className="text-lg opacity-30 text-[var(--text-3)]">›</div>
+                <div className="text-lg opacity-30 text-[var(--k-t3)]">›</div>
               </KCard>
             </Link>
           </AnimatedItem>
@@ -174,10 +172,10 @@ export default async function MovementsPage() {
       {catalog.length > 0 && (
         <AnimatedSection className="px-3.5 mt-8">
           <div className="flex items-baseline justify-between mb-4">
-            <p className="k-eyebrow text-[var(--text-2)]">
+            <p className="k-eyebrow text-[var(--k-t2)]">
               BIBLIOTECA DE MOVIMIENTOS
             </p>
-            <span className="font-mono text-[10px] font-bold text-[var(--text-3)]">
+            <span className="font-mono text-[10px] font-bold text-[var(--k-t3)]">
               {catalog.length} MOVIMIENTOS
             </span>
           </div>

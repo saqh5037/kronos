@@ -47,7 +47,7 @@ export default async function AjustesAtletaPage() {
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center font-display text-lg font-bold"
             style={{
-              background: "var(--grad)",
+              background: "var(--k-accent)",
               color: "#0a0a0c",
             }}
           >
@@ -56,10 +56,7 @@ export default async function AjustesAtletaPage() {
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-base truncate">{userName}</p>
             {userEmail && (
-              <p
-                className="text-xs truncate"
-                style={{ color: "var(--text-3)" }}
-              >
+              <p className="text-xs truncate" style={{ color: "var(--k-t3)" }}>
                 {userEmail}
               </p>
             )}
@@ -71,14 +68,14 @@ export default async function AjustesAtletaPage() {
       <section className="k-card p-5 mb-4">
         <p
           className="font-mono text-[10px] font-bold uppercase tracking-wider mb-3"
-          style={{ color: "var(--text-3)" }}
+          style={{ color: "var(--k-t3)" }}
         >
           Preferencias
         </p>
         <div className="flex items-center justify-between gap-3 py-2">
           <div>
             <p className="font-medium text-sm">Tema</p>
-            <p className="text-xs" style={{ color: "var(--text-3)" }}>
+            <p className="text-xs" style={{ color: "var(--k-t3)" }}>
               Claro u oscuro
             </p>
           </div>
@@ -90,7 +87,7 @@ export default async function AjustesAtletaPage() {
       <section className="k-card p-5">
         <p
           className="font-mono text-[10px] font-bold uppercase tracking-wider mb-3"
-          style={{ color: "var(--text-3)" }}
+          style={{ color: "var(--k-t3)" }}
         >
           Sesión
         </p>
@@ -99,7 +96,7 @@ export default async function AjustesAtletaPage() {
 
       <p
         className="text-center text-[10px] mt-8"
-        style={{ color: "var(--text-3)" }}
+        style={{ color: "var(--k-t3)" }}
       >
         Kronos · v1.0
       </p>

@@ -56,11 +56,11 @@ const STATUS_LABEL: Record<Status, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  BOOKED: "var(--moss)",
-  WAITLIST: "var(--steel)",
-  ATTENDED: "var(--recovery)",
-  NOSHOW: "var(--red)",
-  CANCELLED: "var(--text-3)",
+  BOOKED: "var(--k-accent)",
+  WAITLIST: "var(--k-t2)",
+  ATTENDED: "var(--k-accent)",
+  NOSHOW: "var(--k-accent)",
+  CANCELLED: "var(--k-t3)",
 };
 
 function ymd(d: Date): string {
@@ -141,7 +141,7 @@ export function ReservasView({
       <aside className="flex flex-col gap-2">
         <p
           className="font-mono text-[10px] font-bold uppercase tracking-wider px-1"
-          style={{ color: "var(--text-3)" }}
+          style={{ color: "var(--k-t3)" }}
         >
           {view === "day" ? "Clases del día" : "Clases de la semana"}
         </p>
@@ -151,7 +151,7 @@ export function ReservasView({
               {view === "week" && (
                 <p
                   className="font-mono text-[10px] font-bold uppercase tracking-wider px-1 pt-1.5"
-                  style={{ color: "var(--text-3)" }}
+                  style={{ color: "var(--k-t3)" }}
                 >
                   {new Date(dayKey + "T12:00:00").toLocaleDateString("es-MX", {
                     weekday: "short",
@@ -164,12 +164,12 @@ export function ReservasView({
                 const fillRatio = c.bookingCount / c.capacity;
                 const accent =
                   c.kind === "OPEN_BOX"
-                    ? "var(--cyan)"
+                    ? "var(--k-warning)"
                     : fillRatio >= 1
-                      ? "var(--red)"
+                      ? "var(--k-accent)"
                       : fillRatio >= 0.7
-                        ? "var(--steel)"
-                        : "var(--moss)";
+                        ? "var(--k-t2)"
+                        : "var(--k-accent)";
                 const isSelected = c.id === selectedId;
                 return (
                   <Link
@@ -184,9 +184,11 @@ export function ReservasView({
                     }}
                     className="rounded-xl p-3 border transition-all"
                     style={{
-                      background: isSelected ? "var(--card-2)" : "var(--card)",
+                      background: isSelected
+                        ? "var(--k-elevated)"
+                        : "var(--card)",
                       borderColor: isSelected
-                        ? "var(--line-strong)"
+                        ? "var(--k-line-2)"
                         : "var(--line)",
                       boxShadow: isSelected
                         ? `inset 3px 0 0 ${accent}`
@@ -211,7 +213,9 @@ export function ReservasView({
                       className="text-[11px] mt-1 truncate font-semibold"
                       style={{
                         color:
-                          c.kind === "OPEN_BOX" ? "var(--cyan)" : "var(--text)",
+                          c.kind === "OPEN_BOX"
+                            ? "var(--k-warning)"
+                            : "var(--text)",
                       }}
                     >
                       {c.kind === "OPEN_BOX"
@@ -240,7 +244,7 @@ export function ReservasView({
               <div>
                 <p
                   className="font-mono text-[10px] font-bold uppercase tracking-wider"
-                  style={{ color: "var(--text-3)" }}
+                  style={{ color: "var(--k-t3)" }}
                 >
                   ROSTER ·{" "}
                   {new Date(roster.startsAt).toLocaleString("es-MX", {
@@ -257,7 +261,7 @@ export function ReservasView({
                 {roster.coachName && (
                   <p
                     className="text-xs mt-0.5"
-                    style={{ color: "var(--text-2)" }}
+                    style={{ color: "var(--k-t2)" }}
                   >
                     Coach: {roster.coachName}
                   </p>
@@ -267,22 +271,22 @@ export function ReservasView({
                 <Stat
                   label="Reservadas"
                   value={counts.booked}
-                  color="var(--moss)"
+                  color="var(--k-accent)"
                 />
                 <Stat
                   label="Lista"
                   value={counts.waitlist}
-                  color="var(--steel)"
+                  color="var(--k-t2)"
                 />
                 <Stat
                   label="Asist."
                   value={counts.attended}
-                  color="var(--recovery)"
+                  color="var(--k-accent)"
                 />
                 <Stat
                   label="No-show"
                   value={counts.noshow}
-                  color="var(--red)"
+                  color="var(--k-accent)"
                 />
               </div>
             </div>
@@ -294,13 +298,13 @@ export function ReservasView({
                 placeholder="Buscar atleta…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="rounded-lg border bg-[var(--card-2)] px-3 py-1.5 text-sm flex-1 min-w-[180px]"
+                className="rounded-lg border bg-[var(--k-elevated)] px-3 py-1.5 text-sm flex-1 min-w-[180px]"
                 style={{ borderColor: "var(--line)" }}
               />
               <div
                 className="inline-flex rounded-full p-1 gap-0.5"
                 style={{
-                  background: "var(--card-2)",
+                  background: "var(--k-elevated)",
                   border: "1px solid var(--line)",
                 }}
               >
@@ -321,8 +325,7 @@ export function ReservasView({
                     style={{
                       background:
                         statusFilter === s ? "var(--card)" : "transparent",
-                      color:
-                        statusFilter === s ? "var(--text)" : "var(--text-3)",
+                      color: statusFilter === s ? "var(--text)" : "var(--k-t3)",
                     }}
                   >
                     {STATUS_LABEL[s]}
@@ -366,7 +369,7 @@ export function ReservasView({
               <div className="flex flex-col gap-1">
                 <div
                   className="grid grid-cols-[1fr_120px_120px_140px] gap-3 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-wider"
-                  style={{ color: "var(--text-3)" }}
+                  style={{ color: "var(--k-t3)" }}
                 >
                   <span>Atleta</span>
                   <span>Estado</span>
@@ -377,7 +380,7 @@ export function ReservasView({
                   <div
                     key={b.bookingId}
                     className="grid grid-cols-[1fr_120px_120px_140px] gap-3 items-center px-3 py-2.5 rounded-lg"
-                    style={{ background: "var(--card-2)" }}
+                    style={{ background: "var(--k-elevated)" }}
                   >
                     <span className="font-medium text-sm truncate">
                       {b.firstName} {b.lastName}
@@ -393,7 +396,7 @@ export function ReservasView({
                     </span>
                     <span
                       className="font-mono text-[10px]"
-                      style={{ color: "var(--text-3)" }}
+                      style={{ color: "var(--k-t3)" }}
                     >
                       {new Date(b.bookedAt).toLocaleString("es-MX", {
                         day: "2-digit",

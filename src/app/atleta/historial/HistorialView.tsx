@@ -176,7 +176,7 @@ export default function HistorialPage({ wodOptions }: Props) {
       <div className="px-3.5 mt-3 space-y-2">
         {isPending && scores.length === 0 && (
           <KCard variant="ghost" className="p-6 text-center">
-            <div className="text-sm" style={{ color: "var(--text-3)" }}>
+            <div className="text-sm" style={{ color: "var(--k-t3)" }}>
               Cargando...
             </div>
           </KCard>
@@ -184,7 +184,7 @@ export default function HistorialPage({ wodOptions }: Props) {
 
         {!isPending && scores.length === 0 && (
           <KCard variant="ghost" className="p-6 text-center">
-            <p className="text-sm" style={{ color: "var(--text-2)" }}>
+            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
               No hay scores que coincidan con los filtros.
             </p>
           </KCard>
@@ -200,14 +200,16 @@ export default function HistorialPage({ wodOptions }: Props) {
               className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
               style={{
                 background:
-                  s.scaling === "RX" ? "var(--moss-soft)" : "var(--bg-soft)",
-                border: `1px solid ${s.scaling === "RX" ? "var(--moss-line)" : "var(--line)"}`,
+                  s.scaling === "RX"
+                    ? "var(--k-accent-soft)"
+                    : "var(--k-surface)",
+                border: `1px solid ${s.scaling === "RX" ? "var(--k-accent-line)" : "var(--line)"}`,
               }}
             >
               <span
                 className="text-[10px] font-bold"
                 style={{
-                  color: s.scaling === "RX" ? "var(--moss)" : "var(--text-3)",
+                  color: s.scaling === "RX" ? "var(--k-accent)" : "var(--k-t3)",
                 }}
               >
                 {s.scaling === "RX" ? "RX" : "SC"}
@@ -219,7 +221,7 @@ export default function HistorialPage({ wodOptions }: Props) {
               </div>
               <div
                 className="text-[10px] font-mono"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 {new Date(s.createdAt).toLocaleDateString("es-MX", {
                   day: "numeric",
@@ -234,7 +236,7 @@ export default function HistorialPage({ wodOptions }: Props) {
               </div>
               <div
                 className="text-[9px] font-bold tracking-wide"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 {s.unit}
               </div>
@@ -259,7 +261,7 @@ export default function HistorialPage({ wodOptions }: Props) {
           </button>
           <span
             className="text-[11px] font-bold"
-            style={{ color: "var(--text-3)" }}
+            style={{ color: "var(--k-t3)" }}
           >
             {page} / {totalPages}
           </span>
