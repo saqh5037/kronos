@@ -1,6 +1,7 @@
 import { ClassCard } from "./ClassCard";
 import { addDays, formatWeekday } from "@/lib/week";
 import type { ClassRow } from "@/server/actions/classes";
+import { EmptyState } from "@/components/kronos/EmptyState";
 
 export function WeekView({
   weekStart,
@@ -71,10 +72,12 @@ export function WeekView({
       </div>
 
       {classes.length === 0 && (
-        <div className="mt-6 k-card p-6 text-center">
-          <p className="text-sm font-medium" style={{ color: "var(--text-2)" }}>
-            No hay clases programadas en este rango.
-          </p>
+        <div className="mt-6">
+          <EmptyState
+            tone="info"
+            title="Sin clases programadas esta semana"
+            description="Crea tu primera clase con el botón ‘+ Nueva clase’ o configura horarios operativos en Ajustes › Horarios."
+          />
         </div>
       )}
     </>

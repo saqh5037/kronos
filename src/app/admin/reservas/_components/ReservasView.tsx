@@ -8,6 +8,7 @@ import {
   NoShowButton,
   CancelBookingButton,
 } from "@/components/BookingActions";
+import { EmptyState } from "@/components/kronos/EmptyState";
 
 type ClassChip = {
   id: string;
@@ -228,11 +229,11 @@ export function ReservasView({
       {/* Roster column */}
       <section>
         {!roster ? (
-          <div className="k-card p-6 text-center">
-            <p className="text-sm" style={{ color: "var(--text-2)" }}>
-              Selecciona una clase para ver el roster.
-            </p>
-          </div>
+          <EmptyState
+            tone="info"
+            title="Seleccioná una clase"
+            description="Tocá una clase de la lista izquierda para ver su roster, hacer check-in o gestionar waitlist."
+          />
         ) : (
           <div className="k-card p-4 lg:p-5">
             <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
@@ -332,10 +333,34 @@ export function ReservasView({
 
             {/* Bookings table */}
             {filteredBookings.length === 0 ? (
-              <div className="py-8 text-center">
-                <p className="text-sm" style={{ color: "var(--text-3)" }}>
-                  Sin atletas que cumplan el filtro.
-                </p>
+              <div className="py-8">
+                <EmptyState
+                  tone="neutral"
+                  title={
+                    search || statusFilter !== "ALL"
+                      ? "Sin atletas con estos filtros"
+                      : "Aún no hay reservas"
+                  }
+                  description={
+                    search || statusFilter !== "ALL"
+                      ? "Probá con otro nombre o cambiá el estado."
+                      : "Cuando los atletas reserven, aparecerán acá para hacer check-in."
+                  }
+                  action={
+                    search || statusFilter !== "ALL" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearch("");
+                          setStatusFilter("ALL");
+                        }}
+                        className="k-btn-ghost px-4 py-2 text-xs font-bold"
+                      >
+                        Limpiar filtros
+                      </button>
+                    ) : null
+                  }
+                />
               </div>
             ) : (
               <div className="flex flex-col gap-1">

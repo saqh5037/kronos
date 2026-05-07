@@ -1,5 +1,6 @@
 import { ClassCard } from "./ClassCard";
 import type { ClassRow } from "@/server/actions/classes";
+import { EmptyState } from "@/components/kronos/EmptyState";
 
 const HOUR_HEIGHT = 56;
 const START_HOUR = 5;
@@ -75,11 +76,15 @@ export function DayView({
       </div>
 
       {sorted.length === 0 ? (
-        <div className="py-12 text-center">
-          <p className="text-sm" style={{ color: "var(--text-3)" }}>
-            No hay clases programadas el {date.toLocaleDateString("es-MX")}.
-          </p>
-        </div>
+        <EmptyState
+          tone="neutral"
+          title={`Sin clases el ${date.toLocaleDateString("es-MX", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+          })}`}
+          description="Si este día no opera, configúralo en Ajustes › Horarios. Si querés agregar una clase puntual, usá ‘+ Nueva clase’."
+        />
       ) : (
         <div className="relative grid grid-cols-[60px_1fr] gap-3">
           <div className="flex flex-col">

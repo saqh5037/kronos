@@ -5,6 +5,7 @@ import Eyebrow from "@/components/kronos/Eyebrow";
 import { ScheduleNav } from "@/app/admin/programacion/_components/ScheduleNav";
 import { ScheduleViewSwitch } from "@/app/admin/programacion/_components/ScheduleViewSwitch";
 import { ReservasView } from "./_components/ReservasView";
+import { EmptyState } from "@/components/kronos/EmptyState";
 
 export const metadata = { title: "Kronos — Reservas" };
 
@@ -111,11 +112,11 @@ export default async function ReservasPage({
       </div>
 
       {sortedClasses.length === 0 ? (
-        <div className="k-card p-6 text-center">
-          <p className="text-sm" style={{ color: "var(--text-2)" }}>
-            No hay clases programadas en este rango.
-          </p>
-        </div>
+        <EmptyState
+          tone="neutral"
+          title="Sin clases en este rango"
+          description="Cambia la fecha o el rango para ver clases con reservas. Si necesitas crear clases, anda a Programación."
+        />
       ) : (
         <ReservasView
           classes={sortedClasses.map((c) => ({

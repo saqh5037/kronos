@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { AvailableClass } from "@/server/actions/bookings";
 import { BookButton } from "@/components/BookingActions";
-import KCard from "@/components/kronos/KCard";
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
+import { EmptyState } from "@/components/kronos/EmptyState";
 
 const WOD_TYPE_ICONS: Record<string, { color: string; label: string }> = {
   STRENGTH: { color: "var(--strain)", label: "F" },
@@ -197,14 +197,30 @@ export function ClassesList({
       {/* Lista */}
       <div className="flex flex-col gap-2">
         {filtered.length === 0 ? (
-          <KCard>
-            <p
-              className="py-6 text-center text-sm"
-              style={{ color: "var(--text-2)" }}
-            >
-              Sin clases que cumplan los filtros.
-            </p>
-          </KCard>
+          <EmptyState
+            tone="info"
+            title={
+              type || coach || bucket !== "all" || onlyUsual
+                ? "No hay clases con estos filtros"
+                : "Sin clases en este rango"
+            }
+            description={
+              type || coach || bucket !== "all" || onlyUsual
+                ? "Probá ampliar el rango de horas o cambiar el tipo."
+                : "Cambiá la fecha o vista para ver más opciones."
+            }
+            action={
+              type || coach || bucket !== "all" || onlyUsual ? (
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="k-btn-ghost px-4 py-2 text-xs font-bold"
+                >
+                  Limpiar filtros
+                </button>
+              ) : null
+            }
+          />
         ) : (
           byDay.map(([dateKey, dayClasses]) => {
             const date = new Date(dateKey + "T12:00:00.000Z");
