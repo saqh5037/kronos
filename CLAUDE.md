@@ -168,6 +168,54 @@ Fuentes: `font-sans` (Inter), `font-display` (Space Grotesk), `font-mono` (JetBr
 - NO `npm run dev` — usar `pnpm dev`
 - NO mezclar lanes sin coordinación (Claude toca CSS decorativo = problema)
 - NO instalar shadcn sin correr el CLI correcto: `pnpm dlx shadcn@latest add <component>`
+- NO `window.confirm()` ni `window.alert()` — usar `useConfirm()` de `@/lib/use-confirm` (modal real, brand consistente, accesible). Si falta el provider en el árbol, agregar `<ConfirmProvider>` al layout correspondiente.
+
+## Hydration patterns (regla dura)
+
+Aprendido del bug de mobile 2026-05-06: `Hydration failed because the server rendered HTML didn't match the client.`
+
+### Causa raíz típica
+
+Cualquier valor que difiera entre el render del server y el primer render del cliente rompe la rehidratación. Los más comunes:
+
+1. **`new Date()`, `Date.now()`, `Math.random()`** en el render de un client component (`"use client"`)
+2. **`toLocaleString()` / `toLocaleDateString()`** sin pasar `locale` explícito (puede diferir entre runtime del server y del browser)
+3. **`window.matchMedia`, `localStorage`, `sessionStorage`, `navigator.*`** leídos en render
+4. **Branches `typeof window !== 'undefined'`** que producen markup distinto
+
+### Patrón correcto
+
+Si el componente es client-only (`"use client"`) y necesita "ahora", `localStorage`, etc:
+
+```tsx
+"use client";
+import { useState, useEffect } from "react";
+
+export function MyComponent({ items }: Props) {
+  // ❌ NO HAGAS ESTO en render: const now = Date.now();
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+  }, []);
+
+  // En render: tratar `now === null` como "antes de hidratar"
+  const past = now !== null && itemDate.getTime() < now;
+  // ...
+}
+```
+
+Misma idea con preferencias de tema (`localStorage`), media queries, etc. Server renderiza una versión "neutra", `useEffect` enriquece después del mount.
+
+### Si el dato viene del server (server component)
+
+Pasarlo como prop inmutable. Server calcula `new Date()` una vez, lo serializa, el cliente lo recibe como `Date` reconstruido. **No volver a calcular `new Date()` en el cliente** sobre el mismo concepto.
+
+### Cómo detectar regresiones
+
+- Test manual desde otro device (mobile, otra timezone, otro locale)
+- Buscar `new Date()` o `Date.now()` en `src/components/**` y `src/app/**/_components/**` (client components) — cualquier resultado es candidato a bug
+- Console error en navegador: `Hydration failed because...` → leer el stack para encontrar el componente
+- En dev mode Next muestra el error overlay con el componente exacto
 
 ## Para retomar
 
