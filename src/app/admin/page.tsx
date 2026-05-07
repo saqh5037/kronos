@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auth";
+import { db as prismaBase } from "@/server/db";
 import { getDashboardData } from "@/server/actions/dashboard";
 import { getBox } from "@/server/actions/box";
+import OnboardingBanner from "@/components/admin/OnboardingBanner";
 import { getRevenueByDay } from "@/server/actions/payments";
 import {
   getAttendanceByDay,
@@ -115,8 +119,19 @@ export default async function AdminDashboardPage({
   const waitlistCount = data.waitlistedClassesToday;
   const allClear = expiringCount === 0 && waitlistCount === 0;
 
+  const session = await getServerSession(authOptions);
+  let showOnboardingBanner = false;
+  if (session?.user?.role === "OWNER" && session.user.tenantId) {
+    const flag = await prismaBase.box.findUnique({
+      where: { id: session.user.tenantId },
+      select: { onboardingCompletedAt: true },
+    });
+    showOnboardingBanner = !flag?.onboardingCompletedAt;
+  }
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 lg:p-8">
+      <OnboardingBanner show={showOnboardingBanner} />
       {/* Header */}
       <RevealOnScroll variant="fade-up">
         <Eyebrow>Hoy</Eyebrow>

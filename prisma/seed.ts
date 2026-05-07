@@ -376,6 +376,7 @@ async function main() {
     sun: null,
   };
 
+  const seedNow = new Date();
   const box1 = await prisma.box.upsert({
     where: { slug: "iron-hands-polanco" },
     update: {
@@ -384,6 +385,7 @@ async function main() {
       cancelCloseMinBefore: 30,
       weeklySchedule: WEEKLY_SCHEDULE_DEFAULT,
       subscriptionStatus: "ACTIVE",
+      onboardingCompletedAt: seedNow,
     },
     create: {
       slug: "iron-hands-polanco",
@@ -396,18 +398,23 @@ async function main() {
       cancelCloseMinBefore: 30,
       weeklySchedule: WEEKLY_SCHEDULE_DEFAULT,
       subscriptionStatus: "ACTIVE",
+      onboardingCompletedAt: seedNow,
     },
   });
 
   const box2 = await prisma.box.upsert({
     where: { slug: "demo-box-b" },
-    update: { subscriptionStatus: "ACTIVE" },
+    update: {
+      subscriptionStatus: "ACTIVE",
+      onboardingCompletedAt: seedNow,
+    },
     create: {
       slug: "demo-box-b",
       name: "Demo Box B (isolation test)",
       locale: "es-MX",
       currency: "MXN",
       subscriptionStatus: "ACTIVE",
+      onboardingCompletedAt: seedNow,
     },
   });
 

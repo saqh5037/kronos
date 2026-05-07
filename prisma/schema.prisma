@@ -33,6 +33,7 @@ model Box {
   trialStartedAt        DateTime?
   trialEndsAt           DateTime?
   subscriptionStatus    SubscriptionStatus @default(TRIAL)
+  onboardingCompletedAt DateTime?
   createdAt             DateTime           @default(now())
 
   users                   User[]
