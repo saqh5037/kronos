@@ -9,20 +9,31 @@ datasource db {
 
 // ─── TENANT ──────────────────────────────────────────────────────────────────
 
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
 model Box {
-  id                    String   @id @default(cuid())
-  slug                  String   @unique
+  id                    String             @id @default(cuid())
+  slug                  String             @unique
   name                  String
-  locale                String   @default("es-MX")
-  currency              String   @default("MXN")
-  timezone              String   @default("America/Mexico_City")
-  defaultClassCapacity  Int      @default(10)
-  bookingOpenHoursAhead Int      @default(24)
-  cancelCloseMinBefore  Int      @default(30)
+  locale                String             @default("es-MX")
+  currency              String             @default("MXN")
+  timezone              String             @default("America/Mexico_City")
+  defaultClassCapacity  Int                @default(10)
+  bookingOpenHoursAhead Int                @default(24)
+  cancelCloseMinBefore  Int                @default(30)
   weeklySchedule        Json?
   brandColor            String?
   logoUrl               String?
-  createdAt             DateTime @default(now())
+  trialStartedAt        DateTime?
+  trialEndsAt           DateTime?
+  subscriptionStatus    SubscriptionStatus @default(TRIAL)
+  createdAt             DateTime           @default(now())
 
   users                   User[]
   athletes                Athlete[]

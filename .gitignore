@@ -72,6 +72,7 @@ Thumbs.db
 /sweep-*.png
 /v-*.png
 /vi-*.png
+/[0-9].[0-9]-*.png
 /.claude-context.md
 
 # Inspiración / source assets pesados — quedan local

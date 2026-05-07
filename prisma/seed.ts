@@ -383,6 +383,7 @@ async function main() {
       bookingOpenHoursAhead: 24,
       cancelCloseMinBefore: 30,
       weeklySchedule: WEEKLY_SCHEDULE_DEFAULT,
+      subscriptionStatus: "ACTIVE",
     },
     create: {
       slug: "iron-hands-polanco",
@@ -394,17 +395,19 @@ async function main() {
       bookingOpenHoursAhead: 24,
       cancelCloseMinBefore: 30,
       weeklySchedule: WEEKLY_SCHEDULE_DEFAULT,
+      subscriptionStatus: "ACTIVE",
     },
   });
 
   const box2 = await prisma.box.upsert({
     where: { slug: "demo-box-b" },
-    update: {},
+    update: { subscriptionStatus: "ACTIVE" },
     create: {
       slug: "demo-box-b",
       name: "Demo Box B (isolation test)",
       locale: "es-MX",
       currency: "MXN",
+      subscriptionStatus: "ACTIVE",
     },
   });
 

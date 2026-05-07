@@ -1,4 +1,5 @@
 import type { DefaultSession } from "next-auth";
+import type { SubscriptionStatus } from "@/lib/subscription";
 
 declare module "next-auth" {
   interface Session {
@@ -6,6 +7,16 @@ declare module "next-auth" {
       id: string;
       role: string;
       tenantId: string;
+      subscriptionStatus: SubscriptionStatus | null;
     } & DefaultSession["user"];
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string;
+    role?: string;
+    tenantId?: string;
+    subscriptionStatus?: SubscriptionStatus | null;
   }
 }

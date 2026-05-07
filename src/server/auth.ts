@@ -47,27 +47,38 @@ export const authOptions: NextAuthOptions = {
         // Initial sign-in: hydrate token from DB
         const dbUser = await db.user.findUnique({
           where: { email: user.email! },
-          select: { id: true, role: true, tenantId: true },
+          select: {
+            id: true,
+            role: true,
+            tenantId: true,
+            box: { select: { subscriptionStatus: true } },
+          },
         });
         if (dbUser) {
           token.id = dbUser.id;
           token.role = dbUser.role;
           token.tenantId = dbUser.tenantId;
+          token.subscriptionStatus = dbUser.box?.subscriptionStatus ?? null;
         }
       } else if (token.id) {
-        // Subsequent request: revalidate that the user still exists.
-        // Catches the "DB was reset, JWT points to a deleted user/tenant" case.
+        // Subsequent request: revalidate that the user still exists and refresh
+        // subscription status from the box (catches expirations between requests).
         const exists = await db.user.findUnique({
           where: { id: token.id as string },
-          select: { id: true, role: true, tenantId: true },
+          select: {
+            id: true,
+            role: true,
+            tenantId: true,
+            box: { select: { subscriptionStatus: true } },
+          },
         });
         if (!exists) {
-          // User no longer exists — invalidate token to force re-login.
           return {
             ...token,
             id: undefined,
             role: undefined,
             tenantId: undefined,
+            subscriptionStatus: undefined,
           };
         }
         if (exists.tenantId !== token.tenantId) {
@@ -76,6 +87,7 @@ export const authOptions: NextAuthOptions = {
         if (exists.role !== token.role) {
           token.role = exists.role;
         }
+        token.subscriptionStatus = exists.box?.subscriptionStatus ?? null;
       }
       return token;
     },
@@ -84,6 +96,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
         session.user.tenantId = token.tenantId as string;
+        session.user.subscriptionStatus = token.subscriptionStatus ?? null;
       }
       return session;
     },
