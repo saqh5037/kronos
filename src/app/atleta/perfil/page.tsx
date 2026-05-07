@@ -89,69 +89,104 @@ export default async function PerfilPage() {
 
   return (
     <div className="pb-28 relative">
-      {/* HERO PERFIL — radical brand redesign */}
-      <header className="relative px-4 pt-14 pb-5 overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse at 0% 50%, rgba(230,0,38,0.10), transparent 60%), radial-gradient(ellipse at 100% 50%, rgba(0,191,255,0.10), transparent 60%)",
-          }}
-        />
-        <span className="k-corner-tl" aria-hidden />
-        <span className="k-corner-br" aria-hidden />
-
+      {/* HERO PERFIL — V3 */}
+      <header className="relative px-4 pt-12 pb-4">
         <AnimatedSection className="relative">
           <AnimatedItem>
-            <span className="k-eyebrow-bar">Mi perfil · Atleta</span>
+            <span
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: "0.2em",
+                color: "var(--k-t3)",
+              }}
+            >
+              PERFIL · ATLETA
+            </span>
           </AnimatedItem>
           <AnimatedItem className="mt-3 flex items-center gap-3.5">
             <div className="relative shrink-0">
               <div
-                className="w-[72px] h-[72px] rounded-full p-[2px]"
                 style={{
-                  background: "var(--grad)",
-                  boxShadow: "0 0 24px rgba(0,68,255,0.32)",
+                  width: 72,
+                  height: 72,
+                  borderRadius: "50%",
+                  background: "var(--k-elevated)",
+                  border: "1.5px solid var(--k-accent)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 26,
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                  color: "var(--k-accent)",
+                  boxShadow: "var(--k-accent-glow)",
                 }}
               >
-                <div
-                  className="w-full h-full rounded-full flex items-center justify-center font-display font-bold text-[26px] tracking-[-0.02em]"
-                  style={{ background: "var(--card)" }}
-                >
-                  {initials}
-                </div>
-              </div>
-              <div
-                className="absolute -bottom-0.5 -right-0.5 rounded-full p-[2px]"
-                style={{ background: "var(--bg)" }}
-              >
-                <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold text-white"
-                  style={{
-                    background: "var(--brand-blue)",
-                    boxShadow: "0 0 8px rgba(0,68,255,0.55)",
-                  }}
-                >
-                  ✓
-                </div>
+                {initials}
               </div>
             </div>
             <div className="flex-1 min-w-0">
               <h1
-                className="k-h-italic font-display font-extrabold text-xl sm:text-2xl md:text-[26px] leading-[1.1] tracking-[-0.02em] break-words"
-                style={{ color: "var(--text)" }}
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 26,
+                  fontWeight: 700,
+                  letterSpacing: "-0.04em",
+                  lineHeight: 1.1,
+                  color: "var(--k-t1)",
+                  margin: 0,
+                }}
               >
-                {home.athlete.firstName} <em>{home.athlete.lastName}</em>
+                {home.athlete.firstName} {home.athlete.lastName ?? ""}
               </h1>
               <div className="mt-1.5">
-                <span className="k-chip k-chip-blue">ACTIVO · ATLETA</span>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontFamily: "var(--k-font-display)",
+                    fontSize: 9,
+                    fontWeight: 600,
+                    letterSpacing: "0.18em",
+                    color: "var(--k-accent)",
+                    background: "var(--k-accent-soft)",
+                    border: "1px solid var(--k-accent-line)",
+                    padding: "3px 8px",
+                    borderRadius: 999,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 5,
+                      height: 5,
+                      borderRadius: "50%",
+                      background: "var(--k-accent)",
+                    }}
+                  />
+                  Activo
+                </span>
               </div>
             </div>
             <Link
               href="/atleta/ajustes"
-              className="w-10 h-10 rounded-full flex items-center justify-center k-glass shrink-0"
               aria-label="Ajustes"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                background: "var(--k-surface)",
+                border: "1px solid var(--k-line)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--k-t2)",
+                flexShrink: 0,
+              }}
             >
               <svg
                 width="16"
@@ -159,7 +194,7 @@ export default async function PerfilPage() {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="1.5"
               >
                 <circle cx="12" cy="12" r="3" />
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.68 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
@@ -169,51 +204,68 @@ export default async function PerfilPage() {
         </AnimatedSection>
       </header>
 
-      {/* RACHA HERO — brand radical */}
+      {/* RACHA HERO — V3 lima neon */}
       <AnimatedSection className="px-3.5 pb-3.5">
         <AnimatedItem>
-          <div className="k-card-brand relative">
-            <span className="k-corner-tl" aria-hidden />
-            <span className="k-corner-br" aria-hidden />
-            <div
-              className="absolute inset-0 pointer-events-none"
-              aria-hidden
-              style={{
-                background: "var(--grad-soft)",
-                opacity: 0.7,
-              }}
-            />
-            <div className="relative flex items-center gap-4 p-2">
+          <div
+            className="k-grain"
+            style={{
+              background: "var(--k-surface)",
+              border: "1px solid var(--k-line)",
+              borderRadius: 16,
+              padding: 20,
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div className="flex items-center gap-4">
               <div
-                className="k-h-italic font-display font-extrabold leading-none"
                 style={{
-                  fontSize: "76px",
-                  letterSpacing: "-0.04em",
-                  background: "var(--grad)",
-                  WebkitBackgroundClip: "text",
-                  backgroundClip: "text",
-                  color: "transparent",
-                  filter: "drop-shadow(0 4px 18px rgba(230,0,38,0.25))",
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 76,
+                  fontWeight: 700,
+                  letterSpacing: "-0.05em",
+                  color: "var(--k-accent)",
+                  lineHeight: 1,
+                  fontFeatureSettings: '"tnum" 1',
                 }}
               >
-                <em>{home.streak}</em>
+                {home.streak}
               </div>
               <div className="flex-1">
                 <span
-                  className="font-script text-[22px] leading-none"
-                  style={{ color: "var(--brand-red)" }}
+                  style={{
+                    fontFamily: "var(--k-font-display)",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    letterSpacing: "0.18em",
+                    color: "var(--k-t3)",
+                    textTransform: "uppercase",
+                    display: "block",
+                  }}
                 >
-                  Días de
+                  Racha activa
                 </span>
                 <div
-                  className="font-display font-bold text-[18px] tracking-[-0.01em] mt-0.5"
-                  style={{ color: "var(--text)" }}
+                  style={{
+                    fontFamily: "var(--k-font-body)",
+                    fontSize: 16,
+                    fontWeight: 600,
+                    letterSpacing: "-0.01em",
+                    color: "var(--k-t1)",
+                    marginTop: 4,
+                  }}
                 >
-                  racha consecutiva
+                  días consecutivos
                 </div>
                 <div
-                  className="text-[12px] leading-[1.5] mt-2"
-                  style={{ color: "var(--text-2)" }}
+                  style={{
+                    fontFamily: "var(--k-font-body)",
+                    fontSize: 12,
+                    color: "var(--k-t2)",
+                    lineHeight: 1.5,
+                    marginTop: 8,
+                  }}
                 >
                   Vas por buen camino — no rompas hoy.
                 </div>
