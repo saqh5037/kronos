@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { AvailableClass } from "@/server/actions/bookings";
 import { BookButton } from "@/components/BookingActions";
 import KCard from "@/components/kronos/KCard";
@@ -45,15 +46,45 @@ export function ClassesList({
   classes: AvailableClass[];
   usualHours?: number[];
 }) {
-  const [type, setType] = useState<string>("");
-  const [coach, setCoach] = useState<string>("");
-  const [bucket, setBucket] = useState<TimeBucket>("all");
-  const [onlyUsual, setOnlyUsual] = useState(false);
-  const [now, setNow] = useState<number | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
 
+  // Read initial state from URL
+  const type = params.get("type") ?? "";
+  const coach = params.get("coach") ?? "";
+  const bucket = (params.get("bucket") as TimeBucket) || "all";
+  const onlyUsual = params.get("usual") === "1";
+
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     setNow(Date.now());
   }, []);
+
+  const updateParam = useCallback(
+    (key: string, value: string | null) => {
+      const sp = new URLSearchParams(params.toString());
+      if (!value || value === "all" || value === "") sp.delete(key);
+      else sp.set(key, value);
+      const qs = sp.toString();
+      router.replace((qs ? `${pathname}?${qs}` : pathname) as never);
+    },
+    [params, pathname, router],
+  );
+
+  const setType = (v: string) => updateParam("type", v);
+  const setCoach = (v: string) => updateParam("coach", v);
+  const setBucket = (v: TimeBucket) => updateParam("bucket", v);
+  const setOnlyUsual = (v: boolean) => updateParam("usual", v ? "1" : null);
+  const clearAll = () => {
+    const sp = new URLSearchParams(params.toString());
+    sp.delete("type");
+    sp.delete("coach");
+    sp.delete("bucket");
+    sp.delete("usual");
+    const qs = sp.toString();
+    router.replace((qs ? `${pathname}?${qs}` : pathname) as never);
+  };
 
   const wodTypes = useMemo(() => {
     const set = new Set<string>();
@@ -137,7 +168,8 @@ export function ClassesList({
         {usualHours.length > 0 && (
           <button
             type="button"
-            onClick={() => setOnlyUsual((v) => !v)}
+            onClick={() => setOnlyUsual(!onlyUsual)}
+            aria-pressed={onlyUsual}
             className="rounded-lg px-2.5 py-1.5 text-[10px] font-bold tracking-wider uppercase transition-all"
             style={{
               background: onlyUsual ? "var(--cyan)" : "transparent",
@@ -151,12 +183,7 @@ export function ClassesList({
         {(type || coach || bucket !== "all" || onlyUsual) && (
           <button
             type="button"
-            onClick={() => {
-              setType("");
-              setCoach("");
-              setBucket("all");
-              setOnlyUsual(false);
-            }}
+            onClick={clearAll}
             className="rounded-lg px-2 py-1.5 text-[10px] text-[var(--text-3)] hover:text-[var(--text-2)]"
           >
             Limpiar

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   CheckInButton,
   NoShowButton,
@@ -76,8 +77,25 @@ export function ReservasView({
   view: "day" | "week";
   date: Date;
 }) {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<Status>("ALL");
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const search = params.get("q") ?? "";
+  const statusFilter = (params.get("status") as Status) || "ALL";
+
+  const updateParam = useCallback(
+    (key: string, value: string | null) => {
+      const sp = new URLSearchParams(params.toString());
+      if (!value || value === "ALL" || value === "") sp.delete(key);
+      else sp.set(key, value);
+      const qs = sp.toString();
+      router.replace((qs ? `${pathname}?${qs}` : pathname) as never);
+    },
+    [params, pathname, router],
+  );
+
+  const setSearch = (v: string) => updateParam("q", v);
+  const setStatusFilter = (v: Status) => updateParam("status", v);
 
   const selectedId = roster?.classId ?? null;
 
