@@ -281,12 +281,9 @@ function Stepper({ current }: { current: number }) {
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
                 style={{
-                  background: active
-                    ? "var(--grad)"
-                    : done
-                      ? "var(--moss)"
-                      : "var(--card-2)",
-                  color: active || done ? "#0a0a0c" : "var(--text-3)",
+                  background:
+                    active || done ? "var(--k-accent)" : "var(--k-elevated)",
+                  color: active || done ? "var(--k-accent-on)" : "var(--k-t3)",
                 }}
               >
                 {done ? "✓" : s.n}
@@ -294,7 +291,7 @@ function Stepper({ current }: { current: number }) {
               <span
                 className="text-[10px] font-mono uppercase tracking-wider hidden md:inline"
                 style={{
-                  color: active ? "var(--text)" : "var(--text-3)",
+                  color: active ? "var(--k-t1)" : "var(--k-t3)",
                 }}
               >
                 {s.label}
@@ -304,7 +301,7 @@ function Stepper({ current }: { current: number }) {
               <div
                 className="flex-1 h-[2px]"
                 style={{
-                  background: done ? "var(--moss)" : "var(--line)",
+                  background: done ? "var(--k-accent)" : "var(--k-line)",
                 }}
               />
             ) : null}
@@ -337,7 +334,7 @@ function Step1(p: Step1Props) {
         <h2 className="font-display font-bold text-2xl mb-1">
           Empezá por lo básico
         </h2>
-        <p className="text-sm" style={{ color: "var(--text-2)" }}>
+        <p className="text-sm" style={{ color: "var(--k-t2)" }}>
           Estos datos van en tu marca, mails y reportes.
         </p>
       </div>
@@ -359,7 +356,7 @@ function Step1(p: Step1Props) {
       <div>
         <label
           className="text-xs font-mono uppercase tracking-wider"
-          style={{ color: "var(--text-3)" }}
+          style={{ color: "var(--k-t3)" }}
         >
           Color de marca
         </label>
@@ -369,7 +366,7 @@ function Step1(p: Step1Props) {
             value={p.brandColor}
             onChange={(e) => p.setBrandColor(e.target.value)}
             className="w-12 h-12 rounded-lg cursor-pointer border"
-            style={{ borderColor: "var(--line-strong)" }}
+            style={{ borderColor: "var(--k-line-2)" }}
           />
           <input
             type="text"
@@ -377,9 +374,9 @@ function Step1(p: Step1Props) {
             onChange={(e) => p.setBrandColor(e.target.value)}
             className="px-4 py-2 rounded-xl text-sm border font-mono"
             style={{
-              background: "var(--card)",
-              borderColor: "var(--line-strong)",
-              color: "var(--text)",
+              background: "var(--k-surface)",
+              borderColor: "var(--k-line-2)",
+              color: "var(--k-t1)",
             }}
           />
         </div>
@@ -414,7 +411,7 @@ function Step2(p: Step2Props) {
         <h2 className="font-display font-bold text-2xl mb-1">
           Tu horario operativo
         </h2>
-        <p className="text-sm" style={{ color: "var(--text-2)" }}>
+        <p className="text-sm" style={{ color: "var(--k-t2)" }}>
           {p.hasSchedule
             ? "Ya tenés horarios cargados. Podés ajustarlos en Ajustes → Horarios."
             : "Te dejamos un preset CrossFit-friendly. Podés afinarlo después."}
@@ -422,19 +419,19 @@ function Step2(p: Step2Props) {
       </div>
       <div
         className="rounded-xl p-4 space-y-2"
-        style={{ background: "var(--card-2)" }}
+        style={{ background: "var(--k-elevated)" }}
       >
         <div className="flex justify-between text-sm">
-          <span style={{ color: "var(--text-2)" }}>Lun–Vie</span>
+          <span style={{ color: "var(--k-t2)" }}>Lun–Vie</span>
           <span className="font-mono">06 · 07 · 09 · 17 · 18 · 19</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span style={{ color: "var(--text-2)" }}>Sábado · Open Box</span>
+          <span style={{ color: "var(--k-t2)" }}>Sábado · Open Box</span>
           <span className="font-mono">08 · 09 · 10</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span style={{ color: "var(--text-2)" }}>Domingo</span>
-          <span style={{ color: "var(--text-3)" }}>cerrado</span>
+          <span style={{ color: "var(--k-t2)" }}>Domingo</span>
+          <span style={{ color: "var(--k-t3)" }}>cerrado</span>
         </div>
       </div>
       <NavRow
@@ -442,7 +439,7 @@ function Step2(p: Step2Props) {
           <button
             onClick={p.onBack}
             className="text-sm underline"
-            style={{ color: "var(--text-3)" }}
+            style={{ color: "var(--k-t3)" }}
           >
             ← Atrás
           </button>
@@ -454,8 +451,8 @@ function Step2(p: Step2Props) {
               disabled={p.pending}
               className="px-4 py-2.5 rounded-full font-bold text-sm border disabled:opacity-50"
               style={{
-                borderColor: "var(--line-strong)",
-                color: "var(--text-2)",
+                borderColor: "var(--k-line-2)",
+                color: "var(--k-t2)",
               }}
             >
               Saltar
@@ -497,7 +494,7 @@ function Step3(p: Step3Props) {
         <h2 className="font-display font-bold text-2xl mb-1">
           Tu primer plan de membresía
         </h2>
-        <p className="text-sm" style={{ color: "var(--text-2)" }}>
+        <p className="text-sm" style={{ color: "var(--k-t2)" }}>
           Vas a poder crear más planes desde Pagos. Empezá con uno.
         </p>
       </div>
@@ -532,7 +529,7 @@ function Step3(p: Step3Props) {
           <button
             onClick={p.onBack}
             className="text-sm underline"
-            style={{ color: "var(--text-3)" }}
+            style={{ color: "var(--k-t3)" }}
           >
             ← Atrás
           </button>
@@ -543,8 +540,8 @@ function Step3(p: Step3Props) {
               onClick={p.onSkip}
               className="px-4 py-2.5 rounded-full font-bold text-sm border"
               style={{
-                borderColor: "var(--line-strong)",
-                color: "var(--text-2)",
+                borderColor: "var(--k-line-2)",
+                color: "var(--k-t2)",
               }}
             >
               Saltar
@@ -581,7 +578,7 @@ function Step4(p: Step4Props) {
         <h2 className="font-display font-bold text-2xl mb-1">
           Invitá a tu equipo
         </h2>
-        <p className="text-sm" style={{ color: "var(--text-2)" }}>
+        <p className="text-sm" style={{ color: "var(--k-t2)" }}>
           Coaches y staff. Cada uno recibe un email con link para activar su
           cuenta. Atletas se invitan después desde Atletas.
         </p>
@@ -615,8 +612,8 @@ function Step4(p: Step4Props) {
               onClick={() => p.removeInvite(idx)}
               className="px-3 py-2.5 rounded-xl border text-sm"
               style={{
-                borderColor: "var(--line-strong)",
-                color: "var(--text-3)",
+                borderColor: "var(--k-line-2)",
+                color: "var(--k-t3)",
               }}
               aria-label="Eliminar fila"
             >
@@ -627,7 +624,7 @@ function Step4(p: Step4Props) {
         <button
           onClick={p.addInvite}
           className="text-sm underline"
-          style={{ color: "var(--blue)" }}
+          style={{ color: "var(--k-accent)" }}
         >
           + Agregar otro
         </button>
@@ -637,7 +634,7 @@ function Step4(p: Step4Props) {
           <button
             onClick={p.onBack}
             className="text-sm underline"
-            style={{ color: "var(--text-3)" }}
+            style={{ color: "var(--k-t3)" }}
           >
             ← Atrás
           </button>
@@ -648,8 +645,8 @@ function Step4(p: Step4Props) {
               onClick={p.onSkip}
               className="px-4 py-2.5 rounded-full font-bold text-sm border"
               style={{
-                borderColor: "var(--line-strong)",
-                color: "var(--text-2)",
+                borderColor: "var(--k-line-2)",
+                color: "var(--k-t2)",
               }}
             >
               Saltar
@@ -680,11 +677,11 @@ function Step5(p: Step5Props) {
     <div className="space-y-5 text-center">
       <div
         className="inline-flex items-center justify-center w-16 h-16 rounded-full mx-auto"
-        style={{ background: "var(--grad-soft)" }}
+        style={{ background: "var(--k-accent-soft)" }}
       >
         <span
           className="font-display font-bold text-2xl"
-          style={{ color: "var(--moss)" }}
+          style={{ color: "var(--k-accent)" }}
         >
           ✓
         </span>
@@ -692,10 +689,7 @@ function Step5(p: Step5Props) {
       <h2 className="font-display font-bold text-2xl">
         Tu box <em>{p.boxName}</em> está listo
       </h2>
-      <p
-        className="text-sm max-w-md mx-auto"
-        style={{ color: "var(--text-2)" }}
-      >
+      <p className="text-sm max-w-md mx-auto" style={{ color: "var(--k-t2)" }}>
         Podés afinar todo desde Ajustes cuando quieras. Llevate tu trial al
         máximo: cargá WODs, anunciá clases y empezá a operar.
       </p>
@@ -704,7 +698,7 @@ function Step5(p: Step5Props) {
           <button
             onClick={p.onBack}
             className="text-sm underline"
-            style={{ color: "var(--text-3)" }}
+            style={{ color: "var(--k-t3)" }}
           >
             ← Atrás
           </button>
@@ -739,7 +733,7 @@ function Field({ label, value, onChange, type = "text", hint }: FieldProps) {
       {label ? (
         <label
           className="text-xs font-mono uppercase tracking-wider"
-          style={{ color: "var(--text-3)" }}
+          style={{ color: "var(--k-t3)" }}
         >
           {label}
         </label>
@@ -748,15 +742,15 @@ function Field({ label, value, onChange, type = "text", hint }: FieldProps) {
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:border-moss/50 transition-colors"
+        className="w-full px-4 py-2.5 rounded-xl text-sm border focus:outline-none transition-colors"
         style={{
-          background: "var(--card)",
-          borderColor: "var(--line-strong)",
-          color: "var(--text)",
+          background: "var(--k-surface)",
+          borderColor: "var(--k-line-2)",
+          color: "var(--k-t1)",
         }}
       />
       {hint ? (
-        <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "var(--k-t3)" }}>
           {hint}
         </p>
       ) : null}
@@ -777,7 +771,7 @@ function SelectField({ label, value, onChange, options }: SelectFieldProps) {
       {label ? (
         <label
           className="text-xs font-mono uppercase tracking-wider"
-          style={{ color: "var(--text-3)" }}
+          style={{ color: "var(--k-t3)" }}
         >
           {label}
         </label>
@@ -785,11 +779,11 @@ function SelectField({ label, value, onChange, options }: SelectFieldProps) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:border-moss/50 transition-colors"
+        className="w-full px-4 py-2.5 rounded-xl text-sm border focus:outline-none transition-colors"
         style={{
-          background: "var(--card)",
-          borderColor: "var(--line-strong)",
-          color: "var(--text)",
+          background: "var(--k-surface)",
+          borderColor: "var(--k-line-2)",
+          color: "var(--k-t1)",
         }}
       >
         {options.map((o) => (
