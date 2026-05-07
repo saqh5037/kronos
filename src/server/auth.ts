@@ -14,6 +14,26 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
     error: "/login",
   },
+  logger: {
+    error(code, metadata) {
+      // Silenciar ruido de cookies stale en dev (otra ejecución de NextAuth con
+      // secret distinto deja cookie undecryptable hasta que el usuario haga login).
+      if (
+        code === "JWT_SESSION_ERROR" &&
+        metadata instanceof Error &&
+        /decryption operation failed/i.test(metadata.message)
+      ) {
+        return;
+      }
+      console.error(`[next-auth][error][${code}]`, metadata);
+    },
+    warn(code) {
+      console.warn(`[next-auth][warn][${code}]`);
+    },
+    debug() {
+      // noop
+    },
+  },
   providers: [
     EmailProvider({
       server: process.env.EMAIL_SERVER ?? "",
