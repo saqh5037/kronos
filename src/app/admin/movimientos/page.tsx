@@ -18,19 +18,19 @@ export default async function AdminMovimientosPage() {
         <span className="k-eyebrow-bar">Configuración</span>
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
           <span
-            className="font-script text-[26px] leading-none"
-            style={{ color: "var(--red)" }}
+            className="font-display text-[26px] leading-none"
+            style={{ color: "var(--k-accent)" }}
           >
             Biblioteca de
           </span>
           <h1
             className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
-            style={{ color: "var(--text)" }}
+            style={{ color: "var(--k-t1)" }}
           >
             <em>movimientos</em>
           </h1>
         </div>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
+        <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
           {movements.length} movimientos · puedes personalizar el video de cada
           uno
         </p>

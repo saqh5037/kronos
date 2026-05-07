@@ -26,8 +26,8 @@ export function ScheduleViewSwitch({
     <div
       className="inline-flex rounded-full p-1 gap-0.5"
       style={{
-        background: "var(--card)",
-        border: "1px solid var(--line)",
+        background: "var(--k-surface)",
+        border: "1px solid var(--k-line)",
       }}
     >
       {(["day", "week", "month"] as View[]).map((v) => {
@@ -38,8 +38,8 @@ export function ScheduleViewSwitch({
             href={{ pathname: basePath, query: { view: v, date: ymd(date) } }}
             className="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all"
             style={{
-              background: isActive ? "var(--grad)" : "transparent",
-              color: isActive ? "#1c1917" : "var(--text-2)",
+              background: isActive ? "var(--k-accent)" : "transparent",
+              color: isActive ? "var(--k-accent-on)" : "var(--k-t2)",
             }}
           >
             {LABELS[v]}

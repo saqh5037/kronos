@@ -107,7 +107,7 @@ export default async function ProgramacionPage({
           </h1>
           <p
             className="text-sm mt-1 font-medium"
-            style={{ color: "var(--text-2)" }}
+            style={{ color: "var(--k-t2)" }}
           >
             {headerLabel}
           </p>
@@ -120,7 +120,7 @@ export default async function ProgramacionPage({
         className="sticky top-0 z-10 -mx-6 lg:-mx-8 px-6 lg:px-8 py-3 mb-4 backdrop-blur-md flex items-center justify-between gap-3 flex-wrap"
         style={{
           background: "var(--bg)",
-          borderBottom: "1px solid var(--line)",
+          borderBottom: "1px solid var(--k-line)",
         }}
       >
         <ScheduleNav view={view} date={date} />

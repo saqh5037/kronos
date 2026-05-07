@@ -32,7 +32,7 @@ export function DayView({
           <div>
             <p
               className="font-mono text-[10px] tracking-[0.12em] uppercase font-bold"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               CLASES
             </p>
@@ -43,7 +43,7 @@ export function DayView({
           <div>
             <p
               className="font-mono text-[10px] tracking-[0.12em] uppercase font-bold"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               RESERVAS
             </p>
@@ -54,7 +54,7 @@ export function DayView({
           <div>
             <p
               className="font-mono text-[10px] tracking-[0.12em] uppercase font-bold"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               OCUPACIÓN
             </p>
@@ -63,10 +63,10 @@ export function DayView({
               style={{
                 color:
                   fillPct >= 80
-                    ? "var(--red)"
+                    ? "var(--k-accent)"
                     : fillPct >= 50
-                      ? "var(--moss)"
-                      : "var(--text)",
+                      ? "var(--k-accent)"
+                      : "var(--k-t1)",
               }}
             >
               {Math.round(fillPct)}%
@@ -93,7 +93,7 @@ export function DayView({
                 key={h}
                 className="font-mono text-[10px] font-bold tracking-wide flex items-start justify-end pr-2"
                 style={{
-                  color: "var(--text-3)",
+                  color: "var(--k-t3)",
                   height: HOUR_HEIGHT,
                 }}
               >
@@ -110,7 +110,7 @@ export function DayView({
                 key={h}
                 className="absolute left-0 right-0 border-t"
                 style={{
-                  borderColor: "var(--line)",
+                  borderColor: "var(--k-line)",
                   top: (h - START_HOUR) * HOUR_HEIGHT,
                 }}
               />

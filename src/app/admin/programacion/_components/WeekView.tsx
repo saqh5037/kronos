@@ -31,13 +31,13 @@ export function WeekView({
             >
               <div
                 className="px-2.5 py-2 border-b flex items-center justify-between"
-                style={{ borderColor: "var(--line)" }}
+                style={{ borderColor: "var(--k-line)" }}
               >
                 <div className="flex items-center gap-2">
                   <p
                     className="font-mono text-[9px] font-bold tracking-[0.12em] uppercase"
                     style={{
-                      color: isToday ? "var(--cyan)" : "var(--text-3)",
+                      color: isToday ? "var(--k-warning)" : "var(--k-t3)",
                     }}
                   >
                     {formatWeekday(d)}
@@ -57,7 +57,7 @@ export function WeekView({
                   <div className="flex-1 flex items-center justify-center py-4">
                     <p
                       className="text-[11px] font-medium"
-                      style={{ color: "var(--text-3)" }}
+                      style={{ color: "var(--k-t3)" }}
                     >
                       Sin clases
                     </p>

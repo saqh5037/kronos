@@ -59,14 +59,14 @@ export function BulkRoster({ rosters }: { rosters: ClassRoster[] }) {
   return (
     <div className="flex flex-col gap-4">
       {selected.size > 0 ? (
-        <div className="sticky top-2 z-10 flex items-center justify-between gap-3 rounded-xl border border-[var(--line-strong)] bg-[var(--card-elevated)] px-4 py-2 shadow-lg">
+        <div className="sticky top-2 z-10 flex items-center justify-between gap-3 rounded-xl border border-[var(--k-line-2)] bg-[var(--k-elevated)] px-4 py-2 shadow-lg">
           <p className="k-eyebrow">{selected.size} seleccionados</p>
           <div className="flex gap-2">
             <button
               type="button"
               disabled={pending}
               onClick={bulkCheckIn}
-              className="rounded-lg border border-[var(--moss-line)] bg-[var(--moss-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--moss)] disabled:opacity-50"
+              className="rounded-lg border border-[var(--k-accent-line)] bg-[var(--k-accent-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--k-accent)] disabled:opacity-50"
             >
               ✓ Check-in
             </button>
@@ -74,14 +74,14 @@ export function BulkRoster({ rosters }: { rosters: ClassRoster[] }) {
               type="button"
               disabled={pending}
               onClick={bulkNoShow}
-              className="rounded-lg border border-[var(--ember-line)] bg-[var(--ember-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--ember)] disabled:opacity-50"
+              className="rounded-lg border border-[rgba(255, 90, 90, 0.3)] bg-[rgba(255, 90, 90, 0.1)] px-3 py-1.5 text-xs font-semibold text-[var(--k-warning)] disabled:opacity-50"
             >
               ✕ No-show
             </button>
             <button
               type="button"
               onClick={() => setSelected(new Set())}
-              className="text-xs text-[var(--text-3)] hover:text-[var(--text-2)]"
+              className="text-xs text-[var(--k-t3)] hover:text-[var(--k-t2)]"
             >
               Limpiar
             </button>
@@ -104,7 +104,7 @@ export function BulkRoster({ rosters }: { rosters: ClassRoster[] }) {
 
         return (
           <div key={roster.classId} className="k-card">
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--line)] px-4 py-3">
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--k-line)] px-4 py-3">
               <div className="flex items-center gap-3">
                 <div className="font-display text-xl font-bold">
                   {fmtTime(roster.startsAt)}
@@ -114,7 +114,7 @@ export function BulkRoster({ rosters }: { rosters: ClassRoster[] }) {
                     {roster.wodName ?? "Sin WOD"}
                   </p>
                   {roster.coachName ? (
-                    <p className="mt-0.5 text-[10px] text-[var(--text-3)]">
+                    <p className="mt-0.5 text-[10px] text-[var(--k-t3)]">
                       {roster.coachName}
                     </p>
                   ) : null}
@@ -135,7 +135,7 @@ export function BulkRoster({ rosters }: { rosters: ClassRoster[] }) {
                         return next;
                       });
                     }}
-                    className="rounded-md px-2 py-1.5 text-[10px] text-[var(--text-2)] hover:bg-[var(--hover-subtle)] hover:text-[var(--text)]"
+                    className="rounded-md px-2 py-1.5 text-[10px] text-[var(--k-t2)] hover:bg-[var(--k-elevated)] hover:text-[var(--k-t1)]"
                   >
                     {allSelected
                       ? "Deseleccionar"
@@ -144,7 +144,7 @@ export function BulkRoster({ rosters }: { rosters: ClassRoster[] }) {
                 ) : null}
                 <div
                   className="font-mono text-sm font-bold"
-                  style={{ color: "var(--moss)" }}
+                  style={{ color: "var(--k-accent)" }}
                 >
                   {attended}/{booked.length}
                 </div>
@@ -153,7 +153,7 @@ export function BulkRoster({ rosters }: { rosters: ClassRoster[] }) {
 
             <div className="p-4">
               {roster.bookings.length === 0 ? (
-                <p className="text-xs text-[var(--text-3)]">Sin reservas.</p>
+                <p className="text-xs text-[var(--k-t3)]">Sin reservas.</p>
               ) : (
                 <ul className="flex flex-col gap-2">
                   {roster.bookings.map((b) => {

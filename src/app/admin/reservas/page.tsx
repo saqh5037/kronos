@@ -81,14 +81,14 @@ export default async function ReservasPage({
         <Eyebrow>Operación</Eyebrow>
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
           <span
-            className="font-script text-[26px] leading-none"
-            style={{ color: "var(--red)" }}
+            className="font-display text-[26px] leading-none"
+            style={{ color: "var(--k-accent)" }}
           >
             Roster de
           </span>
           <h1
             className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
-            style={{ color: "var(--text)" }}
+            style={{ color: "var(--k-t1)" }}
           >
             <em>reservas</em>
           </h1>
@@ -100,7 +100,7 @@ export default async function ReservasPage({
         className="sticky top-0 z-10 -mx-6 lg:-mx-8 px-6 lg:px-8 py-3 mb-4 backdrop-blur-md flex items-center justify-between gap-3 flex-wrap"
         style={{
           background: "var(--bg)",
-          borderBottom: "1px solid var(--line)",
+          borderBottom: "1px solid var(--k-line)",
         }}
       >
         <ScheduleNav view={view} date={anchor} basePath="/admin/reservas" />

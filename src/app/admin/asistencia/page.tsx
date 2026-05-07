@@ -117,12 +117,12 @@ export default async function AsistenciaPage({
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
           <h1
             className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
-            style={{ color: "var(--text)" }}
+            style={{ color: "var(--k-t1)" }}
           >
             Asis<em>tencia</em>
           </h1>
         </div>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
+        <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
           {formatRange(range)} · {rangeStats.attended} asistencias en el rango
         </p>
       </div>
@@ -132,7 +132,7 @@ export default async function AsistenciaPage({
         className="sticky top-0 z-10 -mx-6 lg:-mx-8 px-6 lg:px-8 py-3 mb-4 backdrop-blur-md"
         style={{
           background: "var(--bg)",
-          borderBottom: "1px solid var(--line)",
+          borderBottom: "1px solid var(--k-line)",
         }}
       >
         <AsistenciaFilters />
@@ -187,7 +187,7 @@ export default async function AsistenciaPage({
             <p className="k-eyebrow">Asistencia diaria</p>
             <p
               className="font-mono text-[10px] font-bold"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               {formatRange(range)}
             </p>
@@ -196,7 +196,7 @@ export default async function AsistenciaPage({
           rangePoints.some((p) => p.attended + p.noShow + p.booked > 0) ? (
             <AttendanceCinematicChart data={rangePoints} />
           ) : (
-            <p className="py-10 text-center text-sm text-[var(--text-3)]">
+            <p className="py-10 text-center text-sm text-[var(--k-t3)]">
               Sin actividad en el rango
             </p>
           )}
@@ -207,7 +207,7 @@ export default async function AsistenciaPage({
             {rangePoints.length > 0 && rangePoints.some((p) => p.noShow > 0) ? (
               <NoShowCinematicChart data={rangePoints} />
             ) : (
-              <p className="py-10 text-center text-sm text-[var(--text-3)]">
+              <p className="py-10 text-center text-sm text-[var(--k-t3)]">
                 Sin no-shows en el rango ✓
               </p>
             )}
@@ -217,7 +217,7 @@ export default async function AsistenciaPage({
             {heatmap.length > 0 ? (
               <DayHourHeatmap cells={heatmap} />
             ) : (
-              <p className="py-10 text-center text-sm text-[var(--text-3)]">
+              <p className="py-10 text-center text-sm text-[var(--k-t3)]">
                 Sin datos en el rango
               </p>
             )}
@@ -228,7 +228,7 @@ export default async function AsistenciaPage({
       {/* No-shows recurrentes */}
       {noShows.length > 0 && (
         <section className="mb-6">
-          <p className="k-eyebrow mb-3" style={{ color: "var(--ember)" }}>
+          <p className="k-eyebrow mb-3" style={{ color: "var(--k-warning)" }}>
             🔁 No-shows recurrentes ({noShows.length})
           </p>
           <div className="k-card overflow-hidden">
@@ -249,7 +249,7 @@ export default async function AsistenciaPage({
                         {ns.noShowCount}
                       </span>
                     </td>
-                    <td className="font-mono text-xs text-[var(--text-3)]">
+                    <td className="font-mono text-xs text-[var(--k-t3)]">
                       {ns.lastNoShowAt
                         ? ns.lastNoShowAt.toLocaleDateString("es-MX", {
                             day: "2-digit",
@@ -269,13 +269,13 @@ export default async function AsistenciaPage({
       <section>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
           <p className="k-eyebrow capitalize">Clases de hoy · {todayLabel}</p>
-          <p className="font-mono text-xs text-[var(--text-3)]">
+          <p className="font-mono text-xs text-[var(--k-t3)]">
             {statsToday.totalAttended}/{statsToday.totalBooked} asistidos hoy
           </p>
         </div>
         {classesToday.length === 0 ? (
           <div className="k-card p-6 text-center">
-            <p className="text-sm" style={{ color: "var(--text-2)" }}>
+            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
               No hay clases programadas para hoy.
             </p>
           </div>
@@ -302,16 +302,16 @@ function KpiCard({
 }) {
   const color =
     tone === "moss"
-      ? "var(--moss)"
+      ? "var(--k-accent)"
       : tone === "steel"
-        ? "var(--steel)"
+        ? "var(--k-t2)"
         : tone === "ember"
-          ? "var(--ember)"
-          : "var(--text)";
+          ? "var(--k-warning)"
+          : "var(--k-t1)";
   return (
     <div className="k-card p-3">
       <div className="flex items-start justify-between gap-2">
-        <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+        <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
           {label}
         </p>
         {delta}
@@ -320,7 +320,7 @@ function KpiCard({
         {value}
       </p>
       {subtitle ? (
-        <p className="mt-1 text-xs text-[var(--text-3)]">{subtitle}</p>
+        <p className="mt-1 text-xs text-[var(--k-t3)]">{subtitle}</p>
       ) : null}
     </div>
   );

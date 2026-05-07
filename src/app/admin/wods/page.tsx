@@ -32,19 +32,19 @@ export default async function WODsPage() {
           <span className="k-eyebrow-bar">Programación · Biblioteca</span>
           <div className="mt-2 flex items-baseline gap-2 flex-wrap">
             <span
-              className="font-script text-[28px] leading-none"
-              style={{ color: "var(--red)" }}
+              className="font-display text-[28px] leading-none"
+              style={{ color: "var(--k-accent)" }}
             >
               Tus
             </span>
             <h1
               className="k-h-italic font-display font-extrabold text-[42px] leading-[1] tracking-[-0.02em]"
-              style={{ color: "var(--text)" }}
+              style={{ color: "var(--k-t1)" }}
             >
               <em>WODs</em>
             </h1>
           </div>
-          <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
+          <p className="text-sm mt-1" style={{ color: "var(--k-t2)" }}>
             Biblioteca de WODs y movimientos del box
           </p>
         </div>
@@ -54,13 +54,13 @@ export default async function WODsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* WOD library */}
         <div className="lg:col-span-2">
-          <p className="k-eyebrow mb-3" style={{ color: "var(--text-2)" }}>
+          <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
             {wods.length} WOD{wods.length === 1 ? "" : "s"} activo
             {wods.length === 1 ? "" : "s"}
           </p>
           {wods.length === 0 ? (
             <div className="k-card p-6 text-center">
-              <p className="text-sm" style={{ color: "var(--text-2)" }}>
+              <p className="text-sm" style={{ color: "var(--k-t2)" }}>
                 No hay WODs aún. Crea el primero con el botón de arriba.
               </p>
             </div>
@@ -76,7 +76,7 @@ export default async function WODsPage() {
         {/* Movements sidebar */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+            <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
               Biblioteca de movimientos
             </p>
             <MovementForm />
@@ -85,7 +85,7 @@ export default async function WODsPage() {
             {movements.length === 0 ? (
               <p
                 className="text-xs p-4 text-center"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 Sin movimientos. Crea el primero.
               </p>
@@ -94,15 +94,15 @@ export default async function WODsPage() {
                 {movements.map((m) => (
                   <li
                     key={m.id}
-                    className="px-4 py-3 border-b last:border-b-0 flex items-center justify-between group hover:bg-hover-subtle transition-colors"
-                    style={{ borderColor: "var(--line)" }}
+                    className="px-4 py-3 border-b last:border-b-0 flex items-center justify-between group hover:bg-[var(--k-elevated)] transition-colors"
+                    style={{ borderColor: "var(--k-line)" }}
                   >
                     <div>
                       <p className="text-sm font-medium">{m.name}</p>
                       {m.equipment.length > 0 && (
                         <p
                           className="text-[10px] mt-0.5"
-                          style={{ color: "var(--text-3)" }}
+                          style={{ color: "var(--k-t3)" }}
                         >
                           {m.equipment.join(" · ")}
                         </p>

@@ -50,8 +50,8 @@ export function ScheduleNav({
     <div className="flex items-center gap-2">
       <Link
         href={{ pathname: basePath, query: { view, date: ymd(prev) } }}
-        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--card-2)]"
-        style={{ border: "1px solid var(--line)" }}
+        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--k-elevated)]"
+        style={{ border: "1px solid var(--k-line)" }}
         aria-label="Anterior"
       >
         ←
@@ -63,22 +63,22 @@ export function ScheduleNav({
           const url = `${basePath}?view=${view}&date=${ymd(t)}`;
           router.push(url as never);
         }}
-        className="px-3 py-1.5 rounded-full text-xs font-bold transition-colors hover:bg-[var(--card-2)]"
-        style={{ border: "1px solid var(--line)" }}
+        className="px-3 py-1.5 rounded-full text-xs font-bold transition-colors hover:bg-[var(--k-elevated)]"
+        style={{ border: "1px solid var(--k-line)" }}
       >
         Hoy
       </button>
       <Link
         href={{ pathname: basePath, query: { view, date: ymd(next) } }}
-        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--card-2)]"
-        style={{ border: "1px solid var(--line)" }}
+        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--k-elevated)]"
+        style={{ border: "1px solid var(--k-line)" }}
         aria-label="Siguiente"
       >
         →
       </Link>
       <p
         className="text-sm font-bold capitalize ml-2"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--k-t1)" }}
       >
         {label}
       </p>

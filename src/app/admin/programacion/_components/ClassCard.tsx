@@ -19,17 +19,17 @@ export function ClassCard({
         ? "k-chip-steel"
         : "k-chip-moss";
   const accent = isOpenBox
-    ? "var(--cyan)"
+    ? "var(--k-warning)"
     : fillRatio >= 1
-      ? "var(--red)"
+      ? "var(--k-accent)"
       : fillRatio >= 0.7
-        ? "var(--steel)"
-        : "var(--moss)";
+        ? "var(--k-t2)"
+        : "var(--k-accent)";
 
   return (
     <div
-      className="rounded-xl border p-2 relative overflow-hidden group transition-all hover:border-[var(--line-strong)] hover:shadow-sm"
-      style={{ background: "var(--card-2)", borderColor: "var(--line)" }}
+      className="rounded-xl border p-2 relative overflow-hidden group transition-all hover:border-[var(--k-line-2)] hover:shadow-sm"
+      style={{ background: "var(--k-elevated)", borderColor: "var(--k-line)" }}
     >
       <div
         className="absolute left-0 top-0 bottom-0 w-[2.5px]"
@@ -51,14 +51,14 @@ export function ClassCard({
           <>
             <p
               className="text-[11px] mt-1 font-semibold truncate leading-tight"
-              style={{ color: "var(--cyan)" }}
+              style={{ color: "var(--k-warning)" }}
             >
               Open Box
             </p>
             {!compact && (
               <p
                 className="text-[10px] mt-0.5 truncate font-medium"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 Acceso libre
               </p>
@@ -77,7 +77,7 @@ export function ClassCard({
             {!compact && c.coach && (
               <p
                 className="text-[10px] mt-0.5 truncate font-medium"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 {c.coach.name ?? "Coach"}
               </p>

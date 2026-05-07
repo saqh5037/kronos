@@ -48,7 +48,7 @@ export function MonthView({
           <p
             key={l}
             className="font-mono text-[10px] font-bold tracking-[0.12em] text-center py-1"
-            style={{ color: "var(--text-3)" }}
+            style={{ color: "var(--k-t3)" }}
           >
             {l}
           </p>
@@ -74,12 +74,12 @@ export function MonthView({
                 pathname: "/admin/programacion",
                 query: { view: "day", date: k },
               }}
-              className="rounded-lg p-1.5 min-h-[80px] transition-all hover:border-[var(--line-strong)]"
+              className="rounded-lg p-1.5 min-h-[80px] transition-all hover:border-[var(--k-line-2)]"
               style={{
-                background: inMonth ? "var(--card-2)" : "transparent",
+                background: inMonth ? "var(--k-elevated)" : "transparent",
                 border: isToday
-                  ? "1px solid var(--cyan)"
-                  : "1px solid var(--line)",
+                  ? "1px solid var(--k-warning)"
+                  : "1px solid var(--k-line)",
                 opacity: inMonth ? 1 : 0.4,
               }}
             >
@@ -87,7 +87,7 @@ export function MonthView({
                 <p
                   className="font-display text-sm font-bold leading-none"
                   style={{
-                    color: isToday ? "var(--cyan)" : "var(--text)",
+                    color: isToday ? "var(--k-warning)" : "var(--k-t1)",
                   }}
                 >
                   {date.getDate()}
@@ -95,7 +95,7 @@ export function MonthView({
                 {dayClasses.length > 0 && (
                   <span
                     className="font-mono text-[8px] font-bold"
-                    style={{ color: "var(--text-3)" }}
+                    style={{ color: "var(--k-t3)" }}
                   >
                     {dayClasses.length}c
                   </span>
@@ -113,17 +113,17 @@ export function MonthView({
                         width: `${Math.min(100, fillPct)}%`,
                         background:
                           fillPct >= 80
-                            ? "var(--red)"
+                            ? "var(--k-accent)"
                             : fillPct >= 50
-                              ? "var(--moss)"
-                              : "var(--steel)",
+                              ? "var(--k-accent)"
+                              : "var(--k-t2)",
                       }}
                     />
                   </div>
                   {hasOpenBox && (
                     <span
                       className="font-mono text-[7px] font-bold uppercase tracking-wider"
-                      style={{ color: "var(--cyan)" }}
+                      style={{ color: "var(--k-warning)" }}
                     >
                       Open Box
                     </span>
