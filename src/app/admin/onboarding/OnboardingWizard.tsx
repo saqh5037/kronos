@@ -582,8 +582,8 @@ function Step4(p: Step4Props) {
           Invitá a tu equipo
         </h2>
         <p className="text-sm" style={{ color: "var(--text-2)" }}>
-          Coaches y staff. Atletas se invitan después desde Atletas. Los emails
-          de invitación salen cuando wirees Resend (Sprint 2.5).
+          Coaches y staff. Cada uno recibe un email con link para activar su
+          cuenta. Atletas se invitan después desde Atletas.
         </p>
       </div>
       <div className="space-y-3">

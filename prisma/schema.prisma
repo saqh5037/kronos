@@ -51,6 +51,7 @@ model Box {
   whiteboardUploads       WhiteboardUpload[]
   athleteAliases          AthleteAlias[]
   athleteInvitations      AthleteInvitation[]
+  staffInvitations        StaffInvitation[]
 }
 
 // ─── USERS / AUTH ─────────────────────────────────────────────────────────────
@@ -779,6 +780,26 @@ model AthleteInvitation {
   firstName   String?
   lastName    String?
   phone       String?
+  token       String    @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  createdById String?
+  createdAt   DateTime  @default(now())
+
+  box Box @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, email])
+  @@index([tenantId, acceptedAt, revokedAt])
+}
+
+model StaffInvitation {
+  id          String    @id @default(cuid())
+  tenantId    String
+  email       String
+  name        String?
+  role        Role
   token       String    @unique
   expiresAt   DateTime
   acceptedAt  DateTime?

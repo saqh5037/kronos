@@ -4,6 +4,11 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { authOptions } from "../auth";
 import { db as prismaBase } from "../db";
+import { logAudit } from "../audit";
+import { sendEmail } from "@/lib/email";
+import { buildInvitationExpiry } from "@/lib/staff-invitation";
+import { buildInvitationToken } from "../invitation-token";
+import { renderStaffInvitationEmail } from "../email-templates/staff-invitation";
 import {
   onboardingPlanSchema,
   onboardingInviteSchema,
@@ -107,6 +112,9 @@ export async function inviteStaff(
   items: OnboardingInviteInput[],
 ): Promise<InviteStaffResult> {
   const tenantId = await requireOwner();
+  const session = await getServerSession(authOptions);
+  const actorId = session?.user?.id;
+  if (!actorId) throw new Error("Unauthorized");
 
   const valid: OnboardingInviteInput[] = [];
   for (const item of items) {
@@ -118,36 +126,108 @@ export async function inviteStaff(
   }
 
   const emails = valid.map((v) => v.email);
-  const existing = await prismaBase.user.findMany({
-    where: { email: { in: emails } },
-    select: { email: true },
-  });
-  const taken = new Set(existing.map((u) => u.email));
+  const now = new Date();
+
+  const [existingUsers, existingInvites, box] = await Promise.all([
+    prismaBase.user.findMany({
+      where: { email: { in: emails } },
+      select: { email: true },
+    }),
+    prismaBase.staffInvitation.findMany({
+      where: {
+        tenantId,
+        email: { in: emails },
+        acceptedAt: null,
+        revokedAt: null,
+      },
+      select: { email: true, expiresAt: true },
+    }),
+    prismaBase.box.findUnique({
+      where: { id: tenantId },
+      select: { name: true },
+    }),
+  ]);
+
+  const taken = new Set(existingUsers.map((u) => u.email));
+  const pendingByEmail = new Set(
+    existingInvites
+      .filter((i) => i.expiresAt.getTime() > now.getTime())
+      .map((i) => i.email),
+  );
 
   const skipped: { email: string; reason: string }[] = [];
   const toCreate: OnboardingInviteInput[] = [];
   for (const item of valid) {
     if (taken.has(item.email)) {
       skipped.push({ email: item.email, reason: "Email ya registrado" });
-    } else {
-      toCreate.push(item);
+      continue;
     }
+    if (pendingByEmail.has(item.email)) {
+      skipped.push({ email: item.email, reason: "Invitación pendiente" });
+      continue;
+    }
+    toCreate.push(item);
   }
 
   if (toCreate.length === 0) {
     return { ok: true, created: 0, skipped };
   }
 
-  await prismaBase.user.createMany({
-    data: toCreate.map((item) => ({
-      email: item.email,
-      name: item.name,
-      role: item.role,
-      tenantId,
-    })),
-  });
+  const expiresAt = buildInvitationExpiry();
+  const created = await prismaBase.$transaction(
+    toCreate.map((item) =>
+      prismaBase.staffInvitation.create({
+        data: {
+          tenantId,
+          email: item.email,
+          name: item.name,
+          role: item.role,
+          token: buildInvitationToken(),
+          expiresAt,
+          createdById: actorId,
+        },
+        select: { id: true, email: true, name: true, role: true, token: true },
+      }),
+    ),
+  );
 
-  return { ok: true, created: toCreate.length, skipped };
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? "";
+
+  await Promise.all(
+    created.map((inv) =>
+      sendEmail({
+        to: [inv.email],
+        subject: `Te invitamos a sumarte como ${inv.role === "COACH" ? "coach" : "staff"} en ${box?.name ?? "tu Box"}`,
+        html: renderStaffInvitationEmail({
+          boxName: box?.name ?? "tu Box",
+          name: inv.name,
+          role: inv.role as "COACH" | "STAFF",
+          link: `${baseUrl}/invitacion-staff/${inv.token}`,
+        }),
+      }),
+    ),
+  );
+
+  for (const inv of created) {
+    await logAudit({
+      tenantId,
+      actorId,
+      action: "BOOKING_CREATED",
+      targetType: "StaffInvitation",
+      targetId: inv.id,
+      metadata: {
+        kind: "STAFF_INVITATION_SENT",
+        email: inv.email,
+        role: inv.role,
+      },
+    });
+  }
+
+  revalidatePath("/admin/onboarding");
+  revalidatePath("/admin/ajustes");
+
+  return { ok: true, created: created.length, skipped };
 }
 
 export async function completeOnboarding(): Promise<{ ok: true }> {
