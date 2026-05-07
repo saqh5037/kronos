@@ -10,6 +10,47 @@ export type InvoiceCsvRow = {
   status: "PAID" | "REFUNDED";
 };
 
+export type InvoiceSummary = {
+  totalCents: number;
+  count: number;
+  refundedCount: number;
+  byPlan: Record<string, { count: number; cents: number }>;
+};
+
+type SummarizableRow = {
+  amountMxnCents: number;
+  status: "PAID" | "REFUNDED";
+  planName?: string;
+  planSlug?: string;
+};
+
+export function summarizeInvoices(rows: SummarizableRow[]): InvoiceSummary {
+  const summary: InvoiceSummary = {
+    totalCents: 0,
+    count: 0,
+    refundedCount: 0,
+    byPlan: {},
+  };
+
+  for (const row of rows) {
+    if (row.status === "REFUNDED") {
+      summary.refundedCount += 1;
+      continue;
+    }
+    summary.count += 1;
+    summary.totalCents += row.amountMxnCents;
+
+    const key = row.planSlug ?? row.planName ?? "unknown";
+    if (!summary.byPlan[key]) {
+      summary.byPlan[key] = { count: 0, cents: 0 };
+    }
+    summary.byPlan[key].count += 1;
+    summary.byPlan[key].cents += row.amountMxnCents;
+  }
+
+  return summary;
+}
+
 const HEADERS = [
   "ID",
   "Fecha de pago",

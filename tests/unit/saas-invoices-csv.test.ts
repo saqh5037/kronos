@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { invoicesToCsv, type InvoiceCsvRow } from "@/lib/saas-invoices-csv";
+import {
+  invoicesToCsv,
+  summarizeInvoices,
+  type InvoiceCsvRow,
+} from "@/lib/saas-invoices-csv";
 
 const sampleRow: InvoiceCsvRow = {
   id: "inv-001",
@@ -84,5 +88,53 @@ describe("invoicesToCsv", () => {
       .filter((l) => l.replace(/^﻿/, "").length > 0);
     expect(lines.length).toBe(1);
     expect(lines[0]?.replace(/^﻿/, "")).toContain("ID");
+  });
+});
+
+describe("summarizeInvoices", () => {
+  it("array vacío → totalCents=0 count=0", () => {
+    expect(summarizeInvoices([])).toEqual({
+      totalCents: 0,
+      count: 0,
+      refundedCount: 0,
+      byPlan: {},
+    });
+  });
+
+  it("suma solo PAID, ignora REFUNDED", () => {
+    const result = summarizeInvoices([
+      { amountMxnCents: 49900, status: "PAID", planSlug: "pro" },
+      { amountMxnCents: 49900, status: "PAID", planSlug: "pro" },
+      { amountMxnCents: 49900, status: "REFUNDED", planSlug: "pro" },
+    ]);
+    expect(result.totalCents).toBe(99800);
+    expect(result.count).toBe(2);
+    expect(result.refundedCount).toBe(1);
+  });
+
+  it("agrupa byPlan correctamente", () => {
+    const result = summarizeInvoices([
+      { amountMxnCents: 49900, status: "PAID", planSlug: "pro" },
+      { amountMxnCents: 99900, status: "PAID", planSlug: "premium" },
+      { amountMxnCents: 49900, status: "PAID", planSlug: "pro" },
+    ]);
+    expect(result.byPlan.pro).toEqual({ count: 2, cents: 99800 });
+    expect(result.byPlan.premium).toEqual({ count: 1, cents: 99900 });
+    expect(result.totalCents).toBe(199700);
+  });
+
+  it("usa planName como fallback si no hay planSlug", () => {
+    const result = summarizeInvoices([
+      { amountMxnCents: 49900, status: "PAID", planName: "Pro" },
+    ]);
+    expect(result.byPlan.Pro).toEqual({ count: 1, cents: 49900 });
+  });
+
+  it("REFUNDED no agrega al byPlan", () => {
+    const result = summarizeInvoices([
+      { amountMxnCents: 49900, status: "REFUNDED", planSlug: "pro" },
+    ]);
+    expect(result.byPlan).toEqual({});
+    expect(result.refundedCount).toBe(1);
   });
 });

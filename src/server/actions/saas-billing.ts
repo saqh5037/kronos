@@ -289,13 +289,31 @@ export type SaasInvoiceRow = {
   status: "PAID" | "REFUNDED";
 };
 
-export async function listSaasInvoices(): Promise<SaasInvoiceRow[]> {
+export type SaasInvoiceFilters = {
+  from?: Date;
+  to?: Date;
+  planSlug?: string;
+};
+
+export async function listSaasInvoices(
+  filters?: SaasInvoiceFilters,
+): Promise<SaasInvoiceRow[]> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.tenantId) throw new Error("Unauthorized");
   if (session.user.role !== "OWNER") throw new Error("Forbidden");
 
+  const paidAtFilter: { gte?: Date; lte?: Date } = {};
+  if (filters?.from) paidAtFilter.gte = filters.from;
+  if (filters?.to) paidAtFilter.lte = filters.to;
+
   const rows = await prismaBase.saasInvoice.findMany({
-    where: { tenantId: session.user.tenantId },
+    where: {
+      tenantId: session.user.tenantId,
+      ...(paidAtFilter.gte || paidAtFilter.lte ? { paidAt: paidAtFilter } : {}),
+      ...(filters?.planSlug
+        ? { subscription: { plan: { slug: filters.planSlug } } }
+        : {}),
+    },
     orderBy: { paidAt: "desc" },
     select: {
       id: true,
@@ -322,9 +340,11 @@ export async function listSaasInvoices(): Promise<SaasInvoiceRow[]> {
   }));
 }
 
-export async function exportSaasInvoicesCsv(): Promise<string> {
+export async function exportSaasInvoicesCsv(
+  filters?: SaasInvoiceFilters,
+): Promise<string> {
   const { invoicesToCsv } = await import("@/lib/saas-invoices-csv");
-  const rows = await listSaasInvoices();
+  const rows = await listSaasInvoices(filters);
   return invoicesToCsv(
     rows.map((r) => ({
       id: r.id,
