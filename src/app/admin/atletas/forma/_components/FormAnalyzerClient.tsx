@@ -7,9 +7,6 @@ import {
 } from "@/server/actions/ai";
 import { FORM_ANALYSIS_DISCLAIMER } from "@/lib/ai/form-analysis";
 
-const AI_PRIMARY = "#e60026";
-const AI_SECONDARY = "#00bfff";
-
 const SCORE_LABEL: Record<
   FormAnalysisResult["feedback"]["overallScore"],
   string
@@ -25,11 +22,11 @@ const SCORE_COLOR: Record<
   FormAnalysisResult["feedback"]["overallScore"],
   string
 > = {
-  excellent: "var(--moss)",
-  good: "var(--moss)",
-  fair: "var(--amber)",
-  "needs-work": "var(--ember)",
-  unable: "var(--text-3)",
+  excellent: "var(--k-accent)",
+  good: "var(--k-accent)",
+  fair: "var(--k-warning)",
+  "needs-work": "var(--k-danger)",
+  unable: "var(--k-t3)",
 };
 
 export default function FormAnalyzerClient({
@@ -81,7 +78,7 @@ export default function FormAnalyzerClient({
           <label className="k-eyebrow mb-2 block">Atleta (opcional)</label>
           <select
             name="athleteId"
-            className="w-full rounded-md border border-[var(--line-strong)] bg-[var(--bg-soft)] px-3 py-2 text-sm"
+            className="w-full rounded-md border border-[var(--k-line-2)] bg-[var(--k-surface)] px-3 py-2 text-sm"
           >
             <option value="">— Sin atleta específico —</option>
             {athletes.map((a) => (
@@ -97,7 +94,7 @@ export default function FormAnalyzerClient({
           <select
             name="movementId"
             required
-            className="w-full rounded-md border border-[var(--line-strong)] bg-[var(--bg-soft)] px-3 py-2 text-sm"
+            className="w-full rounded-md border border-[var(--k-line-2)] bg-[var(--k-surface)] px-3 py-2 text-sm"
           >
             <option value="">— Elegí el movimiento —</option>
             {movements.map((m) => (
@@ -119,7 +116,7 @@ export default function FormAnalyzerClient({
             onChange={handleFileChange}
             className="w-full text-xs"
           />
-          <p className="mt-1.5 text-[10px]" style={{ color: "var(--text-3)" }}>
+          <p className="mt-1.5 text-[10px]" style={{ color: "var(--k-t3)" }}>
             JPG / PNG / WEBP · máximo 6MB · Vista frontal o 3/4 idealmente.
           </p>
           {previewUrl && (
@@ -128,7 +125,7 @@ export default function FormAnalyzerClient({
               <img
                 src={previewUrl}
                 alt="Vista previa"
-                className="rounded-md max-h-48 border border-[var(--line)]"
+                className="rounded-md max-h-48 border border-[var(--k-line)]"
               />
             </div>
           )}
@@ -137,7 +134,7 @@ export default function FormAnalyzerClient({
         <button
           type="submit"
           disabled={loading}
-          className="w-full k-btn-brand disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full k-btn-grad disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             padding: "12px 20px",
             letterSpacing: "0.16em",
@@ -152,9 +149,9 @@ export default function FormAnalyzerClient({
           <p
             className="text-sm rounded-md p-3"
             style={{
-              background: "var(--ember-soft)",
-              color: "var(--ember)",
-              border: "1px solid var(--ember-line)",
+              background: "rgba(255, 90, 90, 0.1)",
+              color: "var(--k-danger)",
+              border: "1px solid rgba(255, 90, 90, 0.3)",
             }}
           >
             {error}
@@ -163,7 +160,7 @@ export default function FormAnalyzerClient({
 
         <p
           className="text-[10px] leading-[1.5]"
-          style={{ color: "var(--text-3)" }}
+          style={{ color: "var(--k-t3)" }}
         >
           {FORM_ANALYSIS_DISCLAIMER}
         </p>
@@ -175,8 +172,8 @@ export default function FormAnalyzerClient({
             <div
               className="mx-auto mb-3 h-12 w-12 rounded-full flex items-center justify-center"
               style={{
-                background: `linear-gradient(135deg, ${AI_PRIMARY}33, ${AI_SECONDARY}33)`,
-                border: "1px solid var(--line-strong)",
+                background: "var(--k-accent-soft)",
+                border: "1px solid var(--k-accent-line)",
               }}
             >
               <svg
@@ -184,7 +181,7 @@ export default function FormAnalyzerClient({
                 height="20"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke={AI_PRIMARY}
+                stroke="var(--k-accent)"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -194,7 +191,7 @@ export default function FormAnalyzerClient({
                 <circle cx="12" cy="13" r="4" />
               </svg>
             </div>
-            <p className="text-sm" style={{ color: "var(--text-2)" }}>
+            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
               Subí una foto y el modelo te da feedback técnico de la ejecución.
             </p>
           </div>
@@ -206,15 +203,15 @@ export default function FormAnalyzerClient({
             style={{
               boxShadow:
                 result.feedback.source === "ai"
-                  ? `0 0 0 1px ${AI_PRIMARY}33, 0 6px 22px ${AI_PRIMARY}1f`
-                  : "var(--card-glow)",
+                  ? "var(--k-accent-glow)"
+                  : "none",
             }}
           >
             <div className="flex items-baseline justify-between mb-3">
               <div>
                 <p
                   className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase mb-0.5"
-                  style={{ color: "var(--text-3)" }}
+                  style={{ color: "var(--k-t3)" }}
                 >
                   {result.athleteName ?? "Análisis de forma"}
                 </p>
@@ -226,7 +223,7 @@ export default function FormAnalyzerClient({
                 className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase px-2.5 py-1 rounded-md"
                 style={{
                   color: SCORE_COLOR[result.feedback.overallScore],
-                  background: "var(--bg-soft)",
+                  background: "var(--k-elevated)",
                   border: `1px solid ${SCORE_COLOR[result.feedback.overallScore]}55`,
                 }}
               >
@@ -234,7 +231,7 @@ export default function FormAnalyzerClient({
               </span>
             </div>
 
-            <p className="text-sm mb-4" style={{ color: "var(--text-2)" }}>
+            <p className="text-sm mb-4" style={{ color: "var(--k-t2)" }}>
               {result.feedback.summary}
             </p>
 
@@ -242,19 +239,19 @@ export default function FormAnalyzerClient({
               <div
                 className="mb-4 rounded-md p-3"
                 style={{
-                  background: "var(--ember-soft)",
-                  border: "1px solid var(--ember-line)",
+                  background: "rgba(255, 90, 90, 0.08)",
+                  border: "1px solid rgba(255, 90, 90, 0.3)",
                 }}
               >
                 <p
                   className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase mb-1.5"
-                  style={{ color: "var(--ember)" }}
+                  style={{ color: "var(--k-danger)" }}
                 >
                   ⚠ Atención
                 </p>
                 <ul className="space-y-1 text-sm">
                   {result.feedback.safetyFlags.map((s, i) => (
-                    <li key={i} style={{ color: "var(--ember)" }}>
+                    <li key={i} style={{ color: "var(--k-danger)" }}>
                       {s}
                     </li>
                   ))}
@@ -266,7 +263,7 @@ export default function FormAnalyzerClient({
               <div className="mb-3">
                 <p
                   className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase mb-1.5"
-                  style={{ color: "var(--moss)" }}
+                  style={{ color: "var(--k-accent)" }}
                 >
                   ✓ Puntos fuertes
                 </p>
@@ -276,7 +273,7 @@ export default function FormAnalyzerClient({
                       <span
                         aria-hidden
                         className="mt-1.5 h-1 w-1 rounded-full flex-shrink-0"
-                        style={{ background: "var(--moss)" }}
+                        style={{ background: "var(--k-accent)" }}
                       />
                       <span>{s}</span>
                     </li>
@@ -289,7 +286,7 @@ export default function FormAnalyzerClient({
               <div>
                 <p
                   className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase mb-1.5"
-                  style={{ color: "var(--amber)" }}
+                  style={{ color: "var(--k-warning)" }}
                 >
                   ↗ A mejorar
                 </p>
@@ -299,7 +296,7 @@ export default function FormAnalyzerClient({
                       <span
                         aria-hidden
                         className="mt-1.5 h-1 w-1 rounded-full flex-shrink-0"
-                        style={{ background: "var(--amber)" }}
+                        style={{ background: "var(--k-warning)" }}
                       />
                       <span>{s}</span>
                     </li>
@@ -311,8 +308,8 @@ export default function FormAnalyzerClient({
             <p
               className="mt-4 pt-3 text-[10px] leading-[1.5]"
               style={{
-                color: "var(--text-3)",
-                borderTop: "1px solid var(--line)",
+                color: "var(--k-t3)",
+                borderTop: "1px solid var(--k-line)",
               }}
             >
               Análisis:{" "}

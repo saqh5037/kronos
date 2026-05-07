@@ -24,21 +24,21 @@ export default async function FormaPage() {
         <span className="k-eyebrow-bar">Kronos AI · Vision</span>
         <div className="mt-3 flex items-baseline gap-3 flex-wrap">
           <span
-            className="font-script text-[34px] leading-none"
-            style={{ color: "var(--brand-red)" }}
+            className="font-display text-[34px] leading-none"
+            style={{ color: "var(--k-accent)" }}
           >
             Análisis de
           </span>
           <h1
             className="k-h-italic font-display font-extrabold text-[44px] leading-[1.05] tracking-[-0.02em]"
-            style={{ color: "var(--text)" }}
+            style={{ color: "var(--k-t1)" }}
           >
             <em>forma</em>
           </h1>
         </div>
         <p
           className="mt-3 text-[14px] leading-[1.6] max-w-[560px]"
-          style={{ color: "var(--text-2)" }}
+          style={{ color: "var(--k-t2)" }}
         >
           Subí una foto de un atleta ejecutando un movimiento. Gemini Vision te
           devuelve fortalezas, áreas de mejora y banderas de seguridad — todo
@@ -48,7 +48,7 @@ export default async function FormaPage() {
 
       {movements.length === 0 ? (
         <div className="k-card p-6 text-center">
-          <p className="text-sm" style={{ color: "var(--text-2)" }}>
+          <p className="text-sm" style={{ color: "var(--k-t2)" }}>
             No tenés permisos o no hay movimientos cargados. Verificá que seas
             COACH/OWNER.
           </p>

@@ -67,9 +67,9 @@ export function InviteForm() {
           rows={10}
           placeholder={PLACEHOLDER}
           spellCheck={false}
-          className="w-full font-mono text-sm rounded-lg p-3 bg-[var(--bg-soft)] text-[var(--text)] border border-[var(--border)] focus:outline-none focus:border-[var(--strain)]"
+          className="w-full font-mono text-sm rounded-lg p-3 bg-[var(--k-surface)] text-[var(--k-t1)] border border-[var(--k-line-2)] focus:outline-none focus:border-[var(--k-accent-line)]"
         />
-        <p className="mt-2 text-xs text-[var(--text-3)]">
+        <p className="mt-2 text-xs text-[var(--k-t3)]">
           Formato: <code>email,nombre apellido,teléfono</code> · una por línea ·
           coma, tab o punto y coma como separadores · líneas con <code>#</code>{" "}
           se ignoran.
@@ -78,7 +78,7 @@ export function InviteForm() {
 
       {/* Preview */}
       {text.trim().length > 0 && (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-soft)] p-3 space-y-2">
+        <div className="rounded-lg border border-[var(--k-line-2)] bg-[var(--k-elevated)] p-3 space-y-2">
           <div className="flex items-center gap-3 text-sm flex-wrap">
             <span className="k-chip k-chip-recovery">
               {validCount} válido{validCount === 1 ? "" : "s"}
@@ -98,7 +98,7 @@ export function InviteForm() {
           {validCount > 0 && (
             <div className="overflow-hidden rounded">
               <table className="w-full text-xs">
-                <thead className="text-[var(--text-3)]">
+                <thead className="text-[var(--k-t3)]">
                   <tr>
                     <th className="text-left p-2">Email</th>
                     <th className="text-left p-2">Nombre</th>
@@ -109,7 +109,7 @@ export function InviteForm() {
                   {preview.valid.slice(0, 10).map((row) => (
                     <tr
                       key={row.email}
-                      className="border-t border-[var(--border)]/40"
+                      className="border-t border-[var(--k-line)]/40"
                     >
                       <td className="p-2 font-mono">{row.email}</td>
                       <td className="p-2">
@@ -123,7 +123,7 @@ export function InviteForm() {
                 </tbody>
               </table>
               {validCount > 10 && (
-                <p className="text-[10px] text-[var(--text-3)] mt-1 px-2 pb-2">
+                <p className="text-[10px] text-[var(--k-t3)] mt-1 px-2 pb-2">
                   …y {validCount - 10} más
                 </p>
               )}
@@ -131,7 +131,7 @@ export function InviteForm() {
           )}
 
           {errorCount > 0 && (
-            <ul className="text-xs text-[var(--pr)] space-y-1">
+            <ul className="text-xs text-[var(--k-danger)] space-y-1">
               {preview.errors.slice(0, 5).map((e) => (
                 <li key={e.line}>
                   Línea {e.line}: <code className="font-mono">{e.input}</code>{" "}
@@ -145,7 +145,7 @@ export function InviteForm() {
 
       {/* Result */}
       {state.kind === "ok" && (
-        <div className="rounded-lg border border-[var(--moss)]/40 bg-[var(--moss)]/10 p-3 text-sm">
+        <div className="rounded-lg border border-[var(--k-accent-line)] bg-[var(--k-accent-soft)] p-3 text-sm">
           ✓ {state.created} invitacion{state.created === 1 ? "" : "es"} enviada
           {state.created === 1 ? "" : "s"}.
           {state.skipped > 0 &&
@@ -153,7 +153,7 @@ export function InviteForm() {
         </div>
       )}
       {state.kind === "error" && (
-        <div className="rounded-lg border border-[var(--pr)]/50 bg-[var(--pr)]/10 p-3 text-sm text-[var(--pr)]">
+        <div className="rounded-lg border border-[var(--k-danger)]/50 bg-[var(--k-danger)]/10 p-3 text-sm text-[var(--k-danger)]">
           {state.message}
         </div>
       )}

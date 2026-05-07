@@ -18,25 +18,25 @@ export default async function InvitarAtletasPage() {
       <div className="mb-6">
         <Link
           href="/admin/atletas"
-          className="k-eyebrow text-[var(--text-3)] hover:text-[var(--text-2)]"
+          className="k-eyebrow text-[var(--k-t3)] hover:text-[var(--k-t2)]"
         >
           ← Atletas
         </Link>
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
           <span
-            className="font-script text-[26px] leading-none"
-            style={{ color: "var(--red)" }}
+            className="font-display text-[26px] leading-none"
+            style={{ color: "var(--k-accent)" }}
           >
             Invitar
           </span>
           <h1
             className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
-            style={{ color: "var(--text)" }}
+            style={{ color: "var(--k-t1)" }}
           >
             <em>atletas</em>
           </h1>
         </div>
-        <p className="mt-2 text-sm text-[var(--text-2)]">
+        <p className="mt-2 text-sm text-[var(--k-t2)]">
           Pegá emails (uno por línea) para enviar invitaciones por correo. Cada
           atleta recibirá un link para confirmar nombre y empezar a usar la app.
         </p>

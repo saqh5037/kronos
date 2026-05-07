@@ -45,7 +45,7 @@ export function PendingInvitationsList({
     return (
       <div className="k-card p-5">
         <p className="k-eyebrow mb-3">Pendientes</p>
-        <p className="text-sm text-[var(--text-3)]">
+        <p className="text-sm text-[var(--k-t3)]">
           No hay invitaciones pendientes. Las que envíes aparecerán acá.
         </p>
       </div>
@@ -62,20 +62,20 @@ export function PendingInvitationsList({
           return (
             <li
               key={row.id}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-soft)] p-3"
+              className="rounded-lg border border-[var(--k-line-2)] bg-[var(--k-elevated)] p-3"
             >
               <div className="flex items-start justify-between gap-2 flex-wrap">
                 <div className="min-w-0 flex-1">
                   <p className="font-mono text-sm truncate">{row.email}</p>
                   {(row.firstName || row.lastName) && (
-                    <p className="text-xs text-[var(--text-2)] mt-0.5">
+                    <p className="text-xs text-[var(--k-t2)] mt-0.5">
                       {[row.firstName, row.lastName].filter(Boolean).join(" ")}
                     </p>
                   )}
-                  <p className="text-[11px] text-[var(--text-3)] mt-1">
+                  <p className="text-[11px] text-[var(--k-t3)] mt-1">
                     Enviada {fmtDate(row.createdAt)} ·{" "}
                     {isExpired ? (
-                      <span className="text-[var(--pr)]">Expirada</span>
+                      <span className="text-[var(--k-danger)]">Expirada</span>
                     ) : (
                       <span>
                         Expira en {days} día{days === 1 ? "" : "s"}
@@ -98,7 +98,7 @@ export function PendingInvitationsList({
                     onClick={() => onRevoke(row.id)}
                     disabled={pending}
                     className="k-btn-ghost text-xs disabled:opacity-50"
-                    style={{ color: "var(--pr)" }}
+                    style={{ color: "var(--k-danger)" }}
                     title="Revocar invitación"
                   >
                     Revocar

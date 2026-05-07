@@ -40,22 +40,34 @@ export default function AthleteForm() {
         name="firstName"
         placeholder="Nombre"
         required
-        className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-        style={{ borderColor: "var(--line)" }}
+        className="px-3 py-2 rounded-lg text-sm border focus:outline-none"
+        style={{
+          background: "var(--k-surface)",
+          borderColor: "var(--k-line-2)",
+          color: "var(--k-t1)",
+        }}
       />
       <input
         name="lastName"
         placeholder="Apellido"
         required
-        className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-        style={{ borderColor: "var(--line)" }}
+        className="px-3 py-2 rounded-lg text-sm border focus:outline-none"
+        style={{
+          background: "var(--k-surface)",
+          borderColor: "var(--k-line-2)",
+          color: "var(--k-t1)",
+        }}
       />
       <input
         name="phone"
         placeholder="Teléfono"
         type="tel"
-        className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-        style={{ borderColor: "var(--line)" }}
+        className="px-3 py-2 rounded-lg text-sm border focus:outline-none"
+        style={{
+          background: "var(--k-surface)",
+          borderColor: "var(--k-line-2)",
+          color: "var(--k-t1)",
+        }}
       />
       <div className="flex gap-2">
         <button

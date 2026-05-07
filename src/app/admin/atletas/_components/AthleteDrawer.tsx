@@ -75,9 +75,9 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
         type="button"
         aria-label="Cerrar"
         onClick={onClose}
-        className="absolute inset-0 bg-[var(--overlay)]"
+        className="absolute inset-0 bg-black/60"
       />
-      <div className="relative h-full w-full max-w-xl overflow-y-auto bg-[var(--card)] p-6 shadow-2xl">
+      <div className="relative h-full w-full max-w-xl overflow-y-auto bg-[var(--k-surface)] p-6 shadow-2xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="k-eyebrow mb-1">Atleta</p>
@@ -85,7 +85,7 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
               {data ? `${data.firstName} ${data.lastName}` : "Cargando…"}
             </h2>
             {data ? (
-              <p className="mt-1 text-xs text-[var(--text-2)]">
+              <p className="mt-1 text-xs text-[var(--k-t2)]">
                 {data.email ?? "Sin email"} · {data.phone ?? "Sin teléfono"} ·
                 Alta {fmtDate(data.createdAt)}
               </p>
@@ -101,11 +101,11 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
         </div>
 
         {loading ? (
-          <p className="text-sm text-[var(--text-2)]">Cargando detalle…</p>
+          <p className="text-sm text-[var(--k-t2)]">Cargando detalle…</p>
         ) : error ? (
-          <p className="text-sm text-[var(--pr)]">{error}</p>
+          <p className="text-sm text-[var(--k-danger)]">{error}</p>
         ) : !data ? (
-          <p className="text-sm text-[var(--text-2)]">Atleta no encontrado.</p>
+          <p className="text-sm text-[var(--k-t2)]">Atleta no encontrado.</p>
         ) : (
           <div className="space-y-5">
             {/* Membership */}
@@ -117,11 +117,11 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                     <p className="font-semibold">
                       {data.activeMembership.planName}
                     </p>
-                    <span className="font-mono text-[10px] text-[var(--text-3)]">
+                    <span className="font-mono text-[10px] text-[var(--k-t3)]">
                       {data.activeMembership.planType}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-[var(--text-2)]">
+                  <p className="mt-1 text-xs text-[var(--k-t2)]">
                     {fmtDate(data.activeMembership.startDate)} →{" "}
                     {fmtDate(data.activeMembership.endDate)}
                   </p>
@@ -129,13 +129,11 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                     <span className="font-mono">
                       {data.activeMembership.classesUsed}
                     </span>{" "}
-                    <span className="text-[var(--text-3)]">
-                      clases asistidas
-                    </span>
+                    <span className="text-[var(--k-t3)]">clases asistidas</span>
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-[var(--text-3)]">
+                <p className="text-sm text-[var(--k-t3)]">
                   Sin membership activa.
                 </p>
               )}
@@ -149,7 +147,7 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                   <p className="font-semibold">
                     {data.nextClass.wodName ?? "Open gym"}
                   </p>
-                  <p className="text-xs text-[var(--text-2)]">
+                  <p className="text-xs text-[var(--k-t2)]">
                     {fmtDate(data.nextClass.startsAt)} ·{" "}
                     {new Date(data.nextClass.startsAt).toLocaleTimeString(
                       "es-MX",
@@ -166,12 +164,12 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
               {data.attendanceLast90d.length > 0 ? (
                 <div className="k-card-flat p-3">
                   <Heatmap data={heatData} from={heatmapFrom} to={heatmapTo} />
-                  <p className="mt-2 text-[10px] text-[var(--text-3)]">
+                  <p className="mt-2 text-[10px] text-[var(--k-t3)]">
                     {data.attendanceLast90d.length} clases en el rango
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-[var(--text-3)]">
+                <p className="text-sm text-[var(--k-t3)]">
                   Sin asistencias en los últimos 90 días.
                 </p>
               )}
@@ -185,7 +183,7 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                   {data.prsTop.map((p) => (
                     <li
                       key={p.id}
-                      className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-[var(--hover-subtle)]"
+                      className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-[var(--k-elevated)]"
                     >
                       <span className="text-sm">{p.movementName}</span>
                       <span className="font-mono text-sm">
@@ -195,7 +193,7 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-[var(--text-3)]">Sin PRs.</p>
+                <p className="text-sm text-[var(--k-t3)]">Sin PRs.</p>
               )}
             </section>
 
@@ -207,9 +205,9 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                   {data.paymentsRecent.map((p) => (
                     <li
                       key={p.id}
-                      className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-[var(--hover-subtle)]"
+                      className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-[var(--k-elevated)]"
                     >
-                      <span className="text-xs text-[var(--text-2)]">
+                      <span className="text-xs text-[var(--k-t2)]">
                         {fmtDate(p.paidAt ?? p.createdAt)} · {p.gateway}
                       </span>
                       <span
@@ -217,10 +215,10 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                         style={{
                           color:
                             p.status === "PAID"
-                              ? "var(--recovery)"
+                              ? "var(--k-accent)"
                               : p.status === "PENDING"
-                                ? "var(--strain)"
-                                : "var(--text-3)",
+                                ? "var(--k-warning)"
+                                : "var(--k-t3)",
                         }}
                       >
                         {fmtMoney(p.amount)}
@@ -229,7 +227,7 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-[var(--text-3)]">Sin pagos.</p>
+                <p className="text-sm text-[var(--k-t3)]">Sin pagos.</p>
               )}
             </section>
           </div>

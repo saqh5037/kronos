@@ -143,19 +143,19 @@ export default async function AtletasPage({
           <span className="k-eyebrow-bar">CRM · Atletas</span>
           <div className="mt-2 flex items-baseline gap-2 flex-wrap">
             <span
-              className="font-script text-[26px] leading-none"
-              style={{ color: "var(--red)" }}
+              className="font-display text-[26px] leading-none"
+              style={{ color: "var(--k-accent)" }}
             >
               Tus
             </span>
             <h1
               className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
-              style={{ color: "var(--text)" }}
+              style={{ color: "var(--k-t1)" }}
             >
               <em>atletas</em>
             </h1>
           </div>
-          <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
+          <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
             {formatRange(range)} · {rows.total} en filtro · {activeNow} activos
             totales
           </p>
@@ -167,7 +167,7 @@ export default async function AtletasPage({
           >
             Invitar atletas
             {pendingInvitationsCount > 0 && (
-              <span className="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-[var(--strain)] text-[var(--bg)]">
+              <span className="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-[var(--k-accent)] text-[var(--k-accent-on)]">
                 {pendingInvitationsCount}
               </span>
             )}
@@ -221,7 +221,7 @@ export default async function AtletasPage({
         {growth.length > 0 ? (
           <GrowthChart data={growth} />
         ) : (
-          <p className="py-10 text-center text-sm text-[var(--text-3)]">
+          <p className="py-10 text-center text-sm text-[var(--k-t3)]">
             Sin datos en el rango
           </p>
         )}
@@ -230,7 +230,7 @@ export default async function AtletasPage({
       {/* En riesgo */}
       {atRisk.length > 0 && (
         <section className="mb-6">
-          <p className="k-eyebrow mb-3" style={{ color: "var(--ember)" }}>
+          <p className="k-eyebrow mb-3" style={{ color: "var(--k-warning)" }}>
             🔥 Atletas en riesgo ({atRisk.length})
           </p>
           <div className="k-card overflow-hidden">
@@ -256,9 +256,9 @@ export default async function AtletasPage({
                     </td>
                     <td className="text-xs">
                       {a.hasOverdueMembership ? (
-                        <span className="text-[var(--pr)]">Vencida</span>
+                        <span className="text-[var(--k-danger)]">Vencida</span>
                       ) : (
-                        <span className="text-[var(--text-3)]">Vigente</span>
+                        <span className="text-[var(--k-t3)]">Vigente</span>
                       )}
                     </td>
                   </tr>
@@ -303,16 +303,14 @@ function KpiCard({
 }) {
   const color =
     tone === "moss"
-      ? "var(--moss)"
-      : tone === "steel"
-        ? "var(--steel)"
-        : tone === "ember"
-          ? "var(--ember)"
-          : "var(--text)";
+      ? "var(--k-accent)"
+      : tone === "ember"
+        ? "var(--k-warning)"
+        : "var(--k-t1)";
   return (
     <div className="k-card p-3">
       <div className="flex items-start justify-between gap-2">
-        <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+        <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
           {label}
         </p>
         {delta}
@@ -321,7 +319,7 @@ function KpiCard({
         {value}
       </p>
       {subtitle ? (
-        <p className="mt-1 text-xs text-[var(--text-3)]">{subtitle}</p>
+        <p className="mt-1 text-xs text-[var(--k-t3)]">{subtitle}</p>
       ) : null}
     </div>
   );

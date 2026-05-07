@@ -97,7 +97,7 @@ export function AtletasTable({
               {row.original.firstName} {row.original.lastName}
             </span>
             {row.original.email ? (
-              <span className="text-[10px] text-[var(--text-3)]">
+              <span className="text-[10px] text-[var(--k-t3)]">
                 {row.original.email}
               </span>
             ) : null}
@@ -108,7 +108,7 @@ export function AtletasTable({
         accessorKey: "phone",
         header: "Teléfono",
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-[var(--text-2)]">
+          <span className="font-mono text-xs text-[var(--k-t2)]">
             {row.original.phone ?? "—"}
           </span>
         ),
@@ -122,7 +122,7 @@ export function AtletasTable({
         accessorKey: "activePlanName",
         header: "Plan",
         cell: ({ row }) => (
-          <span className="text-xs text-[var(--text-2)]">
+          <span className="text-xs text-[var(--k-t2)]">
             {row.original.activePlanName ?? "—"}
           </span>
         ),
@@ -131,7 +131,7 @@ export function AtletasTable({
         accessorKey: "lastAttendanceAt",
         header: "Última clase",
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-[var(--text-3)]">
+          <span className="font-mono text-xs text-[var(--k-t3)]">
             {fmtDate(row.original.lastAttendanceAt)}
           </span>
         ),
@@ -147,7 +147,7 @@ export function AtletasTable({
         accessorKey: "createdAt",
         header: "Alta",
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-[var(--text-3)]">
+          <span className="font-mono text-xs text-[var(--k-t3)]">
             {fmtDate(row.original.createdAt)}
           </span>
         ),
@@ -182,7 +182,7 @@ export function AtletasTable({
   return (
     <>
       <div className="k-card">
-        <div className="flex items-center justify-between gap-3 border-b border-[var(--line)] px-4 py-3">
+        <div className="flex items-center justify-between gap-3 border-b border-[var(--k-line)] px-4 py-3">
           <p className="k-eyebrow">
             {total} atleta{total === 1 ? "" : "s"}
           </p>
@@ -211,7 +211,7 @@ export function AtletasTable({
               onSelectionChange={setSelection}
               onRowClick={(r) => setDrawerId(r.id)}
             />
-            <div className="border-t border-[var(--line)] px-4 py-2">
+            <div className="border-t border-[var(--k-line)] px-4 py-2">
               <Pagination
                 page={page}
                 pageSize={pageSize}
@@ -231,7 +231,7 @@ export function AtletasTable({
           type="button"
           disabled={bulkBusy}
           onClick={() => bulkSetStatus("ACTIVE")}
-          className="rounded-lg border border-[var(--moss-line)] bg-[var(--moss-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--moss)] disabled:opacity-50"
+          className="rounded-lg border border-[var(--k-accent-line)] bg-[var(--k-accent-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--k-accent)] disabled:opacity-50"
         >
           Activar
         </button>
@@ -239,7 +239,7 @@ export function AtletasTable({
           type="button"
           disabled={bulkBusy}
           onClick={() => bulkSetStatus("PAUSED")}
-          className="rounded-lg border border-[var(--steel-line)] bg-[var(--steel-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--steel)] disabled:opacity-50"
+          className="rounded-lg border border-[var(--k-line-2)] bg-[var(--k-elevated)] px-3 py-1.5 text-xs font-semibold text-[var(--k-t2)] disabled:opacity-50"
         >
           Pausar
         </button>
@@ -247,7 +247,7 @@ export function AtletasTable({
           type="button"
           disabled={bulkBusy}
           onClick={() => bulkSetStatus("CANCELLED")}
-          className="rounded-lg border border-[var(--ember-line)] bg-[var(--ember-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--ember)] disabled:opacity-50"
+          className="rounded-lg border border-[var(--k-warning)]/30 bg-[var(--k-warning)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--k-warning)] disabled:opacity-50"
         >
           Cancelar
         </button>
