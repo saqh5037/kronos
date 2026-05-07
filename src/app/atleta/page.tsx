@@ -535,39 +535,31 @@ export default async function AtletaHomePage() {
         </RevealOnScroll>
       )}
 
-      {/* QUICK LINKS */}
+      {/* QUICK LINKS — solo los que NO están en TabBar (Movimientos / Ranking / Historial) */}
       <RevealOnScroll variant="fade-up" className="mt-6 px-4">
+        <div
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.18em",
+            color: "var(--k-t3)",
+            marginBottom: 12,
+          }}
+        >
+          EXPLORAR
+        </div>
         <div className="grid grid-cols-3 gap-2">
-          <QuickLink href="/atleta/wod" label="WOD" tone="steel" icon="wod" />
-          <QuickLink
-            href="/atleta/reservar"
-            label="Reservar"
-            tone="moss"
-            icon="calendar"
-          />
           <QuickLink
             href="/atleta/movimientos"
             label="Movimientos"
-            tone="fire"
             icon="dumbbell"
           />
-          <QuickLink
-            href="/atleta/leaderboard"
-            label="Ranking"
-            tone="ember"
-            icon="trophy"
-          />
+          <QuickLink href="/atleta/leaderboard" label="Ranking" icon="trophy" />
           <QuickLink
             href="/atleta/historial"
             label="Historial"
-            tone="ghost"
             icon="history"
-          />
-          <QuickLink
-            href="/atleta/perfil"
-            label="Perfil"
-            tone="ghost"
-            icon="user"
           />
         </div>
       </RevealOnScroll>
@@ -578,146 +570,89 @@ export default async function AtletaHomePage() {
 function QuickLink({
   href,
   label,
-  tone,
   icon,
 }: {
   href: string;
   label: string;
-  tone: "moss" | "steel" | "ghost" | "fire" | "ember";
-  icon: string;
+  icon: "dumbbell" | "trophy" | "history";
 }) {
-  const color =
-    tone === "moss"
-      ? "var(--moss)"
-      : tone === "steel"
-        ? "var(--steel)"
-        : tone === "fire"
-          ? "var(--fire)"
-          : tone === "ember"
-            ? "var(--ember)"
-            : "var(--text-2)";
-
-  const iconSvgs: Record<string, React.ReactNode> = {
-    wod: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12" />
+  const iconNode = (() => {
+    const common = {
+      width: 22,
+      height: 22,
+      viewBox: "0 0 24 24",
+      fill: "none" as const,
+      stroke: "currentColor",
+      strokeWidth: 1.5,
+      strokeLinecap: "square" as const,
+      strokeLinejoin: "miter" as const,
+    };
+    if (icon === "dumbbell")
+      return (
+        <svg {...common}>
+          <path d="M2 12h2M20 12h2M5 8h3v8H5zM16 8h3v8h-3zM8 12h8" />
+        </svg>
+      );
+    if (icon === "trophy")
+      return (
+        <svg {...common}>
+          <path d="M7 4h10v6a5 5 0 0 1-10 0V4z" />
+          <path d="M3 6h4M17 6h4M9 20h6M12 15v5" />
+        </svg>
+      );
+    return (
+      <svg {...common}>
+        <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+        <path d="M3 3v5h5M12 7v5l3 2" />
       </svg>
-    ),
-    calendar: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="3" y="5" width="18" height="16" rx="2" />
-        <path d="M3 10h18M8 3v4M16 3v4" />
-      </svg>
-    ),
-    card: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="1" y="4" width="22" height="16" rx="2" />
-        <path d="M1 10h22" />
-      </svg>
-    ),
-    user: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21c1-4.5 4.5-7 8-7s7 2.5 8 7" />
-      </svg>
-    ),
-    dumbbell: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M6.5 6.5l11 11M21 21l-1-1M3 3l1 1M18 22l4-4M2 6l4-4" />
-        <path d="M6.5 17.5L2 22M22 2l-4.5 4.5M10 5l4 4M5 10l4 4" />
-      </svg>
-    ),
-    trophy: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-        <path d="M4 22h16" />
-        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-        <path d="M18 2H6v7a6 6 0 0 0 12 0V2z" />
-      </svg>
-    ),
-    history: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 3v5h5" />
-        <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
-        <path d="M12 7v5l4 2" />
-      </svg>
-    ),
-  };
+    );
+  })();
 
   return (
-    <Link href={href as Route}>
-      <KCard
-        variant="ghost"
-        className="p-4 flex items-center justify-center gap-2 text-center text-sm font-display font-semibold"
+    <Link
+      href={href as Route}
+      className="k-tap"
+      style={{
+        background: "var(--k-surface)",
+        border: "1px solid var(--k-line)",
+        borderRadius: 14,
+        padding: "16px 12px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 10,
+        textDecoration: "none",
+        color: "var(--k-t1)",
+      }}
+    >
+      <div
+        style={{
+          width: 38,
+          height: 38,
+          borderRadius: 10,
+          background: "var(--k-elevated)",
+          border: "1px solid var(--k-line)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "var(--k-accent)",
+        }}
       >
-        <span style={{ color }}>{iconSvgs[icon]}</span>
-        <span style={{ color }}>{label}</span>
-      </KCard>
+        {iconNode}
+      </div>
+      <span
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 10,
+          fontWeight: 600,
+          letterSpacing: "0.16em",
+          color: "var(--k-t2)",
+          textTransform: "uppercase",
+          textAlign: "center",
+        }}
+      >
+        {label}
+      </span>
     </Link>
   );
 }
