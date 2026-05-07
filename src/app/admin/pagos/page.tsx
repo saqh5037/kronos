@@ -161,12 +161,12 @@ export default async function PagosPage({
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
           <h1
             className="k-h-italic font-display font-extrabold text-[42px] leading-[1] tracking-[-0.02em]"
-            style={{ color: "var(--text)" }}
+            style={{ color: "var(--k-t1)" }}
           >
             Pa<em>gos</em>
           </h1>
         </div>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
+        <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
           {formatRange(range)} · revenue, memberships, morosos y cobros
         </p>
       </div>
@@ -228,7 +228,7 @@ export default async function PagosPage({
           {revenue.length > 0 && rangeRevenue > 0 ? (
             <RevenueChart data={revenue} />
           ) : (
-            <p className="py-10 text-center text-sm text-[var(--text-3)]">
+            <p className="py-10 text-center text-sm text-[var(--k-t3)]">
               Sin pagos en el rango
             </p>
           )}
@@ -238,7 +238,7 @@ export default async function PagosPage({
           {planDist.length > 0 ? (
             <PlanDonut data={planDist} />
           ) : (
-            <p className="py-10 text-center text-sm text-[var(--text-3)]">
+            <p className="py-10 text-center text-sm text-[var(--k-t3)]">
               Sin memberships activas
             </p>
           )}
@@ -249,7 +249,7 @@ export default async function PagosPage({
       {overdue.length > 0 && (
         <section className="mb-6">
           <div className="mb-3 flex items-center justify-between">
-            <p className="k-eyebrow" style={{ color: "var(--ember)" }}>
+            <p className="k-eyebrow" style={{ color: "var(--k-warning)" }}>
               🚨 Morosos ({overdue.length})
             </p>
           </div>
@@ -268,8 +268,8 @@ export default async function PagosPage({
                 {overdue.map((m) => (
                   <tr key={m.membershipId}>
                     <td className="font-medium">{m.athleteName}</td>
-                    <td className="text-[var(--text-2)]">{m.planName}</td>
-                    <td className="font-mono text-xs text-[var(--text-3)]">
+                    <td className="text-[var(--k-t2)]">{m.planName}</td>
+                    <td className="font-mono text-xs text-[var(--k-t3)]">
                       {m.endDate.toLocaleDateString("es-MX", {
                         day: "2-digit",
                         month: "short",
@@ -282,7 +282,7 @@ export default async function PagosPage({
                     </td>
                     <td
                       className="text-right font-mono font-bold"
-                      style={{ color: "var(--ember)" }}
+                      style={{ color: "var(--k-warning)" }}
                     >
                       {fmtMoney(m.pendingAmount)}
                     </td>
@@ -357,7 +357,7 @@ export default async function PagosPage({
         </div>
         {activePlans.length === 0 ? (
           <div className="k-card p-6 text-center">
-            <p className="text-sm" style={{ color: "var(--text-2)" }}>
+            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
               No hay planes activos. Crea el primero para empezar a asignar
               memberships.
             </p>
@@ -389,16 +389,16 @@ function KpiCard({
 }) {
   const color =
     tone === "moss"
-      ? "var(--moss)"
+      ? "var(--k-accent)"
       : tone === "steel"
-        ? "var(--steel)"
+        ? "var(--k-t2)"
         : tone === "ember"
-          ? "var(--ember)"
-          : "var(--text)";
+          ? "var(--k-warning)"
+          : "var(--k-t1)";
   return (
     <div className="k-card p-3">
       <div className="flex items-start justify-between gap-2">
-        <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+        <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
           {label}
         </p>
         {delta}
@@ -407,7 +407,7 @@ function KpiCard({
         {value}
       </p>
       {subtitle ? (
-        <p className="mt-1 text-xs text-[var(--text-3)]">{subtitle}</p>
+        <p className="mt-1 text-xs text-[var(--k-t3)]">{subtitle}</p>
       ) : null}
     </div>
   );
@@ -423,7 +423,7 @@ function PlanCard({ p }: { p: PlanRow }) {
       <p
         className="font-display mt-3 text-3xl font-bold"
         style={{
-          background: "var(--grad)",
+          background: "var(--k-accent)",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
         }}
@@ -431,21 +431,21 @@ function PlanCard({ p }: { p: PlanRow }) {
         ${p.price.toLocaleString("es-MX")}
         <span
           className="ml-1 font-mono text-xs font-normal"
-          style={{ color: "var(--text-3)" }}
+          style={{ color: "var(--k-t3)" }}
         >
           {p.currency}
         </span>
       </p>
       <div
         className="mt-2 flex items-center gap-3 text-xs"
-        style={{ color: "var(--text-3)" }}
+        style={{ color: "var(--k-t3)" }}
       >
         {p.classesPerMonth && <span>{p.classesPerMonth} clases/mes</span>}
         {p.durationDays && <span>{p.durationDays} días</span>}
       </div>
       <div
         className="mt-3 flex items-center justify-between border-t pt-3 text-xs"
-        style={{ borderColor: "var(--line)", color: "var(--text-2)" }}
+        style={{ borderColor: "var(--k-line)", color: "var(--k-t2)" }}
       >
         <span>
           {p.activeMembershipCount} membership

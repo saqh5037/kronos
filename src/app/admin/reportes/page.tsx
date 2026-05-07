@@ -49,17 +49,17 @@ export default async function ReportesPage() {
           <div className="mt-2 flex items-baseline gap-2 flex-wrap">
             <h1
               className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
-              style={{ color: "var(--text)" }}
+              style={{ color: "var(--k-t1)" }}
             >
               Re<em>portes</em>
             </h1>
           </div>
-          <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
+          <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
             Sin datos disponibles. Verifica que la base esté conectada.
           </p>
         </div>
         <div className="k-card p-6 text-center">
-          <p className="text-sm" style={{ color: "var(--text-2)" }}>
+          <p className="text-sm" style={{ color: "var(--k-t2)" }}>
             Sin datos disponibles. Verifica que la base esté conectada.
           </p>
         </div>
@@ -87,14 +87,14 @@ export default async function ReportesPage() {
           <div className="mt-2 flex items-baseline gap-2 flex-wrap">
             <h1
               className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
-              style={{ color: "var(--text)" }}
+              style={{ color: "var(--k-t1)" }}
             >
               Re<em>portes</em>
             </h1>
           </div>
           <p
             className="mt-1 text-sm capitalize"
-            style={{ color: "var(--text-2)" }}
+            style={{ color: "var(--k-t2)" }}
           >
             {monthLabel} · actualizado{" "}
             {r.generatedAt.toLocaleTimeString("es-MX", {
@@ -152,14 +152,14 @@ export default async function ReportesPage() {
         <div className="k-card p-4">
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <p className="k-eyebrow">Revenue · últimos 12 meses</p>
-            <span className="font-mono text-xs text-[var(--text-3)]">
+            <span className="font-mono text-xs text-[var(--k-t3)]">
               total {fmtMoney(totalRevenue12m)}
             </span>
           </div>
           {revenue12m.some((p) => p.revenue > 0) ? (
             <RevenueLineChart data={revenue12m} />
           ) : (
-            <p className="py-10 text-center text-sm text-[var(--text-3)]">
+            <p className="py-10 text-center text-sm text-[var(--k-t3)]">
               Sin pagos en los últimos 12 meses
             </p>
           )}
@@ -167,14 +167,14 @@ export default async function ReportesPage() {
         <div className="k-card p-4">
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <p className="k-eyebrow">Nuevos vs bajas · últimos 12 meses</p>
-            <span className="font-mono text-xs text-[var(--text-3)]">
+            <span className="font-mono text-xs text-[var(--k-t3)]">
               +{totalNew12m} / −{totalChurn12m}
             </span>
           </div>
           {athletes12m.some((p) => p.newAthletes + p.churnedMemberships > 0) ? (
             <NewChurnBarChart data={athletes12m} />
           ) : (
-            <p className="py-10 text-center text-sm text-[var(--text-3)]">
+            <p className="py-10 text-center text-sm text-[var(--k-t3)]">
               Sin actividad en los últimos 12 meses
             </p>
           )}
@@ -192,7 +192,7 @@ export default async function ReportesPage() {
       <div className="mb-6">
         <div className="mb-3 flex items-baseline justify-between gap-3">
           <span className="k-eyebrow-bar">En riesgo de churn</span>
-          <span className="font-mono text-xs text-[var(--text-3)]">
+          <span className="font-mono text-xs text-[var(--k-t3)]">
             {churnRisk.length} atleta{churnRisk.length === 1 ? "" : "s"}
           </span>
         </div>
@@ -255,16 +255,16 @@ function KpiCard({
 }) {
   const color =
     tone === "moss"
-      ? "var(--moss)"
+      ? "var(--k-accent)"
       : tone === "steel"
-        ? "var(--steel)"
+        ? "var(--k-t2)"
         : tone === "ember"
-          ? "var(--ember)"
-          : "var(--text)";
+          ? "var(--k-warning)"
+          : "var(--k-t1)";
   return (
     <div className="k-card p-3">
       <div className="flex items-start justify-between gap-2">
-        <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+        <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
           {label}
         </p>
         {delta}
@@ -273,7 +273,7 @@ function KpiCard({
         {value}
       </p>
       {subtitle ? (
-        <p className="mt-1 text-xs text-[var(--text-3)]">{subtitle}</p>
+        <p className="mt-1 text-xs text-[var(--k-t3)]">{subtitle}</p>
       ) : null}
     </div>
   );
@@ -290,12 +290,12 @@ function SimpleStat({
 }) {
   return (
     <div className="k-card p-3">
-      <p className="k-eyebrow" style={{ color: "var(--text-2)" }}>
+      <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
         {label}
       </p>
       <p className="font-display mt-1 text-2xl font-bold">{value}</p>
       {subtitle ? (
-        <p className="mt-1 text-xs text-[var(--text-3)]">{subtitle}</p>
+        <p className="mt-1 text-xs text-[var(--k-t3)]">{subtitle}</p>
       ) : null}
     </div>
   );
@@ -314,20 +314,17 @@ function TopTable({
     <div className="k-card overflow-hidden">
       <div
         className="border-b px-4 py-3"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       >
         <p className="font-display text-base font-bold">{title}</p>
         {subtitle && (
-          <p className="mt-0.5 text-xs" style={{ color: "var(--text-3)" }}>
+          <p className="mt-0.5 text-xs" style={{ color: "var(--k-t3)" }}>
             {subtitle}
           </p>
         )}
       </div>
       {rows.length === 0 ? (
-        <p
-          className="p-4 text-center text-xs"
-          style={{ color: "var(--text-3)" }}
-        >
+        <p className="p-4 text-center text-xs" style={{ color: "var(--k-t3)" }}>
           Sin datos este mes.
         </p>
       ) : (
@@ -336,7 +333,7 @@ function TopTable({
             <li
               key={r.rank}
               className="flex items-center justify-between border-b px-4 py-2.5 last:border-b-0"
-              style={{ borderColor: "var(--line)" }}
+              style={{ borderColor: "var(--k-line)" }}
             >
               <div className="flex min-w-0 items-center gap-3">
                 <span
@@ -344,10 +341,10 @@ function TopTable({
                   style={{
                     color:
                       r.rank === 1
-                        ? "var(--moss)"
+                        ? "var(--k-accent)"
                         : r.rank <= 3
-                          ? "var(--steel)"
-                          : "var(--text-3)",
+                          ? "var(--k-t2)"
+                          : "var(--k-t3)",
                   }}
                 >
                   {r.rank}
@@ -357,7 +354,7 @@ function TopTable({
               <span
                 className="flex-shrink-0 font-mono text-sm font-bold"
                 style={{
-                  color: r.rank === 1 ? "var(--moss)" : "var(--text)",
+                  color: r.rank === 1 ? "var(--k-accent)" : "var(--k-t1)",
                 }}
               >
                 {r.value}
@@ -380,21 +377,18 @@ function PlanDistribution({
     <div className="k-card overflow-hidden">
       <div
         className="border-b px-4 py-3"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       >
         <p className="font-display text-base font-bold">
           Distribución de planes
         </p>
-        <p className="mt-0.5 text-xs" style={{ color: "var(--text-3)" }}>
+        <p className="mt-0.5 text-xs" style={{ color: "var(--k-t3)" }}>
           {totalCount} membership{totalCount === 1 ? "" : "s"} activa
           {totalCount === 1 ? "" : "s"}
         </p>
       </div>
       {distribution.length === 0 ? (
-        <p
-          className="p-4 text-center text-xs"
-          style={{ color: "var(--text-3)" }}
-        >
+        <p className="p-4 text-center text-xs" style={{ color: "var(--k-t3)" }}>
           Sin memberships activas.
         </p>
       ) : (
@@ -405,7 +399,7 @@ function PlanDistribution({
               <li key={d.type}>
                 <div className="mb-1 flex items-center justify-between text-xs">
                   <span className="font-mono font-semibold">{d.type}</span>
-                  <span style={{ color: "var(--text-3)" }}>
+                  <span style={{ color: "var(--k-t3)" }}>
                     {d.count} · {fmtMoney(d.revenue)}
                   </span>
                 </div>
@@ -417,7 +411,7 @@ function PlanDistribution({
                     className="h-full rounded-full"
                     style={{
                       width: `${pct}%`,
-                      background: "var(--grad)",
+                      background: "var(--k-accent)",
                     }}
                   />
                 </div>
@@ -440,16 +434,16 @@ function ReadinessTile({ readiness }: { readiness: ReadinessAverage }) {
 
   const tone =
     scorePct >= 70
-      ? "var(--moss)"
+      ? "var(--k-accent)"
       : scorePct >= 40
-        ? "var(--steel)"
-        : "var(--ember)";
+        ? "var(--k-t2)"
+        : "var(--k-warning)";
 
   return (
     <div className="k-card p-4">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <p className="k-eyebrow mb-1" style={{ color: "var(--text-2)" }}>
+          <p className="k-eyebrow mb-1" style={{ color: "var(--k-t2)" }}>
             Readiness del box hoy
           </p>
           <div className="flex items-baseline gap-2">
@@ -459,7 +453,7 @@ function ReadinessTile({ readiness }: { readiness: ReadinessAverage }) {
             >
               {scorePct}%
             </span>
-            <span className="text-sm" style={{ color: "var(--text-2)" }}>
+            <span className="text-sm" style={{ color: "var(--k-t2)" }}>
               promedio 7 días
             </span>
           </div>
@@ -469,7 +463,7 @@ function ReadinessTile({ readiness }: { readiness: ReadinessAverage }) {
             {readiness.count}
             <span
               className="text-[11px] font-normal"
-              style={{ color: "var(--text-2)" }}
+              style={{ color: "var(--k-t2)" }}
             >
               /{readiness.total} respondieron
             </span>
@@ -478,8 +472,8 @@ function ReadinessTile({ readiness }: { readiness: ReadinessAverage }) {
             <div
               className="mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
               style={{
-                background: "var(--ember-soft)",
-                color: "var(--ember)",
+                background: "rgba(255, 90, 90, 0.1)",
+                color: "var(--k-warning)",
               }}
             >
               Engagement bajo
@@ -489,7 +483,7 @@ function ReadinessTile({ readiness }: { readiness: ReadinessAverage }) {
       </div>
       <div
         className="mt-3 h-2 rounded-full overflow-hidden"
-        style={{ background: "var(--bg-soft)" }}
+        style={{ background: "var(--k-surface)" }}
       >
         <div
           className="h-full rounded-full transition-all"

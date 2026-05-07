@@ -69,7 +69,7 @@ export function MembershipsTable({
         cell: ({ row }) => (
           <span>
             {row.original.planName}{" "}
-            <span className="ml-1 font-mono text-[10px] text-[var(--text-3)]">
+            <span className="ml-1 font-mono text-[10px] text-[var(--k-t3)]">
               {row.original.planType}
             </span>
           </span>
@@ -79,7 +79,7 @@ export function MembershipsTable({
         accessorKey: "startDate",
         header: "Vigencia",
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-[var(--text-3)]">
+          <span className="font-mono text-xs text-[var(--k-t3)]">
             {fmtDate(row.original.startDate)} → {fmtDate(row.original.endDate)}
           </span>
         ),
@@ -91,7 +91,7 @@ export function MembershipsTable({
           <span className="text-xs">
             <span className="font-mono">{row.original.classesUsed}</span>
             {row.original.classesRemaining !== null ? (
-              <span className="text-[var(--text-3)]">
+              <span className="text-[var(--k-t3)]">
                 {" "}
                 / {row.original.classesUsed + row.original.classesRemaining}
               </span>
@@ -122,7 +122,7 @@ export function MembershipsTable({
 
   return (
     <div className="k-card overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-[var(--line)] px-4 py-3">
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--k-line)] px-4 py-3">
         <p className="k-eyebrow">
           {total} membership{total === 1 ? "" : "s"}
         </p>
@@ -143,7 +143,7 @@ export function MembershipsTable({
       ) : (
         <>
           <DataTable data={rows} columns={columns} rowKey={(r) => r.id} />
-          <div className="border-t border-[var(--line)] px-4 py-2">
+          <div className="border-t border-[var(--k-line)] px-4 py-2">
             <Pagination
               page={page}
               pageSize={pageSize}

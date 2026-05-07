@@ -59,7 +59,7 @@ export function PaymentsTable({
         accessorKey: "paidAt",
         header: "Fecha",
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-[var(--text-3)]">
+          <span className="font-mono text-xs text-[var(--k-t3)]">
             {fmtDate(row.original.paidAt ?? row.original.createdAt)}
           </span>
         ),
@@ -75,7 +75,7 @@ export function PaymentsTable({
         accessorKey: "planName",
         header: "Plan",
         cell: ({ row }) => (
-          <span className="text-xs text-[var(--text-2)]">
+          <span className="text-xs text-[var(--k-t2)]">
             {row.original.planName ?? "—"}
           </span>
         ),
@@ -96,10 +96,10 @@ export function PaymentsTable({
         cell: ({ row }) => {
           const tone =
             row.original.status === "PAID"
-              ? "var(--recovery)"
+              ? "var(--k-accent)"
               : row.original.status === "REFUNDED"
-                ? "var(--text-3)"
-                : "var(--text)";
+                ? "var(--k-t3)"
+                : "var(--k-t1)";
           return (
             <span className="font-mono font-bold" style={{ color: tone }}>
               {fmtMoney(row.original.amount)}
@@ -122,7 +122,7 @@ export function PaymentsTable({
 
   return (
     <div className="k-card overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-[var(--line)] px-4 py-3">
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--k-line)] px-4 py-3">
         <p className="k-eyebrow">
           {total} pago{total === 1 ? "" : "s"} en el rango
         </p>
@@ -143,7 +143,7 @@ export function PaymentsTable({
       ) : (
         <>
           <DataTable data={rows} columns={columns} rowKey={(r) => r.id} />
-          <div className="border-t border-[var(--line)] px-4 py-2">
+          <div className="border-t border-[var(--k-line)] px-4 py-2">
             <Pagination
               page={page}
               pageSize={pageSize}

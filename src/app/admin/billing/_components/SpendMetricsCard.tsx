@@ -41,19 +41,19 @@ export function SpendMetricsCard({ metrics }: Props) {
     <KCard animate={false} className="p-5 md:p-6">
       <div className="flex items-baseline justify-between gap-3 mb-4">
         <h2 className="font-display text-xl font-bold">Tu gasto en Kronos</h2>
-        <span className="text-xs font-mono uppercase tracking-wider text-[var(--text-3)]">
+        <span className="text-xs font-mono uppercase tracking-wider text-[var(--k-t3)]">
           Últimos 12 meses
         </span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
         <div>
-          <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-3)] mb-1">
+          <p className="text-xs font-mono uppercase tracking-wider text-[var(--k-t3)] mb-1">
             Suscripción mensual
           </p>
           <p
             className="font-display text-2xl font-extrabold"
-            style={{ color: "var(--strain)" }}
+            style={{ color: "var(--k-warning)" }}
           >
             {metrics.currentMrrCents > 0
               ? formatPriceMxn(metrics.currentMrrCents)
@@ -61,7 +61,7 @@ export function SpendMetricsCard({ metrics }: Props) {
           </p>
         </div>
         <div>
-          <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-3)] mb-1">
+          <p className="text-xs font-mono uppercase tracking-wider text-[var(--k-t3)] mb-1">
             Proyección anual (ARR)
           </p>
           <p className="font-display text-2xl font-extrabold">
@@ -71,16 +71,16 @@ export function SpendMetricsCard({ metrics }: Props) {
           </p>
         </div>
         <div>
-          <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-3)] mb-1">
+          <p className="text-xs font-mono uppercase tracking-wider text-[var(--k-t3)] mb-1">
             Total pagado
           </p>
           <p
             className="font-display text-2xl font-extrabold"
-            style={{ color: "var(--moss)" }}
+            style={{ color: "var(--k-accent)" }}
           >
             {formatPriceMxn(metrics.lifetimeSpentCents)}
           </p>
-          <p className="text-xs text-[var(--text-3)] mt-0.5">
+          <p className="text-xs text-[var(--k-t3)] mt-0.5">
             {metrics.totalInvoiceCount} cobro
             {metrics.totalInvoiceCount === 1 ? "" : "s"}
             {monthsActive > 0
@@ -92,7 +92,7 @@ export function SpendMetricsCard({ metrics }: Props) {
 
       {hasHistory && sparkValues.some((v) => v > 0) && (
         <div className="pt-3 border-t border-[var(--border)]">
-          <p className="text-xs text-[var(--text-3)] mb-2 flex items-center justify-between gap-2">
+          <p className="text-xs text-[var(--k-t3)] mb-2 flex items-center justify-between gap-2">
             <span>Historial mensual</span>
             <span className="font-mono">
               {firstNonZero ? formatMonthLabel(firstNonZero.month) : ""}
@@ -102,7 +102,7 @@ export function SpendMetricsCard({ metrics }: Props) {
           <div className="w-full overflow-hidden">
             <Sparkline
               values={sparkValues}
-              color="var(--moss)"
+              color="var(--k-accent)"
               height={48}
               width={320}
               animate

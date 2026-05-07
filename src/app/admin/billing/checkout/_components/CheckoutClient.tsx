@@ -81,11 +81,11 @@ export function CheckoutClient({ plans, mockMode }: Props) {
     const plan = plans.find((p) => p.slug === state.planSlug);
     return (
       <div className="k-card p-6 max-w-2xl">
-        <p className="k-eyebrow text-[var(--text-3)] mb-2">Modo demo</p>
+        <p className="k-eyebrow text-[var(--k-t3)] mb-2">Modo demo</p>
         <h2 className="font-display text-2xl font-bold mb-3">
           Confirmá la activación de <strong>{plan?.name}</strong>
         </h2>
-        <p className="text-[var(--text-2)] mb-4">
+        <p className="text-[var(--k-t2)] mb-4">
           MercadoPago no está configurado en este servidor, así que podés
           simular el cobro acá. Esto activa la suscripción inmediatamente sin
           cargo real.
@@ -109,7 +109,7 @@ export function CheckoutClient({ plans, mockMode }: Props) {
           </button>
         </div>
         {error && (
-          <p className="mt-4 rounded-lg border border-[var(--pr)]/50 bg-[var(--pr)]/10 p-3 text-sm text-[var(--pr)]">
+          <p className="mt-4 rounded-lg border border-[var(--k-danger)]/50 bg-[var(--k-danger)]/10 p-3 text-sm text-[var(--k-danger)]">
             {error}
           </p>
         )}
@@ -128,7 +128,7 @@ export function CheckoutClient({ plans, mockMode }: Props) {
   return (
     <>
       {error && (
-        <p className="mb-4 rounded-lg border border-[var(--pr)]/50 bg-[var(--pr)]/10 p-3 text-sm text-[var(--pr)]">
+        <p className="mb-4 rounded-lg border border-[var(--k-danger)]/50 bg-[var(--k-danger)]/10 p-3 text-sm text-[var(--k-danger)]">
           {error}
         </p>
       )}
@@ -144,7 +144,7 @@ export function CheckoutClient({ plans, mockMode }: Props) {
         ))}
       </div>
       {mockMode && (
-        <p className="mt-6 text-xs text-[var(--text-3)]">
+        <p className="mt-6 text-xs text-[var(--k-t3)]">
           Para activar cobros reales con MercadoPago, configurá la variable de
           entorno <code className="font-mono">MERCADOPAGO_ACCESS_TOKEN</code>.
         </p>
@@ -184,20 +184,20 @@ function PlanCard({
           {formatPriceMxn(plan.priceMxnCents)}
         </span>
         {!isFree && (
-          <span className="text-sm text-[var(--text-3)] ml-1">/ mes</span>
+          <span className="text-sm text-[var(--k-t3)] ml-1">/ mes</span>
         )}
       </div>
       <ul className="space-y-1.5 mb-5 text-sm">
         {limits.map((l) => (
           <li key={l} className="flex items-center gap-2">
-            <span style={{ color: "var(--strain)" }}>·</span>
+            <span style={{ color: "var(--k-warning)" }}>·</span>
             <span>{l}</span>
           </li>
         ))}
         {featuresList.map((f) => (
           <li key={f} className="flex items-center gap-2">
-            <span style={{ color: "var(--moss)" }}>✓</span>
-            <span className="text-[var(--text-2)]">{f}</span>
+            <span style={{ color: "var(--k-accent)" }}>✓</span>
+            <span className="text-[var(--k-t2)]">{f}</span>
           </li>
         ))}
       </ul>

@@ -96,9 +96,9 @@ function copyForStatus(
 }
 
 const TONE_COLOR: Record<StatusCopy["tone"], string> = {
-  info: "var(--blue)",
+  info: "var(--k-accent)",
   warning: "var(--orange, #ffa53d)",
-  danger: "var(--red)",
+  danger: "var(--k-accent)",
   success: "var(--green, #19f08b)",
 };
 
@@ -132,13 +132,13 @@ export default async function BillingPage() {
       </Eyebrow>
       <h1
         className="mt-3 mb-2 font-display font-extrabold text-[32px] md:text-[40px] leading-[1.05] tracking-[-0.02em]"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--k-t1)" }}
       >
         {copy.title}
       </h1>
       <p
         className="mb-6 md:mb-8 text-base leading-relaxed"
-        style={{ color: "var(--text-2)" }}
+        style={{ color: "var(--k-t2)" }}
       >
         {copy.body}
       </p>
@@ -148,7 +148,7 @@ export default async function BillingPage() {
           <div>
             <div
               className="text-xs font-mono uppercase tracking-wider"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               Estado actual
             </div>
@@ -163,13 +163,13 @@ export default async function BillingPage() {
             <div className="text-right">
               <div
                 className="text-xs font-mono uppercase tracking-wider"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 Trial termina
               </div>
               <div
                 className="mt-1 text-base font-medium"
-                style={{ color: "var(--text)" }}
+                style={{ color: "var(--k-t1)" }}
               >
                 {box.trialEndsAt.toLocaleDateString("es-MX", {
                   day: "numeric",
@@ -183,19 +183,19 @@ export default async function BillingPage() {
 
         {currentSub ? (
           <div className="pt-2 border-t border-[var(--border)]">
-            <div className="text-xs font-mono uppercase tracking-wider text-[var(--text-3)] mb-1">
+            <div className="text-xs font-mono uppercase tracking-wider text-[var(--k-t3)] mb-1">
               Plan actual
             </div>
             <div className="flex items-baseline justify-between gap-3 flex-wrap">
               <div className="font-display text-xl font-bold">
                 {currentSub.plan.name}
               </div>
-              <div className="text-sm text-[var(--text-2)]">
+              <div className="text-sm text-[var(--k-t2)]">
                 {formatPriceMxn(currentSub.plan.priceMxnCents)} / mes
               </div>
             </div>
             {currentSub.currentPeriodEnd && (
-              <p className="mt-2 text-xs text-[var(--text-3)]">
+              <p className="mt-2 text-xs text-[var(--k-t3)]">
                 Próxima facturación:{" "}
                 {currentSub.currentPeriodEnd.toLocaleDateString("es-MX", {
                   day: "numeric",
@@ -234,7 +234,7 @@ export default async function BillingPage() {
           <div className="pt-3 border-t border-[var(--border)]">
             <Link
               href="/admin/billing/historial"
-              className="text-sm text-[var(--strain)] hover:underline inline-flex items-center gap-1"
+              className="text-sm text-[var(--k-warning)] hover:underline inline-flex items-center gap-1"
             >
               Ver historial de cobros →
             </Link>

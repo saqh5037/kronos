@@ -18,17 +18,17 @@ export default async function BillingCheckoutPage() {
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
-      <p className="k-eyebrow text-[var(--text-3)] mb-2">Activar suscripción</p>
+      <p className="k-eyebrow text-[var(--k-t3)] mb-2">Activar suscripción</p>
       <h1 className="font-display font-extrabold text-[32px] md:text-[40px] leading-[1.05] tracking-[-0.02em] mb-3">
-        Elegí tu <em style={{ color: "var(--strain)" }}>plan</em>
+        Elegí tu <em style={{ color: "var(--k-warning)" }}>plan</em>
       </h1>
-      <p className="mb-6 md:mb-8 text-base text-[var(--text-2)] leading-relaxed">
+      <p className="mb-6 md:mb-8 text-base text-[var(--k-t2)] leading-relaxed">
         Mantené tu Box online, sin interrupciones. Podés cambiar de plan o
         cancelar cuando quieras.
         {mockMode && (
           <>
             {" "}
-            <strong className="text-[var(--strain)]">
+            <strong className="text-[var(--k-warning)]">
               Modo demo activo:
             </strong>{" "}
             podés simular el pago para activar la suscripción sin cargo real.

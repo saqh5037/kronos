@@ -41,7 +41,7 @@ export function CancelSubscriptionButton() {
       type="button"
       onClick={handleCancel}
       disabled={pending}
-      className="inline-block k-btn-ghost px-5 py-2.5 rounded-full font-bold text-sm text-[var(--pr)] hover:bg-[var(--pr)]/10 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="inline-block k-btn-ghost px-5 py-2.5 rounded-full font-bold text-sm text-[var(--k-danger)] hover:bg-[var(--k-danger)]/10 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {pending ? "Cancelando…" : "Cancelar suscripción"}
     </button>

@@ -70,7 +70,7 @@ export default async function InvoiceHistoryPage({
         <div>
           <Link
             href="/admin/billing"
-            className="text-sm text-[var(--text-3)] hover:text-[var(--text)] mb-2 inline-block"
+            className="text-sm text-[var(--k-t3)] hover:text-[var(--k-t1)] mb-2 inline-block"
           >
             ← Suscripción
           </Link>
@@ -102,20 +102,20 @@ export default async function InvoiceHistoryPage({
           <div className="k-card overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--line)]">
-                  <th className="text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--text-3)]">
+                <tr className="border-b border-[var(--k-line)]">
+                  <th className="text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--k-t3)]">
                     Fecha
                   </th>
-                  <th className="text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--text-3)]">
+                  <th className="text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--k-t3)]">
                     Plan
                   </th>
-                  <th className="text-right p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--text-3)]">
+                  <th className="text-right p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--k-t3)]">
                     Monto
                   </th>
-                  <th className="hidden md:table-cell text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--text-3)]">
+                  <th className="hidden md:table-cell text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--k-t3)]">
                     Período
                   </th>
-                  <th className="text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--text-3)]">
+                  <th className="text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--k-t3)]">
                     Estado
                   </th>
                 </tr>
@@ -124,7 +124,7 @@ export default async function InvoiceHistoryPage({
                 {invoices.map((inv) => (
                   <tr
                     key={inv.id}
-                    className="border-b border-[var(--line)] last:border-b-0 hover:bg-[var(--card-2)]/40 transition-colors"
+                    className="border-b border-[var(--k-line)] last:border-b-0 hover:bg-[var(--k-elevated)]/40 transition-colors"
                   >
                     <td className="p-3 md:p-4 whitespace-nowrap">
                       {formatDate(inv.paidAt)}
@@ -133,7 +133,7 @@ export default async function InvoiceHistoryPage({
                     <td className="p-3 md:p-4 text-right whitespace-nowrap font-bold">
                       {formatPriceMxn(inv.amountMxnCents)}
                     </td>
-                    <td className="hidden md:table-cell p-3 md:p-4 whitespace-nowrap text-[var(--text-2)] text-xs">
+                    <td className="hidden md:table-cell p-3 md:p-4 whitespace-nowrap text-[var(--k-t2)] text-xs">
                       {formatDate(inv.periodStart)} →{" "}
                       {formatDate(inv.periodEnd)}
                     </td>
@@ -150,10 +150,10 @@ export default async function InvoiceHistoryPage({
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-[var(--line)] bg-[var(--card-2)]/30">
+                <tr className="border-t-2 border-[var(--k-line)] bg-[var(--k-elevated)]/30">
                   <td colSpan={2} className="p-3 md:p-4 font-bold text-sm">
                     Total
-                    <span className="text-xs text-[var(--text-3)] font-normal ml-2">
+                    <span className="text-xs text-[var(--k-t3)] font-normal ml-2">
                       ({summary.count} cobro{summary.count === 1 ? "" : "s"}
                       {summary.refundedCount > 0
                         ? ` · ${summary.refundedCount} reembolsado${summary.refundedCount === 1 ? "" : "s"}`
@@ -163,7 +163,7 @@ export default async function InvoiceHistoryPage({
                   </td>
                   <td
                     className="p-3 md:p-4 text-right font-bold text-base whitespace-nowrap"
-                    style={{ color: "var(--moss)" }}
+                    style={{ color: "var(--k-accent)" }}
                   >
                     {formatPriceMxn(summary.totalCents)}
                   </td>
