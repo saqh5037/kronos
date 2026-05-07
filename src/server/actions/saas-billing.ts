@@ -219,7 +219,12 @@ export async function confirmCheckoutMock(
 
   const sub = await prismaBase.saasSubscription.findUnique({
     where: { id: subscriptionId },
-    select: { tenantId: true, status: true, planId: true },
+    select: {
+      tenantId: true,
+      status: true,
+      planId: true,
+      plan: { select: { priceMxnCents: true } },
+    },
   });
   if (!sub || sub.tenantId !== tenantId) {
     return { ok: false, message: "Suscripción no encontrada" };
@@ -246,6 +251,17 @@ export async function confirmCheckoutMock(
       where: { id: tenantId },
       data: { subscriptionStatus: "ACTIVE", trialEndsAt: currentPeriodEnd },
     }),
+    prismaBase.saasInvoice.create({
+      data: {
+        tenantId,
+        subscriptionId,
+        amountMxnCents: sub.plan.priceMxnCents,
+        status: "PAID",
+        periodStart: startsAt,
+        periodEnd: currentPeriodEnd,
+        paidAt: startsAt,
+      },
+    }),
   ]);
 
   await logAudit({
@@ -260,6 +276,66 @@ export async function confirmCheckoutMock(
   revalidatePath("/admin/billing");
   revalidatePath("/admin");
   return { ok: true };
+}
+
+export type SaasInvoiceRow = {
+  id: string;
+  paidAt: Date;
+  planName: string;
+  planSlug: string;
+  amountMxnCents: number;
+  periodStart: Date;
+  periodEnd: Date;
+  status: "PAID" | "REFUNDED";
+};
+
+export async function listSaasInvoices(): Promise<SaasInvoiceRow[]> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  if (session.user.role !== "OWNER") throw new Error("Forbidden");
+
+  const rows = await prismaBase.saasInvoice.findMany({
+    where: { tenantId: session.user.tenantId },
+    orderBy: { paidAt: "desc" },
+    select: {
+      id: true,
+      paidAt: true,
+      amountMxnCents: true,
+      periodStart: true,
+      periodEnd: true,
+      status: true,
+      subscription: {
+        select: { plan: { select: { name: true, slug: true } } },
+      },
+    },
+  });
+
+  return rows.map((r) => ({
+    id: r.id,
+    paidAt: r.paidAt,
+    planName: r.subscription.plan.name,
+    planSlug: r.subscription.plan.slug,
+    amountMxnCents: r.amountMxnCents,
+    periodStart: r.periodStart,
+    periodEnd: r.periodEnd,
+    status: r.status as "PAID" | "REFUNDED",
+  }));
+}
+
+export async function exportSaasInvoicesCsv(): Promise<string> {
+  const { invoicesToCsv } = await import("@/lib/saas-invoices-csv");
+  const rows = await listSaasInvoices();
+  return invoicesToCsv(
+    rows.map((r) => ({
+      id: r.id,
+      paidAt: r.paidAt,
+      planName: r.planName,
+      amountMxnCents: r.amountMxnCents,
+      periodStart: r.periodStart,
+      periodEnd: r.periodEnd,
+      status: r.status,
+    })),
+  );
 }
 
 export async function cancelSaasSubscription(): Promise<

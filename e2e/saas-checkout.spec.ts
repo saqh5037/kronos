@@ -116,6 +116,70 @@ test.describe.serial("SaaS checkout", () => {
     await expect(page.getByText(/Próxima facturación/i)).toBeVisible();
   });
 
+  test("confirm checkout crea SaasInvoice con monto correcto", async ({
+    page,
+  }) => {
+    const tenantId = await getSeedBoxId();
+    // Limpiar invoices y subs previas
+    await db().saasInvoice.deleteMany({ where: { tenantId } });
+    await db().saasSubscription.deleteMany({ where: { tenantId } });
+    await db().box.update({
+      where: { id: tenantId },
+      data: { subscriptionStatus: "TRIAL", trialEndsAt: null },
+    });
+
+    await loginAs(page, "owner");
+    await page.goto("/admin/billing/checkout");
+    await page
+      .locator(".k-card", { hasText: "Pro" })
+      .getByRole("button")
+      .click();
+    await expect(page.getByText(/Confirmá la activación de/)).toBeVisible({
+      timeout: 5_000,
+    });
+    await page.getByRole("button", { name: /Confirmar pago/ }).click();
+    await page.waitForURL(/\/admin\/billing(\?|$)/, { timeout: 10_000 });
+
+    const invoices = await db().saasInvoice.findMany({
+      where: { tenantId },
+      include: { subscription: { include: { plan: true } } },
+    });
+    expect(invoices).toHaveLength(1);
+    expect(invoices[0]?.amountMxnCents).toBe(49900);
+    expect(invoices[0]?.status).toBe("PAID");
+    expect(invoices[0]?.subscription.plan.slug).toBe("pro");
+  });
+
+  test("owner ve invoice en /admin/billing/historial", async ({ page }) => {
+    await loginAs(page, "owner");
+    await page.goto("/admin/billing/historial");
+
+    await expect(
+      page.getByRole("heading", { name: /Historial de cobros/i }),
+    ).toBeVisible();
+    await expect(page.getByText(/^Pro$/).first()).toBeVisible();
+    await expect(page.getByText(/\$499 MXN/).first()).toBeVisible();
+    await expect(page.getByText("Pagado").first()).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Descargar CSV/i }),
+    ).toBeVisible();
+  });
+
+  test("/admin/billing/historial empty state cuando no hay invoices", async ({
+    page,
+  }) => {
+    const tenantId = await getSeedBoxId();
+    await db().saasInvoice.deleteMany({ where: { tenantId } });
+
+    await loginAs(page, "owner");
+    await page.goto("/admin/billing/historial");
+
+    await expect(page.getByText(/Aún no hay cobros/i)).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Descargar CSV/i }),
+    ).toHaveCount(0);
+  });
+
   test("owner cancela sub ACTIVE → DB queda CANCELLED", async ({ page }) => {
     await loginAs(page, "owner");
     await page.goto("/admin/billing");

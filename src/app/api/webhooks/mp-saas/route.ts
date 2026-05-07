@@ -230,7 +230,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   const sub = await rawDb.saasSubscription.findUnique({
     where: { id: subscriptionId },
-    select: { id: true, tenantId: true, status: true },
+    select: {
+      id: true,
+      tenantId: true,
+      status: true,
+      plan: { select: { priceMxnCents: true } },
+    },
   });
   if (!sub) {
     await markEventProcessed(eventId, {
@@ -280,6 +285,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const startsAt = new Date();
   const currentPeriodEnd = nextBillingDate(startsAt);
 
+  // Idempotent invoice creation: skip if mpPaymentId already invoiced
+  const existingInvoice = await rawDb.saasInvoice.findUnique({
+    where: { mpPaymentId: dataId },
+    select: { id: true },
+  });
+
   await rawDb.$transaction([
     rawDb.saasSubscription.update({
       where: { id: sub.id },
@@ -297,6 +308,22 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         trialEndsAt: currentPeriodEnd,
       },
     }),
+    ...(existingInvoice
+      ? []
+      : [
+          rawDb.saasInvoice.create({
+            data: {
+              tenantId: sub.tenantId,
+              subscriptionId: sub.id,
+              amountMxnCents: sub.plan.priceMxnCents,
+              status: "PAID",
+              periodStart: startsAt,
+              periodEnd: currentPeriodEnd,
+              paidAt: startsAt,
+              mpPaymentId: dataId,
+            },
+          }),
+        ]),
   ]);
 
   await logAudit({

@@ -224,6 +224,17 @@ export default async function BillingPage() {
             <CancelSubscriptionButton />
           </div>
         ) : null}
+
+        {currentSub ? (
+          <div className="pt-3 border-t border-[var(--border)]">
+            <Link
+              href="/admin/billing/historial"
+              className="text-sm text-[var(--strain)] hover:underline inline-flex items-center gap-1"
+            >
+              Ver historial de cobros →
+            </Link>
+          </div>
+        ) : null}
       </KCard>
     </div>
   );

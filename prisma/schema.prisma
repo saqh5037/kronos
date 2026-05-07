@@ -53,6 +53,7 @@ model Box {
   athleteInvitations      AthleteInvitation[]
   staffInvitations        StaffInvitation[]
   saasSubscriptions       SaasSubscription[]
+  saasInvoices            SaasInvoice[]
 }
 
 // ─── USERS / AUTH ─────────────────────────────────────────────────────────────
@@ -853,11 +854,36 @@ model SaasSubscription {
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
 
-  box  Box      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  plan SaasPlan @relation(fields: [planId], references: [id])
+  box      Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan     SaasPlan      @relation(fields: [planId], references: [id])
+  invoices SaasInvoice[]
 
   @@index([tenantId])
   @@index([tenantId, status])
+}
+
+enum SaasInvoiceStatus {
+  PAID
+  REFUNDED
+}
+
+model SaasInvoice {
+  id              String            @id @default(cuid())
+  tenantId        String
+  subscriptionId  String
+  amountMxnCents  Int
+  status          SaasInvoiceStatus @default(PAID)
+  periodStart     DateTime
+  periodEnd       DateTime
+  paidAt          DateTime
+  mpPaymentId     String?           @unique
+  createdAt       DateTime          @default(now())
+
+  box          Box              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscription SaasSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, paidAt(sort: Desc)])
 }
 
 // ─── ATHLETE ALIASES ──────────────────────────────────────────────────────────
