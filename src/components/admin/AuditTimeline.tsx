@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { hashStringToColor, getInitials } from "@/lib/hash-color";
 import type { FeedEvent, FeedSeverity } from "@/server/actions/owner-feed";
@@ -83,10 +84,8 @@ function formatTime(date: Date): string {
   });
 }
 
-function formatDate(date: Date): string {
-  const now = new Date();
-  const isToday = date.toDateString() === now.toDateString();
-  if (isToday) return "Hoy";
+function formatDate(date: Date, now: Date | null): string {
+  if (now && date.toDateString() === now.toDateString()) return "Hoy";
   return date.toLocaleDateString("es-MX", {
     weekday: "short",
     month: "short",
@@ -106,6 +105,10 @@ function groupByDate(events: FeedEvent[]): [string, FeedEvent[]][] {
 
 export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
   const grouped = groupByDate(events);
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    setNow(new Date());
+  }, []);
 
   return (
     <div className="relative">
@@ -119,7 +122,7 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
             <div className="relative flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-[var(--k-elevated)] border border-[var(--line)] flex items-center justify-center z-10">
                 <span className="text-[10px] font-mono font-bold text-text-2 uppercase">
-                  {formatDate(dayEvents[0].when)}
+                  {formatDate(dayEvents[0].when, now)}
                 </span>
               </div>
               <div className="h-px flex-1 bg-[var(--line)]" />

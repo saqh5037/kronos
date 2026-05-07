@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   revokeInvitation,
@@ -14,10 +14,8 @@ const fmtDate = (d: Date) =>
     month: "short",
   });
 
-function daysUntil(date: Date): number {
-  return Math.ceil(
-    (new Date(date).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-  );
+function daysUntil(date: Date, nowMs: number): number {
+  return Math.ceil((new Date(date).getTime() - nowMs) / (1000 * 60 * 60 * 24));
 }
 
 export function PendingInvitationsList({
@@ -27,6 +25,10 @@ export function PendingInvitationsList({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [nowMs, setNowMs] = useState<number | null>(null);
+  useEffect(() => {
+    setNowMs(Date.now());
+  }, []);
 
   const onRevoke = (id: string) => {
     startTransition(async () => {
@@ -57,7 +59,7 @@ export function PendingInvitationsList({
       <p className="k-eyebrow mb-3">Pendientes ({rows.length})</p>
       <ul className="space-y-2">
         {rows.map((row) => {
-          const days = daysUntil(row.expiresAt);
+          const days = nowMs !== null ? daysUntil(row.expiresAt, nowMs) : null;
           const isExpired = row.status === "EXPIRED";
           return (
             <li
@@ -76,10 +78,12 @@ export function PendingInvitationsList({
                     Enviada {fmtDate(row.createdAt)} ·{" "}
                     {isExpired ? (
                       <span className="text-[var(--k-danger)]">Expirada</span>
-                    ) : (
+                    ) : days !== null ? (
                       <span>
                         Expira en {days} día{days === 1 ? "" : "s"}
                       </span>
+                    ) : (
+                      <span>Pendiente</span>
                     )}
                   </p>
                 </div>
