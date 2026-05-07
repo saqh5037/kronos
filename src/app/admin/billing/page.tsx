@@ -10,6 +10,7 @@ import { getCurrentSubscription } from "@/server/actions/saas-billing";
 import { formatPriceMxn } from "@/lib/saas-billing";
 
 export const metadata = { title: "Kronos — Suscripción" };
+export const dynamic = "force-dynamic";
 
 type StatusCopy = {
   eyebrow: string;

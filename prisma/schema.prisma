@@ -820,6 +820,7 @@ model StaffInvitation {
 enum SaasSubscriptionStatus {
   PENDING
   ACTIVE
+  PAST_DUE
   CANCELLED
   EXPIRED
 }
