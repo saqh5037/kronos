@@ -9,6 +9,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import GlobalEffects from "@/components/GlobalEffects";
 import { KronosToaster } from "@/components/kronos/KronosToaster";
+import { ConfirmProvider } from "@/lib/use-confirm";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -74,8 +75,10 @@ export default function RootLayout({
           disableTransitionOnChange={false}
         >
           <GlobalEffects />
-          {children}
-          <KronosToaster />
+          <ConfirmProvider>
+            {children}
+            <KronosToaster />
+          </ConfirmProvider>
         </ThemeProvider>
       </body>
     </html>

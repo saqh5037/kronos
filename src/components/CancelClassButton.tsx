@@ -3,17 +3,21 @@
 import { useTransition } from "react";
 import { cancelClass } from "@/server/actions/classes";
 import { kToast } from "@/lib/toast";
+import { useConfirm } from "@/lib/use-confirm";
 
 export default function CancelClassButton({ id }: { id: string }) {
   const [isPending, startTransition] = useTransition();
+  const confirm = useConfirm();
 
-  function handleClick() {
-    if (
-      !confirm(
-        "¿Cancelar esta clase? Los atletas reservados serán notificados.",
-      )
-    )
-      return;
+  async function handleClick() {
+    const ok = await confirm({
+      title: "¿Cancelar esta clase?",
+      message:
+        "Los atletas reservados serán notificados y se liberarán todos los lugares.",
+      confirmLabel: "Cancelar clase",
+      tone: "danger",
+    });
+    if (!ok) return;
     startTransition(async () => {
       try {
         await cancelClass(id);

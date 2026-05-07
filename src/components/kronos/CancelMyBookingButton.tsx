@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { motion } from "framer-motion";
 import { cancelBooking } from "@/server/actions/bookings";
 import { kToast } from "@/lib/toast";
+import { useConfirm } from "@/lib/use-confirm";
 
 export default function CancelMyBookingButton({
   bookingId,
@@ -11,9 +12,16 @@ export default function CancelMyBookingButton({
   bookingId: string;
 }) {
   const [isPending, startTransition] = useTransition();
+  const confirm = useConfirm();
 
-  function handleClick() {
-    if (!confirm("¿Cancelar tu reserva?")) return;
+  async function handleClick() {
+    const ok = await confirm({
+      title: "¿Cancelar tu reserva?",
+      message: "Liberarás el lugar y otro atleta podrá tomarlo.",
+      confirmLabel: "Sí, cancelar",
+      tone: "danger",
+    });
+    if (!ok) return;
     startTransition(async () => {
       try {
         await cancelBooking(bookingId);

@@ -9,6 +9,7 @@ import {
   markNoShow,
 } from "@/server/actions/bookings";
 import { kToast } from "@/lib/toast";
+import { useConfirm } from "@/lib/use-confirm";
 
 export function BookButton({
   classId,
@@ -24,6 +25,7 @@ export function BookButton({
   myBookingId: string | null;
 }) {
   const [isPending, startTransition] = useTransition();
+  const confirm = useConfirm();
 
   function handleBook() {
     startTransition(async () => {
@@ -36,9 +38,16 @@ export function BookButton({
     });
   }
 
-  function handleCancel() {
+  async function handleCancel() {
     if (!myBookingId) return;
-    if (!confirm("¿Cancelar tu reserva?")) return;
+    const ok = await confirm({
+      title: "¿Cancelar tu reserva?",
+      message:
+        "Liberarás el lugar y otro atleta podrá tomarlo. Si está cerca del horario, podrías no alcanzar a reservar de vuelta.",
+      confirmLabel: "Sí, cancelar",
+      tone: "danger",
+    });
+    if (!ok) return;
     startTransition(async () => {
       try {
         await cancelBooking(myBookingId);
@@ -125,18 +134,28 @@ export function CheckInButton({ bookingId }: { bookingId: string }) {
 
 export function NoShowButton({ bookingId }: { bookingId: string }) {
   const [isPending, startTransition] = useTransition();
+  const confirm = useConfirm();
+  const handleClick = async () => {
+    const ok = await confirm({
+      title: "¿Marcar como no-show?",
+      message:
+        "Esto cuenta en las estadísticas del atleta y puede gatillar alertas si es recurrente.",
+      confirmLabel: "Marcar no-show",
+      tone: "danger",
+    });
+    if (!ok) return;
+    startTransition(async () => {
+      try {
+        await markNoShow(bookingId);
+        kToast.warning("Marcado como no-show");
+      } catch (err) {
+        kToast.error(err instanceof Error ? err.message : "Error");
+      }
+    });
+  };
   return (
     <motion.button
-      onClick={() =>
-        startTransition(async () => {
-          try {
-            await markNoShow(bookingId);
-            kToast.warning("Marcado como no-show");
-          } catch (err) {
-            kToast.error(err instanceof Error ? err.message : "Error");
-          }
-        })
-      }
+      onClick={handleClick}
       disabled={isPending}
       className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-semibold"
       style={{
@@ -154,19 +173,27 @@ export function NoShowButton({ bookingId }: { bookingId: string }) {
 
 export function CancelBookingButton({ bookingId }: { bookingId: string }) {
   const [isPending, startTransition] = useTransition();
+  const confirm = useConfirm();
+  const handleClick = async () => {
+    const ok = await confirm({
+      title: "¿Cancelar reserva del atleta?",
+      message: "Se libera el lugar y se promueve waitlist si aplica.",
+      confirmLabel: "Cancelar reserva",
+      tone: "danger",
+    });
+    if (!ok) return;
+    startTransition(async () => {
+      try {
+        await cancelBooking(bookingId);
+        kToast.info("Reserva cancelada");
+      } catch (err) {
+        kToast.error(err instanceof Error ? err.message : "Error");
+      }
+    });
+  };
   return (
     <motion.button
-      onClick={() => {
-        if (!confirm("¿Cancelar reserva del atleta?")) return;
-        startTransition(async () => {
-          try {
-            await cancelBooking(bookingId);
-            kToast.info("Reserva cancelada");
-          } catch (err) {
-            kToast.error(err instanceof Error ? err.message : "Error");
-          }
-        });
-      }}
+      onClick={handleClick}
       disabled={isPending}
       className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-medium"
       style={{

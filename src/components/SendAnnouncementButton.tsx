@@ -6,6 +6,7 @@ import {
   deleteAnnouncement,
 } from "@/server/actions/announcements";
 import { kToast } from "@/lib/toast";
+import { useConfirm } from "@/lib/use-confirm";
 
 export function SendButton({ id }: { id: string }) {
   const [isPending, startTransition] = useTransition();
@@ -32,19 +33,27 @@ export function SendButton({ id }: { id: string }) {
 
 export function DeleteAnnouncementButton({ id }: { id: string }) {
   const [isPending, startTransition] = useTransition();
+  const confirm = useConfirm();
+  const handleClick = async () => {
+    const ok = await confirm({
+      title: "¿Borrar este anuncio?",
+      message: "Esta acción no se puede deshacer.",
+      confirmLabel: "Borrar",
+      tone: "danger",
+    });
+    if (!ok) return;
+    startTransition(async () => {
+      try {
+        await deleteAnnouncement(id);
+        kToast.info("Anuncio borrado");
+      } catch (err) {
+        kToast.error(err instanceof Error ? err.message : "Error");
+      }
+    });
+  };
   return (
     <button
-      onClick={() => {
-        if (!confirm("¿Borrar este anuncio?")) return;
-        startTransition(async () => {
-          try {
-            await deleteAnnouncement(id);
-            kToast.info("Anuncio borrado");
-          } catch (err) {
-            kToast.error(err instanceof Error ? err.message : "Error");
-          }
-        });
-      }}
+      onClick={handleClick}
       disabled={isPending}
       className="text-xs px-2 py-1 rounded-md disabled:opacity-50"
       style={{ color: "var(--text-3)" }}
