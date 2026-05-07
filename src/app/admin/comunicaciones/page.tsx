@@ -34,12 +34,12 @@ export default async function ComunicacionesPage() {
           <div className="mt-2 flex items-baseline gap-2 flex-wrap">
             <h1
               className="k-h-italic font-display font-extrabold text-[40px] leading-[1] tracking-[-0.02em]"
-              style={{ color: "var(--text)" }}
+              style={{ color: "var(--k-t1)" }}
             >
               Comunica<em>ciones</em>
             </h1>
           </div>
-          <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
+          <p className="text-sm mt-1" style={{ color: "var(--k-t2)" }}>
             Anuncios al box · email/in-app/push (proveedor mockeado en Fase 1)
           </p>
         </div>
@@ -48,7 +48,7 @@ export default async function ComunicacionesPage() {
 
       {drafts.length > 0 && (
         <section className="mb-6">
-          <p className="k-eyebrow mb-2" style={{ color: "var(--steel)" }}>
+          <p className="k-eyebrow mb-2" style={{ color: "var(--k-t2)" }}>
             Borradores y programados ({drafts.length})
           </p>
           <div className="flex flex-col gap-2">
@@ -60,12 +60,12 @@ export default async function ComunicacionesPage() {
       )}
 
       <section>
-        <p className="k-eyebrow mb-2" style={{ color: "var(--text-2)" }}>
+        <p className="k-eyebrow mb-2" style={{ color: "var(--k-t2)" }}>
           Historial ({sent.length})
         </p>
         {sent.length === 0 ? (
           <div className="k-card p-6 text-center">
-            <p className="text-sm" style={{ color: "var(--text-2)" }}>
+            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
               Sin anuncios enviados todavía.
             </p>
           </div>
@@ -89,7 +89,7 @@ function Card({ a }: { a: AnnouncementRow }) {
           <h3 className="font-display font-bold text-base">{a.title}</h3>
           <div
             className="flex items-center gap-2 mt-1 text-[10px] flex-wrap"
-            style={{ color: "var(--text-3)" }}
+            style={{ color: "var(--k-t3)" }}
           >
             <span className="k-chip k-chip-ghost text-[10px]">{a.channel}</span>
             <span className="k-chip k-chip-steel text-[10px]">
@@ -109,13 +109,13 @@ function Card({ a }: { a: AnnouncementRow }) {
       </div>
       <p
         className="text-sm whitespace-pre-line"
-        style={{ color: "var(--text-2)" }}
+        style={{ color: "var(--k-t2)" }}
       >
         {a.body}
       </p>
       <div
         className="flex items-center gap-3 mt-3 pt-3 border-t text-[10px]"
-        style={{ borderColor: "var(--line)", color: "var(--text-3)" }}
+        style={{ borderColor: "var(--k-line)", color: "var(--k-t3)" }}
       >
         <span>
           {a.authorName ?? "—"} · {formatDayMonth(a.createdAt)}{" "}
@@ -132,7 +132,7 @@ function Card({ a }: { a: AnnouncementRow }) {
         {a.scheduledAt && a.status === "SCHEDULED" && (
           <>
             <span>·</span>
-            <span style={{ color: "var(--steel)" }}>
+            <span style={{ color: "var(--k-t2)" }}>
               Programado para {formatDayMonth(a.scheduledAt)}{" "}
               {formatTime(a.scheduledAt)}
             </span>

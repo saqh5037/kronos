@@ -22,19 +22,19 @@ export default async function PRsPage() {
         <span className="k-eyebrow-bar">Performance</span>
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
           <span
-            className="font-script text-[28px] leading-none"
-            style={{ color: "var(--red)" }}
+            className="font-display text-[28px] leading-none"
+            style={{ color: "var(--k-accent)" }}
           >
             Records
           </span>
           <h1
             className="k-h-italic font-display font-extrabold text-[42px] leading-[1] tracking-[-0.02em]"
-            style={{ color: "var(--text)" }}
+            style={{ color: "var(--k-t1)" }}
           >
             <em>personales</em>
           </h1>
         </div>
-        <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
+        <p className="text-sm mt-1" style={{ color: "var(--k-t2)" }}>
           {prs.length} PR{prs.length === 1 ? "" : "s"} registrado
           {prs.length === 1 ? "" : "s"} en {byMovement.size} movimiento
           {byMovement.size === 1 ? "" : "s"}
@@ -43,7 +43,7 @@ export default async function PRsPage() {
 
       {prs.length === 0 ? (
         <div className="k-card p-6 text-center">
-          <p className="text-sm" style={{ color: "var(--text-2)" }}>
+          <p className="text-sm" style={{ color: "var(--k-t2)" }}>
             Aún no hay PRs registrados. Se generan automáticamente al subir
             scores en WODs tipo STRENGTH con un solo movimiento.
           </p>
@@ -65,7 +65,7 @@ export default async function PRsPage() {
                   className="px-4 py-4 relative overflow-hidden"
                   style={{
                     background: "var(--hero-bg)",
-                    borderBottom: "1px solid var(--line)",
+                    borderBottom: "1px solid var(--k-line)",
                   }}
                 >
                   <div
@@ -78,7 +78,7 @@ export default async function PRsPage() {
                   <div className="relative">
                     <p
                       className="k-eyebrow mb-2"
-                      style={{ color: "var(--text-2)" }}
+                      style={{ color: "var(--k-t2)" }}
                     >
                       {movementName.toUpperCase()}
                     </p>
@@ -87,7 +87,7 @@ export default async function PRsPage() {
                         className="font-display font-bold text-4xl"
                         style={{
                           letterSpacing: "-0.03em",
-                          background: "var(--grad)",
+                          background: "var(--k-accent)",
                           WebkitBackgroundClip: "text",
                           backgroundClip: "text",
                           color: "transparent",
@@ -97,14 +97,14 @@ export default async function PRsPage() {
                       </span>
                       <span
                         className="font-mono text-sm font-bold"
-                        style={{ color: "var(--text-3)" }}
+                        style={{ color: "var(--k-t3)" }}
                       >
                         {top.unit}
                       </span>
                     </div>
                     <p
                       className="text-xs mt-1"
-                      style={{ color: "var(--text-2)" }}
+                      style={{ color: "var(--k-t2)" }}
                     >
                       {top.athleteName} ·{" "}
                       {top.achievedAt.toLocaleDateString("es-MX")}
@@ -120,12 +120,12 @@ export default async function PRsPage() {
                         <li
                           key={pr.id}
                           className="px-4 py-2.5 border-b last:border-b-0 flex items-center justify-between"
-                          style={{ borderColor: "var(--line)" }}
+                          style={{ borderColor: "var(--k-line)" }}
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <span
                               className="font-mono text-xs w-5"
-                              style={{ color: "var(--text-3)" }}
+                              style={{ color: "var(--k-t3)" }}
                             >
                               {idx + 2}
                             </span>
@@ -146,7 +146,7 @@ export default async function PRsPage() {
                   <div className="flex-1 flex items-center justify-center p-4">
                     <p
                       className="text-xs text-center"
-                      style={{ color: "var(--text-3)" }}
+                      style={{ color: "var(--k-t3)" }}
                     >
                       Solo 1 PR registrado
                     </p>

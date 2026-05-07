@@ -52,19 +52,19 @@ export default async function LeaderboardsPage({
         <span className="k-eyebrow-bar">Performance</span>
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
           <span
-            className="font-script text-[26px] leading-none"
-            style={{ color: "var(--red)" }}
+            className="font-display text-[26px] leading-none"
+            style={{ color: "var(--k-accent)" }}
           >
             Tabla de
           </span>
           <h1
             className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
-            style={{ color: "var(--text)" }}
+            style={{ color: "var(--k-t1)" }}
           >
             <em>rankings</em>
           </h1>
         </div>
-        <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
+        <p className="text-sm mt-1" style={{ color: "var(--k-t2)" }}>
           Mejor score por atleta y asistencia semanal
         </p>
       </div>
@@ -78,7 +78,7 @@ export default async function LeaderboardsPage({
 
           {!board || board.entries.length === 0 ? (
             <div className="k-card p-6 text-center">
-              <p className="text-sm" style={{ color: "var(--text-2)" }}>
+              <p className="text-sm" style={{ color: "var(--k-t2)" }}>
                 {wodOptions.length === 0
                   ? "Sin WODs todavía. Crea uno en /admin/wods."
                   : "No hay scores RX para este WOD aún."}
@@ -88,15 +88,12 @@ export default async function LeaderboardsPage({
             <div className="k-card overflow-hidden">
               <div
                 className="px-4 py-3 border-b"
-                style={{ borderColor: "var(--line)" }}
+                style={{ borderColor: "var(--k-line)" }}
               >
                 <h3 className="font-display font-bold text-base">
                   {board.wodName}
                 </h3>
-                <p
-                  className="text-xs mt-0.5"
-                  style={{ color: "var(--text-3)" }}
-                >
+                <p className="text-xs mt-0.5" style={{ color: "var(--k-t3)" }}>
                   Score: {board.scoreType} · {board.entries.length} atleta
                   {board.entries.length === 1 ? "" : "s"}
                 </p>
@@ -109,8 +106,8 @@ export default async function LeaderboardsPage({
                   <thead>
                     <tr
                       style={{
-                        borderBottom: "1px solid var(--line)",
-                        color: "var(--text-3)",
+                        borderBottom: "1px solid var(--k-line)",
+                        color: "var(--k-t3)",
                       }}
                     >
                       <th className="text-left px-4 py-2 k-eyebrow w-12">#</th>
@@ -126,7 +123,7 @@ export default async function LeaderboardsPage({
                       <tr key={e.athleteId} className="k-row">
                         <td
                           className="px-4 py-2 font-mono text-xs"
-                          style={{ color: "var(--text-3)" }}
+                          style={{ color: "var(--k-t3)" }}
                         >
                           {idx + 4}
                         </td>
@@ -140,7 +137,7 @@ export default async function LeaderboardsPage({
                           {e.scaling !== "RX" && (
                             <span
                               className="ml-2 text-[10px]"
-                              style={{ color: "var(--strain)" }}
+                              style={{ color: "var(--k-warning)" }}
                             >
                               {e.scaling}
                             </span>
@@ -148,7 +145,7 @@ export default async function LeaderboardsPage({
                         </td>
                         <td
                           className="px-4 py-2 font-mono text-xs"
-                          style={{ color: "var(--text-3)" }}
+                          style={{ color: "var(--k-t3)" }}
                         >
                           {formatDayMonth(e.achievedAt)}
                         </td>
@@ -163,14 +160,14 @@ export default async function LeaderboardsPage({
 
         {/* Weekly attendance leaderboard */}
         <div>
-          <p className="k-eyebrow mb-3" style={{ color: "var(--text-2)" }}>
+          <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
             Asistencia esta semana
           </p>
           <div className="k-card overflow-hidden">
             {attendanceLeaders.length === 0 ? (
               <p
                 className="text-xs p-4 text-center"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 Sin check-ins esta semana.
               </p>
@@ -180,7 +177,7 @@ export default async function LeaderboardsPage({
                   <li
                     key={a.athleteId}
                     className="px-4 py-3 border-b last:border-b-0 flex items-center justify-between"
-                    style={{ borderColor: "var(--line)" }}
+                    style={{ borderColor: "var(--k-line)" }}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <span
@@ -188,10 +185,10 @@ export default async function LeaderboardsPage({
                         style={{
                           color:
                             idx === 0
-                              ? "var(--recovery)"
+                              ? "var(--k-accent)"
                               : idx < 3
-                                ? "var(--strain)"
-                                : "var(--text-3)",
+                                ? "var(--k-warning)"
+                                : "var(--k-t3)",
                         }}
                       >
                         {idx + 1}
@@ -203,7 +200,7 @@ export default async function LeaderboardsPage({
                     <span
                       className="font-mono font-bold text-sm"
                       style={{
-                        color: idx === 0 ? "var(--recovery)" : "var(--text)",
+                        color: idx === 0 ? "var(--k-accent)" : "var(--k-t1)",
                       }}
                     >
                       {a.attendedCount}

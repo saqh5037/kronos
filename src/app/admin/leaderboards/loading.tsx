@@ -17,7 +17,7 @@ export default function AdminLeaderboardsLoading() {
           <div className="k-card overflow-hidden">
             <div
               className="px-4 py-3 border-b space-y-2"
-              style={{ borderColor: "var(--line)" }}
+              style={{ borderColor: "var(--k-line)" }}
             >
               <KronosSkeleton variant="line" width="40%" height={14} />
               <KronosSkeleton variant="line" width="25%" height={9} />
@@ -77,7 +77,7 @@ export default function AdminLeaderboardsLoading() {
               <div
                 key={i}
                 className="flex items-center gap-3 px-4 py-3 border-b last:border-b-0"
-                style={{ borderColor: "var(--line)" }}
+                style={{ borderColor: "var(--k-line)" }}
               >
                 <KronosSkeleton
                   variant="line"
