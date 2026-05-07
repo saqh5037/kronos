@@ -1,20 +1,24 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/server/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import LoginForm from "./LoginForm";
+import { authOptions } from "@/server/auth";
 import KCard from "@/components/kronos/KCard";
+import SignupForm from "./SignupForm";
 
-export const metadata = { title: "Kronos — Iniciar sesión" };
+export const metadata = { title: "Kronos — Empezá tu trial" };
 
-export default async function LoginPage() {
+export default async function SignupPage() {
   const session = await getServerSession(authOptions);
-  if (session) redirect("/admin");
+  if (session) {
+    redirect(session.user.role === "ATHLETE" ? "/atleta" : "/admin");
+  }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-bg p-4">
-      <div className="w-full max-w-sm">
-        {/* Wordmark */}
+    <main
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: "var(--bg)" }}
+    >
+      <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <div
             className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-4 border"
@@ -30,15 +34,17 @@ export default async function LoginPage() {
               K
             </span>
           </div>
-          <h1 className="font-display font-bold text-2xl tracking-[0.02em] uppercase">
-            Kronos
+          <h1 className="font-display font-bold text-3xl tracking-[-0.01em]">
+            Empezá tu trial
           </h1>
-          <p className="k-eyebrow mt-1">El tiempo es tu rival</p>
+          <p className="mt-2 text-sm" style={{ color: "var(--text-2)" }}>
+            14 días gratis. Sin tarjeta. Tu box operando hoy mismo.
+          </p>
         </div>
 
-        <KCard>
-          <div className="p-5">
-            <LoginForm />
+        <KCard animate={false}>
+          <div className="p-6">
+            <SignupForm />
           </div>
         </KCard>
 
@@ -46,13 +52,13 @@ export default async function LoginPage() {
           className="text-center text-xs mt-6"
           style={{ color: "var(--text-3)" }}
         >
-          ¿Aún no tenés box?{" "}
+          ¿Ya tenés cuenta?{" "}
           <Link
-            href="/signup"
+            href="/login"
             className="underline"
             style={{ color: "var(--text-2)" }}
           >
-            Empezá tu trial de 14 días
+            Iniciar sesión
           </Link>
         </p>
       </div>
