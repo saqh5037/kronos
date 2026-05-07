@@ -28,8 +28,6 @@ export function ScheduleNav({
   const router = useRouter();
   const prev = shift(date, view, -1);
   const next = shift(date, view, 1);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
 
   const label =
     view === "day"
@@ -60,7 +58,9 @@ export function ScheduleNav({
       </Link>
       <button
         onClick={() => {
-          const url = `${basePath}?view=${view}&date=${ymd(today)}`;
+          const t = new Date();
+          t.setHours(0, 0, 0, 0);
+          const url = `${basePath}?view=${view}&date=${ymd(t)}`;
           router.push(url as never);
         }}
         className="px-3 py-1.5 rounded-full text-xs font-bold transition-colors hover:bg-[var(--card-2)]"

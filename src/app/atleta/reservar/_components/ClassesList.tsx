@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { AvailableClass } from "@/server/actions/bookings";
 import { BookButton } from "@/components/BookingActions";
 import KCard from "@/components/kronos/KCard";
@@ -49,6 +49,11 @@ export function ClassesList({
   const [coach, setCoach] = useState<string>("");
   const [bucket, setBucket] = useState<TimeBucket>("all");
   const [onlyUsual, setOnlyUsual] = useState(false);
+  const [now, setNow] = useState<number | null>(null);
+
+  useEffect(() => {
+    setNow(Date.now());
+  }, []);
 
   const wodTypes = useMemo(() => {
     const set = new Set<string>();
@@ -177,7 +182,8 @@ export function ClassesList({
           byDay.map(([dateKey, dayClasses]) => {
             const date = new Date(dateKey + "T12:00:00.000Z");
             const isToday =
-              new Date(dateKey).toDateString() === new Date().toDateString();
+              now !== null &&
+              new Date(dateKey).toDateString() === new Date(now).toDateString();
             return (
               <div key={dateKey} className="flex flex-col gap-2">
                 {!isToday && (
@@ -192,6 +198,7 @@ export function ClassesList({
                   <ClassRow
                     key={c.id}
                     c={c}
+                    now={now}
                     isUsual={usualHours.includes(
                       new Date(c.startsAt).getHours(),
                     )}
@@ -209,13 +216,15 @@ export function ClassesList({
 function ClassRow({
   c,
   isUsual = false,
+  now,
 }: {
   c: AvailableClass;
   isUsual?: boolean;
+  now: number | null;
 }) {
   const full = c.bookedCount >= c.capacity;
   const fillRatio = c.bookedCount / c.capacity;
-  const past = new Date(c.startsAt) < new Date();
+  const past = now !== null && new Date(c.startsAt).getTime() < now;
   const isBooked = c.myBookingStatus === "BOOKED";
   const isOpenBox = c.kind === "OPEN_BOX";
 

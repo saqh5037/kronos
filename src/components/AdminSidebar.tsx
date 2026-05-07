@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import ThemeToggle from "@/components/ThemeToggle";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 
 type ModuleEntry = {
   href: string;
@@ -480,10 +481,11 @@ export default function AdminSidebar({
 
         {/* Footer */}
         <div
-          className="px-4 pt-3 mt-2 border-t"
+          className="px-4 pt-3 mt-2 border-t flex flex-col gap-2"
           style={{ borderColor: "var(--line)" }}
         >
           <ThemeToggle className="w-full justify-center" />
+          <SignOutButton variant="menu" />
         </div>
       </nav>
     </>

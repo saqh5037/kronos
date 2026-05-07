@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { db } from "./db";
 import { authorizeDev } from "./auth-dev";
+import { logAudit } from "./audit";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
@@ -85,6 +86,32 @@ export const authOptions: NextAuthOptions = {
         session.user.tenantId = token.tenantId as string;
       }
       return session;
+    },
+  },
+  events: {
+    async signIn({ user }) {
+      const dbUser = await db.user.findUnique({
+        where: { email: user.email ?? "" },
+        select: { id: true, tenantId: true },
+      });
+      if (!dbUser) return;
+      await logAudit({
+        tenantId: dbUser.tenantId,
+        actorId: dbUser.id,
+        action: "USER_LOGIN",
+        targetType: "User",
+        targetId: dbUser.id,
+      });
+    },
+    async signOut({ token }) {
+      if (!token?.id || !token?.tenantId) return;
+      await logAudit({
+        tenantId: token.tenantId as string,
+        actorId: token.id as string,
+        action: "USER_LOGOUT",
+        targetType: "User",
+        targetId: token.id as string,
+      });
     },
   },
 };
