@@ -39,10 +39,11 @@ const config: Config = {
         "hover-subtle": "var(--hover-subtle)",
       },
       fontFamily: {
+        // Kronos v3 — Cuarto Oscuro: Plex Mono para display/datos, Inter para body
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        display: ["var(--font-playfair)", "Georgia", "serif"],
-        script: ["var(--font-dancing)", "cursive"],
-        mono: ["var(--font-jetbrains-mono)", "monospace"],
+        display: ["var(--font-plex-mono)", "ui-monospace", "monospace"],
+        script: ["var(--font-plex-mono)", "ui-monospace", "monospace"],
+        mono: ["var(--font-plex-mono)", "ui-monospace", "monospace"],
       },
       backgroundImage: {
         grad: "linear-gradient(135deg, #e60026 0%, #0044ff 50%, #00bfff 100%)",
