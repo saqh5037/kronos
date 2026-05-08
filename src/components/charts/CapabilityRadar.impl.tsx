@@ -77,8 +77,8 @@ export function CapabilityRadar({
           <Radar
             name="Capacidad"
             dataKey="score"
-            stroke={CHART_COLORS.fire}
-            fill={CHART_COLORS.fire}
+            stroke={CHART_COLORS.primary}
+            fill={CHART_COLORS.primary}
             fillOpacity={0.15}
             strokeWidth={2}
           />
@@ -155,12 +155,8 @@ export function CapabilityRadar({
                 className="h-full rounded-full transition-all"
                 style={{
                   width: `${Math.min(100, Math.max(0, c.score))}%`,
-                  background:
-                    c.score >= 70
-                      ? "var(--k-accent)"
-                      : c.score >= 40
-                        ? "var(--k-warning)"
-                        : "var(--k-warning)",
+                  background: "var(--k-accent)",
+                  opacity: c.score >= 70 ? 1 : c.score >= 40 ? 0.7 : 0.4,
                 }}
               />
             </div>
