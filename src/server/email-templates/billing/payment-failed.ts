@@ -26,13 +26,13 @@ export function renderPaymentFailedEmail(args: {
       No pudimos cobrar tu suscripción a Kronos para <strong>${box}</strong>. Tenés <strong>${args.graceDays} días</strong> para actualizar tu método de pago antes de que el Box quede bloqueado.
     </p>
     <p style="margin: 24px 0;">
-      <a href="${args.ctaUrl}" style="display: inline-block; background: linear-gradient(135deg, #ffa53d, #ff5e5e); color: #0b0d0f; padding: 14px 24px; border-radius: 999px; font-weight: 700; text-decoration: none;">
+      <a href="${args.ctaUrl}" style="display: inline-block; background: linear-gradient(135deg, #ffa53d, #ff5e5e); color: #08080a; padding: 14px 24px; border-radius: 999px; font-weight: 700; text-decoration: none;">
         Actualizar método de pago
       </a>
     </p>
     <p style="font-size: 13px; color: #aaa; margin: 16px 0 0 0;">
       Si el botón no funciona, copiá y pegá este link en tu navegador:<br/>
-      <a href="${args.ctaUrl}" style="color: #3aa3ff;">${args.ctaUrl}</a>
+      <a href="${args.ctaUrl}" style="color: #c8ff2d;">${args.ctaUrl}</a>
     </p>
     <p style="font-size: 12px; color: #777; margin-top: 24px;">¿Necesitás ayuda? Respondé este email y te acompañamos.</p>
   </div>

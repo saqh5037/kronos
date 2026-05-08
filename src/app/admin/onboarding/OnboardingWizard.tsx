@@ -68,7 +68,7 @@ export default function OnboardingWizard({ box, schedule, status }: Props) {
   const [name, setName] = useState(box.name);
   const [timezone, setTimezone] = useState(box.timezone);
   const [currency, setCurrency] = useState(box.currency);
-  const [brandColor, setBrandColor] = useState(box.brandColor ?? "#19f08b");
+  const [brandColor, setBrandColor] = useState(box.brandColor ?? "#c8ff2d");
 
   // Step 3 — Plan
   const [planName, setPlanName] = useState("Mensualidad");
