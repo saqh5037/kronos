@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { authOptions } from "@/server/auth";
 import KCard from "@/components/kronos/KCard";
+import KronosLogo from "@/components/brand/KronosLogo";
 import SignupForm from "./SignupForm";
 
 export const metadata = { title: "Kronos — Empezá tu trial" };
@@ -20,19 +21,8 @@ export default async function SignupPage() {
     >
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <div
-            className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-4 border"
-            style={{
-              background: "var(--k-surface)",
-              borderColor: "var(--k-line-2)",
-            }}
-          >
-            <span
-              className="font-display font-bold text-2xl"
-              style={{ color: "var(--k-accent)" }}
-            >
-              K
-            </span>
+          <div className="inline-flex mb-4">
+            <KronosLogo variant="mark" size={56} />
           </div>
           <h1 className="font-display font-bold text-3xl tracking-[-0.01em]">
             Empezá tu trial
