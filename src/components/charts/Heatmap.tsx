@@ -17,7 +17,7 @@ type Props = {
   to: Date;
   cellSize?: number;
   cellGap?: number;
-  /** Color used at the maximum intensity. Defaults to strain blue. */
+  /** Color used at the maximum intensity. Defaults to neutral grey. */
   intensityColor?: string;
   emptyColor?: string;
   ariaLabel?: string;

@@ -1453,15 +1453,15 @@
 
 :root,
 .light {
-  --kronos-skeleton-bg: rgba(58, 163, 255, 0.06);
-  --kronos-skeleton-border: rgba(58, 163, 255, 0.12);
-  --kronos-skeleton-shimmer: rgba(58, 163, 255, 0.16);
+  --kronos-skeleton-bg: rgba(200, 255, 45, 0.06);
+  --kronos-skeleton-border: rgba(200, 255, 45, 0.12);
+  --kronos-skeleton-shimmer: rgba(200, 255, 45, 0.16);
 }
 
 .dark {
-  --kronos-skeleton-bg: rgba(58, 163, 255, 0.08);
-  --kronos-skeleton-border: rgba(58, 163, 255, 0.18);
-  --kronos-skeleton-shimmer: rgba(58, 163, 255, 0.28);
+  --kronos-skeleton-bg: rgba(200, 255, 45, 0.08);
+  --kronos-skeleton-border: rgba(200, 255, 45, 0.18);
+  --kronos-skeleton-shimmer: rgba(200, 255, 45, 0.28);
 }
 
 .k-skeleton {
@@ -1518,27 +1518,27 @@
 }
 
 .k-toast--success::before {
-  background: #19f08b;
-  box-shadow: 0 0 12px rgba(25, 240, 139, 0.55);
+  background: #c8ff2d;
+  box-shadow: 0 0 12px rgba(200, 255, 45, 0.55);
 }
 
 .k-toast--error::before {
-  background: #ff5e5e;
-  box-shadow: 0 0 12px rgba(255, 94, 94, 0.55);
+  background: #ff5a5a;
+  box-shadow: 0 0 12px rgba(255, 90, 90, 0.55);
 }
 
 .k-toast--info::before {
-  background: #3aa3ff;
-  box-shadow: 0 0 12px rgba(58, 163, 255, 0.55);
+  background: #c8ff2d;
+  box-shadow: 0 0 12px rgba(200, 255, 45, 0.4);
 }
 
 .k-toast--warning::before {
-  background: #ffb547;
-  box-shadow: 0 0 12px rgba(255, 181, 71, 0.55);
+  background: #ffb020;
+  box-shadow: 0 0 12px rgba(255, 176, 32, 0.55);
 }
 
 .k-toast--loading::before {
-  background: #3aa3ff;
+  background: #c8ff2d;
   animation: k-toast-loading 1.4s ease-in-out infinite;
 }
 
@@ -1546,11 +1546,11 @@
   0%,
   100% {
     opacity: 0.4;
-    box-shadow: 0 0 6px rgba(58, 163, 255, 0.3);
+    box-shadow: 0 0 6px rgba(200, 255, 45, 0.3);
   }
   50% {
     opacity: 1;
-    box-shadow: 0 0 14px rgba(58, 163, 255, 0.7);
+    box-shadow: 0 0 14px rgba(200, 255, 45, 0.7);
   }
 }
 

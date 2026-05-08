@@ -8,7 +8,7 @@ interface ChartGridProps {
   animate: boolean;
   reduceMotion: boolean;
   baseDelay?: number;
-  /** Cinematic variant: tighter grid, brighter blue lines */
+  /** Cinematic variant: tighter grid, brighter lima lines */
   cinematic?: boolean;
   cinematicColor?: string;
 }
@@ -19,7 +19,7 @@ export function ChartGrid({
   reduceMotion,
   baseDelay = 0,
   cinematic = false,
-  cinematicColor = "#3aa3ff",
+  cinematicColor = "#C8FF2D",
 }: ChartGridProps) {
   const { padding, innerWidth, innerHeight, yTicks, yScale } = scale;
   const x1 = padding.left;

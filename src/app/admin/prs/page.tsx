@@ -72,7 +72,7 @@ export default async function PRsPage() {
                     className="absolute inset-0"
                     style={{
                       background:
-                        "radial-gradient(ellipse at 80% 0%, rgba(58,163,255,0.18), transparent 55%), radial-gradient(ellipse at 0% 100%, rgba(25,240,139,0.12), transparent 60%)",
+                        "radial-gradient(ellipse at 80% 0%, rgba(200,255,45,0.18), transparent 55%), radial-gradient(ellipse at 0% 100%, rgba(200,255,45,0.10), transparent 60%)",
                     }}
                   />
                   <div className="relative">

@@ -4,9 +4,9 @@ export function GatewayChip({ gateway }: { gateway: string }) {
       <span
         className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[10px] font-bold"
         style={{
-          background: "rgba(58,163,255,0.15)",
+          background: "var(--k-elevated)",
           color: "var(--k-t2)",
-          border: "1px solid rgba(58,163,255,0.3)",
+          border: "1px solid var(--k-line-2)",
         }}
         title="Mercado Pago"
       >
@@ -19,9 +19,9 @@ export function GatewayChip({ gateway }: { gateway: string }) {
       <span
         className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[10px] font-bold"
         style={{
-          background: "rgba(25,240,139,0.15)",
+          background: "var(--k-accent-soft)",
           color: "var(--k-accent)",
-          border: "1px solid rgba(25,240,139,0.3)",
+          border: "1px solid var(--k-accent-line)",
         }}
         title="Efectivo"
       >

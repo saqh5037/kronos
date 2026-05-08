@@ -66,8 +66,8 @@ export interface KronosLineChartProps<T> {
   className?: string;
   ariaLabel?: string;
   /**
-   * Visual variant. `cinematic` = bars + line + intense glow + blue palette
-   * over deep navy panel (stock-chart cinematic look).
+   * Visual variant. `cinematic` = bars + line + intense glow + lima palette
+   * over deep black panel (V3 Cuarto Oscuro look).
    */
   variant?: KronosChartVariant;
   /** When true (default in cinematic), render bars beneath the line. */
@@ -264,11 +264,11 @@ export function KronosLineChart<T>({
         ...(isCinematic
           ? {
               background:
-                "radial-gradient(ellipse at 50% 60%, #1a3457 0%, #0d1b2e 65%, #07101e 100%)",
+                "radial-gradient(ellipse at 50% 60%, #14141a 0%, #0f1014 65%, #08080a 100%)",
               borderRadius: 12,
               overflow: "hidden",
               boxShadow:
-                "inset 0 0 40px rgba(58,163,255,0.08), 0 0 0 1px rgba(58,163,255,0.12)",
+                "inset 0 0 40px rgba(200, 255, 45, 0.08), 0 0 0 1px rgba(200, 255, 45, 0.12)",
             }
           : null),
       }}

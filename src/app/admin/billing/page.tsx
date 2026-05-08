@@ -97,9 +97,9 @@ function copyForStatus(
 
 const TONE_COLOR: Record<StatusCopy["tone"], string> = {
   info: "var(--k-accent)",
-  warning: "var(--orange, #ffa53d)",
-  danger: "var(--k-accent)",
-  success: "var(--green, #19f08b)",
+  warning: "var(--k-warning)",
+  danger: "var(--k-danger)",
+  success: "var(--k-accent)",
 };
 
 export default async function BillingPage() {
