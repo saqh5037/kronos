@@ -10,6 +10,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import GlobalEffects from "@/components/GlobalEffects";
 import { KronosToaster } from "@/components/kronos/KronosToaster";
+import { AchievementToastHost } from "@/components/atleta/AchievementToast";
 import { ConfirmProvider } from "@/lib/use-confirm";
 
 const inter = Inter({
@@ -88,6 +89,7 @@ export default function RootLayout({
           <ConfirmProvider>
             {children}
             <KronosToaster />
+            <AchievementToastHost />
           </ConfirmProvider>
         </ThemeProvider>
       </body>

@@ -18,25 +18,25 @@ enum SubscriptionStatus {
 }
 
 model Box {
-  id                    String             @id @default(cuid())
-  slug                  String             @unique
-  name                  String
-  locale                String             @default("es-MX")
-  currency              String             @default("MXN")
-  timezone              String             @default("America/Mexico_City")
-  defaultClassCapacity  Int                @default(10)
-  bookingOpenHoursAhead Int                @default(24)
-  cancelCloseMinBefore  Int                @default(30)
-  weeklySchedule        Json?
-  brandColor            String?
-  logoUrl               String?
-  trialStartedAt        DateTime?
-  trialEndsAt           DateTime?
-  subscriptionStatus    SubscriptionStatus @default(TRIAL)
-  onboardingCompletedAt DateTime?
-  weeklyDigestEnabled        Boolean       @default(true)
-  transactionalEmailsEnabled Boolean       @default(true)
-  createdAt             DateTime           @default(now())
+  id                         String             @id @default(cuid())
+  slug                       String             @unique
+  name                       String
+  locale                     String             @default("es-MX")
+  currency                   String             @default("MXN")
+  timezone                   String             @default("America/Mexico_City")
+  defaultClassCapacity       Int                @default(10)
+  bookingOpenHoursAhead      Int                @default(24)
+  cancelCloseMinBefore       Int                @default(30)
+  weeklySchedule             Json?
+  brandColor                 String?
+  logoUrl                    String?
+  trialStartedAt             DateTime?
+  trialEndsAt                DateTime?
+  subscriptionStatus         SubscriptionStatus @default(TRIAL)
+  onboardingCompletedAt      DateTime?
+  weeklyDigestEnabled        Boolean            @default(true)
+  transactionalEmailsEnabled Boolean            @default(true)
+  createdAt                  DateTime           @default(now())
 
   users                   User[]
   athletes                Athlete[]
@@ -82,13 +82,13 @@ model User {
   athlete      Athlete?
   coachClasses Class[]
 
-  permissionsUpdated      Permission[]             @relation("PermissionUpdatedBy")
-  grantRequestsCreated    PermissionGrantRequest[] @relation("GrantRequestRequester")
-  grantRequestsReviewed   PermissionGrantRequest[] @relation("GrantRequestReviewer")
-  whiteboardUploads       WhiteboardUpload[]       @relation("WhiteboardUploader")
-  aliasesCreated          AthleteAlias[]           @relation("AliasCreatedBy")
-  inAppNotifications      InAppNotification[]
-  pushSubscriptions       PushSubscription[]
+  permissionsUpdated    Permission[]             @relation("PermissionUpdatedBy")
+  grantRequestsCreated  PermissionGrantRequest[] @relation("GrantRequestRequester")
+  grantRequestsReviewed PermissionGrantRequest[] @relation("GrantRequestReviewer")
+  whiteboardUploads     WhiteboardUpload[]       @relation("WhiteboardUploader")
+  aliasesCreated        AthleteAlias[]           @relation("AliasCreatedBy")
+  inAppNotifications    InAppNotification[]
+  pushSubscriptions     PushSubscription[]
 
   @@index([tenantId])
 }
@@ -168,6 +168,8 @@ model Athlete {
   bodyMetrics     BodyMetric[]
   aliases         AthleteAlias[]
   surveyResponses SurveyResponse[]
+  xpLedger        XPLedger[]
+  dailyMissions   DailyMission[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -349,6 +351,12 @@ model Movement {
   equipment           String[]
   createdAt           DateTime         @default(now())
 
+  cues           Json?
+  commonMistakes Json?
+  progressions   Json?
+  musclesWorked  String[]
+  difficulty     Int?
+
   box          Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   wodMovements WODMovement[]
   prs          PR[]
@@ -408,9 +416,9 @@ model PR {
   athlete  Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
   movement Movement @relation(fields: [movementId], references: [id])
 
+  @@unique([athleteId, movementId])
   @@index([tenantId])
   @@index([tenantId, athleteId])
-  @@unique([athleteId, movementId])
 }
 
 /// Append-only log of every PR improvement.
@@ -481,8 +489,8 @@ model BodyMetric {
   id         String   @id @default(cuid())
   tenantId   String
   athleteId  String
-  type       String   // WEIGHT | BODY_FAT | MUSCLE_MASS | BMI | CUSTOM
-  label      String?  // free text when type=CUSTOM
+  type       String // WEIGHT | BODY_FAT | MUSCLE_MASS | BMI | CUSTOM
+  label      String? // free text when type=CUSTOM
   value      Decimal  @db.Decimal(10, 3)
   unit       String
   measuredAt DateTime @default(now())
@@ -612,6 +620,39 @@ model Streak {
   @@index([tenantId])
 }
 
+model XPLedger {
+  id         String   @id @default(cuid())
+  tenantId   String
+  athleteId  String
+  amount     Int
+  reason     String
+  sourceType String
+  sourceId   String
+  createdAt  DateTime @default(now())
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceType, sourceId, reason])
+  @@index([tenantId, athleteId, createdAt])
+}
+
+model DailyMission {
+  id        String   @id @default(cuid())
+  tenantId  String
+  athleteId String
+  date      DateTime @db.Date
+  missions  Json
+  completed Json     @default("{}")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([athleteId, date])
+  @@index([tenantId, date])
+}
+
 // ─── RBAC PARAMETRIZABLE ──────────────────────────────────────────────────────
 
 enum PermissionAction {
@@ -626,17 +667,17 @@ enum PermissionAction {
 }
 
 model Permission {
-  id                   String           @id @default(cuid())
-  tenantId             String
-  action               PermissionAction
-  allowedRoles         Role[]
-  requiresOwnerApproval Boolean         @default(false)
-  threshold            Decimal?         @db.Decimal(10, 2)
-  updatedAt            DateTime         @updatedAt
-  updatedById          String?
+  id                    String           @id @default(cuid())
+  tenantId              String
+  action                PermissionAction
+  allowedRoles          Role[]
+  requiresOwnerApproval Boolean          @default(false)
+  threshold             Decimal?         @db.Decimal(10, 2)
+  updatedAt             DateTime         @updatedAt
+  updatedById           String?
 
-  box         Box   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  updatedBy   User? @relation("PermissionUpdatedBy", fields: [updatedById], references: [id])
+  box       Box   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  updatedBy User? @relation("PermissionUpdatedBy", fields: [updatedById], references: [id])
 
   @@unique([tenantId, action])
   @@index([tenantId])
@@ -844,17 +885,17 @@ model SaasPlan {
 }
 
 model SaasSubscription {
-  id                String                 @id @default(cuid())
-  tenantId          String
-  planId            String
-  status            SaasSubscriptionStatus @default(PENDING)
-  startsAt          DateTime?
-  currentPeriodEnd  DateTime?
-  cancelledAt       DateTime?
-  mpPreferenceId    String?                @unique
-  mpSubscriptionId  String?                @unique
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
+  id               String                 @id @default(cuid())
+  tenantId         String
+  planId           String
+  status           SaasSubscriptionStatus @default(PENDING)
+  startsAt         DateTime?
+  currentPeriodEnd DateTime?
+  cancelledAt      DateTime?
+  mpPreferenceId   String?                @unique
+  mpSubscriptionId String?                @unique
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
 
   box      Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   plan     SaasPlan      @relation(fields: [planId], references: [id])
@@ -870,16 +911,16 @@ enum SaasInvoiceStatus {
 }
 
 model SaasInvoice {
-  id              String            @id @default(cuid())
-  tenantId        String
-  subscriptionId  String
-  amountMxnCents  Int
-  status          SaasInvoiceStatus @default(PAID)
-  periodStart     DateTime
-  periodEnd       DateTime
-  paidAt          DateTime
-  mpPaymentId     String?           @unique
-  createdAt       DateTime          @default(now())
+  id             String            @id @default(cuid())
+  tenantId       String
+  subscriptionId String
+  amountMxnCents Int
+  status         SaasInvoiceStatus @default(PAID)
+  periodStart    DateTime
+  periodEnd      DateTime
+  paidAt         DateTime
+  mpPaymentId    String?           @unique
+  createdAt      DateTime          @default(now())
 
   box          Box              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   subscription SaasSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
@@ -1015,18 +1056,18 @@ enum AnnouncementStatus {
 }
 
 model Announcement {
-  id          String               @id @default(cuid())
-  tenantId    String
-  title       String
-  body        String               @db.Text
-  audience    AnnouncementAudience @default(ALL)
-  channel     AnnouncementChannel  @default(IN_APP)
-  status      AnnouncementStatus   @default(DRAFT)
-  scheduledAt DateTime?
-  sentAt      DateTime?
-  recipientCount Int               @default(0)
-  authorId    String?
-  createdAt   DateTime             @default(now())
+  id             String               @id @default(cuid())
+  tenantId       String
+  title          String
+  body           String               @db.Text
+  audience       AnnouncementAudience @default(ALL)
+  channel        AnnouncementChannel  @default(IN_APP)
+  status         AnnouncementStatus   @default(DRAFT)
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  recipientCount Int                  @default(0)
+  authorId       String?
+  createdAt      DateTime             @default(now())
 
   @@index([tenantId])
   @@index([tenantId, createdAt])

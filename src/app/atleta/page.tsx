@@ -2,8 +2,15 @@ import Link from "next/link";
 import type { Route } from "next";
 import {
   getAthleteHome,
+  getAthleteTrophies,
+  getSuggestedNextClass,
   type AthleteHome,
+  type AthleteTrophy,
+  type SuggestedBooking,
 } from "@/server/actions/athlete-home";
+import { StreakHero } from "@/components/atleta/StreakHero";
+import { TrophyStrip } from "@/components/atleta/TrophyStrip";
+import { SuggestedBookingCard } from "@/components/atleta/SuggestedBookingCard";
 import {
   listAvailableClasses,
   type AvailableClass,
@@ -46,15 +53,20 @@ export default async function AtletaHomePage() {
   let readinessSurvey: SurveyRow | null = null;
   let alreadyRespondedReadiness = true;
   let greeting: DailyGreeting | null = null;
+  let trophies: AthleteTrophy[] = [];
+  let suggestion: SuggestedBooking = null;
 
   try {
-    [home, classes, prs, wod, greeting] = await Promise.all([
-      getAthleteHome(),
-      listAvailableClasses(7),
-      listMyPRs(),
-      getTodayWOD(),
-      getDailyGreeting(),
-    ]);
+    [home, classes, prs, wod, greeting, trophies, suggestion] =
+      await Promise.all([
+        getAthleteHome(),
+        listAvailableClasses(7),
+        listMyPRs(),
+        getTodayWOD(),
+        getDailyGreeting(),
+        getAthleteTrophies(),
+        getSuggestedNextClass().catch(() => null),
+      ]);
   } catch {
     // Sesión ausente
   }
@@ -214,6 +226,11 @@ export default async function AtletaHomePage() {
         <QuickSurvey survey={readinessSurvey} />
       )}
 
+      {/* STREAK HERO */}
+      <div className="px-3.5 mt-4">
+        <StreakHero count={home.streak} lastEventAt={home.streakLastEventAt} />
+      </div>
+
       {/* HERO STATS */}
       <AnimatedStats
         weekAttendance={home.weekAttendance}
@@ -221,6 +238,16 @@ export default async function AtletaHomePage() {
         streak={home.streak}
         prCount={home.prCount}
       />
+
+      {/* TROPHY STRIP */}
+      {trophies.length > 0 && (
+        <div className="mt-4 px-3.5">
+          <div className="k-eyebrow mb-2" style={{ color: "var(--k-t2)" }}>
+            LOGROS · {home.xpTotal} XP
+          </div>
+          <TrophyStrip items={trophies} />
+        </div>
+      )}
 
       {/* NEXT BOOKING */}
       <RevealOnScroll variant="fade-up" className="mt-4 px-3.5">
@@ -272,6 +299,8 @@ export default async function AtletaHomePage() {
               <CancelMyBookingButton bookingId={home.nextBooking.bookingId} />
             </div>
           </KCard>
+        ) : suggestion ? (
+          <SuggestedBookingCard suggestion={suggestion} />
         ) : (
           <Link href="/atleta/reservar" className="block">
             <KCard variant="ghost">

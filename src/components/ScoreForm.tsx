@@ -6,6 +6,7 @@ import { scalings } from "@/lib/validations/score";
 import { defaultUnit, timeStringToSeconds } from "@/lib/validations/score";
 import type { ScoreType } from "@/lib/validations/wod";
 import { kToast } from "@/lib/toast";
+import { fireAchievementToast } from "@/components/atleta/AchievementToast";
 
 const ERROR_RED = "#ff5e5e";
 
@@ -95,6 +96,9 @@ export default function ScoreForm({
         } else {
           kToast.success("Score guardado");
           setFeedback("SCORE GUARDADO");
+        }
+        if (res.unlockedBadges?.length) {
+          fireAchievementToast(res.unlockedBadges);
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Error al guardar";

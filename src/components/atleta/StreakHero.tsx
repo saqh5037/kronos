@@ -1,0 +1,195 @@
+"use client";
+
+import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useState } from "react";
+
+type Status = "safe" | "warning" | "critical";
+
+interface StreakHeroProps {
+  count: number;
+  lastEventAt: Date | string | null;
+  /** Override status (e.g. for storybook/visual demos). */
+  forceStatus?: Status;
+}
+
+const PALETTE: Record<Status, { glow: string; tag: string; line: string }> = {
+  safe: {
+    glow: "rgba(200, 255, 45, 0.22)",
+    tag: "EN LLAMAS",
+    line: "No la rompas hoy",
+  },
+  warning: {
+    glow: "rgba(255, 176, 32, 0.28)",
+    tag: "NO LA SUELTES",
+    line: "Tu racha está en juego",
+  },
+  critical: {
+    glow: "rgba(255, 90, 90, 0.32)",
+    tag: "RACHA EN RIESGO",
+    line: "Quedan horas para mantenerla",
+  },
+};
+
+function computeStatus(lastEventAt: Date | null, now: Date): Status {
+  if (!lastEventAt) return "safe";
+  const sameDay =
+    lastEventAt.getFullYear() === now.getFullYear() &&
+    lastEventAt.getMonth() === now.getMonth() &&
+    lastEventAt.getDate() === now.getDate();
+  if (sameDay) return "safe";
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const wasYesterday =
+    lastEventAt.getFullYear() === yesterday.getFullYear() &&
+    lastEventAt.getMonth() === yesterday.getMonth() &&
+    lastEventAt.getDate() === yesterday.getDate();
+  if (!wasYesterday) return "safe";
+  const hour = now.getHours();
+  if (hour >= 21) return "critical";
+  if (hour >= 18) return "warning";
+  return "safe";
+}
+
+export function StreakHero({
+  count,
+  lastEventAt,
+  forceStatus,
+}: StreakHeroProps) {
+  const reduce = useReducedMotion();
+  const [status, setStatus] = useState<Status>(forceStatus ?? "safe");
+
+  useEffect(() => {
+    if (forceStatus) {
+      setStatus(forceStatus);
+      return;
+    }
+    const last = lastEventAt ? new Date(lastEventAt) : null;
+    setStatus(computeStatus(last, new Date()));
+  }, [lastEventAt, forceStatus]);
+
+  const palette = PALETTE[status];
+  const flameKey = `${status}-${reduce ? "static" : "anim"}`;
+
+  return (
+    <div
+      className="k-card relative overflow-hidden"
+      style={{
+        padding: "20px 18px",
+        background:
+          "linear-gradient(180deg, var(--k-elevated) 0%, var(--k-surface) 100%)",
+      }}
+      data-testid="streak-hero"
+      data-status={status}
+    >
+      <motion.div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse at 70% 30%, ${palette.glow}, transparent 60%)`,
+        }}
+        animate={
+          reduce
+            ? undefined
+            : {
+                opacity: status === "safe" ? [0.6, 1, 0.6] : [0.7, 1, 0.7],
+              }
+        }
+        transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      <div className="relative flex items-start gap-5">
+        <div className="shrink-0">
+          <Flame status={status} reduce={reduce ?? false} key={flameKey} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
+            {palette.tag}
+          </div>
+          <div
+            className="k-mono"
+            style={{
+              fontSize: 56,
+              lineHeight: 1,
+              color: "var(--k-t1)",
+              fontVariantNumeric: "tabular-nums",
+              marginTop: 4,
+            }}
+          >
+            {count}
+          </div>
+          <div
+            className="k-mono"
+            style={{ color: "var(--k-t2)", fontSize: 11, letterSpacing: 1 }}
+          >
+            DÍA{count === 1 ? "" : "S"} DE RACHA
+          </div>
+          <div
+            className="k-body"
+            style={{ color: "var(--k-t2)", fontSize: 13, marginTop: 8 }}
+          >
+            {palette.line}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Flame({ status, reduce }: { status: Status; reduce: boolean }) {
+  const fill =
+    status === "critical"
+      ? "var(--k-danger)"
+      : status === "warning"
+        ? "var(--k-warning)"
+        : "var(--k-accent)";
+
+  const shake =
+    status === "critical" && !reduce
+      ? { rotate: [-1.5, 1.5, -1, 1, 0], x: [0, -1, 1, 0] }
+      : undefined;
+
+  return (
+    <motion.svg
+      width={64}
+      height={72}
+      viewBox="0 0 64 72"
+      fill="none"
+      animate={shake}
+      transition={
+        shake
+          ? { duration: 0.6, repeat: Infinity, repeatDelay: 2.5 }
+          : undefined
+      }
+    >
+      <motion.path
+        d="M32 6 C 38 18, 50 24, 48 38 C 47 50, 38 60, 32 64 C 26 60, 17 50, 16 38 C 14 24, 26 18, 32 6 Z"
+        fill={fill}
+        opacity={0.9}
+        animate={
+          reduce
+            ? undefined
+            : {
+                scale: [1, 1.04, 1],
+                opacity: [0.85, 1, 0.85],
+              }
+        }
+        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+        style={{ transformOrigin: "32px 64px" }}
+      />
+      <motion.path
+        d="M32 22 C 36 30, 42 34, 40 42 C 39 50, 35 56, 32 58 C 29 56, 25 50, 24 42 C 22 34, 28 30, 32 22 Z"
+        fill="var(--k-bg)"
+        opacity={0.55}
+        animate={
+          reduce
+            ? undefined
+            : {
+                scale: [0.95, 1.05, 0.95],
+              }
+        }
+        transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+        style={{ transformOrigin: "32px 58px" }}
+      />
+    </motion.svg>
+  );
+}

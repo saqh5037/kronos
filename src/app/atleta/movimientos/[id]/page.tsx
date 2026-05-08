@@ -13,7 +13,7 @@ import {
   AnimatedSection,
   AnimatedItem,
 } from "@/components/kronos/AnimatedSection";
-import { getEquipmentIcon } from "@/lib/equipment-icons";
+import { EquipmentIcon } from "@/lib/equipment-icons";
 
 export const metadata = { title: "Kronos — Movimiento" };
 
@@ -196,9 +196,7 @@ export default async function MovementDetailPage({
                               fontSize: 12,
                             }}
                           >
-                            <span style={{ fontSize: 14 }}>
-                              {getEquipmentIcon(eq)}
-                            </span>
+                            <EquipmentIcon name={eq} size={14} />
                             {eq}
                           </span>
                         ))}
@@ -209,6 +207,278 @@ export default async function MovementDetailPage({
               </AnimatedItem>
             </AnimatedSection>
           )}
+
+          {/* CUES — Haz esto / No hagas esto */}
+          {movementInfo?.cues &&
+            ((movementInfo.cues.dos?.length ?? 0) > 0 ||
+              (movementInfo.cues.donts?.length ?? 0) > 0 ||
+              (movementInfo.cues.setup?.length ?? 0) > 0) && (
+              <AnimatedSection>
+                <AnimatedItem>
+                  <div
+                    data-testid="movement-cues"
+                    style={{
+                      padding: 16,
+                      background: "var(--k-surface)",
+                      border: "1px solid var(--k-line)",
+                      borderRadius: 16,
+                      display: "grid",
+                      gap: 14,
+                    }}
+                  >
+                    <p
+                      className="k-eyebrow"
+                      style={{ color: "var(--k-t3)", margin: 0 }}
+                    >
+                      Cómo ejecutarlo
+                    </p>
+                    {movementInfo.cues.setup &&
+                      movementInfo.cues.setup.length > 0 && (
+                        <CueList
+                          title="Setup"
+                          items={movementInfo.cues.setup}
+                          tone="neutral"
+                        />
+                      )}
+                    {movementInfo.cues.dos &&
+                      movementInfo.cues.dos.length > 0 && (
+                        <CueList
+                          title="Haz esto"
+                          items={movementInfo.cues.dos}
+                          tone="ok"
+                        />
+                      )}
+                    {movementInfo.cues.donts &&
+                      movementInfo.cues.donts.length > 0 && (
+                        <CueList
+                          title="No hagas esto"
+                          items={movementInfo.cues.donts}
+                          tone="bad"
+                        />
+                      )}
+                  </div>
+                </AnimatedItem>
+              </AnimatedSection>
+            )}
+
+          {/* COMMON MISTAKES */}
+          {movementInfo?.commonMistakes &&
+            movementInfo.commonMistakes.length > 0 && (
+              <AnimatedSection>
+                <AnimatedItem>
+                  <div
+                    data-testid="movement-mistakes"
+                    style={{
+                      padding: 16,
+                      background: "var(--k-surface)",
+                      border: "1px solid var(--k-line)",
+                      borderRadius: 16,
+                    }}
+                  >
+                    <p
+                      className="k-eyebrow"
+                      style={{
+                        color: "var(--k-warning)",
+                        margin: "0 0 12px",
+                      }}
+                    >
+                      Errores comunes
+                    </p>
+                    <div style={{ display: "grid", gap: 10 }}>
+                      {movementInfo.commonMistakes.map((m, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            background: "var(--k-elevated)",
+                            border: "1px solid var(--k-line)",
+                            borderRadius: 12,
+                            padding: "10px 12px",
+                          }}
+                        >
+                          <div style={{ display: "flex", gap: 10 }}>
+                            <WarningGlyph />
+                            <div style={{ flex: 1 }}>
+                              <div
+                                style={{
+                                  fontFamily: "var(--k-font-body)",
+                                  fontSize: 13,
+                                  fontWeight: 600,
+                                  color: "var(--k-t1)",
+                                  marginBottom: 2,
+                                }}
+                              >
+                                {m.title}
+                              </div>
+                              {m.description && (
+                                <div
+                                  style={{
+                                    fontFamily: "var(--k-font-body)",
+                                    fontSize: 12,
+                                    color: "var(--k-t2)",
+                                    marginBottom: 6,
+                                    lineHeight: 1.4,
+                                  }}
+                                >
+                                  {m.description}
+                                </div>
+                              )}
+                              {m.fixCue && (
+                                <div
+                                  style={{
+                                    fontFamily: "var(--k-font-mono)",
+                                    fontSize: 11,
+                                    color: "var(--k-accent)",
+                                    background: "var(--k-accent-soft)",
+                                    border: "1px solid var(--k-accent-line)",
+                                    padding: "4px 8px",
+                                    borderRadius: 6,
+                                    display: "inline-block",
+                                  }}
+                                >
+                                  CUE: {m.fixCue}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </AnimatedItem>
+              </AnimatedSection>
+            )}
+
+          {/* PROGRESSIONS */}
+          {movementInfo?.progressions &&
+            movementInfo.progressions.length > 0 && (
+              <AnimatedSection>
+                <AnimatedItem>
+                  <div
+                    data-testid="movement-progressions"
+                    style={{
+                      padding: 16,
+                      background: "var(--k-surface)",
+                      border: "1px solid var(--k-line)",
+                      borderRadius: 16,
+                    }}
+                  >
+                    <p
+                      className="k-eyebrow"
+                      style={{ color: "var(--k-t3)", margin: "0 0 12px" }}
+                    >
+                      Escalados / progresiones
+                    </p>
+                    <div style={{ display: "grid", gap: 8 }}>
+                      {movementInfo.progressions.map((p, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            background: "var(--k-elevated)",
+                            border: "1px solid var(--k-line)",
+                            borderRadius: 12,
+                            padding: "10px 12px",
+                            display: "flex",
+                            gap: 10,
+                            alignItems: "flex-start",
+                          }}
+                        >
+                          <span
+                            className="k-mono"
+                            style={{
+                              fontSize: 9,
+                              letterSpacing: 1.2,
+                              padding: "3px 6px",
+                              borderRadius: 4,
+                              border: "1px solid var(--k-line)",
+                              color:
+                                p.level === "beginner"
+                                  ? "var(--k-accent)"
+                                  : p.level === "intermediate"
+                                    ? "var(--k-warning)"
+                                    : "var(--k-danger)",
+                            }}
+                          >
+                            {p.level === "beginner"
+                              ? "PRINCIPIANTE"
+                              : p.level === "intermediate"
+                                ? "INTERMEDIO"
+                                : "AVANZADO"}
+                          </span>
+                          <div style={{ flex: 1 }}>
+                            <div
+                              style={{
+                                fontFamily: "var(--k-font-body)",
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: "var(--k-t1)",
+                              }}
+                            >
+                              {p.name}
+                            </div>
+                            {p.description && (
+                              <div
+                                style={{
+                                  fontFamily: "var(--k-font-body)",
+                                  fontSize: 12,
+                                  color: "var(--k-t2)",
+                                  marginTop: 2,
+                                }}
+                              >
+                                {p.description}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </AnimatedItem>
+              </AnimatedSection>
+            )}
+
+          {/* MUSCLES WORKED */}
+          {movementInfo?.musclesWorked &&
+            movementInfo.musclesWorked.length > 0 && (
+              <AnimatedSection>
+                <AnimatedItem>
+                  <div
+                    data-testid="movement-muscles"
+                    style={{
+                      padding: 16,
+                      background: "var(--k-surface)",
+                      border: "1px solid var(--k-line)",
+                      borderRadius: 16,
+                    }}
+                  >
+                    <p
+                      className="k-eyebrow"
+                      style={{ color: "var(--k-t3)", margin: "0 0 10px" }}
+                    >
+                      Músculos trabajados
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {movementInfo.musclesWorked.map((m) => (
+                        <span
+                          key={m}
+                          style={{
+                            padding: "4px 10px",
+                            borderRadius: 999,
+                            background: "var(--k-accent-soft)",
+                            border: "1px solid var(--k-accent-line)",
+                            color: "var(--k-accent)",
+                            fontFamily: "var(--k-font-body)",
+                            fontSize: 11,
+                            textTransform: "capitalize",
+                          }}
+                        >
+                          {m}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </AnimatedItem>
+              </AnimatedSection>
+            )}
         </div>
 
         {/* Right column — stats + chart */}
@@ -542,6 +812,138 @@ export default async function MovementDetailPage({
         </AnimatedSection>
       )}
     </div>
+  );
+}
+
+function CueList({
+  title,
+  items,
+  tone,
+}: {
+  title: string;
+  items: string[];
+  tone: "ok" | "bad" | "neutral";
+}) {
+  const color =
+    tone === "ok"
+      ? "var(--k-accent)"
+      : tone === "bad"
+        ? "var(--k-danger)"
+        : "var(--k-t2)";
+  return (
+    <div>
+      <p
+        className="k-mono"
+        style={{
+          fontSize: 9,
+          letterSpacing: 1.5,
+          color,
+          margin: "0 0 6px",
+        }}
+      >
+        {title.toUpperCase()}
+      </p>
+      <ul
+        style={{
+          display: "grid",
+          gap: 6,
+          margin: 0,
+          padding: 0,
+          listStyle: "none",
+        }}
+      >
+        {items.map((it, i) => (
+          <li
+            key={i}
+            style={{
+              display: "flex",
+              gap: 8,
+              alignItems: "flex-start",
+              fontFamily: "var(--k-font-body)",
+              fontSize: 13,
+              color: "var(--k-t1)",
+              lineHeight: 1.4,
+            }}
+          >
+            <CueGlyph tone={tone} />
+            <span>{it}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function CueGlyph({ tone }: { tone: "ok" | "bad" | "neutral" }) {
+  const color =
+    tone === "ok"
+      ? "var(--k-accent)"
+      : tone === "bad"
+        ? "var(--k-danger)"
+        : "var(--k-t3)";
+  if (tone === "bad") {
+    return (
+      <svg
+        width={16}
+        height={16}
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        style={{ flexShrink: 0, marginTop: 3 }}
+      >
+        <path d="M4 4l8 8M12 4l-8 8" />
+      </svg>
+    );
+  }
+  if (tone === "ok") {
+    return (
+      <svg
+        width={16}
+        height={16}
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ flexShrink: 0, marginTop: 3 }}
+      >
+        <path d="M3 8l3 3 7-7" />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 16 16"
+      fill={color}
+      style={{ flexShrink: 0, marginTop: 5 }}
+    >
+      <circle cx="8" cy="8" r="3" />
+    </svg>
+  );
+}
+
+function WarningGlyph() {
+  return (
+    <svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="var(--k-warning)"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ flexShrink: 0, marginTop: 1 }}
+    >
+      <path d="M12 2L2 21h20L12 2z" />
+      <path d="M12 9v5" />
+      <path d="M12 17h0" />
+    </svg>
   );
 }
 

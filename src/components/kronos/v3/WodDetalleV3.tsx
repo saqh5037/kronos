@@ -12,6 +12,8 @@ export type MovementRowData = {
   name: string;
   sub?: string;
   iconKind?: "run" | "kb" | "pull" | "default";
+  /** When present, the row links to the movement detail page. */
+  movementId?: string;
 };
 
 export type WodDetalleV3Props = {
@@ -327,82 +329,113 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
                 {props.roundsSub.toUpperCase()}
               </span>
             </div>
-            {props.movements.map((m, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  padding: "14px 0",
-                  borderBottom:
-                    i < props.movements.length - 1
-                      ? "1px solid var(--k-line)"
-                      : "none",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "var(--k-font-display)",
-                    fontSize: 18,
-                    fontWeight: 600,
-                    color: "var(--k-t1)",
-                    letterSpacing: "-0.02em",
-                    minWidth: 62,
-                  }}
-                >
-                  {m.reps}
-                </span>
-                <div
-                  style={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 2,
-                  }}
-                >
+            {props.movements.map((m, i) => {
+              const last = i === props.movements.length - 1;
+              const inner = (
+                <>
                   <span
                     style={{
-                      fontFamily: "var(--k-font-body)",
-                      fontSize: 14,
+                      fontFamily: "var(--k-font-display)",
+                      fontSize: 18,
                       fontWeight: 600,
                       color: "var(--k-t1)",
-                      letterSpacing: "-0.01em",
+                      letterSpacing: "-0.02em",
+                      minWidth: 62,
                     }}
                   >
-                    {m.name}
+                    {m.reps}
                   </span>
-                  {m.sub && (
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                      minWidth: 0,
+                    }}
+                  >
                     <span
                       style={{
-                        fontFamily: "var(--k-font-display)",
-                        fontSize: 10,
-                        fontWeight: 500,
-                        color: "var(--k-t2)",
-                        letterSpacing: "0.06em",
+                        fontFamily: "var(--k-font-body)",
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: "var(--k-t1)",
+                        letterSpacing: "-0.01em",
                       }}
                     >
-                      {m.sub.toUpperCase()}
+                      {m.name}
+                      {m.movementId && (
+                        <span
+                          aria-hidden="true"
+                          style={{
+                            color: "var(--k-accent)",
+                            marginLeft: 6,
+                            fontSize: 11,
+                          }}
+                        >
+                          ↗
+                        </span>
+                      )}
                     </span>
-                  )}
+                    {m.sub && (
+                      <span
+                        style={{
+                          fontFamily: "var(--k-font-display)",
+                          fontSize: 10,
+                          fontWeight: 500,
+                          color: "var(--k-t2)",
+                          letterSpacing: "0.06em",
+                        }}
+                      >
+                        {m.sub.toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      background: "var(--k-elevated)",
+                      border: "1px solid var(--k-line)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "var(--k-t2)",
+                    }}
+                  >
+                    <MovIcon kind={m.iconKind} />
+                  </div>
+                </>
+              );
+              const rowStyle: React.CSSProperties = {
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                padding: "14px 0",
+                borderBottom: last ? "none" : "1px solid var(--k-line)",
+                color: "inherit",
+                textDecoration: "none",
+              };
+              if (m.movementId) {
+                return (
+                  <Link
+                    key={i}
+                    href={`/atleta/movimientos/${m.movementId}` as LinkHref}
+                    style={rowStyle}
+                    data-testid="wod-movement-row"
+                    data-movement-id={m.movementId}
+                  >
+                    {inner}
+                  </Link>
+                );
+              }
+              return (
+                <div key={i} style={rowStyle}>
+                  {inner}
                 </div>
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
-                    background: "var(--k-elevated)",
-                    border: "1px solid var(--k-line)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "var(--k-t2)",
-                  }}
-                >
-                  <MovIcon kind={m.iconKind} />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

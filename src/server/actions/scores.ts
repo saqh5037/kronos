@@ -10,6 +10,11 @@ import type { ScoreType } from "@/lib/validations/wod";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
 import { maybeAchievePRGoals } from "./goals";
+import {
+  runAchievementEvaluation,
+  awardXP,
+  type UnlockedBadge,
+} from "@/server/achievements/evaluate";
 import { type ListOpts, type ListResult, normalizePagination } from "./types";
 import type { Scaling } from "@prisma/client";
 
@@ -419,11 +424,44 @@ export async function submitScore(data: unknown) {
     prAchieved,
   });
 
+  // Award XP for the raw score event (idempotent via XPLedger unique).
+  await awardXP({
+    tenantId,
+    athleteId: me.id,
+    amount: 5,
+    reason: "SCORE_SUBMITTED",
+    sourceType: "Score",
+    sourceId: score.id,
+  });
+  if (prAchieved) {
+    await awardXP({
+      tenantId,
+      athleteId: me.id,
+      amount: 50,
+      reason: "PR_ACHIEVED",
+      sourceType: "Score",
+      sourceId: score.id,
+    });
+  }
+
+  // Evaluate achievements that may have unlocked from this event.
+  let unlockedBadges: UnlockedBadge[] = [];
+  try {
+    const result = await runAchievementEvaluation({
+      tenantId,
+      athleteId: me.id,
+      trigger: "PR",
+    });
+    unlockedBadges = result.unlockedBadges;
+  } catch (err) {
+    console.error("[submitScore] achievement eval failed:", err);
+  }
+
   revalidatePath("/atleta/wod");
   revalidatePath("/atleta");
   revalidatePath("/admin/prs");
   revalidatePath("/admin/leaderboards");
-  return { ok: true, scoreId: score.id, prAchieved };
+  return { ok: true, scoreId: score.id, prAchieved, unlockedBadges };
 }
 
 // ─── Whiteboard OCR actions ───────────────────────────────────────────────────
@@ -685,6 +723,20 @@ export async function confirmWhiteboardScores(
         body: `Hiciste un nuevo PR en ${wod.name}: ${formattedScore}`,
         link: `/atleta/wod`,
       });
+    }
+  }
+
+  // Bulk: evaluate achievements once per athlete after all scores landed.
+  const uniqueAthleteIds = Array.from(new Set(rows.map((r) => r.athleteId)));
+  for (const athleteId of uniqueAthleteIds) {
+    try {
+      await runAchievementEvaluation({
+        tenantId,
+        athleteId,
+        trigger: "BULK",
+      });
+    } catch (err) {
+      console.error("[whiteboard.confirm] achievement eval failed:", err);
     }
   }
 

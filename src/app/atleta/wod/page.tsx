@@ -141,6 +141,7 @@ export default async function WODPage() {
       name: m.name,
       sub: sub || undefined,
       iconKind: detectIcon(m.name),
+      movementId: m.movementId,
     };
   });
 

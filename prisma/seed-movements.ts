@@ -491,6 +491,294 @@ export const STANDARD_MOVEMENTS: StandardMovement[] = [
   },
 ];
 
+type MovementEnrichment = {
+  cues?: {
+    setup?: string[];
+    dos?: string[];
+    donts?: string[];
+  };
+  commonMistakes?: Array<{
+    title: string;
+    description?: string;
+    fixCue?: string;
+  }>;
+  progressions?: Array<{
+    name: string;
+    level: "beginner" | "intermediate" | "advanced";
+    description?: string;
+  }>;
+  musclesWorked?: string[];
+  difficulty?: number;
+};
+
+/**
+ * Premium-tier enrichment for the 8 most-used movements. Coaches can
+ * extend or override per tenant via the admin form.
+ */
+export const MOVEMENT_ENRICHMENTS: Record<string, MovementEnrichment> = {
+  thruster: {
+    cues: {
+      setup: [
+        "Pies a la altura de hombros, dedos ligeramente afuera",
+        "Barra en rack frontal, codos altos paralelos al piso",
+      ],
+      dos: [
+        "Mantén core activo durante todo el movimiento",
+        "Sube y empuja en un solo flujo sin pausa",
+        "Bloquea brazos arriba con la cabeza pasando entre los hombros",
+      ],
+      donts: [
+        "Despegar talones del piso al subir",
+        "Separar codos y dejar caer la barra del rack",
+        "Hacer dos movimientos separados (squat y luego press)",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Codos caídos en el front rack",
+        description: "Pierdes posición y la barra rueda hacia adelante.",
+        fixCue: "Codos arriba, dedos sueltos en la barra",
+      },
+      {
+        title: "Press sin usar la cadera",
+        description: "Presionar sólo con tríceps quema brazos rapidísimo.",
+        fixCue: "Empuja desde piernas, brazos solo guían",
+      },
+    ],
+    progressions: [
+      {
+        name: "Goblet thruster con dumbbell",
+        level: "beginner",
+        description: "Mismo patrón con peso al frente, más fácil de balancear.",
+      },
+      {
+        name: "Thruster con barra vacía",
+        level: "intermediate",
+        description: "Foco en flujo squat-to-press sin carga.",
+      },
+      {
+        name: "Thruster RX (43kg / 30kg)",
+        level: "advanced",
+      },
+    ],
+    musclesWorked: ["quads", "glutes", "shoulders", "core", "triceps"],
+    difficulty: 4,
+  },
+  clean: {
+    cues: {
+      setup: ["Barra cerca del cuerpo, brazos largos", "Espalda neutra"],
+      dos: [
+        "Extensión triple (tobillos, rodillas, cadera) explosiva",
+        "Codos rápidos para recibir en rack frontal",
+        "Recibe en cuarter squat antes de pararte",
+      ],
+      donts: [
+        "Tirar con los brazos antes de la extensión",
+        "Curvar la espalda baja al despegar",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Brazos doblados temprano",
+        fixCue: "Brazos largos hasta que la cadera se abra",
+      },
+      {
+        title: "Recepción con espalda redondeada",
+        fixCue: "Pecho arriba al recibir, codos altos",
+      },
+    ],
+    progressions: [
+      { name: "Hang clean", level: "beginner" },
+      { name: "Power clean", level: "intermediate" },
+      { name: "Squat clean", level: "advanced" },
+    ],
+    musclesWorked: ["hamstrings", "glutes", "traps", "quads", "core"],
+    difficulty: 5,
+  },
+  snatch: {
+    cues: {
+      setup: [
+        "Agarre amplio (snatch grip), pulgares apuntando afuera",
+        "Cadera baja, pecho arriba",
+      ],
+      dos: [
+        "Barra cerca del cuerpo durante todo el pull",
+        "Extensión triple agresiva",
+        "Recibe activo (overhead squat lockout)",
+      ],
+      donts: ["Soltar pecho al iniciar", "Recibir con codos blandos arriba"],
+    },
+    commonMistakes: [
+      {
+        title: "Lockout débil arriba",
+        description: "Codos no completamente bloqueados, hombros sueltos.",
+        fixCue: "Push the bar up, shrug at the top",
+      },
+    ],
+    progressions: [
+      { name: "Snatch deadlift", level: "beginner" },
+      { name: "Hang power snatch", level: "intermediate" },
+      { name: "Squat snatch", level: "advanced" },
+    ],
+    musclesWorked: ["shoulders", "traps", "glutes", "core", "hamstrings"],
+    difficulty: 5,
+  },
+  deadlift: {
+    cues: {
+      setup: [
+        "Pies a la cadera, barra sobre el medio del pie",
+        "Espalda neutra, hombros ligeramente delante de la barra",
+      ],
+      dos: [
+        "Empuja el piso lejos con piernas",
+        "Mantén la barra pegada al cuerpo",
+        "Bloquea cadera arriba sin hiperextender",
+      ],
+      donts: [
+        "Redondear la espalda baja",
+        'Subir pierna+cadera por separado ("good morning")',
+        "Hyperextender la zona lumbar al final",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Caderas suben antes que el pecho",
+        description: "Conviertes el deadlift en un good-morning con peso.",
+        fixCue: "Empuja el piso, no levantes las caderas",
+      },
+      {
+        title: "Espalda redondeada",
+        description: "Riesgo alto de lesión lumbar.",
+        fixCue: "Pecho arriba, cinturón apretado",
+      },
+    ],
+    progressions: [
+      { name: "Romanian deadlift con KB", level: "beginner" },
+      { name: "Conventional deadlift con barra ligera", level: "intermediate" },
+      { name: "Deadlift heavy (1.5x BW+)", level: "advanced" },
+    ],
+    musclesWorked: ["hamstrings", "glutes", "lower back", "lats", "core"],
+    difficulty: 3,
+  },
+  "pull-up": {
+    cues: {
+      setup: ["Agarre prono ligeramente más amplio que hombros"],
+      dos: [
+        "Cuerpo en arco hueco al iniciar",
+        "Tira con la espalda, no solo brazos",
+        "Cabeza pasa la barra completa",
+      ],
+      donts: [
+        "Patear las piernas para impulsarte (a menos que sea kipping intencional)",
+        "Cortar el rango (mentón corto)",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Hombros encogidos al iniciar",
+        fixCue: "Activa los lats hacia abajo y atrás",
+      },
+    ],
+    progressions: [
+      { name: "Ring rows", level: "beginner" },
+      { name: "Banded pull-ups", level: "beginner" },
+      { name: "Strict pull-up", level: "intermediate" },
+      { name: "Chest-to-bar / Butterfly", level: "advanced" },
+    ],
+    musclesWorked: ["lats", "biceps", "core", "rear delts"],
+    difficulty: 3,
+  },
+  squat: {
+    cues: {
+      setup: [
+        "Pies a la altura de hombros, dedos ligeramente afuera",
+        "Mirada al frente",
+      ],
+      dos: [
+        "Inicia el movimiento con la cadera y rodillas a la vez",
+        "Rodillas siguen la línea de los pies",
+        "Profundidad: cadera por debajo de rodilla",
+      ],
+      donts: [
+        "Rodillas colapsando hacia adentro",
+        "Cargar peso en la punta de los pies",
+        "Quedar a media profundidad",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Rodillas cayendo hacia adentro",
+        fixCue: "Empuja las rodillas afuera, contra los pies",
+      },
+    ],
+    progressions: [
+      { name: "Air squat con caja", level: "beginner" },
+      { name: "Goblet squat con KB", level: "beginner" },
+      { name: "Back squat", level: "intermediate" },
+      { name: "Front squat / Overhead squat", level: "advanced" },
+    ],
+    musclesWorked: ["quads", "glutes", "hamstrings", "core"],
+    difficulty: 2,
+  },
+  burpee: {
+    cues: {
+      setup: ["De pie, pies a la altura de hombros"],
+      dos: [
+        "Baja a plancha controlado",
+        "Pecho y muslos tocan el piso",
+        "Salta con dos pies y aplaude arriba",
+      ],
+      donts: [
+        "Saltar uno solo pie a la vez",
+        "Quitar el pecho/muslos del piso al subir",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Cadera cayendo en plancha",
+        fixCue: "Activa core como una tabla rígida",
+      },
+    ],
+    progressions: [
+      {
+        name: "Step-down burpee (sin saltar)",
+        level: "beginner",
+      },
+      { name: "Burpee estándar", level: "intermediate" },
+      { name: "Burpee bar facing", level: "advanced" },
+    ],
+    musclesWorked: ["full body", "core", "shoulders", "quads"],
+    difficulty: 3,
+  },
+  "wall-ball": {
+    cues: {
+      setup: [
+        "Pies a la altura de hombros frente al wall",
+        "Pelota apoyada en el pecho",
+      ],
+      dos: [
+        "Squat completo (cadera bajo rodilla)",
+        "Lanza con piernas + brazos en un solo movimiento",
+        "Apunta a la marca/altura objetivo",
+      ],
+      donts: ["Hacer squat parcial", "Empujar solo con los brazos"],
+    },
+    commonMistakes: [
+      {
+        title: "Pelota cayendo en la cara",
+        fixCue: "Manos sueltas pero atentas, recibe controlada",
+      },
+    ],
+    progressions: [
+      { name: "Pelota ligera 4kg", level: "beginner" },
+      { name: "Wall ball estándar 9kg / 6kg", level: "intermediate" },
+      { name: "Wall ball heavy 14kg+", level: "advanced" },
+    ],
+    musclesWorked: ["quads", "glutes", "shoulders", "core"],
+    difficulty: 2,
+  },
+};
+
 /**
  * Creates/upserts the 50 standard CrossFit movements for a given tenantId.
  * Uses isStandard=true flag. Idempotent — safe to run multiple times.
@@ -500,6 +788,19 @@ export async function seedStandardMovements(tenantId: string): Promise<void> {
     `  Seeding ${STANDARD_MOVEMENTS.length} standard movements for tenant ${tenantId}...`,
   );
   for (const mv of STANDARD_MOVEMENTS) {
+    const enrich = MOVEMENT_ENRICHMENTS[mv.slug];
+    const enrichmentData: Record<string, unknown> = {};
+    if (enrich) {
+      if (enrich.cues) enrichmentData.cues = enrich.cues;
+      if (enrich.commonMistakes)
+        enrichmentData.commonMistakes = enrich.commonMistakes;
+      if (enrich.progressions)
+        enrichmentData.progressions = enrich.progressions;
+      if (enrich.musclesWorked)
+        enrichmentData.musclesWorked = enrich.musclesWorked;
+      if (enrich.difficulty != null)
+        enrichmentData.difficulty = enrich.difficulty;
+    }
     await prisma.movement.upsert({
       where: { tenantId_slug: { tenantId, slug: mv.slug } },
       update: {
@@ -509,6 +810,7 @@ export async function seedStandardMovements(tenantId: string): Promise<void> {
         videoUrl: mv.videoUrl,
         equipment: mv.equipment,
         isStandard: true,
+        ...enrichmentData,
       },
       create: {
         tenantId,
@@ -519,6 +821,7 @@ export async function seedStandardMovements(tenantId: string): Promise<void> {
         standardDescription: mv.standardDescription,
         videoUrl: mv.videoUrl,
         equipment: mv.equipment,
+        ...enrichmentData,
       },
     });
   }

@@ -342,6 +342,27 @@ export async function checkInAthlete(bookingId: string) {
     console.error("[checkIn] streak recompute failed:", err);
   }
 
+  // Award attendance XP and evaluate achievement unlocks (idempotent).
+  try {
+    const { awardXP, runAchievementEvaluation } =
+      await import("@/server/achievements/evaluate");
+    await awardXP({
+      tenantId: session.user.tenantId,
+      athleteId: updated.athleteId,
+      amount: 10,
+      reason: "ATTENDANCE",
+      sourceType: "Booking",
+      sourceId: bookingId,
+    });
+    await runAchievementEvaluation({
+      tenantId: session.user.tenantId,
+      athleteId: updated.athleteId,
+      trigger: "ATTENDANCE",
+    });
+  } catch (err) {
+    console.error("[checkIn] achievement eval failed:", err);
+  }
+
   await logAudit({
     tenantId: session.user.tenantId,
     actorId: session.user.id,

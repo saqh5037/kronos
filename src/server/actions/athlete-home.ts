@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
 import { withTenant } from "../db";
 import { subDays, startOfDay } from "date-fns";
+import { pickSuggestedClass, type Suggestion } from "@/lib/booking-suggestion";
+import { listAvailableClasses, getAthleteUsualSlots } from "./bookings";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -75,6 +77,8 @@ export async function getMyScoresTimeline(
 export type AthleteHome = {
   athlete: { id: string; firstName: string; lastName: string } | null;
   streak: number;
+  streakLastEventAt: Date | null;
+  xpTotal: number;
   weekAttendance: number; // ATTENDED count this week
   weekGoal: number; // capacity goal (default 5)
   nextBooking: {
@@ -115,7 +119,7 @@ export async function getAthleteHome(): Promise<AthleteHome> {
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 7);
 
-  const [streak, weekAttended, nextBookingRaw, lastScore, prCount] =
+  const [streak, weekAttended, nextBookingRaw, lastScore, prCount, xpAgg] =
     await Promise.all([
       db.streak.findFirst({
         where: { athleteId: me.id, type: "ATTENDANCE" },
@@ -149,11 +153,17 @@ export async function getAthleteHome(): Promise<AthleteHome> {
         include: { wod: { select: { name: true, scoreType: true } } },
       }),
       db.pR.count({ where: { athleteId: me.id } }),
+      db.xPLedger.aggregate({
+        where: { athleteId: me.id, tenantId },
+        _sum: { amount: true },
+      }),
     ]);
 
   return {
     athlete: me,
     streak: streak?.count ?? 0,
+    streakLastEventAt: streak?.lastEventAt ?? null,
+    xpTotal: xpAgg._sum.amount ?? 0,
     weekAttendance: weekAttended,
     weekGoal: 5,
     nextBooking: nextBookingRaw
@@ -177,4 +187,83 @@ export async function getAthleteHome(): Promise<AthleteHome> {
       : null,
     prCount,
   };
+}
+
+export type AthleteTrophy = {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  earnedAt: Date | null;
+  unlocked: boolean;
+  progress?: number;
+};
+
+export async function getAthleteTrophies(): Promise<AthleteTrophy[]> {
+  const session = await requireSession();
+  const tenantId = session.user.tenantId;
+  const db = withTenant(tenantId);
+
+  const me = await db.athlete.findFirst({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
+  if (!me) return [];
+
+  const [badges, achievements] = await Promise.all([
+    db.badge.findMany({ where: { tenantId }, orderBy: { code: "asc" } }),
+    db.achievement.findMany({ where: { tenantId, athleteId: me.id } }),
+  ]);
+
+  const ownedMap = new Map(achievements.map((a) => [a.badgeId, a.earnedAt]));
+
+  const items: AthleteTrophy[] = badges.map((b) => {
+    const earnedAt = ownedMap.get(b.id) ?? null;
+    return {
+      id: b.id,
+      code: b.code,
+      name: b.name,
+      description: b.description,
+      earnedAt,
+      unlocked: earnedAt !== null,
+    };
+  });
+
+  // Sort: unlocked first (most recent earnedAt first), then locked.
+  items.sort((a, b) => {
+    if (a.unlocked && !b.unlocked) return -1;
+    if (!a.unlocked && b.unlocked) return 1;
+    if (a.unlocked && b.unlocked) {
+      return (b.earnedAt?.getTime() ?? 0) - (a.earnedAt?.getTime() ?? 0);
+    }
+    return a.name.localeCompare(b.name);
+  });
+
+  return items;
+}
+
+export type SuggestedBooking = Suggestion;
+
+export async function getSuggestedNextClass(): Promise<SuggestedBooking> {
+  await requireSession();
+  const [classes, usualSlots] = await Promise.all([
+    listAvailableClasses(2),
+    getAthleteUsualSlots(60).catch(() => []),
+  ]);
+  return pickSuggestedClass({
+    classes: classes.map((c) => ({
+      id: c.id,
+      startsAt: c.startsAt,
+      durationMin: c.durationMin,
+      capacity: c.capacity,
+      kind: c.kind,
+      bookedCount: c.bookedCount,
+      waitlistCount: c.waitlistCount,
+      coach: c.coach,
+      wod: c.wod,
+      myBookingId: c.myBookingId,
+    })),
+    usualSlots,
+    now: new Date(),
+  });
 }
