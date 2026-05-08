@@ -7,11 +7,15 @@ import { getRevenueByDay } from "@/server/actions/payments";
 import { getAttendanceByDay } from "@/server/actions/attendance";
 import { rangeFromParams, previousRange } from "@/lib/dates";
 import { getOwnerDashboardSnapshot } from "@/server/actions/owner-dashboard";
+import { getCoachDashboardSnapshot } from "@/server/actions/coach-dashboard";
 import AdminDashboardV3, {
   type AdminDashboardV3Props,
   type ClassRowData,
   type AlertRowData,
 } from "@/components/kronos/v3/AdminDashboardV3";
+import { CoachClassesTodayCard } from "./_components/CoachClassesTodayCard";
+import { CoachAttendanceTodayCard } from "./_components/CoachAttendanceTodayCard";
+import { AtRiskCard } from "./_components/AtRiskCard";
 
 export const metadata = { title: "Kronos — Dashboard" };
 
@@ -69,6 +73,12 @@ export default async function AdminDashboardPage({
   }
   if (!session?.user?.tenantId) {
     redirect("/login?callbackUrl=/admin");
+  }
+
+  // Role-aware branch: COACH/STAFF ven dashboard limitado (Sprint 3.12).
+  // Sin revenue, sin billing, sin MRR — solo info operacional del coach.
+  if (session.user.role === "COACH" || session.user.role === "STAFF") {
+    return <CoachDashboard session={session} />;
   }
 
   const sp = (await searchParams) ?? {};
@@ -321,4 +331,85 @@ export default async function AdminDashboardPage({
   };
 
   return <AdminDashboardV3 {...props} />;
+}
+
+async function CoachDashboard({ session }: { session: Session }) {
+  const snapshot = await getCoachDashboardSnapshot();
+  const coachName = session.user?.name ?? "Coach";
+  const firstName = coachName.split(" ")[0] || coachName;
+  const dateLabel = new Intl.DateTimeFormat("es-MX", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date());
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--k-bg)",
+        color: "var(--k-t1)",
+        padding: "32px 24px",
+        fontFamily: "var(--k-font-body)",
+      }}
+    >
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        {/* Header */}
+        <p
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 11,
+            letterSpacing: "0.2em",
+            color: "var(--k-t3)",
+            margin: 0,
+            textTransform: "uppercase",
+          }}
+        >
+          Dashboard · Coach
+        </p>
+        <h1
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 36,
+            fontWeight: 700,
+            letterSpacing: "-0.02em",
+            margin: "8px 0 4px",
+          }}
+        >
+          Hola, {firstName}
+        </h1>
+        <p
+          style={{
+            color: "var(--k-t2)",
+            fontSize: 14,
+            margin: 0,
+            textTransform: "capitalize",
+          }}
+        >
+          {dateLabel}
+        </p>
+
+        {/* Cards grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: 20,
+            marginTop: 32,
+          }}
+        >
+          <CoachClassesTodayCard classes={snapshot?.classesToday ?? []} />
+          <CoachAttendanceTodayCard
+            totals={
+              snapshot?.attendanceTodayTotal ?? { booked: 0, attended: 0 }
+            }
+          />
+        </div>
+
+        <div style={{ marginTop: 20 }}>
+          <AtRiskCard rows={snapshot?.athletesAtRisk ?? []} />
+        </div>
+      </div>
+    </div>
+  );
 }
