@@ -62,8 +62,30 @@ const tabs = [
     ),
   },
   {
+    href: "/atleta/logros",
+    label: "Logros",
+    icon: (active: boolean) => (
+      <svg
+        viewBox="0 0 24 24"
+        width="22"
+        height="22"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={active ? 2.4 : 1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M8 21h8" />
+        <path d="M12 17v4" />
+        <path d="M7 4h10v6a5 5 0 0 1-10 0V4z" />
+        <path d="M7 6H4a2 2 0 0 0 0 4h3" />
+        <path d="M17 6h3a2 2 0 0 1 0 4h-3" />
+      </svg>
+    ),
+  },
+  {
     href: "/atleta/perfil",
-    label: "Atleta",
+    label: "Yo",
     icon: (active: boolean) => (
       <svg
         viewBox="0 0 24 24"

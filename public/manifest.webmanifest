@@ -5,8 +5,8 @@
   "display": "standalone",
   "start_url": "/atleta",
   "scope": "/",
-  "theme_color": "#19f08b",
-  "background_color": "#1a1d20",
+  "theme_color": "#c8ff2d",
+  "background_color": "#08080a",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -20,6 +20,11 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
   ]
 }

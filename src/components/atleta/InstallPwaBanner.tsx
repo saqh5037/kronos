@@ -75,7 +75,16 @@ export default function InstallPwaBanner() {
   }
 
   if (dismissed || isStandalone) return null;
-  if (!deferredPrompt && !isIos) return null;
+
+  // 3 modos: iOS Safari (instrucciones Compartir → Agregar), Android con
+  // beforeinstallprompt (botón nativo), Android sin prompt (instrucciones
+  // manuales del menú ⋮). Antes el banner desaparecía silenciosamente en el
+  // 3er caso; ahora siempre da una vía concreta para instalar.
+  const mode = isIos
+    ? "ios"
+    : deferredPrompt
+      ? "android-prompt"
+      : "android-manual";
 
   return (
     <AnimatePresence>
@@ -119,7 +128,7 @@ export default function InstallPwaBanner() {
             <div className="text-[13px] font-semibold text-[var(--text)] mb-0.5">
               Instalar Kronos
             </div>
-            {isIos ? (
+            {mode === "ios" && (
               <div className="text-[11px] leading-relaxed text-[var(--k-t3)]">
                 Toca{" "}
                 <span className="font-bold text-[var(--k-warning)]">
@@ -131,16 +140,32 @@ export default function InstallPwaBanner() {
                 </span>
                 .
               </div>
-            ) : (
+            )}
+            {mode === "android-prompt" && (
               <div className="text-[11px] text-[var(--k-t3)]">
                 Acceso rápido desde tu pantalla de inicio. Funciona sin
                 conexión.
               </div>
             )}
+            {mode === "android-manual" && (
+              <div className="text-[11px] leading-relaxed text-[var(--k-t3)]">
+                Abre el menú{" "}
+                <span className="font-bold text-[var(--k-warning)]">⋮</span> del
+                navegador y toca{" "}
+                <span className="font-bold text-[var(--k-warning)]">
+                  Instalar app
+                </span>{" "}
+                o{" "}
+                <span className="font-bold text-[var(--k-warning)]">
+                  Agregar a inicio
+                </span>
+                .
+              </div>
+            )}
           </div>
 
           <div className="flex gap-1.5 shrink-0">
-            {!isIos && deferredPrompt && (
+            {mode === "android-prompt" && (
               <motion.button
                 onClick={handleInstall}
                 className="k-btn-grad text-[11px] px-3 py-1.5 rounded-lg font-semibold"

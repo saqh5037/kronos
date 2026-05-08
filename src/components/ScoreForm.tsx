@@ -87,7 +87,15 @@ export default function ScoreForm({
       try {
         const res = await submitScore(data);
         form.reset();
-        if (res.prAchieved) {
+        // Si hay logro desbloqueado, AchievementToast es la única celebración
+        // (premium, top-center, +XP, confetti). El kToast genérico se suprime
+        // para evitar overlap visual en mobile.
+        if (res.unlockedBadges?.length) {
+          fireAchievementToast(res.unlockedBadges);
+          setFeedback(
+            res.prAchieved ? "NUEVO PR REGISTRADO" : "SCORE GUARDADO",
+          );
+        } else if (res.prAchieved) {
           kToast.success("🏆 ¡Nuevo PR registrado!", {
             description: "Tu mejor marca personal ha sido actualizada.",
             duration: 5000,
@@ -96,9 +104,6 @@ export default function ScoreForm({
         } else {
           kToast.success("Score guardado");
           setFeedback("SCORE GUARDADO");
-        }
-        if (res.unlockedBadges?.length) {
-          fireAchievementToast(res.unlockedBadges);
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Error al guardar";

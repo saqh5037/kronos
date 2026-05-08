@@ -169,7 +169,7 @@ function toBodyweightKg(metric: {
   return v;
 }
 
-async function loadAthleteState(
+export async function loadAthleteState(
   tenantId: string,
   athleteId: string,
   candidates: Array<{ criteria: unknown }>,

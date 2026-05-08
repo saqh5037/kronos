@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import type { Route } from "next";
 import { motion } from "framer-motion";
 
 export type TrophyItem = {
@@ -73,101 +75,117 @@ function TrophyCard({ item, index }: { item: TrophyItem; index: number }) {
       .join("")
       .slice(0, 2) || "★";
 
+  const href = `/atleta/logros/${item.code}` as Route;
+  const aria = locked
+    ? `Logro bloqueado: ${item.name}. Toca para ver el criterio y progreso.`
+    : `Logro desbloqueado: ${item.name}. Toca para ver el detalle.`;
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.3, ease: "easeOut" }}
-      className="k-card"
+    <Link
+      href={href}
+      aria-label={aria}
       style={{
+        textDecoration: "none",
         flex: "0 0 auto",
-        width: 140,
-        padding: 12,
         scrollSnapAlign: "start",
-        position: "relative",
-        background: locked ? "var(--k-surface)" : "var(--k-elevated)",
-        opacity: locked ? 0.55 : 1,
-        borderColor: locked ? "var(--k-line)" : "var(--k-accent-line)",
       }}
-      data-testid="trophy-card"
-      data-locked={locked}
     >
-      <div
-        aria-hidden="true"
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ delay: index * 0.04, duration: 0.3, ease: "easeOut" }}
+        className="k-card"
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: 12,
-          background: locked ? "var(--k-line-2)" : "var(--k-accent-soft)",
-          border: `1px solid ${locked ? "var(--k-line)" : "var(--k-accent-line)"}`,
-          display: "grid",
-          placeItems: "center",
-          color: locked ? "var(--k-t3)" : "var(--k-accent)",
-          fontFamily: "var(--k-font-display)",
-          fontSize: 18,
-          fontWeight: 600,
-          marginBottom: 8,
-          boxShadow: locked ? undefined : "var(--k-accent-glow)",
+          width: 140,
+          padding: 12,
+          position: "relative",
+          background: locked ? "var(--k-surface)" : "var(--k-elevated)",
+          opacity: locked ? 0.55 : 1,
+          borderColor: locked ? "var(--k-line)" : "var(--k-accent-line)",
+          cursor: "pointer",
         }}
+        data-testid="trophy-card"
+        data-locked={locked}
       >
-        {locked ? <LockIcon /> : initial}
-      </div>
-      <div
-        className="k-mono"
-        style={{
-          fontSize: 9,
-          color: locked ? "var(--k-t3)" : "var(--k-accent)",
-          letterSpacing: 1.2,
-          marginBottom: 4,
-        }}
-      >
-        {locked ? "BLOQUEADO" : "DESBLOQUEADO"}
-      </div>
-      <div
-        style={{
-          fontFamily: "var(--k-font-body)",
-          fontSize: 13,
-          color: "var(--k-t1)",
-          fontWeight: 600,
-          lineHeight: 1.2,
-          marginBottom: 2,
-        }}
-      >
-        {item.name}
-      </div>
-      <div
-        style={{
-          fontFamily: "var(--k-font-body)",
-          fontSize: 11,
-          color: "var(--k-t2)",
-          lineHeight: 1.3,
-          minHeight: 28,
-        }}
-      >
-        {item.description}
-      </div>
-      {locked && typeof item.progress === "number" && (
         <div
+          aria-hidden="true"
           style={{
-            marginTop: 8,
-            height: 4,
-            width: "100%",
-            background: "var(--k-line)",
-            borderRadius: 2,
-            overflow: "hidden",
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            background: locked ? "var(--k-line-2)" : "var(--k-accent-soft)",
+            border: `1px solid ${locked ? "var(--k-line)" : "var(--k-accent-line)"}`,
+            display: "grid",
+            placeItems: "center",
+            color: locked ? "var(--k-t3)" : "var(--k-accent)",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 18,
+            fontWeight: 600,
+            marginBottom: 8,
+            boxShadow: locked ? undefined : "var(--k-accent-glow)",
           }}
         >
+          {locked ? <LockIcon /> : initial}
+        </div>
+        <div
+          className="k-mono"
+          style={{
+            fontSize: 9,
+            color: locked ? "var(--k-t3)" : "var(--k-accent)",
+            letterSpacing: 1.2,
+            marginBottom: 4,
+          }}
+        >
+          {locked ? "BLOQUEADO" : "DESBLOQUEADO"}
+        </div>
+        <div
+          style={{
+            fontFamily: "var(--k-font-body)",
+            fontSize: 13,
+            color: "var(--k-t1)",
+            fontWeight: 600,
+            lineHeight: 1.2,
+            marginBottom: 2,
+          }}
+        >
+          {item.name}
+        </div>
+        <div
+          style={{
+            fontFamily: "var(--k-font-body)",
+            fontSize: 11,
+            color: "var(--k-t2)",
+            lineHeight: 1.3,
+            minHeight: 28,
+          }}
+        >
+          {item.description}
+        </div>
+        {locked && typeof item.progress === "number" && (
           <div
             style={{
-              height: "100%",
-              width: `${Math.min(100, Math.max(0, item.progress * 100))}%`,
-              background: "var(--k-accent)",
-              transition: "width 400ms ease",
+              marginTop: 8,
+              height: 4,
+              width: "100%",
+              background: "var(--k-line)",
+              borderRadius: 2,
+              overflow: "hidden",
             }}
-          />
-        </div>
-      )}
-    </motion.div>
+          >
+            <div
+              style={{
+                height: "100%",
+                width: `${Math.min(100, Math.max(0, item.progress * 100))}%`,
+                background: "var(--k-accent)",
+                transition: "width 400ms ease",
+              }}
+            />
+          </div>
+        )}
+      </motion.div>
+    </Link>
   );
 }
 

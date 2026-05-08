@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-type Status = "safe" | "warning" | "critical";
+type Status = "dormant" | "safe" | "warning" | "critical";
 
 interface StreakHeroProps {
   count: number;
@@ -13,6 +13,11 @@ interface StreakHeroProps {
 }
 
 const PALETTE: Record<Status, { glow: string; tag: string; line: string }> = {
+  dormant: {
+    glow: "rgba(200, 255, 45, 0.10)",
+    tag: "PRIMERA RACHA",
+    line: "Empezá hoy con tu primera clase",
+  },
   safe: {
     glow: "rgba(200, 255, 45, 0.22)",
     tag: "EN LLAMAS",
@@ -30,7 +35,12 @@ const PALETTE: Record<Status, { glow: string; tag: string; line: string }> = {
   },
 };
 
-function computeStatus(lastEventAt: Date | null, now: Date): Status {
+function computeStatus(
+  count: number,
+  lastEventAt: Date | null,
+  now: Date,
+): Status {
+  if (count === 0) return "dormant";
   if (!lastEventAt) return "safe";
   const sameDay =
     lastEventAt.getFullYear() === now.getFullYear() &&
@@ -64,8 +74,8 @@ export function StreakHero({
       return;
     }
     const last = lastEventAt ? new Date(lastEventAt) : null;
-    setStatus(computeStatus(last, new Date()));
-  }, [lastEventAt, forceStatus]);
+    setStatus(computeStatus(count, last, new Date()));
+  }, [count, lastEventAt, forceStatus]);
 
   const palette = PALETTE[status];
   const flameKey = `${status}-${reduce ? "static" : "anim"}`;
@@ -113,6 +123,8 @@ export function StreakHero({
               color: "var(--k-t1)",
               fontVariantNumeric: "tabular-nums",
               marginTop: 4,
+              opacity: status === "dormant" ? 0.45 : 1,
+              transition: "opacity 320ms ease",
             }}
           >
             {count}
@@ -148,6 +160,19 @@ function Flame({ status, reduce }: { status: Status; reduce: boolean }) {
       ? { rotate: [-1.5, 1.5, -1, 1, 0], x: [0, -1, 1, 0] }
       : undefined;
 
+  // Dormant: llama "respirando" lenta, opacity 0.4↔0.7. Sin escala (estático
+  // en tamaño, solo intensidad). Visual: viva pero baja energía. Esperando.
+  const outerAnim =
+    status === "dormant"
+      ? reduce
+        ? undefined
+        : { opacity: [0.4, 0.7, 0.4] }
+      : reduce
+        ? undefined
+        : { scale: [1, 1.04, 1], opacity: [0.85, 1, 0.85] };
+
+  const outerDuration = status === "dormant" ? 3.2 : 1.6;
+
   return (
     <motion.svg
       width={64}
@@ -165,27 +190,22 @@ function Flame({ status, reduce }: { status: Status; reduce: boolean }) {
         d="M32 6 C 38 18, 50 24, 48 38 C 47 50, 38 60, 32 64 C 26 60, 17 50, 16 38 C 14 24, 26 18, 32 6 Z"
         fill={fill}
         opacity={0.9}
-        animate={
-          reduce
-            ? undefined
-            : {
-                scale: [1, 1.04, 1],
-                opacity: [0.85, 1, 0.85],
-              }
-        }
-        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+        animate={outerAnim}
+        transition={{
+          duration: outerDuration,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
         style={{ transformOrigin: "32px 64px" }}
       />
       <motion.path
         d="M32 22 C 36 30, 42 34, 40 42 C 39 50, 35 56, 32 58 C 29 56, 25 50, 24 42 C 22 34, 28 30, 32 22 Z"
         fill="var(--k-bg)"
-        opacity={0.55}
+        opacity={status === "dormant" ? 0.7 : 0.55}
         animate={
-          reduce
+          reduce || status === "dormant"
             ? undefined
-            : {
-                scale: [0.95, 1.05, 0.95],
-              }
+            : { scale: [0.95, 1.05, 0.95] }
         }
         transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
         style={{ transformOrigin: "32px 58px" }}
