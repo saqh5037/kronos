@@ -12,7 +12,7 @@ export default function SectionAtleta() {
   const v = reduce ? undefined : fadeUp;
 
   return (
-    <section className="lp-section" id="atleta">
+    <section className="lp-section" id="section-atleta">
       <motion.div
         className="lp-section-grid lp-flip"
         initial="hidden"
@@ -29,15 +29,12 @@ export default function SectionAtleta() {
             <span className="lp-dot" />
             /01 · PARA EL ATLETA
           </div>
-          <h2>
-            La app que{" "}
-            <span className="lp-tag-lime">no se siente como app</span>.
-          </h2>
+          <h2>La app que no se siente como app.</h2>
           <p>
-            Sin notificaciones basura. Sin gamificación barata. Sin el logo de
-            un proveedor gringo.{" "}
-            <strong>Una pantalla con lo que importa</strong>: el WOD de hoy, la
-            próxima clase, y la racha que está construyendo.
+            Sin notificaciones basura. Sin gamificación cringe. Sin el logo de
+            un proveedor extranjero ocupando la pantalla del atleta. Una
+            interfaz con lo único que importa: el WOD de hoy, la próxima clase,
+            y la racha que está construyendo.
           </p>
           <ul className="lp-feature-list">
             <li>
@@ -45,7 +42,8 @@ export default function SectionAtleta() {
                 <strong>23 días de racha</strong>
                 <span className="desc">
                   El número más grande de la app. Si lo rompe, lo ve antes que
-                  nada. Si lo extiende, lo siente todo el día.
+                  nada. Si lo extiende, lo siente todo el día. Retención
+                  psicológica pura, sin push notifications motivacionales.
                 </span>
               </div>
             </li>
@@ -53,8 +51,9 @@ export default function SectionAtleta() {
               <div>
                 <strong>Helen · 11:42 (su PR)</strong>
                 <span className="desc">
-                  El WOD del día contra su mejor marca. Compara contra sí mismo,
-                  no contra el feed.
+                  El WOD del día contra la mejor marca histórica del atleta.
+                  Compite contra sí mismo, no contra el feed de extraños. PR
+                  detection automático sobre RX y scaled.
                 </span>
               </div>
             </li>
@@ -62,8 +61,9 @@ export default function SectionAtleta() {
               <div>
                 <strong>Reserva en 1 tap, no en 4 menús</strong>
                 <span className="desc">
-                  CTA primaria de 54px, en la marca de tu Box. Cero fricción,
-                  cero ambigüedad.
+                  CTA primario de 54px en el color exacto del Box. Carga
+                  instantánea (PWA con SSR). Cero ambigüedad al confirmar
+                  asistencia.
                 </span>
               </div>
             </li>
@@ -71,8 +71,9 @@ export default function SectionAtleta() {
               <div>
                 <strong>Tu Box, no nosotros</strong>
                 <span className="desc">
-                  Logo, nombre y color del Box. Operamos detrás como un sistema
-                  operativo. Cero presencia de Kronos en pantalla.
+                  Logo, nombre, color, dominio: todo del Box. Operamos detrás
+                  como infraestructura nativa. El ecosistema le pertenece a tu
+                  marca.
                 </span>
               </div>
             </li>
@@ -82,7 +83,7 @@ export default function SectionAtleta() {
         <motion.div className="lp-card-frame lp-grain" variants={v}>
           <div className="lp-caption" style={{ color: "var(--k-accent)" }}>
             <span className="lp-dot" style={{ marginRight: 10 }} />
-            PREVIEW · DETECCIÓN AUTOMÁTICA DE PR
+            PREVIEW · MULTI-TENANT CROSS-BOX
           </div>
 
           <div
@@ -209,14 +210,7 @@ export default function SectionAtleta() {
             }}
           >
             <span className="lp-caption" style={{ color: "var(--k-t3)" }}>
-              REGLA DE PR
-            </span>
-            <div style={{ height: 1, flex: 1, background: "var(--k-line)" }} />
-            <span
-              className="lp-mono"
-              style={{ fontSize: 12, fontWeight: 600, color: "var(--k-t2)" }}
-            >
-              TIME ASC · KG DESC · REPS DESC
+              RACHA UNIFICADA · 23 DÍAS · 3 BOXES · 0 FRICCIONES
             </span>
           </div>
         </motion.div>

@@ -1073,3 +1073,25 @@ model Announcement {
   @@index([tenantId, createdAt])
   @@index([tenantId, status])
 }
+
+// ─── LANDING LEADS ───────────────────────────────────────────────────────────
+
+model Lead {
+  id            String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt     DateTime @default(now()) @map("created_at")
+  ownerName     String   @map("owner_name")
+  email         String
+  whatsapp      String
+  boxName       String   @map("box_name")
+  athletes      String
+  currentSw     String?  @map("current_sw")
+  planInterest  String?  @map("plan_interest")
+  notes         String?
+  consent       Boolean
+  source        String   @default("landing")
+  status        String   @default("new")
+
+  @@index([createdAt])
+  @@index([status])
+  @@map("leads")
+}

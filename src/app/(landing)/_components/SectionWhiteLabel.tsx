@@ -13,7 +13,7 @@ export default function SectionWhiteLabel() {
   const v = reduce ? undefined : fadeUp;
 
   return (
-    <section className="lp-section lp-wl-section" id="white-label">
+    <section className="lp-section lp-wl-section" id="section-whitelabel">
       <motion.div
         className="lp-wl-head"
         initial="hidden"
@@ -27,18 +27,51 @@ export default function SectionWhiteLabel() {
       >
         <motion.div className="lp-eyebrow" variants={v}>
           <span className="lp-dot" />
-          /03 · WHITE-LABEL ARCHITECTURE
+          /03 · WHITE-LABEL REAL
         </motion.div>
-        <motion.h2 variants={v}>
-          Tu marca. <br />
-          No la <span className="lp-tag-lime">nuestra</span>.
-        </motion.h2>
+        <motion.h2 variants={v}>La app del Box es del Box.</motion.h2>
         <motion.p variants={v}>
-          Cada Box define <strong>un solo color</strong>: el de su marca. Es la
-          única variable visual del sistema — toca 4 superficies (CTA, hero, tab
-          activo, dot de estado). El resto vive en negros estratificados:
-          agnóstico, atemporal, brutalmente consistente.
+          No es un skin. No es co-branded. No es &ldquo;powered by
+          Kronos&rdquo;. Es la marca del Box arriba, nuestro motor abajo, en tu
+          dominio, con tu logo, en App Store y Play Store si lo decidís. El
+          atleta nunca lee Kronos en pantalla.
         </motion.p>
+      </motion.div>
+
+      <motion.div
+        className="lp-wl-pillars"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-50px" }}
+        variants={
+          reduce
+            ? undefined
+            : { show: { transition: { staggerChildren: 0.08 } } }
+        }
+      >
+        {[
+          {
+            title: "Tu dominio",
+            body: "app.tubox.mx (o el dominio que elijas). Sin redirects. Sin subdominios compartidos. Configuración DNS asistida en el onboarding.",
+          },
+          {
+            title: "Tu paleta",
+            body: "Pegás un #hex y el motor calcula el contraste accesible sobre cada superficie. Lima requiere texto negro. Sangre requiere texto blanco. Cero ajustes manuales.",
+          },
+          {
+            title: "Tus comunicaciones",
+            body: "Emails desde no-reply@tubox.mx, no desde Kronos. Push notifications firmadas como el Box. SMS desde tu sender ID si lo configurás.",
+          },
+          {
+            title: "Tu marca en stores (Acero+)",
+            body: "App nativa con tu nombre y tu ícono publicada en App Store y Play Store. Apple Developer Account a tu nombre, gestión del review process incluida.",
+          },
+        ].map((p) => (
+          <motion.div key={p.title} className="lp-wl-pillar" variants={v}>
+            <h3>{p.title}</h3>
+            <p>{p.body}</p>
+          </motion.div>
+        ))}
       </motion.div>
 
       <motion.div
@@ -80,10 +113,10 @@ export default function SectionWhiteLabel() {
       >
         <span className="lp-dot" />
         <div className="text">
-          Pegás el <code>#hex</code> de tu marca, nosotros calculamos contraste
-          automático sobre cada superficie.{" "}
-          <span className="em">Lima → texto negro. Brasa → texto blanco.</span>{" "}
-          Cero ajuste manual. Cualquier hex válido funciona.
+          Pegás el <code>#hex</code> de tu marca en el setup. El motor calcula
+          contraste, estados hover, bordes y focus rings automáticamente.
+          Cualquier hex válido en sRGB funciona. Si no pasa los thresholds WCAG
+          AA, el sistema sugiere el más cercano que sí los pasa.
         </div>
       </motion.div>
     </section>

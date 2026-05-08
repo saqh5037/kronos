@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { OWNER_KPIS, OWNER_OCCUPANCY } from "../_data/mock";
+import { track } from "../_lib/track";
 
 const fadeUp = {
   hidden: { y: 14 },
@@ -32,7 +33,7 @@ export default function SectionOwner() {
   return (
     <section
       className="lp-section"
-      id="owner"
+      id="section-owner"
       style={{ borderTop: "1px solid var(--k-line)" }}
     >
       <motion.div
@@ -58,7 +59,7 @@ export default function SectionOwner() {
           >
             <div className="lp-caption" style={{ color: "var(--k-accent)" }}>
               <span className="lp-dot" style={{ marginRight: 10 }} />
-              ADMIN · TU BOX · ESTE MES
+              ADMIN · IRON HANDS · MAYO 2026
             </div>
             <span className="lp-caption" style={{ color: "var(--k-t3)" }}>
               v1.0
@@ -133,21 +134,20 @@ export default function SectionOwner() {
             <span className="lp-dot" />
             /02 · PARA EL OWNER
           </div>
-          <h2>
-            Tu Box, <span className="lp-tag-lime">en cifras frías</span>.
-          </h2>
+          <h2>Tu operación, en cifras frías.</h2>
           <p>
-            Un panel que tu CFO entiende y tu coach principal abre cada mañana.
-            Sin gráficos decorativos, sin métricas de vanity.{" "}
-            <strong>Las cifras que mueven dinero</strong>, en una sola pantalla.
+            Un panel que tu contador respeta y tu coach principal abre cada
+            mañana. Sin gráficos decorativos, sin métricas de vanity. Las cifras
+            que dictan si el mes cierra en azul o en rojo, en una sola pantalla.
           </p>
           <ul className="lp-feature-list">
             <li>
               <div>
                 <strong>MRR, churn, CAC, LTV</strong>
                 <span className="desc">
-                  Las 4 métricas que importan, listas para tu junta mensual. Sin
-                  armar Excel, sin pedirle al contador.
+                  Las cuatro métricas vitales en tiempo real, listas para tu
+                  junta mensual. Sin armar Excel, sin pedirle al contador, sin
+                  exportar nada.
                 </span>
               </div>
             </li>
@@ -155,32 +155,39 @@ export default function SectionOwner() {
               <div>
                 <strong>Ocupación por hora del día</strong>
                 <span className="desc">
-                  Sabés qué clase mover y qué coach reforzar. Decisiones de
-                  programación basadas en data, no en intuición.
+                  Sabés qué clase mover y qué horario pierde dinero. Decisiones
+                  de programación basadas en data dura, no en la intuición del
+                  coach.
                 </span>
               </div>
             </li>
             <li>
               <div>
-                <strong>Atletas en riesgo, antes que se vayan</strong>
+                <strong>Atletas en riesgo, antes de la baja</strong>
                 <span className="desc">
                   Quién dejó de venir 14 días. Quién bajó intensidad. Quién
-                  vence membresía esta semana. Acción antes del churn.
+                  vence membresía esta semana. Acción de retención antes del
+                  churn definitivo.
                 </span>
               </div>
             </li>
             <li>
               <div>
-                <strong>Pagos sin perseguir</strong>
+                <strong>Pagos sin perseguir a nadie</strong>
                 <span className="desc">
-                  Stripe, Mercado Pago, OXXO, transferencia. Recordatorios
-                  automáticos. Reportes de cobranza sin abrir Excel.
+                  Stripe para tarjeta, Mercado Pago para tarjeta y OXXO, SPEI
+                  para transferencias. Reintentos automáticos. Bloqueo de acceso
+                  por mora sin tener que llamar.
                 </span>
               </div>
             </li>
           </ul>
-          <a href="#pricing" className="lp-btn-ghost lp-btn-lg">
-            Ver el admin completo →
+          <a
+            href="#section-form"
+            className="lp-btn-ghost lp-btn-lg"
+            onClick={() => track("cta_clicked", { location: "section_owner" })}
+          >
+            Ver el admin completo en demo →
           </a>
         </motion.div>
       </motion.div>

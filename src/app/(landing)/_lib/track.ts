@@ -4,6 +4,14 @@
 import posthog from "posthog-js";
 
 type EventName =
+  | "landing_viewed"
+  | "cta_clicked"
+  | "pricing_card_hovered"
+  | "faq_opened"
+  | "lead_form_started"
+  | "lead_form_submitted"
+  | "lead_form_succeeded"
+  | "lead_form_failed"
   | "landing_hero_cta_clicked"
   | "landing_pricing_viewed"
   | "landing_pricing_tier_clicked"

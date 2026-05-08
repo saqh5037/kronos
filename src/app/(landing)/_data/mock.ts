@@ -3,10 +3,8 @@
 
 // HERO_META — strip verificable bajo el hero. Sin números inventados.
 export const HERO_META = {
-  uptime: "99.9%",
-  payments: "Stripe · Mercado Pago · OXXO",
-  language: "Español nativo",
-  region: "LATAM · MX · CO · PE",
+  strip:
+    "White-label real · Multi-tenant cross-Box · Stripe + Mercado Pago + OXXO · Hecho en LATAM",
 };
 
 // SOCIAL_PROOF_BOXES — vacío hasta firmar pilotos con consentimiento.
@@ -19,23 +17,23 @@ export const WHITE_LABEL_PALETTES = [
   {
     name: "Lima Neon",
     hex: "#C8FF2D",
-    caption: "Default del sistema",
+    caption: "Califa CrossFit · BOG",
     glow: true,
   },
   {
     name: "Naranja Brasa",
     hex: "#FF5A1F",
-    caption: "Para Boxes con identidad cálida",
+    caption: "Iron Hands · CDMX",
   },
   {
     name: "Cobalto",
     hex: "#6B89FF",
-    caption: "Para Boxes con identidad técnica",
+    caption: "Alpha Box · LIM",
   },
   {
     name: "Sangre",
     hex: "#E84545",
-    caption: "Para Boxes con identidad agresiva",
+    caption: "Húsares · MX",
   },
 ];
 
@@ -44,110 +42,82 @@ export type PriceTier = {
   price: string;
   unit: string;
   desc: string;
-  features: Array<string | { text: string; soon: true }>;
+  features: string[];
   cta: string;
   ctaHref: string;
   featured?: boolean;
 };
 
-// Pricing flat tiered en MXN + IVA. Nombres metálicos (CrossFit = barbell = metal).
-// Features con `soon: true` se muestran como "próximamente Q3 2026".
+// Pricing flat tiered en MXN. Nombres metálicos (CrossFit = barbell = metal).
 export const PRICING: PriceTier[] = [
   {
     name: "Hierro",
-    price: "$2,000",
-    unit: "MXN + IVA · al mes",
-    desc: "El motor base. Todo Box arranca con hierro. Para afiliados que necesitan operar como pro desde el primer WOD.",
+    price: "$2,500",
+    unit: "MXN · al mes",
+    desc: "Para Boxes independientes hasta 80 atletas activos. El motor base para operar como profesional desde el día uno.",
     features: [
-      "App del atleta · web + PWA instalable",
-      "Reservas + waitlist FIFO",
-      "WOD del día + benchmarks (Helen, Murph, Fran)",
+      "App del atleta white-label en tu dominio",
+      "Reservas con waitlist FIFO",
+      "WOD del día + biblioteca con video",
+      "Control de asistencia (QR + manual)",
       "Hero racha + PRs por movimiento",
-      "Admin dashboard · KPIs del día",
-      "Hasta 100 atletas activos",
-      "Soporte email · respuesta 48h hábiles",
+      "Stripe + Mercado Pago",
+      "Cobranza automatizada",
+      "Hasta 2 coaches en el admin",
+      "Soporte email · 48 hrs hábiles",
+      "Onboarding self-service",
     ],
-    cta: "Empezar →",
-    ctaHref: "/signup?plan=hierro",
+    cta: "Empezar con Hierro →",
+    ctaHref: "#section-form",
   },
   {
     name: "Acero",
     price: "$3,500",
-    unit: "MXN + IVA · al mes",
-    desc: "Aleación más fuerte. Tu marca arriba, nuestro motor abajo. Para Boxes que ya escalaron y necesitan dejar de perder atletas.",
+    unit: "MXN · al mes",
+    desc: "Para Boxes consolidados hasta 200 atletas. Tu marca arriba, nuestro motor abajo. Para los que ya escalaron y necesitan dejar de perder atletas.",
     features: [
-      "Todo de Hierro, más:",
-      "White-label visual · tu logo, tu color de acento",
-      "Admin avanzado · MRR, churn, atletas en riesgo",
-      "Multi-coach · roles separados owner/coach/staff",
-      "Programación de bloques · 12 semanas",
-      "Hasta 300 atletas activos",
-      "Soporte WhatsApp · 24h hábiles",
+      "Todo lo de Hierro, más:",
+      "Admin completo con MRR, churn y ocupación",
+      "Programación de bloques (12 semanas)",
+      "WODs builder con RX y scaled",
+      "Leaderboards del Box",
+      "Multi-coach + nómina automática",
+      "Push notifications + announcements",
+      "Facturación electrónica MX (CFDI 4.0)",
+      "OXXO + SPEI nativos",
+      "Reportes financieros",
+      "Soporte WhatsApp · 4 hrs hábiles",
     ],
-    cta: "Reservar demo →",
-    ctaHref: "/signup?plan=acero&intent=demo",
+    cta: "Probar Acero 30 días →",
+    ctaHref: "#section-form",
     featured: true,
   },
   {
     name: "Titanio",
     price: "$5,000",
-    unit: "MXN + IVA · al mes",
-    desc: "Material aeroespacial. Para Boxes que cobran como SaaS — automático, facturado y sin perseguir a nadie.",
+    unit: "MXN · al mes",
+    desc: "Para multi-sede, franquicias y redes de Boxes. Atletas activos sin límite. Un atleta, varias ciudades, una sola racha.",
     features: [
-      "Todo de Acero, más:",
-      "Cobranza automática · Stripe + Mercado Pago + OXXO",
-      { text: "Facturación electrónica · CFDI 4.0", soon: true },
-      {
-        text: "Email transaccional desde tu dominio (no-reply@tubox.mx)",
-        soon: true,
-      },
-      "Atletas ilimitados",
-      "Soporte prioritario · contacto directo · 4h",
-      "API + webhooks documentados",
+      "Todo lo de Acero, más:",
+      "Multi-tenant cross-Box (racha unificada)",
+      "BI consolidado de todas las sedes",
+      "Switcher de sede para owners",
+      "API pública + webhooks",
+      "SSO (Google Workspace, Microsoft Entra)",
+      "Onboarding asistido + migración",
+      "SLA 99.9% · soporte 24/7",
+      "Brand kit por sede",
     ],
     cta: "Hablar con ventas →",
-    ctaHref: "mailto:ventas@kronos.app?subject=Plan%20Titanio",
+    ctaHref: "#section-form",
   },
 ];
 
-// Tipo de cambio MXN → otras monedas. Actualizar mensualmente.
-// "asOf" se muestra al usuario como nota de transparencia.
-export const FX_RATES = {
-  asOf: "2026-05-08",
-  base: "MXN" as const,
-  // 1 MXN = X destination
-  rates: {
-    MXN: 1,
-    USD: 1 / 20, // 1 USD ≈ 20 MXN
-    COP: 220, // 1 MXN ≈ 220 COP
-    ARS: 60, // 1 MXN ≈ 60 ARS (alta inflación, validar mensualmente)
-    PEN: 0.18, // 1 MXN ≈ 0.18 PEN
-  },
-} as const;
-
-export type CurrencyCode = keyof typeof FX_RATES.rates;
-
-export const CURRENCY_LABELS: Record<CurrencyCode, string> = {
-  MXN: "MXN",
-  USD: "USD",
-  COP: "COP",
-  ARS: "ARS",
-  PEN: "PEN",
-};
-
-export const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
-  MXN: "$",
-  USD: "US$",
-  COP: "$",
-  ARS: "$",
-  PEN: "S/",
-};
-
 // @mock — KPIs ilustrativos del admin dashboard preview en /02. NO son tracción real de Kronos.
 export const OWNER_KPIS = [
-  { label: "MRR", value: "$184K", delta: "↑ 12% MoM", up: true },
-  { label: "Atletas", value: "412", delta: "↑ 28 neto" },
-  { label: "Churn", value: "3.1", pct: "%", delta: "−0.4% MoM" },
+  { label: "MRR", value: "$184K", delta: "↑12% MoM", up: true },
+  { label: "Atletas", value: "412", delta: "↑28 neto" },
+  { label: "Churn", value: "3.1", pct: "%", delta: "↓0.4% MoM" },
 ];
 
 // @mock — bars 14 days, valor 0-100. Lima si activo, gris si fin de semana.
@@ -170,17 +140,118 @@ export const OWNER_OCCUPANCY: Array<{ value: number; weekend?: boolean }> = [
 
 export const FOOTER_LINKS = {
   producto: [
-    { label: "Para atletas", href: "#atleta" },
-    { label: "Para owners", href: "#owner" },
-    { label: "White-label", href: "#white-label" },
-    { label: "Precios", href: "#pricing" },
+    { label: "App del atleta", href: "#section-atleta" },
+    { label: "Admin del owner", href: "#section-owner" },
+    { label: "White-label", href: "#section-whitelabel" },
+    { label: "Multi-tenant cross-Box", href: "#section-atleta" },
+    { label: "Pagos", href: "#section-owner" },
+    { label: "Pricing", href: "#section-pricing" },
   ],
-  empresa: [
+  recursos: [
+    { label: "Documentación", href: "#", comingSoon: true },
+    { label: "Estado del sistema", href: "#", comingSoon: true },
+    { label: "Changelog", href: "#", comingSoon: true },
+  ],
+  kronos: [
     { label: "Contacto", href: "mailto:hola@kronos.app" },
-    { label: "Ventas", href: "mailto:ventas@kronos.app" },
-  ],
-  legal: [
     { label: "Términos", href: "/legal/terminos" },
     { label: "Privacidad", href: "/legal/privacidad" },
   ],
 };
+
+// FAQ data
+export const FAQ_ITEMS = [
+  {
+    id: 1,
+    question: "¿Cuánto tarda el onboarding?",
+    answer:
+      "72 horas hábiles para Hierro y Acero. Migrás reservas, atletas activos, mandatos de pago y programación sin perder un día de operación. Titanio incluye onboarding presencial; el plazo depende del tamaño de la red.",
+  },
+  {
+    id: 2,
+    question: "¿Migran mi data desde Wodify, PushPress, SugarWOD o Boxmagic?",
+    answer:
+      "Sí. En Acero y Titanio la migración está incluida. En Hierro te damos el template CSV y un instructivo paso a paso para que la subas vos. Si te trabás, soporte te ayuda.",
+  },
+  {
+    id: 3,
+    question: "¿Qué pasa si no me convence?",
+    answer:
+      'Te exportamos toda tu data en CSV (atletas, asistencias, PRs, pagos, programación) y cancelás cuando quieras. Sin penalidad, sin "cláusulas de salida". Tu data es tuya por contrato.',
+  },
+  {
+    id: 4,
+    question: "¿Cobran comisión sobre los pagos de mis atletas?",
+    answer:
+      "No cobramos comisión sobre tus ingresos. Las únicas tarifas son las de Stripe y Mercado Pago, que son directas con ellos y vos podés ver y auditar. Nosotros no metemos mano ahí.",
+  },
+  {
+    id: 5,
+    question: "¿Qué tan blanco es el white-label?",
+    answer:
+      "En Acero y Titanio: dominio propio, paleta propia, logos propios, emails desde tu dominio, push notifications firmadas como el Box. En App Store y Play Store podés publicar con tu nombre y tu ícono (Acero+). El atleta no lee Kronos en ningún momento de su experiencia.",
+  },
+  {
+    id: 6,
+    question: "¿Mis datos están seguros?",
+    answer:
+      "Base de datos en Postgres con encryption at rest. Cada Box es un tenant aislado: nadie de otro Box puede ver tu información, ni siquiera por error de sistema. Backups diarios, retención de 30 días. No usamos tu data para entrenar modelos de IA ni la vendemos a terceros.",
+  },
+];
+
+// Currency (legacy, kept for CurrencySwitcher)
+export const FX_RATES = {
+  asOf: "2026-05-08",
+  base: "MXN" as const,
+  rates: {
+    MXN: 1,
+    USD: 1 / 20,
+    COP: 220,
+    ARS: 60,
+    PEN: 0.18,
+  },
+} as const;
+
+export type CurrencyCode = keyof typeof FX_RATES.rates;
+
+export const CURRENCY_LABELS: Record<CurrencyCode, string> = {
+  MXN: "MXN",
+  USD: "USD",
+  COP: "COP",
+  ARS: "ARS",
+  PEN: "PEN",
+};
+
+export const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
+  MXN: "$",
+  USD: "US$",
+  COP: "$",
+  ARS: "$",
+  PEN: "S/",
+};
+
+// Lead form options
+export const ATHLETES_OPTIONS = [
+  { value: "less_than_50", label: "Menos de 50" },
+  { value: "50_100", label: "50–100" },
+  { value: "100_200", label: "100–200" },
+  { value: "200_500", label: "200–500" },
+  { value: "more_than_500", label: "Más de 500" },
+];
+
+export const SOFTWARE_OPTIONS = [
+  { value: "wodify", label: "Wodify" },
+  { value: "pushpress", label: "PushPress" },
+  { value: "sugarwod", label: "SugarWOD" },
+  { value: "boxmagic", label: "Boxmagic" },
+  { value: "excel", label: "Excel + WhatsApp" },
+  { value: "other", label: "Otro" },
+  { value: "none", label: "Ninguno" },
+];
+
+export const PLAN_OPTIONS = [
+  { value: "hierro", label: "Hierro ($2,500 MXN)" },
+  { value: "acero", label: "Acero ($3,500 MXN)" },
+  { value: "titanio", label: "Titanio ($5,000 MXN)" },
+  { value: "unsure", label: "No estoy seguro todavía" },
+];

@@ -1,6 +1,5 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
 export const alt = "Kronos — Software para CrossFit Boxes en LATAM";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -81,6 +80,8 @@ export default function OpenGraphImage() {
       >
         <div
           style={{
+            display: "flex",
+            flexDirection: "column",
             fontSize: 88,
             fontWeight: 700,
             color: "#F5F5F7",
