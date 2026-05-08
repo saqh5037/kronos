@@ -15,7 +15,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-export default function Hero() {
+export default function Hero({ boxHref }: { boxHref: string | null }) {
   const reduce = useReducedMotion();
   const variants = reduce ? undefined : stagger;
   const child = reduce ? undefined : item;
@@ -35,63 +35,72 @@ export default function Hero() {
         <motion.div initial="hidden" animate="show" variants={variants}>
           <motion.div className="lp-eyebrow" variants={child}>
             <span className="lp-dot" />
-            SOFTWARE PARA CROSSFIT BOXES EN LATAM
+            PILOTO PRIVADO · CDMX · CUPO LIMITADO
           </motion.div>
           <motion.h1 variants={child}>
             Tu Box arriba.
             <br />
-            <span className="lp-tag-lime">Nuestro motor abajo.</span>
+            Nuestro motor abajo.
           </motion.h1>
           <motion.p className="lp-lead" variants={child}>
-            Reservas, WODs, pagos y racha en una app y un admin que viven con{" "}
-            <strong>tu logo y tu color</strong>. El atleta nunca lee
-            &ldquo;Kronos&rdquo; en pantalla. Construido en CDMX para Boxes en
-            MX, CO, PE y AR.
+            Software invisible para CrossFit Boxes. Reservas, WODs, pagos, racha
+            y admin en una app que vive en tu dominio, con tu logo y tu color.
+            El atleta nunca lee Kronos en pantalla.
           </motion.p>
           <motion.div className="lp-hero-actions" variants={child}>
-            <a
-              href="#pricing"
-              className="lp-btn-lime lp-btn-lg"
-              onClick={() =>
-                track("landing_hero_cta_clicked", { cta: "primary" })
-              }
-            >
-              Reservar demo
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
+            {boxHref ? (
+              <a
+                href={boxHref}
+                className="lp-btn-lime lp-btn-lg"
+                onClick={() =>
+                  track("cta_clicked", { location: "hero_to_box" })
+                }
               >
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
-            </a>
+                Ir a mi box
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </a>
+            ) : (
+              <a
+                href="#section-form"
+                className="lp-btn-lime lp-btn-lg"
+                onClick={() => track("cta_clicked", { location: "hero" })}
+              >
+                Reservar mi lugar
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </a>
+            )}
             <a
-              href="#owner"
+              href="#section-atleta"
               className="lp-btn-ghost lp-btn-lg"
               onClick={() =>
-                track("landing_hero_cta_clicked", { cta: "secondary" })
+                track("cta_clicked", { location: "hero_secondary" })
               }
             >
-              Ver el admin · 90 seg
+              Ver cómo funciona
             </a>
           </motion.div>
           <motion.div className="lp-hero-meta" variants={child}>
-            <span>
-              <strong>{HERO_META.uptime}</strong> UPTIME
-            </span>
-            <span>
-              <strong>{HERO_META.payments}</strong>
-            </span>
-            <span>
-              <strong>{HERO_META.language}</strong>
-            </span>
-            <span>
-              <strong>{HERO_META.region}</strong>
-            </span>
+            {HERO_META.strip}
           </motion.div>
         </motion.div>
 

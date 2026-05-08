@@ -1,14 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import KronosLogo from "@/components/brand/KronosLogo";
+import { track } from "../_lib/track";
 
 const NAV_LINKS = [
-  { label: "Producto", href: "#producto" },
-  { label: "Para Boxes", href: "#owner" },
-  { label: "Para atletas", href: "#atleta" },
-  { label: "Precios", href: "#pricing" },
+  { label: "Para el atleta", href: "#section-atleta" },
+  { label: "Para el owner", href: "#section-owner" },
+  { label: "White-label", href: "#section-whitelabel" },
+  { label: "Precios", href: "#section-pricing" },
 ];
 
-export default function Nav() {
+export default function Nav({ boxHref }: { boxHref: string | null }) {
   return (
     <header className="lp-nav">
       <Link href="/" className="lp-nav-logo" aria-label="Kronos — Inicio">
@@ -22,23 +25,50 @@ export default function Nav() {
         ))}
       </nav>
       <div className="lp-nav-cta">
-        <Link href="/login" className="lp-btn-ghost">
-          Entrar
-        </Link>
-        <Link href="/signup" className="lp-btn-lime">
-          Registrate gratis
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
+        {boxHref ? (
+          <a
+            href={boxHref}
+            className="lp-btn-lime"
+            onClick={() => track("cta_clicked", { location: "nav_to_box" })}
           >
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </svg>
-        </Link>
+            Ir a mi box
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+        ) : (
+          <>
+            <Link href="/login" className="lp-btn-ghost">
+              Entrar al box
+            </Link>
+            <a
+              href="#section-form"
+              className="lp-btn-lime"
+              onClick={() => track("cta_clicked", { location: "nav" })}
+            >
+              Reservar lugar
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </a>
+          </>
+        )}
       </div>
     </header>
   );

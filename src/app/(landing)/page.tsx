@@ -1,45 +1,41 @@
 import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 import { authOptions } from "@/server/auth";
+import LandingTracker from "./_components/LandingTracker";
 import Nav from "./_components/Nav";
 import Hero from "./_components/Hero";
-import SocialProof from "./_components/SocialProof";
+import FoundingPartners from "./_components/FoundingPartners";
 import SectionAtleta from "./_components/SectionAtleta";
 import SectionOwner from "./_components/SectionOwner";
 import SectionWhiteLabel from "./_components/SectionWhiteLabel";
 import Pricing from "./_components/Pricing";
-import CtaTail from "./_components/CtaTail";
+import SectionFAQ from "./_components/SectionFAQ";
+import SectionLeadForm from "./_components/SectionLeadForm";
 import Footer from "./_components/Footer";
 
-export default async function LandingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ preview?: string }>;
-}) {
-  const { preview } = await searchParams;
-  const isPreview = preview === "1";
-
-  if (!isPreview) {
-    const session = await getServerSession(authOptions);
-    if (session?.user) {
-      redirect(session.user.role === "ATHLETE" ? "/atleta" : "/admin");
-    }
-  }
+export default async function LandingPage() {
+  const session = await getServerSession(authOptions);
+  const boxHref = session?.user
+    ? session.user.role === "ATHLETE"
+      ? "/atleta"
+      : "/admin"
+    : null;
 
   return (
     <>
       <a href="#main" className="lp-skip">
         Saltar al contenido
       </a>
-      <Nav />
+      <LandingTracker />
+      <Nav boxHref={boxHref} />
       <main id="main">
-        <Hero />
-        <SocialProof />
+        <Hero boxHref={boxHref} />
+        <FoundingPartners />
         <SectionAtleta />
         <SectionOwner />
         <SectionWhiteLabel />
         <Pricing />
-        <CtaTail />
+        <SectionFAQ />
+        <SectionLeadForm />
       </main>
       <Footer />
     </>
