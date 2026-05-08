@@ -28,6 +28,7 @@ next-env.d.ts
 .env.local
 .env.development.local
 .env.test.local
+.env.production
 .env.production.local
 .env*.local
 
@@ -79,3 +80,16 @@ Thumbs.db
 /Imspiracion/
 /_design-source/logo/
 /kronos-*.png
+
+# Screenshots de sesión Kimi/Claude (untracked)
+/landing-*.png
+/landing-*.jpg
+/final-*.png
+/final-*.jpg
+/nav-*.png
+/nav-*.jpg
+/signup-*.png
+/.tmp-*.png
+/.tmp-*.jpg
+/verify-*.png
+/verify-*.jpg
