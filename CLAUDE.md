@@ -6,6 +6,8 @@ SaaS multi-tenant para boxes de CrossFit. Next.js 15 + Prisma + NextAuth.
 
 ## Estado actual
 
+**V3 Sweep Total cerrado** (2026-05-07, último commit `4da235b`): 16 commits desde `e64495b`. Brand consistency end-to-end — producto + charts + skeletons + toasts + emails todos en lima neon `#C8FF2D` monocromático.
+
 **Fase 1 al 100%** (2026-05-04): 7 vertical slices end-to-end con TDD + cierre.
 
 Módulos admin con datos reales:
@@ -54,12 +56,13 @@ Lógica de dominio (pure helpers + tests):
 Stats:
 
 - Branch: `main`
-- Dev server: `:3000`
+- Dev server: `:3000` (local) o `:3007 HOSTNAME=0.0.0.0` (acceso externo via port forwarding "hitazo" del router)
 - BD: PostgreSQL en `:5434` (docker compose)
-- Tests unit: 150/150 (`pnpm test`) — 13 archivos
-- Tests E2E: 21/21 (`pnpm test:e2e`) — 4 specs (auth, reservar, score-pr, leaderboard)
+- Tests unit: 669/669 (`pnpm test`) — 54 archivos
+- Tests E2E: 11 fallos preexistentes con strict-mode violations (`getByText` ambiguo entre toast + `<p>`) — NO son regresión del sweep V3, queda como deuda separada
 - Build: `pnpm build` ✅
-- Commits Fase 1 + cierre: `48fd157`..`<HEAD>` (10+ commits)
+- Typecheck + Lint: ✅
+- Commits sweep V3: `4908109`..`4da235b` (16 commits del sistema visual completo)
 
 ## Comandos
 
@@ -137,17 +140,45 @@ prisma/
   seed.ts         — 2 boxes, 5 atletas, WODs, clases, badges
 ```
 
-## Tokens visuales
+## Tokens visuales (V3 "Cuarto Oscuro")
 
-Variables CSS en `src/app/globals.css`:
+Sistema actual — paleta lima neon monocromática, dark-only forzado. Variables canónicas en `src/app/globals.css:1612-1675`:
 
-- `--bg #1a1d20`, `--bg-soft #23272b`, `--card #2a2f33`, `--card-2 #34393e`
-- `--recovery #19f08b` (verde), `--strain #3aa3ff` (azul), `--pr #ff5e5e` (rojo)
-- `--grad` (gradiente azul→verde), `--grad-soft` (versión transparente)
+**Backgrounds & text:**
 
-Clases Tailwind custom: `k-card`, `k-eyebrow`, `k-btn-grad`, `k-btn-ghost`, `k-chip`, `k-chip-recovery`, `k-chip-strain`, `k-chip-pr`, `k-chip-ghost`
+- `--k-bg #08080a`, `--k-surface #0f1014`, `--k-elevated #14141a`
+- `--k-line #1c1c24`, `--k-line-2 #26262e`
+- `--k-t1 #f5f5f7` (primary), `--k-t2 #8a8a94`, `--k-t3 #54545c`
 
-Fuentes: `font-sans` (Inter), `font-display` (Space Grotesk), `font-mono` (JetBrains Mono)
+**Acento (lima neon):**
+
+- `--k-accent #c8ff2d` (lima — color brand único)
+- `--k-accent-press #a8d726` (estado pressed)
+- `--k-accent-on #08080a` (texto sobre acento)
+- `--k-accent-soft rgba(200, 255, 45, 0.1)`
+- `--k-accent-line rgba(200, 255, 45, 0.3)`
+- `--k-accent-glow 0 0 16px rgba(200, 255, 45, 0.18)`
+
+**Semánticos:**
+
+- `--k-warning #ffb020` (naranja, solo para warnings reales)
+- `--k-danger #ff5a5a` (rojo, solo para errores)
+
+**Tipografía:**
+
+- `--k-font-display` IBM Plex Mono (headings, números, monospace)
+- `--k-font-body` Inter (body copy)
+
+**Compat layer** (`globals.css:1740+`): tokens legacy `--moss/--fire/--blue/--cyan/--strain/--red/--grad/--text-2/etc` están aliased a tokens V3 como red de seguridad. Pero el sweep V3 dejó cero referencias legacy en `src/{app,components}` — el compat solo cubre código futuro accidental.
+
+**Clases utilitarias:**
+
+- Cards: `k-card`, `k-card-featured`, `k-card-ghost`, `k-card-flat`
+- Botones: `k-btn-grad` (lima sólido), `k-btn-ghost`
+- Chips: `k-chip`, `k-chip-recovery`, `k-chip-strain`, `k-chip-pr`, `k-chip-ghost`
+- Eyebrow: `k-eyebrow`, `k-eyebrow-bar`
+- Headings: `k-h-italic`, `k-mono`, `k-body`
+- Animation: `k-tap`, `k-pulse-glow`, `k-grain`, `k-skeleton`
 
 ## Diseño source
 
@@ -155,10 +186,15 @@ Fuentes: `font-sans` (Inter), `font-display` (Space Grotesk), `font-mono` (JetBr
 
 ## Engram topic keys
 
-- `proj.kronos.dev_port` — 3000
+- `proj.kronos.dev_port` — 3000 (local) / 3007 (acceso externo)
 - `proj.kronos.db_port` — 5434
-- `proj.kronos.phase` — Fase 0 completa, Fase 1 pendiente
+- `proj.kronos.phase` — Fase 1 cerrada, V3 sweep total cerrado
 - `proj.kronos.stack` — Next.js 15 + Prisma 6 + NextAuth 4 + Tailwind 3
+- `decision.kronos.v3_sweep_total` — sweep V3 cerrado completo (16 commits)
+- `bug.kronos.charts_navy_residual` — culprit del azul-marino en charts (cinematic bg + skeleton)
+- `bug.kronos.sprint_role_aware_regression` — Sprint role-aware perdido en sweeps visuales
+- `pattern.kronos.opacity_for_intensity` — opacidad variable para mantener monocromático
+- `pattern.kronos.perl_bulk_sweep` — perl bulk para sweeps masivos de tokens
 
 ## Anti-patterns
 
@@ -169,6 +205,10 @@ Fuentes: `font-sans` (Inter), `font-display` (Space Grotesk), `font-mono` (JetBr
 - NO mezclar lanes sin coordinación (Claude toca CSS decorativo = problema)
 - NO instalar shadcn sin correr el CLI correcto: `pnpm dlx shadcn@latest add <component>`
 - NO `window.confirm()` ni `window.alert()` — usar `useConfirm()` de `@/lib/use-confirm` (modal real, brand consistente, accesible). Si falta el provider en el árbol, agregar `<ConfirmProvider>` al layout correspondiente.
+- NO usar `var(--moss/--fire/--blue/--cyan/--strain/--red/--grad/--text-2/--card-2/--bg-soft/--line-strong)` legacy — usar `--k-*` directamente. El compat layer es solo red de seguridad.
+- NO usar hex hardcoded `#19f08b` (verde teal), `#3aa3ff` (cyan), `#1a3457/#0d1b2e/#07101e` (navy) — son colores legacy. Solo OK los V3: `#c8ff2d` (lima), `#a8d726` (lima press), `#ff5a5a` (danger), `#ffb020` (warning).
+- NO escribir branches role-aware sin e2e que los proteja — el branch puede perderse en sweeps visuales (lección Sprint 3.12 commit `b116a0f`).
+- NO usar `font-script` class — eliminada en sweep V3, usar `font-display` (Plex Mono).
 
 ## Hydration patterns (regla dura)
 
@@ -217,6 +257,49 @@ Pasarlo como prop inmutable. Server calcula `new Date()` una vez, lo serializa, 
 - Console error en navegador: `Hydration failed because...` → leer el stack para encontrar el componente
 - En dev mode Next muestra el error overlay con el componente exacto
 
+## Sweeps masivos — patrones aprendidos
+
+### Perl bulk para tokens CSS
+
+Cuando hay que cambiar muchos tokens CSS en muchos archivos (típico de sweeps visuales tipo V3), usar `perl -i -pe` con regex en bloque sobre lista de archivos. Mucho más rápido que Edit individual.
+
+```bash
+FILES=(src/path/a.tsx src/path/b.tsx ...)
+for f in "${FILES[@]}"; do
+  perl -i -pe '
+    s/var\(--grad-soft\)/var(--k-accent-soft)/g;  # ESPECÍFICO antes que general
+    s/var\(--grad\)/var(--k-accent)/g;            # general DESPUÉS
+    s/var\(--moss\)/var(--k-accent)/g;
+    s/var\(--text-2\)/var(--k-t2)/g;
+    s/#1c1917/var(--k-accent-on)/g;
+    # ...
+  ' "$f"
+done
+```
+
+**Reglas:**
+
+- **Orden importa**: específicos antes que generales (`--grad-soft` antes que `--grad`).
+- **Tokens hardcoded NO captura**: agregar regex separados para `rgba\(58.*163.*255` (cyan), `#3aa3ff` (cyan), `#19f08b` (verde teal), `#1a3457|#0d1b2e|#07101e` (navy).
+- **Verificación post-sweep**: `grep -rE "<patterns_legacy>" src/` debe dar 0 residuos.
+- **Tests obligatorios**: `pnpm typecheck && pnpm test` después de cada bulk.
+- **Excluir** `_design-source/`, `src/app/dev/**` (demos), y `src/server/email-templates/**` (emails Resend usan hex literales no CSS vars — sweep separado).
+
+### Opacidad variable para data viz monocromática
+
+Cuando una visualización necesita "intensidad" (low/mid/high) en V3 monocromático, usar opacidad del color base en vez de cambiar de color:
+
+```tsx
+style={{
+  background: "var(--k-accent)",
+  opacity: score >= 70 ? 1 : score >= 40 ? 0.7 : 0.4,
+}}
+```
+
+**No hacer**: `score >= 70 ? lima : warning` — rompe monocromático cuando datasets reales tienen muchos valores en rango "warning".
+
+**Sí hacer** semántica con color cuando es **distinta cosa** (success vs error) — no para intensidades de la misma cosa.
+
 ## Para retomar
 
-"Retomo kronos, [fase/feature/bug]" — leer este CLAUDE.md y el estado de git.
+"Retomo kronos, [fase/feature/bug]" — leer este CLAUDE.md y el estado de git. Los topic keys de Engram (`decision.kronos.v3_sweep_total`, `bug.kronos.*`, `pattern.kronos.*`) tienen contexto detallado de las decisiones del sweep.
