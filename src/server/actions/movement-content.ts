@@ -116,6 +116,54 @@ export async function getOrGenerateMovementContent(
 }
 
 /**
+ * Admin only: regenera SOLO las progressions vía AI sin tocar cues ni
+ * commonMistakes. Útil cuando un movement tiene contenido manual/seed bueno
+ * pero el árbol de progresiones está vacío o desactualizado.
+ *
+ * No respeta rate limit (admin sabe lo que hace). No bloquea si
+ * MANUAL_OVERRIDE — solo escribe progressions, deja contentSource intacto.
+ */
+export async function regenerateProgressionsOnly(
+  id: string,
+): Promise<MovementContentResult> {
+  const session = await requireSession();
+  const role = session.user.role;
+  if (role !== "OWNER" && role !== "COACH") {
+    throw new Error("Solo owner/coach pueden regenerar progresiones");
+  }
+
+  const existing = await rawDb.movement.findFirst({
+    where: { id, tenantId: session.user.tenantId },
+  });
+  if (!existing) return { ok: false, reason: "not_found" };
+
+  try {
+    const content = await generateMovementContent({
+      name: existing.name,
+      category: existing.category,
+      equipment: existing.equipment,
+    });
+
+    await rawDb.movement.update({
+      where: { id },
+      data: {
+        progressions: content.progressions as never,
+      },
+    });
+
+    revalidatePath(`/atleta/movimientos/${id}`);
+    revalidatePath(`/admin/movimientos/${id}`);
+
+    const detail = await getMovementById(id);
+    if (!detail) return { ok: false, reason: "not_found" };
+    return { ok: true, movement: detail, generated: true };
+  } catch (err) {
+    console.error("[movement-content] regenerate progressions failed:", err);
+    return { ok: false, reason: "ai_failed" };
+  }
+}
+
+/**
  * Admin only: fuerza regeneración del contenido AI. No respeta rate limit
  * (admin sabe lo que hace).
  */
