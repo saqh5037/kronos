@@ -7,6 +7,7 @@ import {
   SUPPORTED_CURRENCIES,
   SUPPORTED_TIMEZONES,
 } from "@/lib/validations/box";
+import { LogoUpload } from "@/components/admin/LogoUpload";
 
 type Props = {
   box: BoxSettings;
@@ -102,15 +103,25 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
             </div>
           </Field>
 
-          <Field label="Logo (URL)">
-            <input
-              type="url"
-              value={logoUrl}
-              onChange={(e) => setLogoUrl(e.target.value)}
-              placeholder="https://…/logo.png"
-              disabled={!canEdit}
-              className={inputClass}
-            />
+          <Field label="Logo">
+            {canEdit ? (
+              <LogoUpload
+                currentUrl={logoUrl || null}
+                onUploaded={(url) => setLogoUrl(url)}
+              />
+            ) : logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logoUrl}
+                alt="Logo"
+                className="w-20 h-20 rounded-xl object-contain"
+                style={{ background: "var(--k-surface)" }}
+              />
+            ) : (
+              <span className="text-xs" style={{ color: "var(--k-t3)" }}>
+                Sin logo configurado
+              </span>
+            )}
           </Field>
         </div>
       </section>

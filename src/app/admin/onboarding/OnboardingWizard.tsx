@@ -23,6 +23,7 @@ import { PLAN_TYPES, STAFF_ROLES } from "@/lib/validations/onboarding";
 import { kToast } from "@/lib/toast";
 import KCard from "@/components/kronos/KCard";
 import Eyebrow from "@/components/kronos/Eyebrow";
+import { LogoUpload } from "@/components/admin/LogoUpload";
 
 type Props = {
   box: BoxSettings;
@@ -69,6 +70,7 @@ export default function OnboardingWizard({ box, schedule, status }: Props) {
   const [timezone, setTimezone] = useState(box.timezone);
   const [currency, setCurrency] = useState(box.currency);
   const [brandColor, setBrandColor] = useState(box.brandColor ?? "#c8ff2d");
+  const [logoUrl, setLogoUrl] = useState<string | null>(box.logoUrl ?? null);
 
   // Step 3 — Plan
   const [planName, setPlanName] = useState("Mensualidad");
@@ -101,7 +103,7 @@ export default function OnboardingWizard({ box, schedule, status }: Props) {
           timezone,
           defaultClassCapacity: box.defaultClassCapacity,
           brandColor,
-          logoUrl: box.logoUrl ?? "",
+          logoUrl: logoUrl ?? "",
         });
         kToast.success("Box actualizado");
         next();
@@ -212,6 +214,8 @@ export default function OnboardingWizard({ box, schedule, status }: Props) {
             setCurrency={setCurrency}
             brandColor={brandColor}
             setBrandColor={setBrandColor}
+            logoUrl={logoUrl}
+            setLogoUrl={setLogoUrl}
             pending={pending}
             onNext={submitStep1}
           />
@@ -323,6 +327,8 @@ type Step1Props = {
   setCurrency: (v: string) => void;
   brandColor: string;
   setBrandColor: (v: string) => void;
+  logoUrl: string | null;
+  setLogoUrl: (v: string | null) => void;
   pending: boolean;
   onNext: () => void;
 };
@@ -378,6 +384,20 @@ function Step1(p: Step1Props) {
               borderColor: "var(--k-line-2)",
               color: "var(--k-t1)",
             }}
+          />
+        </div>
+      </div>
+      <div>
+        <label
+          className="text-xs font-mono uppercase tracking-wider"
+          style={{ color: "var(--k-t3)" }}
+        >
+          Logo (opcional)
+        </label>
+        <div className="mt-2">
+          <LogoUpload
+            currentUrl={p.logoUrl}
+            onUploaded={(url) => p.setLogoUrl(url)}
           />
         </div>
       </div>
