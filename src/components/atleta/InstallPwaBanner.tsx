@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  detectPwaPlatform,
+  buildSafariDeepLink,
+  type PwaPlatform,
+} from "@/lib/pwa-detect";
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -23,7 +28,7 @@ function isDismissExpired(): boolean {
 export default function InstallPwaBanner() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<InstallPromptEvent | null>(null);
-  const [isIos, setIsIos] = useState(false);
+  const [platform, setPlatform] = useState<PwaPlatform>("unknown");
   const [isStandalone, setIsStandalone] = useState(false);
   const [dismissed, setDismissed] = useState(true);
   const [visible, setVisible] = useState(false);
@@ -38,9 +43,7 @@ export default function InstallPwaBanner() {
       (window.navigator as { standalone?: boolean }).standalone === true;
     setIsStandalone(standalone);
 
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const safari = /safari/i.test(navigator.userAgent);
-    setIsIos(ios && safari);
+    setPlatform(detectPwaPlatform(navigator.userAgent));
 
     const handler = (e: Event) => {
       e.preventDefault();
@@ -74,17 +77,27 @@ export default function InstallPwaBanner() {
     }
   }
 
+  function handleOpenInSafari() {
+    if (typeof window === "undefined") return;
+    window.location.href = buildSafariDeepLink(window.location.href);
+  }
+
   if (dismissed || isStandalone) return null;
 
-  // 3 modos: iOS Safari (instrucciones Compartir → Agregar), Android con
-  // beforeinstallprompt (botón nativo), Android sin prompt (instrucciones
-  // manuales del menú ⋮). Antes el banner desaparecía silenciosamente en el
-  // 3er caso; ahora siempre da una vía concreta para instalar.
-  const mode = isIos
-    ? "ios"
-    : deferredPrompt
-      ? "android-prompt"
-      : "android-manual";
+  // 4 modos según plataforma:
+  // - ios-safari: instrucciones "Compartir → Agregar a inicio" (puede instalar)
+  // - ios-other: Chrome/Firefox/Edge iOS o in-app browser → botón "Abrir en
+  //   Safari" porque Apple SOLO deja a Safari instalar PWAs como standalone
+  // - android-prompt: tiene beforeinstallprompt → botón nativo "Instalar"
+  // - android-manual: Android sin prompt → instrucciones menú ⋮
+  const mode =
+    platform === "ios-safari"
+      ? "ios-safari"
+      : platform === "ios-other"
+        ? "ios-other"
+        : deferredPrompt
+          ? "android-prompt"
+          : "android-manual";
 
   return (
     <AnimatePresence>
@@ -128,7 +141,7 @@ export default function InstallPwaBanner() {
             <div className="text-[13px] font-semibold text-[var(--text)] mb-0.5">
               Instalar Kronos
             </div>
-            {mode === "ios" && (
+            {mode === "ios-safari" && (
               <div className="text-[11px] leading-relaxed text-[var(--k-t3)]">
                 Toca{" "}
                 <span className="font-bold text-[var(--k-warning)]">
@@ -137,6 +150,19 @@ export default function InstallPwaBanner() {
                 (icono cuadrado con flecha) y luego{" "}
                 <span className="font-bold text-[var(--k-warning)]">
                   Agregar a inicio
+                </span>
+                .
+              </div>
+            )}
+            {mode === "ios-other" && (
+              <div className="text-[11px] leading-relaxed text-[var(--k-t3)]">
+                Apple solo deja a{" "}
+                <span className="font-bold text-[var(--k-warning)]">
+                  Safari
+                </span>{" "}
+                instalar apps. Tocá el botón para abrir Kronos en Safari y luego{" "}
+                <span className="font-bold text-[var(--k-warning)]">
+                  Compartir → Agregar a inicio
                 </span>
                 .
               </div>
@@ -173,6 +199,16 @@ export default function InstallPwaBanner() {
                 whileTap={{ scale: 0.95 }}
               >
                 Instalar
+              </motion.button>
+            )}
+            {mode === "ios-other" && (
+              <motion.button
+                onClick={handleOpenInSafari}
+                className="k-btn-grad text-[11px] px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Abrir en Safari
               </motion.button>
             )}
             <button
