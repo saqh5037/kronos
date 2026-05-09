@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Kronos — Software para CrossFit Boxes en LATAM";
+export const runtime = "edge";
+export const alt = "Kronos — Software invisible para CrossFit Boxes";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -120,7 +121,7 @@ export default function OpenGraphImage() {
           zIndex: 1,
         }}
       >
-        <span>kronos.app</span>
+        <span>kronos-fit.com</span>
         <span>·</span>
         <span>HECHO EN MÉXICO</span>
       </div>
