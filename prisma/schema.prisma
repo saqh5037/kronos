@@ -173,6 +173,7 @@ model Athlete {
   surveyResponses SurveyResponse[]
   xpLedger        XPLedger[]
   dailyMissions   DailyMission[]
+  skillLevels     AthleteSkillLevel[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -617,6 +618,32 @@ model Achievement {
 
   @@unique([athleteId, badgeId])
   @@index([tenantId])
+}
+
+// ─── SKILL PROGRESSIONS ──────────────────────────────────────────────────────
+
+enum SkillLevelStatus {
+  CURRENT
+  ACHIEVED
+}
+
+model AthleteSkillLevel {
+  id              String           @id @default(cuid())
+  tenantId        String
+  athleteId       String
+  movementSlug    String
+  progressionSlug String
+  status          SkillLevelStatus
+  achievedAt      DateTime?
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([athleteId, movementSlug, progressionSlug])
+  @@index([tenantId, athleteId])
+  @@index([tenantId, movementSlug])
 }
 
 model Streak {

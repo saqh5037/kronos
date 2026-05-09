@@ -8,6 +8,8 @@ import {
 } from "@/server/actions/prs";
 import type { getMovementById } from "@/server/actions/movements";
 import { getOrGenerateMovementContent } from "@/server/actions/movement-content";
+import { getMyMovementSkillTree } from "@/server/actions/skill-levels";
+import SkillTree from "@/components/atleta/SkillTree";
 import { getTodayWOD } from "@/server/actions/scores";
 import { PRChart, type PRChartPoint } from "@/components/charts/PRChart";
 import {
@@ -29,6 +31,7 @@ export default async function MovementDetailPage({
   let progression: PRProgressionResult | null = null;
   let movementInfo: Awaited<ReturnType<typeof getMovementById>> = null;
   let todayWod = null;
+  let skillTree: Awaited<ReturnType<typeof getMyMovementSkillTree>> = null;
 
   try {
     const [profileR, progressionR, contentR, todayWodR] = await Promise.all([
@@ -41,6 +44,15 @@ export default async function MovementDetailPage({
     progression = progressionR;
     movementInfo = contentR.ok ? contentR.movement : null;
     todayWod = todayWodR;
+
+    // SkillTree depende del slug — lookup secuencial tras tener el movement.
+    if (movementInfo?.slug) {
+      try {
+        skillTree = await getMyMovementSkillTree(movementInfo.slug);
+      } catch {
+        skillTree = null;
+      }
+    }
   } catch {
     notFound();
   }
@@ -353,93 +365,56 @@ export default async function MovementDetailPage({
               </AnimatedSection>
             )}
 
-          {/* PROGRESSIONS */}
-          {movementInfo?.progressions &&
-            movementInfo.progressions.length > 0 && (
-              <AnimatedSection>
-                <AnimatedItem>
+          {/* SKILL TREE — progresiones interactivas */}
+          {skillTree && skillTree.nodes.length > 0 && (
+            <AnimatedSection>
+              <AnimatedItem>
+                <div
+                  data-testid="movement-progressions"
+                  style={{
+                    padding: 16,
+                    background: "var(--k-surface)",
+                    border: "1px solid var(--k-line)",
+                    borderRadius: 16,
+                  }}
+                >
                   <div
-                    data-testid="movement-progressions"
                     style={{
-                      padding: 16,
-                      background: "var(--k-surface)",
-                      border: "1px solid var(--k-line)",
-                      borderRadius: 16,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "baseline",
+                      marginBottom: 12,
                     }}
                   >
                     <p
                       className="k-eyebrow"
-                      style={{ color: "var(--k-t3)", margin: "0 0 12px" }}
+                      style={{ color: "var(--k-t3)", margin: 0 }}
                     >
-                      Escalados / progresiones
+                      Tu camino · progresiones
                     </p>
-                    <div style={{ display: "grid", gap: 8 }}>
-                      {movementInfo.progressions.map((p, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            background: "var(--k-elevated)",
-                            border: "1px solid var(--k-line)",
-                            borderRadius: 12,
-                            padding: "10px 12px",
-                            display: "flex",
-                            gap: 10,
-                            alignItems: "flex-start",
-                          }}
-                        >
-                          <span
-                            className="k-mono"
-                            style={{
-                              fontSize: 9,
-                              letterSpacing: 1.2,
-                              padding: "3px 6px",
-                              borderRadius: 4,
-                              border: "1px solid var(--k-line)",
-                              color:
-                                p.level === "beginner"
-                                  ? "var(--k-accent)"
-                                  : p.level === "intermediate"
-                                    ? "var(--k-warning)"
-                                    : "var(--k-danger)",
-                            }}
-                          >
-                            {p.level === "beginner"
-                              ? "PRINCIPIANTE"
-                              : p.level === "intermediate"
-                                ? "INTERMEDIO"
-                                : "AVANZADO"}
-                          </span>
-                          <div style={{ flex: 1 }}>
-                            <div
-                              style={{
-                                fontFamily: "var(--k-font-body)",
-                                fontSize: 13,
-                                fontWeight: 600,
-                                color: "var(--k-t1)",
-                              }}
-                            >
-                              {p.name}
-                            </div>
-                            {p.description && (
-                              <div
-                                style={{
-                                  fontFamily: "var(--k-font-body)",
-                                  fontSize: 12,
-                                  color: "var(--k-t2)",
-                                  marginTop: 2,
-                                }}
-                              >
-                                {p.description}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <span
+                      className="k-mono"
+                      style={{
+                        fontSize: 9,
+                        letterSpacing: 1.2,
+                        color: "var(--k-t3)",
+                      }}
+                    >
+                      {
+                        skillTree.nodes.filter((n) => n.status === "achieved")
+                          .length
+                      }
+                      /{skillTree.nodes.length} DOMINADOS
+                    </span>
                   </div>
-                </AnimatedItem>
-              </AnimatedSection>
-            )}
+                  <SkillTree
+                    movementSlug={skillTree.movementSlug}
+                    nodes={skillTree.nodes}
+                  />
+                </div>
+              </AnimatedItem>
+            </AnimatedSection>
+          )}
 
           {/* AI DISCLAIMER */}
           {movementInfo?.contentSource === "AI_GENERATED" && (
