@@ -32,7 +32,7 @@ export default function CtaTail() {
             30 DÍAS · SIN TARJETA · SIN CLÁUSULAS
           </div>
           <h2>
-            Probá Kronos <br />
+            Prueba Kronos <br />
             en <span className="lp-tag-lime">tu Box</span>.
           </h2>
           <p>

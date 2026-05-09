@@ -17,12 +17,12 @@ const leadSchema = z.object({
   email: z.string().email("Email inválido"),
   whatsapp: z.string().min(8, "Formato internacional requerido"),
   boxName: z.string().min(1, "Requerido"),
-  athletes: z.string().min(1, "Seleccioná una opción"),
+  athletes: z.string().min(1, "Selecciona una opción"),
   currentSw: z.string().optional(),
   planInterest: z.string().optional(),
   notes: z.string().max(500, "Máximo 500 caracteres").optional(),
   consent: z.literal(true, {
-    errorMap: () => ({ message: "Tenés que aceptar para continuar" }),
+    errorMap: () => ({ message: "Tienes que aceptar para continuar" }),
   }),
   website: z.string().optional(), // honeypot
 });
@@ -65,12 +65,12 @@ function LeadForm({ onSuccess }: { onSuccess: () => void }) {
       } else {
         track("lead_form_failed", { error: json.error ?? "unknown" });
         setServerError(
-          json.error ?? "No pudimos enviar el formulario. Probá de nuevo.",
+          json.error ?? "No pudimos enviar el formulario. Inténtalo de nuevo.",
         );
       }
     } catch {
       track("lead_form_failed", { error: "network" });
-      setServerError("No pudimos enviar el formulario. Probá de nuevo.");
+      setServerError("No pudimos enviar el formulario. Inténtalo de nuevo.");
     }
   };
 
@@ -166,7 +166,7 @@ function LeadForm({ onSuccess }: { onSuccess: () => void }) {
           aria-invalid={errors.athletes ? "true" : "false"}
           aria-describedby={errors.athletes ? "athletes-error" : undefined}
         >
-          <option value="">Seleccioná...</option>
+          <option value="">Selecciona...</option>
           {ATHLETES_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
@@ -183,7 +183,7 @@ function LeadForm({ onSuccess }: { onSuccess: () => void }) {
       <div className="lp-form-field">
         <label htmlFor="currentSw">Software actual (opcional)</label>
         <select id="currentSw" {...register("currentSw")}>
-          <option value="">Seleccioná...</option>
+          <option value="">Selecciona...</option>
           {SOFTWARE_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
@@ -209,10 +209,10 @@ function LeadForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
 
       <div className="lp-form-field">
-        <label htmlFor="notes">Algo que querés contarnos (opcional)</label>
+        <label htmlFor="notes">Algo que quieres contarnos (opcional)</label>
         <textarea
           id="notes"
-          placeholder="Si querés agregar contexto..."
+          placeholder="Si quieres agregar contexto..."
           rows={3}
           maxLength={500}
           {...register("notes")}
@@ -243,7 +243,7 @@ function LeadForm({ onSuccess }: { onSuccess: () => void }) {
         <div className="lp-form-error" role="alert">
           {serverError}
           <br />
-          <span style={{ fontSize: 13 }}>Escribinos a hola@kronos.app</span>
+          <span style={{ fontSize: 13 }}>Escríbenos a hola@kronos.app</span>
         </div>
       )}
 
@@ -299,7 +299,7 @@ function LeadFormSuccess() {
         minutos.
       </p>
       <p style={{ marginTop: 16 }}>
-        Mientras tanto, podés entrar al producto acá:{" "}
+        Mientras tanto, puedes entrar al producto aquí:{" "}
         <a href="/login" className="lp-link-lime">
           /login
         </a>
@@ -325,11 +325,11 @@ export default function SectionLeadForm() {
           <span className="lp-dot" />
           /06 · RESERVAR MI LUGAR
         </div>
-        <h2>Probá Kronos en tu Box.</h2>
+        <h2>Prueba Kronos en tu Box.</h2>
         <p>
           30 días sin cargo. Sin tarjeta. Sin contrato anual. Te llamamos en
           menos de 24 horas hábiles para entender tu Box y armar el setup. Si no
-          funciona, exportamos tu data en CSV y cancelás cuando quieras.
+          funciona, exportamos tu data en CSV y cancelas cuando quieras.
         </p>
       </motion.div>
 
@@ -340,7 +340,7 @@ export default function SectionLeadForm() {
           <>
             <div className="lp-eyebrow" style={{ marginBottom: 24 }}>
               <span className="lp-dot" />
-              DEJANOS TUS DATOS · TE CONTACTAMOS HOY
+              DÉJANOS TUS DATOS · TE CONTACTAMOS HOY
             </div>
             <LeadForm onSuccess={() => setSubmitted(true)} />
             <p

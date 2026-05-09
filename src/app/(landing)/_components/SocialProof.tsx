@@ -19,8 +19,8 @@ export default function SocialProof() {
             textAlign: "center",
           }}
         >
-          Construido en CDMX. En piloto con afiliados de CrossFit en México.
-          Cupo limitado para founding Boxes.
+          Construido en México. En piloto con afiliados de CrossFit en MX, CO y
+          PE. Cupo limitado para founding Boxes.
         </div>
       </div>
     );

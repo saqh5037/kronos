@@ -39,41 +39,78 @@ export default function SectionAtleta() {
           <ul className="lp-feature-list">
             <li>
               <div>
-                <strong>23 días de racha</strong>
+                <strong>
+                  Reserva en 1 tap, lista de espera con tu lugar real
+                </strong>
                 <span className="desc">
-                  El número más grande de la app. Si lo rompe, lo ve antes que
-                  nada. Si lo extiende, lo siente todo el día. Retención
-                  psicológica pura, sin push notifications motivacionales.
+                  CTA primario gigante en el color del Box. Si la clase está
+                  llena, lista de espera FIFO con tu posición visible. Cuando
+                  alguien cancela, te entra push instantáneo y se confirma sin
+                  que tengas que volver a entrar.
                 </span>
               </div>
             </li>
             <li>
               <div>
-                <strong>Helen · 11:42 (su PR)</strong>
+                <strong>Recordatorio inteligente, no spam motivacional</strong>
                 <span className="desc">
-                  El WOD del día contra la mejor marca histórica del atleta.
-                  Compite contra sí mismo, no contra el feed de extraños. PR
-                  detection automático sobre RX y scaled.
+                  Push 2 horas antes de tu clase confirmada. Si tienes que
+                  cancelar, un tap. Sin guilt-tripping, sin emojis de fuego, sin
+                  frases tipo &ldquo;¡tú puedes campeón!&rdquo;.
                 </span>
               </div>
             </li>
             <li>
               <div>
-                <strong>Reserva en 1 tap, no en 4 menús</strong>
+                <strong>WOD del día con video por movimiento</strong>
                 <span className="desc">
-                  CTA primario de 54px en el color exacto del Box. Carga
-                  instantánea (PWA con SSR). Cero ambigüedad al confirmar
-                  asistencia.
+                  Cada movimiento del WOD lleva su video de técnica curado.
+                  Snatch, muscle-up, kipping pull-up, clean &amp; jerk: el
+                  atleta entra al box ya con la imagen del patrón en la cabeza,
+                  no preguntándole al coach a media clase.
                 </span>
               </div>
             </li>
             <li>
               <div>
-                <strong>Tu Box, no nosotros</strong>
+                <strong>Tu marca, contra ti mismo (auto-PR)</strong>
                 <span className="desc">
-                  Logo, nombre, color, dominio: todo del Box. Operamos detrás
-                  como infraestructura nativa. El ecosistema le pertenece a tu
-                  marca.
+                  Helen 11:42 vs tu mejor de 12:16 → el sistema lo detecta, lo
+                  registra y te lo dice en el momento. RX, scaled y
+                  modificaciones por separado. Compites contra ti, no contra el
+                  feed de extraños.
+                </span>
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Histórico por movimiento, no por día</strong>
+                <span className="desc">
+                  Tu Fran de hoy contra los últimos 6 meses. Tu back squat 1RM
+                  contra el del año pasado. Gráfica simple, datos duros, sin
+                  charts decorativos. Ves si estás mejorando o si llevas 3 meses
+                  estancado en el mismo peso.
+                </span>
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>23 días de racha — el número que importa</strong>
+                <span className="desc">
+                  El contador de racha es el número más grande de la app. Si lo
+                  rompes, lo ves antes que nada. Si lo extiendes, lo sientes
+                  todo el día. Retención psicológica pura, sin push
+                  notifications motivacionales.
+                </span>
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Tu Box al frente (Titanio = sin Kronos)</strong>
+                <span className="desc">
+                  En Titanio, logo, nombre, color y dominio son del Box. Kronos
+                  opera detrás como infraestructura nativa. En Hierro y Acero tu
+                  marca es la dominante; Kronos aparece solo en el footer.
                 </span>
               </div>
             </li>

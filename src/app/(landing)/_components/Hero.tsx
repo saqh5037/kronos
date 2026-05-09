@@ -35,17 +35,16 @@ export default function Hero({ boxHref }: { boxHref: string | null }) {
         <motion.div initial="hidden" animate="show" variants={variants}>
           <motion.div className="lp-eyebrow" variants={child}>
             <span className="lp-dot" />
-            PILOTO PRIVADO · CDMX · CUPO LIMITADO
+            PILOTO PRIVADO · MÉXICO · CUPO LIMITADO
           </motion.div>
           <motion.h1 variants={child}>
-            Tu Box arriba.
+            Software invisible
             <br />
-            Nuestro motor abajo.
+            para tu CrossFit Box.
           </motion.h1>
           <motion.p className="lp-lead" variants={child}>
-            Software invisible para CrossFit Boxes. Reservas, WODs, pagos, racha
-            y admin en una app que vive en tu dominio, con tu logo y tu color.
-            El atleta nunca lee Kronos en pantalla.
+            Reservas, WODs, pagos, racha y admin en una sola app, en español,
+            con tu logo y tu color. Diseñada para CrossFit en México.
           </motion.p>
           <motion.div className="lp-hero-actions" variants={child}>
             {boxHref ? (
