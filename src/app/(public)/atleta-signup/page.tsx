@@ -5,6 +5,7 @@ import { authOptions } from "@/server/auth";
 import KCard from "@/components/kronos/KCard";
 import KronosLogo from "@/components/brand/KronosLogo";
 import AtletaSignupForm from "./AtletaSignupForm";
+import IosPwaTip from "./IosPwaTip";
 
 export const metadata = {
   title: "Kronos — Soy atleta",
@@ -44,6 +45,8 @@ export default async function AtletaSignupPage({
             Tus PRs, tus movimientos, tu progreso. Gratis. Sin box requerido.
           </p>
         </div>
+
+        <IosPwaTip />
 
         <KCard animate={false}>
           <div className="p-6">
