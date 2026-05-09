@@ -7,7 +7,10 @@ import { db } from "./db";
 import { authorizeDev } from "./auth-dev";
 import { logAudit } from "./audit";
 import { sendEmail } from "@/lib/email";
-import { renderMagicLinkEmail } from "./email-templates/magic-link";
+import {
+  renderMagicLinkEmail,
+  renderMagicLinkText,
+} from "./email-templates/magic-link";
 import { validateMagicLinkSignIn } from "./auth-signin";
 
 export const authOptions: NextAuthOptions = {
@@ -45,6 +48,7 @@ export const authOptions: NextAuthOptions = {
           to: [identifier],
           subject: "Tu enlace para entrar a Kronos",
           html: renderMagicLinkEmail({ email: identifier, url }),
+          text: renderMagicLinkText({ email: identifier, url }),
           from: provider.from,
         });
         if (!result.ok) {

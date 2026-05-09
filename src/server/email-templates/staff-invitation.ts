@@ -1,10 +1,4 @@
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
+import { renderEmailLayout, escapeHtml } from "./_layout";
 
 export function renderStaffInvitationEmail(args: {
   boxName: string;
@@ -17,25 +11,26 @@ export function renderStaffInvitationEmail(args: {
   const roleLabel = args.role === "COACH" ? "coach" : "staff";
   const link = args.link;
 
-  return `
-<!DOCTYPE html>
-<html><body style="font-family: system-ui, sans-serif; background: #1a1d20; color: #eaeaea; padding: 32px;">
-  <div style="max-width: 480px; margin: 0 auto; background: #2a2f33; border-radius: 16px; padding: 32px;">
-    <h1 style="font-size: 22px; margin: 0 0 16px 0;">${greeting}</h1>
-    <p style="font-size: 16px; line-height: 1.5; margin: 0 0 16px 0;">
-      ${box} te invitó a sumarte como <strong>${roleLabel}</strong> en <strong>Kronos</strong> — la plataforma que usan para programar clases, registrar PRs y manejar el día a día del Box.
+  const body = `
+    <h1 style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:22px;font-weight:700;letter-spacing:-0.01em;color:#f5f5f7;margin:0 0 12px 0;">${greeting}</h1>
+    <p style="font-family:'Inter',Arial,sans-serif;font-size:15px;line-height:1.6;color:#8a8a94;margin:0 0 24px 0;">
+      <strong style="color:#f5f5f7;">${box}</strong> te invitó a sumarte como <strong style="color:#c8ff2d;">${roleLabel}</strong> en Kronos — la plataforma para programar clases, registrar PRs y manejar el día a día del Box.
     </p>
-    <p style="margin: 24px 0;">
-      <a href="${link}" style="display: inline-block; background: linear-gradient(135deg, #c8ff2d, #a8d726); color: #08080a; padding: 14px 24px; border-radius: 999px; font-weight: 700; text-decoration: none;">
-        Activar mi cuenta
-      </a>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 28px 0;">
+      <tr><td style="background:#c8ff2d;border-radius:999px;">
+        <a href="${link}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:700;color:#08080a;text-decoration:none;letter-spacing:0.01em;">Activar mi cuenta →</a>
+      </td></tr>
+    </table>
+    <p style="font-family:'Inter',Arial,sans-serif;font-size:12px;line-height:1.6;color:#54545c;margin:0 0 12px 0;">
+      El link expira en 14 días.
     </p>
-    <p style="font-size: 13px; color: #aaa; margin: 16px 0 0 0;">
-      Si el botón no funciona, copiá y pegá este link en tu navegador:<br/>
-      <a href="${link}" style="color: #c8ff2d;">${link}</a>
+    <p style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:11px;line-height:1.5;color:#54545c;margin:16px 0 0 0;word-break:break-all;">
+      ¿No funciona el botón? Pegá este link en tu navegador:<br><a href="${link}" style="color:#8a8a94;text-decoration:underline;">${link}</a>
     </p>
-    <p style="font-size: 12px; color: #777; margin-top: 24px;">El link expira en 14 días.</p>
-  </div>
-</body></html>
-`;
+  `;
+
+  return renderEmailLayout({
+    preheader: `${args.boxName} te invitó a Kronos como ${roleLabel}.`,
+    body,
+  });
 }
