@@ -6,6 +6,8 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { db } from "./db";
 import { authorizeDev } from "./auth-dev";
 import { logAudit } from "./audit";
+import { sendEmail } from "@/lib/email";
+import { renderMagicLinkEmail } from "./email-templates/magic-link";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
@@ -36,8 +38,18 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     EmailProvider({
-      server: process.env.EMAIL_SERVER ?? "",
-      from: process.env.EMAIL_FROM ?? "noreply@kronos.app",
+      from: process.env.EMAIL_FROM ?? "Kronos <noreply@kronos.app>",
+      async sendVerificationRequest({ identifier, url, provider }) {
+        const result = await sendEmail({
+          to: [identifier],
+          subject: "Tu enlace para entrar a Kronos",
+          html: renderMagicLinkEmail({ email: identifier, url }),
+          from: provider.from,
+        });
+        if (!result.ok) {
+          throw new Error(result.error ?? "Failed to send magic link");
+        }
+      },
     }),
     ...(process.env.GOOGLE_CLIENT_ID
       ? [
