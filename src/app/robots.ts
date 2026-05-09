@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin", "/atleta", "/api", "/dev"],
       },
     ],
-    sitemap: "https://kronos.app/sitemap.xml",
+    sitemap: "https://www.kronos-fit.com/sitemap.xml",
   };
 }

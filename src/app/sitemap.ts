@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://kronos.app";
+  const base = "https://www.kronos-fit.com";
   const lastModified = new Date();
 
   return [
