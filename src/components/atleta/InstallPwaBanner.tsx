@@ -7,6 +7,7 @@ import {
   buildSafariDeepLink,
   type PwaPlatform,
 } from "@/lib/pwa-detect";
+import { shouldShowInstallBanner } from "@/lib/pwa-visits";
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -34,7 +35,10 @@ export default function InstallPwaBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (isDismissExpired()) {
+    // Gate: solo aparece si el user califica (visits>=3 || onboarded || ?install=1)
+    // Y si no fue dismiss reciente.
+    const eligible = shouldShowInstallBanner(window.location.search);
+    if (eligible && isDismissExpired()) {
       setDismissed(false);
     }
 

@@ -5,6 +5,7 @@ import TabBar from "@/components/kronos/TabBar";
 import NotificationBell from "@/components/atleta/NotificationBell";
 import InstallPwaBanner from "@/components/atleta/InstallPwaBanner";
 import PwaRegister from "@/components/PwaRegister";
+import VisitTracker from "@/components/atleta/VisitTracker";
 
 export default async function AtletaLayout({
   children,
@@ -20,6 +21,7 @@ export default async function AtletaLayout({
       style={{ background: "var(--k-bg)", paddingBottom: 96 }}
     >
       <PwaRegister />
+      <VisitTracker />
       {/* Notification bell flota top-right, sin header bar */}
       <div
         style={{

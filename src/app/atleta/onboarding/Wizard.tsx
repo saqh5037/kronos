@@ -10,6 +10,7 @@ import {
 } from "@/server/actions/atleta-onboarding";
 import type { Unit, Level } from "@/lib/atleta-prefs";
 import AvatarUpload from "@/components/atleta/AvatarUpload";
+import { markOnboarded } from "@/lib/pwa-visits";
 
 type Props = {
   initialFirstName: string;
@@ -63,6 +64,9 @@ export default function OnboardingWizard({
       } else {
         kToast.success("¡Listo! Bienvenido a Kronos");
       }
+      // Flag para gatear el banner PWA — al completar onboarding habilitamos
+      // que el banner aparezca en la próxima visita a /atleta/*.
+      markOnboarded();
       router.push("/atleta");
       router.refresh();
     });
@@ -72,6 +76,7 @@ export default function OnboardingWizard({
     startTransition(async () => {
       const r = await markOnboardingCompleted();
       if (r.ok) {
+        markOnboarded();
         router.push("/atleta");
         router.refresh();
       } else {
