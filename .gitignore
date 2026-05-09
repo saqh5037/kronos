@@ -93,3 +93,6 @@ Thumbs.db
 /.tmp-*.jpg
 /verify-*.png
 /verify-*.jpg
+
+# Proyecto paralelo de scratch — NO trackear
+kronos-atleta-self-serve/
