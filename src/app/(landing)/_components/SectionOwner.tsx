@@ -155,7 +155,7 @@ export default function SectionOwner() {
               <div>
                 <strong>Ocupación por hora del día</strong>
                 <span className="desc">
-                  Sabés qué clase mover y qué horario pierde dinero. Decisiones
+                  Sabes qué clase mover y qué horario pierde dinero. Decisiones
                   de programación basadas en data dura, no en la intuición del
                   coach.
                 </span>

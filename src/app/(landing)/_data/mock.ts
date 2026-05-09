@@ -17,18 +17,18 @@ export const WHITE_LABEL_PALETTES = [
   {
     name: "Lima Neon",
     hex: "#C8FF2D",
-    caption: "Califa CrossFit · BOG",
+    caption: "Califa CrossFit · CO",
     glow: true,
   },
   {
     name: "Naranja Brasa",
     hex: "#FF5A1F",
-    caption: "Iron Hands · CDMX",
+    caption: "Iron Hands · MX",
   },
   {
     name: "Cobalto",
     hex: "#6B89FF",
-    caption: "Alpha Box · LIM",
+    caption: "Alpha Box · PE",
   },
   {
     name: "Sangre",
@@ -56,7 +56,8 @@ export const PRICING: PriceTier[] = [
     unit: "MXN · al mes",
     desc: "Para Boxes independientes hasta 80 atletas activos. El motor base para operar como profesional desde el día uno.",
     features: [
-      "App del atleta white-label en tu dominio",
+      "App del atleta con tu logo, color y nombre del Box",
+      "Subdominio tubox.kronos.app",
       "Reservas con waitlist FIFO",
       "WOD del día + biblioteca con video",
       "Control de asistencia (QR + manual)",
@@ -74,7 +75,7 @@ export const PRICING: PriceTier[] = [
     name: "Acero",
     price: "$3,500",
     unit: "MXN · al mes",
-    desc: "Para Boxes consolidados hasta 200 atletas. Tu marca arriba, nuestro motor abajo. Para los que ya escalaron y necesitan dejar de perder atletas.",
+    desc: "Para Boxes consolidados hasta 200 atletas. La operación profesional para los que ya escalaron y necesitan dejar de perder atletas.",
     features: [
       "Todo lo de Hierro, más:",
       "Admin completo con MRR, churn y ocupación",
@@ -83,6 +84,7 @@ export const PRICING: PriceTier[] = [
       "Leaderboards del Box",
       "Multi-coach + nómina automática",
       "Push notifications + announcements",
+      "Apps móviles cobranded (tu logo, sub-marca Kronos)",
       "Facturación electrónica MX (CFDI 4.0)",
       "OXXO + SPEI nativos",
       "Reportes financieros",
@@ -96,9 +98,12 @@ export const PRICING: PriceTier[] = [
     name: "Titanio",
     price: "$5,000",
     unit: "MXN · al mes",
-    desc: "Para multi-sede, franquicias y redes de Boxes. Atletas activos sin límite. Un atleta, varias ciudades, una sola racha.",
+    desc: "Para multi-sede, franquicias y redes de Boxes. Atletas activos sin límite, white-label total y multi-tenant cross-Box. Un atleta, varias ciudades, una sola racha.",
     features: [
       "Todo lo de Acero, más:",
+      "White-label completo · dominio propio (app.tubox.mx)",
+      "Cero marca Kronos en pantalla, footer ni emails",
+      "Apps con tu nombre en App Store y Play Store",
       "Multi-tenant cross-Box (racha unificada)",
       "BI consolidado de todas las sedes",
       "Switcher de sede para owners",
@@ -165,31 +170,31 @@ export const FAQ_ITEMS = [
     id: 1,
     question: "¿Cuánto tarda el onboarding?",
     answer:
-      "72 horas hábiles para Hierro y Acero. Migrás reservas, atletas activos, mandatos de pago y programación sin perder un día de operación. Titanio incluye onboarding presencial; el plazo depende del tamaño de la red.",
+      "72 horas hábiles para Hierro y Acero. Migras reservas, atletas activos, mandatos de pago y programación sin perder un día de operación. Titanio incluye onboarding presencial; el plazo depende del tamaño de la red.",
   },
   {
     id: 2,
     question: "¿Migran mi data desde Wodify, PushPress, SugarWOD o Boxmagic?",
     answer:
-      "Sí. En Acero y Titanio la migración está incluida. En Hierro te damos el template CSV y un instructivo paso a paso para que la subas vos. Si te trabás, soporte te ayuda.",
+      "Sí. En Acero y Titanio la migración está incluida. En Hierro te damos el template CSV y un instructivo paso a paso para que la subas tú. Si te atoras, soporte te ayuda.",
   },
   {
     id: 3,
     question: "¿Qué pasa si no me convence?",
     answer:
-      'Te exportamos toda tu data en CSV (atletas, asistencias, PRs, pagos, programación) y cancelás cuando quieras. Sin penalidad, sin "cláusulas de salida". Tu data es tuya por contrato.',
+      'Te exportamos toda tu data en CSV (atletas, asistencias, PRs, pagos, programación) y cancelas cuando quieras. Sin penalidad, sin "cláusulas de salida". Tu data es tuya por contrato.',
   },
   {
     id: 4,
     question: "¿Cobran comisión sobre los pagos de mis atletas?",
     answer:
-      "No cobramos comisión sobre tus ingresos. Las únicas tarifas son las de Stripe y Mercado Pago, que son directas con ellos y vos podés ver y auditar. Nosotros no metemos mano ahí.",
+      "No cobramos comisión sobre tus ingresos. Las únicas tarifas son las de Stripe y Mercado Pago, que son directas con ellos y tú puedes ver y auditar. Nosotros no metemos mano ahí.",
   },
   {
     id: 5,
     question: "¿Qué tan blanco es el white-label?",
     answer:
-      "En Acero y Titanio: dominio propio, paleta propia, logos propios, emails desde tu dominio, push notifications firmadas como el Box. En App Store y Play Store podés publicar con tu nombre y tu ícono (Acero+). El atleta no lee Kronos en ningún momento de su experiencia.",
+      "Hierro y Acero: tu logo, color y nombre dominan la app, en un subdominio tubox.kronos.app con un footer discreto 'Powered by Kronos'. Los emails llegan desde no-reply@kronos.app firmados por el Box. En Acero, además, apps móviles cobranded (tu logo + sub-marca Kronos). Titanio: dominio propio (app.tubox.mx), emails desde tu dominio, apps publicadas con tu nombre en App Store y Play Store, sin Kronos en ninguna pantalla. El atleta de Titanio nunca lee Kronos.",
   },
   {
     id: 6,

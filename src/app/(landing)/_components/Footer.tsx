@@ -86,7 +86,7 @@ export default function Footer() {
 
       <div className="lp-foot-bottom">
         <span>
-          © {new Date().getFullYear()} KRONOS · CDMX ·{" "}
+          © {new Date().getFullYear()} KRONOS · MÉXICO ·{" "}
           <a href="/legal/terminos">TÉRMINOS</a> ·{" "}
           <a href="/legal/privacidad">PRIVACIDAD</a>
         </span>

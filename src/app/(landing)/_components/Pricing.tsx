@@ -145,7 +145,7 @@ export default function Pricing() {
         decrece, también — pagás lo que corresponde al volumen real del mes.
         <br />
         <br />
-        Para 5+ sedes o casos enterprise, escribinos.
+        Para 5+ sedes o casos enterprise, escríbenos.
       </p>
     </section>
   );

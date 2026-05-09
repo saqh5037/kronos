@@ -29,12 +29,14 @@ export default function SectionWhiteLabel() {
           <span className="lp-dot" />
           /03 · WHITE-LABEL REAL
         </motion.div>
-        <motion.h2 variants={v}>La app del Box es del Box.</motion.h2>
+        <motion.h2 variants={v}>La marca del Box, al frente.</motion.h2>
         <motion.p variants={v}>
-          No es un skin. No es co-branded. No es &ldquo;powered by
-          Kronos&rdquo;. Es la marca del Box arriba, nuestro motor abajo, en tu
-          dominio, con tu logo, en App Store y Play Store si lo decidís. El
-          atleta nunca lee Kronos en pantalla.
+          Tu logo, tu color y tu nombre dominan la experiencia del atleta en
+          todos los tiers. Hierro y Acero corren sobre{" "}
+          <code>tubox.kronos.app</code> con un footer discreto &ldquo;Powered by
+          Kronos&rdquo;. Titanio elimina toda marca Kronos: dominio propio,
+          emails propios y apps publicadas con tu nombre en App Store y Play
+          Store.
         </motion.p>
       </motion.div>
 
@@ -51,23 +53,42 @@ export default function SectionWhiteLabel() {
       >
         {[
           {
-            title: "Tu dominio",
-            body: "app.tubox.mx (o el dominio que elijas). Sin redirects. Sin subdominios compartidos. Configuración DNS asistida en el onboarding.",
+            tier: "TODOS",
+            title: "Tu marca, no la nuestra",
+            body: "Logo, nombre, color y tipografía del Box. El atleta ve tu identidad en cada pantalla, sin cobrand visual ni el logo de un proveedor extranjero.",
           },
           {
-            title: "Tu paleta",
-            body: "Pegás un #hex y el motor calcula el contraste accesible sobre cada superficie. Lima requiere texto negro. Sangre requiere texto blanco. Cero ajustes manuales.",
+            tier: "TODOS",
+            title: "Tu paleta, contraste calculado",
+            body: "Pegas un #hex y el motor calcula el contraste accesible sobre cada superficie. Lima requiere texto negro. Sangre requiere texto blanco. Cero ajustes manuales.",
           },
           {
-            title: "Tus comunicaciones",
-            body: "Emails desde no-reply@tubox.mx, no desde Kronos. Push notifications firmadas como el Box. SMS desde tu sender ID si lo configurás.",
+            tier: "TITANIO",
+            title: "Tu dominio, sin Kronos",
+            body: "app.tubox.mx (o el dominio que elijas). Sin redirects, sin subdominios compartidos, sin badge en el footer. Configuración DNS asistida en el onboarding.",
           },
           {
-            title: "Tu marca en stores (Acero+)",
-            body: "App nativa con tu nombre y tu ícono publicada en App Store y Play Store. Apple Developer Account a tu nombre, gestión del review process incluida.",
+            tier: "TITANIO",
+            title: "Tus comunicaciones, tu nombre",
+            body: "Emails desde no-reply@tubox.mx, no desde Kronos. Push notifications firmadas como el Box. SMS desde tu sender ID si lo configuras. En Hierro y Acero los emails llegan desde no-reply@kronos.app firmados por el Box.",
+          },
+          {
+            tier: "TITANIO",
+            title: "Tu marca en App Store y Play Store",
+            body: "App nativa con tu nombre y tu ícono publicada en stores. Apple Developer Account a tu nombre, gestión del review process incluida. En Acero las apps son cobranded (tu logo, sub-marca Kronos).",
           },
         ].map((p) => (
           <motion.div key={p.title} className="lp-wl-pillar" variants={v}>
+            <span
+              className="lp-eyebrow"
+              style={{
+                color: p.tier === "TITANIO" ? "var(--k-accent)" : "var(--k-t3)",
+                fontSize: 11,
+                marginBottom: 12,
+              }}
+            >
+              {p.tier === "TITANIO" ? "★ TITANIO" : "TODOS LOS TIERS"}
+            </span>
             <h3>{p.title}</h3>
             <p>{p.body}</p>
           </motion.div>
@@ -113,7 +134,7 @@ export default function SectionWhiteLabel() {
       >
         <span className="lp-dot" />
         <div className="text">
-          Pegás el <code>#hex</code> de tu marca en el setup. El motor calcula
+          Pegas el <code>#hex</code> de tu marca en el setup. El motor calcula
           contraste, estados hover, bordes y focus rings automáticamente.
           Cualquier hex válido en sRGB funciona. Si no pasa los thresholds WCAG
           AA, el sistema sugiere el más cercano que sí los pasa.

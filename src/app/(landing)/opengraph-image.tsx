@@ -89,9 +89,9 @@ export default function OpenGraphImage() {
             lineHeight: 1.05,
           }}
         >
-          Tu Box arriba.
+          Software invisible
           <br />
-          <span style={{ color: "#C8FF2D" }}>Nuestro motor abajo.</span>
+          <span style={{ color: "#C8FF2D" }}>para tu CrossFit Box.</span>
         </div>
 
         <div
@@ -122,7 +122,7 @@ export default function OpenGraphImage() {
       >
         <span>kronos.app</span>
         <span>·</span>
-        <span>HECHO EN CDMX</span>
+        <span>HECHO EN MÉXICO</span>
       </div>
     </div>,
     { ...size },

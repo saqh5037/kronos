@@ -21,9 +21,9 @@ export default function FoundingPartners() {
             textAlign: "center",
           }}
         >
-          Estamos arrancando con un grupo cerrado de Boxes en CDMX.
+          Estamos arrancando con un grupo cerrado de Boxes en México.
           <br />
-          Si tu Box opera en MX, CO o PE y querés sumarte al piloto, hay 20
+          Si tu Box opera en MX, CO o PE y quieres sumarte al piloto, hay 20
           cupos durante 2026.
         </div>
       </section>
