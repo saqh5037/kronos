@@ -249,16 +249,27 @@ export async function seedDefaultMovements(
   for (const mv of STANDARD_MOVEMENTS) {
     const enrich = MOVEMENT_ENRICHMENTS[mv.slug];
     const enrichmentData: Record<string, unknown> = {};
+    let hasContent = false;
     if (enrich) {
-      if (enrich.cues) enrichmentData.cues = enrich.cues;
-      if (enrich.commonMistakes)
+      if (enrich.cues) {
+        enrichmentData.cues = enrich.cues;
+        hasContent = true;
+      }
+      if (enrich.commonMistakes) {
         enrichmentData.commonMistakes = enrich.commonMistakes;
-      if (enrich.progressions)
+        hasContent = true;
+      }
+      if (enrich.progressions) {
         enrichmentData.progressions = enrich.progressions;
+        hasContent = true;
+      }
       if (enrich.musclesWorked)
         enrichmentData.musclesWorked = enrich.musclesWorked;
       if (enrich.difficulty != null)
         enrichmentData.difficulty = enrich.difficulty;
+    }
+    if (hasContent) {
+      enrichmentData.contentSource = "STANDARD_SEED";
     }
     await client.movement.upsert({
       where: { tenantId_slug: { tenantId, slug: mv.slug } },

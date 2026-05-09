@@ -6,7 +6,8 @@ import {
   getMyPRProgression,
   type PRProgressionResult,
 } from "@/server/actions/prs";
-import { getMovementById } from "@/server/actions/movements";
+import type { getMovementById } from "@/server/actions/movements";
+import { getOrGenerateMovementContent } from "@/server/actions/movement-content";
 import { getTodayWOD } from "@/server/actions/scores";
 import { PRChart, type PRChartPoint } from "@/components/charts/PRChart";
 import {
@@ -30,12 +31,16 @@ export default async function MovementDetailPage({
   let todayWod = null;
 
   try {
-    [profile, progression, movementInfo, todayWod] = await Promise.all([
+    const [profileR, progressionR, contentR, todayWodR] = await Promise.all([
       getMyMovementProfile(id),
       getMyPRProgression(id, 180),
-      getMovementById(id),
+      getOrGenerateMovementContent(id),
       getTodayWOD(),
     ]);
+    profile = profileR;
+    progression = progressionR;
+    movementInfo = contentR.ok ? contentR.movement : null;
+    todayWod = todayWodR;
   } catch {
     notFound();
   }
@@ -435,6 +440,53 @@ export default async function MovementDetailPage({
                 </AnimatedItem>
               </AnimatedSection>
             )}
+
+          {/* AI DISCLAIMER */}
+          {movementInfo?.contentSource === "AI_GENERATED" && (
+            <AnimatedSection>
+              <AnimatedItem>
+                <div
+                  data-testid="movement-ai-disclaimer"
+                  style={{
+                    padding: "10px 12px",
+                    background: "var(--k-elevated)",
+                    border: "1px dashed var(--k-line-2)",
+                    borderRadius: 12,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--k-t3)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ flexShrink: 0 }}
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4M12 8h.01" />
+                  </svg>
+                  <p
+                    style={{
+                      fontFamily: "var(--k-font-body)",
+                      fontSize: 11,
+                      color: "var(--k-t3)",
+                      margin: 0,
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    Generado con IA · consultá un coach certificado para casos
+                    específicos.
+                  </p>
+                </div>
+              </AnimatedItem>
+            </AnimatedSection>
+          )}
 
           {/* MUSCLES WORKED */}
           {movementInfo?.musclesWorked &&

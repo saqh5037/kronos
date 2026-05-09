@@ -17,7 +17,7 @@ import {
   type Progression,
 } from "@/lib/validations/movement";
 import { z } from "zod";
-import type { MovementCategory } from "@prisma/client";
+import type { MovementCategory, MovementContentSource } from "@prisma/client";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -43,6 +43,8 @@ export type MovementDetail = MovementRow & {
   progressions: Progression[] | null;
   musclesWorked: string[];
   difficulty: number | null;
+  contentSource: MovementContentSource;
+  contentGeneratedAt: Date | null;
 };
 
 const movementDetailSelect = {
@@ -60,6 +62,8 @@ const movementDetailSelect = {
   progressions: true,
   musclesWorked: true,
   difficulty: true,
+  contentSource: true,
+  contentGeneratedAt: true,
 } as const;
 
 export async function listMovements(opts?: {

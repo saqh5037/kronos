@@ -299,6 +299,13 @@ enum MovementCategory {
   ACCESSORY
 }
 
+enum MovementContentSource {
+  EMPTY
+  STANDARD_SEED
+  AI_GENERATED
+  MANUAL_OVERRIDE
+}
+
 enum WODType {
   FORTIME
   AMRAP
@@ -359,6 +366,9 @@ model Movement {
   progressions   Json?
   musclesWorked  String[]
   difficulty     Int?
+
+  contentSource      MovementContentSource @default(EMPTY)
+  contentGeneratedAt DateTime?
 
   box          Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   wodMovements WODMovement[]
