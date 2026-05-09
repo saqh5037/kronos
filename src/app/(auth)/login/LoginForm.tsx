@@ -6,14 +6,20 @@ import { kToast } from "@/lib/toast";
 
 const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEV_LOGIN === "1";
 
+type Mode = "magic" | "password";
+
 export default function LoginForm() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [mode, setMode] = useState<Mode>("magic");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     try {
       await signIn("email", { email, redirect: false });
       kToast.success("Liga enviada", {
@@ -25,6 +31,24 @@ export default function LoginForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handlePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const res = await signIn("password", {
+      email,
+      password,
+      redirect: false,
+    });
+    if (res?.error) {
+      setError("Email o contraseña inválidos");
+      setLoading(false);
+      return;
+    }
+    kToast.success("Sesión iniciada");
+    window.location.href = "/admin";
   }
 
   if (sent) {
@@ -42,28 +66,99 @@ export default function LoginForm() {
 
   return (
     <div className="flex flex-col gap-5">
-      <form onSubmit={handleMagicLink} className="flex flex-col gap-3">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="correo@tubox.com"
-          required
-          className="w-full px-4 py-3 rounded-xl border focus:outline-none transition-colors"
-          style={{
-            background: "var(--k-surface)",
-            borderColor: "var(--k-line-2)",
-            color: "var(--k-t1)",
-          }}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50"
-        >
-          {loading ? "Enviando…" : "Enviar liga de acceso"}
-        </button>
-      </form>
+      {mode === "magic" ? (
+        <form onSubmit={handleMagicLink} className="flex flex-col gap-3">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="correo@tubox.com"
+            required
+            autoComplete="email"
+            className="w-full px-4 py-3 rounded-xl border focus:outline-none transition-colors"
+            style={{
+              background: "var(--k-surface)",
+              borderColor: "var(--k-line-2)",
+              color: "var(--k-t1)",
+            }}
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50"
+          >
+            {loading ? "Enviando…" : "Enviar liga de acceso"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode("password");
+              setError(null);
+            }}
+            className="text-xs underline mt-1"
+            style={{ color: "var(--k-t2)" }}
+          >
+            Usar contraseña
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={handlePassword} className="flex flex-col gap-3">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="correo@tubox.com"
+            required
+            autoComplete="email"
+            className="w-full px-4 py-3 rounded-xl border focus:outline-none transition-colors"
+            style={{
+              background: "var(--k-surface)",
+              borderColor: "var(--k-line-2)",
+              color: "var(--k-t1)",
+            }}
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="contraseña"
+            required
+            autoComplete="current-password"
+            className="w-full px-4 py-3 rounded-xl border focus:outline-none transition-colors"
+            style={{
+              background: "var(--k-surface)",
+              borderColor: "var(--k-line-2)",
+              color: "var(--k-t1)",
+            }}
+          />
+          {error && (
+            <p
+              className="text-xs text-center"
+              style={{ color: "var(--k-danger)" }}
+            >
+              {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={loading || !email || !password}
+            className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50"
+          >
+            {loading ? "Entrando…" : "Entrar"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode("magic");
+              setError(null);
+            }}
+            className="text-xs underline mt-1"
+            style={{ color: "var(--k-t2)" }}
+          >
+            ¿Olvidaste tu contraseña? Usá magic link
+          </button>
+        </form>
+      )}
 
       {DEV_LOGIN_ENABLED && <DevLoginForm />}
     </div>

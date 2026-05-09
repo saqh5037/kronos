@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { db } from "./db";
 import { authorizeDev } from "./auth-dev";
+import { authorizePassword } from "./auth-password";
 import { logAudit } from "./audit";
 import { sendEmail } from "@/lib/email";
 import {
@@ -89,6 +90,15 @@ export const authOptions: NextAuthOptions = {
           }),
         ]
       : []),
+    CredentialsProvider({
+      id: "password",
+      name: "Email + contraseña",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Contraseña", type: "password" },
+      },
+      authorize: (creds) => authorizePassword(creds),
+    }),
     ...(process.env.NODE_ENV === "development"
       ? [
           CredentialsProvider({
