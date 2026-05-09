@@ -16,6 +16,11 @@ import {
   type OnboardingStatus,
 } from "@/server/actions/onboarding";
 import {
+  importBenchmarkWods,
+  type BenchmarkWodOption,
+  DEFAULT_WOD_SLUGS,
+} from "@/server/actions/wod-presets";
+import {
   SUPPORTED_TIMEZONES,
   SUPPORTED_CURRENCIES,
 } from "@/lib/validations/box";
@@ -29,15 +34,19 @@ type Props = {
   box: BoxSettings;
   schedule: BoxScheduleSettings;
   status: OnboardingStatus;
+  wodPresets: BenchmarkWodOption[];
 };
 
 const STEPS = [
   { n: 1, label: "Box" },
   { n: 2, label: "Horarios" },
-  { n: 3, label: "Plan" },
-  { n: 4, label: "Equipo" },
-  { n: 5, label: "Listo" },
+  { n: 3, label: "WODs" },
+  { n: 4, label: "Plan" },
+  { n: 5, label: "Equipo" },
+  { n: 6, label: "Listo" },
 ] as const;
+
+const TOTAL_STEPS = STEPS.length;
 
 const DEFAULT_SCHEDULE: WeeklySchedule = {
   mon: { kind: "WOD", hours: [6, 7, 9, 17, 18, 19] },
@@ -51,14 +60,20 @@ const DEFAULT_SCHEDULE: WeeklySchedule = {
 
 type InviteRow = { email: string; name: string; role: "COACH" | "STAFF" };
 
-export default function OnboardingWizard({ box, schedule, status }: Props) {
+export default function OnboardingWizard({
+  box,
+  schedule,
+  status,
+  wodPresets,
+}: Props) {
   const router = useRouter();
+  // Step indices: 1=Box, 2=Horarios, 3=WODs, 4=Plan, 5=Equipo, 6=Listo
   const initialStep = status.completedAt
-    ? 5
+    ? TOTAL_STEPS
     : status.staffCount > 0
-      ? 4
+      ? 5
       : status.hasPlan
-        ? 4
+        ? 5
         : status.hasSchedule
           ? 3
           : 1;
@@ -79,13 +94,18 @@ export default function OnboardingWizard({ box, schedule, status }: Props) {
   const [planPrice, setPlanPrice] = useState("1200");
   const [planClasses, setPlanClasses] = useState("12");
 
-  // Step 4 — Invites
+  // Step 3 — WOD presets
+  const [selectedWods, setSelectedWods] = useState<Set<string>>(
+    () => new Set(DEFAULT_WOD_SLUGS),
+  );
+
+  // Step 5 — Invites
   const [invites, setInvites] = useState<InviteRow[]>([
     { email: "", name: "", role: "COACH" },
   ]);
 
   function next() {
-    setStep((s) => Math.min(5, s + 1));
+    setStep((s) => Math.min(TOTAL_STEPS, s + 1));
   }
 
   function back() {
@@ -132,6 +152,31 @@ export default function OnboardingWizard({ box, schedule, status }: Props) {
 
   function submitStep3() {
     startTransition(async () => {
+      const wodSlugs = Array.from(selectedWods);
+      if (wodSlugs.length === 0) {
+        next();
+        return;
+      }
+      const result = await importBenchmarkWods({ wodSlugs });
+      if (!result.ok) {
+        kToast.error(result.message);
+        return;
+      }
+      const msg =
+        result.created > 0
+          ? `${result.created} WOD${result.created === 1 ? "" : "s"} importado${result.created === 1 ? "" : "s"}`
+          : "Sin WODs nuevos";
+      if (result.skipped.length > 0) {
+        kToast.info(`${msg} · ${result.skipped.length} omitidos`);
+      } else {
+        kToast.success(msg);
+      }
+      next();
+    });
+  }
+
+  function submitStep4() {
+    startTransition(async () => {
       const result = await createFirstPlan({
         name: planName,
         type: planType,
@@ -147,7 +192,7 @@ export default function OnboardingWizard({ box, schedule, status }: Props) {
     });
   }
 
-  function submitStep4() {
+  function submitStep5() {
     startTransition(async () => {
       const filtered = invites.filter((i) => i.email && i.name);
       if (filtered.length === 0) {
@@ -169,6 +214,15 @@ export default function OnboardingWizard({ box, schedule, status }: Props) {
         kToast.success(msg);
       }
       next();
+    });
+  }
+
+  function toggleWod(slug: string) {
+    setSelectedWods((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
     });
   }
 
@@ -196,9 +250,11 @@ export default function OnboardingWizard({ box, schedule, status }: Props) {
   return (
     <div>
       <div className="mb-8">
-        <Eyebrow color="blue">Onboarding · Paso {step} de 5</Eyebrow>
+        <Eyebrow color="blue">
+          Onboarding · Paso {step} de {TOTAL_STEPS}
+        </Eyebrow>
         <h1 className="mt-3 font-display font-extrabold text-[36px] md:text-[44px] leading-[1.05] tracking-[-0.02em]">
-          Configurá tu box en 5 pasos
+          Configurá tu box en {TOTAL_STEPS} pasos
         </h1>
         <Stepper current={step} />
       </div>
@@ -230,6 +286,17 @@ export default function OnboardingWizard({ box, schedule, status }: Props) {
           />
         ) : null}
         {step === 3 ? (
+          <StepWods
+            presets={wodPresets}
+            selected={selectedWods}
+            onToggle={toggleWod}
+            pending={pending}
+            onNext={submitStep3}
+            onBack={back}
+            onSkip={next}
+          />
+        ) : null}
+        {step === 4 ? (
           <Step3
             planName={planName}
             setPlanName={setPlanName}
@@ -241,24 +308,24 @@ export default function OnboardingWizard({ box, schedule, status }: Props) {
             setPlanClasses={setPlanClasses}
             currency={currency}
             pending={pending}
-            onNext={submitStep3}
-            onBack={back}
-            onSkip={next}
-          />
-        ) : null}
-        {step === 4 ? (
-          <Step4
-            invites={invites}
-            addInvite={addInvite}
-            updateInvite={updateInvite}
-            removeInvite={removeInvite}
-            pending={pending}
             onNext={submitStep4}
             onBack={back}
             onSkip={next}
           />
         ) : null}
         {step === 5 ? (
+          <Step4
+            invites={invites}
+            addInvite={addInvite}
+            updateInvite={updateInvite}
+            removeInvite={removeInvite}
+            pending={pending}
+            onNext={submitStep5}
+            onBack={back}
+            onSkip={next}
+          />
+        ) : null}
+        {step === 6 ? (
           <Step5
             boxName={name}
             pending={pending}
@@ -483,6 +550,113 @@ function Step2(p: Step2Props) {
               className="k-btn-grad px-5 py-2.5 rounded-full font-bold text-sm disabled:opacity-50"
             >
               {p.pending ? "Aplicando…" : "Aplicar este horario"}
+            </button>
+          </div>
+        }
+      />
+    </div>
+  );
+}
+
+type StepWodsProps = {
+  presets: BenchmarkWodOption[];
+  selected: Set<string>;
+  onToggle: (slug: string) => void;
+  pending: boolean;
+  onNext: () => void;
+  onBack: () => void;
+  onSkip: () => void;
+};
+
+function StepWods(p: StepWodsProps) {
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="font-display font-bold text-2xl mb-1">WODs benchmark</h2>
+        <p className="text-sm" style={{ color: "var(--k-t2)" }}>
+          Importá los WODs clásicos para arrancar con biblioteca cargada.
+          Después podés crear los tuyos. Tildá los que querés.
+        </p>
+      </div>
+      <div className="grid sm:grid-cols-2 gap-2 max-h-[420px] overflow-y-auto pr-1">
+        {p.presets.map((wod) => {
+          const checked = p.selected.has(wod.slug);
+          return (
+            <label
+              key={wod.slug}
+              className="flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-colors"
+              style={{
+                background: checked
+                  ? "var(--k-accent-soft)"
+                  : "var(--k-elevated)",
+                border: `1px solid ${checked ? "var(--k-accent-line)" : "var(--k-line)"}`,
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => p.onToggle(wod.slug)}
+                className="mt-1"
+                style={{ accentColor: "var(--k-accent)" }}
+              />
+              <div className="min-w-0">
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="font-display font-bold text-sm">
+                    {wod.name}
+                  </span>
+                  <span
+                    className="text-[10px] uppercase font-mono tracking-wider px-1.5 py-0.5 rounded"
+                    style={{
+                      background: "var(--k-line)",
+                      color: "var(--k-t2)",
+                    }}
+                  >
+                    {wod.type}
+                  </span>
+                </div>
+                <p
+                  className="text-xs mt-1 truncate"
+                  style={{ color: "var(--k-t3)" }}
+                >
+                  {wod.movements.join(" · ")}
+                </p>
+              </div>
+            </label>
+          );
+        })}
+      </div>
+      <p className="text-xs" style={{ color: "var(--k-t3)" }}>
+        {p.selected.size} de {p.presets.length} seleccionados.
+      </p>
+      <NavRow
+        left={
+          <button
+            onClick={p.onBack}
+            className="text-sm underline"
+            style={{ color: "var(--k-t3)" }}
+          >
+            ← Atrás
+          </button>
+        }
+        right={
+          <div className="flex gap-2">
+            <button
+              onClick={p.onSkip}
+              disabled={p.pending}
+              className="px-4 py-2.5 rounded-full font-bold text-sm border disabled:opacity-50"
+              style={{
+                borderColor: "var(--k-line-2)",
+                color: "var(--k-t2)",
+              }}
+            >
+              Saltar
+            </button>
+            <button
+              onClick={p.onNext}
+              disabled={p.pending}
+              className="k-btn-grad px-5 py-2.5 rounded-full font-bold text-sm disabled:opacity-50"
+            >
+              {p.pending ? "Importando…" : "Importar seleccionados"}
             </button>
           </div>
         }
