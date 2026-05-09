@@ -13,6 +13,7 @@ type FieldErrors = Partial<
 type SuccessState = {
   email: string;
   hasPassword: boolean;
+  existingUser: boolean;
 };
 
 const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEV_LOGIN === "1";
@@ -57,8 +58,19 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         kToast.error(result.message);
         return;
       }
-      // Si NO seteó password, intentamos el magic link como hoy.
-      // Si SÍ, no mandamos magic link (puede entrar con email/password).
+      // Si el email ya estaba registrado, mandamos magic link automáticamente
+      // y mostramos copy "ya tenés cuenta, te enviamos magic link".
+      if (result.existingUser) {
+        try {
+          await signIn("email", { email, redirect: false });
+        } catch {
+          // best-effort
+        }
+        setSuccess({ email, hasPassword: false, existingUser: true });
+        return;
+      }
+      // Cuenta nueva: si NO seteó password, mandamos magic link.
+      // Si SÍ, no hace falta (puede entrar con email/password).
       if (!result.hasPassword) {
         try {
           await signIn("email", { email, redirect: false });
@@ -66,7 +78,11 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
           // best-effort
         }
       }
-      setSuccess({ email, hasPassword: result.hasPassword });
+      setSuccess({
+        email,
+        hasPassword: result.hasPassword,
+        existingUser: false,
+      });
     });
   }
 
@@ -84,9 +100,58 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
             ✓
           </span>
         </div>
-        <h2 className="font-display font-bold text-xl">¡Listo!</h2>
+        <h2 className="font-display font-bold text-xl">
+          {success.existingUser ? "Ya tenés cuenta" : "¡Listo!"}
+        </h2>
 
-        {success.hasPassword ? (
+        {success.existingUser ? (
+          <>
+            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
+              Detectamos que{" "}
+              <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>{" "}
+              ya estaba registrado. Te mandamos un enlace mágico para que entres
+              sin tener que crearla de nuevo.
+            </p>
+            {isIos ? (
+              <div
+                className="rounded-xl border p-3 text-left"
+                style={{
+                  background: "var(--k-accent-soft)",
+                  borderColor: "var(--k-accent-line)",
+                }}
+              >
+                <p
+                  className="text-xs font-bold mb-1"
+                  style={{ color: "var(--k-accent)" }}
+                >
+                  ⚠️ Importante en iPhone
+                </p>
+                <p
+                  className="text-[11px] leading-relaxed"
+                  style={{ color: "var(--k-t2)" }}
+                >
+                  El link del email puede abrir en Chrome u otro navegador. Si
+                  tenés problemas,{" "}
+                  <a
+                    href="/login"
+                    className="underline"
+                    style={{ color: "var(--k-accent)" }}
+                  >
+                    iniciá sesión con contraseña →
+                  </a>{" "}
+                  (si la creaste antes).
+                </p>
+              </div>
+            ) : null}
+            <p className="text-xs" style={{ color: "var(--k-t3)" }}>
+              ¿No te llegó? Revisá spam o pedí otro desde{" "}
+              <a href="/login" className="underline">
+                /login
+              </a>
+              .
+            </p>
+          </>
+        ) : success.hasPassword ? (
           <>
             <p className="text-sm" style={{ color: "var(--k-t2)" }}>
               Cuenta creada para{" "}
@@ -186,14 +251,15 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         required
       />
       <Field
-        label="Apellido (opcional)"
+        label="Apellido"
         name="lastName"
         type="text"
         value={lastName}
         onChange={setLastName}
-        placeholder=""
+        placeholder="Tu apellido"
         error={errors.lastName}
         autoComplete="family-name"
+        required
       />
 
       {/* Sección password — auto-expandida en iOS por el bug de magic link */}

@@ -185,8 +185,7 @@ function Step1({
   pending,
 }: Step1Props) {
   const canContinue = firstName.trim().length >= 2;
-  const initials =
-    (firstName.trim()[0] ?? "") + (lastName.trim()[0] ?? "");
+  const initials = (firstName.trim()[0] ?? "") + (lastName.trim()[0] ?? "");
   return (
     <div className="space-y-5">
       <div>
@@ -205,10 +204,11 @@ function Step1({
         required
       />
       <Field
-        label="Apellido (opcional)"
+        label="Apellido"
         value={lastName}
         onChange={setLastName}
-        placeholder=""
+        placeholder="Tu apellido"
+        required
       />
       <div className="space-y-2">
         <label
@@ -487,7 +487,10 @@ function SegmentedControl({
   return (
     <div
       className="flex gap-1 p-1 rounded-xl"
-      style={{ background: "var(--k-surface)", border: "1px solid var(--k-line-2)" }}
+      style={{
+        background: "var(--k-surface)",
+        border: "1px solid var(--k-line-2)",
+      }}
     >
       {options.map((opt) => {
         const active = opt.value === value;
