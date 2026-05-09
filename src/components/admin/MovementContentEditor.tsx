@@ -178,8 +178,15 @@ export default function MovementContentEditor({
               background: "transparent",
               border: "none",
               color: "var(--k-t3)",
-              fontSize: 20,
+              fontSize: 24,
               cursor: "pointer",
+              width: 44,
+              height: 44,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: -8,
+              marginTop: -8,
             }}
             aria-label="Cerrar"
           >
@@ -336,7 +343,8 @@ function btn(opts: {
     fontWeight: 700,
     letterSpacing: "0.14em",
     textTransform: "uppercase",
-    padding: "8px 14px",
+    padding: "10px 16px",
+    minHeight: 44,
     background: opts.ghost ? "transparent" : (opts.bg ?? "var(--k-accent)"),
     color: opts.ghost ? "var(--k-t1)" : (opts.color ?? "var(--k-accent-on)"),
     border: opts.ghost ? "1px solid var(--k-line)" : "none",

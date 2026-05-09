@@ -81,11 +81,11 @@ export default function CoachCardsSection({ cards }: Props) {
             disabled={isPending}
             style={{
               position: "absolute",
-              top: 8,
-              right: 8,
-              width: 26,
-              height: 26,
-              borderRadius: 13,
+              top: 4,
+              right: 4,
+              width: 44,
+              height: 44,
+              borderRadius: 22,
               background: "transparent",
               border: "none",
               cursor: "pointer",
@@ -110,7 +110,7 @@ export default function CoachCardsSection({ cards }: Props) {
 
           <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
             <CardGlyph type={card.type} />
-            <div style={{ flex: 1, paddingRight: 24 }}>
+            <div style={{ flex: 1, paddingRight: 40 }}>
               <h3
                 style={{
                   fontFamily: "var(--k-font-display)",
