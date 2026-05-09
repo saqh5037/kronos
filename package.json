@@ -36,7 +36,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^11.15.0",
     "mercadopago": "^2.12.0",
-    "next": "15.3.2",
+    "next": "15.5.18",
     "next-auth": "^4.24.11",
     "next-themes": "^0.4.6",
     "posthog-js": "^1.240.6",
@@ -75,5 +75,10 @@
     "*.{js,json,css,md}": [
       "prettier --write"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-uri@<3.1.2": "^3.1.2"
+    }
   }
 }
