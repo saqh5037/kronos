@@ -11,6 +11,7 @@ import Pricing from "./_components/Pricing";
 import SectionFAQ from "./_components/SectionFAQ";
 import SectionLeadForm from "./_components/SectionLeadForm";
 import Footer from "./_components/Footer";
+import DominusPromoBanner from "./_components/DominusPromoBanner";
 
 export default async function LandingPage() {
   const session = await getServerSession(authOptions);
@@ -26,6 +27,7 @@ export default async function LandingPage() {
         Saltar al contenido
       </a>
       <LandingTracker />
+      <DominusPromoBanner />
       <Nav boxHref={boxHref} />
       <main id="main">
         <Hero boxHref={boxHref} />
