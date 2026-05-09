@@ -920,6 +920,57 @@ async function main() {
       description: "Deadlift de 2x tu peso corporal",
       criteria: { type: "ratio_pr", movement: "Deadlift", ratio: 2 },
     },
+    // Skill unlocks — disparados al marcar una progression como ACHIEVED
+    {
+      code: "first-strict-pull-up",
+      name: "Primer Pull-up estricto",
+      description: "Dominaste tu primer strict pull-up sin asistencia",
+      criteria: {
+        type: "skill_level_reached",
+        movementSlug: "pull-up",
+        progressionSlug: "strict-pull-up",
+      },
+    },
+    {
+      code: "first-muscle-up-bar",
+      name: "Primer Muscle-up en barra",
+      description: "Subiste por encima de la barra en un solo movimiento",
+      criteria: {
+        type: "skill_level_reached",
+        movementSlug: "muscle-up-bar",
+        progressionSlug: "muscle-up-en-barra",
+      },
+    },
+    {
+      code: "first-strict-hspu",
+      name: "Primer HSPU estricto",
+      description: "Handstand push-up estricto contra la pared",
+      criteria: {
+        type: "skill_level_reached",
+        movementSlug: "handstand-push-up",
+        progressionSlug: "strict-hspu-full-rom-contra-pared",
+      },
+    },
+    {
+      code: "first-pistol",
+      name: "Primer Pistol Squat",
+      description: "Pistol squat completo en cada pierna",
+      criteria: {
+        type: "skill_level_reached",
+        movementSlug: "pistol-squat",
+        progressionSlug: "pistol-squat",
+      },
+    },
+    {
+      code: "first-double-under",
+      name: "Primer Double Under",
+      description: "Doble salto sin tropezar la cuerda",
+      criteria: {
+        type: "skill_level_reached",
+        movementSlug: "double-under",
+        progressionSlug: "double-under",
+      },
+    },
   ];
 
   for (const b of badgesData) {

@@ -12,6 +12,7 @@ import {
   type ProgressionNode,
 } from "@/lib/skill-tree";
 import type { Progression } from "@/lib/validations/movement";
+import { runAchievementEvaluation } from "@/server/achievements/evaluate";
 
 async function requireAthleteSession() {
   const session = await getServerSession(authOptions);
@@ -95,8 +96,18 @@ export async function getMyMovementSkillTree(
   };
 }
 
+export type UnlockedBadgeRef = {
+  code: string;
+  name: string;
+  description: string;
+};
+
 export type MarkSkillLevelResult =
-  | { ok: true; status: "CURRENT" | "ACHIEVED" }
+  | {
+      ok: true;
+      status: "CURRENT" | "ACHIEVED";
+      unlockedBadges: UnlockedBadgeRef[];
+    }
   | { ok: false; reason: string };
 
 /**
@@ -180,6 +191,7 @@ export async function markMyProgressionStatus(args: {
 
   // When a node is achieved, demote any other CURRENT in this movement
   // to "no row" by deleting CURRENT rows on superseded slugs (idempotente).
+  let unlockedBadges: UnlockedBadgeRef[] = [];
   if (status === "ACHIEVED") {
     await rawDb.athleteSkillLevel.deleteMany({
       where: {
@@ -189,9 +201,26 @@ export async function markMyProgressionStatus(args: {
         progressionSlug: { not: progressionSlug },
       },
     });
+
+    // Trigger badge evaluation for SKILL trigger
+    try {
+      const r = await runAchievementEvaluation({
+        tenantId: session.user.tenantId,
+        athleteId: session.athleteId,
+        trigger: "SKILL",
+      });
+      unlockedBadges = r.unlockedBadges.map((b) => ({
+        code: b.code,
+        name: b.name,
+        description: b.description,
+      }));
+    } catch (err) {
+      console.error("[skill-levels] badge evaluation failed:", err);
+    }
   }
 
   revalidatePath("/atleta/movimientos");
+  revalidatePath("/atleta/logros");
   // Find the Movement.id for path revalidation
   const mv = await rawDb.movement.findUnique({
     where: {
@@ -201,7 +230,7 @@ export async function markMyProgressionStatus(args: {
   });
   if (mv) revalidatePath(`/atleta/movimientos/${mv.id}`);
 
-  return { ok: true, status };
+  return { ok: true, status, unlockedBadges };
 }
 
 /**

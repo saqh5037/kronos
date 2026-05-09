@@ -16,6 +16,10 @@ export default function SkillTree({ movementSlug, nodes }: Props) {
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [pendingSlug, setPendingSlug] = useState<string | null>(null);
+  const [unlockedBadge, setUnlockedBadge] = useState<{
+    name: string;
+    description: string;
+  } | null>(null);
 
   function handleMark(progressionSlug: string, status: "CURRENT" | "ACHIEVED") {
     setErrorMsg(null);
@@ -26,7 +30,19 @@ export default function SkillTree({ movementSlug, nodes }: Props) {
         progressionSlug,
         status,
       });
-      if (!r.ok) setErrorMsg(translateReason(r.reason));
+      if (!r.ok) {
+        setErrorMsg(translateReason(r.reason));
+      } else if (r.unlockedBadges.length > 0) {
+        const first = r.unlockedBadges[0];
+        if (first) {
+          setUnlockedBadge({
+            name: first.name,
+            description: first.description,
+          });
+          // Auto-dismiss after 5s
+          setTimeout(() => setUnlockedBadge(null), 5000);
+        }
+      }
       setPendingSlug(null);
     });
   }
@@ -69,6 +85,71 @@ export default function SkillTree({ movementSlug, nodes }: Props) {
           }}
         >
           {errorMsg}
+        </div>
+      )}
+      {unlockedBadge && (
+        <div
+          role="status"
+          data-testid="skill-badge-toast"
+          style={{
+            padding: "12px 14px",
+            background: "var(--k-accent-soft)",
+            border: "1px solid var(--k-accent-line)",
+            borderRadius: 12,
+            boxShadow: "var(--k-accent-glow)",
+            display: "flex",
+            gap: 10,
+            alignItems: "flex-start",
+          }}
+        >
+          <svg
+            width={22}
+            height={22}
+            viewBox="0 0 22 22"
+            fill="none"
+            stroke="var(--k-accent)"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ flexShrink: 0, marginTop: 1 }}
+          >
+            <path d="M11 2l3 6 6 1-4 5 1 6-6-3-6 3 1-6-4-5 6-1z" />
+          </svg>
+          <div>
+            <div
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: "var(--k-accent)",
+              }}
+            >
+              Logro desbloqueado
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--k-font-body)",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--k-t1)",
+                marginTop: 2,
+              }}
+            >
+              {unlockedBadge.name}
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--k-font-body)",
+                fontSize: 11,
+                color: "var(--k-t2)",
+                marginTop: 2,
+              }}
+            >
+              {unlockedBadge.description}
+            </div>
+          </div>
         </div>
       )}
     </div>

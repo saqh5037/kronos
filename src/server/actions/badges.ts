@@ -52,6 +52,8 @@ function humanizeCriterion(c: Criterion): string {
       return `Completar ${c.count} WODs en RX`;
     case "ratio_pr":
       return `Levantar ${c.ratio}× tu peso corporal en ${c.movement}`;
+    case "skill_level_reached":
+      return `Dominar la progresión "${c.progressionSlug.replace(/-/g, " ")}" en ${c.movementSlug.replace(/-/g, " ")}`;
   }
 }
 
@@ -102,6 +104,16 @@ function progressFor(c: Criterion, state: AthleteState): BadgeProgress {
         target,
         ratio: target > 0 ? Math.min(1, best / target) : 0,
         human: `${best.toFixed(1)} / ${target.toFixed(1)} kg`,
+      };
+    }
+    case "skill_level_reached": {
+      const key = `${c.movementSlug}:${c.progressionSlug}`;
+      const reached = state.skillLevelsAchieved.has(key);
+      return {
+        current: reached ? 1 : 0,
+        target: 1,
+        ratio: reached ? 1 : 0,
+        human: reached ? "Desbloqueada" : "Pendiente de desbloquear",
       };
     }
   }

@@ -178,6 +178,7 @@ describe("runAchievementEvaluation · uses precomputed state when given", () => 
         prCount: 0,
         rxScoreCount: 0,
         prByMovement: {},
+        skillLevelsAchieved: new Set<string>(),
       },
     });
     expect(countBooking).not.toHaveBeenCalled();
