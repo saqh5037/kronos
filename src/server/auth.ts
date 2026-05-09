@@ -7,7 +7,11 @@ import { db } from "./db";
 import { authorizeDev } from "./auth-dev";
 import { logAudit } from "./audit";
 import { sendEmail } from "@/lib/email";
-import { renderMagicLinkEmail } from "./email-templates/magic-link";
+import {
+  renderMagicLinkEmail,
+  renderMagicLinkText,
+} from "./email-templates/magic-link";
+import { validateMagicLinkSignIn } from "./auth-signin";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
@@ -44,6 +48,7 @@ export const authOptions: NextAuthOptions = {
           to: [identifier],
           subject: "Tu enlace para entrar a Kronos",
           html: renderMagicLinkEmail({ email: identifier, url }),
+          text: renderMagicLinkText({ email: identifier, url }),
           from: provider.from,
         });
         if (!result.ok) {
@@ -74,6 +79,17 @@ export const authOptions: NextAuthOptions = {
       : []),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      const decision = await validateMagicLinkSignIn(
+        account?.provider,
+        user.email,
+        (email) =>
+          db.user.findUnique({ where: { email }, select: { tenantId: true } }),
+      );
+      if (decision.type === "allow") return true;
+      if (decision.type === "redirect") return decision.url;
+      return false;
+    },
     async jwt({ token, user }) {
       if (user) {
         // Initial sign-in: hydrate token from DB

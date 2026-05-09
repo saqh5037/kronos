@@ -11,6 +11,7 @@ export type EmailMessage = {
   to: string[];
   subject: string;
   html: string;
+  text?: string;
   from?: string;
 };
 
@@ -50,6 +51,7 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
       to: msg.to,
       subject: msg.subject,
       html: msg.html,
+      ...(msg.text ? { text: msg.text } : {}),
     });
     if (error) {
       return {

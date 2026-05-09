@@ -18,8 +18,16 @@ type SuccessState = {
 
 const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEV_LOGIN === "1";
 
-export default function SignupForm() {
-  const [email, setEmail] = useState("");
+type SignupFormProps = {
+  initialEmail?: string;
+  reason?: string;
+};
+
+export default function SignupForm({
+  initialEmail = "",
+  reason = "",
+}: SignupFormProps) {
+  const [email, setEmail] = useState(initialEmail);
   const [ownerName, setOwnerName] = useState("");
   const [boxName, setBoxName] = useState("");
   const [slug, setSlug] = useState("");
@@ -114,6 +122,21 @@ export default function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {reason === "no_account" && initialEmail ? (
+        <div
+          className="rounded-xl border p-3 text-xs leading-relaxed"
+          style={{
+            background: "var(--k-accent-soft)",
+            borderColor: "var(--k-accent-line)",
+            color: "var(--k-t1)",
+          }}
+        >
+          Detectamos que intentaste entrar con{" "}
+          <strong style={{ color: "var(--k-accent)" }}>{initialEmail}</strong>{" "}
+          pero todavía no tenés cuenta. Completá tu registro acá — vas a recibir
+          tu Box de prueba al instante.
+        </div>
+      ) : null}
       <Field
         label="Email del owner"
         name="email"

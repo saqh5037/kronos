@@ -470,6 +470,55 @@ async function main() {
     },
   });
 
+  // Plan exclusivo del lanzamiento Dominus 23-may. Lock-in 12 meses + 3 meses
+  // gratis al pagar anual + onboarding 1-a-1. Solo accesible vía /founding-dominus
+  // mientras isDominusPromoActive() === true.
+  await prisma.saasPlan.upsert({
+    where: { slug: "dominus-founding" },
+    update: {
+      name: "Founding Box Dominus",
+      priceMxnCents: 350000,
+      maxAthletes: 200,
+      maxCoaches: 5,
+      features: {
+        bookings: true,
+        wods: true,
+        leaderboard: true,
+        analytics: true,
+        ocr: true,
+        ai: true,
+        lockIn12Months: true,
+        threeMonthsBonusOnAnnual: true,
+        priorityOnboarding: true,
+        foundingBadge: true,
+        promoCode: "dominus-23may",
+      },
+      isActive: true,
+      sortOrder: 4,
+    },
+    create: {
+      slug: "dominus-founding",
+      name: "Founding Box Dominus",
+      priceMxnCents: 350000,
+      maxAthletes: 200,
+      maxCoaches: 5,
+      features: {
+        bookings: true,
+        wods: true,
+        leaderboard: true,
+        analytics: true,
+        ocr: true,
+        ai: true,
+        lockIn12Months: true,
+        threeMonthsBonusOnAnnual: true,
+        priorityOnboarding: true,
+        foundingBadge: true,
+        promoCode: "dominus-23may",
+      },
+      sortOrder: 4,
+    },
+  });
+
   // ─── Boxes ────────────────────────────────────────────────────────────────────
   // Default operating schedule: 6 WOD slots Mon-Fri (3 AM + 3 PM),
   // 3 Open Box slots Saturday, Sunday closed.

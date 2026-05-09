@@ -13,6 +13,7 @@ import {
 import { formatPriceMxn } from "@/lib/saas-billing";
 import { CancelSubscriptionButton } from "./_components/CancelSubscriptionButton";
 import { SpendMetricsCard } from "./_components/SpendMetricsCard";
+import { isDominusPromoActive, promoDaysLeft } from "@/lib/dominus-promo";
 
 export const metadata = { title: "Kronos — Suscripción" };
 export const dynamic = "force-dynamic";
@@ -125,8 +126,50 @@ export default async function BillingPage() {
   const status = box.subscriptionStatus as SubscriptionStatus;
   const copy = copyForStatus(status, box.trialEndsAt);
 
+  const showFoundingPromo = isDominusPromoActive() && status === "TRIAL";
+  const promoDays = promoDaysLeft();
+
   return (
     <div className="p-6 md:p-8 max-w-3xl mx-auto">
+      {showFoundingPromo ? (
+        <div
+          className="rounded-xl border p-4 md:p-5 mb-6 flex items-start gap-3 flex-wrap md:flex-nowrap"
+          style={{
+            background: "var(--k-accent-soft)",
+            borderColor: "var(--k-accent-line)",
+          }}
+        >
+          <div className="flex-1 min-w-[200px]">
+            <div
+              className="text-[10px] font-mono uppercase tracking-wider mb-1"
+              style={{ color: "var(--k-accent)" }}
+            >
+              · {promoDays === 1 ? "Último día" : `${promoDays} días`} ·
+              Founding Box Dominus
+            </div>
+            <div
+              className="font-display font-bold text-base mb-1"
+              style={{ color: "var(--k-t1) " }}
+            >
+              Lockeá tu precio fundador antes del 23 de mayo
+            </div>
+            <div
+              className="text-xs leading-relaxed"
+              style={{ color: "var(--k-t2)" }}
+            >
+              $3,500 MXN/mes lock 12 meses + 3 meses gratis al pagar anual.
+              Onboarding 1-a-1 incluido. Si te interesa, escribinos para
+              activarte el plan Founding sobre tu Box actual.
+            </div>
+          </div>
+          <a
+            href="mailto:contacto@kronos-fit.com?subject=Quiero%20Founding%20Box%20Dominus"
+            className="k-btn-grad px-4 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap"
+          >
+            Activar Founding →
+          </a>
+        </div>
+      ) : null}
       <Eyebrow color={copy.tone === "danger" ? "red" : "blue"}>
         {copy.eyebrow}
       </Eyebrow>
