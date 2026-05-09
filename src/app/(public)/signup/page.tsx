@@ -8,11 +8,19 @@ import SignupForm from "./SignupForm";
 
 export const metadata = { title: "Kronos — Empezá tu trial" };
 
-export default async function SignupPage() {
+type SignupPageProps = {
+  searchParams: Promise<{ email?: string; reason?: string }>;
+};
+
+export default async function SignupPage({ searchParams }: SignupPageProps) {
   const session = await getServerSession(authOptions);
   if (session) {
     redirect(session.user.role === "ATHLETE" ? "/atleta" : "/admin");
   }
+
+  const params = await searchParams;
+  const initialEmail = params.email?.toLowerCase().trim() ?? "";
+  const reason = params.reason ?? "";
 
   return (
     <main
@@ -34,7 +42,7 @@ export default async function SignupPage() {
 
         <KCard animate={false}>
           <div className="p-6">
-            <SignupForm />
+            <SignupForm initialEmail={initialEmail} reason={reason} />
           </div>
         </KCard>
 

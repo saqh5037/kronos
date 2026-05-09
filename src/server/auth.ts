@@ -8,6 +8,7 @@ import { authorizeDev } from "./auth-dev";
 import { logAudit } from "./audit";
 import { sendEmail } from "@/lib/email";
 import { renderMagicLinkEmail } from "./email-templates/magic-link";
+import { validateMagicLinkSignIn } from "./auth-signin";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
@@ -74,6 +75,17 @@ export const authOptions: NextAuthOptions = {
       : []),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      const decision = await validateMagicLinkSignIn(
+        account?.provider,
+        user.email,
+        (email) =>
+          db.user.findUnique({ where: { email }, select: { tenantId: true } }),
+      );
+      if (decision.type === "allow") return true;
+      if (decision.type === "redirect") return decision.url;
+      return false;
+    },
     async jwt({ token, user }) {
       if (user) {
         // Initial sign-in: hydrate token from DB
