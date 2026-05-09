@@ -69,12 +69,13 @@ export default async function PerfilPage() {
 
   const activeGoals = myGoals.filter((g) => g.status === "ACTIVE");
 
-  // Config: prefs + Box flags
+  // Config: prefs + Box flags + photo
   let configPrefs: { unit: "kg" | "lb" | null; level: "rx" | "scaled" | "beginner" | null } = {
     unit: null,
     level: null,
   };
   let isPersonalBox = false;
+  let configPhotoUrl: string | null = null;
   try {
     const session = await getServerSession(authOptions);
     if (session?.user?.tenantId && session.user.id) {
@@ -85,11 +86,14 @@ export default async function PerfilPage() {
         }),
         prismaBase.athlete.findFirst({
           where: { tenantId: session.user.tenantId, userId: session.user.id },
-          select: { tags: true },
+          select: { tags: true, photoUrl: true },
         }),
       ]);
       if (box) isPersonalBox = isPersonalBoxSlug(box.slug);
-      if (athlete) configPrefs = readPrefs(athlete.tags);
+      if (athlete) {
+        configPrefs = readPrefs(athlete.tags);
+        configPhotoUrl = athlete.photoUrl;
+      }
     }
   } catch {
     // best effort
@@ -783,7 +787,7 @@ export default async function PerfilPage() {
         </AnimatedItem>
       </AnimatedSection>
 
-      {/* CONFIGURACIÓN — preferencias, unirse a box, cerrar sesión */}
+      {/* CONFIGURACIÓN — avatar, preferencias, unirse a box, cerrar sesión */}
       <AnimatedSection className="mt-5 px-3.5">
         <AnimatedItem>
           <KCard>
@@ -791,6 +795,8 @@ export default async function PerfilPage() {
               initialUnit={configPrefs.unit}
               initialLevel={configPrefs.level}
               isPersonalBox={isPersonalBox}
+              initialPhotoUrl={configPhotoUrl}
+              initials={initials}
             />
           </KCard>
         </AnimatedItem>

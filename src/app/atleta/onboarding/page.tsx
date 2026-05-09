@@ -21,7 +21,7 @@ export default async function AtletaOnboardingPage() {
     }),
     prismaBase.athlete.findFirst({
       where: { tenantId: session.user.tenantId, userId: session.user.id },
-      select: { firstName: true, lastName: true, tags: true },
+      select: { firstName: true, lastName: true, tags: true, photoUrl: true },
     }),
   ]);
 
@@ -43,6 +43,7 @@ export default async function AtletaOnboardingPage() {
         initialLastName={athlete?.lastName ?? ""}
         initialUnit={prefs.unit}
         initialLevel={prefs.level}
+        initialPhotoUrl={athlete?.photoUrl ?? null}
       />
     </main>
   );

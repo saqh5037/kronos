@@ -5,17 +5,22 @@ import { signOut } from "next-auth/react";
 import { completeOnboarding } from "@/server/actions/atleta-onboarding";
 import type { Unit, Level } from "@/lib/atleta-prefs";
 import { kToast } from "@/lib/toast";
+import AvatarUpload from "./AvatarUpload";
 
 type Props = {
   initialUnit: Unit | null;
   initialLevel: Level | null;
   isPersonalBox: boolean;
+  initialPhotoUrl: string | null;
+  initials: string;
 };
 
 export default function ProfileConfigBlock({
   initialUnit,
   initialLevel,
   isPersonalBox,
+  initialPhotoUrl,
+  initials,
 }: Props) {
   const [unit, setUnit] = useState<Unit>(initialUnit ?? "kg");
   const [level, setLevel] = useState<Level>(initialLevel ?? "scaled");
@@ -57,6 +62,16 @@ export default function ProfileConfigBlock({
       <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
         CONFIGURACIÓN
       </p>
+
+      <div className="space-y-2">
+        <label
+          className="text-[10px] font-mono uppercase tracking-wider"
+          style={{ color: "var(--k-t3)" }}
+        >
+          Foto de perfil
+        </label>
+        <AvatarUpload initialPhotoUrl={initialPhotoUrl} initials={initials} />
+      </div>
 
       <div className="space-y-2">
         <label

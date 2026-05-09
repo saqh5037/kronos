@@ -9,12 +9,14 @@ import {
   markOnboardingCompleted,
 } from "@/server/actions/atleta-onboarding";
 import type { Unit, Level } from "@/lib/atleta-prefs";
+import AvatarUpload from "@/components/atleta/AvatarUpload";
 
 type Props = {
   initialFirstName: string;
   initialLastName: string;
   initialUnit: Unit | null;
   initialLevel: Level | null;
+  initialPhotoUrl: string | null;
 };
 
 const TOTAL_STEPS = 3;
@@ -24,6 +26,7 @@ export default function OnboardingWizard({
   initialLastName,
   initialUnit,
   initialLevel,
+  initialPhotoUrl,
 }: Props) {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -32,6 +35,7 @@ export default function OnboardingWizard({
   const [unit, setUnit] = useState<Unit>(initialUnit ?? "kg");
   const [level, setLevel] = useState<Level>(initialLevel ?? "scaled");
   const [joinSlug, setJoinSlug] = useState("");
+  const [photoUrl, setPhotoUrl] = useState<string | null>(initialPhotoUrl);
   const [pending, startTransition] = useTransition();
 
   function next() {
@@ -94,6 +98,8 @@ export default function OnboardingWizard({
             <Step1
               firstName={firstName}
               lastName={lastName}
+              photoUrl={photoUrl}
+              onPhotoChange={setPhotoUrl}
               setFirstName={setFirstName}
               setLastName={setLastName}
               onNext={next}
@@ -158,6 +164,8 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
 type Step1Props = {
   firstName: string;
   lastName: string;
+  photoUrl: string | null;
+  onPhotoChange: (url: string | null) => void;
   setFirstName: (v: string) => void;
   setLastName: (v: string) => void;
   onNext: () => void;
@@ -168,6 +176,8 @@ type Step1Props = {
 function Step1({
   firstName,
   lastName,
+  photoUrl,
+  onPhotoChange,
   setFirstName,
   setLastName,
   onNext,
@@ -175,6 +185,8 @@ function Step1({
   pending,
 }: Step1Props) {
   const canContinue = firstName.trim().length >= 2;
+  const initials =
+    (firstName.trim()[0] ?? "") + (lastName.trim()[0] ?? "");
   return (
     <div className="space-y-5">
       <div>
@@ -198,6 +210,21 @@ function Step1({
         onChange={setLastName}
         placeholder=""
       />
+      <div className="space-y-2">
+        <label
+          className="text-xs font-mono uppercase tracking-wider"
+          style={{ color: "var(--k-t3)" }}
+        >
+          Foto (opcional)
+        </label>
+        <AvatarUpload
+          initialPhotoUrl={photoUrl}
+          initials={initials.toUpperCase() || "?"}
+          size={72}
+          showRemove={false}
+          onChange={onPhotoChange}
+        />
+      </div>
       <div className="flex flex-col gap-2 pt-2">
         <button
           type="button"
