@@ -133,8 +133,15 @@ export default function SignupForm({
         >
           Detectamos que intentaste entrar con{" "}
           <strong style={{ color: "var(--k-accent)" }}>{initialEmail}</strong>{" "}
-          pero todavía no tenés cuenta. Completá tu registro acá — vas a recibir
-          tu Box de prueba al instante.
+          pero todavía no tenés cuenta. Si sos dueño de un box, completá tu
+          registro acá. Si sos atleta,{" "}
+          <a
+            href={`/atleta-signup?email=${encodeURIComponent(initialEmail)}`}
+            className="underline"
+            style={{ color: "var(--k-accent)" }}
+          >
+            registrate gratis acá →
+          </a>
         </div>
       ) : null}
       <Field

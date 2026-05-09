@@ -15,10 +15,20 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-export default function Hero({ boxHref }: { boxHref: string | null }) {
+export default function Hero({
+  boxHref,
+  dominusActive = false,
+}: {
+  boxHref: string | null;
+  dominusActive?: boolean;
+}) {
   const reduce = useReducedMotion();
   const variants = reduce ? undefined : stagger;
   const child = reduce ? undefined : item;
+  const ownerHref = dominusActive ? "/founding-dominus" : "/signup";
+  const ownerLabel = dominusActive
+    ? "Tengo un box · Founding Dominus"
+    : "Tengo un box · Trial 14 días";
 
   return (
     <section className="lp-hero" id="producto">
@@ -69,34 +79,72 @@ export default function Hero({ boxHref }: { boxHref: string | null }) {
                 </svg>
               </a>
             ) : (
-              <a
-                href="#section-form"
-                className="lp-btn-lime lp-btn-lg"
-                onClick={() => track("cta_clicked", { location: "hero" })}
-              >
-                Reservar mi lugar
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
+              <>
+                <a
+                  href="/atleta-signup"
+                  className="lp-btn-lime lp-btn-lg"
+                  onClick={() =>
+                    track("cta_clicked", {
+                      location: "hero_split",
+                      audience: "atleta",
+                    })
+                  }
                 >
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
+                  Soy atleta · Empezar gratis
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </a>
+                <a
+                  href={ownerHref}
+                  className="lp-btn-ghost lp-btn-lg"
+                  onClick={() =>
+                    track("cta_clicked", {
+                      location: "hero_split",
+                      audience: "owner",
+                    })
+                  }
+                >
+                  {ownerLabel}
+                </a>
+              </>
+            )}
+            {boxHref ? (
+              <a
+                href="#section-atleta"
+                className="lp-btn-ghost lp-btn-lg"
+                onClick={() =>
+                  track("cta_clicked", { location: "hero_secondary" })
+                }
+              >
+                Ver cómo funciona
+              </a>
+            ) : (
+              <a
+                href="#section-atleta"
+                className="lp-link-tertiary"
+                onClick={() =>
+                  track("cta_clicked", { location: "hero_tertiary" })
+                }
+                style={{
+                  fontSize: 13,
+                  color: "var(--k-t3)",
+                  textDecoration: "underline",
+                  marginTop: 8,
+                  display: "inline-block",
+                }}
+              >
+                ¿Ver cómo funciona primero?
               </a>
             )}
-            <a
-              href="#section-atleta"
-              className="lp-btn-ghost lp-btn-lg"
-              onClick={() =>
-                track("cta_clicked", { location: "hero_secondary" })
-              }
-            >
-              Ver cómo funciona
-            </a>
           </motion.div>
           <motion.div className="lp-hero-meta" variants={child}>
             {HERO_META.strip}

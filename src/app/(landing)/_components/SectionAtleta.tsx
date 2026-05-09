@@ -252,46 +252,6 @@ export default function SectionAtleta() {
           </div>
         </motion.div>
       </motion.div>
-
-      <div
-        style={{
-          maxWidth: 720,
-          margin: "48px auto 0",
-          padding: "20px 24px",
-          borderRadius: 12,
-          border: "1px solid var(--k-line-2)",
-          background: "var(--k-elevated)",
-          textAlign: "center",
-        }}
-      >
-        <p
-          style={{
-            fontFamily: "var(--k-font-body)",
-            fontSize: 14,
-            color: "var(--k-t2)",
-            lineHeight: 1.5,
-            marginBottom: 12,
-          }}
-        >
-          ¿Sos atleta y querés empezar a trackear ya?
-        </p>
-        <a
-          href="/atleta-signup"
-          className="lp-mono"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 13,
-            fontWeight: 700,
-            color: "var(--k-accent)",
-            textDecoration: "none",
-            letterSpacing: "-0.005em",
-          }}
-        >
-          Empezá gratis · sin box requerido →
-        </a>
-      </div>
     </section>
   );
 }
