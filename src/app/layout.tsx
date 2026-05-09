@@ -47,7 +47,11 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600", "700"],
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.kronos-fit.com";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Kronos",
   description: "El sistema operativo de tu box.",
   manifest: "/manifest.webmanifest",
