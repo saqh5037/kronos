@@ -40,10 +40,26 @@ import type { ScoreType } from "@/lib/validations/wod";
 
 import KCard from "@/components/kronos/KCard";
 import RevealOnScroll from "@/components/kronos/RevealOnScroll";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/server/auth";
+import { db as prismaBase } from "@/server/db";
+import { isPersonalBoxSlug } from "@/lib/personal-box";
 
 export const metadata = { title: "Kronos — Inicio" };
 
 export default async function AtletaHomePage() {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.tenantId) {
+    const box = await prismaBase.box.findUnique({
+      where: { id: session.user.tenantId },
+      select: { slug: true, onboardingCompletedAt: true },
+    });
+    if (box && isPersonalBoxSlug(box.slug) && !box.onboardingCompletedAt) {
+      redirect("/atleta/onboarding");
+    }
+  }
+
   let home: AthleteHome = null;
   let classes: AvailableClass[] = [];
   let prs: PRRow[] = [];

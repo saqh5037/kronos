@@ -12,6 +12,7 @@ import { isDominusPromoActive, PROMO_PLAN_SLUG } from "@/lib/dominus-promo";
 import { sendEmail } from "@/lib/email";
 import { renderFoundingReservationEmail } from "@/server/email-templates/founding-reservation";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { isPersonalBoxSlug } from "@/lib/personal-box";
 
 const RESERVED_SLUGS = new Set([
   "admin",
@@ -98,7 +99,7 @@ export async function reserveFoundingPlan(
 
   const { email, ownerName, boxName, slug, billingCycle, phone } = parsed.data;
 
-  if (RESERVED_SLUGS.has(slug)) {
+  if (RESERVED_SLUGS.has(slug) || isPersonalBoxSlug(slug)) {
     return {
       ok: false,
       error: "SLUG_RESERVED",

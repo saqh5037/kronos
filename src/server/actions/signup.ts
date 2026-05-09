@@ -6,6 +6,7 @@ import {
   TRIAL_DURATION_DAYS,
   type SignupInput,
 } from "@/lib/validations/signup";
+import { isPersonalBoxSlug } from "@/lib/personal-box";
 
 const RESERVED_SLUGS = new Set([
   "admin",
@@ -62,7 +63,7 @@ export async function createBoxAndOwner(
 
   const { email, ownerName, boxName, slug } = parsed.data;
 
-  if (RESERVED_SLUGS.has(slug)) {
+  if (RESERVED_SLUGS.has(slug) || isPersonalBoxSlug(slug)) {
     return {
       ok: false,
       error: "SLUG_RESERVED",
