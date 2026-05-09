@@ -13,6 +13,7 @@ import {
   renderMagicLinkText,
 } from "./email-templates/magic-link";
 import { validateMagicLinkSignIn } from "./auth-signin";
+import { deriveOtpFromToken } from "./otp";
 
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 90; // 90 días — keep-alive mobile
 const SESSION_UPDATE_AGE_SECONDS = 60 * 60 * 24; // refrescar JWT 1x/día si activo
@@ -69,12 +70,15 @@ export const authOptions: NextAuthOptions = {
   providers: [
     EmailProvider({
       from: process.env.EMAIL_FROM ?? "Kronos <noreply@kronos.app>",
-      async sendVerificationRequest({ identifier, url, provider }) {
+      async sendVerificationRequest({ identifier, url, provider, token }) {
+        // Derivar OTP del mismo VerificationToken — el email contiene AMBOS:
+        // magic link tradicional + código de 6 dígitos como fallback.
+        const code = deriveOtpFromToken(token, process.env.NEXTAUTH_SECRET!);
         const result = await sendEmail({
           to: [identifier],
           subject: "Tu enlace para entrar a Kronos",
-          html: renderMagicLinkEmail({ email: identifier, url }),
-          text: renderMagicLinkText({ email: identifier, url }),
+          html: renderMagicLinkEmail({ email: identifier, url, code }),
+          text: renderMagicLinkText({ email: identifier, url, code }),
           from: provider.from,
         });
         if (!result.ok) {

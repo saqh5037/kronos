@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { createIndependentAthlete } from "@/server/actions/atleta-signup";
 import { kToast } from "@/lib/toast";
 import { detectPwaPlatform } from "@/lib/pwa-detect";
+import MagicLinkWaiting from "@/components/auth/MagicLinkWaiting";
 
 type FieldErrors = Partial<
   Record<"email" | "firstName" | "lastName" | "password", string>
@@ -87,142 +88,68 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
   }
 
   if (success) {
-    return (
-      <div className="space-y-4 text-center">
-        <div
-          className="inline-flex items-center justify-center w-12 h-12 rounded-full"
-          style={{ background: "var(--k-accent-soft)" }}
-        >
-          <span
-            className="font-display font-bold text-xl"
-            style={{ color: "var(--k-accent)" }}
+    // Si seteó password, no necesitamos magic link — directo a /login.
+    if (success.hasPassword) {
+      return (
+        <div className="space-y-4 text-center">
+          <div
+            className="inline-flex items-center justify-center w-12 h-12 rounded-full"
+            style={{ background: "var(--k-accent-soft)" }}
           >
-            ✓
-          </span>
-        </div>
-        <h2 className="font-display font-bold text-xl">
-          {success.existingUser ? "Ya tenés cuenta" : "¡Listo!"}
-        </h2>
-
-        {success.existingUser ? (
-          <>
-            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-              Detectamos que{" "}
-              <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>{" "}
-              ya estaba registrado. Te mandamos un enlace mágico para que entres
-              sin tener que crearla de nuevo.
-            </p>
-            {isIos ? (
-              <div
-                className="rounded-xl border p-3 text-left"
-                style={{
-                  background: "var(--k-accent-soft)",
-                  borderColor: "var(--k-accent-line)",
-                }}
-              >
-                <p
-                  className="text-xs font-bold mb-1"
-                  style={{ color: "var(--k-accent)" }}
-                >
-                  ⚠️ Importante en iPhone
-                </p>
-                <p
-                  className="text-[11px] leading-relaxed"
-                  style={{ color: "var(--k-t2)" }}
-                >
-                  El link del email puede abrir en Chrome u otro navegador. Si
-                  tenés problemas,{" "}
-                  <a
-                    href="/login"
-                    className="underline"
-                    style={{ color: "var(--k-accent)" }}
-                  >
-                    iniciá sesión con contraseña →
-                  </a>{" "}
-                  (si la creaste antes).
-                </p>
-              </div>
-            ) : null}
+            <span
+              className="font-display font-bold text-xl"
+              style={{ color: "var(--k-accent)" }}
+            >
+              ✓
+            </span>
+          </div>
+          <h2 className="font-display font-bold text-xl">¡Listo!</h2>
+          <p className="text-sm" style={{ color: "var(--k-t2)" }}>
+            Cuenta creada para{" "}
+            <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>.
+            Ya podés entrar.
+          </p>
+          <a
+            href={`/login?email=${encodeURIComponent(success.email)}`}
+            className="k-btn-grad inline-block px-6 py-3 rounded-xl font-bold text-sm"
+          >
+            Entrar ahora →
+          </a>
+          {DEV_LOGIN_ENABLED ? (
             <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-              ¿No te llegó? Revisá spam o pedí otro desde{" "}
-              <a href="/login" className="underline">
+              (Dev: entrá con tu email + password <code>dev</code> en{" "}
+              <a href="/login?dev=1" className="underline">
                 /login
               </a>
-              .
+              )
             </p>
-          </>
-        ) : success.hasPassword ? (
-          <>
-            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-              Cuenta creada para{" "}
-              <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>.
-              Ya podés entrar.
-            </p>
-            <a
-              href={`/login?email=${encodeURIComponent(success.email)}`}
-              className="k-btn-grad inline-block px-6 py-3 rounded-xl font-bold text-sm"
-            >
-              Entrar ahora →
-            </a>
-          </>
-        ) : (
-          <>
-            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
+          ) : null}
+        </div>
+      );
+    }
+    // Sin password: magic link + OTP fallback (componente compartido).
+    return (
+      <MagicLinkWaiting
+        email={success.email}
+        title={success.existingUser ? "Ya tenés cuenta" : "¡Listo!"}
+        subtitle={
+          success.existingUser ? (
+            <>
+              Detectamos que{" "}
+              <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>{" "}
+              ya estaba registrado. Te mandamos un enlace mágico (y código de 6
+              dígitos) para que entres sin tener que crearla de nuevo.
+            </>
+          ) : (
+            <>
               Te enviamos un enlace mágico a{" "}
               <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>.
-              Hacé click ahí para entrar.
-            </p>
-            {isIos ? (
-              <div
-                className="rounded-xl border p-3 text-left"
-                style={{
-                  background: "var(--k-accent-soft)",
-                  borderColor: "var(--k-accent-line)",
-                }}
-              >
-                <p
-                  className="text-xs font-bold mb-1"
-                  style={{ color: "var(--k-accent)" }}
-                >
-                  ⚠️ Importante en iPhone
-                </p>
-                <p
-                  className="text-[11px] leading-relaxed"
-                  style={{ color: "var(--k-t2)" }}
-                >
-                  El link del email puede abrir en Chrome u otro navegador y
-                  romper la sesión. Si tenés problemas,{" "}
-                  <a
-                    href="/login"
-                    className="underline"
-                    style={{ color: "var(--k-accent)" }}
-                  >
-                    iniciá sesión con contraseña →
-                  </a>{" "}
-                  (la podés crear desde tu perfil).
-                </p>
-              </div>
-            ) : null}
-            <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-              Si no llega en 1 minuto, revisá spam o pedí otro desde{" "}
-              <a href="/login" className="underline">
-                iniciar sesión
-              </a>
-              .
-            </p>
-          </>
-        )}
-
-        {DEV_LOGIN_ENABLED ? (
-          <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-            (Dev: entrá con tu email + password <code>dev</code> en{" "}
-            <a href="/login?dev=1" className="underline">
-              /login
-            </a>
-            )
-          </p>
-        ) : null}
-      </div>
+              Tocalo desde tu teléfono — o usá el código del email si el link no
+              funciona.
+            </>
+          )
+        }
+      />
     );
   }
 
