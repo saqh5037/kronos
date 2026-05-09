@@ -32,11 +32,24 @@ apt-get upgrade -y
 apt-get install -y build-essential curl git ufw
 
 echo "▶ 2. Firewall"
-ufw default deny incoming || true
-ufw default allow outgoing || true
-ufw allow OpenSSH || true
-ufw allow 'Nginx Full' || true
-yes | ufw enable || true
+# CRÍTICO: NO activar UFW si hay otros servicios escuchando en puertos no estándar.
+# Si el host es compartido con otras apps/DBs (Postgres en 5432, JBoss en 8080, etc.)
+# encender UFW deny-incoming les rompe el acceso silenciosamente.
+EXISTING_LISTENERS=$(ss -tulpn 2>/dev/null | awk 'NR>1 && $5 !~ /:(22|80|443|5432)$/ && $5 ~ /:[0-9]+$/' | wc -l)
+ALREADY_LISTENING_OTHER=$(ss -tulpn 2>/dev/null | awk '$5 ~ /:(5432|8080|8443|3000|3306|6379|27017|9200|11211)$/' | wc -l)
+
+if [ "$ALREADY_LISTENING_OTHER" -gt 0 ] || [ "$EXISTING_LISTENERS" -gt 3 ]; then
+  echo "⚠  Detectados servicios externos en puertos no-Kronos. NO se enciende UFW."
+  echo "   Servicios detectados:"
+  ss -tulpn 2>/dev/null | awk 'NR>1 && $5 ~ /:[0-9]+$/' | head -10
+  echo "   Configurar firewall manualmente para no romper esos servicios."
+else
+  ufw default deny incoming || true
+  ufw default allow outgoing || true
+  ufw allow OpenSSH || true
+  ufw allow 'Nginx Full' || true
+  yes | ufw enable || true
+fi
 
 echo "▶ 3. Node 20 LTS + pnpm + PM2"
 if ! command -v node >/dev/null 2>&1; then
