@@ -646,6 +646,35 @@ model AthleteSkillLevel {
   @@index([tenantId, movementSlug])
 }
 
+// ─── COACH VIRTUAL CARDS ─────────────────────────────────────────────────────
+
+enum CoachCardType {
+  STAGNATION
+  NEXT_UNLOCK
+  AVOIDANCE_PATTERN
+  CELEBRATION
+}
+
+model CoachCard {
+  id          String        @id @default(cuid())
+  tenantId    String
+  athleteId   String
+  type        CoachCardType
+  title       String
+  body        String
+  ctaLabel    String?
+  ctaHref     String?
+  meta        Json?
+  generatedAt DateTime      @default(now())
+  validUntil  DateTime
+  dismissed   Boolean       @default(false)
+  dismissedAt DateTime?
+  priority    Int           @default(50)
+
+  @@index([tenantId, athleteId, dismissed, validUntil])
+  @@index([validUntil])
+}
+
 model Streak {
   id          String     @id @default(cuid())
   tenantId    String
