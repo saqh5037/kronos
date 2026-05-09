@@ -7,6 +7,7 @@ import { logAudit } from "../audit";
 import { getStorage } from "../storage";
 
 const MAX_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB
+const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
 const EXPIRE_DAYS = 7;
 
 async function requireCoachSession() {
@@ -91,6 +92,56 @@ export async function uploadWhiteboardPhoto(
   });
 
   return { uploadId: upload.id, url: stored.url };
+}
+
+async function requireOwnerSession() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  if (session.user.role !== "OWNER") {
+    throw new Error("Forbidden — OWNER only");
+  }
+  return session;
+}
+
+export type LogoUploadResult = {
+  url: string;
+};
+
+/**
+ * Upload (or replace) the Box logo. OWNER only. Persists Box.logoUrl.
+ * Same storage driver as whiteboards (local | s3).
+ */
+export async function uploadBoxLogo(
+  formData: FormData,
+): Promise<LogoUploadResult> {
+  const session = await requireOwnerSession();
+  const tenantId = session.user.tenantId;
+
+  const file = formData.get("file") as File | null;
+  if (!file) throw new Error("Archivo requerido");
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Solo se aceptan imágenes (image/*)");
+  }
+  if (file.size > MAX_LOGO_SIZE_BYTES) {
+    throw new Error("El logo no puede superar 2 MB");
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const pathname = `box-logos/${tenantId}/${Date.now()}-${safeName(file.name)}`;
+
+  const storage = getStorage();
+  const stored = await storage.put({
+    buffer,
+    contentType: file.type || "image/png",
+    pathname,
+  });
+
+  await rawDb.box.update({
+    where: { id: tenantId },
+    data: { logoUrl: stored.url },
+  });
+
+  return { url: stored.url };
 }
 
 /**

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/server/auth";
 import { getBox, getBoxSchedule } from "@/server/actions/box";
 import { getOnboardingStatus } from "@/server/actions/onboarding";
+import { getBenchmarkWodPresets } from "@/lib/wod-presets-data";
 import OnboardingWizard from "./OnboardingWizard";
 
 export const metadata = { title: "Kronos — Configurá tu box" };
@@ -17,11 +18,17 @@ export default async function OnboardingPage() {
     getBoxSchedule(),
     getOnboardingStatus(),
   ]);
+  const wodPresets = getBenchmarkWodPresets();
 
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-3xl mx-auto">
-        <OnboardingWizard box={box} schedule={schedule} status={status} />
+        <OnboardingWizard
+          box={box}
+          schedule={schedule}
+          status={status}
+          wodPresets={wodPresets}
+        />
       </div>
     </div>
   );

@@ -16,6 +16,8 @@ import AdminDashboardV3, {
 import { CoachClassesTodayCard } from "./_components/CoachClassesTodayCard";
 import { CoachAttendanceTodayCard } from "./_components/CoachAttendanceTodayCard";
 import { AtRiskCard } from "./_components/AtRiskCard";
+import OnboardingBanner from "@/components/admin/OnboardingBanner";
+import { db as prismaBase } from "@/server/db";
 
 export const metadata = { title: "Kronos — Dashboard" };
 
@@ -330,7 +332,71 @@ export default async function AdminDashboardPage({
     } programadas`,
   };
 
-  return <AdminDashboardV3 {...props} />;
+  // Onboarding banner state — only for OWNER, only if not completed
+  let onboardingProgress: {
+    show: boolean;
+    hasMovements: boolean;
+    hasSchedule: boolean;
+    hasWods: boolean;
+    hasPlan: boolean;
+    hasStaff: boolean;
+    hasPassword: boolean;
+  } | null = null;
+  if (session_.user?.role === "OWNER") {
+    try {
+      const [boxFlag, movementCount, wodCount, planCount, staffCount, owner] =
+        await Promise.all([
+          prismaBase.box.findUnique({
+            where: { id: session_.user.tenantId },
+            select: {
+              onboardingCompletedAt: true,
+              weeklySchedule: true,
+            },
+          }),
+          prismaBase.movement.count({
+            where: { tenantId: session_.user.tenantId },
+          }),
+          prismaBase.wOD.count({
+            where: { tenantId: session_.user.tenantId },
+          }),
+          prismaBase.membershipPlan.count({
+            where: { tenantId: session_.user.tenantId, isActive: true },
+          }),
+          prismaBase.user.count({
+            where: {
+              tenantId: session_.user.tenantId,
+              role: { in: ["COACH", "STAFF"] },
+            },
+          }),
+          prismaBase.user.findUnique({
+            where: { id: session_.user.id },
+            select: { passwordHash: true },
+          }),
+        ]);
+      onboardingProgress = {
+        show: !boxFlag?.onboardingCompletedAt,
+        hasMovements: movementCount > 0,
+        hasSchedule: Boolean(boxFlag?.weeklySchedule),
+        hasWods: wodCount > 0,
+        hasPlan: planCount > 0,
+        hasStaff: staffCount > 0,
+        hasPassword: Boolean(owner?.passwordHash),
+      };
+    } catch {
+      // best-effort: si falla, no bloquea el dashboard
+    }
+  }
+
+  return (
+    <>
+      {onboardingProgress?.show ? (
+        <div style={{ padding: "16px 24px 0" }}>
+          <OnboardingBanner {...onboardingProgress} />
+        </div>
+      ) : null}
+      <AdminDashboardV3 {...props} />
+    </>
+  );
 }
 
 async function CoachDashboard({ session }: { session: Session }) {

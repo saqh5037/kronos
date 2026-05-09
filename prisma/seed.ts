@@ -8,6 +8,10 @@ import {
   type AuditAction,
 } from "@prisma/client";
 import { seedStandardMovements, STANDARD_MOVEMENTS } from "./seed-movements";
+import {
+  WOD_LIBRARY as CANONICAL_WOD_LIBRARY,
+  type WodRecipe as CanonicalWodRecipe,
+} from "../src/server/seed-defaults";
 
 const prisma = new PrismaClient();
 
@@ -145,193 +149,11 @@ const MOVEMENT_LIBRARY = [
   { name: "Run", slug: "run", equipment: [] },
 ];
 
-type WODRecipe = {
-  name: string;
-  type: WODType;
-  scoreType: ScoreType;
-  description: string;
-  timeCap?: number;
-  movements: { name: string; reps?: number; weight?: number }[];
-};
+type WODRecipe = CanonicalWodRecipe;
 
-const WOD_LIBRARY: WODRecipe[] = [
-  {
-    name: "Fran",
-    type: "FORTIME",
-    scoreType: "TIME",
-    description: "21-15-9 reps for time:\nThruster (43kg/30kg)\nPull-up",
-    timeCap: 15,
-    movements: [
-      { name: "Thruster", reps: 21, weight: 43 },
-      { name: "Pull-up", reps: 21 },
-    ],
-  },
-  {
-    name: "Helen",
-    type: "FORTIME",
-    scoreType: "TIME",
-    description:
-      "3 rounds for time:\n400m run\n21 KB swings (24kg)\n12 pull-ups",
-    timeCap: 20,
-    movements: [
-      { name: "Run", reps: 400 },
-      { name: "Kettlebell Swing", reps: 21, weight: 24 },
-      { name: "Pull-up", reps: 12 },
-    ],
-  },
-  {
-    name: "Cindy",
-    type: "AMRAP",
-    scoreType: "ROUNDS_REPS",
-    description: "AMRAP 20 min:\n5 pull-ups\n10 push-ups\n15 air squats",
-    timeCap: 20,
-    movements: [
-      { name: "Pull-up", reps: 5 },
-      { name: "Push-up", reps: 10 },
-      { name: "Air Squat", reps: 15 },
-    ],
-  },
-  {
-    name: "Diane",
-    type: "FORTIME",
-    scoreType: "TIME",
-    description: "21-15-9 for time:\nDeadlift (102kg/70kg)\nHandstand push-up",
-    timeCap: 15,
-    movements: [
-      { name: "Deadlift", reps: 21, weight: 102 },
-      { name: "Push-up", reps: 21 },
-    ],
-  },
-  {
-    name: "Karen",
-    type: "FORTIME",
-    scoreType: "TIME",
-    description: "150 wall balls (9kg/6kg) for time",
-    timeCap: 20,
-    movements: [{ name: "Wall Ball", reps: 150, weight: 9 }],
-  },
-  {
-    name: "Murph",
-    type: "FORTIME",
-    scoreType: "TIME",
-    description:
-      "1 mile run\n100 pull-ups\n200 push-ups\n300 air squats\n1 mile run",
-    timeCap: 60,
-    movements: [
-      { name: "Run", reps: 1600 },
-      { name: "Pull-up", reps: 100 },
-      { name: "Push-up", reps: 200 },
-      { name: "Air Squat", reps: 300 },
-      { name: "Run", reps: 1600 },
-    ],
-  },
-  {
-    name: "Annie",
-    type: "FORTIME",
-    scoreType: "TIME",
-    description: "50-40-30-20-10 for time:\nDouble unders\nSit-ups",
-    timeCap: 15,
-    movements: [
-      { name: "Double Under", reps: 50 },
-      { name: "Push-up", reps: 50 },
-    ],
-  },
-  {
-    name: "Grace",
-    type: "FORTIME",
-    scoreType: "TIME",
-    description: "30 clean & jerks (60kg/43kg) for time",
-    timeCap: 10,
-    movements: [{ name: "Clean", reps: 30, weight: 60 }],
-  },
-  {
-    name: "Isabel",
-    type: "FORTIME",
-    scoreType: "TIME",
-    description: "30 snatches (60kg/43kg) for time",
-    timeCap: 10,
-    movements: [{ name: "Snatch", reps: 30, weight: 60 }],
-  },
-  {
-    name: "EMOM 10 Power Clean",
-    type: "EMOM",
-    scoreType: "WEIGHT",
-    description: "EMOM 10 min: 3 power cleans @ 70% 1RM",
-    movements: [{ name: "Power Clean", reps: 3 }],
-  },
-  {
-    name: "Tabata Squats",
-    type: "TABATA",
-    scoreType: "REPS",
-    description:
-      "Tabata air squats (8 rounds: 20s on / 10s off). Score = total reps",
-    movements: [{ name: "Air Squat" }],
-  },
-  {
-    name: "Death by Burpees",
-    type: "EMOM",
-    scoreType: "REPS",
-    description: "Min 1: 1 burpee, Min 2: 2 burpees… hasta que falles",
-    movements: [{ name: "Burpee" }],
-  },
-  // STRENGTH WODs (1RM-style — disparan PRs)
-  {
-    name: "1RM Back Squat",
-    type: "STRENGTH",
-    scoreType: "WEIGHT",
-    description: "Build to a heavy single in 20 minutes",
-    movements: [{ name: "Back Squat" }],
-  },
-  {
-    name: "1RM Front Squat",
-    type: "STRENGTH",
-    scoreType: "WEIGHT",
-    description: "Build to a heavy single in 15 minutes",
-    movements: [{ name: "Front Squat" }],
-  },
-  {
-    name: "1RM Deadlift",
-    type: "STRENGTH",
-    scoreType: "WEIGHT",
-    description: "Build to a heavy single in 20 minutes",
-    movements: [{ name: "Deadlift" }],
-  },
-  {
-    name: "1RM Clean",
-    type: "STRENGTH",
-    scoreType: "WEIGHT",
-    description: "Build to a heavy single in 20 minutes",
-    movements: [{ name: "Clean" }],
-  },
-  {
-    name: "1RM Snatch",
-    type: "STRENGTH",
-    scoreType: "WEIGHT",
-    description: "Build to a heavy single in 20 minutes",
-    movements: [{ name: "Snatch" }],
-  },
-  {
-    name: "1RM Strict Press",
-    type: "STRENGTH",
-    scoreType: "WEIGHT",
-    description: "Build to a heavy single in 15 minutes",
-    movements: [{ name: "Strict Press" }],
-  },
-  {
-    name: "1RM Push Press",
-    type: "STRENGTH",
-    scoreType: "WEIGHT",
-    description: "Build to a heavy single in 15 minutes",
-    movements: [{ name: "Push Press" }],
-  },
-  {
-    name: "1RM Thruster",
-    type: "STRENGTH",
-    scoreType: "WEIGHT",
-    description: "Build to a heavy single in 15 minutes",
-    movements: [{ name: "Thruster" }],
-  },
-];
+// Canonical benchmark library lives in src/server/seed-defaults.ts so it can
+// be reused by the runtime onboarding wizard. The seed CLI consumes it here.
+const WOD_LIBRARY: WODRecipe[] = CANONICAL_WOD_LIBRARY;
 
 function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];

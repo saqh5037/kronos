@@ -19,6 +19,7 @@ const TABS = [
   { href: "/admin/ajustes/alertas" as const, label: "Alertas" },
   { href: "/admin/ajustes/apodos" as const, label: "Apodos" },
   { href: "/admin/ajustes/permisos" as const, label: "Permisos" },
+  { href: "/admin/ajustes/seguridad" as const, label: "Seguridad" },
 ];
 
 export default async function NotificacionesPage() {

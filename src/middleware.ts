@@ -7,6 +7,7 @@ import {
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const SIGNIN_EMAIL_PATH = "/api/auth/signin/email";
+const PASSWORD_CALLBACK_PATH = "/api/auth/callback/password";
 
 const authMiddleware = withAuth(
   function middleware(req) {
@@ -81,9 +82,35 @@ export default function middleware(
     return NextResponse.next();
   }
 
+  if (pathname === PASSWORD_CALLBACK_PATH && req.method === "POST") {
+    const ip = getClientIp(req.headers);
+    const rl = rateLimit(`signin-password:${ip}`, 10, 60_000);
+    if (!rl.ok) {
+      return new NextResponse(
+        JSON.stringify({
+          error: "rate_limited",
+          retryAfter: rl.retryAfterSec,
+        }),
+        {
+          status: 429,
+          headers: {
+            "content-type": "application/json",
+            "retry-after": String(rl.retryAfterSec),
+          },
+        },
+      );
+    }
+    return NextResponse.next();
+  }
+
   return authMiddleware(req as Parameters<typeof authMiddleware>[0], event);
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/atleta/:path*", "/api/auth/signin/email"],
+  matcher: [
+    "/admin/:path*",
+    "/atleta/:path*",
+    "/api/auth/signin/email",
+    "/api/auth/callback/password",
+  ],
 };

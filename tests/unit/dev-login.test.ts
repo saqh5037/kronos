@@ -109,23 +109,42 @@ describe("CredentialsProvider gating by NODE_ENV", () => {
     vi.doUnmock("@next-auth/prisma-adapter");
   });
 
-  it("includes a credentials provider when NODE_ENV=development", async () => {
+  it("includes the dev-login credentials provider when NODE_ENV=development", async () => {
     setNodeEnv("development");
     const mod = await import("../../src/server/auth");
     const providers = mod.authOptions.providers as Array<{
       type?: string;
       options?: { id?: string };
     }>;
-    const credsProvider = providers.find((p) => p.type === "credentials");
-    expect(credsProvider).toBeDefined();
-    expect(credsProvider?.options?.id).toBe("dev-login");
+    const devLogin = providers.find((p) => p.options?.id === "dev-login");
+    expect(devLogin).toBeDefined();
   });
 
-  it("does NOT include any credentials provider when NODE_ENV=production", async () => {
+  it("does NOT include the dev-login provider when NODE_ENV=production", async () => {
     setNodeEnv("production");
     const mod = await import("../../src/server/auth");
-    const providers = mod.authOptions.providers as Array<{ type?: string }>;
-    const credsProvider = providers.find((p) => p.type === "credentials");
-    expect(credsProvider).toBeUndefined();
+    const providers = mod.authOptions.providers as Array<{
+      type?: string;
+      options?: { id?: string };
+    }>;
+    const devLogin = providers.find((p) => p.options?.id === "dev-login");
+    expect(devLogin).toBeUndefined();
+  });
+
+  it("includes the password credentials provider in BOTH dev and prod", async () => {
+    for (const env of ["development", "production"]) {
+      setNodeEnv(env);
+      vi.resetModules();
+      const mod = await import("../../src/server/auth");
+      const providers = mod.authOptions.providers as Array<{
+        type?: string;
+        options?: { id?: string };
+      }>;
+      const password = providers.find((p) => p.options?.id === "password");
+      expect(
+        password,
+        `password provider missing when env=${env}`,
+      ).toBeDefined();
+    }
   });
 });
