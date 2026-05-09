@@ -686,21 +686,21 @@ export const MOVEMENT_ENRICHMENTS: Record<string, MovementEnrichment> = {
     musclesWorked: ["lats", "biceps", "core", "rear delts"],
     difficulty: 3,
   },
-  squat: {
+  "air-squat": {
     cues: {
       setup: [
         "Pies a la altura de hombros, dedos ligeramente afuera",
-        "Mirada al frente",
+        "Mirada al frente, brazos al frente o sobre la cabeza",
       ],
       dos: [
-        "Inicia el movimiento con la cadera y rodillas a la vez",
+        "Inicia el movimiento con cadera y rodillas a la vez",
         "Rodillas siguen la línea de los pies",
-        "Profundidad: cadera por debajo de rodilla",
+        "Profundidad: cadera por debajo de la rodilla",
       ],
       donts: [
         "Rodillas colapsando hacia adentro",
         "Cargar peso en la punta de los pies",
-        "Quedar a media profundidad",
+        "Quedar a media profundidad (squat parcial)",
       ],
     },
     commonMistakes: [
@@ -708,15 +708,282 @@ export const MOVEMENT_ENRICHMENTS: Record<string, MovementEnrichment> = {
         title: "Rodillas cayendo hacia adentro",
         fixCue: "Empuja las rodillas afuera, contra los pies",
       },
+      {
+        title: "Talones se despegan del piso",
+        description: "Falta movilidad de tobillo o cadera.",
+        fixCue: "Pies firmes en el piso, pesa los talones",
+      },
     ],
     progressions: [
-      { name: "Air squat con caja", level: "beginner" },
+      { name: "Air squat con caja (box squat)", level: "beginner" },
       { name: "Goblet squat con KB", level: "beginner" },
-      { name: "Back squat", level: "intermediate" },
-      { name: "Front squat / Overhead squat", level: "advanced" },
+      { name: "Air squat estándar", level: "intermediate" },
+      { name: "Pistol squat", level: "advanced" },
     ],
     musclesWorked: ["quads", "glutes", "hamstrings", "core"],
+    difficulty: 1,
+  },
+  "back-squat": {
+    cues: {
+      setup: [
+        "Barra sobre trapecio (high bar) o deltoide posterior (low bar)",
+        "Pies a ancho de hombros, dedos ligeramente afuera",
+      ],
+      dos: [
+        "Mantén el pecho arriba durante todo el descenso",
+        "Empuja rodillas hacia los pies",
+        "Cadera por debajo de rodilla en el bottom",
+      ],
+      donts: [
+        "Caer hacia adelante (good morning con barra)",
+        "Rebote agresivo sin control en el bottom",
+        "Hyperextender la lumbar al subir",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Pecho que se hunde al bajar",
+        description: "La barra rueda y la lumbar se redondea.",
+        fixCue: "Codos abajo, pecho arriba, mira al frente",
+      },
+      {
+        title: "Asimetría de cadera al subir",
+        fixCue: "Empuja parejo con ambos pies",
+      },
+    ],
+    progressions: [
+      { name: "Goblet squat con KB", level: "beginner" },
+      { name: "Air squat profundo", level: "beginner" },
+      { name: "Back squat barra vacía", level: "intermediate" },
+      { name: "Back squat 1.5x BW+", level: "advanced" },
+    ],
+    musclesWorked: ["quads", "glutes", "hamstrings", "core", "lower back"],
+    difficulty: 3,
+  },
+  "front-squat": {
+    cues: {
+      setup: [
+        "Barra en rack frontal sobre los deltoides anteriores",
+        "Codos altos, paralelos al piso",
+      ],
+      dos: [
+        "Codos altos durante todo el squat",
+        "Torso vertical (más vertical que back squat)",
+        "Profundidad completa con codos firmes",
+      ],
+      donts: [
+        "Dejar caer codos al bajar (barra rueda hacia adelante)",
+        "Inclinarse adelante perdiendo el rack",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Codos caen en el bottom",
+        description: "La barra se desprende del rack y se pierde la posición.",
+        fixCue: "Codos arriba, dedos sueltos en la barra",
+      },
+    ],
+    progressions: [
+      { name: "Front squat con dumbbells (cross-grip)", level: "beginner" },
+      { name: "Front squat barra vacía", level: "intermediate" },
+      { name: "Front squat heavy (1x BW+)", level: "advanced" },
+    ],
+    musclesWorked: ["quads", "core", "upper back", "glutes"],
+    difficulty: 4,
+  },
+  "push-up": {
+    cues: {
+      setup: [
+        "Manos a la altura de hombros, ligeramente más amplias",
+        "Cuerpo en línea recta de cabeza a talones",
+      ],
+      dos: [
+        "Codos a 45° del torso (no abiertos en T)",
+        "Pecho toca el piso en cada rep",
+        "Empuja parejo con ambos brazos al subir",
+      ],
+      donts: [
+        "Cadera caída o pop-up al subir",
+        "Codos en T abiertos a 90° del torso",
+        "Cortar el rango (pecho no toca)",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Cadera caída o levantada",
+        description: "Pierdes la línea recta del cuerpo.",
+        fixCue: "Cuerpo de tabla, glúteos y core apretados",
+      },
+    ],
+    progressions: [
+      { name: "Push-up con rodillas", level: "beginner" },
+      { name: "Push-up inclinado en caja/banco", level: "beginner" },
+      { name: "Push-up estándar", level: "intermediate" },
+      { name: "Strict handstand push-up", level: "advanced" },
+    ],
+    musclesWorked: ["chest", "triceps", "shoulders", "core"],
     difficulty: 2,
+  },
+  "push-press": {
+    cues: {
+      setup: ["Barra en front rack, codos al frente", "Pies a ancho de cadera"],
+      dos: [
+        "Dip corto y vertical con piernas",
+        "Drive explosivo con piernas para iniciar el press",
+        "Bloqueo final con cabeza al frente entre brazos",
+      ],
+      donts: [
+        "Dip muy profundo (lo convierte en thruster)",
+        "Inclinar el torso adelante en el dip",
+        "Press solo con brazos sin usar cadera",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Dip horizontal (rodillas adelante)",
+        fixCue: "Dip vertical, cadera baja directo",
+      },
+      {
+        title: "Bloqueo con codos blandos",
+        fixCue: "Empuja la cabeza por la ventana, codos duros",
+      },
+    ],
+    progressions: [
+      { name: "Strict press con barra vacía", level: "beginner" },
+      { name: "Push press con barra vacía", level: "intermediate" },
+      { name: "Push jerk / split jerk", level: "advanced" },
+    ],
+    musclesWorked: ["shoulders", "triceps", "quads", "core"],
+    difficulty: 3,
+  },
+  "strict-press": {
+    cues: {
+      setup: [
+        "Barra en front rack, manos a ancho de hombros",
+        "Codos ligeramente al frente de la barra",
+      ],
+      dos: [
+        "Empuja la barra recta hacia arriba",
+        "Glúteos y core apretados (sin arquear lumbar)",
+        "Cabeza pasa entre brazos al final",
+      ],
+      donts: [
+        "Usar piernas (eso es push press)",
+        "Hyperextender la lumbar para empujar",
+        "Empujar la barra hacia adelante",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Hyperextensión lumbar",
+        description: "Compensas falta de movilidad de hombros con arco.",
+        fixCue: "Costillas abajo, glúteos apretados",
+      },
+    ],
+    progressions: [
+      { name: "Strict press con dumbbells", level: "beginner" },
+      { name: "Strict press barra vacía", level: "intermediate" },
+      { name: "Strict press 0.6x BW+", level: "advanced" },
+    ],
+    musclesWorked: ["shoulders", "triceps", "core", "upper back"],
+    difficulty: 3,
+  },
+  "handstand-push-up": {
+    cues: {
+      setup: [
+        "Manos a ancho de hombros frente a la pared",
+        "Cuerpo vertical contra el muro, talones tocando",
+      ],
+      dos: [
+        "Cabeza forma triángulo con las manos en el bottom",
+        "Empuja con shrug agresivo al final",
+        "Mantén core apretado todo el rango",
+      ],
+      donts: [
+        "Bajar sin control hasta golpear la cabeza",
+        "Bajar solo la cabeza sin que el cuerpo descienda",
+        "Codos abiertos en T",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Plancha en vez de vertical",
+        description: "Cadera adelante en vez de stack vertical.",
+        fixCue: "Glúteos apretados, costillas abajo, talones a la pared",
+      },
+      {
+        title: "No completar el rango (cabeza no toca)",
+        fixCue: "Triángulo cabeza-manos, baja completo",
+      },
+    ],
+    progressions: [
+      {
+        name: "Pike push-up con pies en caja",
+        level: "beginner",
+        description: "Misma mecánica sin invertir el cuerpo completo.",
+      },
+      {
+        name: "Wall-walk + hold",
+        level: "beginner",
+      },
+      {
+        name: "HSPU con abmats (rango parcial)",
+        level: "intermediate",
+      },
+      {
+        name: "Strict HSPU full ROM contra pared",
+        level: "advanced",
+      },
+      {
+        name: "Freestanding HSPU",
+        level: "advanced",
+      },
+    ],
+    musclesWorked: ["shoulders", "triceps", "core", "traps"],
+    difficulty: 5,
+  },
+  "kettlebell-swing": {
+    cues: {
+      setup: [
+        "Pies un poco más amplios que la cadera",
+        "KB al frente entre los pies",
+      ],
+      dos: [
+        "Hip hinge: cadera atrás, no squat",
+        "KB pasa entre las piernas atrás (no entre rodillas)",
+        "Drive con cadera explosivo, brazos relajados",
+      ],
+      donts: [
+        "Subir el KB con los brazos (no es press frontal)",
+        "Hacer squat en vez de hinge",
+        "Hyperextender la lumbar al final",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Squat swing en vez de hip hinge",
+        fixCue: "Cadera atrás, rodillas firmes pero no squat",
+      },
+      {
+        title: "KB se aleja del cuerpo en el back swing",
+        fixCue: "Codos cerca del torso, KB pasa alto entre las piernas",
+      },
+    ],
+    progressions: [
+      {
+        name: "Hip hinge con barra ligera",
+        level: "beginner",
+        description: "Aprender el patrón sin el peso oscilante.",
+      },
+      { name: "Russian swing (hasta el pecho)", level: "beginner" },
+      {
+        name: "American swing (overhead) con KB ligero",
+        level: "intermediate",
+      },
+      { name: "American swing RX (24kg / 16kg)", level: "advanced" },
+    ],
+    musclesWorked: ["glutes", "hamstrings", "core", "shoulders", "lats"],
+    difficulty: 3,
   },
   burpee: {
     cues: {
