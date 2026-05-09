@@ -101,54 +101,6 @@ const LAST_NAMES = [
   "Chávez",
 ];
 
-// Movement names → slugs (must match STANDARD_MOVEMENTS slugs in seed-movements.ts)
-const MOVEMENT_LIBRARY = [
-  {
-    name: "Back Squat",
-    slug: "back-squat",
-    equipment: ["Barbell", "Plates", "Rack"],
-  },
-  {
-    name: "Front Squat",
-    slug: "front-squat",
-    equipment: ["Barbell", "Plates", "Rack"],
-  },
-  { name: "Deadlift", slug: "deadlift", equipment: ["Barbell", "Plates"] },
-  { name: "Clean", slug: "clean", equipment: ["Barbell", "Plates"] },
-  { name: "Snatch", slug: "snatch", equipment: ["Barbell", "Plates"] },
-  {
-    name: "Power Clean",
-    slug: "power-clean",
-    equipment: ["Barbell", "Plates"],
-  },
-  { name: "Push Press", slug: "push-press", equipment: ["Barbell", "Plates"] },
-  {
-    name: "Strict Press",
-    slug: "strict-press",
-    equipment: ["Barbell", "Plates"],
-  },
-  { name: "Thruster", slug: "thruster", equipment: ["Barbell", "Plates"] },
-  { name: "Pull-up", slug: "pull-up", equipment: ["Pull-up bar"] },
-  { name: "Push-up", slug: "push-up", equipment: [] },
-  { name: "Air Squat", slug: "air-squat", equipment: [] },
-  { name: "Box Jump", slug: "box-jump", equipment: ["Box"] },
-  {
-    name: "Wall Ball",
-    slug: "wall-ball",
-    equipment: ["Med ball", "Wall target"],
-  },
-  { name: "Burpee", slug: "burpee", equipment: [] },
-  { name: "Toes to Bar", slug: "toes-to-bar", equipment: ["Pull-up bar"] },
-  {
-    name: "Kettlebell Swing",
-    slug: "kettlebell-swing",
-    equipment: ["Kettlebell"],
-  },
-  { name: "Double Under", slug: "double-under", equipment: ["Jump rope"] },
-  { name: "Row", slug: "row", equipment: ["Rower"] },
-  { name: "Run", slug: "run", equipment: [] },
-];
-
 type WODRecipe = CanonicalWodRecipe;
 
 // Canonical benchmark library lives in src/server/seed-defaults.ts so it can
@@ -528,16 +480,17 @@ async function main() {
   await seedStandardMovements(box1.id);
   await seedStandardMovements(box2.id);
 
-  // Build movementByName map for WOD creation (use standard slugs from MOVEMENT_LIBRARY)
+  // Build movementByName map from ALL standard movements seeded for box1.
+  // (MOVEMENT_LIBRARY is a historical subset; STANDARD_MOVEMENTS is the
+  // canonical catalog of 50+ movements, and WOD recipes can reference any
+  // of them — e.g. "Diane" needs "Handstand Push-up".)
   const movementByName = new Map<string, string>();
-  for (const mv of MOVEMENT_LIBRARY) {
-    const found = await prisma.movement.findUnique({
-      where: { tenantId_slug: { tenantId: box1.id, slug: mv.slug } },
-      select: { id: true },
-    });
-    if (found) {
-      movementByName.set(mv.name, found.id);
-    }
+  const allMovements = await prisma.movement.findMany({
+    where: { tenantId: box1.id, isStandard: true },
+    select: { id: true, name: true },
+  });
+  for (const mv of allMovements) {
+    movementByName.set(mv.name, mv.id);
   }
 
   // ─── WODs ────────────────────────────────────────────────────────────────────
@@ -966,6 +919,57 @@ async function main() {
       name: "Double bodyweight DL",
       description: "Deadlift de 2x tu peso corporal",
       criteria: { type: "ratio_pr", movement: "Deadlift", ratio: 2 },
+    },
+    // Skill unlocks — disparados al marcar una progression como ACHIEVED
+    {
+      code: "first-strict-pull-up",
+      name: "Primer Pull-up estricto",
+      description: "Dominaste tu primer strict pull-up sin asistencia",
+      criteria: {
+        type: "skill_level_reached",
+        movementSlug: "pull-up",
+        progressionSlug: "strict-pull-up",
+      },
+    },
+    {
+      code: "first-muscle-up-bar",
+      name: "Primer Muscle-up en barra",
+      description: "Subiste por encima de la barra en un solo movimiento",
+      criteria: {
+        type: "skill_level_reached",
+        movementSlug: "muscle-up-bar",
+        progressionSlug: "muscle-up-en-barra",
+      },
+    },
+    {
+      code: "first-strict-hspu",
+      name: "Primer HSPU estricto",
+      description: "Handstand push-up estricto contra la pared",
+      criteria: {
+        type: "skill_level_reached",
+        movementSlug: "handstand-push-up",
+        progressionSlug: "strict-hspu-full-rom-contra-pared",
+      },
+    },
+    {
+      code: "first-pistol",
+      name: "Primer Pistol Squat",
+      description: "Pistol squat completo en cada pierna",
+      criteria: {
+        type: "skill_level_reached",
+        movementSlug: "pistol-squat",
+        progressionSlug: "pistol-squat",
+      },
+    },
+    {
+      code: "first-double-under",
+      name: "Primer Double Under",
+      description: "Doble salto sin tropezar la cuerda",
+      criteria: {
+        type: "skill_level_reached",
+        movementSlug: "double-under",
+        progressionSlug: "double-under",
+      },
     },
   ];
 

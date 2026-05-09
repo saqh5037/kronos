@@ -173,6 +173,7 @@ model Athlete {
   surveyResponses SurveyResponse[]
   xpLedger        XPLedger[]
   dailyMissions   DailyMission[]
+  skillLevels     AthleteSkillLevel[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -299,6 +300,13 @@ enum MovementCategory {
   ACCESSORY
 }
 
+enum MovementContentSource {
+  EMPTY
+  STANDARD_SEED
+  AI_GENERATED
+  MANUAL_OVERRIDE
+}
+
 enum WODType {
   FORTIME
   AMRAP
@@ -359,6 +367,9 @@ model Movement {
   progressions   Json?
   musclesWorked  String[]
   difficulty     Int?
+
+  contentSource      MovementContentSource @default(EMPTY)
+  contentGeneratedAt DateTime?
 
   box          Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   wodMovements WODMovement[]
@@ -607,6 +618,61 @@ model Achievement {
 
   @@unique([athleteId, badgeId])
   @@index([tenantId])
+}
+
+// ─── SKILL PROGRESSIONS ──────────────────────────────────────────────────────
+
+enum SkillLevelStatus {
+  CURRENT
+  ACHIEVED
+}
+
+model AthleteSkillLevel {
+  id              String           @id @default(cuid())
+  tenantId        String
+  athleteId       String
+  movementSlug    String
+  progressionSlug String
+  status          SkillLevelStatus
+  achievedAt      DateTime?
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([athleteId, movementSlug, progressionSlug])
+  @@index([tenantId, athleteId])
+  @@index([tenantId, movementSlug])
+}
+
+// ─── COACH VIRTUAL CARDS ─────────────────────────────────────────────────────
+
+enum CoachCardType {
+  STAGNATION
+  NEXT_UNLOCK
+  AVOIDANCE_PATTERN
+  CELEBRATION
+}
+
+model CoachCard {
+  id          String        @id @default(cuid())
+  tenantId    String
+  athleteId   String
+  type        CoachCardType
+  title       String
+  body        String
+  ctaLabel    String?
+  ctaHref     String?
+  meta        Json?
+  generatedAt DateTime      @default(now())
+  validUntil  DateTime
+  dismissed   Boolean       @default(false)
+  dismissedAt DateTime?
+  priority    Int           @default(50)
+
+  @@index([tenantId, athleteId, dismissed, validUntil])
+  @@index([validUntil])
 }
 
 model Streak {

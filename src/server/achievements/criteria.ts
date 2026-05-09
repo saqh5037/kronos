@@ -21,6 +21,11 @@ export type AthleteState = {
    * Athlete's body weight (kg). May be undefined when not recorded.
    */
   bodyweightKg?: number;
+  /**
+   * Set of "movementSlug:progressionSlug" strings the athlete has
+   * marked as ACHIEVED. Used by skill_level_reached criterion.
+   */
+  skillLevelsAchieved: Set<string>;
 };
 
 export type Criterion =
@@ -28,9 +33,19 @@ export type Criterion =
   | { type: "attendance_streak"; count: number }
   | { type: "pr"; count: number }
   | { type: "rx_count"; count: number }
-  | { type: "ratio_pr"; movement: string; ratio: number };
+  | { type: "ratio_pr"; movement: string; ratio: number }
+  | {
+      type: "skill_level_reached";
+      movementSlug: string;
+      progressionSlug: string;
+    };
 
-export type AchievementTrigger = "PR" | "ATTENDANCE" | "BULK" | "BACKFILL";
+export type AchievementTrigger =
+  | "PR"
+  | "ATTENDANCE"
+  | "BULK"
+  | "BACKFILL"
+  | "SKILL";
 
 /**
  * Triggers that should be considered for each criterion type.
@@ -46,6 +61,9 @@ export const triggerMatchesType = (
   }
   if (trigger === "PR") {
     return type === "pr" || type === "rx_count" || type === "ratio_pr";
+  }
+  if (trigger === "SKILL") {
+    return type === "skill_level_reached";
   }
   return false;
 };
@@ -64,6 +82,11 @@ export const isCriterion = (value: unknown): value is Criterion => {
       return (
         typeof (c as { movement?: unknown }).movement === "string" &&
         typeof (c as { ratio?: unknown }).ratio === "number"
+      );
+    case "skill_level_reached":
+      return (
+        typeof (c as { movementSlug?: unknown }).movementSlug === "string" &&
+        typeof (c as { progressionSlug?: unknown }).progressionSlug === "string"
       );
     default:
       return false;
@@ -89,6 +112,10 @@ export const evaluateCriterion = (
       const best = state.prByMovement[key];
       if (best == null) return false;
       return best >= criterion.ratio * state.bodyweightKg;
+    }
+    case "skill_level_reached": {
+      const key = `${criterion.movementSlug}:${criterion.progressionSlug}`;
+      return state.skillLevelsAchieved.has(key);
     }
   }
 };

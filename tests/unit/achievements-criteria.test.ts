@@ -15,7 +15,69 @@ const baseState = (over: Partial<AthleteState> = {}): AthleteState => ({
   rxScoreCount: 0,
   prByMovement: {},
   bodyweightKg: undefined,
+  skillLevelsAchieved: new Set<string>(),
   ...over,
+});
+
+describe("evaluateCriterion · skill_level_reached", () => {
+  it("unlocks cuando el atleta tiene la progression como ACHIEVED", () => {
+    const c: Criterion = {
+      type: "skill_level_reached",
+      movementSlug: "pull-up",
+      progressionSlug: "strict-pull-up",
+    };
+    expect(
+      evaluateCriterion(
+        c,
+        baseState({
+          skillLevelsAchieved: new Set(["pull-up:strict-pull-up"]),
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it("no unlocks si la progression no está achieved", () => {
+    const c: Criterion = {
+      type: "skill_level_reached",
+      movementSlug: "pull-up",
+      progressionSlug: "strict-pull-up",
+    };
+    expect(
+      evaluateCriterion(
+        c,
+        baseState({
+          skillLevelsAchieved: new Set(["pull-up:ring-rows"]),
+        }),
+      ),
+    ).toBe(false);
+    expect(evaluateCriterion(c, baseState())).toBe(false);
+  });
+
+  it("isCriterion valida shape", () => {
+    expect(
+      isCriterion({
+        type: "skill_level_reached",
+        movementSlug: "pull-up",
+        progressionSlug: "strict",
+      }),
+    ).toBe(true);
+    expect(isCriterion({ type: "skill_level_reached" })).toBe(false);
+    expect(
+      isCriterion({
+        type: "skill_level_reached",
+        movementSlug: 123,
+        progressionSlug: "strict",
+      }),
+    ).toBe(false);
+  });
+
+  it("triggerMatchesType respeta SKILL trigger", () => {
+    expect(triggerMatchesType("SKILL", "skill_level_reached")).toBe(true);
+    expect(triggerMatchesType("SKILL", "attendance")).toBe(false);
+    expect(triggerMatchesType("PR", "skill_level_reached")).toBe(false);
+    expect(triggerMatchesType("BULK", "skill_level_reached")).toBe(true);
+    expect(triggerMatchesType("BACKFILL", "skill_level_reached")).toBe(true);
+  });
 });
 
 describe("evaluateCriterion · attendance", () => {

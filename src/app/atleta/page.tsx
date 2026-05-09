@@ -46,6 +46,8 @@ import { authOptions } from "@/server/auth";
 import { db as prismaBase } from "@/server/db";
 import { isPersonalBoxSlug } from "@/lib/personal-box";
 import PersonalHomeView from "@/components/atleta/PersonalHomeView";
+import CoachCardsSection from "@/components/atleta/CoachCardsSection";
+import { getMyCoachCards } from "@/server/actions/coach-cards";
 
 export const metadata = { title: "Kronos — Inicio" };
 
@@ -81,9 +83,10 @@ export default async function AtletaHomePage() {
   let greeting: DailyGreeting | null = null;
   let trophies: AthleteTrophy[] = [];
   let suggestion: SuggestedBooking = null;
+  let coachCards: Awaited<ReturnType<typeof getMyCoachCards>> = [];
 
   try {
-    [home, classes, prs, wod, greeting, trophies, suggestion] =
+    [home, classes, prs, wod, greeting, trophies, suggestion, coachCards] =
       await Promise.all([
         getAthleteHome(),
         listAvailableClasses(7),
@@ -92,6 +95,7 @@ export default async function AtletaHomePage() {
         getDailyGreeting(),
         getAthleteTrophies(),
         getSuggestedNextClass().catch(() => null),
+        getMyCoachCards().catch(() => []),
       ]);
   } catch {
     // Sesión ausente
@@ -246,6 +250,13 @@ export default async function AtletaHomePage() {
 
       {/* PERSONALIZED GREETING */}
       <PersonalizedGreeting greeting={greeting} />
+
+      {/* COACH VIRTUAL CARDS */}
+      {coachCards.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <CoachCardsSection cards={coachCards} />
+        </div>
+      )}
 
       {/* READINESS SURVEY */}
       {readinessSurvey && !alreadyRespondedReadiness && (

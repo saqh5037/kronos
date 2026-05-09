@@ -176,11 +176,13 @@ export async function loadAthleteState(
 ): Promise<AthleteState> {
   const types = new Set<Criterion["type"]>();
   let needsRatio = false;
+  let needsSkillLevels = false;
   for (const b of candidates) {
     if (!isCriterion(b.criteria)) continue;
     const c = b.criteria as Criterion;
     types.add(c.type);
     if (c.type === "ratio_pr") needsRatio = true;
+    if (c.type === "skill_level_reached") needsSkillLevels = true;
   }
 
   const db = withTenant(tenantId);
@@ -230,6 +232,17 @@ export async function loadAthleteState(
     }
   }
 
+  const skillLevelsAchieved = new Set<string>();
+  if (needsSkillLevels) {
+    const skillRows = await prismaBase.athleteSkillLevel.findMany({
+      where: { tenantId, athleteId, status: "ACHIEVED" },
+      select: { movementSlug: true, progressionSlug: true },
+    });
+    for (const r of skillRows) {
+      skillLevelsAchieved.add(`${r.movementSlug}:${r.progressionSlug}`);
+    }
+  }
+
   return {
     attendanceCount: attendance,
     attendanceStreak: streak,
@@ -237,5 +250,6 @@ export async function loadAthleteState(
     rxScoreCount: rxScores,
     prByMovement,
     bodyweightKg: latestBody?.value ? toBodyweightKg(latestBody) : undefined,
+    skillLevelsAchieved,
   };
 }

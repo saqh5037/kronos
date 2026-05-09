@@ -8,6 +8,8 @@ import {
 import PersonalizedGreeting from "@/components/atleta/PersonalizedGreeting";
 import { StreakHero } from "@/components/atleta/StreakHero";
 import KCard from "@/components/kronos/KCard";
+import CoachCardsSection from "@/components/atleta/CoachCardsSection";
+import { getMyCoachCards } from "@/server/actions/coach-cards";
 
 /**
  * Home alternativa para atletas en Box Personal (signup independiente sin
@@ -21,12 +23,14 @@ export default async function PersonalHomeView() {
   let home: AthleteHome = null;
   let prs: PRRow[] = [];
   let greeting: DailyGreeting | null = null;
+  let coachCards: Awaited<ReturnType<typeof getMyCoachCards>> = [];
 
   try {
-    [home, prs, greeting] = await Promise.all([
+    [home, prs, greeting, coachCards] = await Promise.all([
       getAthleteHome(),
       listMyPRs(),
       getDailyGreeting(),
+      getMyCoachCards().catch(() => []),
     ]);
   } catch {
     // Sesión ausente o atleta sin perfil
@@ -100,6 +104,12 @@ export default async function PersonalHomeView() {
   return (
     <div style={{ padding: "64px 16px 32px" }}>
       <PersonalizedGreeting greeting={greeting} />
+
+      {coachCards.length > 0 && (
+        <div style={{ marginTop: 16, marginLeft: -16, marginRight: -16 }}>
+          <CoachCardsSection cards={coachCards} />
+        </div>
+      )}
 
       <div style={{ marginTop: 24 }}>
         <StreakHero count={home.streak} lastEventAt={home.streakLastEventAt} />
