@@ -5,7 +5,7 @@ import AnalyticsProvider from "./_components/AnalyticsProvider";
 export const metadata: Metadata = {
   title: "Kronos — Software invisible para CrossFit Boxes en LATAM",
   description:
-    "Reservas, WODs, pagos, racha y admin en una app que vive en tu dominio, con tu logo. El atleta nunca lee Kronos en pantalla.",
+    "Reservas, WODs, pagos, racha y admin en una sola app, en español, con tu logo y tu color. Diseñada para CrossFit en México.",
   keywords: [
     "software CrossFit Box",
     "gestión gimnasio CrossFit México",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Kronos — Software invisible para CrossFit Boxes",
     description:
-      "Tu Box arriba. Nuestro motor abajo. Software para CrossFit Boxes en MX, CO, PE.",
+      "Software invisible para tu CrossFit Box. White-label real, pagos Stripe + Mercado Pago + OXXO. Hecho en México.",
     type: "website",
     locale: "es_MX",
     siteName: "Kronos",
