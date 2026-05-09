@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 
     if (isRateLimited(ip)) {
       return NextResponse.json(
-        { ok: false, error: "Demasiados intentos. Probá en una hora." },
+        { ok: false, error: "Demasiados intentos. Prueba en una hora." },
         { status: 429 },
       );
     }
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
     const parsed = leadSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { ok: false, error: "Datos inválidos. Revisá los campos." },
+        { ok: false, error: "Datos inválidos. Revisa los campos." },
         { status: 400 },
       );
     }
@@ -164,8 +164,8 @@ Ver en admin: https://kronos.app/admin/leads/${lead.id}
   <h1 style="font-size:28px;font-weight:700;margin-bottom:20px">Recibimos tus datos</h1>
   <p style="color:#8A8A94;line-height:1.6;margin-bottom:16px">Hola ${data.ownerName},</p>
   <p style="color:#8A8A94;line-height:1.6;margin-bottom:16px">Recibimos tus datos para ${data.boxName}. En menos de 24 horas hábiles te escribimos por WhatsApp (${data.whatsapp}) para coordinar una demo de 20 minutos.</p>
-  <p style="color:#8A8A94;line-height:1.6;margin-bottom:32px">Mientras tanto, si querés ver cómo se ve el admin en vivo: <a href="https://kronos.app/demo" style="color:#C8FF2D;text-decoration:none">https://kronos.app/demo</a></p>
-  <p style="color:#54545C;font-size:13px;line-height:1.6">Cualquier cosa, respondé este email.</p>
+  <p style="color:#8A8A94;line-height:1.6;margin-bottom:32px">Si quieres ver el admin en vivo antes de la llamada, te lo compartimos por WhatsApp.</p>
+  <p style="color:#54545C;font-size:13px;line-height:1.6">Cualquier cosa, responde este email.</p>
   <p style="color:#54545C;font-size:13px;line-height:1.6;margin-top:24px">— Equipo Kronos<br/>hola@kronos.app</p>
 </div>`,
     });
@@ -174,7 +174,7 @@ Ver en admin: https://kronos.app/admin/leads/${lead.id}
   } catch (err) {
     console.error("Lead submission error:", err);
     return NextResponse.json(
-      { ok: false, error: "Error interno. Probá de nuevo más tarde." },
+      { ok: false, error: "Error interno. Prueba de nuevo más tarde." },
       { status: 500 },
     );
   }
