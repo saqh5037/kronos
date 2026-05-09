@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Inter,
   Playfair_Display,
@@ -50,6 +50,13 @@ const plexMono = IBM_Plex_Mono({
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.kronos-fit.com";
 
+export const viewport: Viewport = {
+  themeColor: "#08080A",
+  viewportFit: "cover",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Kronos",
@@ -78,8 +85,9 @@ export default function RootLayout({
       className={`${inter.variable} ${playfair.variable} ${dancing.variable} ${jetbrainsMono.variable} ${plexMono.variable}`}
     >
       <head>
-        <meta name="theme-color" content="#08080A" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
       </head>
       <body className="font-sans bg-bg text-text antialiased min-h-screen">
         <ThemeProvider

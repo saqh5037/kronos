@@ -1,5 +1,11 @@
 import { listMyScores, type MyScoreRow } from "@/server/actions/scores";
 import PushSubscribeButton from "@/components/atleta/PushSubscribeButton";
+import ProfileConfigBlock from "@/components/atleta/ProfileConfigBlock";
+import { readPrefs } from "@/lib/atleta-prefs";
+import { isPersonalBoxSlug } from "@/lib/personal-box";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auth";
+import { db as prismaBase } from "@/server/db";
 import { listMyPRs, type PRRow } from "@/server/actions/prs";
 import {
   getAthleteHome,
@@ -62,6 +68,36 @@ export default async function PerfilPage() {
   }
 
   const activeGoals = myGoals.filter((g) => g.status === "ACTIVE");
+
+  // Config: prefs + Box flags + photo
+  let configPrefs: { unit: "kg" | "lb" | null; level: "rx" | "scaled" | "beginner" | null } = {
+    unit: null,
+    level: null,
+  };
+  let isPersonalBox = false;
+  let configPhotoUrl: string | null = null;
+  try {
+    const session = await getServerSession(authOptions);
+    if (session?.user?.tenantId && session.user.id) {
+      const [box, athlete] = await Promise.all([
+        prismaBase.box.findUnique({
+          where: { id: session.user.tenantId },
+          select: { slug: true },
+        }),
+        prismaBase.athlete.findFirst({
+          where: { tenantId: session.user.tenantId, userId: session.user.id },
+          select: { tags: true, photoUrl: true },
+        }),
+      ]);
+      if (box) isPersonalBox = isPersonalBoxSlug(box.slug);
+      if (athlete) {
+        configPrefs = readPrefs(athlete.tags);
+        configPhotoUrl = athlete.photoUrl;
+      }
+    }
+  } catch {
+    // best effort
+  }
 
   if (!home || !home.athlete) {
     return (
@@ -747,6 +783,21 @@ export default async function PerfilPage() {
               </p>
               <PushSubscribeButton />
             </div>
+          </KCard>
+        </AnimatedItem>
+      </AnimatedSection>
+
+      {/* CONFIGURACIÓN — avatar, preferencias, unirse a box, cerrar sesión */}
+      <AnimatedSection className="mt-5 px-3.5">
+        <AnimatedItem>
+          <KCard>
+            <ProfileConfigBlock
+              initialUnit={configPrefs.unit}
+              initialLevel={configPrefs.level}
+              isPersonalBox={isPersonalBox}
+              initialPhotoUrl={configPhotoUrl}
+              initials={initials}
+            />
           </KCard>
         </AnimatedItem>
       </AnimatedSection>
