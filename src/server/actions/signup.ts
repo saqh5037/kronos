@@ -1,6 +1,7 @@
 "use server";
 
 import { db as prismaBase } from "../db";
+import { seedDefaultMovements } from "../seed-defaults";
 import {
   signupSchema,
   TRIAL_DURATION_DAYS,
@@ -98,27 +99,31 @@ export async function createBoxAndOwner(
     now.getTime() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000,
   );
 
-  const result = await prismaBase.$transaction(async (tx) => {
-    const box = await tx.box.create({
-      data: {
-        slug,
-        name: boxName,
-        subscriptionStatus: "TRIAL",
-        trialStartedAt: now,
-        trialEndsAt,
-      },
-      select: { id: true, slug: true },
-    });
-    await tx.user.create({
-      data: {
-        email,
-        name: ownerName,
-        role: "OWNER",
-        tenantId: box.id,
-      },
-    });
-    return box;
-  });
+  const result = await prismaBase.$transaction(
+    async (tx) => {
+      const box = await tx.box.create({
+        data: {
+          slug,
+          name: boxName,
+          subscriptionStatus: "TRIAL",
+          trialStartedAt: now,
+          trialEndsAt,
+        },
+        select: { id: true, slug: true },
+      });
+      await tx.user.create({
+        data: {
+          email,
+          name: ownerName,
+          role: "OWNER",
+          tenantId: box.id,
+        },
+      });
+      await seedDefaultMovements(tx, box.id);
+      return box;
+    },
+    { timeout: 15_000 },
+  );
 
   return {
     ok: true,
