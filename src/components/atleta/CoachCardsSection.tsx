@@ -137,9 +137,14 @@ export default function CoachCardsSection({ cards }: Props) {
               {card.ctaLabel && card.ctaHref && (
                 <Link
                   href={card.ctaHref as Route}
+                  className="k-tap"
                   style={{
                     display: "inline-flex",
-                    marginTop: 10,
+                    alignItems: "center",
+                    marginTop: 8,
+                    marginLeft: -10,
+                    minHeight: 44,
+                    padding: "10px 10px",
                     fontFamily: "var(--k-font-display)",
                     fontSize: 11,
                     fontWeight: 700,
