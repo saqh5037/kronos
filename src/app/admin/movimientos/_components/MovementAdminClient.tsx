@@ -5,9 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   updateMovementVideoUrl,
   restoreStandardMovement,
+  getMovementById,
 } from "@/server/actions/movements";
 import { extractYouTubeId, getYouTubeThumbnail } from "@/lib/youtube";
-import type { MovementRow } from "@/server/actions/movements";
+import type { MovementRow, MovementDetail } from "@/server/actions/movements";
+import MovementContentEditor from "@/components/admin/MovementContentEditor";
 
 const CATEGORY_LABELS: Record<string, string> = {
   OLYMPIC: "Olímpicos",
@@ -37,6 +39,18 @@ export default function MovementAdminClient({
   const [activeCategory, setActiveCategory] = useState("ALL");
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
+  const [editorDetail, setEditorDetail] = useState<MovementDetail | null>(null);
+  const [editorLoading, setEditorLoading] = useState(false);
+
+  function openContentEditor(movementId: string) {
+    setEditorLoading(true);
+    void getMovementById(movementId)
+      .then((d) => {
+        if (d) setEditorDetail(d);
+        setEditorLoading(false);
+      })
+      .catch(() => setEditorLoading(false));
+  }
 
   const selected = movements.find((m) => m.id === selectedId);
 
@@ -346,7 +360,7 @@ export default function MovementAdminClient({
                 )}
               </AnimatePresence>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <motion.button
                   onClick={handleSave}
                   disabled={isPending}
@@ -354,7 +368,17 @@ export default function MovementAdminClient({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  {isPending ? "Guardando..." : "Guardar"}
+                  {isPending ? "Guardando..." : "Guardar video"}
+                </motion.button>
+                <motion.button
+                  type="button"
+                  onClick={() => openContentEditor(selected.id)}
+                  disabled={isPending || editorLoading}
+                  className="k-btn-ghost px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {editorLoading ? "Cargando..." : "Editar contenido AI"}
                 </motion.button>
                 {selected.isStandard && (
                   <motion.button
@@ -389,6 +413,22 @@ export default function MovementAdminClient({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {editorDetail && (
+        <MovementContentEditor
+          movementId={editorDetail.id}
+          movementName={editorDetail.name}
+          contentSource={editorDetail.contentSource}
+          initialJson={{
+            cues: editorDetail.cues,
+            commonMistakes: editorDetail.commonMistakes,
+            progressions: editorDetail.progressions,
+            musclesWorked: editorDetail.musclesWorked,
+            difficulty: editorDetail.difficulty,
+          }}
+          onClose={() => setEditorDetail(null)}
+        />
+      )}
     </>
   );
 }
