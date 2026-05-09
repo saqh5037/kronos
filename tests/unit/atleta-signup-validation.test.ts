@@ -37,7 +37,10 @@ describe("atletaSignupSchema", () => {
   });
 
   it("rechaza email inválido", () => {
-    const out = atletaSignupSchema.safeParse({ ...valid, email: "no-es-email" });
+    const out = atletaSignupSchema.safeParse({
+      ...valid,
+      email: "no-es-email",
+    });
     expect(out.success).toBe(false);
   });
 
@@ -60,5 +63,46 @@ describe("atletaSignupSchema", () => {
       lastName: "B".repeat(61),
     });
     expect(out.success).toBe(false);
+  });
+
+  describe("password (opcional)", () => {
+    it("acepta sin password", () => {
+      const out = atletaSignupSchema.safeParse(valid);
+      expect(out.success).toBe(true);
+      if (out.success) expect(out.data.password).toBeUndefined();
+    });
+
+    it("acepta password válido (10+ chars con letras y números)", () => {
+      const out = atletaSignupSchema.safeParse({
+        ...valid,
+        password: "password123",
+      });
+      expect(out.success).toBe(true);
+      if (out.success) expect(out.data.password).toBe("password123");
+    });
+
+    it("rechaza password muy corto (<10)", () => {
+      const out = atletaSignupSchema.safeParse({
+        ...valid,
+        password: "abc123",
+      });
+      expect(out.success).toBe(false);
+    });
+
+    it("rechaza password sin letras", () => {
+      const out = atletaSignupSchema.safeParse({
+        ...valid,
+        password: "1234567890",
+      });
+      expect(out.success).toBe(false);
+    });
+
+    it("rechaza password sin números", () => {
+      const out = atletaSignupSchema.safeParse({
+        ...valid,
+        password: "passwordxxx",
+      });
+      expect(out.success).toBe(false);
+    });
   });
 });

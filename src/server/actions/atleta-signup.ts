@@ -8,10 +8,8 @@ import {
   type AtletaSignupInput,
 } from "@/lib/validations/atleta-signup";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import {
-  generatePersonalSlug,
-  PERSONAL_BOX_NAME,
-} from "@/lib/personal-box";
+import { generatePersonalSlug, PERSONAL_BOX_NAME } from "@/lib/personal-box";
+import { hashPassword } from "../auth-password";
 import { STANDARD_MOVEMENTS } from "../../../prisma/seed-movements";
 
 export type AtletaSignupResult =
@@ -20,6 +18,7 @@ export type AtletaSignupResult =
       email: string;
       boxId: string;
       slug: string;
+      hasPassword: boolean;
     }
   | {
       ok: false;
@@ -60,7 +59,7 @@ export async function createIndependentAthlete(
     };
   }
 
-  const { email, firstName, lastName } = parsed.data;
+  const { email, firstName, lastName, password } = parsed.data;
 
   const existingUser = await prismaBase.user.findUnique({
     where: { email },
@@ -74,6 +73,11 @@ export async function createIndependentAthlete(
       fieldErrors: { email: "Email ya registrado" },
     };
   }
+
+  // Hash de password ANTES de la transacción. bcrypt es CPU-bound y costoso
+  // (~250ms con cost=12); no queremos tenerlo dentro del lock de la tx que
+  // también hace 30 INSERTs de movimientos.
+  const passwordHash = password ? await hashPassword(password) : null;
 
   // Retry slug generation on the (very unlikely) collision: 4 hex bytes = 4.3B combos.
   let lastError: unknown = null;
@@ -96,6 +100,9 @@ export async function createIndependentAthlete(
               name: firstName,
               role: "ATHLETE",
               tenantId: box.id,
+              ...(passwordHash
+                ? { passwordHash, passwordSetAt: new Date() }
+                : {}),
             },
             select: { id: true },
           });
@@ -130,6 +137,7 @@ export async function createIndependentAthlete(
         email,
         boxId: result.id,
         slug: result.slug,
+        hasPassword: Boolean(passwordHash),
       };
     } catch (e) {
       lastError = e;

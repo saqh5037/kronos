@@ -1,13 +1,19 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { createIndependentAthlete } from "@/server/actions/atleta-signup";
 import { kToast } from "@/lib/toast";
+import { detectPwaPlatform } from "@/lib/pwa-detect";
 
-type FieldErrors = Partial<Record<"email" | "firstName" | "lastName", string>>;
+type FieldErrors = Partial<
+  Record<"email" | "firstName" | "lastName" | "password", string>
+>;
 
-type SuccessState = { email: string };
+type SuccessState = {
+  email: string;
+  hasPassword: boolean;
+};
 
 const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEV_LOGIN === "1";
 
@@ -19,9 +25,22 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
   const [email, setEmail] = useState(initialEmail);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [usePassword, setUsePassword] = useState(false); // expandido o no
   const [errors, setErrors] = useState<FieldErrors>({});
   const [success, setSuccess] = useState<SuccessState | null>(null);
   const [pending, startTransition] = useTransition();
+  const [isIos, setIsIos] = useState(false);
+
+  // Detectar iOS post-mount (cliente only). Si es iOS, abrir el campo password
+  // por defecto y marcar como recomendado.
+  useEffect(() => {
+    const platform = detectPwaPlatform(navigator.userAgent);
+    const ios = platform === "ios-safari" || platform === "ios-other";
+    setIsIos(ios);
+    if (ios) setUsePassword(true);
+  }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,19 +50,23 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         email,
         firstName,
         lastName,
+        password: usePassword && password.length > 0 ? password : undefined,
       });
       if (!result.ok) {
         setErrors(result.fieldErrors ?? {});
         kToast.error(result.message);
         return;
       }
-      try {
-        await signIn("email", { email, redirect: false });
-      } catch {
-        // Falla silenciosa: la cuenta ya existe, el usuario puede pedir
-        // magic link otra vez desde /login.
+      // Si NO seteó password, intentamos el magic link como hoy.
+      // Si SÍ, no mandamos magic link (puede entrar con email/password).
+      if (!result.hasPassword) {
+        try {
+          await signIn("email", { email, redirect: false });
+        } catch {
+          // best-effort
+        }
       }
-      setSuccess({ email });
+      setSuccess({ email, hasPassword: result.hasPassword });
     });
   }
 
@@ -62,18 +85,69 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
           </span>
         </div>
         <h2 className="font-display font-bold text-xl">¡Listo!</h2>
-        <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-          Te enviamos un enlace mágico a{" "}
-          <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>.
-          Hacé click ahí para entrar.
-        </p>
-        <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-          Si no llega en 1 minuto, revisá spam o pedí otro desde{" "}
-          <a href="/login" className="underline">
-            iniciar sesión
-          </a>
-          .
-        </p>
+
+        {success.hasPassword ? (
+          <>
+            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
+              Cuenta creada para{" "}
+              <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>.
+              Ya podés entrar.
+            </p>
+            <a
+              href={`/login?email=${encodeURIComponent(success.email)}`}
+              className="k-btn-grad inline-block px-6 py-3 rounded-xl font-bold text-sm"
+            >
+              Entrar ahora →
+            </a>
+          </>
+        ) : (
+          <>
+            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
+              Te enviamos un enlace mágico a{" "}
+              <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>.
+              Hacé click ahí para entrar.
+            </p>
+            {isIos ? (
+              <div
+                className="rounded-xl border p-3 text-left"
+                style={{
+                  background: "var(--k-accent-soft)",
+                  borderColor: "var(--k-accent-line)",
+                }}
+              >
+                <p
+                  className="text-xs font-bold mb-1"
+                  style={{ color: "var(--k-accent)" }}
+                >
+                  ⚠️ Importante en iPhone
+                </p>
+                <p
+                  className="text-[11px] leading-relaxed"
+                  style={{ color: "var(--k-t2)" }}
+                >
+                  El link del email puede abrir en Chrome u otro navegador y
+                  romper la sesión. Si tenés problemas,{" "}
+                  <a
+                    href="/login"
+                    className="underline"
+                    style={{ color: "var(--k-accent)" }}
+                  >
+                    iniciá sesión con contraseña →
+                  </a>{" "}
+                  (la podés crear desde tu perfil).
+                </p>
+              </div>
+            ) : null}
+            <p className="text-xs" style={{ color: "var(--k-t3)" }}>
+              Si no llega en 1 minuto, revisá spam o pedí otro desde{" "}
+              <a href="/login" className="underline">
+                iniciar sesión
+              </a>
+              .
+            </p>
+          </>
+        )}
+
         {DEV_LOGIN_ENABLED ? (
           <p className="text-xs" style={{ color: "var(--k-t3)" }}>
             (Dev: entrá con tu email + password <code>dev</code> en{" "}
@@ -122,10 +196,96 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         autoComplete="family-name"
       />
 
+      {/* Sección password — auto-expandida en iOS por el bug de magic link */}
+      <div
+        className="rounded-xl border p-3"
+        style={{
+          background: usePassword ? "var(--k-accent-soft)" : "var(--k-surface)",
+          borderColor: usePassword ? "var(--k-accent-line)" : "var(--k-line-2)",
+        }}
+      >
+        {!usePassword ? (
+          <button
+            type="button"
+            onClick={() => setUsePassword(true)}
+            className="w-full text-left text-xs font-mono uppercase tracking-wider flex items-center justify-between"
+            style={{ color: "var(--k-t2)" }}
+          >
+            <span>+ Crear contraseña (opcional)</span>
+            <span style={{ color: "var(--k-t3)" }}>→</span>
+          </button>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label
+                className="text-xs font-mono uppercase tracking-wider"
+                style={{ color: "var(--k-t3)" }}
+              >
+                {isIos
+                  ? "Contraseña (recomendada en iPhone)"
+                  : "Contraseña (opcional)"}
+              </label>
+              {!isIos ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUsePassword(false);
+                    setPassword("");
+                  }}
+                  className="text-[10px] underline"
+                  style={{ color: "var(--k-t3)" }}
+                >
+                  saltar
+                </button>
+              ) : null}
+            </div>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="mínimo 10 caracteres"
+                autoComplete="new-password"
+                className="w-full px-4 py-3 pr-16 rounded-xl text-sm border focus:outline-none transition-colors"
+                style={{
+                  background: "var(--k-elevated)",
+                  borderColor: errors.password
+                    ? "var(--k-danger)"
+                    : "var(--k-line-2)",
+                  color: "var(--k-t1)",
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono uppercase tracking-wider"
+                style={{ color: "var(--k-t3)" }}
+              >
+                {showPassword ? "ocultar" : "ver"}
+              </button>
+            </div>
+            {errors.password ? (
+              <p className="text-[11px]" style={{ color: "var(--k-danger)" }}>
+                {errors.password}
+              </p>
+            ) : (
+              <p
+                className="text-[11px] leading-relaxed"
+                style={{ color: "var(--k-t3)" }}
+              >
+                {isIos
+                  ? "En iPhone los magic links pueden saltar entre Chrome y Safari. Con contraseña entrás directo desde cualquier navegador."
+                  : "Con contraseña podés entrar sin esperar el email. Mínimo 10 caracteres con letras y números."}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
       <button
         type="submit"
         disabled={pending}
-        className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 mt-2"
+        className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 mt-1"
       >
         {pending ? "Creando tu cuenta…" : "Empezar gratis"}
       </button>

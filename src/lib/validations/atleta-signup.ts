@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { passwordSchema } from "./password";
 
 export const atletaSignupSchema = z.object({
   email: z.string().trim().toLowerCase().email("Email inválido"),
@@ -13,6 +14,16 @@ export const atletaSignupSchema = z.object({
     .max(60, "Máximo 60 caracteres")
     .optional()
     .default(""),
+  // Opcional. Si viene, se hashea con bcrypt y se guarda en User.passwordHash.
+  // Permite login con email+password desde cualquier browser/PWA — soluciona
+  // el bug iOS de magic link cross-browser. Recomendado pero no required.
+  password: z
+    .string()
+    .optional()
+    .refine(
+      (p) => !p || passwordSchema.safeParse(p).success,
+      "Mínimo 10 caracteres con letras y números",
+    ),
 });
 
 export type AtletaSignupInput = z.infer<typeof atletaSignupSchema>;
