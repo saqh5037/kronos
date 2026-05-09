@@ -6,6 +6,7 @@ import NotificationBell from "@/components/atleta/NotificationBell";
 import InstallPwaBanner from "@/components/atleta/InstallPwaBanner";
 import PwaRegister from "@/components/PwaRegister";
 import VisitTracker from "@/components/atleta/VisitTracker";
+import { getBoxMode } from "@/server/actions/box-mode";
 
 export default async function AtletaLayout({
   children,
@@ -14,6 +15,7 @@ export default async function AtletaLayout({
 }) {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
+  const { isPersonal } = await getBoxMode();
 
   return (
     <div
@@ -35,7 +37,7 @@ export default async function AtletaLayout({
       </div>
       <InstallPwaBanner />
       {children}
-      <TabBar />
+      <TabBar mode={isPersonal ? "personal" : "box"} />
     </div>
   );
 }

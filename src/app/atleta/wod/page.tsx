@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import {
   getTodayWOD,
   listMyScores,
@@ -12,6 +13,7 @@ import WodDetalleV3, {
   type WodDetalleV3Props,
   type MovementRowData,
 } from "@/components/kronos/v3/WodDetalleV3";
+import { getBoxMode } from "@/server/actions/box-mode";
 
 export const metadata = { title: "Kronos — WOD del día" };
 
@@ -55,6 +57,11 @@ function roundsLabelFor(wod: NonNullable<TodayWOD>): {
 }
 
 export default async function WODPage() {
+  // Personal Box: sin clases programadas, no hay "WOD del día" del coach.
+  // Redirect al mini editor para que el atleta loggee su propio WOD.
+  const { isPersonal } = await getBoxMode();
+  if (isPersonal) redirect("/atleta/wod/nuevo");
+
   let wod: TodayWOD = null;
   let myScores: MyScoreRow[] = [];
 

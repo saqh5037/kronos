@@ -5,7 +5,15 @@ import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
-const tabs = [
+type Tab = {
+  href: string;
+  label: string;
+  /** Oculto cuando el atleta está en Box Personal (sin coach/clases). */
+  hideForPersonal?: boolean;
+  icon: (active: boolean) => React.ReactNode;
+};
+
+const allTabs: Tab[] = [
   {
     href: "/atleta",
     label: "Inicio",
@@ -27,6 +35,7 @@ const tabs = [
   {
     href: "/atleta/reservar",
     label: "Reservar",
+    hideForPersonal: true,
     icon: (active: boolean) => (
       <svg
         viewBox="0 0 24 24"
@@ -104,8 +113,16 @@ const tabs = [
   },
 ];
 
-export default function TabBar() {
+type TabBarProps = {
+  /** "personal" oculta tabs marcados con hideForPersonal (ej: Reservar). */
+  mode?: "personal" | "box";
+};
+
+export default function TabBar({ mode = "box" }: TabBarProps) {
   const pathname = usePathname();
+  const tabs = allTabs.filter(
+    (t) => !(mode === "personal" && t.hideForPersonal),
+  );
 
   const activeIndex = tabs.findIndex((tab) => {
     if (tab.href === "/atleta") return pathname === tab.href;

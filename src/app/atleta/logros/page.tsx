@@ -71,8 +71,8 @@ export default async function TrophyRoomPage() {
               fontSize: 14,
             }}
           >
-            Tu box todavía no tiene logros configurados. Pedile al coach que
-            agregue badges para empezar a coleccionar.
+            Todavía no hay logros configurados. Empezá a loggear WODs y PRs para
+            irlos desbloqueando.
           </div>
         </div>
       )}

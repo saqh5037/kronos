@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import {
   getWODLeaderboard,
   getMovementLeaderboard,
@@ -6,10 +7,15 @@ import {
   listMovementOptions,
 } from "@/server/actions/leaderboards";
 import LeaderboardView from "./LeaderboardView";
+import { getBoxMode } from "@/server/actions/box-mode";
 
 export const metadata = { title: "Kronos — Leaderboards" };
 
 export default async function LeaderboardPage() {
+  // Personal Box: leaderboard tiene 1 atleta, no aporta — redirect home.
+  const { isPersonal } = await getBoxMode();
+  if (isPersonal) redirect("/atleta");
+
   const [wodOptions, movementOptions, attendanceData] = await Promise.all([
     listWODOptions(),
     listMovementOptions(),
