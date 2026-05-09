@@ -15,11 +15,11 @@ import {
   completeOnboarding,
   type OnboardingStatus,
 } from "@/server/actions/onboarding";
+import { importBenchmarkWods } from "@/server/actions/wod-presets";
 import {
-  importBenchmarkWods,
-  type BenchmarkWodOption,
   DEFAULT_WOD_SLUGS,
-} from "@/server/actions/wod-presets";
+  type BenchmarkWodOption,
+} from "@/lib/wod-presets-data";
 import {
   SUPPORTED_TIMEZONES,
   SUPPORTED_CURRENCIES,
