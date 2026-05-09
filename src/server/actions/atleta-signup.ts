@@ -19,10 +19,19 @@ export type AtletaSignupResult =
       boxId: string;
       slug: string;
       hasPassword: boolean;
+      existingUser?: false;
+    }
+  | {
+      ok: true;
+      email: string;
+      existingUser: true;
+      boxId?: undefined;
+      slug?: undefined;
+      hasPassword?: undefined;
     }
   | {
       ok: false;
-      error: "EMAIL_TAKEN" | "VALIDATION" | "RATE_LIMITED" | "UNKNOWN";
+      error: "VALIDATION" | "RATE_LIMITED" | "UNKNOWN";
       message: string;
       fieldErrors?: Record<string, string>;
     };
@@ -66,12 +75,10 @@ export async function createIndependentAthlete(
     select: { id: true },
   });
   if (existingUser) {
-    return {
-      ok: false,
-      error: "EMAIL_TAKEN",
-      message: "Ese email ya tiene cuenta — entrá por /login",
-      fieldErrors: { email: "Email ya registrado" },
-    };
+    // Email ya registrado: en vez de error duro, tratamos al usuario como
+    // alguien que quiso volver a entrar. El cliente disparará el magic link
+    // automáticamente con el email ya validado.
+    return { ok: true, email, existingUser: true };
   }
 
   // Hash de password ANTES de la transacción. bcrypt es CPU-bound y costoso
@@ -147,12 +154,9 @@ export async function createIndependentAthlete(
       ) {
         const target = (e.meta?.target as string[] | undefined) ?? [];
         if (target.some((t) => t.toLowerCase().includes("email"))) {
-          return {
-            ok: false,
-            error: "EMAIL_TAKEN",
-            message: "Ese email ya tiene cuenta — entrá por /login",
-            fieldErrors: { email: "Email ya registrado" },
-          };
+          // Race condition: el email se registró entre nuestro check y el create.
+          // Tratamos igual que existingUser arriba — el cliente dispara magic link.
+          return { ok: true, email, existingUser: true };
         }
         // slug collision — retry with new slug
         if (target.some((t) => t.toLowerCase().includes("slug"))) {

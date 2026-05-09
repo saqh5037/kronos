@@ -23,7 +23,11 @@ export type OnboardingInput = {
 
 export type OnboardingResult =
   | { ok: true; joinedBoxRequested: boolean; joinBoxName?: string }
-  | { ok: false; error: "UNAUTH" | "NOT_FOUND" | "BOX_NOT_FOUND" | "BOX_INVALID"; message: string };
+  | {
+      ok: false;
+      error: "UNAUTH" | "NOT_FOUND" | "BOX_NOT_FOUND" | "BOX_INVALID";
+      message: string;
+    };
 
 export async function completeOnboarding(
   input: OnboardingInput,
@@ -40,7 +44,11 @@ export async function completeOnboarding(
     select: { id: true, tags: true, firstName: true, lastName: true },
   });
   if (!athlete) {
-    return { ok: false, error: "NOT_FOUND", message: "No encontramos tu atleta" };
+    return {
+      ok: false,
+      error: "NOT_FOUND",
+      message: "No encontramos tu atleta",
+    };
   }
 
   let nextTags = athlete.tags;
@@ -51,13 +59,17 @@ export async function completeOnboarding(
     nextTags = withReplacedTag(nextTags, LEVEL_TAG_PREFIX, input.level);
   }
 
-  const profileUpdate: { firstName?: string; lastName?: string; tags?: string[] } = {
+  const profileUpdate: {
+    firstName?: string;
+    lastName?: string;
+    tags?: string[];
+  } = {
     tags: nextTags,
   };
   if (input.firstName !== undefined && input.firstName.trim().length >= 2) {
     profileUpdate.firstName = input.firstName.trim();
   }
-  if (input.lastName !== undefined) {
+  if (input.lastName !== undefined && input.lastName.trim().length >= 2) {
     profileUpdate.lastName = input.lastName.trim();
   }
 
@@ -102,7 +114,8 @@ export async function completeOnboarding(
           subject: `Solicitud para unirse a ${targetBox.name}`,
           html: renderJoinRequestEmail({
             ownerName: owner.name ?? "Coach",
-            athleteName: `${profileUpdate.firstName ?? athlete.firstName} ${profileUpdate.lastName ?? athlete.lastName}`.trim(),
+            athleteName:
+              `${profileUpdate.firstName ?? athlete.firstName} ${profileUpdate.lastName ?? athlete.lastName}`.trim(),
             athleteEmail: session.user.email ?? "(sin email)",
             boxName: targetBox.name,
           }),
@@ -127,7 +140,9 @@ export async function completeOnboarding(
   return { ok: true, joinedBoxRequested, joinBoxName };
 }
 
-export async function markOnboardingCompleted(): Promise<{ ok: true } | { ok: false; message: string }> {
+export async function markOnboardingCompleted(): Promise<
+  { ok: true } | { ok: false; message: string }
+> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.tenantId) {
     return { ok: false, message: "Sesión expirada" };

@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { listAthleteMemberships } from "@/server/actions/payments";
 import PayMembershipButton from "@/components/atleta/PayMembershipButton";
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
+import { getBoxMode } from "@/server/actions/box-mode";
 
 export const metadata = { title: "Kronos — Mis pagos" };
 export const dynamic = "force-dynamic";
@@ -72,6 +74,10 @@ function statusChipStyle(
 }
 
 export default async function AtletaPagosPage() {
+  // Personal Box: el atleta es independiente, no paga membresía a un box.
+  const { isPersonal } = await getBoxMode();
+  if (isPersonal) redirect("/atleta");
+
   let memberships: Awaited<ReturnType<typeof listAthleteMemberships>> = [];
   try {
     memberships = await listAthleteMemberships();

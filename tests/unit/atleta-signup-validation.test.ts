@@ -13,18 +13,22 @@ describe("atletaSignupSchema", () => {
     expect(out.success).toBe(true);
   });
 
-  it("acepta sin lastName (opcional)", () => {
+  it("rechaza sin lastName (ahora obligatorio)", () => {
     const out = atletaSignupSchema.safeParse({
       email: valid.email,
       firstName: valid.firstName,
     });
-    expect(out.success).toBe(true);
-    if (out.success) expect(out.data.lastName).toBe("");
+    expect(out.success).toBe(false);
   });
 
-  it("acepta lastName vacío", () => {
+  it("rechaza lastName vacío (ahora obligatorio)", () => {
     const out = atletaSignupSchema.safeParse({ ...valid, lastName: "" });
-    expect(out.success).toBe(true);
+    expect(out.success).toBe(false);
+  });
+
+  it("rechaza lastName muy corto (<2)", () => {
+    const out = atletaSignupSchema.safeParse({ ...valid, lastName: "A" });
+    expect(out.success).toBe(false);
   });
 
   it("normaliza email a lowercase y trim", () => {

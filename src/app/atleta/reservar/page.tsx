@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   listAvailableClasses,
   type AvailableClass,
 } from "@/server/actions/bookings";
 import { ClassesList } from "./_components/ClassesList";
 import { Icon } from "@/components/kronos/v3/icons";
+import { getBoxMode } from "@/server/actions/box-mode";
 
 export const metadata = { title: "Kronos — Reservar" };
 
@@ -43,6 +45,10 @@ export default async function ReservarPage({
 }: {
   searchParams?: Promise<SearchParams>;
 }) {
+  // Personal Box no tiene clases programadas — redirect a home.
+  const { isPersonal } = await getBoxMode();
+  if (isPersonal) redirect("/atleta");
+
   const sp = (await searchParams) ?? {};
   const today = new Date();
   today.setHours(0, 0, 0, 0);

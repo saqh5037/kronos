@@ -45,19 +45,30 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/server/auth";
 import { db as prismaBase } from "@/server/db";
 import { isPersonalBoxSlug } from "@/lib/personal-box";
+import PersonalHomeView from "@/components/atleta/PersonalHomeView";
 
 export const metadata = { title: "Kronos — Inicio" };
 
 export default async function AtletaHomePage() {
   const session = await getServerSession(authOptions);
+  let isPersonal = false;
   if (session?.user?.tenantId) {
     const box = await prismaBase.box.findUnique({
       where: { id: session.user.tenantId },
       select: { slug: true, onboardingCompletedAt: true },
     });
-    if (box && isPersonalBoxSlug(box.slug) && !box.onboardingCompletedAt) {
-      redirect("/atleta/onboarding");
+    if (box && isPersonalBoxSlug(box.slug)) {
+      if (!box.onboardingCompletedAt) {
+        redirect("/atleta/onboarding");
+      }
+      isPersonal = true;
     }
+  }
+
+  // Atleta independiente con onboarding completado: vista alternativa sin
+  // clases/reservas/leaderboard. Resto del archivo es path Box real.
+  if (isPersonal) {
+    return <PersonalHomeView />;
   }
 
   let home: AthleteHome = null;

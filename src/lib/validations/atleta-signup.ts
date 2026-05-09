@@ -11,9 +11,8 @@ export const atletaSignupSchema = z.object({
   lastName: z
     .string()
     .trim()
-    .max(60, "Máximo 60 caracteres")
-    .optional()
-    .default(""),
+    .min(2, "Mínimo 2 caracteres")
+    .max(60, "Máximo 60 caracteres"),
   // Opcional. Si viene, se hashea con bcrypt y se guarda en User.passwordHash.
   // Permite login con email+password desde cualquier browser/PWA — soluciona
   // el bug iOS de magic link cross-browser. Recomendado pero no required.

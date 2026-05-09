@@ -10,6 +10,7 @@ import {
 } from "@/server/actions/atleta-onboarding";
 import type { Unit, Level } from "@/lib/atleta-prefs";
 import AvatarUpload from "@/components/atleta/AvatarUpload";
+import { markOnboarded } from "@/lib/pwa-visits";
 
 type Props = {
   initialFirstName: string;
@@ -63,6 +64,9 @@ export default function OnboardingWizard({
       } else {
         kToast.success("¡Listo! Bienvenido a Kronos");
       }
+      // Flag para gatear el banner PWA — al completar onboarding habilitamos
+      // que el banner aparezca en la próxima visita a /atleta/*.
+      markOnboarded();
       router.push("/atleta");
       router.refresh();
     });
@@ -72,6 +76,7 @@ export default function OnboardingWizard({
     startTransition(async () => {
       const r = await markOnboardingCompleted();
       if (r.ok) {
+        markOnboarded();
         router.push("/atleta");
         router.refresh();
       } else {
@@ -185,8 +190,7 @@ function Step1({
   pending,
 }: Step1Props) {
   const canContinue = firstName.trim().length >= 2;
-  const initials =
-    (firstName.trim()[0] ?? "") + (lastName.trim()[0] ?? "");
+  const initials = (firstName.trim()[0] ?? "") + (lastName.trim()[0] ?? "");
   return (
     <div className="space-y-5">
       <div>
@@ -205,10 +209,11 @@ function Step1({
         required
       />
       <Field
-        label="Apellido (opcional)"
+        label="Apellido"
         value={lastName}
         onChange={setLastName}
-        placeholder=""
+        placeholder="Tu apellido"
+        required
       />
       <div className="space-y-2">
         <label
@@ -487,7 +492,10 @@ function SegmentedControl({
   return (
     <div
       className="flex gap-1 p-1 rounded-xl"
-      style={{ background: "var(--k-surface)", border: "1px solid var(--k-line-2)" }}
+      style={{
+        background: "var(--k-surface)",
+        border: "1px solid var(--k-line-2)",
+      }}
     >
       {options.map((opt) => {
         const active = opt.value === value;

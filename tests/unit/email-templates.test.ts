@@ -66,22 +66,26 @@ describe("renderEmailLayout", () => {
 });
 
 describe("renderMagicLinkEmail", () => {
-  it("incluye email del recipient + URL clickeable", () => {
+  it("incluye email del recipient + URL clickeable + código formateado", () => {
     const html = renderMagicLinkEmail({
       email: "owner@box.com",
       url: "https://kronos-fit.com/api/auth/callback/email?token=xyz",
+      code: "123456",
     });
     expect(html).toContain("owner@box.com");
     expect(html).toContain(
       "https://kronos-fit.com/api/auth/callback/email?token=xyz",
     );
     expect(html).toContain("Entrar a Kronos");
+    // Código se muestra formato "123 456"
+    expect(html).toContain("123 456");
   });
 
   it("escapa email para prevenir XSS en cuerpo", () => {
     const html = renderMagicLinkEmail({
       email: "<script>x</script>@evil.com",
       url: "https://safe.url",
+      code: "000000",
     });
     expect(html).toContain("&lt;script&gt;");
     expect(html).not.toMatch(/<script>x<\/script>/);
@@ -89,14 +93,16 @@ describe("renderMagicLinkEmail", () => {
 });
 
 describe("renderMagicLinkText", () => {
-  it("plain text fallback contiene email + url + instrucciones", () => {
+  it("plain text fallback contiene email + url + código + instrucciones", () => {
     const text = renderMagicLinkText({
       email: "owner@box.com",
       url: "https://kronos-fit.com/x",
+      code: "654321",
     });
     expect(text).toContain("owner@box.com");
     expect(text).toContain("https://kronos-fit.com/x");
     expect(text).toContain("expira en 24h");
+    expect(text).toContain("654 321");
   });
 });
 
