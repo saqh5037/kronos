@@ -21,7 +21,22 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
     try {
-      await signIn("email", { email, redirect: false });
+      const res = await signIn("email", { email, redirect: false });
+      // Si el signIn callback retornó un redirect a /signup?reason=no_account,
+      // significa que el email no tiene cuenta en Kronos. UX: mandar a
+      // /atleta-signup precargando el email (la mayoría de los visitors
+      // sin cuenta van a ser atletas, y desde ahí pueden saltar a /signup
+      // si son box owner).
+      const url = res?.url ?? "";
+      if (url.includes("reason=no_account")) {
+        window.location.href = `/atleta-signup?email=${encodeURIComponent(email)}`;
+        return;
+      }
+      if (res?.error) {
+        kToast.error("No se pudo enviar la liga");
+        setError("Algo no funcionó. Probá de nuevo en un momento.");
+        return;
+      }
       kToast.success("Liga enviada", {
         description: "Revisa tu bandeja de entrada.",
       });

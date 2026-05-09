@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
+import { isDominusPromoActive } from "@/lib/dominus-promo";
 import LandingTracker from "./_components/LandingTracker";
 import Nav from "./_components/Nav";
 import Hero from "./_components/Hero";
@@ -20,6 +21,7 @@ export default async function LandingPage() {
       ? "/atleta"
       : "/admin"
     : null;
+  const dominusActive = isDominusPromoActive();
 
   return (
     <>
@@ -30,7 +32,7 @@ export default async function LandingPage() {
       <DominusPromoBanner />
       <Nav boxHref={boxHref} />
       <main id="main">
-        <Hero boxHref={boxHref} />
+        <Hero boxHref={boxHref} dominusActive={dominusActive} />
         <FoundingPartners />
         <SectionAtleta />
         <SectionOwner />
