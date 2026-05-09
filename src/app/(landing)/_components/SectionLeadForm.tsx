@@ -299,10 +299,8 @@ function LeadFormSuccess() {
         minutos.
       </p>
       <p style={{ marginTop: 16 }}>
-        Mientras tanto, puedes entrar al producto aquí:{" "}
-        <a href="/login" className="lp-link-lime">
-          /login
-        </a>
+        En el primer mensaje te compartimos el link de la demo grabada y
+        coordinamos la llamada.
       </p>
     </motion.div>
   );
