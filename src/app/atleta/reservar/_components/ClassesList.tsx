@@ -133,113 +133,112 @@ export function ClassesList({
 
   return (
     <div style={{ padding: "0 16px" }}>
-      {/* Filtros */}
-      <div
-        style={{
-          marginBottom: 12,
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 8,
-        }}
-      >
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          style={selectStyle}
-          aria-label="Filtrar por tipo"
-        >
-          <option value="">Todos los tipos</option>
-          {wodTypes.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-        {coaches.length > 0 ? (
+      {/* Filtros — en mobile: selects stack vertical, botones en fila aparte */}
+      <div className="mb-3 space-y-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <select
-            value={coach}
-            onChange={(e) => setCoach(e.target.value)}
+            value={type}
+            onChange={(e) => setType(e.target.value)}
             style={selectStyle}
-            aria-label="Filtrar por coach"
+            className="w-full sm:w-auto sm:min-w-[140px]"
+            aria-label="Filtrar por tipo"
           >
-            <option value="">Todos los coaches</option>
-            {coaches.map((c) => (
-              <option key={c} value={c}>
-                {c}
+            <option value="">Todos los tipos</option>
+            {wodTypes.map((t) => (
+              <option key={t} value={t}>
+                {t}
               </option>
             ))}
           </select>
-        ) : null}
-        <select
-          value={bucket}
-          onChange={(e) => setBucket(e.target.value as TimeBucket)}
-          style={selectStyle}
-          aria-label="Filtrar por hora"
-        >
-          {TIME_BUCKETS.map((b) => (
-            <option key={b.value} value={b.value}>
-              {b.label}
-            </option>
-          ))}
-        </select>
-        {usualHours.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setOnlyUsual(!onlyUsual)}
-            aria-pressed={onlyUsual}
-            style={{
-              fontFamily: "var(--k-font-display)",
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              padding: "8px 12px",
-              borderRadius: 10,
-              background: onlyUsual ? "var(--k-accent)" : "transparent",
-              color: onlyUsual ? "var(--k-accent-on)" : "var(--k-accent)",
-              border: onlyUsual ? "none" : "1px solid var(--k-accent-line)",
-              cursor: "pointer",
-              boxShadow: onlyUsual ? "var(--k-accent-glow)" : "none",
-            }}
+          {coaches.length > 0 ? (
+            <select
+              value={coach}
+              onChange={(e) => setCoach(e.target.value)}
+              style={selectStyle}
+              className="w-full sm:w-auto sm:min-w-[140px]"
+              aria-label="Filtrar por coach"
+            >
+              <option value="">Todos los coaches</option>
+              {coaches.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          <select
+            value={bucket}
+            onChange={(e) => setBucket(e.target.value as TimeBucket)}
+            style={selectStyle}
+            className="w-full sm:w-auto sm:min-w-[140px]"
+            aria-label="Filtrar por hora"
           >
-            Mi horario
-          </button>
-        )}
-        {hasFilters && (
-          <button
-            type="button"
-            onClick={clearAll}
+            {TIME_BUCKETS.map((b) => (
+              <option key={b.value} value={b.value}>
+                {b.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          {usualHours.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setOnlyUsual(!onlyUsual)}
+              aria-pressed={onlyUsual}
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                padding: "8px 12px",
+                borderRadius: 10,
+                background: onlyUsual ? "var(--k-accent)" : "transparent",
+                color: onlyUsual ? "var(--k-accent-on)" : "var(--k-accent)",
+                border: onlyUsual ? "none" : "1px solid var(--k-accent-line)",
+                cursor: "pointer",
+                boxShadow: onlyUsual ? "var(--k-accent-glow)" : "none",
+              }}
+            >
+              Mi horario
+            </button>
+          )}
+          {hasFilters && (
+            <button
+              type="button"
+              onClick={clearAll}
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                padding: "8px 10px",
+                borderRadius: 8,
+                background: "transparent",
+                border: "none",
+                color: "var(--k-t3)",
+                cursor: "pointer",
+              }}
+            >
+              Limpiar
+            </button>
+          )}
+          <span
             style={{
+              marginLeft: "auto",
               fontFamily: "var(--k-font-display)",
               fontSize: 10,
               fontWeight: 600,
               letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              padding: "8px 10px",
-              borderRadius: 8,
-              background: "transparent",
-              border: "none",
               color: "var(--k-t3)",
-              cursor: "pointer",
+              textTransform: "uppercase",
             }}
           >
-            Limpiar
-          </button>
-        )}
-        <span
-          style={{
-            marginLeft: "auto",
-            fontFamily: "var(--k-font-display)",
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: "0.14em",
-            color: "var(--k-t3)",
-            textTransform: "uppercase",
-          }}
-        >
-          {filtered.length} clase{filtered.length === 1 ? "" : "s"}
-        </span>
+            {filtered.length} clase{filtered.length === 1 ? "" : "s"}
+          </span>
+        </div>
       </div>
 
       {/* Lista */}
