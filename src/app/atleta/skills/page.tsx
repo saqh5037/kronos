@@ -11,6 +11,8 @@ import {
   getSkillCatalogForAthlete,
 } from "@/server/actions/skills";
 import { getTop3PRPredictions } from "@/server/actions/ai";
+import { getMyCoachCards } from "@/server/actions/coach-cards";
+import CoachCardsSection from "@/components/atleta/CoachCardsSection";
 import type {
   ActiveSkillData,
   CatalogSkill,
@@ -44,14 +46,16 @@ const TIER_LABEL: Record<
 };
 
 export default async function SkillsPage() {
-  const [activeSkill, catalogResult, prPredictions] = await Promise.all([
-    getActiveSkillForAthlete().catch(() => null),
-    getSkillCatalogForAthlete().catch(() => ({
-      athleteTier: "principiante" as SkillTier,
-      catalog: [] as CatalogSkill[],
-    })),
-    getTop3PRPredictions().catch(() => []),
-  ]);
+  const [activeSkill, catalogResult, prPredictions, coachCards] =
+    await Promise.all([
+      getActiveSkillForAthlete().catch(() => null),
+      getSkillCatalogForAthlete().catch(() => ({
+        athleteTier: "principiante" as SkillTier,
+        catalog: [] as CatalogSkill[],
+      })),
+      getTop3PRPredictions().catch(() => []),
+      getMyCoachCards().catch(() => []),
+    ]);
 
   const tierCfg = TIER_LABEL[catalogResult.athleteTier];
 
@@ -88,6 +92,12 @@ export default async function SkillsPage() {
           </span>
         </div>
       </header>
+
+      {coachCards.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <CoachCardsSection cards={coachCards} />
+        </div>
+      )}
 
       {activeSkill ? (
         <ActiveSkillView

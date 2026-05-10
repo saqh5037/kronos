@@ -10,6 +10,8 @@ type Tab = {
   label: string;
   /** Oculto cuando el atleta está en Box Personal (sin coach/clases). */
   hideForPersonal?: boolean;
+  /** Oculto siempre del bottom nav (la ruta sigue accesible por URL). */
+  hideAlways?: boolean;
   icon: (active: boolean) => React.ReactNode;
 };
 
@@ -53,6 +55,24 @@ const allTabs: Tab[] = [
     ),
   },
   {
+    href: "/atleta/skills",
+    label: "Skills",
+    icon: (active: boolean) => (
+      <svg
+        viewBox="0 0 24 24"
+        width="22"
+        height="22"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={active ? 2.4 : 1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 2l3 6 6 1-4 5 1 6-6-3-6 3 1-6-4-5 6-1z" />
+      </svg>
+    ),
+  },
+  {
     href: "/atleta/wod",
     label: "WOD",
     icon: (active: boolean) => (
@@ -73,6 +93,8 @@ const allTabs: Tab[] = [
   {
     href: "/atleta/movimientos",
     label: "Movs",
+    /** Skills reemplaza a Movs en V4. Sub-rutas siguen accesibles por URL. */
+    hideAlways: true,
     icon: (active: boolean) => (
       <svg
         viewBox="0 0 24 24"
@@ -121,7 +143,7 @@ type TabBarProps = {
 export default function TabBar({ mode = "box" }: TabBarProps) {
   const pathname = usePathname();
   const tabs = allTabs.filter(
-    (t) => !(mode === "personal" && t.hideForPersonal),
+    (t) => !t.hideAlways && !(mode === "personal" && t.hideForPersonal),
   );
 
   const activeIndex = tabs.findIndex((tab) => {

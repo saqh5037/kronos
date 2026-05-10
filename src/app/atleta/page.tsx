@@ -33,7 +33,6 @@ import {
   getAthleteTier,
 } from "@/server/actions/skills";
 import { getDailyGreeting, type DailyGreeting } from "@/server/actions/ai";
-import { AnimatedStats } from "@/components/kronos/AnimatedStats";
 import {
   AnimatedSection,
   AnimatedItem,
@@ -51,8 +50,7 @@ import { authOptions } from "@/server/auth";
 import { db as prismaBase } from "@/server/db";
 import { isPersonalBoxSlug } from "@/lib/personal-box";
 import PersonalHomeView from "@/components/atleta/PersonalHomeView";
-import CoachCardsSection from "@/components/atleta/CoachCardsSection";
-import { getMyCoachCards } from "@/server/actions/coach-cards";
+// CoachCards moved to /atleta/skills in V4
 
 export const metadata = { title: "Kronos — Inicio" };
 
@@ -87,7 +85,6 @@ export default async function AtletaHomePage() {
   let alreadyRespondedReadiness = true;
   let greeting: DailyGreeting | null = null;
   let suggestion: SuggestedBooking = null;
-  let coachCards: Awaited<ReturnType<typeof getMyCoachCards>> = [];
 
   let activeSkill: Awaited<ReturnType<typeof getActiveSkillForAthlete>> = null;
   let athleteTier: Awaited<ReturnType<typeof getAthleteTier>> = "principiante";
@@ -101,7 +98,6 @@ export default async function AtletaHomePage() {
       wod,
       greeting,
       suggestion,
-      coachCards,
       activeSkill,
       athleteTier,
       featuredTrophy,
@@ -112,7 +108,6 @@ export default async function AtletaHomePage() {
       getTodayWOD(),
       getDailyGreeting(),
       getSuggestedNextClass().catch(() => null),
-      getMyCoachCards().catch(() => []),
       getActiveSkillForAthlete().catch(() => null),
       getAthleteTier().catch(() => "principiante" as const),
       getMonthlyFeaturedTrophy().catch(() => null),
@@ -239,37 +234,22 @@ export default async function AtletaHomePage() {
         activeSkill={activeSkill}
       />
 
+      {/* READINESS check-in chip (no-bloqueante) */}
+      {readinessSurvey && !alreadyRespondedReadiness && (
+        <div style={{ marginTop: 16 }}>
+          <ReadinessChip survey={readinessSurvey} />
+        </div>
+      )}
+
       {/* PERSONALIZED GREETING (insight IA) */}
       <div style={{ marginTop: 16 }}>
         <PersonalizedGreeting greeting={greeting} />
       </div>
 
-      {/* COACH VIRTUAL CARDS */}
-      {coachCards.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <CoachCardsSection cards={coachCards} />
-        </div>
-      )}
-
-      {/* READINESS check-in chip (no-bloqueante) */}
-      {readinessSurvey && !alreadyRespondedReadiness && (
-        <div style={{ marginTop: 12 }}>
-          <ReadinessChip survey={readinessSurvey} />
-        </div>
-      )}
-
       {/* STREAK HERO */}
       <div className="px-3.5 mt-4">
         <StreakHero count={home.streak} lastEventAt={home.streakLastEventAt} />
       </div>
-
-      {/* HERO STATS */}
-      <AnimatedStats
-        weekAttendance={home.weekAttendance}
-        weekGoal={home.weekGoal}
-        streak={home.streak}
-        prCount={home.prCount}
-      />
 
       {/* TROPHY V4 — logro destacado del mes (curado) */}
       <div className="mt-4 px-3.5">
