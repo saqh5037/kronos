@@ -3,35 +3,40 @@ import type { Route } from "next";
 import type { Metadata } from "next";
 import {
   listBadgesWithProgress,
+  getCollectionStats,
   type BadgeDetail,
 } from "@/server/actions/badges";
+import { badgeTierLabel } from "@/lib/badges/tier";
 
 export const metadata: Metadata = { title: "Logros · Kronos" };
 export const dynamic = "force-dynamic";
 
 export default async function TrophyRoomPage() {
-  const all = await listBadgesWithProgress();
+  const [all, stats] = await Promise.all([
+    listBadgesWithProgress(),
+    getCollectionStats(),
+  ]);
 
-  const unlocked = all
+  const accessible = all.filter((b) => !b.isAboveTier);
+  const teasers = all.filter((b) => b.isAboveTier);
+
+  const unlocked = accessible
     .filter((b) => b.unlocked)
     .sort(
       (a, b) => (b.earnedAt?.getTime() ?? 0) - (a.earnedAt?.getTime() ?? 0),
     );
-  const locked = all
+  const upcoming = accessible
     .filter((b) => !b.unlocked)
     .sort((a, b) => (b.progress?.ratio ?? 0) - (a.progress?.ratio ?? 0));
-
-  const unlockedCount = unlocked.length;
-  const total = all.length;
 
   return (
     <main
       className="min-h-screen pb-28"
       style={{ background: "var(--k-bg)", color: "var(--k-t1)" }}
     >
-      <header className="px-4 pt-5 pb-4">
+      <header className="px-4 pt-6 pb-4">
         <div className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
-          Trophy Room · Atleta
+          TROPHY ROOM · ATLETA
         </div>
         <h1
           style={{
@@ -44,22 +49,12 @@ export default async function TrophyRoomPage() {
             marginTop: 4,
           }}
         >
-          Tus logros
+          Tu colección
         </h1>
-        <div
-          className="k-mono"
-          style={{
-            color: "var(--k-accent)",
-            fontSize: 13,
-            marginTop: 6,
-            letterSpacing: 1,
-          }}
-        >
-          {unlockedCount} / {total} desbloqueados
-        </div>
+        {stats && <XPHero stats={stats} />}
       </header>
 
-      {total === 0 && (
+      {all.length === 0 && (
         <div className="px-4">
           <div
             className="k-card"
@@ -83,40 +78,180 @@ export default async function TrophyRoomPage() {
         </Section>
       )}
 
-      {locked.length > 0 && (
-        <Section title="Por desbloquear" eyebrow={`${locked.length}`}>
-          <Grid items={locked} />
+      {upcoming.length > 0 && (
+        <Section title="Por desbloquear" eyebrow={`${upcoming.length}`}>
+          <Grid items={upcoming} />
+        </Section>
+      )}
+
+      {teasers.length > 0 && (
+        <Section
+          title="Otros niveles"
+          eyebrow={`${teasers.length}`}
+          subtitle="Sube de nivel para acceder"
+        >
+          <Grid items={teasers} />
         </Section>
       )}
     </main>
   );
 }
 
+function XPHero({
+  stats,
+}: {
+  stats: NonNullable<Awaited<ReturnType<typeof getCollectionStats>>>;
+}) {
+  const pct = Math.round(stats.level.progressToNext * 100);
+  return (
+    <div
+      style={{
+        marginTop: 14,
+        padding: 16,
+        background: "var(--k-surface)",
+        border: "1px solid var(--k-accent-line)",
+        borderRadius: 16,
+        boxShadow: "var(--k-accent-glow)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          marginBottom: 8,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: "0.18em",
+            color: "var(--k-accent)",
+            textTransform: "uppercase",
+          }}
+        >
+          Nivel atleta {stats.level.level}
+        </div>
+        <div
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: "0.14em",
+            color: "var(--k-t3)",
+          }}
+        >
+          {stats.unlockedCount}/{stats.totalCount} DESBLOQUEADOS
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
+        <div
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 56,
+            fontWeight: 700,
+            letterSpacing: "-0.04em",
+            lineHeight: 1,
+            color: "var(--k-accent)",
+            fontFeatureSettings: '"tnum" 1',
+          }}
+        >
+          {stats.xpTotal}
+        </div>
+        <div style={{ paddingBottom: 6 }}>
+          <div
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              color: "var(--k-t3)",
+            }}
+          >
+            XP
+          </div>
+        </div>
+      </div>
+      <div
+        style={{
+          height: 4,
+          background: "var(--k-line)",
+          borderRadius: 2,
+          overflow: "hidden",
+          marginTop: 10,
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            width: `${pct}%`,
+            background: "var(--k-accent)",
+            borderRadius: 2,
+            transition: "width 800ms ease",
+          }}
+        />
+      </div>
+      <div
+        style={{
+          marginTop: 6,
+          fontFamily: "var(--k-font-display)",
+          fontSize: 10,
+          fontWeight: 600,
+          letterSpacing: "0.12em",
+          color: "var(--k-t3)",
+        }}
+      >
+        {stats.level.xpToNext !== null
+          ? `${stats.level.xpToNext} XP AL NIVEL ${stats.level.level + 1}`
+          : "NIVEL MÁXIMO ALCANZADO"}
+      </div>
+    </div>
+  );
+}
+
 function Section({
   title,
   eyebrow,
+  subtitle,
   accent,
   children,
 }: {
   title: string;
   eyebrow: string;
+  subtitle?: string;
   accent?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <section className="px-4 mt-4">
+    <section className="px-4 mt-5">
       <div className="flex items-baseline justify-between mb-3">
-        <div
-          style={{
-            fontFamily: "var(--k-font-display)",
-            fontSize: 14,
-            fontWeight: 700,
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-            color: accent ? "var(--k-accent)" : "var(--k-t1)",
-          }}
-        >
-          {title}
+        <div>
+          <div
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 14,
+              fontWeight: 700,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              color: accent ? "var(--k-accent)" : "var(--k-t1)",
+            }}
+          >
+            {title}
+          </div>
+          {subtitle && (
+            <div
+              style={{
+                fontFamily: "var(--k-font-body)",
+                fontSize: 11,
+                color: "var(--k-t3)",
+                marginTop: 2,
+              }}
+            >
+              {subtitle}
+            </div>
+          )}
         </div>
         <span
           className="k-mono"
@@ -158,6 +293,7 @@ function TrophyTile({ badge }: { badge: BadgeDetail }) {
       .join("")
       .slice(0, 2) || "★";
   const ratio = badge.progress ? Math.round(badge.progress.ratio * 100) : 0;
+  const isTeaser = badge.isAboveTier;
 
   return (
     <Link
@@ -165,7 +301,9 @@ function TrophyTile({ badge }: { badge: BadgeDetail }) {
       aria-label={
         badge.unlocked
           ? `Logro desbloqueado: ${badge.name}`
-          : `Logro bloqueado: ${badge.name}`
+          : isTeaser
+            ? `Logro de tier superior: ${badge.name}`
+            : `Logro bloqueado: ${badge.name}`
       }
       style={{ textDecoration: "none" }}
     >
@@ -174,7 +312,7 @@ function TrophyTile({ badge }: { badge: BadgeDetail }) {
         style={{
           padding: 12,
           background: badge.unlocked ? "var(--k-elevated)" : "var(--k-surface)",
-          opacity: badge.unlocked ? 1 : 0.7,
+          opacity: badge.unlocked ? 1 : isTeaser ? 0.45 : 0.7,
           borderColor: badge.unlocked
             ? "var(--k-accent-line)"
             : "var(--k-line)",
@@ -213,7 +351,11 @@ function TrophyTile({ badge }: { badge: BadgeDetail }) {
             letterSpacing: 1.2,
           }}
         >
-          {badge.unlocked ? "DESBLOQUEADO" : "BLOQUEADO"}
+          {badge.unlocked
+            ? `+${badge.xp} XP`
+            : isTeaser && badge.tier
+              ? `NIVEL ${badgeTierLabel(badge.tier).toUpperCase()}`
+              : "BLOQUEADO"}
         </div>
         <div
           style={{
@@ -237,7 +379,7 @@ function TrophyTile({ badge }: { badge: BadgeDetail }) {
         >
           {badge.description}
         </div>
-        {!badge.unlocked && badge.progress && (
+        {!badge.unlocked && !isTeaser && badge.progress && (
           <div style={{ marginTop: "auto" }}>
             <div
               className="k-mono"

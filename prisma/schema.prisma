@@ -590,15 +590,23 @@ enum StreakType {
   PR
 }
 
+enum BadgeTier {
+  PRINCIPIANTE
+  ESCALADO
+  RX
+}
+
 model Badge {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   tenantId    String
   code        String
   name        String
   description String
   iconUrl     String?
   criteria    Json
-  createdAt   DateTime @default(now())
+  tier        BadgeTier?
+  xpReward    Int        @default(50)
+  createdAt   DateTime   @default(now())
 
   box          Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   achievements Achievement[]

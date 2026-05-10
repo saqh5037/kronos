@@ -1,8 +1,9 @@
 "use server";
 
 import { getServerSession } from "next-auth";
+import type { BadgeTier } from "@prisma/client";
 import { authOptions } from "../auth";
-import { withTenant } from "../db";
+import { withTenant, db as rawDb } from "../db";
 import {
   isCriterion,
   xpForBadgeCode,
@@ -10,6 +11,14 @@ import {
   type AthleteState,
 } from "../achievements/criteria";
 import { loadAthleteState } from "../achievements/evaluate";
+import { readPrefs } from "@/lib/atleta-prefs";
+import { levelToTier } from "@/lib/skills/progress";
+import { getAthleteLevel, type AthleteLevelInfo } from "@/lib/badges/level";
+import {
+  badgeTierFromSkillTier,
+  isBadgeAboveAthleteTier,
+} from "@/lib/badges/tier";
+import type { SkillTier } from "@/lib/skills/types";
 
 export type BadgeProgress = {
   current: number;
@@ -30,6 +39,16 @@ export type BadgeDetail = {
   earnedAt: Date | null;
   xp: number;
   progress: BadgeProgress | null;
+  tier: BadgeTier | null;
+  isAboveTier: boolean;
+};
+
+export type AthleteCollectionStats = {
+  athleteTier: SkillTier;
+  xpTotal: number;
+  level: AthleteLevelInfo;
+  unlockedCount: number;
+  totalCount: number;
 };
 
 async function requireAthleteSession() {
@@ -128,7 +147,7 @@ export async function getBadgeDetail(
 
   const me = await db.athlete.findFirst({
     where: { userId: session.user.id },
-    select: { id: true },
+    select: { id: true, tags: true },
   });
   if (!me) return null;
 
@@ -143,7 +162,9 @@ export async function getBadgeDetail(
   const criteria = isCriterion(badge.criteria)
     ? (badge.criteria as Criterion)
     : null;
-  const xp = xpForBadgeCode(badge.code);
+  const xp = badge.xpReward ?? xpForBadgeCode(badge.code);
+  const athleteTier = levelToTier(readPrefs(me.tags).level);
+  const isAboveTier = isBadgeAboveAthleteTier(badge.tier, athleteTier);
 
   let progress: BadgeProgress | null = null;
   if (criteria) {
@@ -167,31 +188,39 @@ export async function getBadgeDetail(
     earnedAt: achievement?.earnedAt ?? null,
     xp,
     progress,
+    tier: badge.tier,
+    isAboveTier,
   };
 }
 
-export async function listBadgesWithProgress(): Promise<BadgeDetail[]> {
+async function resolveAthleteContext() {
   const session = await requireAthleteSession();
   const tenantId = session.user.tenantId;
   const db = withTenant(tenantId);
-
   const me = await db.athlete.findFirst({
     where: { userId: session.user.id },
-    select: { id: true },
+    select: { id: true, tags: true },
   });
-  if (!me) return [];
+  return { session, tenantId, db, athlete: me };
+}
+
+export async function listBadgesWithProgress(): Promise<BadgeDetail[]> {
+  const { tenantId, db, athlete } = await resolveAthleteContext();
+  if (!athlete) return [];
+
+  const prefs = readPrefs(athlete.tags);
+  const athleteTier = levelToTier(prefs.level);
 
   const [badges, achievements] = await Promise.all([
     db.badge.findMany({ where: { tenantId }, orderBy: { code: "asc" } }),
-    db.achievement.findMany({ where: { athleteId: me.id, tenantId } }),
+    db.achievement.findMany({ where: { athleteId: athlete.id, tenantId } }),
   ]);
 
   const ownedMap = new Map(achievements.map((a) => [a.badgeId, a.earnedAt]));
 
-  // Carga state UNA vez con todas las criterias en juego para evitar N+1.
   const state = await loadAthleteState(
     tenantId,
-    me.id,
+    athlete.id,
     badges.map((b) => ({ criteria: b.criteria })),
   );
 
@@ -200,8 +229,9 @@ export async function listBadgesWithProgress(): Promise<BadgeDetail[]> {
       ? (badge.criteria as Criterion)
       : null;
     const earnedAt = ownedMap.get(badge.id) ?? null;
-    const xp = xpForBadgeCode(badge.code);
+    const xp = badge.xpReward ?? xpForBadgeCode(badge.code);
     const progress = criteria ? progressFor(criteria, state) : null;
+    const isAboveTier = isBadgeAboveAthleteTier(badge.tier, athleteTier);
 
     return {
       id: badge.id,
@@ -217,6 +247,62 @@ export async function listBadgesWithProgress(): Promise<BadgeDetail[]> {
       earnedAt,
       xp,
       progress,
+      tier: badge.tier,
+      isAboveTier,
     };
   });
+}
+
+export async function getAthleteXPTotal(): Promise<number> {
+  const { tenantId, athlete } = await resolveAthleteContext();
+  if (!athlete) return 0;
+  const result = await rawDb.xPLedger.aggregate({
+    where: { tenantId, athleteId: athlete.id },
+    _sum: { amount: true },
+  });
+  return result._sum.amount ?? 0;
+}
+
+export async function getCollectionStats(): Promise<AthleteCollectionStats | null> {
+  const { tenantId, db, athlete } = await resolveAthleteContext();
+  if (!athlete) return null;
+
+  const prefs = readPrefs(athlete.tags);
+  const athleteTier = levelToTier(prefs.level);
+  const accessibleBadgeTier = badgeTierFromSkillTier(athleteTier);
+
+  const [xpAgg, badges, ownedCount] = await Promise.all([
+    rawDb.xPLedger.aggregate({
+      where: { tenantId, athleteId: athlete.id },
+      _sum: { amount: true },
+    }),
+    db.badge.findMany({
+      where: {
+        tenantId,
+        OR: [
+          { tier: null },
+          { tier: { in: badgeTierAtOrBelow(accessibleBadgeTier) } },
+        ],
+      },
+      select: { id: true },
+    }),
+    db.achievement.count({
+      where: { athleteId: athlete.id, tenantId },
+    }),
+  ]);
+
+  const xpTotal = xpAgg._sum.amount ?? 0;
+  return {
+    athleteTier,
+    xpTotal,
+    level: getAthleteLevel(xpTotal),
+    unlockedCount: ownedCount,
+    totalCount: badges.length,
+  };
+}
+
+function badgeTierAtOrBelow(tier: BadgeTier): BadgeTier[] {
+  if (tier === "RX") return ["PRINCIPIANTE", "ESCALADO", "RX"];
+  if (tier === "ESCALADO") return ["PRINCIPIANTE", "ESCALADO"];
+  return ["PRINCIPIANTE"];
 }
