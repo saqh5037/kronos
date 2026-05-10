@@ -25,7 +25,7 @@ import {
   hasRespondedToday,
   type SurveyRow,
 } from "@/server/actions/surveys";
-import QuickSurvey from "@/components/atleta/QuickSurvey";
+import ReadinessChip from "@/components/atleta/ReadinessChip";
 import PersonalizedGreeting from "@/components/atleta/PersonalizedGreeting";
 import { getDailyGreeting, type DailyGreeting } from "@/server/actions/ai";
 import { AnimatedStats } from "@/components/kronos/AnimatedStats";
@@ -258,9 +258,11 @@ export default async function AtletaHomePage() {
         </div>
       )}
 
-      {/* READINESS SURVEY */}
+      {/* READINESS check-in chip (no-bloqueante) */}
       {readinessSurvey && !alreadyRespondedReadiness && (
-        <QuickSurvey survey={readinessSurvey} />
+        <div style={{ marginTop: 12 }}>
+          <ReadinessChip survey={readinessSurvey} />
+        </div>
       )}
 
       {/* STREAK HERO */}
