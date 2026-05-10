@@ -175,6 +175,7 @@ export default function TabBar({ mode = "box" }: TabBarProps) {
               style={{
                 color: isActive ? "var(--k-accent)" : "var(--k-t3)",
                 textDecoration: "none",
+                minWidth: 0,
               }}
             >
               <motion.span
@@ -186,10 +187,14 @@ export default function TabBar({ mode = "box" }: TabBarProps) {
               <span
                 style={{
                   fontFamily: "var(--k-font-display)",
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: 600,
-                  letterSpacing: "0.12em",
+                  letterSpacing: "0.08em",
                   textTransform: "uppercase",
+                  maxWidth: "100%",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {tab.label}
