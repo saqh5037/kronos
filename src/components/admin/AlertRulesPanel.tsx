@@ -181,6 +181,7 @@ export default function AlertRulesPanel({
                     </span>
                     <input
                       type="number"
+                      inputMode="decimal"
                       name="threshold"
                       placeholder="Opcional"
                       min={0}

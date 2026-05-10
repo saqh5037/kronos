@@ -72,6 +72,7 @@ export default function PlanForm() {
           <input
             name="price"
             type="number"
+            inputMode="decimal"
             step="0.01"
             min="0"
             required
@@ -86,6 +87,7 @@ export default function PlanForm() {
           <input
             name="classesPerMonth"
             type="number"
+            inputMode="numeric"
             min="0"
             placeholder="0 = sin cap"
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
@@ -97,6 +99,7 @@ export default function PlanForm() {
           <input
             name="durationDays"
             type="number"
+            inputMode="numeric"
             min="0"
             placeholder="auto si vacío"
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"

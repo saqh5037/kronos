@@ -107,6 +107,7 @@ export default function ClassForm({
           <input
             name="durationMin"
             type="number"
+            inputMode="numeric"
             min="15"
             max="240"
             defaultValue="60"
@@ -120,6 +121,7 @@ export default function ClassForm({
           <input
             name="capacity"
             type="number"
+            inputMode="numeric"
             min="1"
             max="50"
             defaultValue="16"
@@ -181,6 +183,7 @@ export default function ClassForm({
           <input
             name="recCount"
             type="number"
+            inputMode="numeric"
             min="1"
             max="52"
             defaultValue="8"

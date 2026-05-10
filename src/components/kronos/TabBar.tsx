@@ -71,8 +71,8 @@ const allTabs: Tab[] = [
     ),
   },
   {
-    href: "/atleta/logros",
-    label: "Logros",
+    href: "/atleta/movimientos",
+    label: "Movs",
     icon: (active: boolean) => (
       <svg
         viewBox="0 0 24 24"
@@ -84,11 +84,11 @@ const allTabs: Tab[] = [
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M8 21h8" />
-        <path d="M12 17v4" />
-        <path d="M7 4h10v6a5 5 0 0 1-10 0V4z" />
-        <path d="M7 6H4a2 2 0 0 0 0 4h3" />
-        <path d="M17 6h3a2 2 0 0 1 0 4h-3" />
+        <path d="M6.5 6.5L17.5 17.5M17.5 6.5L6.5 17.5" />
+        <circle cx="6.5" cy="6.5" r="2" />
+        <circle cx="17.5" cy="6.5" r="2" />
+        <circle cx="6.5" cy="17.5" r="2" />
+        <circle cx="17.5" cy="17.5" r="2" />
       </svg>
     ),
   },
@@ -149,6 +149,8 @@ export default function TabBar({ mode = "box" }: TabBarProps) {
             <Link
               key={tab.href}
               href={tab.href as Route}
+              aria-current={isActive ? "page" : undefined}
+              aria-label={tab.label}
               className="relative flex-1 flex flex-col items-center justify-center gap-[5px]"
               style={{
                 color: isActive ? "var(--k-accent)" : "var(--k-t3)",
@@ -164,9 +166,9 @@ export default function TabBar({ mode = "box" }: TabBarProps) {
               <span
                 style={{
                   fontFamily: "var(--k-font-display)",
-                  fontSize: 8,
+                  fontSize: 11,
                   fontWeight: 600,
-                  letterSpacing: "0.16em",
+                  letterSpacing: "0.12em",
                   textTransform: "uppercase",
                 }}
               >

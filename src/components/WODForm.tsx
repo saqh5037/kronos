@@ -143,6 +143,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
           <input
             name="timeCap"
             type="number"
+            inputMode="numeric"
             min="0"
             max="180"
             placeholder="0 = sin cap"
@@ -191,6 +192,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
               onChange={(e) => updateLine(idx, { reps: e.target.value })}
               placeholder="Reps"
               type="number"
+              inputMode="numeric"
               min="0"
               className="col-span-2 px-2 py-1.5 rounded-md border bg-transparent text-xs"
               style={{ borderColor: "var(--line)" }}
@@ -200,6 +202,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
               onChange={(e) => updateLine(idx, { weight: e.target.value })}
               placeholder="Peso"
               type="number"
+              inputMode="decimal"
               min="0"
               step="0.5"
               className="col-span-2 px-2 py-1.5 rounded-md border bg-transparent text-xs"

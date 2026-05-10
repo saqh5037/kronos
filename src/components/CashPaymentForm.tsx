@@ -83,6 +83,7 @@ export default function CashPaymentForm({
           <input
             name="amount"
             type="number"
+            inputMode="decimal"
             step="0.01"
             min="0.01"
             required

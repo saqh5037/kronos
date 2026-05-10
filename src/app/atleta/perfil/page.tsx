@@ -70,7 +70,10 @@ export default async function PerfilPage() {
   const activeGoals = myGoals.filter((g) => g.status === "ACTIVE");
 
   // Config: prefs + Box flags + photo
-  let configPrefs: { unit: "kg" | "lb" | null; level: "rx" | "scaled" | "beginner" | null } = {
+  let configPrefs: {
+    unit: "kg" | "lb" | null;
+    level: "rx" | "scaled" | "beginner" | null;
+  } = {
     unit: null,
     level: null,
   };
@@ -734,16 +737,22 @@ export default async function PerfilPage() {
           </p>
           <div className="grid grid-cols-2 gap-2">
             <HubCard
-              href="/atleta/movimientos"
-              label="Movimientos"
-              hint="Biblioteca + cues"
-              icon="dumbbell"
+              href="/atleta/logros"
+              label="Logros"
+              hint="Trofeos del año"
+              icon="target"
             />
             <HubCard
               href="/atleta/leaderboard"
               label="Ranking"
               hint="Top del box"
-              icon="trophy"
+              icon="podium"
+            />
+            <HubCard
+              href="/atleta/movimientos"
+              label="Movimientos"
+              hint="Biblioteca + cues"
+              icon="dumbbell"
             />
             <HubCard
               href="/atleta/historial"
@@ -808,6 +817,7 @@ export default async function PerfilPage() {
 type HubIcon =
   | "dumbbell"
   | "trophy"
+  | "podium"
   | "history"
   | "target"
   | "card"
@@ -917,6 +927,14 @@ function renderHubIcon(icon: HubIcon) {
       <svg {...common}>
         <path d="M7 4h10v6a5 5 0 0 1-10 0V4z" />
         <path d="M3 6h4M17 6h4M9 20h6M12 15v5" />
+      </svg>
+    );
+  if (icon === "podium")
+    return (
+      <svg {...common}>
+        <rect x="3" y="14" width="5" height="7" />
+        <rect x="9.5" y="9" width="5" height="12" />
+        <rect x="16" y="12" width="5" height="9" />
       </svg>
     );
   if (icon === "history")

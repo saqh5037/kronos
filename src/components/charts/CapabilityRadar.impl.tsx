@@ -60,12 +60,12 @@ export function CapabilityRadar({
       <ResponsiveContainer width="100%" height={height}>
         <RRadarChart
           data={data}
-          margin={{ top: 16, right: 24, bottom: 16, left: 24 }}
+          margin={{ top: 20, right: 36, bottom: 20, left: 36 }}
         >
           <PolarGrid stroke={CHART_COLORS.grid} radialLines={true} />
           <PolarAngleAxis
             dataKey="name"
-            tick={{ fontSize: 11, fill: CHART_COLORS.text2, fontWeight: 600 }}
+            tick={{ fontSize: 10, fill: CHART_COLORS.text2, fontWeight: 600 }}
           />
           <PolarRadiusAxis
             angle={90}
@@ -79,7 +79,7 @@ export function CapabilityRadar({
             dataKey="score"
             stroke={CHART_COLORS.primary}
             fill={CHART_COLORS.primary}
-            fillOpacity={0.15}
+            fillOpacity={0.2}
             strokeWidth={2}
           />
         </RRadarChart>

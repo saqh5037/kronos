@@ -365,8 +365,8 @@ export default function AdminSidebar({
                     href={it.href}
                     className="k-tap"
                     style={{
-                      height: 38,
-                      padding: "0 16px",
+                      minHeight: 44,
+                      padding: "10px 16px",
                       display: "flex",
                       alignItems: "center",
                       gap: 12,
