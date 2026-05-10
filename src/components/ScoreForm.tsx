@@ -165,6 +165,8 @@ export default function ScoreForm({
               placeholder={placeholder}
               required
               autoComplete="off"
+              inputMode={scoreType === "TIME" ? "numeric" : "decimal"}
+              pattern={scoreType === "TIME" ? "[0-9:]*" : "[0-9.,]*"}
               style={inputStyle}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = "var(--k-accent)";
@@ -182,6 +184,7 @@ export default function ScoreForm({
               name="unit"
               defaultValue={defaultUnit(scoreType)}
               autoComplete="off"
+              inputMode="text"
               style={inputStyle}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = "var(--k-accent)";

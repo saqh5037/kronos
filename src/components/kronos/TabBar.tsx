@@ -149,6 +149,8 @@ export default function TabBar({ mode = "box" }: TabBarProps) {
             <Link
               key={tab.href}
               href={tab.href as Route}
+              aria-current={isActive ? "page" : undefined}
+              aria-label={tab.label}
               className="relative flex-1 flex flex-col items-center justify-center gap-[5px]"
               style={{
                 color: isActive ? "var(--k-accent)" : "var(--k-t3)",
@@ -164,9 +166,9 @@ export default function TabBar({ mode = "box" }: TabBarProps) {
               <span
                 style={{
                   fontFamily: "var(--k-font-display)",
-                  fontSize: 8,
+                  fontSize: 11,
                   fontWeight: 600,
-                  letterSpacing: "0.16em",
+                  letterSpacing: "0.12em",
                   textTransform: "uppercase",
                 }}
               >

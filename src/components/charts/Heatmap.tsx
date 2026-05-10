@@ -31,7 +31,7 @@ export function Heatmap({
   data,
   from,
   to,
-  cellSize = 12,
+  cellSize = 14,
   cellGap = 3,
   intensityColor = CHART_COLORS.steel,
   emptyColor = CHART_COLORS.grid,
