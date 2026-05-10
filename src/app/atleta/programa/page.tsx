@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getBoxMode } from "@/server/actions/box-mode";
 import { listMyScheduledProgramWods } from "@/server/actions/athlete-program";
+import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 import ProgramWeekForm from "./_components/ProgramWeekForm";
 
 export const metadata = { title: "Kronos — Programa personal" };
@@ -15,22 +16,9 @@ export default async function ProgramaPage() {
 
   return (
     <div className="pb-28 relative">
-      <header style={{ padding: "56px 20px 16px" }}>
-        <div style={{ marginBottom: 8 }}>
-          <Link
-            href="/atleta"
-            style={{
-              fontFamily: "var(--k-font-display)",
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.16em",
-              color: "var(--k-t3)",
-              textDecoration: "none",
-              textTransform: "uppercase",
-            }}
-          >
-            ← INICIO
-          </Link>
+      <header style={{ padding: "48px 20px 16px" }}>
+        <div style={{ marginBottom: 4 }}>
+          <AthleteBackLink href="/atleta" label="Inicio" />
         </div>
         <span
           style={{

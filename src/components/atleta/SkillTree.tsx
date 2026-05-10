@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
+import type { Route } from "next";
 import {
   markMyProgressionStatus,
   unmarkMyProgression,
@@ -8,11 +10,12 @@ import {
 import type { ProgressionNode } from "@/lib/skill-tree";
 
 type Props = {
+  movementId: string;
   movementSlug: string;
   nodes: ProgressionNode[];
 };
 
-export default function SkillTree({ movementSlug, nodes }: Props) {
+export default function SkillTree({ movementId, movementSlug, nodes }: Props) {
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [pendingSlug, setPendingSlug] = useState<string | null>(null);
@@ -64,7 +67,14 @@ export default function SkillTree({ movementSlug, nodes }: Props) {
   }
 
   return (
-    <div data-testid="skill-tree" style={{ display: "grid", gap: 8 }}>
+    <div
+      data-testid="skill-tree"
+      style={{
+        display: "grid",
+        gap: 8,
+        gridTemplateColumns: "minmax(0, 1fr)",
+      }}
+    >
       {nodes.map((node, idx) => (
         <SkillNode
           key={node.slug}
@@ -72,6 +82,7 @@ export default function SkillTree({ movementSlug, nodes }: Props) {
           isLast={idx === nodes.length - 1}
           disabled={isPending}
           pending={pendingSlug === node.slug}
+          movementId={movementId}
           onMarkCurrent={() => handleMark(node.slug, "CURRENT")}
           onMarkAchieved={() => handleMark(node.slug, "ACHIEVED")}
           onUnmark={() => handleUnmark(node.slug)}
@@ -194,6 +205,7 @@ function SkillNode({
   isLast,
   disabled,
   pending,
+  movementId,
   onMarkCurrent,
   onMarkAchieved,
   onUnmark,
@@ -202,27 +214,149 @@ function SkillNode({
   isLast: boolean;
   disabled: boolean;
   pending: boolean;
+  movementId: string;
   onMarkCurrent: () => void;
   onMarkAchieved: () => void;
   onUnmark: () => void;
 }) {
+  const [expanded, setExpanded] = useState(false);
+  const isAchieved = node.status === "achieved";
+  const isCurrent = node.status === "current";
+  const isLocked = node.status === "locked";
+  const techniqueHref = `/atleta/movimientos/${movementId}` as Route;
+
+  // Achieved colapsado (default) — fila slim escaneable
+  if (isAchieved && !expanded) {
+    return (
+      <div style={{ position: "relative", minWidth: 0 }}>
+        <div
+          data-testid={`skill-node-${node.slug}`}
+          data-status="achieved"
+          data-collapsed="true"
+          style={{
+            display: "flex",
+            alignItems: "stretch",
+            gap: 4,
+            background: "var(--k-elevated)",
+            border: "1px solid var(--k-accent-line)",
+            borderRadius: 12,
+            opacity: pending ? 0.6 : 1,
+            minHeight: 48,
+            minWidth: 0,
+          }}
+        >
+          <Link
+            href={techniqueHref}
+            aria-label={`Ver técnica de ${node.name}`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              flex: "1 1 0",
+              minWidth: 0,
+              padding: "8px 4px 8px 12px",
+              textDecoration: "none",
+              color: "inherit",
+            }}
+          >
+            <StatusGlyph status="achieved" />
+            <span
+              style={{
+                fontFamily: "var(--k-font-body)",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--k-t1)",
+                flex: 1,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {node.name}
+            </span>
+            <LevelChip level={node.level} />
+          </Link>
+          <button
+            type="button"
+            aria-label="Mostrar opciones"
+            aria-expanded={false}
+            aria-controls={`skill-panel-${node.slug}`}
+            data-testid={`skill-toggle-${node.slug}`}
+            onClick={() => setExpanded(true)}
+            className="k-tap"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 44,
+              minHeight: 44,
+              background: "transparent",
+              border: "none",
+              color: "var(--k-t2)",
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
+          >
+            <svg
+              width={18}
+              height={18}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+        </div>
+
+        {!isLast && (
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              left: 24,
+              top: "100%",
+              width: 2,
+              height: 8,
+              background: "var(--k-line-2)",
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Achieved expandido, current, locked, pending — vista detallada
   const styles = nodeStyles(node.status);
+  const containerBg = isAchieved ? "var(--k-elevated)" : styles.bg;
+  const containerBorder = isAchieved
+    ? "1px solid var(--k-accent-line)"
+    : styles.border;
+  const containerShadow = isAchieved ? "none" : styles.shadow;
+  const titleColor = isAchieved ? "var(--k-t1)" : styles.text;
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", minWidth: 0 }}>
       <div
         data-testid={`skill-node-${node.slug}`}
         data-status={node.status}
+        data-collapsed="false"
+        id={`skill-panel-${node.slug}`}
         style={{
           padding: 14,
           borderRadius: 14,
-          background: styles.bg,
-          border: styles.border,
-          boxShadow: styles.shadow,
+          background: containerBg,
+          border: containerBorder,
+          boxShadow: containerShadow,
           display: "flex",
           flexDirection: "column",
           gap: 10,
           opacity: pending ? 0.6 : 1,
+          minWidth: 0,
         }}
       >
         <div
@@ -233,7 +367,7 @@ function SkillNode({
           }}
         >
           <StatusGlyph status={node.status} />
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
                 display: "flex",
@@ -247,7 +381,7 @@ function SkillNode({
                   fontFamily: "var(--k-font-body)",
                   fontSize: 13,
                   fontWeight: 600,
-                  color: styles.text,
+                  color: titleColor,
                 }}
               >
                 {node.name}
@@ -267,10 +401,70 @@ function SkillNode({
                 {node.description}
               </p>
             )}
+            {!isLocked && (
+              <Link
+                href={techniqueHref}
+                data-testid={`skill-technique-link-${node.slug}`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  marginTop: 8,
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "var(--k-accent)",
+                  textDecoration: "none",
+                }}
+              >
+                Ver técnica →
+              </Link>
+            )}
           </div>
+          {isAchieved && (
+            <button
+              type="button"
+              aria-label="Ocultar opciones"
+              aria-expanded={true}
+              aria-controls={`skill-panel-${node.slug}`}
+              data-testid={`skill-toggle-${node.slug}`}
+              onClick={() => setExpanded(false)}
+              className="k-tap"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 32,
+                height: 32,
+                background: "transparent",
+                border: "none",
+                color: "var(--k-t2)",
+                cursor: "pointer",
+                flexShrink: 0,
+                marginTop: -4,
+                marginRight: -6,
+              }}
+            >
+              <svg
+                width={18}
+                height={18}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M6 15l6-6 6 6" />
+              </svg>
+            </button>
+          )}
         </div>
 
-        {node.status !== "locked" && (
+        {!isLocked && (
           <div
             style={{
               display: "flex",
@@ -280,7 +474,7 @@ function SkillNode({
               paddingTop: 10,
             }}
           >
-            {node.status === "achieved" ? (
+            {isAchieved ? (
               <button
                 type="button"
                 disabled={disabled}
@@ -301,7 +495,7 @@ function SkillNode({
                 >
                   Lo domino
                 </button>
-                {node.status !== "current" && (
+                {!isCurrent && (
                   <button
                     type="button"
                     disabled={disabled}
@@ -312,7 +506,7 @@ function SkillNode({
                     Estoy en este
                   </button>
                 )}
-                {node.status === "current" && (
+                {isCurrent && (
                   <button
                     type="button"
                     disabled={disabled}
@@ -379,13 +573,21 @@ function StatusGlyph({ status }: { status: ProgressionNode["status"] }) {
         height={20}
         viewBox="0 0 20 20"
         fill="none"
-        stroke="var(--k-accent-on)"
+        stroke="var(--k-accent)"
         strokeWidth={2.5}
         strokeLinecap="round"
         strokeLinejoin="round"
         style={{ flexShrink: 0, marginTop: 2 }}
+        aria-hidden
       >
-        <path d="M4 10l4 4 8-8" />
+        <circle
+          cx={10}
+          cy={10}
+          r={9}
+          stroke="var(--k-accent-line)"
+          strokeWidth={1.5}
+        />
+        <path d="M5.5 10l3 3 6-6" />
       </svg>
     );
   }

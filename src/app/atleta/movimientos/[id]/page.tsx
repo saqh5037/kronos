@@ -408,6 +408,7 @@ export default async function MovementDetailPage({
                     </span>
                   </div>
                   <SkillTree
+                    movementId={skillTree.movementId}
                     movementSlug={skillTree.movementSlug}
                     nodes={skillTree.nodes}
                   />

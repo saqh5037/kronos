@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 import SkillTree from "@/components/atleta/SkillTree";
 import { getSkillById, SKILL_CATALOG } from "@/lib/skills/catalog";
 import { getMyMovementSkillTree } from "@/server/actions/skill-levels";
@@ -25,22 +25,9 @@ export default async function SkillDetailPage({
 
   return (
     <div className="pb-28 relative">
-      <header style={{ padding: "56px 20px 16px" }}>
-        <div style={{ marginBottom: 8 }}>
-          <Link
-            href="/atleta/skills"
-            style={{
-              fontFamily: "var(--k-font-display)",
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.16em",
-              color: "var(--k-t3)",
-              textDecoration: "none",
-              textTransform: "uppercase",
-            }}
-          >
-            ← SKILLS
-          </Link>
+      <header style={{ padding: "48px 20px 16px" }}>
+        <div style={{ marginBottom: 4 }}>
+          <AthleteBackLink href="/atleta/skills" label="Skills" />
         </div>
         <span
           style={{
@@ -72,7 +59,11 @@ export default async function SkillDetailPage({
 
       <section style={{ padding: "0 14px 20px" }}>
         {tree && tree.nodes.length > 0 ? (
-          <SkillTree movementSlug={skill.movementSlug} nodes={tree.nodes} />
+          <SkillTree
+            movementId={tree.movementId}
+            movementSlug={skill.movementSlug}
+            nodes={tree.nodes}
+          />
         ) : (
           <div
             style={{

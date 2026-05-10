@@ -20,6 +20,10 @@ import {
   type CapabilityProfile,
 } from "@/server/analytics/capability";
 import { listMyBodyMetrics } from "@/server/actions/body-metrics";
+import {
+  listMyMovementsRated,
+  type RankedMovement,
+} from "@/server/analytics/movement";
 import { formatDayMonth } from "@/lib/week";
 import {
   AnimatedSection,
@@ -61,17 +65,18 @@ export default async function PerfilPage() {
   let scoresTimeline: MyScoreTimelinePoint[] = [];
   let capability: CapabilityProfile | null = null;
   let bodyMetrics: Awaited<ReturnType<typeof listMyBodyMetrics>> = [];
+  let topMovements: RankedMovement[] = [];
 
   try {
-    [home, prs, attendance90d, scoresTimeline, bodyMetrics] = await Promise.all(
-      [
+    [home, prs, attendance90d, scoresTimeline, bodyMetrics, topMovements] =
+      await Promise.all([
         getAthleteHome(),
         listMyPRs(),
         getMyAttendanceLast90d(),
         getMyScoresTimeline(90),
         listMyBodyMetrics({ limit: 60 }),
-      ],
-    );
+        listMyMovementsRated(6).catch(() => []),
+      ]);
     capability = await getMyCapabilityProfile().catch(() => null);
   } catch {
     // Sesión ausente
@@ -477,6 +482,124 @@ export default async function PerfilPage() {
           </KCard>
         </AnimatedItem>
       </AnimatedSection>
+
+      {/* ── MIS MOVIMIENTOS · top frecuencia 90d ── */}
+      {topMovements.length > 0 && (
+        <AnimatedSection className="mb-4">
+          <div className="flex items-baseline justify-between px-[18px] pb-2">
+            <span className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
+              MIS MOVIMIENTOS
+            </span>
+            <Link
+              href={"/atleta/movimientos" as Route}
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--k-accent)",
+                textDecoration: "none",
+              }}
+            >
+              Ver todos →
+            </Link>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              gap: 10,
+              overflowX: "auto",
+              padding: "4px 14px 8px",
+              scrollSnapType: "x mandatory",
+              scrollbarWidth: "none",
+            }}
+          >
+            {topMovements.map((m) => (
+              <AnimatedItem key={m.movementId}>
+                <Link
+                  href={`/atleta/movimientos/${m.movementId}` as Route}
+                  className="k-tap"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 6,
+                    minWidth: 132,
+                    padding: "12px 14px",
+                    background: "var(--k-surface)",
+                    border: m.isStale
+                      ? "1px solid var(--k-warning)"
+                      : "1px solid var(--k-line)",
+                    borderRadius: 12,
+                    textDecoration: "none",
+                    color: "inherit",
+                    scrollSnapAlign: "start",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--k-font-body)",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: "var(--k-t1)",
+                      lineHeight: 1.25,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      minHeight: 30,
+                    }}
+                  >
+                    {m.movementName}
+                  </span>
+                  <div
+                    style={{ display: "flex", alignItems: "baseline", gap: 4 }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "var(--k-font-display)",
+                        fontSize: 18,
+                        fontWeight: 700,
+                        letterSpacing: "-0.02em",
+                        color: "var(--k-accent)",
+                      }}
+                    >
+                      {m.frequency90d}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "var(--k-font-display)",
+                        fontSize: 9,
+                        fontWeight: 700,
+                        letterSpacing: "0.14em",
+                        color: "var(--k-t3)",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {m.frequency90d === 1 ? "vez · 90d" : "veces · 90d"}
+                    </span>
+                  </div>
+                  {m.isStale && (
+                    <span
+                      style={{
+                        fontFamily: "var(--k-font-display)",
+                        fontSize: 9,
+                        fontWeight: 700,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "var(--k-warning)",
+                      }}
+                    >
+                      Hace +30d
+                    </span>
+                  )}
+                </Link>
+              </AnimatedItem>
+            ))}
+          </div>
+        </AnimatedSection>
+      )}
 
       {/* Acceso secundario a Logros (sin Hub Explorar) */}
       <AnimatedSection className="px-3.5">

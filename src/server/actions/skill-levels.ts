@@ -27,6 +27,7 @@ async function requireAthleteSession() {
 }
 
 export type MovementSkillTree = {
+  movementId: string;
   movementSlug: string;
   movementName: string;
   nodes: ProgressionNode[];
@@ -47,6 +48,7 @@ export async function getMyMovementSkillTree(
       tenantId_slug: { tenantId: session.user.tenantId, slug: movementSlug },
     },
     select: {
+      id: true,
       slug: true,
       name: true,
       progressions: true,
@@ -57,6 +59,7 @@ export async function getMyMovementSkillTree(
   const progressions = movement.progressions as Progression[] | null;
   if (!progressions || progressions.length === 0) {
     return {
+      movementId: movement.id,
       movementSlug: movement.slug,
       movementName: movement.name,
       nodes: [],
@@ -90,6 +93,7 @@ export async function getMyMovementSkillTree(
   );
 
   return {
+    movementId: movement.id,
     movementSlug: movement.slug,
     movementName: movement.name,
     nodes,
