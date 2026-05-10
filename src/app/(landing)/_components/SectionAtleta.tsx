@@ -115,6 +115,20 @@ export default function SectionAtleta() {
               </div>
             </li>
           </ul>
+
+          <a
+            href="/atletas"
+            className="lp-btn-ghost"
+            style={{
+              alignSelf: "flex-start",
+              marginTop: 8,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              fontWeight: 600,
+            }}
+          >
+            Ver guía completa de Kronos Atletas →
+          </a>
         </motion.div>
 
         <motion.div className="lp-card-frame lp-grain" variants={v}>
