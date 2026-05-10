@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { listMyPRs, type PRRow } from "@/server/actions/prs";
 import { getDailyGreeting, type DailyGreeting } from "@/server/actions/ai";
 import {
@@ -10,6 +11,10 @@ import { StreakHero } from "@/components/atleta/StreakHero";
 import KCard from "@/components/kronos/KCard";
 import CoachCardsSection from "@/components/atleta/CoachCardsSection";
 import { getMyCoachCards } from "@/server/actions/coach-cards";
+import {
+  listMyScheduledProgramWods,
+  type ScheduledProgramWod,
+} from "@/server/actions/athlete-program";
 
 /**
  * Home alternativa para atletas en Box Personal (signup independiente sin
@@ -24,17 +29,24 @@ export default async function PersonalHomeView() {
   let prs: PRRow[] = [];
   let greeting: DailyGreeting | null = null;
   let coachCards: Awaited<ReturnType<typeof getMyCoachCards>> = [];
+  let programWods: ScheduledProgramWod[] = [];
 
   try {
-    [home, prs, greeting, coachCards] = await Promise.all([
+    [home, prs, greeting, coachCards, programWods] = await Promise.all([
       getAthleteHome(),
       listMyPRs(),
       getDailyGreeting(),
       getMyCoachCards().catch(() => []),
+      listMyScheduledProgramWods().catch(() => []),
     ]);
   } catch {
     // Sesión ausente o atleta sin perfil
   }
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayWod = programWods.find(
+    (w) => new Date(w.scheduledFor).toISOString().slice(0, 10) === todayKey,
+  );
 
   if (!home || !home.athlete) {
     return (
@@ -115,10 +127,64 @@ export default async function PersonalHomeView() {
         <StreakHero count={home.streak} lastEventAt={home.streakLastEventAt} />
       </div>
 
+      {/* WOD del día desde el programa */}
+      {todayWod && (
+        <div className="px-3.5" style={{ marginTop: 20 }}>
+          <div
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: "0.18em",
+              color: "var(--k-accent)",
+              textTransform: "uppercase",
+              marginBottom: 6,
+            }}
+          >
+            TU WOD DE HOY · DEL PROGRAMA
+          </div>
+          <div
+            style={{
+              padding: "14px 16px",
+              background: "var(--k-surface)",
+              border: "1px solid var(--k-accent-line)",
+              borderRadius: 14,
+              boxShadow: "var(--k-accent-glow)",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 16,
+                fontWeight: 700,
+                color: "var(--k-t1)",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {todayWod.name}
+            </div>
+            {todayWod.description && (
+              <div
+                style={{
+                  fontFamily: "var(--k-font-body)",
+                  fontSize: 12,
+                  color: "var(--k-t2)",
+                  marginTop: 6,
+                  lineHeight: 1.5,
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                {todayWod.description}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* CTAs principales — el atleta standalone necesita loggear sin clase */}
       <div
         style={{
-          marginTop: 28,
+          marginTop: 20,
           display: "flex",
           flexDirection: "column",
           gap: 10,
@@ -139,23 +205,44 @@ export default async function PersonalHomeView() {
         >
           Loggea tu WOD de hoy →
         </Link>
-        <Link
-          href="/atleta/wod/foto"
-          style={{
-            padding: "14px 20px",
-            borderRadius: 16,
-            fontWeight: 600,
-            fontSize: 13,
-            textAlign: "center",
-            textDecoration: "none",
-            background: "var(--k-surface)",
-            border: "1px solid var(--k-line-2)",
-            color: "var(--k-t1)",
-            letterSpacing: "0.01em",
-          }}
-        >
-          📷 Foto del whiteboard
-        </Link>
+        <div style={{ display: "flex", gap: 10 }}>
+          <Link
+            href={"/atleta/programa" as Route}
+            style={{
+              flex: 1,
+              padding: "14px 16px",
+              borderRadius: 16,
+              fontWeight: 600,
+              fontSize: 12,
+              textAlign: "center",
+              textDecoration: "none",
+              background: "var(--k-surface)",
+              border: "1px solid var(--k-accent-line)",
+              color: "var(--k-accent)",
+              letterSpacing: "0.04em",
+            }}
+          >
+            🗓️ Tu programa
+          </Link>
+          <Link
+            href="/atleta/wod/foto"
+            style={{
+              flex: 1,
+              padding: "14px 16px",
+              borderRadius: 16,
+              fontWeight: 600,
+              fontSize: 12,
+              textAlign: "center",
+              textDecoration: "none",
+              background: "var(--k-surface)",
+              border: "1px solid var(--k-line-2)",
+              color: "var(--k-t1)",
+              letterSpacing: "0.04em",
+            }}
+          >
+            📷 Foto whiteboard
+          </Link>
+        </div>
       </div>
 
       {/* PRs recientes */}

@@ -340,6 +340,10 @@ model WOD {
   scaleOptions Json?
   timeCap      Int?
   isActive     Boolean   @default(true)
+  /** Optional date for personal-program WODs (atleta sin box). */
+  scheduledFor DateTime? @db.Date
+  /** When set, this WOD is part of an athlete's personal program. */
+  ownerAthleteId String?
   createdAt    DateTime  @default(now())
 
   box       Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -348,6 +352,7 @@ model WOD {
   movements WODMovement[]
 
   @@index([tenantId])
+  @@index([tenantId, ownerAthleteId, scheduledFor])
 }
 
 model Movement {
