@@ -27,6 +27,11 @@ import {
 } from "@/server/actions/surveys";
 import ReadinessChip from "@/components/atleta/ReadinessChip";
 import PersonalizedGreeting from "@/components/atleta/PersonalizedGreeting";
+import VictoryHero from "@/components/atleta/VictoryHero";
+import {
+  getActiveSkillForAthlete,
+  getAthleteTier,
+} from "@/server/actions/skills";
 import { getDailyGreeting, type DailyGreeting } from "@/server/actions/ai";
 import { AnimatedStats } from "@/components/kronos/AnimatedStats";
 import {
@@ -85,18 +90,33 @@ export default async function AtletaHomePage() {
   let suggestion: SuggestedBooking = null;
   let coachCards: Awaited<ReturnType<typeof getMyCoachCards>> = [];
 
+  let activeSkill: Awaited<ReturnType<typeof getActiveSkillForAthlete>> = null;
+  let athleteTier: Awaited<ReturnType<typeof getAthleteTier>> = "principiante";
+
   try {
-    [home, classes, prs, wod, greeting, trophies, suggestion, coachCards] =
-      await Promise.all([
-        getAthleteHome(),
-        listAvailableClasses(7),
-        listMyPRs(),
-        getTodayWOD(),
-        getDailyGreeting(),
-        getAthleteTrophies(),
-        getSuggestedNextClass().catch(() => null),
-        getMyCoachCards().catch(() => []),
-      ]);
+    [
+      home,
+      classes,
+      prs,
+      wod,
+      greeting,
+      trophies,
+      suggestion,
+      coachCards,
+      activeSkill,
+      athleteTier,
+    ] = await Promise.all([
+      getAthleteHome(),
+      listAvailableClasses(7),
+      listMyPRs(),
+      getTodayWOD(),
+      getDailyGreeting(),
+      getAthleteTrophies(),
+      getSuggestedNextClass().catch(() => null),
+      getMyCoachCards().catch(() => []),
+      getActiveSkillForAthlete().catch(() => null),
+      getAthleteTier().catch(() => "principiante" as const),
+    ]);
   } catch {
     // Sesión ausente
   }
@@ -212,44 +232,17 @@ export default async function AtletaHomePage() {
 
   return (
     <div className="pb-28 relative">
-      {/* HERO V3 — limpio, sin particles ni gradients hardcoded */}
-      <header
-        style={{
-          padding: "56px 20px 24px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--k-font-display)",
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: "0.2em",
-            color: "var(--k-t3)",
-            textTransform: "uppercase",
-          }}
-        >
-          INICIO · ATLETA
-        </span>
-        <h1
-          style={{
-            fontFamily: "var(--k-font-display)",
-            fontSize: 36,
-            fontWeight: 700,
-            letterSpacing: "-0.03em",
-            color: "var(--k-t1)",
-            margin: 0,
-            lineHeight: 1.05,
-          }}
-        >
-          Hola, {home.athlete?.firstName}
-        </h1>
-      </header>
+      {/* HERO V4 — Tu próxima victoria (tipográfico estilo Whoop) */}
+      <VictoryHero
+        athleteFirstName={home.athlete?.firstName ?? "atleta"}
+        athleteTier={athleteTier}
+        activeSkill={activeSkill}
+      />
 
-      {/* PERSONALIZED GREETING */}
-      <PersonalizedGreeting greeting={greeting} />
+      {/* PERSONALIZED GREETING (insight IA) */}
+      <div style={{ marginTop: 16 }}>
+        <PersonalizedGreeting greeting={greeting} />
+      </div>
 
       {/* COACH VIRTUAL CARDS */}
       {coachCards.length > 0 && (
