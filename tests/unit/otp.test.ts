@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { deriveOtpFromToken, isValidOtpFormat } from "@/server/otp";
+import {
+  deriveOtpFromToken,
+  isValidOtpFormat,
+  hashEmailToken,
+} from "@/server/otp";
+import { createHash } from "crypto";
 
 const SECRET = "test-secret-1234567890-abcdefghijklmnop";
 
@@ -35,6 +40,41 @@ describe("deriveOtpFromToken", () => {
       const code = deriveOtpFromToken(`token-${i}`, SECRET);
       expect(code).toHaveLength(6);
     }
+  });
+});
+
+describe("hashEmailToken (NextAuth-compatible)", () => {
+  it("reproduce el hash interno de NextAuth: sha256(token + secret)", () => {
+    const token = "raw-token-abc";
+    const secret = "test-secret";
+    const expected = createHash("sha256")
+      .update(`${token}${secret}`)
+      .digest("hex");
+    expect(hashEmailToken(token, secret)).toBe(expected);
+  });
+
+  it("es determinístico", () => {
+    const a = hashEmailToken("token-1", "secret-1");
+    const b = hashEmailToken("token-1", "secret-1");
+    expect(a).toBe(b);
+  });
+
+  it("cambia con el token o el secret", () => {
+    const base = hashEmailToken("token-1", "secret-1");
+    expect(hashEmailToken("token-2", "secret-1")).not.toBe(base);
+    expect(hashEmailToken("token-1", "secret-2")).not.toBe(base);
+  });
+
+  it("OTP del raw + OTP del hash NO matchean (justifica el wrapper)", () => {
+    const raw = "raw-token-123";
+    const secret = "secret-abc";
+    const hashed = hashEmailToken(raw, secret);
+    const otpFromRaw = deriveOtpFromToken(raw, secret);
+    const otpFromHash = deriveOtpFromToken(hashed, secret);
+    // Garantía contra regresión: si alguna vez derivamos del raw en send y
+    // del hash en verify (como hacía PR #14 antes del fix), los OTPs son
+    // distintos y el flow OTP fallback no funciona.
+    expect(otpFromRaw).not.toBe(otpFromHash);
   });
 });
 

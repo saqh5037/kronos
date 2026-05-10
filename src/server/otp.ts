@@ -27,11 +27,24 @@
  *    borra inline (housekeeping). El magic link tradicional sigue siendo
  *    hard-delete (consumido vía PrismaAdapter.verifyEmail de NextAuth).
  */
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHash, createHmac, timingSafeEqual } from "crypto";
 import { db } from "./db";
 
 const OTP_LENGTH = 6;
 export const REUSE_GRACE_MS = 5 * 60_000; // 5 min de reuso post-primer-uso
+
+/**
+ * Reproduce el hashing interno de NextAuth EmailProvider:
+ * `sha256(token_raw + secret)`. NextAuth almacena ESTE hash en
+ * VerificationToken.token (no el raw), pero pasa el raw a
+ * `sendVerificationRequest`. Si querés derivar un OTP que matchee con el
+ * registro en DB, hashear primero con esta función.
+ *
+ * Ref: https://github.com/nextauthjs/next-auth/blob/v4/packages/next-auth/src/core/lib/email/signin.ts
+ */
+export function hashEmailToken(rawToken: string, secret: string): string {
+  return createHash("sha256").update(`${rawToken}${secret}`).digest("hex");
+}
 
 export function deriveOtpFromToken(token: string, secret: string): string {
   const hmac = createHmac("sha256", secret);

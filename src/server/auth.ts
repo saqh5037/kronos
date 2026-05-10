@@ -13,7 +13,7 @@ import {
   renderMagicLinkText,
 } from "./email-templates/magic-link";
 import { validateMagicLinkSignIn } from "./auth-signin";
-import { deriveOtpFromToken } from "./otp";
+import { deriveOtpFromToken, hashEmailToken } from "./otp";
 
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 90; // 90 días — keep-alive mobile
 const SESSION_UPDATE_AGE_SECONDS = 60 * 60 * 24; // refrescar JWT 1x/día si activo
@@ -74,9 +74,13 @@ export const authOptions: NextAuthOptions = {
       // (ver REUSE_GRACE_MS en src/server/otp.ts).
       maxAge: 60 * 60,
       async sendVerificationRequest({ identifier, url, provider, token }) {
-        // Derivar OTP del mismo VerificationToken — el email contiene AMBOS:
-        // OTP primario (6 dígitos) + magic link tradicional como fallback.
-        const code = deriveOtpFromToken(token, process.env.NEXTAUTH_SECRET!);
+        // El `token` que NextAuth pasa acá es el RAW (32 bytes random). Pero
+        // NextAuth almacena en DB el HASH = sha256(token + secret), no el raw.
+        // Para que el OTP del email matchee con findOtpMatch (que deriva del
+        // hash almacenado en DB), reproducimos el hashing acá.
+        const secret = process.env.NEXTAUTH_SECRET!;
+        const hashedToken = hashEmailToken(token, secret);
+        const code = deriveOtpFromToken(hashedToken, secret);
         const codePretty = `${code.slice(0, 3)} ${code.slice(3, 6)}`;
         const result = await sendEmail({
           to: [identifier],
