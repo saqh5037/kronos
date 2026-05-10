@@ -242,6 +242,62 @@ export async function getAthleteTrophies(): Promise<AthleteTrophy[]> {
   return items;
 }
 
+export type FeaturedTrophy = {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  earnedAt: Date;
+  isThisMonth: boolean;
+};
+
+export async function getMonthlyFeaturedTrophy(): Promise<FeaturedTrophy | null> {
+  const session = await requireSession();
+  const tenantId = session.user.tenantId;
+  const db = withTenant(tenantId);
+
+  const me = await db.athlete.findFirst({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
+  if (!me) return null;
+
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const monthly = await db.achievement.findFirst({
+    where: { athleteId: me.id, tenantId, earnedAt: { gte: monthStart } },
+    orderBy: { earnedAt: "desc" },
+    include: { badge: true },
+  });
+
+  if (monthly) {
+    return {
+      id: monthly.badge.id,
+      code: monthly.badge.code,
+      name: monthly.badge.name,
+      description: monthly.badge.description,
+      earnedAt: monthly.earnedAt,
+      isThisMonth: true,
+    };
+  }
+
+  const fallback = await db.achievement.findFirst({
+    where: { athleteId: me.id, tenantId },
+    orderBy: { earnedAt: "desc" },
+    include: { badge: true },
+  });
+  if (!fallback) return null;
+  return {
+    id: fallback.badge.id,
+    code: fallback.badge.code,
+    name: fallback.badge.name,
+    description: fallback.badge.description,
+    earnedAt: fallback.earnedAt,
+    isThisMonth: false,
+  };
+}
+
 export type SuggestedBooking = Suggestion;
 
 export async function getSuggestedNextClass(): Promise<SuggestedBooking> {

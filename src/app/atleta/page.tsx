@@ -1,14 +1,14 @@
 import Link from "next/link";
 import {
   getAthleteHome,
-  getAthleteTrophies,
+  getMonthlyFeaturedTrophy,
   getSuggestedNextClass,
   type AthleteHome,
-  type AthleteTrophy,
+  type FeaturedTrophy,
   type SuggestedBooking,
 } from "@/server/actions/athlete-home";
 import { StreakHero } from "@/components/atleta/StreakHero";
-import { TrophyStrip } from "@/components/atleta/TrophyStrip";
+import TrophyStripV4 from "@/components/atleta/TrophyStripV4";
 import { SuggestedBookingCard } from "@/components/atleta/SuggestedBookingCard";
 import {
   listAvailableClasses,
@@ -86,12 +86,12 @@ export default async function AtletaHomePage() {
   let readinessSurvey: SurveyRow | null = null;
   let alreadyRespondedReadiness = true;
   let greeting: DailyGreeting | null = null;
-  let trophies: AthleteTrophy[] = [];
   let suggestion: SuggestedBooking = null;
   let coachCards: Awaited<ReturnType<typeof getMyCoachCards>> = [];
 
   let activeSkill: Awaited<ReturnType<typeof getActiveSkillForAthlete>> = null;
   let athleteTier: Awaited<ReturnType<typeof getAthleteTier>> = "principiante";
+  let featuredTrophy: FeaturedTrophy | null = null;
 
   try {
     [
@@ -100,22 +100,22 @@ export default async function AtletaHomePage() {
       prs,
       wod,
       greeting,
-      trophies,
       suggestion,
       coachCards,
       activeSkill,
       athleteTier,
+      featuredTrophy,
     ] = await Promise.all([
       getAthleteHome(),
       listAvailableClasses(7),
       listMyPRs(),
       getTodayWOD(),
       getDailyGreeting(),
-      getAthleteTrophies(),
       getSuggestedNextClass().catch(() => null),
       getMyCoachCards().catch(() => []),
       getActiveSkillForAthlete().catch(() => null),
       getAthleteTier().catch(() => "principiante" as const),
+      getMonthlyFeaturedTrophy().catch(() => null),
     ]);
   } catch {
     // Sesión ausente
@@ -271,15 +271,10 @@ export default async function AtletaHomePage() {
         prCount={home.prCount}
       />
 
-      {/* TROPHY STRIP */}
-      {trophies.length > 0 && (
-        <div className="mt-4 px-3.5">
-          <div className="k-eyebrow mb-2" style={{ color: "var(--k-t2)" }}>
-            LOGROS · {home.xpTotal} XP
-          </div>
-          <TrophyStrip items={trophies} />
-        </div>
-      )}
+      {/* TROPHY V4 — logro destacado del mes (curado) */}
+      <div className="mt-4 px-3.5">
+        <TrophyStripV4 featured={featuredTrophy} />
+      </div>
 
       {/* NEXT BOOKING */}
       <RevealOnScroll variant="fade-up" className="mt-4 px-3.5">
