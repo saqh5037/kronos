@@ -133,7 +133,7 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
             className="text-xs font-mono uppercase tracking-wider"
             style={{ color: "var(--k-t3)" }}
           >
-            Mete el código del email
+            Pegá los 6 dígitos del email
           </p>
           <OtpInput
             value={code}
