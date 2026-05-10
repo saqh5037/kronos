@@ -266,6 +266,7 @@ export default function PermissionMatrix({
                       </span>
                       <input
                         type="number"
+                        inputMode="decimal"
                         defaultValue={state.threshold ?? ""}
                         onBlur={(e) => updateThreshold(action, e.target.value)}
                         placeholder="—"

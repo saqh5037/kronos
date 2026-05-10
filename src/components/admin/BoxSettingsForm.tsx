@@ -178,6 +178,7 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
           <Field label="Capacidad default por clase">
             <input
               type="number"
+              inputMode="numeric"
               min={1}
               max={200}
               value={defaultClassCapacity}

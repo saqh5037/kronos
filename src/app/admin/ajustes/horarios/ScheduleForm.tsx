@@ -292,6 +292,7 @@ function NumberField({
       </span>
       <input
         type="number"
+        inputMode="numeric"
         value={value}
         min={min}
         max={max}
