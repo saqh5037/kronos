@@ -15,7 +15,7 @@ import { cookies } from "next/headers";
 import { encode } from "next-auth/jwt";
 import { db } from "@/server/db";
 import { logAudit } from "@/server/audit";
-import { findOtpMatch, consumeOtpToken } from "@/server/otp";
+import { findOtpMatch, markOtpConsumed } from "@/server/otp";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 90; // 90 días, igual que auth.ts
@@ -87,8 +87,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: match.reason, message }, { status: 400 });
   }
 
-  // Match. Consume el token y resuelve el usuario para construir el JWT.
-  await consumeOtpToken(match.identifier, match.token);
+  // Match. Soft-consume el token (queda válido 5 min más para cross-browser)
+  // y resuelve el usuario para construir el JWT.
+  await markOtpConsumed(match.identifier, match.token);
 
   const user = await db.user.findUnique({
     where: { email: match.identifier },

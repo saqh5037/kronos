@@ -126,8 +126,9 @@ model Session {
 
 model VerificationToken {
   identifier String
-  token      String   @unique
+  token      String    @unique
   expires    DateTime
+  consumedAt DateTime?
 
   @@unique([identifier, token])
 }

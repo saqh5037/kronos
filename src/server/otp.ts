@@ -1,10 +1,11 @@
 /**
- * OTP fallback al magic link de NextAuth EmailProvider.
+ * OTP del email atleta — código de 6 dígitos derivado del VerificationToken.
  *
- * El email de magic link incluye AMBOS: el link tradicional y un código de
- * 6 dígitos derivado del mismo VerificationToken. Si el atleta no puede usar
- * el link (cross-browser iOS, webview Gmail, link expirado), mete el código
- * en un input y obtiene la misma sesión.
+ * Cada email enviado por NextAuth EmailProvider incluye un magic link y, en
+ * paralelo, un código numérico derivado determinísticamente del token raw
+ * almacenado en VerificationToken. El usuario puede entrar tipeando el código
+ * en `/api/auth/otp/verify` (mismo efecto que clickear el link, pero sin la
+ * fricción cross-browser de iOS).
  *
  * Derivación del código:
  *  - HMAC-SHA256(token, NEXTAUTH_SECRET) → digest
@@ -15,14 +16,22 @@
  *  - Determinístico: mismo token siempre produce mismo código
  *  - Sin secret server, no se puede derivar (HMAC + secret)
  *  - Sin token, no se puede derivar (HMAC requiere los dos)
- *  - El token raw vive en VerificationToken.token (default NextAuth/Prisma adapter),
- *    así que para validar OTP buscamos por identifier=email + expires>now y
- *    derivamos el código de cada uno hasta encontrar match.
+ *
+ * Reusabilidad (cross-browser, eliminada fricción iPhone Chrome ↔ Safari):
+ *  - El código vive `expires` (1h por config en EmailProvider).
+ *  - Al primer uso (`markOtpConsumed`) se marca `consumedAt` pero NO se borra.
+ *  - Durante los siguientes `REUSE_GRACE_MS` (5 min), el mismo código sigue
+ *    siendo válido — el atleta puede usarlo en Chrome y luego en Safari sin
+ *    pedir uno nuevo.
+ *  - Pasada la ventana de gracia, `findOtpMatch` lo trata como inválido y lo
+ *    borra inline (housekeeping). El magic link tradicional sigue siendo
+ *    hard-delete (consumido vía PrismaAdapter.verifyEmail de NextAuth).
  */
 import { createHmac, timingSafeEqual } from "crypto";
 import { db } from "./db";
 
 const OTP_LENGTH = 6;
+export const REUSE_GRACE_MS = 5 * 60_000; // 5 min de reuso post-primer-uso
 
 export function deriveOtpFromToken(token: string, secret: string): string {
   const hmac = createHmac("sha256", secret);
@@ -45,7 +54,6 @@ export function isValidOtpFormat(input: string): boolean {
 
 /**
  * Compara dos strings de igual longitud en tiempo constante (anti timing attack).
- * Usa Buffer porque ambos strings serán de 6 dígitos.
  */
 function constantTimeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -62,11 +70,11 @@ export type OtpMatchResult =
 
 /**
  * Busca un VerificationToken activo para `email` que matchee con el OTP `code`.
- * Si encuentra, devuelve el token raw (para que el caller lo consuma).
+ * Acepta tokens nunca consumidos o consumidos hace ≤ REUSE_GRACE_MS.
  *
- * NOTA: NO consume el token aquí. El consumo (delete) es responsabilidad del
- * caller después de crear la sesión, para mantener atomic la sequence
- * "match → consume → cookie".
+ * NO consume el token aquí. El consumo (mark) es responsabilidad del caller
+ * después de crear la sesión, para mantener atomic la sequence
+ * "match → mark → cookie".
  */
 export async function findOtpMatch(
   email: string,
@@ -85,7 +93,24 @@ export async function findOtpMatch(
   if (candidates.length === 0) {
     return { ok: false, reason: "NO_TOKEN" };
   }
-  const active = candidates.filter((t) => t.expires > now);
+  const active = candidates.filter((t) => {
+    if (t.expires <= now) return false;
+    if (
+      t.consumedAt &&
+      now.getTime() - t.consumedAt.getTime() > REUSE_GRACE_MS
+    ) {
+      // Pasó la ventana de gracia: GC inline, best-effort.
+      db.verificationToken
+        .delete({
+          where: {
+            identifier_token: { identifier: t.identifier, token: t.token },
+          },
+        })
+        .catch(() => {});
+      return false;
+    }
+    return true;
+  });
   if (active.length === 0) {
     return { ok: false, reason: "EXPIRED" };
   }
@@ -98,15 +123,25 @@ export async function findOtpMatch(
   return { ok: false, reason: "MISMATCH" };
 }
 
-export async function consumeOtpToken(
+/**
+ * Marca un VerificationToken como consumido (soft). Idempotente:
+ *   - primer call: setea consumedAt = now
+ *   - calls subsiguientes (mismo token): no cambian el timestamp original,
+ *     porque updateMany filtra por consumedAt: null.
+ *
+ * Se mantiene en DB hasta que `findOtpMatch` lo GC al pasar la ventana de
+ * gracia, o hasta que el `expires` lo invalide.
+ */
+export async function markOtpConsumed(
   identifier: string,
   token: string,
 ): Promise<void> {
   await db.verificationToken
-    .delete({
-      where: { identifier_token: { identifier, token } },
+    .updateMany({
+      where: { identifier, token, consumedAt: null },
+      data: { consumedAt: new Date() },
     })
     .catch(() => {
-      // Idempotent: si ya fue borrado por otro proceso, ignorar.
+      // Idempotente: si ya fue marcado o borrado, ignorar.
     });
 }

@@ -66,7 +66,7 @@ describe("renderEmailLayout", () => {
 });
 
 describe("renderMagicLinkEmail", () => {
-  it("incluye email del recipient + URL clickeable + código formateado", () => {
+  it("incluye email del recipient + magic link fallback + código formateado + link otp-redirect", () => {
     const html = renderMagicLinkEmail({
       email: "owner@box.com",
       url: "https://kronos-fit.com/api/auth/callback/email?token=xyz",
@@ -76,7 +76,9 @@ describe("renderMagicLinkEmail", () => {
     expect(html).toContain(
       "https://kronos-fit.com/api/auth/callback/email?token=xyz",
     );
-    expect(html).toContain("Entrar a Kronos");
+    // CTA primario es OTP redirect, magic link queda como fallback secundario
+    expect(html).toContain("Copiar código y abrir Kronos");
+    expect(html).toContain("/login/otp");
     // Código se muestra formato "123 456"
     expect(html).toContain("123 456");
   });
@@ -93,7 +95,7 @@ describe("renderMagicLinkEmail", () => {
 });
 
 describe("renderMagicLinkText", () => {
-  it("plain text fallback contiene email + url + código + instrucciones", () => {
+  it("plain text contiene email + magic link + código + iOS one-time-code marker", () => {
     const text = renderMagicLinkText({
       email: "owner@box.com",
       url: "https://kronos-fit.com/x",
@@ -101,8 +103,13 @@ describe("renderMagicLinkText", () => {
     });
     expect(text).toContain("owner@box.com");
     expect(text).toContain("https://kronos-fit.com/x");
-    expect(text).toContain("expira en 24h");
+    expect(text).toContain("válido 1h");
     expect(text).toContain("654 321");
+    // Última línea formato `@<host> #<code>` para autofill iOS
+    expect(text).toMatch(/@kronos-fit\.com #654321\s*$/);
+    // Link tappable a /login/otp con código y email
+    expect(text).toContain("/login/otp?");
+    expect(text).toContain("code=654321");
   });
 });
 
