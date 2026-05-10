@@ -50,6 +50,46 @@ export function rateLimit(
   return { ok: true, retryAfterSec: 0, remaining: limit - fresh.length };
 }
 
+/**
+ * Read-only check: lee el bucket sin incrementar. Útil cuando querés decidir
+ * si bloquear ANTES de hacer la operación, e incrementar SOLO cuando la
+ * operación falla (penalizar fallos, no éxitos — caso típico OTP verify).
+ */
+export function rateLimitCheck(
+  key: string,
+  limit: number,
+  windowMs: number,
+): RateLimitResult {
+  const now = Date.now();
+  const cutoff = now - windowMs;
+  const existing = buckets.get(key) ?? [];
+  const fresh = existing.filter((t) => t > cutoff);
+
+  if (fresh.length >= limit) {
+    const oldest = fresh[0]!;
+    const retryAfterSec = Math.max(
+      1,
+      Math.ceil((oldest + windowMs - now) / 1000),
+    );
+    return { ok: false, retryAfterSec, remaining: 0 };
+  }
+  return { ok: true, retryAfterSec: 0, remaining: limit - fresh.length };
+}
+
+/**
+ * Incrementa el bucket sin chequear el cap. Llamar después de un fallo
+ * cuando ya pasaste `rateLimitCheck` y querés contar este intento.
+ */
+export function rateLimitHit(key: string, windowMs: number): void {
+  const now = Date.now();
+  const cutoff = now - windowMs;
+  const existing = buckets.get(key) ?? [];
+  const fresh = existing.filter((t) => t > cutoff);
+  fresh.push(now);
+  buckets.set(key, fresh);
+  maybeCleanup(now);
+}
+
 function maybeCleanup(now: number) {
   opsSinceCleanup += 1;
   if (opsSinceCleanup < CLEANUP_EVERY) return;

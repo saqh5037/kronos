@@ -16,14 +16,20 @@ import { encode } from "next-auth/jwt";
 import { db } from "@/server/db";
 import { logAudit } from "@/server/audit";
 import { findOtpMatch, markOtpConsumed } from "@/server/otp";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import {
+  rateLimit,
+  rateLimitCheck,
+  rateLimitHit,
+  getClientIp,
+} from "@/lib/rate-limit";
 
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 90; // 90 días, igual que auth.ts
 
 export async function POST(req: NextRequest) {
-  // Rate limit por IP: 10 intentos / 5 min
+  // Rate limit por IP: 20 requests / 5 min (preventivo anti-spam — cuenta
+  // TODOS los requests, exitosos o no, para limitar bots agresivos).
   const ip = getClientIp(req.headers);
-  const rlIp = rateLimit(`otp-verify-ip:${ip}`, 10, 5 * 60_000);
+  const rlIp = rateLimit(`otp-verify-ip:${ip}`, 20, 5 * 60_000);
   if (!rlIp.ok) {
     return NextResponse.json(
       {
@@ -54,9 +60,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Rate limit por email: 5 intentos / 10 min (anti brute force al código de 6
-  // dígitos para un email específico)
-  const rlEmail = rateLimit(`otp-verify-email:${email}`, 5, 10 * 60_000);
+  // Rate limit por email: 8 FALLOS / 10 min (anti brute force al código de 6
+  // dígitos). Solo cuenta intentos fallidos — un atleta legítimo que mete el
+  // código bien al primer intento NO consume cap. Cuando entra al rango
+  // /login/otp redirect tras un reenvío, no se penaliza el éxito.
+  const rlKey = `otp-verify-email-fail:${email}`;
+  const rlEmail = rateLimitCheck(rlKey, 8, 10 * 60_000);
   if (!rlEmail.ok) {
     return NextResponse.json(
       {
@@ -78,6 +87,8 @@ export async function POST(req: NextRequest) {
 
   const match = await findOtpMatch(email, code, secret);
   if (!match.ok) {
+    // Penalizar este fallo en el bucket por-email (anti brute force).
+    rateLimitHit(rlKey, 10 * 60_000);
     const message =
       match.reason === "EXPIRED"
         ? "El código expiró. Pedí uno nuevo."

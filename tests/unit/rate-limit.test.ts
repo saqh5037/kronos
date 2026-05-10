@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import {
   rateLimit,
+  rateLimitCheck,
+  rateLimitHit,
   getClientIp,
   __resetRateLimitForTests,
 } from "@/lib/rate-limit";
@@ -45,6 +47,59 @@ describe("rateLimit", () => {
     for (let i = 0; i < 5; i++) rateLimit("ip:1.1.1.1", 5, 60_000);
     expect(rateLimit("ip:1.1.1.1", 5, 60_000).ok).toBe(false);
     expect(rateLimit("ip:2.2.2.2", 5, 60_000).ok).toBe(true);
+  });
+});
+
+describe("rateLimitCheck (read-only) + rateLimitHit (incrementa)", () => {
+  beforeEach(() => {
+    __resetRateLimitForTests();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-09T12:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("rateLimitCheck NO incrementa el bucket — múltiples checks consecutivos siguen ok", () => {
+    for (let i = 0; i < 20; i++) {
+      const r = rateLimitCheck("k:1", 5, 60_000);
+      expect(r.ok).toBe(true);
+      expect(r.remaining).toBe(5);
+    }
+  });
+
+  it("rateLimitHit incrementa y rateLimitCheck refleja el cambio", () => {
+    rateLimitHit("k:1", 60_000);
+    const r1 = rateLimitCheck("k:1", 5, 60_000);
+    expect(r1.remaining).toBe(4);
+    rateLimitHit("k:1", 60_000);
+    const r2 = rateLimitCheck("k:1", 5, 60_000);
+    expect(r2.remaining).toBe(3);
+  });
+
+  it("patrón 'solo penalizar fallos': N éxitos no consumen cap, M fallos sí", () => {
+    // Simula: 100 logins exitosos (no incrementan) + 5 fallos (incrementan)
+    for (let i = 0; i < 100; i++) {
+      const r = rateLimitCheck("k:1", 5, 60_000);
+      expect(r.ok).toBe(true);
+      // éxito → no llamamos a hit
+    }
+    // Ahora 5 fallos
+    for (let i = 0; i < 5; i++) {
+      expect(rateLimitCheck("k:1", 5, 60_000).ok).toBe(true);
+      rateLimitHit("k:1", 60_000);
+    }
+    // Sexto debería bloquear
+    expect(rateLimitCheck("k:1", 5, 60_000).ok).toBe(false);
+  });
+
+  it("rateLimitCheck con bucket lleno devuelve retryAfterSec realista", () => {
+    for (let i = 0; i < 5; i++) rateLimitHit("k:1", 60_000);
+    const r = rateLimitCheck("k:1", 5, 60_000);
+    expect(r.ok).toBe(false);
+    expect(r.retryAfterSec).toBeGreaterThan(0);
+    expect(r.retryAfterSec).toBeLessThanOrEqual(60);
   });
 });
 
