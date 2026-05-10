@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { kToast } from "@/lib/toast";
+import MagicLinkWaiting from "@/components/auth/MagicLinkWaiting";
 
 const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEV_LOGIN === "1";
 
@@ -33,16 +34,16 @@ export default function LoginForm() {
         return;
       }
       if (res?.error) {
-        kToast.error("No se pudo enviar la liga");
+        kToast.error("No se pudo enviar el código");
         setError("Algo no funcionó. Probá de nuevo en un momento.");
         return;
       }
-      kToast.success("Liga enviada", {
-        description: "Revisa tu bandeja de entrada.",
+      kToast.success("Código enviado", {
+        description: "Revisá tu correo — código de 6 dígitos.",
       });
       setSent(true);
     } catch {
-      kToast.error("No se pudo enviar la liga");
+      kToast.error("No se pudo enviar el código");
     } finally {
       setLoading(false);
     }
@@ -68,13 +69,8 @@ export default function LoginForm() {
 
   if (sent) {
     return (
-      <div className="k-card p-6 text-center">
-        <p className="k-eyebrow mb-2" style={{ color: "var(--k-accent)" }}>
-          Liga enviada
-        </p>
-        <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-          Revisa tu correo y haz clic en la liga para entrar.
-        </p>
+      <div className="k-card p-6">
+        <MagicLinkWaiting email={email} />
       </div>
     );
   }
@@ -102,7 +98,7 @@ export default function LoginForm() {
             disabled={loading}
             className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50"
           >
-            {loading ? "Enviando…" : "Enviar liga de acceso"}
+            {loading ? "Enviando…" : "Enviar código"}
           </button>
           <button
             type="button"
@@ -170,7 +166,7 @@ export default function LoginForm() {
             className="text-xs underline mt-1"
             style={{ color: "var(--k-t2)" }}
           >
-            ¿Olvidaste tu contraseña? Usá magic link
+            ¿Olvidaste tu contraseña? Pedí un código
           </button>
         </form>
       )}
