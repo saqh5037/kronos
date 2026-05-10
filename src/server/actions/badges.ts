@@ -193,6 +193,16 @@ export async function getBadgeDetail(
   };
 }
 
+export async function getMyAthleteFirstName(): Promise<string | null> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId || !session.user.id) return null;
+  const athlete = await rawDb.athlete.findFirst({
+    where: { userId: session.user.id, tenantId: session.user.tenantId },
+    select: { firstName: true },
+  });
+  return athlete?.firstName ?? null;
+}
+
 async function resolveAthleteContext() {
   const session = await requireAthleteSession();
   const tenantId = session.user.tenantId;

@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getBadgeDetail, type BadgeDetail } from "@/server/actions/badges";
+import {
+  getBadgeDetail,
+  getMyAthleteFirstName,
+  type BadgeDetail,
+} from "@/server/actions/badges";
+import BadgeShareCanvas from "@/components/atleta/BadgeShareCanvas";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +27,10 @@ export default async function BadgeDetailPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
-  const badge = await getBadgeDetail(code);
+  const [badge, athleteFirstName] = await Promise.all([
+    getBadgeDetail(code),
+    getMyAthleteFirstName().catch(() => null),
+  ]);
   if (!badge) notFound();
 
   return (
@@ -55,7 +63,10 @@ export default async function BadgeDetailPage({
 
       <div className="px-4 mt-5 flex flex-col gap-4">
         <CriteriaCard badge={badge} />
-        <DescriptionCard badge={badge} />
+        <DescriptionCard
+          badge={badge}
+          athleteFirstName={athleteFirstName ?? "Atleta"}
+        />
       </div>
     </main>
   );
@@ -261,7 +272,13 @@ function CriteriaCard({ badge }: { badge: BadgeDetail }) {
   );
 }
 
-function DescriptionCard({ badge }: { badge: BadgeDetail }) {
+function DescriptionCard({
+  badge,
+  athleteFirstName,
+}: {
+  badge: BadgeDetail;
+  athleteFirstName: string;
+}) {
   if (badge.unlocked) {
     return (
       <div className="k-card" style={{ padding: 16 }}>
@@ -282,29 +299,19 @@ function DescriptionCard({ badge }: { badge: BadgeDetail }) {
             fontSize: 14,
             color: "var(--k-t1)",
             lineHeight: 1.4,
+            marginBottom: 14,
           }}
         >
           Compartí este logro con tu box. Cada PR cuenta historia.
         </div>
-        <button
-          disabled
-          style={{
-            marginTop: 12,
-            background: "var(--k-elevated)",
-            color: "var(--k-t3)",
-            border: "1px solid var(--k-line)",
-            borderRadius: 12,
-            padding: "10px 16px",
-            fontFamily: "var(--k-font-display)",
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            cursor: "not-allowed",
-          }}
-        >
-          Compartir · Pronto
-        </button>
+        <BadgeShareCanvas
+          athleteName={athleteFirstName}
+          badgeName={badge.name}
+          badgeCode={badge.code}
+          badgeDescription={badge.description}
+          earnedAtISO={(badge.earnedAt ?? new Date()).toISOString()}
+          xp={badge.xp}
+        />
       </div>
     );
   }
