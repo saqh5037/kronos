@@ -93,8 +93,6 @@ const allTabs: Tab[] = [
   {
     href: "/atleta/movimientos",
     label: "Movs",
-    /** Skills reemplaza a Movs en V4. Sub-rutas siguen accesibles por URL. */
-    hideAlways: true,
     icon: (active: boolean) => (
       <svg
         viewBox="0 0 24 24"
