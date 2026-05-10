@@ -10,6 +10,8 @@ export type AchievementBadge = {
   name: string;
   description: string;
   xp: number;
+  /** Eyebrow text override. Default: "LOGRO DESBLOQUEADO · +X XP" (or "NUEVO PR" if xp === 0). */
+  eyebrow?: string;
 };
 
 const ACCENT = "#c8ff2d";
@@ -144,7 +146,8 @@ export function AchievementToastHost() {
                   marginBottom: 2,
                 }}
               >
-                LOGRO DESBLOQUEADO · +{t.xp} XP
+                {t.eyebrow ??
+                  (t.xp > 0 ? `LOGRO DESBLOQUEADO · +${t.xp} XP` : "NUEVO PR")}
               </div>
               <div
                 style={{

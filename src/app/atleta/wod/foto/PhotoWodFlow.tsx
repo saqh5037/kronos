@@ -5,8 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { kToast } from "@/lib/toast";
 import { uploadAndAnalyzePhotoWod } from "@/server/actions/atleta-photo-wod";
-import { createMyQuickWod } from "@/server/actions/atleta-quick-wod";
+import {
+  createMyQuickWod,
+  type QuickWodPR,
+} from "@/server/actions/atleta-quick-wod";
 import type { PhotoWodAIResult } from "@/server/ocr/photo-wod";
+import { fireAchievementToast } from "@/components/atleta/AchievementToast";
+import { formatScore } from "@/lib/scores";
 
 type WodType = "FORTIME" | "AMRAP" | "EMOM" | "TABATA" | "STRENGTH" | "CUSTOM";
 type ScoreType = "TIME" | "REPS" | "WEIGHT" | "ROUNDS_REPS";
@@ -199,10 +204,41 @@ export default function PhotoWodFlow() {
         setStep("review");
         return;
       }
-      kToast.success("¡WOD guardado desde la foto!");
+      if (result.pr.isPR) {
+        firePRToast(result.pr, result.scoreId);
+      } else {
+        kToast.success("¡WOD guardado desde la foto!");
+      }
       router.push("/atleta");
       router.refresh();
     });
+  }
+
+  function firePRToast(pr: QuickWodPR, scoreId: string) {
+    const newFormatted = formatScore(pr.newValue, pr.scoreType);
+    if (pr.isFirst) {
+      fireAchievementToast([
+        {
+          badgeId: `wod-first-${scoreId}`,
+          code: "WOD_FIRST",
+          name: `Primer score en ${pr.wodName}`,
+          description: `${newFormatted} — tu marca a vencer.`,
+          xp: 0,
+          eyebrow: "PRIMER REGISTRO",
+        },
+      ]);
+      return;
+    }
+    const prevFormatted = formatScore(pr.previousBest ?? 0, pr.scoreType);
+    fireAchievementToast([
+      {
+        badgeId: `wod-pr-${scoreId}`,
+        code: "WOD_PR",
+        name: `¡Nuevo PR en ${pr.wodName}!`,
+        description: `${newFormatted} · antes ${prevFormatted}.`,
+        xp: 0,
+      },
+    ]);
   }
 
   if (step === "upload") {

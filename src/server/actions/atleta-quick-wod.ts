@@ -6,6 +6,7 @@ import { authOptions } from "@/server/auth";
 import { db as prismaBase, withTenant } from "@/server/db";
 import { isPersonalBoxSlug } from "@/lib/personal-box";
 import { logAudit } from "@/server/audit";
+import { detectPR, isBetterScore } from "@/lib/scores";
 
 /**
  * Mini editor de WOD para atletas en Box Personal: en una sola pantalla,
@@ -50,8 +51,17 @@ export const quickWodSchema = z.object({
 
 export type QuickWodInput = z.infer<typeof quickWodSchema>;
 
+export type QuickWodPR = {
+  isPR: boolean;
+  isFirst: boolean;
+  previousBest: number | null;
+  newValue: number;
+  scoreType: QuickWodInput["scoreType"];
+  wodName: string;
+};
+
 export type QuickWodResult =
-  | { ok: true; wodId: string; scoreId: string }
+  | { ok: true; wodId: string; scoreId: string; pr: QuickWodPR }
   | {
       ok: false;
       error: "UNAUTH" | "NOT_PERSONAL" | "VALIDATION" | "NO_ATHLETE";
@@ -137,6 +147,29 @@ export async function createMyQuickWod(
     canonicalValue = data.scoreValue + data.scoreReps / 1000;
   }
 
+  // PR detection: buscar el mejor score previo del atleta en WODs anteriores
+  // con el MISMO name (case-insensitive) + scoreType. Si el nuevo supera al
+  // mejor previo, es PR. Si no había scores previos, es "primer score".
+  const previousScores = await db.score.findMany({
+    where: {
+      athleteId: athlete.id,
+      wod: {
+        name: { equals: data.name, mode: "insensitive" },
+        scoreType: data.scoreType,
+      },
+    },
+    select: { value: true },
+  });
+
+  const previousBest = previousScores.reduce<number | null>((best, s) => {
+    const v = Number(s.value);
+    if (best === null) return v;
+    return isBetterScore(best, v, data.scoreType) ? v : best;
+  }, null);
+
+  const isFirst = previousBest === null;
+  const isPR = detectPR(previousBest, canonicalValue, data.scoreType) !== null;
+
   const result = await prismaBase.$transaction(async (tx) => {
     const wod = await tx.wOD.create({
       data: {
@@ -172,5 +205,17 @@ export async function createMyQuickWod(
     metadata: { source: "atleta-quick-wod", scoreId: result.scoreId },
   });
 
-  return { ok: true, wodId: result.wodId, scoreId: result.scoreId };
+  return {
+    ok: true,
+    wodId: result.wodId,
+    scoreId: result.scoreId,
+    pr: {
+      isPR,
+      isFirst,
+      previousBest,
+      newValue: canonicalValue,
+      scoreType: data.scoreType,
+      wodName: data.name,
+    },
+  };
 }
