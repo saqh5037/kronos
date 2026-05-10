@@ -20,6 +20,7 @@ export default function SkillTree({ movementSlug, nodes }: Props) {
     name: string;
     description: string;
   } | null>(null);
+  const [xpToast, setXpToast] = useState<number | null>(null);
 
   function handleMark(progressionSlug: string, status: "CURRENT" | "ACHIEVED") {
     setErrorMsg(null);
@@ -32,15 +33,20 @@ export default function SkillTree({ movementSlug, nodes }: Props) {
       });
       if (!r.ok) {
         setErrorMsg(translateReason(r.reason));
-      } else if (r.unlockedBadges.length > 0) {
-        const first = r.unlockedBadges[0];
-        if (first) {
-          setUnlockedBadge({
-            name: first.name,
-            description: first.description,
-          });
-          // Auto-dismiss after 5s
-          setTimeout(() => setUnlockedBadge(null), 5000);
+      } else {
+        if (r.xpAwarded > 0) {
+          setXpToast(r.xpAwarded);
+          setTimeout(() => setXpToast(null), 2400);
+        }
+        if (r.unlockedBadges.length > 0) {
+          const first = r.unlockedBadges[0];
+          if (first) {
+            setUnlockedBadge({
+              name: first.name,
+              description: first.description,
+            });
+            setTimeout(() => setUnlockedBadge(null), 5000);
+          }
         }
       }
       setPendingSlug(null);
@@ -85,6 +91,33 @@ export default function SkillTree({ movementSlug, nodes }: Props) {
           }}
         >
           {errorMsg}
+        </div>
+      )}
+      {xpToast !== null && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            position: "fixed",
+            top: 60,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 60,
+            padding: "10px 18px",
+            background: "var(--k-accent)",
+            color: "var(--k-accent-on)",
+            borderRadius: 999,
+            boxShadow: "var(--k-accent-glow)",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            pointerEvents: "none",
+            animation: "k-pulse-glow 2.4s ease-out",
+          }}
+        >
+          +{xpToast} XP
         </div>
       )}
       {unlockedBadge && (

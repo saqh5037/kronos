@@ -102,10 +102,18 @@ export type UnlockedBadgeRef = {
   description: string;
 };
 
+import {
+  SKILL_PROGRESSION_XP,
+  SKILL_XP_LEDGER_REASON,
+  SKILL_XP_LEDGER_SOURCE_TYPE,
+  buildSkillXPLedgerSourceId,
+} from "@/lib/skills/xp";
+
 export type MarkSkillLevelResult =
   | {
       ok: true;
       status: "CURRENT" | "ACHIEVED";
+      xpAwarded: number;
       unlockedBadges: UnlockedBadgeRef[];
     }
   | { ok: false; reason: string };
@@ -165,6 +173,19 @@ export async function markMyProgressionStatus(args: {
     if (!can.ok) return { ok: false, reason: can.reason };
   }
 
+  // Detect transition to ACHIEVED to award XP only once per progression.
+  const previousLevel = await rawDb.athleteSkillLevel.findUnique({
+    where: {
+      athleteId_movementSlug_progressionSlug: {
+        athleteId: session.athleteId,
+        movementSlug,
+        progressionSlug,
+      },
+    },
+    select: { status: true },
+  });
+  const wasAchievedBefore = previousLevel?.status === "ACHIEVED";
+
   await rawDb.athleteSkillLevel.upsert({
     where: {
       athleteId_movementSlug_progressionSlug: {
@@ -188,6 +209,27 @@ export async function markMyProgressionStatus(args: {
       notes: notes ?? undefined,
     },
   });
+
+  // Award XP only on transition into ACHIEVED. Idempotent via XPLedger
+  // @@unique([sourceType, sourceId, reason]).
+  let xpAwarded = 0;
+  if (status === "ACHIEVED" && !wasAchievedBefore) {
+    try {
+      await rawDb.xPLedger.create({
+        data: {
+          tenantId: session.user.tenantId,
+          athleteId: session.athleteId,
+          amount: SKILL_PROGRESSION_XP,
+          reason: SKILL_XP_LEDGER_REASON,
+          sourceType: SKILL_XP_LEDGER_SOURCE_TYPE,
+          sourceId: buildSkillXPLedgerSourceId(movementSlug, progressionSlug),
+        },
+      });
+      xpAwarded = SKILL_PROGRESSION_XP;
+    } catch {
+      // Already awarded — XPLedger unique constraint guards against dupes.
+    }
+  }
 
   // When a node is achieved, demote any other CURRENT in this movement
   // to "no row" by deleting CURRENT rows on superseded slugs (idempotente).
@@ -221,6 +263,8 @@ export async function markMyProgressionStatus(args: {
 
   revalidatePath("/atleta/movimientos");
   revalidatePath("/atleta/logros");
+  revalidatePath("/atleta/skills");
+  revalidatePath("/atleta");
   // Find the Movement.id for path revalidation
   const mv = await rawDb.movement.findUnique({
     where: {
@@ -230,7 +274,7 @@ export async function markMyProgressionStatus(args: {
   });
   if (mv) revalidatePath(`/atleta/movimientos/${mv.id}`);
 
-  return { ok: true, status, unlockedBadges };
+  return { ok: true, status, xpAwarded, unlockedBadges };
 }
 
 /**
