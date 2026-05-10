@@ -39,10 +39,11 @@ export default async function AtletaSignupPage({
             <KronosLogo variant="mark" size={56} />
           </div>
           <h1 className="font-display font-bold text-3xl tracking-[-0.01em]">
-            Empezá a trackear
+            Atleta Kronos
           </h1>
           <p className="mt-2 text-sm" style={{ color: "var(--k-t2)" }}>
-            Tus PRs, tus movimientos, tu progreso. Gratis. Sin box requerido.
+            Tus PRs, tus movimientos, tu progreso. Si ya tenés cuenta entrás con
+            tu email — si no, te ayudamos a crearla.
           </p>
         </div>
 
@@ -56,19 +57,6 @@ export default async function AtletaSignupPage({
 
         <p
           className="text-center text-xs mt-6"
-          style={{ color: "var(--k-t3)" }}
-        >
-          ¿Ya tenés cuenta?{" "}
-          <Link
-            href="/login"
-            className="underline"
-            style={{ color: "var(--k-t2)" }}
-          >
-            Iniciar sesión
-          </Link>
-        </p>
-        <p
-          className="text-center text-xs mt-2"
           style={{ color: "var(--k-t3)" }}
         >
           ¿Sos dueño de un box?{" "}

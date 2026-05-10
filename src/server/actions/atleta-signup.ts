@@ -38,6 +38,44 @@ export type AtletaSignupResult =
 
 const SLUG_RETRY = 3;
 
+export type EmailCheckResult =
+  | { ok: true; exists: boolean; email: string }
+  | { ok: false; error: "INVALID_EMAIL" | "RATE_LIMITED"; message: string };
+
+/**
+ * Pure lookup: ¿existe ya un User con este email?
+ * Used by the smart entry form to decide: magic link (existing) vs reveal
+ * signup fields (new). No side effects, rate-limited per IP.
+ */
+export async function checkEmailExists(
+  rawEmail: string,
+): Promise<EmailCheckResult> {
+  const email = rawEmail.toLowerCase().trim();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return {
+      ok: false,
+      error: "INVALID_EMAIL",
+      message: "Ingresá un email válido.",
+    };
+  }
+
+  const ip = getClientIp(await headers());
+  const rl = rateLimit(`atleta-check:${ip}`, 12, 60_000);
+  if (!rl.ok) {
+    return {
+      ok: false,
+      error: "RATE_LIMITED",
+      message: `Demasiados intentos. Probá de nuevo en ${rl.retryAfterSec} segundos.`,
+    };
+  }
+
+  const user = await prismaBase.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+  return { ok: true, exists: !!user, email };
+}
+
 export async function createIndependentAthlete(
   input: AtletaSignupInput,
 ): Promise<AtletaSignupResult> {

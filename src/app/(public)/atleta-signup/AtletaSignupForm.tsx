@@ -2,7 +2,10 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
-import { createIndependentAthlete } from "@/server/actions/atleta-signup";
+import {
+  checkEmailExists,
+  createIndependentAthlete,
+} from "@/server/actions/atleta-signup";
 import { kToast } from "@/lib/toast";
 import { detectPwaPlatform } from "@/lib/pwa-detect";
 import MagicLinkWaiting from "@/components/auth/MagicLinkWaiting";
@@ -17,6 +20,8 @@ type SuccessState = {
   existingUser: boolean;
 };
 
+type Phase = "email" | "details";
+
 const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEV_LOGIN === "1";
 
 type Props = {
@@ -24,19 +29,18 @@ type Props = {
 };
 
 export default function AtletaSignupForm({ initialEmail = "" }: Props) {
+  const [phase, setPhase] = useState<Phase>("email");
   const [email, setEmail] = useState(initialEmail);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [usePassword, setUsePassword] = useState(false); // expandido o no
+  const [usePassword, setUsePassword] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [success, setSuccess] = useState<SuccessState | null>(null);
   const [pending, startTransition] = useTransition();
   const [isIos, setIsIos] = useState(false);
 
-  // Detectar iOS post-mount (cliente only). Si es iOS, abrir el campo password
-  // por defecto y marcar como recomendado.
   useEffect(() => {
     const platform = detectPwaPlatform(navigator.userAgent);
     const ios = platform === "ios-safari" || platform === "ios-other";
@@ -44,7 +48,36 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
     if (ios) setUsePassword(true);
   }, []);
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleEmailContinue(e: React.FormEvent) {
+    e.preventDefault();
+    setErrors({});
+    startTransition(async () => {
+      const r = await checkEmailExists(email);
+      if (!r.ok) {
+        setErrors({ email: r.message });
+        return;
+      }
+      if (r.exists) {
+        // Usuario ya existe → magic link directo, sin pedir nombre/apellido.
+        try {
+          await signIn("email", { email: r.email, redirect: false });
+        } catch {
+          // best-effort
+        }
+        setSuccess({
+          email: r.email,
+          hasPassword: false,
+          existingUser: true,
+        });
+        return;
+      }
+      // Cuenta nueva → revelar campos de detalle.
+      setEmail(r.email);
+      setPhase("details");
+    });
+  }
+
+  function handleDetailsSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrors({});
     startTransition(async () => {
@@ -59,8 +92,7 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         kToast.error(result.message);
         return;
       }
-      // Si el email ya estaba registrado, mandamos magic link automáticamente
-      // y mostramos copy "ya tenés cuenta, te enviamos magic link".
+      // Edge case: el email se registró entre checkEmail y el submit (race).
       if (result.existingUser) {
         try {
           await signIn("email", { email, redirect: false });
@@ -70,8 +102,6 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         setSuccess({ email, hasPassword: false, existingUser: true });
         return;
       }
-      // Cuenta nueva: si NO seteó password, mandamos magic link.
-      // Si SÍ, no hace falta (puede entrar con email/password).
       if (!result.hasPassword) {
         try {
           await signIn("email", { email, redirect: false });
@@ -88,7 +118,6 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
   }
 
   if (success) {
-    // Si seteó password, no necesitamos magic link — directo a /login.
     if (success.hasPassword) {
       return (
         <div className="space-y-4 text-center">
@@ -127,17 +156,16 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         </div>
       );
     }
-    // Sin password: magic link + OTP fallback (componente compartido).
     return (
       <MagicLinkWaiting
         email={success.email}
-        title={success.existingUser ? "Ya tenés cuenta" : "¡Listo!"}
+        title={success.existingUser ? "Bienvenido de vuelta" : "¡Listo!"}
         subtitle={
           success.existingUser ? (
             <>
               Detectamos que{" "}
               <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>{" "}
-              ya estaba registrado. Te mandamos un enlace mágico (y código de 6
+              ya tiene cuenta. Te mandamos un enlace mágico (y código de 6
               dígitos) para que entres sin tener que crearla de nuevo.
             </>
           ) : (
@@ -153,19 +181,88 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
     );
   }
 
+  // Fase 1: pedimos solo el email y decidimos según existencia.
+  if (phase === "email") {
+    return (
+      <form
+        onSubmit={handleEmailContinue}
+        className="flex flex-col gap-4"
+        data-testid="atleta-signup-email-phase"
+      >
+        <Field
+          label="Email"
+          name="email"
+          type="email"
+          value={email}
+          onChange={setEmail}
+          placeholder="tu@email.com"
+          error={errors.email}
+          autoComplete="email"
+          required
+          autoFocus
+        />
+
+        <button
+          type="submit"
+          disabled={pending || email.length === 0}
+          className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 mt-1"
+        >
+          {pending ? "Verificando…" : "Continuar"}
+        </button>
+
+        <p
+          className="text-center text-[11px] leading-relaxed"
+          style={{ color: "var(--k-t3)" }}
+        >
+          Si ya tenés cuenta te enviamos el código para entrar.
+          <br />
+          Si no, te ayudamos a crear una en 10 segundos.
+        </p>
+      </form>
+    );
+  }
+
+  // Fase 2: usuario nuevo — pedimos nombre, apellido, password opcional.
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <Field
-        label="Email"
-        name="email"
-        type="email"
-        value={email}
-        onChange={setEmail}
-        placeholder="tu@email.com"
-        error={errors.email}
-        autoComplete="email"
-        required
-      />
+    <form
+      onSubmit={handleDetailsSubmit}
+      className="flex flex-col gap-4"
+      data-testid="atleta-signup-details-phase"
+    >
+      <div
+        className="flex items-center justify-between rounded-xl border px-3 py-2.5"
+        style={{
+          background: "var(--k-elevated)",
+          borderColor: "var(--k-line-2)",
+        }}
+      >
+        <div className="flex flex-col min-w-0">
+          <span
+            className="text-[10px] font-mono uppercase tracking-wider"
+            style={{ color: "var(--k-t3)" }}
+          >
+            Tu email
+          </span>
+          <span
+            className="text-sm font-medium truncate"
+            style={{ color: "var(--k-t1)" }}
+          >
+            {email}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setPhase("email");
+            setErrors({});
+          }}
+          className="text-[10px] font-mono uppercase tracking-wider underline shrink-0 ml-2"
+          style={{ color: "var(--k-t2)" }}
+        >
+          Cambiar
+        </button>
+      </div>
+
       <Field
         label="Nombre"
         name="firstName"
@@ -176,6 +273,7 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         error={errors.firstName}
         autoComplete="given-name"
         required
+        autoFocus
       />
       <Field
         label="Apellido"
@@ -189,7 +287,6 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         required
       />
 
-      {/* Sección password — auto-expandida en iOS por el bug de magic link */}
       <div
         className="rounded-xl border p-3"
         style={{
@@ -280,7 +377,7 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         disabled={pending}
         className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 mt-1"
       >
-        {pending ? "Creando tu cuenta…" : "Empezar gratis"}
+        {pending ? "Creando tu cuenta…" : "Crear cuenta"}
       </button>
 
       <p
@@ -303,6 +400,7 @@ type FieldProps = {
   error?: string;
   autoComplete?: string;
   required?: boolean;
+  autoFocus?: boolean;
 };
 
 function Field({
@@ -315,6 +413,7 @@ function Field({
   error,
   autoComplete,
   required,
+  autoFocus,
 }: FieldProps) {
   return (
     <div className="flex flex-col gap-1">
@@ -334,6 +433,7 @@ function Field({
         placeholder={placeholder}
         autoComplete={autoComplete}
         required={required}
+        autoFocus={autoFocus}
         className="w-full px-4 py-3 rounded-xl text-sm border focus:outline-none transition-colors"
         style={{
           background: "var(--k-surface)",
