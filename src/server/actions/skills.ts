@@ -179,3 +179,36 @@ export async function getAthleteTier(): Promise<SkillTier> {
   const session = await getAthleteSession();
   return session?.athleteTier ?? "principiante";
 }
+
+/**
+ * Returns PR predictions filtered by movements relevant to the given skill's
+ * movementSlug. If the skill or its movement is not found, returns all
+ * predictions as fallback. Empty array if athlete has insufficient data.
+ */
+export async function getSkillContextualPRPredictions(skillId: string) {
+  const skill = SKILL_CATALOG.find((s) => s.id === skillId);
+  if (!skill) return [];
+
+  const session = await getAthleteSession();
+  if (!session) return [];
+
+  const { getTop3PRPredictions } = await import("./ai");
+  const allPredictions = await getTop3PRPredictions().catch(() => []);
+  if (allPredictions.length === 0) return [];
+
+  const db = withTenant(session.tenantId);
+  const movement = await db.movement.findUnique({
+    where: {
+      tenantId_slug: {
+        tenantId: session.tenantId,
+        slug: skill.movementSlug,
+      },
+    },
+    select: { id: true },
+  });
+
+  if (!movement) return allPredictions;
+
+  const filtered = allPredictions.filter((p) => p.movementId === movement.id);
+  return filtered.length > 0 ? filtered : allPredictions;
+}

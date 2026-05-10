@@ -9,8 +9,9 @@ import RevealOnScroll from "@/components/kronos/RevealOnScroll";
 import {
   getActiveSkillForAthlete,
   getSkillCatalogForAthlete,
+  getSkillContextualPRPredictions,
 } from "@/server/actions/skills";
-import { getTop3PRPredictions } from "@/server/actions/ai";
+import type { getTop3PRPredictions } from "@/server/actions/ai";
 import { getMyCoachCards } from "@/server/actions/coach-cards";
 import CoachCardsSection from "@/components/atleta/CoachCardsSection";
 import type {
@@ -46,16 +47,21 @@ const TIER_LABEL: Record<
 };
 
 export default async function SkillsPage() {
-  const [activeSkill, catalogResult, prPredictions, coachCards] =
-    await Promise.all([
-      getActiveSkillForAthlete().catch(() => null),
-      getSkillCatalogForAthlete().catch(() => ({
-        athleteTier: "principiante" as SkillTier,
-        catalog: [] as CatalogSkill[],
-      })),
-      getTop3PRPredictions().catch(() => []),
-      getMyCoachCards().catch(() => []),
-    ]);
+  const [activeSkill, catalogResult, coachCards] = await Promise.all([
+    getActiveSkillForAthlete().catch(() => null),
+    getSkillCatalogForAthlete().catch(() => ({
+      athleteTier: "principiante" as SkillTier,
+      catalog: [] as CatalogSkill[],
+    })),
+    getMyCoachCards().catch(() => []),
+  ]);
+
+  const prPredictions: Awaited<ReturnType<typeof getTop3PRPredictions>> =
+    activeSkill
+      ? await getSkillContextualPRPredictions(activeSkill.skill.id).catch(
+          () => [],
+        )
+      : [];
 
   const tierCfg = TIER_LABEL[catalogResult.athleteTier];
 
