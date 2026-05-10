@@ -3,24 +3,21 @@
 import { useEffect, useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { kToast } from "@/lib/toast";
-import { detectPwaPlatform } from "@/lib/pwa-detect";
 import OtpInput from "./OtpInput";
 
 /**
- * Pantalla "esperando email" con switch a OTP fallback.
+ * Pantalla "esperando email" — modo OTP por default.
  *
- * Modo default (magic-link): copy "te mandamos un link, abrilo desde tu
- * teléfono", timer de 30s + botón "Reenviar email", link discreto "¿No te
- * llegó? Usar código en su lugar".
+ * Modo OTP (default): input 6 dígitos con autofill iOS nativo. Al completar,
+ * dispara fetch a /api/auth/otp/verify y redirige rol-aware. El código vive
+ * 1h y es reusable los primeros 5 min post-primer-uso (cross-browser).
  *
- * Modo OTP: input 6 dígitos con autofill iOS nativo. Al alcanzar 6 dígitos
- * dispara fetch a /api/auth/otp/verify. Si OK, redirige a redirectTo del
- * server (rol-aware).
+ * Modo link (fallback opcional): magic link tradicional para los que prefieran.
+ *
+ * Pre-fill: si la URL trae ?code=XXXXXX (vía /atleta/otp-redirect), arranca
+ * en modo OTP con el código pre-cargado.
  *
  * Pie con WhatsApp soporte visible en cualquier modo.
- *
- * Para iOS Chrome muestra copy adicional explicando que para instalar la
- * PWA va a necesitar Safari y que el código sirve igual ahí.
  */
 
 type Props = {
@@ -35,7 +32,7 @@ const RESEND_COOLDOWN_SECONDS = 30;
 const WHATSAPP_SUPPORT_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_SUPPORT ?? "";
 
 export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
-  const [mode, setMode] = useState<"link" | "otp">("link");
+  const [mode, setMode] = useState<"link" | "otp">("otp");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -43,13 +40,16 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
     RESEND_COOLDOWN_SECONDS,
   );
   const [resendBusy, setResendBusy] = useState(false);
-  const [iosChrome, setIosChrome] = useState(false);
-  const [iosSafari, setIosSafari] = useState(false);
 
+  // Pre-fill desde ?code= en URL (caso flow /atleta/otp-redirect que cae acá
+  // si la verificación auto falla y queremos que el atleta confirme manual).
   useEffect(() => {
-    const platform = detectPwaPlatform(navigator.userAgent);
-    setIosChrome(platform === "ios-other");
-    setIosSafari(platform === "ios-safari");
+    const params = new URLSearchParams(window.location.search);
+    const prefill = params.get("code");
+    if (prefill && /^\d{6}$/.test(prefill)) {
+      setCode(prefill);
+      setMode("otp");
+    }
   }, []);
 
   // Cooldown de reenvío. Se resetea al volver a 30 cuando el user reenvía.
@@ -121,74 +121,19 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
         </div>
       ) : (
         <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-          Te enviamos un enlace mágico a{" "}
-          <strong style={{ color: "var(--k-t1)" }}>{email}</strong>. Tocalo
-          desde tu teléfono para entrar.
+          Te mandamos un código de 6 dígitos a{" "}
+          <strong style={{ color: "var(--k-t1)" }}>{email}</strong>. Pegalo
+          abajo para entrar.
         </p>
       )}
 
-      {iosChrome && mode === "link" ? (
-        <div
-          className="rounded-xl border p-3 text-left"
-          style={{
-            background: "var(--k-accent-soft)",
-            borderColor: "var(--k-accent-line)",
-          }}
-        >
-          <p
-            className="text-xs font-bold mb-1"
-            style={{ color: "var(--k-accent)" }}
-          >
-            ⚠️ Estás en Chrome iOS
-          </p>
-          <p
-            className="text-[11px] leading-relaxed"
-            style={{ color: "var(--k-t2)" }}
-          >
-            Para instalar la app en tu iPhone vas a necesitar Safari. Tip: podés
-            abrir Safari, venir a esta misma página, tocar{" "}
-            <strong>Usar código</strong> abajo y meter el código del email — sin
-            re-loguear.
-          </p>
-        </div>
-      ) : null}
-
-      {mode === "link" ? (
-        <>
-          <button
-            type="button"
-            onClick={() => {
-              setMode("otp");
-              setError(null);
-            }}
-            className="text-sm underline"
-            style={{ color: "var(--k-accent)" }}
-          >
-            ¿No te llegó el link? Usar código en su lugar →
-          </button>
-          <div className="flex flex-col gap-2 pt-2">
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={resendCooldown > 0 || resendBusy}
-              className="text-xs disabled:opacity-50"
-              style={{ color: "var(--k-t2)" }}
-            >
-              {resendCooldown > 0
-                ? `Reenviar email en ${resendCooldown}s`
-                : resendBusy
-                  ? "Reenviando…"
-                  : "Reenviar email"}
-            </button>
-          </div>
-        </>
-      ) : (
+      {mode === "otp" ? (
         <div className="space-y-3 pt-2">
           <p
             className="text-xs font-mono uppercase tracking-wider"
             style={{ color: "var(--k-t3)" }}
           >
-            Mete el código de 6 dígitos del email
+            Mete el código del email
           </p>
           <OtpInput
             value={code}
@@ -213,6 +158,10 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
               Verificando…
             </p>
           ) : null}
+          <p className="text-[11px]" style={{ color: "var(--k-t3)" }}>
+            El código vive 1 hora. Lo podés usar en Chrome y Safari los primeros
+            5 minutos.
+          </p>
           <div className="flex flex-col gap-2 pt-1">
             <button
               type="button"
@@ -229,22 +178,57 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
             </button>
             <button
               type="button"
-              onClick={() => setMode("link")}
+              onClick={() => {
+                setMode("link");
+                setError(null);
+              }}
               className="text-xs underline"
               style={{ color: "var(--k-t3)" }}
             >
-              ← Volver al link
+              Prefiero un link mágico
             </button>
           </div>
         </div>
+      ) : (
+        <>
+          <p
+            className="text-xs font-mono uppercase tracking-wider"
+            style={{ color: "var(--k-t3)" }}
+          >
+            Magic link
+          </p>
+          <p className="text-sm" style={{ color: "var(--k-t2)" }}>
+            Tocá el botón <strong>Entrar a Kronos</strong> en el mail desde el
+            mismo dispositivo. El link es válido 1 hora.
+          </p>
+          <div className="flex flex-col gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setMode("otp");
+                setError(null);
+              }}
+              className="text-sm underline"
+              style={{ color: "var(--k-accent)" }}
+            >
+              ← Volver al código
+            </button>
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resendCooldown > 0 || resendBusy}
+              className="text-xs disabled:opacity-50"
+              style={{ color: "var(--k-t2)" }}
+            >
+              {resendCooldown > 0
+                ? `Reenviar email en ${resendCooldown}s`
+                : resendBusy
+                  ? "Reenviando…"
+                  : "Reenviar email"}
+            </button>
+          </div>
+        </>
       )}
-
-      {iosSafari && mode === "link" ? (
-        <p className="text-[11px]" style={{ color: "var(--k-t3)" }}>
-          Tip: una vez adentro vas a poder instalar Kronos como app desde el
-          botón Compartir de Safari.
-        </p>
-      ) : null}
 
       {WHATSAPP_SUPPORT_NUMBER ? (
         <p

@@ -70,13 +70,17 @@ export const authOptions: NextAuthOptions = {
   providers: [
     EmailProvider({
       from: process.env.EMAIL_FROM ?? "Kronos <noreply@kronos.app>",
+      // Token vive 1h. OTP es reusable los primeros 5 min post-primer-uso
+      // (ver REUSE_GRACE_MS en src/server/otp.ts).
+      maxAge: 60 * 60,
       async sendVerificationRequest({ identifier, url, provider, token }) {
         // Derivar OTP del mismo VerificationToken — el email contiene AMBOS:
-        // magic link tradicional + código de 6 dígitos como fallback.
+        // OTP primario (6 dígitos) + magic link tradicional como fallback.
         const code = deriveOtpFromToken(token, process.env.NEXTAUTH_SECRET!);
+        const codePretty = `${code.slice(0, 3)} ${code.slice(3, 6)}`;
         const result = await sendEmail({
           to: [identifier],
-          subject: "Tu enlace para entrar a Kronos",
+          subject: `Tu código Kronos: ${codePretty}`,
           html: renderMagicLinkEmail({ email: identifier, url, code }),
           text: renderMagicLinkText({ email: identifier, url, code }),
           from: provider.from,

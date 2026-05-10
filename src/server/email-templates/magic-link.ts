@@ -1,5 +1,40 @@
 import { renderEmailLayout, escapeHtml } from "./_layout";
 
+/**
+ * Email primario de auth atleta — código OTP de 6 dígitos como hero,
+ * magic link tradicional como fallback secundario.
+ *
+ * Decisiones:
+ *  - El código vive 1h y es reusable los primeros 5 min post-primer-uso —
+ *    eso resuelve la fricción cross-browser en iPhone (Chrome ↔ Safari/PWA).
+ *  - El link "Copiar código y abrir Kronos →" abre /atleta/otp-redirect, que
+ *    copia el código al portapapeles y completa el login automáticamente.
+ *  - El plain text incluye una línea con formato `@<host> #<code>` (Apple
+ *    Origin-bound One-Time Codes) para que iOS Mail/Safari ofrezcan el código
+ *    en la barra del teclado al tocar un input con autocomplete="one-time-code".
+ */
+
+function deriveOriginFromUrl(url: string): {
+  origin: string;
+  host: string;
+} {
+  try {
+    const u = new URL(url);
+    return { origin: u.origin, host: u.host };
+  } catch {
+    return { origin: "https://kronos-fit.com", host: "kronos-fit.com" };
+  }
+}
+
+function buildOtpRedirectUrl(
+  origin: string,
+  email: string,
+  code: string,
+): string {
+  const params = new URLSearchParams({ code, email });
+  return `${origin}/login/otp?${params.toString()}`;
+}
+
 export function renderMagicLinkEmail(args: {
   email: string;
   url: string;
@@ -8,37 +43,43 @@ export function renderMagicLinkEmail(args: {
   const email = escapeHtml(args.email);
   const url = args.url;
   const code = escapeHtml(args.code);
-  // Formato visual "123 456" para que sea más fácil de leer y dictar.
   const codePretty = `${code.slice(0, 3)} ${code.slice(3, 6)}`;
+  const { origin } = deriveOriginFromUrl(url);
+  const otpRedirect = buildOtpRedirectUrl(origin, args.email, args.code);
 
   const body = `
-    <h1 style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:24px;font-weight:700;letter-spacing:-0.01em;color:#f5f5f7;margin:0 0 12px 0;">Tu enlace para entrar</h1>
+    <h1 style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:24px;font-weight:700;letter-spacing:-0.01em;color:#f5f5f7;margin:0 0 12px 0;">Tu código para entrar</h1>
     <p style="font-family:'Inter',Arial,sans-serif;font-size:15px;line-height:1.6;color:#8a8a94;margin:0 0 24px 0;">
-      Recibimos una solicitud para iniciar sesión como <strong style="color:#f5f5f7;">${email}</strong>. Tocá el botón para entrar a Kronos.
+      Pedimos un acceso para <strong style="color:#f5f5f7;">${email}</strong>. Usá el código abajo o tocá el botón.
     </p>
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 28px 0;">
-      <tr><td style="background:#c8ff2d;border-radius:999px;">
-        <a href="${url}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:700;color:#08080a;text-decoration:none;letter-spacing:0.01em;">Entrar a Kronos →</a>
+    <a href="${otpRedirect}" target="_blank" style="display:block;text-decoration:none;margin:0 0 20px 0;padding:24px 20px;background:#0f1014;border:1px solid #c8ff2d;border-radius:16px;text-align:center;">
+      <span style="display:block;font-family:'Inter',Arial,sans-serif;font-size:11px;line-height:1.4;color:#8a8a94;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Tu código</span>
+      <span style="display:block;font-family:'IBM Plex Mono',Consolas,monospace;font-size:40px;font-weight:700;letter-spacing:0.18em;color:#c8ff2d;line-height:1;">${codePretty}</span>
+    </a>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 24px 0;width:100%;">
+      <tr><td align="center" style="background:#c8ff2d;border-radius:999px;">
+        <a href="${otpRedirect}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:700;color:#08080a;text-decoration:none;letter-spacing:0.01em;">Copiar código y abrir Kronos →</a>
       </td></tr>
     </table>
-    <div style="margin:0 0 24px 0;padding:16px 20px;background:#0f1014;border:1px solid #1c1c24;border-radius:12px;">
-      <p style="font-family:'Inter',Arial,sans-serif;font-size:12px;line-height:1.5;color:#8a8a94;margin:0 0 8px 0;">
-        ¿El botón no funciona? Usá este código en la pantalla "Usar código en su lugar":
+    <p style="font-family:'Inter',Arial,sans-serif;font-size:13px;line-height:1.6;color:#8a8a94;margin:0 0 16px 0;text-align:center;">
+      O pegá el código manualmente en la pantalla de login.
+    </p>
+    <div style="margin:24px 0 16px 0;padding:14px 16px;background:#0a0a0c;border:1px solid #1c1c24;border-radius:10px;">
+      <p style="font-family:'Inter',Arial,sans-serif;font-size:12px;line-height:1.5;color:#8a8a94;margin:0 0 6px 0;">
+        ¿Preferís un link tradicional?
       </p>
-      <p style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:28px;font-weight:700;letter-spacing:0.15em;color:#c8ff2d;margin:0;text-align:center;">
-        ${codePretty}
-      </p>
+      <a href="${url}" target="_blank" style="font-family:'Inter',Arial,sans-serif;font-size:13px;color:#c8ff2d;text-decoration:underline;word-break:break-all;">Entrar con magic link</a>
     </div>
     <p style="font-family:'Inter',Arial,sans-serif;font-size:12px;line-height:1.6;color:#54545c;margin:0 0 12px 0;">
-      El enlace y el código expiran en 24 horas y solo se pueden usar una vez. Si no fuiste vos, ignorá este correo — nadie va a entrar sin tu código ni tu link.
+      El código vive 1 hora. Después del primer uso podés meterlo en otro navegador (Chrome, Safari) durante 5 minutos — útil si tenés la PWA instalada en Safari pero abrís el mail en Chrome.
     </p>
-    <p style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:11px;line-height:1.5;color:#54545c;margin:16px 0 0 0;word-break:break-all;">
-      ¿No funciona el botón? Pegá este link en tu navegador:<br><a href="${url}" style="color:#8a8a94;text-decoration:underline;">${url}</a>
+    <p style="font-family:'Inter',Arial,sans-serif;font-size:11px;line-height:1.6;color:#54545c;margin:0;">
+      Si no fuiste vos, ignorá este correo — nadie va a entrar sin tu código.
     </p>
   `;
 
   return renderEmailLayout({
-    preheader: `Tu código: ${codePretty}. O tocá el enlace para entrar a Kronos como ${args.email}.`,
+    preheader: `Tu código: ${codePretty}. Tap para copiar y entrar a Kronos como ${args.email}.`,
     body,
   });
 }
@@ -49,18 +90,30 @@ export function renderMagicLinkText(args: {
   code: string;
 }): string {
   const codePretty = `${args.code.slice(0, 3)} ${args.code.slice(3, 6)}`;
+  const { origin, host } = deriveOriginFromUrl(args.url);
+  const otpRedirect = buildOtpRedirectUrl(origin, args.email, args.code);
+
   return [
-    `Tu enlace para entrar a Kronos`,
+    `Tu código para entrar a Kronos: ${codePretty}`,
     ``,
     `Hola, recibimos una solicitud para iniciar sesión como ${args.email}.`,
     ``,
-    `Entrá con este enlace (expira en 24h, un solo uso):`,
-    args.url,
+    `Código: ${codePretty}`,
+    `(válido 1h. Reusable los primeros 5 min en otro navegador.)`,
     ``,
-    `O usá este código si el link no funciona: ${codePretty}`,
+    `Tap para copiar y entrar:`,
+    otpRedirect,
+    ``,
+    `O usá el magic link tradicional:`,
+    args.url,
     ``,
     `Si no fuiste vos, ignorá este correo.`,
     ``,
     `— Kronos · kronos-fit.com`,
+    ``,
+    // Apple Origin-bound One-Time Codes (RFC 8959-ish): iOS Mail/Safari
+    // detecta esta línea cuando el host matchea y ofrece el código en la
+    // barra del teclado al tocar un input con autocomplete="one-time-code".
+    `@${host} #${args.code}`,
   ].join("\n");
 }
