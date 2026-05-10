@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { kToast } from "@/lib/toast";
 
 /**
  * Input de OTP de 6 dígitos. Diseñado para autofill nativo:
@@ -10,6 +11,8 @@ import { useEffect, useRef, useState } from "react";
  *    atributo no molesta)
  *
  * Acepta paste de "123 456" o "123-456" o "123456" — normaliza a 6 dígitos.
+ * Si el usuario pega un texto sin dígitos (típico: pegar password creyendo que
+ * es OTP), avisa con toast en vez de silenciosamente borrar todo.
  * Dispara onComplete al alcanzar 6 dígitos sin necesidad de botón submit.
  */
 
@@ -57,12 +60,21 @@ export default function OtpInput({
   }
 
   function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
-    const text = e.clipboardData.getData("text");
-    const cleaned = text.replace(/\D/g, "").slice(0, 6);
-    if (cleaned.length > 0) {
+    const text = e.clipboardData.getData("text").trim();
+    if (text.length === 0) return;
+
+    const digitsOnly = text.replace(/\D/g, "");
+
+    // Caso típico: el usuario pegó su password creyendo que era el OTP.
+    // Sin dígitos = no hay nada que rescatar. Avisar en vez de borrar silente.
+    if (digitsOnly.length === 0) {
       e.preventDefault();
-      onChange(cleaned);
+      kToast.error("Pegá los 6 dígitos del email — no tu password.");
+      return;
     }
+
+    e.preventDefault();
+    onChange(digitsOnly.slice(0, 6));
   }
 
   return (
