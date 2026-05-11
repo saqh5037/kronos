@@ -3,6 +3,7 @@ import { listAthleteMemberships } from "@/server/actions/payments";
 import PayMembershipButton from "@/components/atleta/PayMembershipButton";
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
 import { getBoxMode } from "@/server/actions/box-mode";
+import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 
 export const metadata = { title: "Kronos — Mis pagos" };
 export const dynamic = "force-dynamic";
@@ -90,12 +91,13 @@ export default async function AtletaPagosPage() {
       {/* HERO V3 — limpio */}
       <header
         style={{
-          padding: "56px 20px 20px",
+          padding: "48px 20px 20px",
           display: "flex",
           flexDirection: "column",
           gap: 8,
         }}
       >
+        <AthleteBackLink href="/atleta" label="Inicio" />
         <span
           style={{
             fontFamily: "var(--k-font-display)",

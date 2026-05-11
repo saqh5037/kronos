@@ -47,7 +47,7 @@ export default function Nav({ boxHref }: { boxHref: string | null }) {
         ) : (
           <>
             <Link href="/login" className="lp-btn-ghost">
-              Entrar al box
+              Entrar
             </Link>
             <a
               href="#section-form"

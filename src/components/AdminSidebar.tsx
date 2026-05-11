@@ -440,6 +440,70 @@ export default function AdminSidebar({
             gap: 8,
           }}
         >
+          <Link
+            href="/atleta"
+            className="k-tap"
+            style={{
+              minHeight: 40,
+              padding: "10px 12px",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              borderRadius: 8,
+              color: "var(--k-t2)",
+              textDecoration: "none",
+              fontFamily: "var(--k-font-body)",
+              fontSize: 13,
+              fontWeight: 500,
+            }}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H10v7H4a1 1 0 0 1-1-1z" />
+            </svg>
+            App del atleta
+          </Link>
+          <Link
+            href="/"
+            className="k-tap"
+            style={{
+              minHeight: 40,
+              padding: "10px 12px",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              borderRadius: 8,
+              color: "var(--k-t2)",
+              textDecoration: "none",
+              fontFamily: "var(--k-font-body)",
+              fontSize: 13,
+              fontWeight: 500,
+            }}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            Landing pública
+          </Link>
           <SignOutButton variant="menu" />
         </div>
       </nav>

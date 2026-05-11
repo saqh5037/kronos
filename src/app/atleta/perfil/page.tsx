@@ -601,7 +601,7 @@ export default async function PerfilPage() {
         </AnimatedSection>
       )}
 
-      {/* Acceso secundario a Logros (sin Hub Explorar) */}
+      {/* Acceso secundario a Logros */}
       <AnimatedSection className="px-3.5">
         <AnimatedItem>
           <Link
@@ -661,6 +661,31 @@ export default async function PerfilPage() {
         </AnimatedItem>
       </AnimatedSection>
 
+      {/* Acceso rápido a páginas huérfanas */}
+      <AnimatedSection className="px-3.5 mt-3">
+        <AnimatedItem>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: 10,
+            }}
+          >
+            <ProfileQuickLink
+              href="/atleta/historial"
+              icon="📊"
+              label="Historial"
+            />
+            <ProfileQuickLink
+              href="/atleta/leaderboard"
+              icon="🏆"
+              label="Leaderboard"
+            />
+            <ProfileQuickLink href="/atleta/pagos" icon="💳" label="Pagos" />
+          </div>
+        </AnimatedItem>
+      </AnimatedSection>
+
       {/* Box Personal helper si aplica */}
       {isPersonalBox && (
         <div
@@ -676,6 +701,50 @@ export default async function PerfilPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function ProfileQuickLink({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: string;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href as Route}
+      className="k-tap"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 8,
+        padding: "14px 8px",
+        background: "var(--k-surface)",
+        border: "1px solid var(--k-line)",
+        borderRadius: 14,
+        textDecoration: "none",
+        color: "var(--k-t1)",
+      }}
+    >
+      <span style={{ fontSize: 22 }}>{icon}</span>
+      <span
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          color: "var(--k-t2)",
+          textAlign: "center",
+        }}
+      >
+        {label}
+      </span>
+    </Link>
   );
 }
 

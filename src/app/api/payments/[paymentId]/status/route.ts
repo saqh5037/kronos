@@ -6,15 +6,29 @@
  *
  * Auth: session NextAuth. Atleta solo puede leer su propio Payment.
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getPaymentStatus } from "@/server/actions/payments";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  _req: Request,
+  req: NextRequest,
   ctx: { params: Promise<{ paymentId: string }> },
 ) {
+  // Rate limit: 30 requests / 1 min per IP (polling endpoint)
+  const ip = getClientIp(req.headers);
+  const rl = rateLimit(`payment-status:ip:${ip}`, 30, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: `Demasiadas consultas. Probá en ${rl.retryAfterSec} segundos.`,
+      },
+      { status: 429 },
+    );
+  }
+
   const { paymentId } = await ctx.params;
   try {
     const status = await getPaymentStatus(paymentId);

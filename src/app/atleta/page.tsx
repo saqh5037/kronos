@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import {
   getAthleteHome,
   getMonthlyFeaturedTrophy,
@@ -705,6 +706,86 @@ export default async function AtletaHomePage() {
           </KCard>
         </RevealOnScroll>
       )}
+
+      {/* ACCESO RÁPIDO */}
+      <RevealOnScroll variant="fade-up" className="mt-5 px-3.5">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "space-between",
+            padding: "0 4px 8px",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: "0.18em",
+              color: "var(--k-t3)",
+              textTransform: "uppercase",
+            }}
+          >
+            Acceso rápido
+          </span>
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 10,
+          }}
+        >
+          <QuickLink href="/atleta/historial" icon="📊" label="Historial" />
+          <QuickLink href="/atleta/leaderboard" icon="🏆" label="Leaderboard" />
+          <QuickLink href="/atleta/pagos" icon="💳" label="Pagos" />
+        </div>
+      </RevealOnScroll>
     </div>
+  );
+}
+
+function QuickLink({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: string;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href as Route}
+      className="k-tap"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 8,
+        padding: "14px 8px",
+        background: "var(--k-surface)",
+        border: "1px solid var(--k-line)",
+        borderRadius: 14,
+        textDecoration: "none",
+        color: "var(--k-t1)",
+      }}
+    >
+      <span style={{ fontSize: 22 }}>{icon}</span>
+      <span
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          color: "var(--k-t2)",
+          textAlign: "center",
+        }}
+      >
+        {label}
+      </span>
+    </Link>
   );
 }
