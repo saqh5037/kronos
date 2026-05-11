@@ -35,11 +35,11 @@ export default function LoginForm() {
       }
       if (res?.error) {
         kToast.error("No se pudo enviar el código");
-        setError("Algo no funcionó. Probá de nuevo en un momento.");
+        setError("Algo no funcionó. Prueba de nuevo en un momento.");
         return;
       }
       kToast.success("Código enviado", {
-        description: "Revisá tu correo — código de 6 dígitos.",
+        description: "Revisa tu correo — código de 6 dígitos.",
       });
       setSent(true);
     } catch {
@@ -166,7 +166,7 @@ export default function LoginForm() {
             className="text-xs underline mt-1"
             style={{ color: "var(--k-t2)" }}
           >
-            ¿Olvidaste tu contraseña? Pedí un código
+            ¿Olvidaste tu contraseña? Pide un código
           </button>
         </form>
       )}
