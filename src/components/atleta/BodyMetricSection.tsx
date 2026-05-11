@@ -7,6 +7,7 @@ import {
   type BodyMetricEntry,
 } from "@/server/actions/body-metrics";
 import type { BodyMetricType } from "@/lib/validations/body-metric";
+import { useConfirm } from "@/lib/use-confirm";
 
 type Props = {
   initial: BodyMetricEntry[];
@@ -49,6 +50,7 @@ function trendBetween(
 }
 
 export default function BodyMetricSection({ initial, defaultUnit }: Props) {
+  const confirm = useConfirm();
   const [entries, setEntries] = useState<BodyMetricEntry[]>(initial);
   const [showForm, setShowForm] = useState(false);
   const [type, setType] = useState<BodyMetricType>("WEIGHT");
@@ -103,11 +105,15 @@ export default function BodyMetricSection({ initial, defaultUnit }: Props) {
     });
   }
 
-  function handleDelete(id: string) {
-    if (typeof window !== "undefined") {
-      const ok = window.confirm("¿Borrar esta medición?");
-      if (!ok) return;
-    }
+  async function handleDelete(id: string) {
+    const ok = await confirm({
+      title: "¿Borrar esta medición?",
+      message: "Se quita del historial. Esta acción no se puede deshacer.",
+      confirmLabel: "Borrar",
+      cancelLabel: "Cancelar",
+      tone: "danger",
+    });
+    if (!ok) return;
     startTransition(async () => {
       try {
         await deleteBodyMetric(id);

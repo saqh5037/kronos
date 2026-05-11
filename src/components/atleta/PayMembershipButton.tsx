@@ -51,7 +51,7 @@ export default function PayMembershipButton({
       >
         {loading
           ? "Redirigiendo…"
-          : `Pagar ${amount.toLocaleString()} ${currency}`}
+          : `Pagar ${amount.toLocaleString("es-MX")} ${currency}`}
       </button>
       {error && (
         <p

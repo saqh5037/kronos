@@ -6,6 +6,7 @@ import {
   deleteProgramWod,
   type ScheduledProgramWod,
 } from "@/server/actions/athlete-program";
+import { useConfirm } from "@/lib/use-confirm";
 
 type Props = {
   initialUpcoming: ScheduledProgramWod[];
@@ -48,6 +49,7 @@ type DayState = {
 };
 
 export default function ProgramWeekForm({ initialUpcoming }: Props) {
+  const confirm = useConfirm();
   const [upcoming, setUpcoming] =
     useState<ScheduledProgramWod[]>(initialUpcoming);
   const [weekStart, setWeekStart] = useState(() =>
@@ -120,11 +122,15 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
     });
   }
 
-  function handleDelete(id: string) {
-    if (typeof window !== "undefined") {
-      const ok = window.confirm("¿Borrar este WOD del programa?");
-      if (!ok) return;
-    }
+  async function handleDelete(id: string) {
+    const ok = await confirm({
+      title: "¿Borrar este WOD?",
+      message: "Lo quitamos de tu programa. Esta acción no se puede deshacer.",
+      confirmLabel: "Borrar",
+      cancelLabel: "Cancelar",
+      tone: "danger",
+    });
+    if (!ok) return;
     startTransition(async () => {
       const r = await deleteProgramWod(id);
       if (r.ok) {
