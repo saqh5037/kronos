@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cómo reservar una clase — Kronos Guide</title>
+  <title>Tu perfil, racha y PRs — Kronos Guide</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -252,7 +252,7 @@
 <body>
   <div class="guide-header">
     <div class="guide-logo">KRONOS</div>
-    <div class="guide-title">Cómo reservar una clase</div>
+    <div class="guide-title">Tu perfil, racha y PRs</div>
     <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
       Escuchar
@@ -262,42 +262,62 @@
   <div class="stage" id="stage">
     
     <div class="slide" data-step="0">
-      <img class="slide-img" src="./screenshots/01-home.png" alt="Tu Semana en un Vistazo" loading="lazy">
+      <img class="slide-img" src="./screenshots/01-perfil.png" alt="Tu Perfil" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="left:5%;bottom:8%;">
-        <div class="tooltip-step">Paso 1 de 4</div>
-        <div class="tooltip-title">Tu Semana en un Vistazo</div>
-        <div class="tooltip-desc">La pantalla Reservar abre con tu semana: lunes a sábado, día actual resaltado en lima.</div>
+        <div class="tooltip-step">Paso 1 de 6</div>
+        <div class="tooltip-title">Tu Perfil</div>
+        <div class="tooltip-desc">Tu nombre, nivel, meses activo y un radar con tus capacidades: fuerza, olympic, cardio, gimnástico, core.</div>
       </div>
     </div>
 
     <div class="slide" data-step="1">
-      <img class="slide-img" src="./screenshots/02-filtros.png" alt="Filtra por Tipo y Horario" loading="lazy">
+      <img class="slide-img" src="./screenshots/02-prs.png" alt="Tus Records Personales" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="right:5%;bottom:8%;">
-        <div class="tooltip-step">Paso 2 de 4</div>
-        <div class="tooltip-title">Filtra por Tipo y Horario</div>
-        <div class="tooltip-desc">Dos filtros: tipo de clase (CrossFit, Open Gym, etc.) y horario del día (mañana, tarde, noche).</div>
+        <div class="tooltip-step">Paso 2 de 6</div>
+        <div class="tooltip-title">Tus Records Personales</div>
+        <div class="tooltip-desc">Top 6 PRs en formato grilla: Deadlift, Back Squat, Front Squat, Clean, Bench Press, Strict Press. Con fecha.</div>
       </div>
     </div>
 
     <div class="slide" data-step="2">
-      <img class="slide-img" src="./screenshots/03-clases.png" alt="Las Clases del Día" loading="lazy">
+      <img class="slide-img" src="./screenshots/03-historico.png" alt="Histórico de 90 Días" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="left:5%;bottom:8%;">
-        <div class="tooltip-step">Paso 3 de 4</div>
-        <div class="tooltip-title">Las Clases del Día</div>
-        <div class="tooltip-desc">Cada clase muestra hora, duración, coach, tipo, y cupos disponibles. El botón RESERVAR habilita si hay lugar.</div>
+        <div class="tooltip-step">Paso 3 de 6</div>
+        <div class="tooltip-title">Histórico de 90 Días</div>
+        <div class="tooltip-desc">Tu rendimiento normalizado en los últimos 90 días. Permite comparar diferentes WODs en una sola línea.</div>
       </div>
     </div>
 
     <div class="slide" data-step="3">
-      <img class="slide-img" src="./screenshots/04-otro-dia.png" alt="Cambia de Día" loading="lazy">
+      <img class="slide-img" src="./screenshots/04-asistencia.png" alt="Tu Asistencia" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="right:5%;bottom:8%;">
-        <div class="tooltip-step">Paso 4 de 4</div>
-        <div class="tooltip-title">Cambia de Día</div>
-        <div class="tooltip-desc">Toca otro día del calendario superior para ver sus clases. La lista se actualiza al instante.</div>
+        <div class="tooltip-step">Paso 4 de 6</div>
+        <div class="tooltip-title">Tu Asistencia</div>
+        <div class="tooltip-desc">Heatmap GitHub-style de tus asistencias. Cada cuadrito es un día. Cuántas clases atendiste y tu consistencia.</div>
+      </div>
+    </div>
+
+    <div class="slide" data-step="4">
+      <img class="slide-img" src="./screenshots/05-cuerpo.png" alt="Tu Cuerpo" loading="lazy">
+      <div class="hotspot" style="display:none;"></div>
+      <div class="tooltip" style="left:5%;bottom:8%;">
+        <div class="tooltip-step">Paso 5 de 6</div>
+        <div class="tooltip-title">Tu Cuerpo</div>
+        <div class="tooltip-desc">Tu altura y peso más recientes. Botón para registrar una nueva medición sin salir del perfil.</div>
+      </div>
+    </div>
+
+    <div class="slide" data-step="5">
+      <img class="slide-img" src="./screenshots/06-coleccion.png" alt="Tu Colección de Logros" loading="lazy">
+      <div class="hotspot" style="display:none;"></div>
+      <div class="tooltip" style="right:5%;bottom:8%;">
+        <div class="tooltip-step">Paso 6 de 6</div>
+        <div class="tooltip-title">Tu Colección de Logros</div>
+        <div class="tooltip-desc">Logros desbloqueados, XP acumulado y accesos rápidos a Historial, Leaderboard y Pagos.</div>
       </div>
     </div>
   </div>
@@ -312,10 +332,10 @@
   <div class="progress-bar">
     <div class="progress-fill" id="progressFill" style="width: 0%"></div>
   </div>
-  <div class="progress-text" id="progressText">1 / 4</div>
+  <div class="progress-text" id="progressText">1 / 6</div>
 
   <script>
-    window.steps = [{"id":"calendar-week","order":1,"title":"Tu Semana en un Vistazo","description":"La pantalla Reservar abre con tu semana: lunes a sábado, día actual resaltado en lima.","narration":"Bienvenido a Reservar. La pantalla abre con tu semana completa: lunes a sábado, con el día actual resaltado en lima. Toca cualquier día para ver sus clases.","url":"/atleta/reservar","action":"screenshot","duration":5,"scrollY":0,"screenshot":"01-home.png"},{"id":"filters","order":2,"title":"Filtra por Tipo y Horario","description":"Dos filtros: tipo de clase (CrossFit, Open Gym, etc.) y horario del día (mañana, tarde, noche).","narration":"Justo abajo, dos filtros: tipo de clase y horario del día. Útiles cuando hay muchas clases programadas. Si no, déjalos en 'Todos'.","url":"/atleta/reservar","action":"screenshot","duration":5,"scrollY":380,"screenshot":"02-filtros.png"},{"id":"class-card","order":3,"title":"Las Clases del Día","description":"Cada clase muestra hora, duración, coach, tipo, y cupos disponibles. El botón RESERVAR habilita si hay lugar.","narration":"Cada clase muestra hora, duración, nombre del WOD, tipo y cupos disponibles. Si hay lugar, el botón RESERVAR queda activo.","url":"/atleta/reservar","action":"screenshot","duration":6,"scrollY":600,"screenshot":"03-clases.png"},{"id":"next-day","order":4,"title":"Cambia de Día","description":"Toca otro día del calendario superior para ver sus clases. La lista se actualiza al instante.","narration":"Para ver otro día, toca su tarjeta en el calendario superior. La lista de clases se actualiza al instante. Reserva con un solo tap.","url":"/atleta/reservar?date=2026-05-12","action":"screenshot","duration":5,"scrollY":0,"screenshot":"04-otro-dia.png"}];
+    window.steps = [{"id":"profile-header","order":1,"title":"Tu Perfil","description":"Tu nombre, nivel, meses activo y un radar con tus capacidades: fuerza, olympic, cardio, gimnástico, core.","narration":"Bienvenido a tu perfil. Arriba ves tu nombre, nivel y meses activo. El radar muestra tus capacidades: fuerza, olympic, cardio, gimnástico y core. Tu silueta como atleta, en una imagen.","url":"/atleta/perfil","action":"screenshot","duration":6,"scrollY":0,"screenshot":"01-perfil.png"},{"id":"prs","order":2,"title":"Tus Records Personales","description":"Top 6 PRs en formato grilla: Deadlift, Back Squat, Front Squat, Clean, Bench Press, Strict Press. Con fecha.","narration":"Tus records personales en una grilla limpia. Top seis movimientos con tu mejor marca y la fecha en que la lograste. Tu progreso real, sin adornos.","url":"/atleta/perfil","action":"screenshot","duration":6,"scrollY":600,"screenshot":"02-prs.png"},{"id":"history-90d","order":3,"title":"Histórico de 90 Días","description":"Tu rendimiento normalizado en los últimos 90 días. Permite comparar diferentes WODs en una sola línea.","narration":"El histórico de noventa días muestra tu rendimiento normalizado. Compara WODs distintos en una sola línea para ver tu evolución real, no impresiones del día.","url":"/atleta/perfil","action":"screenshot","duration":5,"scrollY":900,"screenshot":"03-historico.png"},{"id":"attendance","order":4,"title":"Tu Asistencia","description":"Heatmap GitHub-style de tus asistencias. Cada cuadrito es un día. Cuántas clases atendiste y tu consistencia.","narration":"Tu asistencia en formato heatmap. Cada cuadrito es un día. Lima cuando entrenas, gris cuando no. Verás tu consistencia de un solo vistazo.","url":"/atleta/perfil","action":"screenshot","duration":5,"scrollY":1180,"screenshot":"04-asistencia.png"},{"id":"body","order":5,"title":"Tu Cuerpo","description":"Tu altura y peso más recientes. Botón para registrar una nueva medición sin salir del perfil.","narration":"Más abajo ves tu cuerpo: altura, peso, fecha de la última medición. Un botón te permite registrar una medición nueva sin salir del perfil.","url":"/atleta/perfil","action":"screenshot","duration":5,"scrollY":1400,"screenshot":"05-cuerpo.png"},{"id":"collection","order":6,"title":"Tu Colección de Logros","description":"Logros desbloqueados, XP acumulado y accesos rápidos a Historial, Leaderboard y Pagos.","narration":"Al final, tu colección de logros con XP acumulado. Y los accesos rápidos a historial, leaderboard y pagos. Tu perfil completo, en una sola pantalla.","url":"/atleta/perfil","action":"screenshot","duration":5,"scrollY":1900,"screenshot":"06-coleccion.png"}];
     let current = 0;
     const steps = window.steps;
     let synth = window.speechSynthesis;

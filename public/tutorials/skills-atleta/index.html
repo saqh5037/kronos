@@ -267,57 +267,57 @@
       <div class="tooltip" style="left:5%;bottom:8%;">
         <div class="tooltip-step">Paso 1 de 6</div>
         <div class="tooltip-title">Tu Página de Skills</div>
-        <div class="tooltip-desc">Desde aquí ves tu skill activo, tu porcentaje de progreso y qué necesitas practicar hoy para avanzar.</div>
+        <div class="tooltip-desc">Tu nivel actual visible arriba: PRINCIPIANTE, INTERMEDIO o AVANZADO. Más abajo, lo que Kronos te recomienda esta semana.</div>
       </div>
     </div>
 
     <div class="slide" data-step="1">
-      <img class="slide-img" src="./screenshots/02-progreso.png" alt="Tu Progreso" loading="lazy">
+      <img class="slide-img" src="./screenshots/02-progreso.png" alt="Coach IA de la Semana" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="right:5%;bottom:8%;">
         <div class="tooltip-step">Paso 2 de 6</div>
-        <div class="tooltip-title">Tu Progreso</div>
-        <div class="tooltip-desc">El número grande muestra tu avance en el skill activo. Abajo ves cuántas progresiones has completado del total.</div>
+        <div class="tooltip-title">Coach IA de la Semana</div>
+        <div class="tooltip-desc">Tres tarjetas con recomendaciones específicas: qué movimiento revisar, qué PR celebrar, qué patrón mejorar.</div>
       </div>
     </div>
 
     <div class="slide" data-step="2">
-      <img class="slide-img" src="./screenshots/03-foco-hoy.png" alt="Foco de Hoy" loading="lazy">
+      <img class="slide-img" src="./screenshots/03-foco-hoy.png" alt="Tu Próxima Victoria" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="left:5%;bottom:8%;">
         <div class="tooltip-step">Paso 3 de 6</div>
-        <div class="tooltip-title">Foco de Hoy</div>
-        <div class="tooltip-desc">Kronos te dice exactamente qué progresión trabajar hoy. Sigue esta recomendación en tu entrenamiento.</div>
+        <div class="tooltip-title">Tu Próxima Victoria</div>
+        <div class="tooltip-desc">El skill activo que Kronos te asignó. Aquí está el objetivo grande, en grande, en mayúsculas.</div>
       </div>
     </div>
 
     <div class="slide" data-step="3">
-      <img class="slide-img" src="./screenshots/04-progresiones.png" alt="Tus Progresiones" loading="lazy">
+      <img class="slide-img" src="./screenshots/04-progresiones.png" alt="Progresiones" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="right:5%;bottom:8%;">
         <div class="tooltip-step">Paso 4 de 6</div>
-        <div class="tooltip-title">Tus Progresiones</div>
-        <div class="tooltip-desc">Cada skill se divide en progresiones. Las verdes están completadas, la amarilla es tu foco actual, y las grises están bloqueadas.</div>
+        <div class="tooltip-title">Progresiones</div>
+        <div class="tooltip-desc">Cada skill se divide en pasos. Las verdes están completadas, la amarilla con punto es tu foco actual, las grises siguen.</div>
       </div>
     </div>
 
     <div class="slide" data-step="4">
-      <img class="slide-img" src="./screenshots/05-plan-ia.png" alt="Tu Plan con IA" loading="lazy">
+      <img class="slide-img" src="./screenshots/05-plan-ia.png" alt="Tu Plan con Kronos IA" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="left:5%;bottom:8%;">
         <div class="tooltip-step">Paso 5 de 6</div>
-        <div class="tooltip-title">Tu Plan con IA</div>
-        <div class="tooltip-desc">Kronos AI analiza tu historial y te recomienda movimientos específicos para alcanzar tu próximo PR.</div>
+        <div class="tooltip-title">Tu Plan con Kronos IA</div>
+        <div class="tooltip-desc">Movimientos específicos que Kronos recomienda para tu siguiente PR, basados en tu historial real.</div>
       </div>
     </div>
 
     <div class="slide" data-step="5">
-      <img class="slide-img" src="./screenshots/06-otros-skills.png" alt="Cambiar de Skill" loading="lazy">
+      <img class="slide-img" src="./screenshots/06-otros-skills.png" alt="Otros Skills" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="right:5%;bottom:8%;">
         <div class="tooltip-step">Paso 6 de 6</div>
-        <div class="tooltip-title">Cambiar de Skill</div>
-        <div class="tooltip-desc">En la parte inferior encuentras otros skills disponibles. Toca cualquiera para cambiar tu objetivo.</div>
+        <div class="tooltip-title">Otros Skills</div>
+        <div class="tooltip-desc">Al final ves todos los skills disponibles. Toca cualquiera para cambiar tu foco.</div>
       </div>
     </div>
   </div>
@@ -335,7 +335,7 @@
   <div class="progress-text" id="progressText">1 / 6</div>
 
   <script>
-    window.steps = [{"id":"skills-home","order":1,"title":"Tu Página de Skills","description":"Desde aquí ves tu skill activo, tu porcentaje de progreso y qué necesitas practicar hoy para avanzar.","narration":"Bienvenido a Skills. Esta es tu página de objetivos. Aquí ves tu skill activo, tu porcentaje de progreso, y exactamente qué necesitas practicar hoy.","url":"/atleta/skills","action":"screenshot","duration":6,"screenshot":"01-skills-home.png"},{"id":"your-progress","order":2,"title":"Tu Progreso","description":"El número grande muestra tu avance en el skill activo. Abajo ves cuántas progresiones has completado del total.","narration":"Este número grande es tu progreso en el skill activo. Abajo ves cuántas progresiones has completado del total. Cuanto más practiques, más sube.","url":"/atleta/skills","action":"screenshot","duration":5,"screenshot":"02-progreso.png"},{"id":"focus-today","order":3,"title":"Foco de Hoy","description":"Kronos te dice exactamente qué progresión trabajar hoy. Sigue esta recomendación en tu entrenamiento.","narration":"Aquí está tu foco de hoy. Kronos te dice exactamente qué progresión practicar en tu entrenamiento. Sigue esta recomendación para avanzar más rápido.","url":"/atleta/skills","action":"screenshot","duration":5,"screenshot":"03-foco-hoy.png"},{"id":"progressions","order":4,"title":"Tus Progresiones","description":"Cada skill se divide en progresiones. Las verdes están completadas, la amarilla es tu foco actual, y las grises están bloqueadas.","narration":"Cada skill se divide en progresiones. Las verdes están completadas, la amarilla con punto es tu foco actual, y las grises con candado están bloqueadas hasta que completes las anteriores.","url":"/atleta/skills","action":"screenshot","duration":6,"screenshot":"04-progresiones.png"},{"id":"ai-plan","order":5,"title":"Tu Plan con IA","description":"Kronos AI analiza tu historial y te recomienda movimientos específicos para alcanzar tu próximo PR.","narration":"Kronos AI analiza tu historial de entrenamiento y te recomienda movimientos específicos para que alcances tu próximo PR. Es como tener un coach personal 24/7.","url":"/atleta/skills","action":"screenshot","duration":5,"screenshot":"05-plan-ia.png"},{"id":"change-skill","order":6,"title":"Cambiar de Skill","description":"En la parte inferior encuentras otros skills disponibles. Toca cualquiera para cambiar tu objetivo.","narration":"Si quieres cambiar de objetivo, en la parte inferior encuentras otros skills disponibles. Toca cualquiera para ver su detalle y activarlo.","url":"/atleta/skills","action":"screenshot","duration":5,"screenshot":"06-otros-skills.png"}];
+    window.steps = [{"id":"skills-header","order":1,"title":"Tu Página de Skills","description":"Tu nivel actual visible arriba: PRINCIPIANTE, INTERMEDIO o AVANZADO. Más abajo, lo que Kronos te recomienda esta semana.","narration":"Bienvenido a Skills. Arriba ves tu nivel actual: principiante, intermedio o avanzado. Más abajo, lo que Kronos te recomienda trabajar esta semana.","url":"/atleta/skills","action":"screenshot","duration":5,"scrollY":0,"screenshot":"01-skills-home.png"},{"id":"coach-week","order":2,"title":"Coach IA de la Semana","description":"Tres tarjetas con recomendaciones específicas: qué movimiento revisar, qué PR celebrar, qué patrón mejorar.","narration":"Tu coach IA te muestra tres recomendaciones para esta semana. Qué movimiento revisar, qué PR celebrar, qué patrón mejorar. Cada tarjeta lleva a una acción concreta.","url":"/atleta/skills","action":"screenshot","duration":6,"scrollY":270,"screenshot":"02-progreso.png"},{"id":"next-victory","order":3,"title":"Tu Próxima Victoria","description":"El skill activo que Kronos te asignó. Aquí está el objetivo grande, en grande, en mayúsculas.","narration":"Tu próxima victoria: el skill activo asignado por Kronos. Toes-to-Bar, Muscle-Up, Handstand. El objetivo grande, en mayúsculas, sin distracciones.","url":"/atleta/skills","action":"screenshot","duration":5,"scrollY":600,"screenshot":"03-foco-hoy.png"},{"id":"progressions","order":4,"title":"Progresiones","description":"Cada skill se divide en pasos. Las verdes están completadas, la amarilla con punto es tu foco actual, las grises siguen.","narration":"Cada skill se divide en progresiones. Las verdes ya las completaste. La amarilla con punto es tu foco actual. Las grises siguen después. Trabaja una a la vez.","url":"/atleta/skills","action":"screenshot","duration":6,"scrollY":1100,"screenshot":"04-progresiones.png"},{"id":"ai-plan","order":5,"title":"Tu Plan con Kronos IA","description":"Movimientos específicos que Kronos recomienda para tu siguiente PR, basados en tu historial real.","narration":"Más abajo, tu plan con Kronos IA. Movimientos específicos para tu siguiente PR, basados en tu historial real. Es como tener un coach personal todo el tiempo.","url":"/atleta/skills","action":"screenshot","duration":5,"scrollY":1550,"screenshot":"05-plan-ia.png"},{"id":"other-skills","order":6,"title":"Otros Skills","description":"Al final ves todos los skills disponibles. Toca cualquiera para cambiar tu foco.","narration":"Al final, todos los skills disponibles. Double-Under, Ring Dip, Muscle-Up, Snatch. Toca cualquiera para cambiar tu foco y empezar a trabajarlo.","url":"/atleta/skills","action":"screenshot","duration":5,"scrollY":1950,"screenshot":"06-otros-skills.png"}];
     let current = 0;
     const steps = window.steps;
     let synth = window.speechSynthesis;

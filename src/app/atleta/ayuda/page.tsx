@@ -5,15 +5,37 @@ export const metadata = { title: "Kronos — Centro de Ayuda" };
 
 const tutorials = [
   {
+    id: "home-tour",
+    title: "Tu Home en 30 segundos",
+    description:
+      "Recorrido por la pantalla principal: hero personalizado, coach IA, racha, registro de WOD y PRs recientes.",
+    target: "Atleta",
+    duration: "27s",
+    thumbnail: "/tutorials/home-tour/screenshots/01-hero.png",
+    guideUrl: "/tutorials/home-tour/index.html",
+    videoUrl: "/tutorials/home-tour/tutorial.mp4",
+  },
+  {
     id: "reserva-clases",
     title: "Cómo reservar una clase",
     description:
       "Aprende a reservar tu lugar en una clase de CrossFit paso a paso.",
     target: "Atleta",
-    duration: "25s",
+    duration: "26s",
     thumbnail: "/tutorials/reserva-clases/screenshots/01-home.png",
     guideUrl: "/tutorials/reserva-clases/index.html",
     videoUrl: "/tutorials/reserva-clases/tutorial.mp4",
+  },
+  {
+    id: "wod-del-dia",
+    title: "Cómo registrar tu WOD",
+    description:
+      "Anota tu WOD y tu resultado en una sola pantalla: nombre, tipo, métrica y score.",
+    target: "Atleta",
+    duration: "27s",
+    thumbnail: "/tutorials/wod-del-dia/screenshots/01-wod.png",
+    guideUrl: "/tutorials/wod-del-dia/index.html",
+    videoUrl: "/tutorials/wod-del-dia/tutorial.mp4",
   },
   {
     id: "skills-atleta",
@@ -25,6 +47,28 @@ const tutorials = [
     thumbnail: "/tutorials/skills-atleta/screenshots/01-skills-home.png",
     guideUrl: "/tutorials/skills-atleta/index.html",
     videoUrl: "/tutorials/skills-atleta/tutorial.mp4",
+  },
+  {
+    id: "perfil-y-prs",
+    title: "Tu perfil, racha y PRs",
+    description:
+      "PRs por movimiento, historial de scores, badges y stats acumulados.",
+    target: "Atleta",
+    duration: "26s",
+    thumbnail: "/tutorials/perfil-y-prs/screenshots/01-perfil.png",
+    guideUrl: "/tutorials/perfil-y-prs/index.html",
+    videoUrl: "/tutorials/perfil-y-prs/tutorial.mp4",
+  },
+  {
+    id: "salud-wellness",
+    title: "Registra tu progreso físico",
+    description:
+      "Peso, composición corporal y metas de wellness. Tu evolución más allá del entrenamiento.",
+    target: "Atleta",
+    duration: "27s",
+    thumbnail: "/tutorials/salud-wellness/screenshots/01-salud.png",
+    guideUrl: "/tutorials/salud-wellness/index.html",
+    videoUrl: "/tutorials/salud-wellness/tutorial.mp4",
   },
 ];
 

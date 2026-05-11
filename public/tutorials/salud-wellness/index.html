@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cómo reservar una clase — Kronos Guide</title>
+  <title>Registra tu progreso físico — Kronos Guide</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -252,7 +252,7 @@
 <body>
   <div class="guide-header">
     <div class="guide-logo">KRONOS</div>
-    <div class="guide-title">Cómo reservar una clase</div>
+    <div class="guide-title">Registra tu progreso físico</div>
     <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
       Escuchar
@@ -262,42 +262,52 @@
   <div class="stage" id="stage">
     
     <div class="slide" data-step="0">
-      <img class="slide-img" src="./screenshots/01-home.png" alt="Tu Semana en un Vistazo" loading="lazy">
+      <img class="slide-img" src="./screenshots/01-salud.png" alt="Tu Cuerpo en el Tiempo" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="left:5%;bottom:8%;">
-        <div class="tooltip-step">Paso 1 de 4</div>
-        <div class="tooltip-title">Tu Semana en un Vistazo</div>
-        <div class="tooltip-desc">La pantalla Reservar abre con tu semana: lunes a sábado, día actual resaltado en lima.</div>
+        <div class="tooltip-step">Paso 1 de 5</div>
+        <div class="tooltip-title">Tu Cuerpo en el Tiempo</div>
+        <div class="tooltip-desc">Salud reúne tu peso, IMC y tendencia en un solo lugar, separado del entrenamiento.</div>
       </div>
     </div>
 
     <div class="slide" data-step="1">
-      <img class="slide-img" src="./screenshots/02-filtros.png" alt="Filtra por Tipo y Horario" loading="lazy">
+      <img class="slide-img" src="./screenshots/02-cuerpo-hoy.png" alt="Tu Cuerpo Hoy" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="right:5%;bottom:8%;">
-        <div class="tooltip-step">Paso 2 de 4</div>
-        <div class="tooltip-title">Filtra por Tipo y Horario</div>
-        <div class="tooltip-desc">Dos filtros: tipo de clase (CrossFit, Open Gym, etc.) y horario del día (mañana, tarde, noche).</div>
+        <div class="tooltip-step">Paso 2 de 5</div>
+        <div class="tooltip-title">Tu Cuerpo Hoy</div>
+        <div class="tooltip-desc">Tu peso más reciente, el cambio vs la medición anterior, y tu IMC calculado con tu altura.</div>
       </div>
     </div>
 
     <div class="slide" data-step="2">
-      <img class="slide-img" src="./screenshots/03-clases.png" alt="Las Clases del Día" loading="lazy">
+      <img class="slide-img" src="./screenshots/03-tendencia.png" alt="Peso 90 Días" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="left:5%;bottom:8%;">
-        <div class="tooltip-step">Paso 3 de 4</div>
-        <div class="tooltip-title">Las Clases del Día</div>
-        <div class="tooltip-desc">Cada clase muestra hora, duración, coach, tipo, y cupos disponibles. El botón RESERVAR habilita si hay lugar.</div>
+        <div class="tooltip-step">Paso 3 de 5</div>
+        <div class="tooltip-title">Peso 90 Días</div>
+        <div class="tooltip-desc">Gráfico de tu peso en los últimos 90 días. La tendencia salta a la vista sin Excel ni apps externas.</div>
       </div>
     </div>
 
     <div class="slide" data-step="3">
-      <img class="slide-img" src="./screenshots/04-otro-dia.png" alt="Cambia de Día" loading="lazy">
+      <img class="slide-img" src="./screenshots/04-meta.png" alt="Crea una Meta" loading="lazy">
       <div class="hotspot" style="display:none;"></div>
       <div class="tooltip" style="right:5%;bottom:8%;">
-        <div class="tooltip-step">Paso 4 de 4</div>
-        <div class="tooltip-title">Cambia de Día</div>
-        <div class="tooltip-desc">Toca otro día del calendario superior para ver sus clases. La lista se actualiza al instante.</div>
+        <div class="tooltip-step">Paso 4 de 5</div>
+        <div class="tooltip-title">Crea una Meta</div>
+        <div class="tooltip-desc">Define un objetivo de composición corporal. Kronos compara cada medición nueva con tu meta.</div>
+      </div>
+    </div>
+
+    <div class="slide" data-step="4">
+      <img class="slide-img" src="./screenshots/05-registrar.png" alt="Registra una Medición" loading="lazy">
+      <div class="hotspot" style="display:none;"></div>
+      <div class="tooltip" style="left:5%;bottom:8%;">
+        <div class="tooltip-step">Paso 5 de 5</div>
+        <div class="tooltip-title">Registra una Medición</div>
+        <div class="tooltip-desc">El botón superior te permite agregar peso, body fat, masa muscular u otros valores cuando quieras.</div>
       </div>
     </div>
   </div>
@@ -312,10 +322,10 @@
   <div class="progress-bar">
     <div class="progress-fill" id="progressFill" style="width: 0%"></div>
   </div>
-  <div class="progress-text" id="progressText">1 / 4</div>
+  <div class="progress-text" id="progressText">1 / 5</div>
 
   <script>
-    window.steps = [{"id":"calendar-week","order":1,"title":"Tu Semana en un Vistazo","description":"La pantalla Reservar abre con tu semana: lunes a sábado, día actual resaltado en lima.","narration":"Bienvenido a Reservar. La pantalla abre con tu semana completa: lunes a sábado, con el día actual resaltado en lima. Toca cualquier día para ver sus clases.","url":"/atleta/reservar","action":"screenshot","duration":5,"scrollY":0,"screenshot":"01-home.png"},{"id":"filters","order":2,"title":"Filtra por Tipo y Horario","description":"Dos filtros: tipo de clase (CrossFit, Open Gym, etc.) y horario del día (mañana, tarde, noche).","narration":"Justo abajo, dos filtros: tipo de clase y horario del día. Útiles cuando hay muchas clases programadas. Si no, déjalos en 'Todos'.","url":"/atleta/reservar","action":"screenshot","duration":5,"scrollY":380,"screenshot":"02-filtros.png"},{"id":"class-card","order":3,"title":"Las Clases del Día","description":"Cada clase muestra hora, duración, coach, tipo, y cupos disponibles. El botón RESERVAR habilita si hay lugar.","narration":"Cada clase muestra hora, duración, nombre del WOD, tipo y cupos disponibles. Si hay lugar, el botón RESERVAR queda activo.","url":"/atleta/reservar","action":"screenshot","duration":6,"scrollY":600,"screenshot":"03-clases.png"},{"id":"next-day","order":4,"title":"Cambia de Día","description":"Toca otro día del calendario superior para ver sus clases. La lista se actualiza al instante.","narration":"Para ver otro día, toca su tarjeta en el calendario superior. La lista de clases se actualiza al instante. Reserva con un solo tap.","url":"/atleta/reservar?date=2026-05-12","action":"screenshot","duration":5,"scrollY":0,"screenshot":"04-otro-dia.png"}];
+    window.steps = [{"id":"salud-overview","order":1,"title":"Tu Cuerpo en el Tiempo","description":"Salud reúne tu peso, IMC y tendencia en un solo lugar, separado del entrenamiento.","narration":"Bienvenido a Salud. Aquí registras tu peso, tu composición corporal y tus metas. Todo separado del entrenamiento, en su propia pantalla.","url":"/atleta/salud","action":"screenshot","duration":5,"scrollY":0,"screenshot":"01-salud.png"},{"id":"today","order":2,"title":"Tu Cuerpo Hoy","description":"Tu peso más reciente, el cambio vs la medición anterior, y tu IMC calculado con tu altura.","narration":"Tu peso más reciente, con el cambio respecto a la última medición. Lima si bajaste, gris si subiste. Y tu IMC se calcula solo a partir de tu altura.","url":"/atleta/salud","action":"screenshot","duration":5,"scrollY":100,"screenshot":"02-cuerpo-hoy.png"},{"id":"trend","order":3,"title":"Peso 90 Días","description":"Gráfico de tu peso en los últimos 90 días. La tendencia salta a la vista sin Excel ni apps externas.","narration":"El gráfico muestra tu peso en los últimos noventa días. La tendencia salta a la vista. Nada de Excel, nada de apps externas. Tu progreso real, en tu app del box.","url":"/atleta/salud","action":"screenshot","duration":6,"scrollY":350,"screenshot":"03-tendencia.png"},{"id":"goal","order":4,"title":"Crea una Meta","description":"Define un objetivo de composición corporal. Kronos compara cada medición nueva con tu meta.","narration":"Toca crear meta de composición para definir un objetivo concreto. Kronos compara cada medición nueva con tu objetivo y te dice qué tan cerca estás.","url":"/atleta/salud","action":"screenshot","duration":5,"scrollY":550,"screenshot":"04-meta.png"},{"id":"register","order":5,"title":"Registra una Medición","description":"El botón superior te permite agregar peso, body fat, masa muscular u otros valores cuando quieras.","narration":"El botón superior te permite agregar una medición nueva cuando quieras: peso, body fat, masa muscular. Lo que tu coach te pida, lo guardas aquí.","url":"/atleta/salud","action":"screenshot","duration":5,"scrollY":0,"screenshot":"05-registrar.png"}];
     let current = 0;
     const steps = window.steps;
     let synth = window.speechSynthesis;

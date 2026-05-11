@@ -1,0 +1,70 @@
+{
+  "id": "home-tour",
+  "title": "Tu Home en 30 segundos",
+  "description": "Recorrido por la pantalla principal del atleta: hero personalizado, coach AI, racha activa, CTA del WOD y PRs recientes.",
+  "target": "atleta",
+  "version": "1.0.0",
+  "createdAt": "2026-05-11",
+  "steps": [
+    {
+      "id": "home-hero",
+      "order": 1,
+      "title": "Tu Home",
+      "description": "Tu pantalla principal abre con un mensaje personalizado. Tu nombre, tu racha actual y una pista de tu próximo entrenamiento.",
+      "narration": "Bienvenido a Kronos. Tu pantalla principal abre con un mensaje hecho para ti: tu nombre, tu racha actual y una pista de qué viene en tu próximo entrenamiento.",
+      "url": "/atleta",
+      "action": "screenshot",
+      "duration": 5,
+      "scrollY": 0,
+      "screenshot": "01-hero.png"
+    },
+    {
+      "id": "coach-week",
+      "order": 2,
+      "title": "Tu Coach IA de la Semana",
+      "description": "Kronos analiza tu historial y te sugiere tres puntos para mejorar esta semana, con un movimiento específico cada uno.",
+      "narration": "Justo abajo, Kronos te muestra tres puntos para trabajar esta semana. Cada tarjeta tiene un movimiento concreto: practícalo y verás el cambio.",
+      "url": "/atleta",
+      "action": "screenshot",
+      "duration": 6,
+      "scrollY": 200,
+      "screenshot": "02-coach-semana.png"
+    },
+    {
+      "id": "streak-hero",
+      "order": 3,
+      "title": "Tu Racha",
+      "description": "El bloque de racha muestra cuántos días seguidos has entrenado. Si la rompes, se reinicia. Si la extiendes, se siente.",
+      "narration": "Aquí está tu racha. Cuántos días seguidos has venido al box. Si la rompes, se reinicia. Si la extiendes, lo sientes el día completo.",
+      "url": "/atleta",
+      "action": "screenshot",
+      "duration": 5,
+      "scrollY": 780,
+      "screenshot": "03-racha.png"
+    },
+    {
+      "id": "wod-cta",
+      "order": 4,
+      "title": "Registra tu WOD",
+      "description": "El botón principal de la pantalla. Después de tu clase, un tap registra tu resultado y Kronos detecta si fue PR.",
+      "narration": "Este es el botón más importante de la app. Después de tu clase, lo presionas y registras tu resultado. Si fue un PR, Kronos lo detecta solo.",
+      "url": "/atleta",
+      "action": "screenshot",
+      "duration": 5,
+      "scrollY": 900,
+      "screenshot": "04-cta-wod.png"
+    },
+    {
+      "id": "prs-recientes",
+      "order": 5,
+      "title": "Tus PRs Recientes",
+      "description": "Tus mejores marcas registradas en los últimos días. Aquí ves tu progreso real en cifras frías.",
+      "narration": "Al final, tus mejores marcas recientes. Deadlift, Back Squat, Front Squat. Tu progreso real en cifras frías, sin adornos. Ya conoces tu Home — empieza a entrenar.",
+      "url": "/atleta",
+      "action": "screenshot",
+      "duration": 6,
+      "scrollY": 1150,
+      "screenshot": "05-prs-recientes.png"
+    }
+  ]
+}

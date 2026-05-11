@@ -1,0 +1,82 @@
+{
+  "id": "perfil-y-prs",
+  "title": "Tu perfil, racha y PRs",
+  "description": "Perfil del atleta: radar de capacidades, records personales, histórico 90 días, asistencia, cuerpo y movimientos.",
+  "target": "atleta",
+  "version": "2.0.0",
+  "createdAt": "2026-05-11",
+  "steps": [
+    {
+      "id": "profile-header",
+      "order": 1,
+      "title": "Tu Perfil",
+      "description": "Tu nombre, nivel, meses activo y un radar con tus capacidades: fuerza, olympic, cardio, gimnástico, core.",
+      "narration": "Bienvenido a tu perfil. Arriba ves tu nombre, nivel y meses activo. El radar muestra tus capacidades: fuerza, olympic, cardio, gimnástico y core. Tu silueta como atleta, en una imagen.",
+      "url": "/atleta/perfil",
+      "action": "screenshot",
+      "duration": 6,
+      "scrollY": 0,
+      "screenshot": "01-perfil.png"
+    },
+    {
+      "id": "prs",
+      "order": 2,
+      "title": "Tus Records Personales",
+      "description": "Top 6 PRs en formato grilla: Deadlift, Back Squat, Front Squat, Clean, Bench Press, Strict Press. Con fecha.",
+      "narration": "Tus records personales en una grilla limpia. Top seis movimientos con tu mejor marca y la fecha en que la lograste. Tu progreso real, sin adornos.",
+      "url": "/atleta/perfil",
+      "action": "screenshot",
+      "duration": 6,
+      "scrollY": 600,
+      "screenshot": "02-prs.png"
+    },
+    {
+      "id": "history-90d",
+      "order": 3,
+      "title": "Histórico de 90 Días",
+      "description": "Tu rendimiento normalizado en los últimos 90 días. Permite comparar diferentes WODs en una sola línea.",
+      "narration": "El histórico de noventa días muestra tu rendimiento normalizado. Compara WODs distintos en una sola línea para ver tu evolución real, no impresiones del día.",
+      "url": "/atleta/perfil",
+      "action": "screenshot",
+      "duration": 5,
+      "scrollY": 900,
+      "screenshot": "03-historico.png"
+    },
+    {
+      "id": "attendance",
+      "order": 4,
+      "title": "Tu Asistencia",
+      "description": "Heatmap GitHub-style de tus asistencias. Cada cuadrito es un día. Cuántas clases atendiste y tu consistencia.",
+      "narration": "Tu asistencia en formato heatmap. Cada cuadrito es un día. Lima cuando entrenas, gris cuando no. Verás tu consistencia de un solo vistazo.",
+      "url": "/atleta/perfil",
+      "action": "screenshot",
+      "duration": 5,
+      "scrollY": 1180,
+      "screenshot": "04-asistencia.png"
+    },
+    {
+      "id": "body",
+      "order": 5,
+      "title": "Tu Cuerpo",
+      "description": "Tu altura y peso más recientes. Botón para registrar una nueva medición sin salir del perfil.",
+      "narration": "Más abajo ves tu cuerpo: altura, peso, fecha de la última medición. Un botón te permite registrar una medición nueva sin salir del perfil.",
+      "url": "/atleta/perfil",
+      "action": "screenshot",
+      "duration": 5,
+      "scrollY": 1400,
+      "screenshot": "05-cuerpo.png"
+    },
+    {
+      "id": "collection",
+      "order": 6,
+      "title": "Tu Colección de Logros",
+      "description": "Logros desbloqueados, XP acumulado y accesos rápidos a Historial, Leaderboard y Pagos.",
+      "narration": "Al final, tu colección de logros con XP acumulado. Y los accesos rápidos a historial, leaderboard y pagos. Tu perfil completo, en una sola pantalla.",
+      "url": "/atleta/perfil",
+      "action": "screenshot",
+      "duration": 5,
+      "scrollY": 1900,
+      "screenshot": "06-coleccion.png"
+    }
+  ]
+}

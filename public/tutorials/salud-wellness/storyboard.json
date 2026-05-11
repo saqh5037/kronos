@@ -1,0 +1,70 @@
+{
+  "id": "salud-wellness",
+  "title": "Registra tu progreso físico",
+  "description": "Módulo Salud: peso actual, IMC, tendencia 90 días, registrar medición y crear meta de composición.",
+  "target": "atleta",
+  "version": "2.0.0",
+  "createdAt": "2026-05-11",
+  "steps": [
+    {
+      "id": "salud-overview",
+      "order": 1,
+      "title": "Tu Cuerpo en el Tiempo",
+      "description": "Salud reúne tu peso, IMC y tendencia en un solo lugar, separado del entrenamiento.",
+      "narration": "Bienvenido a Salud. Aquí registras tu peso, tu composición corporal y tus metas. Todo separado del entrenamiento, en su propia pantalla.",
+      "url": "/atleta/salud",
+      "action": "screenshot",
+      "duration": 5,
+      "scrollY": 0,
+      "screenshot": "01-salud.png"
+    },
+    {
+      "id": "today",
+      "order": 2,
+      "title": "Tu Cuerpo Hoy",
+      "description": "Tu peso más reciente, el cambio vs la medición anterior, y tu IMC calculado con tu altura.",
+      "narration": "Tu peso más reciente, con el cambio respecto a la última medición. Lima si bajaste, gris si subiste. Y tu IMC se calcula solo a partir de tu altura.",
+      "url": "/atleta/salud",
+      "action": "screenshot",
+      "duration": 5,
+      "scrollY": 100,
+      "screenshot": "02-cuerpo-hoy.png"
+    },
+    {
+      "id": "trend",
+      "order": 3,
+      "title": "Peso 90 Días",
+      "description": "Gráfico de tu peso en los últimos 90 días. La tendencia salta a la vista sin Excel ni apps externas.",
+      "narration": "El gráfico muestra tu peso en los últimos noventa días. La tendencia salta a la vista. Nada de Excel, nada de apps externas. Tu progreso real, en tu app del box.",
+      "url": "/atleta/salud",
+      "action": "screenshot",
+      "duration": 6,
+      "scrollY": 350,
+      "screenshot": "03-tendencia.png"
+    },
+    {
+      "id": "goal",
+      "order": 4,
+      "title": "Crea una Meta",
+      "description": "Define un objetivo de composición corporal. Kronos compara cada medición nueva con tu meta.",
+      "narration": "Toca crear meta de composición para definir un objetivo concreto. Kronos compara cada medición nueva con tu objetivo y te dice qué tan cerca estás.",
+      "url": "/atleta/salud",
+      "action": "screenshot",
+      "duration": 5,
+      "scrollY": 550,
+      "screenshot": "04-meta.png"
+    },
+    {
+      "id": "register",
+      "order": 5,
+      "title": "Registra una Medición",
+      "description": "El botón superior te permite agregar peso, body fat, masa muscular u otros valores cuando quieras.",
+      "narration": "El botón superior te permite agregar una medición nueva cuando quieras: peso, body fat, masa muscular. Lo que tu coach te pida, lo guardas aquí.",
+      "url": "/atleta/salud",
+      "action": "screenshot",
+      "duration": 5,
+      "scrollY": 0,
+      "screenshot": "05-registrar.png"
+    }
+  ]
+}
