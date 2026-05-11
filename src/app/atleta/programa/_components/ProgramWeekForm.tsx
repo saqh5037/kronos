@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   createProgramDays,
   deleteProgramWod,
@@ -52,9 +52,12 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
   const confirm = useConfirm();
   const [upcoming, setUpcoming] =
     useState<ScheduledProgramWod[]>(initialUpcoming);
-  const [weekStart, setWeekStart] = useState(() =>
-    startOfWeekMonday(new Date()),
-  );
+  // Hydration-safe: weekStart depende del día actual en la TZ local.
+  // SSR no lo conoce — arrancamos en null y lo calculamos post-mount.
+  const [weekStart, setWeekStart] = useState<Date | null>(null);
+  useEffect(() => {
+    setWeekStart(startOfWeekMonday(new Date()));
+  }, []);
   const [days, setDays] = useState<DayState[]>(() =>
     Array.from({ length: 7 }, () => ({
       enabled: false,
@@ -75,6 +78,7 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
   }
 
   function shiftWeek(deltaDays: number) {
+    if (!weekStart) return;
     const next = new Date(weekStart);
     next.setDate(next.getDate() + deltaDays);
     setWeekStart(startOfWeekMonday(next));
@@ -85,10 +89,12 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
     setError(null);
     setSuccess(null);
 
+    if (!weekStart) return;
+    const base = weekStart;
     const payload = days
       .map((d, i) => {
         if (!d.enabled || !d.name.trim()) return null;
-        const date = new Date(weekStart);
+        const date = new Date(base);
         date.setDate(date.getDate() + i);
         return {
           scheduledFor: date,
@@ -263,202 +269,223 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
         </section>
       )}
 
-      {/* FORM */}
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          padding: "0 16px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-        }}
-      >
+      {/* FORM — gateado por weekStart (post-mount) para evitar hydration mismatch */}
+      {weekStart === null ? (
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "10px 14px",
+            margin: "0 16px",
+            padding: "60px 20px",
             background: "var(--k-surface)",
             border: "1px solid var(--k-line)",
             borderRadius: 12,
+            textAlign: "center",
+            color: "var(--k-t3)",
+            fontFamily: "var(--k-font-body)",
+            fontSize: 13,
+          }}
+          aria-busy="true"
+        >
+          Cargando semana…
+        </div>
+      ) : (
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            padding: "0 16px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
           }}
         >
-          <button
-            type="button"
-            onClick={() => shiftWeek(-7)}
-            className="k-tap"
-            style={navBtn}
-          >
-            ‹
-          </button>
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontFamily: "var(--k-font-display)",
-                fontSize: 9,
-                fontWeight: 700,
-                letterSpacing: "0.18em",
-                color: "var(--k-t3)",
-              }}
-            >
-              SEMANA DE
-            </div>
-            <div
-              style={{
-                fontFamily: "var(--k-font-display)",
-                fontSize: 14,
-                fontWeight: 700,
-                color: "var(--k-t1)",
-              }}
-            >
-              {fmtDateShort(weekStart)} —{" "}
-              {fmtDateShort(addDaysJS(weekStart, 6))}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => shiftWeek(7)}
-            className="k-tap"
-            style={navBtn}
-          >
-            ›
-          </button>
-        </div>
-
-        {days.map((d, i) => {
-          const date = addDaysJS(weekStart, i);
-          return (
-            <div
-              key={i}
-              style={{
-                padding: 14,
-                background: d.enabled
-                  ? "var(--k-elevated)"
-                  : "var(--k-surface)",
-                border: `1px solid ${
-                  d.enabled ? "var(--k-accent-line)" : "var(--k-line)"
-                }`,
-                borderRadius: 12,
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
-            >
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={d.enabled}
-                  onChange={(e) => updateDay(i, { enabled: e.target.checked })}
-                />
-                <span
-                  style={{
-                    fontFamily: "var(--k-font-display)",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    letterSpacing: "0.12em",
-                    color: "var(--k-t2)",
-                    textTransform: "uppercase",
-                    flex: 1,
-                  }}
-                >
-                  {DAY_LABELS[i]} · {fmtDateInput(date)}
-                </span>
-              </label>
-              {d.enabled && (
-                <>
-                  <input
-                    type="text"
-                    placeholder="Nombre del WOD (Ej: Fran)"
-                    value={d.name}
-                    onChange={(e) => updateDay(i, { name: e.target.value })}
-                    maxLength={80}
-                    style={inputStyle}
-                  />
-                  <textarea
-                    placeholder="Descripción (movimientos, reps, peso) — opcional"
-                    value={d.description}
-                    onChange={(e) =>
-                      updateDay(i, { description: e.target.value })
-                    }
-                    maxLength={1000}
-                    rows={3}
-                    style={{ ...inputStyle, resize: "vertical" }}
-                  />
-                </>
-              )}
-            </div>
-          );
-        })}
-
-        {error && (
           <div
-            role="alert"
             style={{
-              padding: 10,
-              background: "var(--k-elevated)",
-              border: "1px solid var(--k-danger)",
-              borderRadius: 10,
-              color: "var(--k-danger)",
-              fontFamily: "var(--k-font-body)",
-              fontSize: 12,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "10px 14px",
+              background: "var(--k-surface)",
+              border: "1px solid var(--k-line)",
+              borderRadius: 12,
             }}
           >
-            {error}
+            <button
+              type="button"
+              onClick={() => shiftWeek(-7)}
+              className="k-tap"
+              style={navBtn}
+            >
+              ‹
+            </button>
+            <div style={{ textAlign: "center" }}>
+              <div
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: "0.18em",
+                  color: "var(--k-t3)",
+                }}
+              >
+                SEMANA DE
+              </div>
+              <div
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: "var(--k-t1)",
+                }}
+              >
+                {fmtDateShort(weekStart)} —{" "}
+                {fmtDateShort(addDaysJS(weekStart, 6))}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => shiftWeek(7)}
+              className="k-tap"
+              style={navBtn}
+            >
+              ›
+            </button>
           </div>
-        )}
 
-        {success && (
-          <div
-            role="status"
+          {days.map((d, i) => {
+            const date = addDaysJS(weekStart, i);
+            return (
+              <div
+                key={i}
+                style={{
+                  padding: 14,
+                  background: d.enabled
+                    ? "var(--k-elevated)"
+                    : "var(--k-surface)",
+                  border: `1px solid ${
+                    d.enabled ? "var(--k-accent-line)" : "var(--k-line)"
+                  }`,
+                  borderRadius: 12,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={d.enabled}
+                    onChange={(e) =>
+                      updateDay(i, { enabled: e.target.checked })
+                    }
+                  />
+                  <span
+                    style={{
+                      fontFamily: "var(--k-font-display)",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: "0.12em",
+                      color: "var(--k-t2)",
+                      textTransform: "uppercase",
+                      flex: 1,
+                    }}
+                  >
+                    {DAY_LABELS[i]} · {fmtDateInput(date)}
+                  </span>
+                </label>
+                {d.enabled && (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Nombre del WOD (Ej: Fran)"
+                      value={d.name}
+                      onChange={(e) => updateDay(i, { name: e.target.value })}
+                      maxLength={80}
+                      style={inputStyle}
+                    />
+                    <textarea
+                      placeholder="Descripción (movimientos, reps, peso) — opcional"
+                      value={d.description}
+                      onChange={(e) =>
+                        updateDay(i, { description: e.target.value })
+                      }
+                      maxLength={1000}
+                      rows={3}
+                      style={{ ...inputStyle, resize: "vertical" }}
+                    />
+                  </>
+                )}
+              </div>
+            );
+          })}
+
+          {error && (
+            <div
+              role="alert"
+              style={{
+                padding: 10,
+                background: "var(--k-elevated)",
+                border: "1px solid var(--k-danger)",
+                borderRadius: 10,
+                color: "var(--k-danger)",
+                fontFamily: "var(--k-font-body)",
+                fontSize: 12,
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div
+              role="status"
+              style={{
+                padding: 10,
+                background: "var(--k-accent-soft)",
+                border: "1px solid var(--k-accent-line)",
+                borderRadius: 10,
+                color: "var(--k-accent)",
+                fontFamily: "var(--k-font-display)",
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+              }}
+            >
+              ✓ {success}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isPending}
+            className="k-tap"
             style={{
-              padding: 10,
-              background: "var(--k-accent-soft)",
-              border: "1px solid var(--k-accent-line)",
-              borderRadius: 10,
-              color: "var(--k-accent)",
+              background: "var(--k-accent)",
+              color: "var(--k-accent-on)",
+              border: "none",
+              borderRadius: 12,
+              padding: "14px 18px",
               fontFamily: "var(--k-font-display)",
               fontSize: 12,
               fontWeight: 700,
-              letterSpacing: "0.12em",
+              letterSpacing: "0.16em",
               textTransform: "uppercase",
+              cursor: isPending ? "wait" : "pointer",
+              opacity: isPending ? 0.6 : 1,
+              boxShadow: "var(--k-accent-glow)",
+              marginTop: 8,
             }}
           >
-            ✓ {success}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={isPending}
-          className="k-tap"
-          style={{
-            background: "var(--k-accent)",
-            color: "var(--k-accent-on)",
-            border: "none",
-            borderRadius: 12,
-            padding: "14px 18px",
-            fontFamily: "var(--k-font-display)",
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            cursor: isPending ? "wait" : "pointer",
-            opacity: isPending ? 0.6 : 1,
-            boxShadow: "var(--k-accent-glow)",
-            marginTop: 8,
-          }}
-        >
-          {isPending ? "Guardando..." : "Guardar programa"}
-        </button>
-      </form>
+            {isPending ? "Guardando..." : "Guardar programa"}
+          </button>
+        </form>
+      )}
     </>
   );
 }
