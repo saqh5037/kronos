@@ -5,10 +5,30 @@ export const bodyMetricTypes = [
   "BODY_FAT",
   "MUSCLE_MASS",
   "BMI",
+  "HEIGHT",
+  "WAIST",
+  "HIP",
+  "ARM",
+  "THIGH",
+  "CHEST",
   "CUSTOM",
 ] as const;
 
 export type BodyMetricType = (typeof bodyMetricTypes)[number];
+
+export const BODY_METRIC_LABEL: Record<BodyMetricType, string> = {
+  WEIGHT: "Peso",
+  BODY_FAT: "% Grasa",
+  MUSCLE_MASS: "% Músculo",
+  BMI: "IMC",
+  HEIGHT: "Altura",
+  WAIST: "Cintura",
+  HIP: "Cadera",
+  ARM: "Brazo",
+  THIGH: "Muslo",
+  CHEST: "Pecho",
+  CUSTOM: "Otra",
+};
 
 export const bodyMetricSchema = z
   .object({

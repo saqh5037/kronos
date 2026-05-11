@@ -73,6 +73,24 @@ const allTabs: Tab[] = [
     ),
   },
   {
+    href: "/atleta/salud",
+    label: "Salud",
+    icon: (active: boolean) => (
+      <svg
+        viewBox="0 0 24 24"
+        width="22"
+        height="22"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={active ? 2.4 : 1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 12h4l2-6 4 12 2-6h6" />
+      </svg>
+    ),
+  },
+  {
     href: "/atleta/wod",
     label: "WOD",
     icon: (active: boolean) => (
@@ -87,28 +105,6 @@ const allTabs: Tab[] = [
         strokeLinejoin="round"
       >
         <path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12" />
-      </svg>
-    ),
-  },
-  {
-    href: "/atleta/movimientos",
-    label: "Movs",
-    icon: (active: boolean) => (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={active ? 2.4 : 1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M6.5 6.5L17.5 17.5M17.5 6.5L6.5 17.5" />
-        <circle cx="6.5" cy="6.5" r="2" />
-        <circle cx="17.5" cy="6.5" r="2" />
-        <circle cx="6.5" cy="17.5" r="2" />
-        <circle cx="17.5" cy="17.5" r="2" />
       </svg>
     ),
   },

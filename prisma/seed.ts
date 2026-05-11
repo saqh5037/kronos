@@ -1029,6 +1029,11 @@ async function main() {
       allowedRoles: ["OWNER", "COACH"],
       requiresOwnerApproval: false,
     },
+    {
+      action: "MANAGE_ATHLETE_METRICS",
+      allowedRoles: ["OWNER", "COACH"],
+      requiresOwnerApproval: false,
+    },
   ];
 
   for (const perm of permissionDefaults) {

@@ -83,6 +83,41 @@ export default async function AjustesAtletaPage() {
         </div>
       </section>
 
+      {/* Ayuda */}
+      <section className="k-card p-5 mb-4">
+        <p
+          className="font-mono text-[10px] font-bold uppercase tracking-wider mb-3"
+          style={{ color: "var(--k-t3)" }}
+        >
+          Soporte
+        </p>
+        <Link
+          href="/atleta/ayuda"
+          className="flex items-center justify-between gap-3 py-2 group"
+        >
+          <div>
+            <p className="font-medium text-sm">Centro de Ayuda</p>
+            <p className="text-xs" style={{ color: "var(--k-t3)" }}>
+              Tutoriales y guías visuales
+            </p>
+          </div>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0 transition-transform group-hover:translate-x-0.5"
+            style={{ color: "var(--k-t3)" }}
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </Link>
+      </section>
+
       {/* Session */}
       <section className="k-card p-5">
         <p

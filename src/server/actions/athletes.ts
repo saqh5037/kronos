@@ -3,7 +3,13 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
 import { withTenant } from "../db";
-import { athleteSchema } from "@/lib/validations/athlete";
+import {
+  athleteSchema,
+  FITNESS_GOAL_TAGS,
+  withFitnessGoalTags,
+  readFitnessGoalTags,
+  type FitnessGoalTag,
+} from "@/lib/validations/athlete";
 import { revalidatePath } from "next/cache";
 import { type ListOpts, type ListResult, normalizePagination } from "./types";
 import type { AthleteStatus } from "@prisma/client";
@@ -289,6 +295,14 @@ export type AthleteDetail = {
     startsAt: Date;
     wodName: string | null;
   } | null;
+  bodyMetricsRecent: {
+    id: string;
+    type: string;
+    label: string | null;
+    value: number;
+    unit: string;
+    measuredAt: Date;
+  }[];
 };
 
 export async function getAthleteDetail(
@@ -327,7 +341,7 @@ export async function getAthleteDetail(
   });
   if (!athlete) return null;
 
-  const [paymentsRecent, nextBooking] = await Promise.all([
+  const [paymentsRecent, nextBooking, bodyMetricRows] = await Promise.all([
     db.payment.findMany({
       where: { membership: { athleteId: athlete.id } },
       orderBy: { createdAt: "desc" },
@@ -350,7 +364,21 @@ export async function getAthleteDetail(
         },
       },
     }),
+    db.bodyMetric.findMany({
+      where: { athleteId: athlete.id },
+      orderBy: { measuredAt: "desc" },
+      take: 30,
+    }),
   ]);
+
+  const bodyMetricsRecent = bodyMetricRows.map((r) => ({
+    id: r.id,
+    type: r.type,
+    label: r.label,
+    value: Number(r.value),
+    unit: r.unit,
+    measuredAt: r.measuredAt,
+  }));
 
   const activeMembership = athlete.memberships[0]
     ? {
@@ -413,6 +441,7 @@ export async function getAthleteDetail(
           wodName: nextBooking.class.wod?.name ?? null,
         }
       : null,
+    bodyMetricsRecent,
   };
 }
 
@@ -426,6 +455,46 @@ export async function updateAthleteStatus(
   await db.athlete.update({ where: { id: athleteId }, data: { status } });
   revalidatePath("/admin/atletas");
   return { ok: true };
+}
+
+/**
+ * Persist the athlete's fitness motivation tags. Used by the signup goals
+ * step and the perfil settings panel. Idempotent: replaces all `goal:*`
+ * tags while preserving other tag prefixes (e.g. `level:*`).
+ */
+export async function setMyFitnessGoals(
+  goals: FitnessGoalTag[],
+): Promise<{ ok: true; tags: FitnessGoalTag[] }> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  const tenantId = session.user.tenantId;
+  const userId = session.user.id;
+
+  const allowed = new Set<string>(FITNESS_GOAL_TAGS);
+  const cleaned = goals.filter((g): g is FitnessGoalTag => allowed.has(g));
+
+  const db = withTenant(tenantId);
+  const me = await db.athlete.findFirst({ where: { userId } });
+  if (!me) throw new Error("No tienes perfil de atleta en este box");
+
+  const next = withFitnessGoalTags(me.tags, cleaned);
+  await db.athlete.update({ where: { id: me.id }, data: { tags: next } });
+
+  revalidatePath("/atleta");
+  revalidatePath("/atleta/perfil");
+  return { ok: true, tags: cleaned };
+}
+
+export async function getMyFitnessGoals(): Promise<FitnessGoalTag[]> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) return [];
+  const db = withTenant(session.user.tenantId);
+  const me = await db.athlete.findFirst({
+    where: { userId: session.user.id },
+    select: { tags: true },
+  });
+  if (!me) return [];
+  return readFitnessGoalTags(me.tags);
 }
 
 export async function createAthlete(data: unknown) {

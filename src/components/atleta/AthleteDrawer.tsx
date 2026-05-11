@@ -5,6 +5,7 @@ import type { Route } from "next";
 import { useState } from "react";
 
 const EXTRA_LINKS = [
+  { href: "/atleta/movimientos" as Route, label: "Movimientos", icon: "💪" },
   { href: "/atleta/historial" as Route, label: "Historial", icon: "📊" },
   { href: "/atleta/leaderboard" as Route, label: "Leaderboard", icon: "🏆" },
   { href: "/atleta/pagos" as Route, label: "Mis pagos", icon: "💳" },

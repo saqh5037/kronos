@@ -4,8 +4,9 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { authOptions } from "../auth";
 import { withTenant, db as rawDb } from "../db";
-import { goalSchema } from "@/lib/validations/goal";
+import { goalSchema, type GoalMetricCode } from "@/lib/validations/goal";
 import { computeGoalProgress, type GoalProgress } from "@/lib/goals/progress";
+import { calcWellnessProgress } from "@/lib/wellness/calculations";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -20,7 +21,7 @@ async function getMyAthlete(userId: string, tenantId: string) {
 
 export type GoalRow = {
   id: string;
-  metric: "PR" | "TONNAGE" | "ATTENDANCE";
+  metric: GoalMetricCode;
   movementId: string | null;
   movementName: string | null;
   targetValue: number;
@@ -37,9 +38,10 @@ export type GoalRow = {
 async function resolveCurrentValue(
   athleteId: string,
   tenantId: string,
-  metric: "PR" | "TONNAGE" | "ATTENDANCE",
+  metric: GoalMetricCode,
   movementId: string | null,
   since: Date | null = null,
+  unit: string | null = null,
 ): Promise<number> {
   const db = withTenant(tenantId);
   if (metric === "PR" && movementId) {
@@ -56,6 +58,14 @@ async function resolveCurrentValue(
         ...(since ? { class: { startsAt: { gte: since } } } : {}),
       },
     });
+  }
+  if (metric === "BODY_COMPOSITION") {
+    const type = unit === "%" ? "BODY_FAT" : "WEIGHT";
+    const latest = await db.bodyMetric.findFirst({
+      where: { athleteId, type },
+      orderBy: { measuredAt: "desc" },
+    });
+    return latest ? Number(latest.value) : 0;
   }
   return 0;
 }
@@ -77,6 +87,8 @@ export async function createGoal(input: unknown): Promise<{ id: string }> {
           tenantId,
           parsed.metric,
           parsed.movementId ?? null,
+          null,
+          parsed.unit,
         ));
 
   const goal = await rawDb.goal.create({
@@ -94,7 +106,17 @@ export async function createGoal(input: unknown): Promise<{ id: string }> {
 
   revalidatePath("/atleta");
   revalidatePath("/atleta/perfil");
+  revalidatePath("/atleta/salud");
   return { id: goal.id };
+}
+
+/**
+ * Variant of listMyGoals scoped to BODY_COMPOSITION only — used by the
+ * `/atleta/salud` page so we don't pull PR/TONNAGE/ATTENDANCE goals.
+ */
+export async function listMyWellnessGoals(): Promise<GoalRow[]> {
+  const all = await listMyGoals();
+  return all.filter((g) => g.metric === "BODY_COMPOSITION");
 }
 
 export async function listMyGoals(): Promise<GoalRow[]> {
@@ -113,27 +135,27 @@ export async function listMyGoals(): Promise<GoalRow[]> {
   const now = new Date();
   return Promise.all(
     goals.map(async (g): Promise<GoalRow> => {
+      const metric = g.metric as GoalMetricCode;
       const currentValue = await resolveCurrentValue(
         me.id,
         tenantId,
-        g.metric as "PR" | "TONNAGE" | "ATTENDANCE",
+        metric,
         g.movementId,
-        g.metric === "ATTENDANCE" ? g.createdAt : null,
+        metric === "ATTENDANCE" ? g.createdAt : null,
+        g.unit,
       );
-      const progress = computeGoalProgress(
-        {
-          metric: g.metric as "PR" | "TONNAGE" | "ATTENDANCE",
-          targetValue: Number(g.targetValue),
-          startValue: g.startValue === null ? null : Number(g.startValue),
-          deadline: g.deadline,
-          createdAt: g.createdAt,
-        },
+      const progress = computeProgressFor(
+        metric,
+        Number(g.targetValue),
+        g.startValue === null ? null : Number(g.startValue),
+        g.deadline,
+        g.createdAt,
         currentValue,
         now,
       );
       return {
         id: g.id,
-        metric: g.metric as "PR" | "TONNAGE" | "ATTENDANCE",
+        metric,
         movementId: g.movementId,
         movementName: g.movement?.name ?? null,
         targetValue: Number(g.targetValue),
@@ -161,27 +183,27 @@ export async function getGoalProgress(goalId: string): Promise<GoalRow | null> {
   });
   if (!g) return null;
 
+  const metric = g.metric as GoalMetricCode;
   const currentValue = await resolveCurrentValue(
     g.athleteId,
     tenantId,
-    g.metric as "PR" | "TONNAGE" | "ATTENDANCE",
+    metric,
     g.movementId,
-    g.metric === "ATTENDANCE" ? g.createdAt : null,
+    metric === "ATTENDANCE" ? g.createdAt : null,
+    g.unit,
   );
-  const progress = computeGoalProgress(
-    {
-      metric: g.metric as "PR" | "TONNAGE" | "ATTENDANCE",
-      targetValue: Number(g.targetValue),
-      startValue: g.startValue === null ? null : Number(g.startValue),
-      deadline: g.deadline,
-      createdAt: g.createdAt,
-    },
+  const progress = computeProgressFor(
+    metric,
+    Number(g.targetValue),
+    g.startValue === null ? null : Number(g.startValue),
+    g.deadline,
+    g.createdAt,
     currentValue,
   );
 
   return {
     id: g.id,
-    metric: g.metric as "PR" | "TONNAGE" | "ATTENDANCE",
+    metric,
     movementId: g.movementId,
     movementName: g.movement?.name ?? null,
     targetValue: Number(g.targetValue),
@@ -194,6 +216,59 @@ export async function getGoalProgress(goalId: string): Promise<GoalRow | null> {
     progress,
     currentValue,
   };
+}
+
+/**
+ * Direction-aware progress: wellness goals can be descending (lose weight)
+ * or ascending (gain muscle), so we route them through the wellness helper.
+ * PR/TONNAGE/ATTENDANCE keep the original ascending semantics.
+ */
+function computeProgressFor(
+  metric: GoalMetricCode,
+  targetValue: number,
+  startValue: number | null,
+  deadline: Date,
+  createdAt: Date,
+  currentValue: number,
+  now: Date = new Date(),
+): GoalProgress {
+  if (metric === "BODY_COMPOSITION") {
+    const start = startValue ?? currentValue;
+    const w = calcWellnessProgress({
+      startValue: start,
+      currentValue,
+      targetValue,
+    });
+    const totalMs = Math.max(0, deadline.getTime() - createdAt.getTime());
+    const totalDays = Math.max(1, Math.round(totalMs / 86_400_000));
+    const daysLeft = Math.max(
+      0,
+      Math.ceil((deadline.getTime() - now.getTime()) / 86_400_000),
+    );
+    const elapsedPct =
+      totalMs <= 0
+        ? 100
+        : ((now.getTime() - createdAt.getTime()) / totalMs) * 100;
+    return {
+      pct: w.pct,
+      daysLeft,
+      totalDays,
+      onTrack: w.pct + 0.5 >= elapsedPct,
+      eta: null,
+      achieved: w.achieved,
+    };
+  }
+  return computeGoalProgress(
+    {
+      metric: metric as "PR" | "TONNAGE" | "ATTENDANCE",
+      targetValue,
+      startValue,
+      deadline,
+      createdAt,
+    },
+    currentValue,
+    now,
+  );
 }
 
 export async function cancelGoal(goalId: string): Promise<{ ok: boolean }> {
@@ -211,7 +286,55 @@ export async function cancelGoal(goalId: string): Promise<{ ok: boolean }> {
     data: { status: "CANCELLED" },
   });
   revalidatePath("/atleta/perfil");
+  revalidatePath("/atleta/salud");
   return { ok: true };
+}
+
+/**
+ * Internal hook used after a new body metric is saved. Auto-marks active
+ * BODY_COMPOSITION goals as ACHIEVED when the target is crossed. Idempotent.
+ * Returns the count of goals transitioned.
+ */
+export async function maybeAchieveWellnessGoals(
+  athleteId: string,
+  tenantId: string,
+): Promise<number> {
+  const goals = await rawDb.goal.findMany({
+    where: {
+      tenantId,
+      athleteId,
+      metric: "BODY_COMPOSITION",
+      status: "ACTIVE",
+    },
+  });
+  if (goals.length === 0) return 0;
+
+  let count = 0;
+  const now = new Date();
+  for (const g of goals) {
+    const type = g.unit === "%" ? "BODY_FAT" : "WEIGHT";
+    const latest = await rawDb.bodyMetric.findFirst({
+      where: { tenantId, athleteId, type },
+      orderBy: { measuredAt: "desc" },
+    });
+    if (!latest) continue;
+    const current = Number(latest.value);
+    const target = Number(g.targetValue);
+    const start = g.startValue === null ? current : Number(g.startValue);
+    const w = calcWellnessProgress({
+      startValue: start,
+      currentValue: current,
+      targetValue: target,
+    });
+    if (w.achieved) {
+      await rawDb.goal.update({
+        where: { id: g.id },
+        data: { status: "ACHIEVED", achievedAt: now },
+      });
+      count += 1;
+    }
+  }
+  return count;
 }
 
 /**

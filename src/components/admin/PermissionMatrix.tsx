@@ -14,6 +14,7 @@ const ALL_ACTIONS: PermissionAction[] = [
   "MARK_OVERDUE",
   "VIEW_FINANCIAL_REPORTS",
   "EDIT_OTHERS_SCORES",
+  "MANAGE_ATHLETE_METRICS",
 ];
 
 const ACTION_LABELS: Record<PermissionAction, string> = {
@@ -25,6 +26,7 @@ const ACTION_LABELS: Record<PermissionAction, string> = {
   MARK_OVERDUE: "Marcar como vencido",
   VIEW_FINANCIAL_REPORTS: "Ver reportes financieros",
   EDIT_OTHERS_SCORES: "Editar scores de otros",
+  MANAGE_ATHLETE_METRICS: "Registrar mediciones de atletas",
 };
 
 const ACTION_ICONS: Partial<Record<PermissionAction, string>> = {
@@ -36,6 +38,7 @@ const ACTION_ICONS: Partial<Record<PermissionAction, string>> = {
   MARK_OVERDUE: "⚠️",
   VIEW_FINANCIAL_REPORTS: "📊",
   EDIT_OTHERS_SCORES: "✏️",
+  MANAGE_ATHLETE_METRICS: "⚖️",
 };
 
 const ROLES: Role[] = ["COACH", "STAFF"];

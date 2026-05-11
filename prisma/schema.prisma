@@ -471,6 +471,7 @@ enum GoalMetric {
   PR
   TONNAGE
   ATTENDANCE
+  BODY_COMPOSITION
 }
 
 enum GoalStatus {
@@ -747,6 +748,7 @@ enum PermissionAction {
   MARK_OVERDUE
   VIEW_FINANCIAL_REPORTS
   EDIT_OTHERS_SCORES
+  MANAGE_ATHLETE_METRICS
 }
 
 model Permission {

@@ -1,0 +1,76 @@
+{
+  "id": "skills-atleta",
+  "title": "Cómo usar Skills",
+  "description": "Tutorial para entender el sistema de Skills de Kronos: tu skill activo, progresiones, foco de hoy y cómo cambiar de objetivo.",
+  "target": "atleta",
+  "version": "1.0.0",
+  "createdAt": "2026-05-08",
+  "steps": [
+    {
+      "id": "skills-home",
+      "order": 1,
+      "title": "Tu Página de Skills",
+      "description": "Desde aquí ves tu skill activo, tu porcentaje de progreso y qué necesitas practicar hoy para avanzar.",
+      "narration": "Bienvenido a Skills. Esta es tu página de objetivos. Aquí ves tu skill activo, tu porcentaje de progreso, y exactamente qué necesitas practicar hoy.",
+      "url": "/atleta/skills",
+      "action": "screenshot",
+      "duration": 6,
+      "screenshot": "01-skills-home.png"
+    },
+    {
+      "id": "your-progress",
+      "order": 2,
+      "title": "Tu Progreso",
+      "description": "El número grande muestra tu avance en el skill activo. Abajo ves cuántas progresiones has completado del total.",
+      "narration": "Este número grande es tu progreso en el skill activo. Abajo ves cuántas progresiones has completado del total. Cuanto más practiques, más sube.",
+      "url": "/atleta/skills",
+      "action": "screenshot",
+      "duration": 5,
+      "screenshot": "02-progreso.png"
+    },
+    {
+      "id": "focus-today",
+      "order": 3,
+      "title": "Foco de Hoy",
+      "description": "Kronos te dice exactamente qué progresión trabajar hoy. Sigue esta recomendación en tu entrenamiento.",
+      "narration": "Aquí está tu foco de hoy. Kronos te dice exactamente qué progresión practicar en tu entrenamiento. Sigue esta recomendación para avanzar más rápido.",
+      "url": "/atleta/skills",
+      "action": "screenshot",
+      "duration": 5,
+      "screenshot": "03-foco-hoy.png"
+    },
+    {
+      "id": "progressions",
+      "order": 4,
+      "title": "Tus Progresiones",
+      "description": "Cada skill se divide en progresiones. Las verdes están completadas, la amarilla es tu foco actual, y las grises están bloqueadas.",
+      "narration": "Cada skill se divide en progresiones. Las verdes están completadas, la amarilla con punto es tu foco actual, y las grises con candado están bloqueadas hasta que completes las anteriores.",
+      "url": "/atleta/skills",
+      "action": "screenshot",
+      "duration": 6,
+      "screenshot": "04-progresiones.png"
+    },
+    {
+      "id": "ai-plan",
+      "order": 5,
+      "title": "Tu Plan con IA",
+      "description": "Kronos AI analiza tu historial y te recomienda movimientos específicos para alcanzar tu próximo PR.",
+      "narration": "Kronos AI analiza tu historial de entrenamiento y te recomienda movimientos específicos para que alcances tu próximo PR. Es como tener un coach personal 24/7.",
+      "url": "/atleta/skills",
+      "action": "screenshot",
+      "duration": 5,
+      "screenshot": "05-plan-ia.png"
+    },
+    {
+      "id": "change-skill",
+      "order": 6,
+      "title": "Cambiar de Skill",
+      "description": "En la parte inferior encuentras otros skills disponibles. Toca cualquiera para cambiar tu objetivo.",
+      "narration": "Si quieres cambiar de objetivo, en la parte inferior encuentras otros skills disponibles. Toca cualquiera para ver su detalle y activarlo.",
+      "url": "/atleta/skills",
+      "action": "screenshot",
+      "duration": 5,
+      "screenshot": "06-otros-skills.png"
+    }
+  ]
+}

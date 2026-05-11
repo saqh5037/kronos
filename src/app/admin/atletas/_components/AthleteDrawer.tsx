@@ -7,6 +7,7 @@ import {
   getAthleteDetail,
   type AthleteDetail,
 } from "@/server/actions/athletes";
+import { AthleteBodyMetrics } from "./AthleteBodyMetrics";
 
 type Props = {
   athleteId: string | null;
@@ -174,6 +175,12 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                 </p>
               )}
             </section>
+
+            {/* Body composition */}
+            <AthleteBodyMetrics
+              athleteId={data.id}
+              entries={data.bodyMetricsRecent}
+            />
 
             {/* PRs */}
             <section>
