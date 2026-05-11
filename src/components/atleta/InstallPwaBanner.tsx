@@ -164,7 +164,7 @@ export default function InstallPwaBanner() {
                 <span className="font-bold text-[var(--k-warning)]">
                   Safari
                 </span>{" "}
-                instalar apps. Tocá el botón para abrir Kronos en Safari y luego{" "}
+                instalar apps. Toca el botón para abrir Kronos en Safari y luego{" "}
                 <span className="font-bold text-[var(--k-warning)]">
                   Compartir → Agregar a inicio
                 </span>
