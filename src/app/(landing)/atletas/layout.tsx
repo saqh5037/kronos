@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Kronos Atletas — La app de CrossFit que entrena con vos",
+  title: "Kronos Atletas — La app de CrossFit que entrena contigo",
   description:
-    "Trackeá PRs, reservá clases, mejorá skills con coach IA. Foto del whiteboard → score auto-detectado. Para atletas que toman su entrenamiento en serio.",
+    "Anota PRs, reserva clases, mejora skills con coach IA. Foto del pizarrón → score automático. Para atletas que toman su entrenamiento en serio.",
   keywords: [
     "app atleta CrossFit",
     "tracker PR CrossFit",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "app reservar clase CrossFit",
   ],
   openGraph: {
-    title: "Kronos Atletas — La app que entrena con vos",
+    title: "Kronos Atletas — La app que entrena contigo",
     description:
       "Tu progreso es el producto. WODs, PRs, skills, reservas. Anti-cringe, anti-spam, datos duros.",
     type: "website",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kronos Atletas — La app que entrena con vos",
+    title: "Kronos Atletas — La app que entrena contigo",
     description:
       "Tu progreso es el producto. WODs, PRs, skills, reservas. Anti-cringe, anti-spam, datos duros.",
   },

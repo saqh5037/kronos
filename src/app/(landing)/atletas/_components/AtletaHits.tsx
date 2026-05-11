@@ -17,38 +17,38 @@ type Hit = {
 const HITS: Hit[] = [
   {
     num: "01",
-    title: "Foto del whiteboard → score auto-detectado",
-    body: "Tomás foto del whiteboard al final del WOD. Kronos lee el nombre, los movimientos, tu marca. Si bajaste 34 segundos en Helen, lo sabés en el momento — no porque el coach se acordó tres días después.",
+    title: "Foto del pizarrón → PR automático",
+    body: "Tomas foto del pizarrón al terminar el WOD. Kronos lee el nombre, los movimientos, tu marca. Si bajaste 34 segundos en Helen, lo sabes al instante — no porque el coach se acordó tres días después.",
     detail: { label: "ÚLTIMO HELEN", value: "−0:34" },
   },
   {
     num: "02",
-    title: "Coach virtual con IA contextualizada",
-    body: "Elegís el skill (snatch, muscle-up, pistol). Kronos calcula qué progresiones te tocan hoy según tu nivel real, no según un PDF genérico. Las que ya pasaste se marcan, las bloqueadas te dicen por qué.",
-    detail: { label: "PROGRESIÓN ACTUAL", value: "27%" },
+    title: "Coach virtual con IA real",
+    body: "Eliges el skill (snatch, muscle-up, pistol). Kronos calcula las progresiones que te tocan hoy según tu nivel, no según un PDF genérico. Las que ya pasaste se marcan, las bloqueadas te dicen por qué.",
+    detail: { label: "PROGRESIÓN", value: "27%" },
   },
   {
     num: "03",
-    title: "Racha + readiness + trophy del mes",
-    body: "El contador de racha es el número más grande de la app. Survey diario no-bloqueante: cómo te sentís. Trophy del mes curado por IA. Retención psicológica pura, sin spam motivacional.",
-    detail: { label: "RACHA ACTUAL", value: "23 DÍAS" },
+    title: "Racha + check-in + trofeo del mes",
+    body: "La racha es el número más grande de la app. Check-in diario rápido: cómo te sientes. Trofeo del mes curado por IA. Retención de verdad, sin emojis de fuego.",
+    detail: { label: "RACHA", value: "23 DÍAS" },
   },
   {
     num: "04",
-    title: "Perfil con datos duros, no decorativos",
-    body: "Radar de capacidades vs el promedio de tu box. Heatmap 90 días tipo GitHub. Timeline de scores normalizados. Si llevás 3 meses estancado en el mismo peso, lo ves.",
+    title: "Perfil con datos duros",
+    body: "Radar de capacidades vs el promedio de tu box. Mapa de calor de 90 días. Timeline de scores normalizados. Si llevas 3 meses estancado en el mismo peso, lo ves.",
     detail: { label: "VENTANA", value: "90 DÍAS" },
   },
   {
     num: "05",
-    title: "Logros que sí valen (skill tree real)",
-    body: "Cero estrellas decorativas. Badges con condiciones reales: «Primer muscle-up estricto», «Doble peso corporal en back squat», «Guerrero RX». Lo que desbloqueás te costó.",
+    title: "Logros que sí valen",
+    body: "Cero estrellas decorativas. Badges con condiciones reales: «Primer muscle-up estricto», «Doble peso corporal en back squat», «Guerrero RX». Lo que desbloqueas te costó.",
     detail: { label: "NIVEL ATLETA", value: "07" },
   },
   {
     num: "06",
-    title: "Reservar en 1 tap, waitlist con tu lugar real",
-    body: "Si tu box usa Kronos: CTA primario gigante en el color del box. Lista de espera FIFO con tu posición visible. Si alguien cancela, te entra push y se confirma sin que vuelvas a entrar.",
+    title: "Reserva en 1 tap, lista FIFO",
+    body: "Si tu box usa Kronos: CTA gigante en el color del box. Lista de espera con tu posición visible. Si alguien cancela, te llega push y se confirma sin que vuelvas a abrir.",
     detail: { label: "TIEMPO RESERVA", value: "1 TAP" },
   },
 ];
@@ -103,17 +103,19 @@ export default function AtletaHits() {
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                alignItems: "flex-start",
+                alignItems: "baseline",
                 gap: 16,
+                borderBottom: "1px solid var(--k-line)",
+                paddingBottom: 14,
               }}
             >
               <span
                 className="lp-mono"
                 style={{
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: 700,
-                  letterSpacing: "0.18em",
-                  color: "var(--k-accent)",
+                  letterSpacing: "0.22em",
+                  color: "var(--k-t3)",
                 }}
               >
                 /{h.num}
@@ -121,9 +123,8 @@ export default function AtletaHits() {
               <div
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  gap: 2,
+                  alignItems: "baseline",
+                  gap: 10,
                   textAlign: "right",
                 }}
               >
@@ -131,8 +132,8 @@ export default function AtletaHits() {
                   className="lp-caption"
                   style={{
                     color: "var(--k-t3)",
-                    letterSpacing: "0.16em",
-                    fontSize: 9,
+                    letterSpacing: "0.18em",
+                    fontSize: 9.5,
                   }}
                 >
                   {h.detail.label}
@@ -140,9 +141,9 @@ export default function AtletaHits() {
                 <span
                   className="lp-mono"
                   style={{
-                    fontSize: 22,
+                    fontSize: 15,
                     fontWeight: 700,
-                    letterSpacing: "-0.02em",
+                    letterSpacing: "-0.01em",
                     color: "var(--k-accent)",
                   }}
                 >

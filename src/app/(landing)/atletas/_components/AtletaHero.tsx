@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
+import PhoneFrame from "./PhoneFrame";
 
 const stagger = {
   hidden: {},
@@ -33,11 +33,10 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
             es <span className="lp-tag-lime">el producto</span>.
           </motion.h1>
           <motion.p className="lp-lead" variants={child}>
-            La app del atleta de CrossFit que{" "}
-            <strong>no se siente como app</strong>. Trackea PRs reales, lee tu
-            whiteboard con la cámara, y entrena skills con un coach virtual que
-            sabe en qué nivel estás. Sin notificaciones basura. Sin gamificación
-            cringe. Sin influencers.
+            La app de CrossFit que <strong>no se siente como app</strong>. Anota
+            PRs reales, lee tu pizarrón con la cámara, y mejora skills con un
+            coach virtual que conoce tu nivel. Sin spam motivacional. Sin
+            gamificación tonta. Sin influencers.
           </motion.p>
           <motion.div className="lp-hero-actions" variants={child}>
             <a
@@ -70,18 +69,18 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
                 track("cta_clicked", { location: "atletas_hero_manual" })
               }
             >
-              Leer el manual completo →
+              Ver el manual →
             </a>
           </motion.div>
           <motion.div className="lp-hero-meta" variants={child}>
             <span>
-              <strong>2 modos</strong> · BOX PERSONAL + ATLETA DE BOX
+              <strong>2 modos</strong> · solo o en tu box
             </span>
             <span>
-              <strong>9 pantallas</strong> · DOCUMENTADAS PASO A PASO
+              <strong>9 pantallas</strong> · documentadas
             </span>
             <span>
-              <strong>0 anuncios</strong> · 0 INFLUENCERS · 0 CRINGE
+              <strong>0 anuncios</strong> · 0 influencers
             </span>
           </motion.div>
         </motion.div>
@@ -91,35 +90,16 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
           initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
+          style={{ display: "flex", justifyContent: "center" }}
         >
-          <div className="lp-phone-glow" aria-hidden="true" />
-          <div
-            className="atletas-hero-phone"
-            style={{
-              position: "relative",
-              borderRadius: 44,
-              overflow: "hidden",
-              boxShadow:
-                "0 60px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 80px rgba(200,255,45,0.08)",
-              background: "#000",
-              width: 320,
-              maxWidth: "100%",
-            }}
-          >
-            <Image
-              src="/manual/atleta/home.png"
-              alt="Pantalla de inicio de Kronos Atletas mostrando la racha, próxima clase y leaderboard del WOD del día"
-              width={750}
-              height={1624}
-              priority
-              sizes="(max-width: 720px) 280px, 320px"
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-              }}
-            />
-          </div>
+          <PhoneFrame
+            src="/manual/atleta/home.png"
+            alt="Pantalla de inicio de Kronos Atletas mostrando la racha, próxima clase y leaderboard del WOD del día"
+            size="lg"
+            priority
+            glow
+            width={320}
+          />
         </motion.div>
       </div>
     </section>

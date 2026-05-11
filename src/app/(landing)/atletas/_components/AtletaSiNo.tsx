@@ -8,19 +8,19 @@ const fadeUp = {
 };
 
 const SI = [
-  "Trackear tus PRs y ver progresión real",
+  "Trackear tus PRs y ver tu progresión real",
   "Reservar clase en tu box (si tu box usa Kronos)",
-  "Foto del whiteboard → score auto-detectado",
+  "Foto del pizarrón → score automático",
   "Skills con coach IA y progresiones desbloqueables",
   "Comparar tu rendimiento contra el promedio del box",
-  "Leerte tu propio histórico sin vender tus datos",
+  "Leer tu propio histórico sin vender tus datos",
 ];
 
 const NO = [
-  "Reemplaza a tu coach humano (no genera planes, no corrige técnica)",
-  "Es app de fitness genérica (no caminás, no contás macros, no hay yoga)",
+  "Reemplaza a tu coach humano (no arma planes, no corrige técnica)",
+  "Es app de fitness genérica (no caminas, no cuentas macros, no hay yoga)",
   "Es red social (no hay feed de extraños, no hay influencers)",
-  "Funciona sin tu box (en Box Personal cargás vos los WODs)",
+  "Funciona sin tu box (en Box Personal tú cargas los WODs)",
   "Te da motivación falsa (cero «¡tú puedes!», cero emojis de fuego)",
   "Te vende a anunciantes (tu data no entrena modelos de terceros)",
 ];
@@ -43,9 +43,8 @@ export default function AtletaSiNo() {
           Honestidad <span className="lp-tag-lime">antes que venta</span>.
         </h2>
         <p style={{ margin: "24px auto 0", textAlign: "center" }}>
-          Listamos lo que no hacemos para que sepas si Kronos Atletas es para
-          vos. Si lo que necesitás está en la columna derecha, hay otras apps
-          mejores.
+          Te decimos qué no hace Kronos para que sepas si es para ti. Si lo que
+          necesitas está en la columna derecha, hay otras apps mejores.
         </p>
       </div>
 

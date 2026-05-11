@@ -33,9 +33,9 @@ export default function AtletaClosingCTA({
             <span className="lp-tag-lime">victoria</span> ya está cargada.
           </h2>
           <p>
-            Si entrenás solo, abrís cuenta y empezás. Si tu box todavía no usa
-            Kronos, mandale el link a tu coach — la decisión es de él, pero ya
-            tenés argumentos.
+            Si entrenas solo, abres cuenta y empiezas. Si tu box todavía no usa
+            Kronos, mándale el link a tu coach — la decisión es de él, pero ya
+            tienes argumentos.
           </p>
         </div>
         <div

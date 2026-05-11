@@ -1,6 +1,6 @@
-import Image from "next/image";
 import type { Screen } from "../_data/screens";
 import { imageExists } from "../_data/screens";
+import PhoneFrame from "./PhoneFrame";
 
 export default function ManualScreen({
   screen,
@@ -18,27 +18,26 @@ export default function ManualScreen({
       : "manual-screen-chip";
   const indexLabel = String(index).padStart(2, "0");
 
+  const placeholderNode = (
+    <div className="manual-screen-placeholder">
+      <span className="lbl">CAPTURA · PRÓXIMAMENTE</span>
+      <span className="nm">{screen.label}</span>
+      <span className="hnt">
+        Esta sección se ilustrará con captura real en la próxima iteración. La
+        descripción es definitiva.
+      </span>
+    </div>
+  );
+
   return (
     <article id={screen.id} className="manual-screen">
-      <div className="manual-screen-frame">
-        {hasImage ? (
-          <Image
-            src={screen.imageSrc}
-            alt={screen.imageAlt}
-            fill
-            sizes="(max-width: 720px) 280px, 320px"
-            style={{ objectFit: "cover" }}
-          />
-        ) : (
-          <div className="manual-screen-placeholder">
-            <span className="lbl">CAPTURA · PRÓXIMAMENTE</span>
-            <span className="nm">{screen.label}</span>
-            <span className="hnt">
-              Esta sección se ilustrará con captura real en la próxima
-              iteración. La descripción es definitiva.
-            </span>
-          </div>
-        )}
+      <div className="manual-screen-frame-wrap">
+        <PhoneFrame
+          src={hasImage ? screen.imageSrc : undefined}
+          alt={screen.imageAlt}
+          size="md"
+          placeholder={placeholderNode}
+        />
       </div>
 
       <div className="manual-screen-body">
@@ -74,7 +73,7 @@ export default function ManualScreen({
             margin: "8px 0 12px",
           }}
         >
-          QUÉ PODÉS HACER ACÁ
+          QUÉ PUEDES HACER AQUÍ
         </div>
         <ul className="manual-screen-actions">
           {screen.actions.map((a) => (

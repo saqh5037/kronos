@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
+import PhoneFrame from "./PhoneFrame";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -26,7 +26,7 @@ const PREVIEW = [
   },
   {
     src: "/manual/atleta/perfil.png",
-    alt: "Pantalla de perfil con radar de capacidades, PRs y heatmap 90 días",
+    alt: "Pantalla de perfil con radar de capacidades, PRs y mapa de calor de 90 días",
     label: "PERFIL",
     hint: "Datos duros, no decorativos",
     anchor: "#perfil",
@@ -60,8 +60,8 @@ export default function AtletaManualPreview() {
           <span className="lp-tag-lime">paso a paso</span>.
         </h2>
         <p style={{ margin: "24px auto 0", textAlign: "center" }}>
-          Documentación visual de cada pantalla con qué hace y qué podés
-          ejecutar en cada una. Compartible por link directo a la sección.
+          Cada pantalla documentada con qué hace y qué puedes ejecutar.
+          Compartible por link directo a la sección.
         </p>
       </div>
 
@@ -98,27 +98,8 @@ export default function AtletaManualPreview() {
                 textDecoration: "none",
               }}
             >
-              <div
-                style={{
-                  position: "relative",
-                  aspectRatio: "9 / 19.5",
-                  borderRadius: 22,
-                  overflow: "hidden",
-                  background: "#000",
-                  border: "1px solid var(--k-line)",
-                  boxShadow:
-                    "0 24px 48px -16px rgba(0,0,0,0.6), 0 0 40px rgba(200,255,45,0.05)",
-                  transition: "transform 0.22s ease, box-shadow 0.22s ease",
-                }}
-                className="atletas-preview-frame"
-              >
-                <Image
-                  src={p.src}
-                  alt={p.alt}
-                  fill
-                  sizes="(max-width: 720px) 50vw, (max-width: 1100px) 33vw, 22vw"
-                  style={{ objectFit: "cover" }}
-                />
+              <div className="atletas-preview-frame">
+                <PhoneFrame src={p.src} alt={p.alt} size="sm" />
               </div>
               <div>
                 <div
@@ -167,7 +148,7 @@ export default function AtletaManualPreview() {
             letterSpacing: "0.18em",
           }}
         >
-          9 PANTALLAS · QUÉ HACE · QUÉ PODÉS EJECUTAR
+          9 PANTALLAS · QUÉ HACE · QUÉ PUEDES EJECUTAR EN CADA UNA
         </p>
       </div>
     </section>

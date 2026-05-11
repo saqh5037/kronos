@@ -15,10 +15,11 @@ export default function ManualHero() {
           style={{
             color: "var(--k-t3)",
             letterSpacing: "0.18em",
-            display: "inline-flex",
+            display: "flex",
+            width: "fit-content",
             alignItems: "center",
             gap: 8,
-            marginBottom: 24,
+            marginBottom: 28,
           }}
         >
           ← VOLVER A KRONOS ATLETAS
@@ -44,8 +45,9 @@ export default function ManualHero() {
           <span className="lp-tag-lime">qué hace</span>, cómo se usa.
         </h1>
         <p className="lp-lead" style={{ marginTop: 24 }}>
-          Las 9 pantallas del atleta documentadas paso a paso. Quién la lea,
-          entiende toda la app. Linkeable por sección — copiá la URL y mandala.
+          Las 9 pantallas del atleta documentadas paso a paso. Quien la lea,
+          entiende toda la app. Linkeable por sección — copia la URL y
+          compártela.
         </p>
       </div>
     </section>

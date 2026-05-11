@@ -118,16 +118,21 @@ export default function SectionAtleta() {
 
           <a
             href="/atletas"
-            className="lp-btn-ghost"
             style={{
               alignSelf: "flex-start",
               marginTop: 8,
-              letterSpacing: "0.04em",
+              fontFamily: "var(--k-font-display), monospace",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.18em",
               textTransform: "uppercase",
-              fontWeight: 600,
+              color: "var(--k-accent)",
+              borderBottom:
+                "1px solid var(--k-accent-line, rgba(200,255,45,0.3))",
+              paddingBottom: 4,
             }}
           >
-            Ver guía completa de Kronos Atletas →
+            Guía completa de Kronos Atletas →
           </a>
         </motion.div>
 

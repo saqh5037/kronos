@@ -10,17 +10,17 @@ const fadeUp = {
 };
 
 const PERSONAL_FEATURES = [
-  "Subís foto del whiteboard → OCR detecta el WOD",
+  "Foto del pizarrón → OCR detecta el WOD",
   "Coach virtual con IA que arma tus progresiones",
-  "Trackeo completo de PRs por movimiento",
-  "Perfil con radar, heatmap 90 días, timeline",
+  "Tu histórico de PRs por movimiento",
+  "Perfil con radar, mapa de calor de 90 días, timeline",
   "Logros desbloqueables (badges + niveles + XP)",
 ];
 
 const BOX_FEATURES = [
   "Reservar clase en 1 tap, lista de espera con tu lugar real",
   "WOD del día con video por movimiento",
-  "Auto-PR detectado contra tu propio histórico",
+  "Auto-PR contra tu propio histórico",
   "Leaderboard del box, escalas RX/scaled separadas",
   "Racha de asistencia que sí cuenta",
 ];
@@ -117,13 +117,13 @@ export default function AtletaForWho() {
           /01 · PARA QUIÉN ES
         </div>
         <h2 style={{ marginTop: 20, textAlign: "center" }}>
-          Hay <span className="lp-tag-lime">dos formas</span> de usar Kronos.
+          Dos formas de entrenar
           <br />
-          Las dos son válidas.
+          con <span className="lp-tag-lime">Kronos</span>.
         </h2>
         <p style={{ margin: "24px auto 0", textAlign: "center" }}>
-          No hay tier &laquo;mejor&raquo;. Atleta solo o atleta de box — decidí
-          cómo entrás, Kronos se acomoda.
+          No hay tier &laquo;mejor&raquo;. Entrenas solo o vas a tu box — elige
+          tu modo, Kronos se acomoda.
         </p>
       </div>
 
@@ -137,8 +137,8 @@ export default function AtletaForWho() {
       >
         <TrackCardShell
           badge="BOX PERSONAL"
-          title="Si entrenás solo"
-          desc="Garage, parque, box que no usa Kronos. Vos cargás los WODs, Kronos hace el resto."
+          title="Si entrenas solo"
+          desc="Garage, parque, o box que no usa Kronos. Tú cargas los WODs, Kronos hace todo lo demás."
           features={PERSONAL_FEATURES}
           delay={0}
           cta={
@@ -161,8 +161,8 @@ export default function AtletaForWho() {
         />
         <TrackCardShell
           badge="ATLETA DE BOX"
-          title="Si tenés tu box"
-          desc="Tu box ya usa Kronos (o querés que lo use). Tu coach programa, vos entrenás."
+          title="Si tienes tu box"
+          desc="Tu box ya usa Kronos (o quieres que lo use). Tu coach programa, tú entrenas."
           features={BOX_FEATURES}
           delay={0.08}
           cta={
