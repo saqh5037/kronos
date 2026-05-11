@@ -138,4 +138,49 @@ describe("goalSchema", () => {
       }),
     ).toThrow();
   });
+
+  it("accepts BODY_COMPOSITION goal in kg", () => {
+    const out = goalSchema.parse({
+      metric: "BODY_COMPOSITION",
+      targetValue: 72,
+      unit: "kg",
+      startValue: 78,
+      deadline: new Date(Date.now() + 86400000 * 60),
+    });
+    expect(out.metric).toBe("BODY_COMPOSITION");
+    expect(out.unit).toBe("kg");
+  });
+
+  it("accepts BODY_COMPOSITION goal in %", () => {
+    const out = goalSchema.parse({
+      metric: "BODY_COMPOSITION",
+      targetValue: 18,
+      unit: "%",
+      deadline: new Date(Date.now() + 86400000 * 90),
+    });
+    expect(out.unit).toBe("%");
+  });
+
+  it("rejects BODY_COMPOSITION goal with invalid unit", () => {
+    expect(() =>
+      goalSchema.parse({
+        metric: "BODY_COMPOSITION",
+        targetValue: 72,
+        unit: "lb",
+        deadline: new Date(Date.now() + 86400000 * 30),
+      }),
+    ).toThrow();
+  });
+
+  it("rejects BODY_COMPOSITION with movementId", () => {
+    expect(() =>
+      goalSchema.parse({
+        metric: "BODY_COMPOSITION",
+        movementId: "mov_123",
+        targetValue: 72,
+        unit: "kg",
+        deadline: new Date(Date.now() + 86400000 * 30),
+      }),
+    ).toThrow();
+  });
 });
