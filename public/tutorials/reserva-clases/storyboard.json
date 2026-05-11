@@ -1,0 +1,66 @@
+{
+  "id": "reserva-clases",
+  "title": "Cómo reservar una clase",
+  "description": "Tutorial paso a paso para que los atletas aprendan a reservar su lugar en una clase de CrossFit desde la app Kronos.",
+  "target": "atleta",
+  "version": "1.0.0",
+  "createdAt": "2026-05-08",
+  "steps": [
+    {
+      "id": "home-overview",
+      "order": 1,
+      "title": "Tu Home de Atleta",
+      "description": "Desde tu pantalla principal puedes ver tu próxima clase, acceder rápidamente a Movimientos, Ranking e Historial.",
+      "narration": "Bienvenido a Kronos. Esta es tu pantalla principal. Aquí ves tu próxima clase programada, y tienes acceso rápido a Movimientos, Ranking e Historial.",
+      "url": "/atleta",
+      "action": "screenshot",
+      "duration": 5,
+      "screenshot": "01-home.png"
+    },
+    {
+      "id": "navigate-reservar",
+      "order": 2,
+      "title": "Ir a Reservar",
+      "description": "Toca 'Reservar' en tu barra de navegación para ver el calendario de clases disponibles de la semana.",
+      "narration": "Para reservar una clase, toca 'Reservar' en la barra de navegación inferior. Esto te llevará al calendario de clases disponibles.",
+      "url": "/atleta/reservar",
+      "action": "navigate",
+      "duration": 5,
+      "screenshot": "02-reservar.png"
+    },
+    {
+      "id": "select-day",
+      "order": 3,
+      "title": "Selecciona un Día",
+      "description": "La barra de días te muestra toda la semana. Toca el día que prefieras para ver las clases disponibles.",
+      "narration": "Arriba verás los días de la semana. Selecciona el día que prefieras entrenar para ver las clases disponibles.",
+      "url": "/atleta/reservar",
+      "action": "click",
+      "selector": "button",
+      "duration": 5,
+      "screenshot": "03-dia-seleccionado.png"
+    },
+    {
+      "id": "choose-class",
+      "order": 4,
+      "title": "Elige tu Clase",
+      "description": "Verás la lista de clases del día con horario, coach y cupos disponibles. Toca la clase que quieras reservar.",
+      "narration": "Aquí ves todas las clases del día con horario, coach y cupos disponibles. Toca la clase que quieras reservar.",
+      "url": "/atleta/reservar",
+      "action": "screenshot",
+      "duration": 5,
+      "screenshot": "04-clases-lista.png"
+    },
+    {
+      "id": "confirmation",
+      "order": 5,
+      "title": "¡Reserva Confirmada!",
+      "description": "Tu reserva aparece automáticamente en tu calendario. También puedes cancelarla desde aquí si cambias de planes.",
+      "narration": "¡Listo! Tu reserva está confirmada. La clase aparecerá automáticamente en tu calendario y recibirás un recordatorio antes de la hora.",
+      "url": "/atleta/reservar",
+      "action": "screenshot",
+      "duration": 6,
+      "screenshot": "05-confirmacion.png"
+    }
+  ]
+}

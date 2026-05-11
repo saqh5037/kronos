@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cómo reservar una clase — Kronos Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --k-lima: #C8FF2D;
+      --k-dark: #0A0A0A;
+      --k-surface: #141414;
+      --k-surface-elevated: #1A1A1A;
+      --k-border: rgba(255,255,255,0.08);
+      --k-text: #F5F5F5;
+      --k-text-secondary: #A3A3A3;
+      --k-glass: rgba(20,20,20,0.85);
+      --k-glass-border: rgba(200,255,45,0.15);
+      --font-display: 'IBM Plex Mono', monospace;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--k-dark);
+      color: var(--k-text);
+      font-family: var(--font-body);
+      overflow: hidden;
+    }
+
+    .stage {
+      width: 100vw; height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Screenshot container */
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .slide-img {
+      max-width: 90vw;
+      max-height: 80vh;
+      border-radius: 12px;
+      border: 1px solid var(--k-border);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      object-fit: contain;
+    }
+
+    /* Hotspot / highlight overlay */
+    .hotspot {
+      position: absolute;
+      border: 2px solid var(--k-lima);
+      border-radius: 8px;
+      box-shadow: 0 0 0 4px rgba(200,255,45,0.15), 0 0 24px rgba(200,255,45,0.2);
+      opacity: 0;
+      transform: scale(0.95);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+    .slide.active .hotspot {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Glass tooltip */
+    .tooltip {
+      position: absolute;
+      max-width: 380px;
+      padding: 20px 24px;
+      background: var(--k-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--k-glass-border);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      opacity: 0;
+      transform: translateY(16px);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+    }
+    .slide.active .tooltip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .tooltip-step {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--k-lima);
+      margin-bottom: 8px;
+    }
+
+    .tooltip-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 10px;
+      color: var(--k-text);
+    }
+
+    .tooltip-desc {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--k-text-secondary);
+    }
+
+    /* Navigation */
+    .nav-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--k-surface-elevated);
+      border: 1px solid var(--k-border);
+      color: var(--k-text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      z-index: 100;
+    }
+    .nav-btn:hover {
+      background: var(--k-surface);
+      border-color: var(--k-lima);
+      color: var(--k-lima);
+    }
+    .nav-btn.prev { left: 24px; }
+    .nav-btn.next { right: 24px; }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .nav-btn svg { width: 20px; height: 20px; }
+
+    /* Progress */
+    .progress-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--k-surface-elevated);
+      z-index: 100;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--k-lima);
+      box-shadow: 0 0 12px rgba(200,255,45,0.4);
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-text {
+      position: fixed;
+      bottom: 16px; left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-display);
+      font-size: 12px;
+      color: var(--k-text-secondary);
+      letter-spacing: 0.05em;
+      z-index: 100;
+    }
+
+    /* Header */
+    .guide-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+      background: linear-gradient(to bottom, rgba(10,10,10,0.9) 0%, transparent 100%);
+    }
+
+    .guide-logo {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--k-lima);
+      letter-spacing: 0.05em;
+    }
+
+    .guide-title {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--k-text-secondary);
+    }
+
+    .voice-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: var(--k-surface-elevated);
+      border: 1px solid var(--k-border);
+      color: var(--k-text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .voice-btn:hover {
+      border-color: var(--k-lima);
+      color: var(--k-lima);
+    }
+    .voice-btn.playing {
+      border-color: var(--k-lima);
+      color: var(--k-lima);
+      animation: pulse 1.5s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(200,255,45,0.2); }
+      50% { box-shadow: 0 0 0 8px rgba(200,255,45,0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .slide-img { max-width: 95vw; max-height: 70vh; }
+      .tooltip { max-width: 85vw; padding: 16px 20px; }
+      .tooltip-title { font-size: 15px; }
+      .tooltip-desc { font-size: 13px; }
+      .nav-btn { width: 40px; height: 40px; }
+      .nav-btn.prev { left: 12px; }
+      .nav-btn.next { right: 12px; }
+      .guide-header { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="guide-header">
+    <div class="guide-logo">KRONOS</div>
+    <div class="guide-title">Cómo reservar una clase</div>
+    <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      Escuchar
+    </button>
+  </div>
+
+  <div class="stage" id="stage">
+    
+    <div class="slide" data-step="0">
+      <img class="slide-img" src="./screenshots/01-home.png" alt="Tu Home de Atleta" loading="lazy">
+      <div class="hotspot" style="display:none;"></div>
+      <div class="tooltip" style="left:5%;bottom:8%;">
+        <div class="tooltip-step">Paso 1 de 5</div>
+        <div class="tooltip-title">Tu Home de Atleta</div>
+        <div class="tooltip-desc">Desde tu pantalla principal puedes ver tu próxima clase, acceder rápidamente a Movimientos, Ranking e Historial.</div>
+      </div>
+    </div>
+
+    <div class="slide" data-step="1">
+      <img class="slide-img" src="./screenshots/02-reservar.png" alt="Ir a Reservar" loading="lazy">
+      <div class="hotspot" style="display:none;"></div>
+      <div class="tooltip" style="right:5%;bottom:8%;">
+        <div class="tooltip-step">Paso 2 de 5</div>
+        <div class="tooltip-title">Ir a Reservar</div>
+        <div class="tooltip-desc">Toca 'Reservar' en tu barra de navegación para ver el calendario de clases disponibles de la semana.</div>
+      </div>
+    </div>
+
+    <div class="slide" data-step="2">
+      <img class="slide-img" src="./screenshots/03-dia-seleccionado.png" alt="Selecciona un Día" loading="lazy">
+      <div class="hotspot" style="display:none;"></div>
+      <div class="tooltip" style="left:5%;bottom:8%;">
+        <div class="tooltip-step">Paso 3 de 5</div>
+        <div class="tooltip-title">Selecciona un Día</div>
+        <div class="tooltip-desc">La barra de días te muestra toda la semana. Toca el día que prefieras para ver las clases disponibles.</div>
+      </div>
+    </div>
+
+    <div class="slide" data-step="3">
+      <img class="slide-img" src="./screenshots/04-clases-lista.png" alt="Elige tu Clase" loading="lazy">
+      <div class="hotspot" style="display:none;"></div>
+      <div class="tooltip" style="right:5%;bottom:8%;">
+        <div class="tooltip-step">Paso 4 de 5</div>
+        <div class="tooltip-title">Elige tu Clase</div>
+        <div class="tooltip-desc">Verás la lista de clases del día con horario, coach y cupos disponibles. Toca la clase que quieras reservar.</div>
+      </div>
+    </div>
+
+    <div class="slide" data-step="4">
+      <img class="slide-img" src="./screenshots/05-confirmacion.png" alt="¡Reserva Confirmada!" loading="lazy">
+      <div class="hotspot" style="display:none;"></div>
+      <div class="tooltip" style="left:5%;bottom:8%;">
+        <div class="tooltip-step">Paso 5 de 5</div>
+        <div class="tooltip-title">¡Reserva Confirmada!</div>
+        <div class="tooltip-desc">Tu reserva aparece automáticamente en tu calendario. También puedes cancelarla desde aquí si cambias de planes.</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="nav-btn prev" id="prevBtn" onclick="goPrev()" disabled>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="nav-btn next" id="nextBtn" onclick="goNext()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+  <div class="progress-text" id="progressText">1 / 5</div>
+
+  <script>
+    window.steps = [{"id":"home-overview","order":1,"title":"Tu Home de Atleta","description":"Desde tu pantalla principal puedes ver tu próxima clase, acceder rápidamente a Movimientos, Ranking e Historial.","narration":"Bienvenido a Kronos. Esta es tu pantalla principal. Aquí ves tu próxima clase programada, y tienes acceso rápido a Movimientos, Ranking e Historial.","url":"/atleta","action":"screenshot","duration":5,"screenshot":"01-home.png"},{"id":"navigate-reservar","order":2,"title":"Ir a Reservar","description":"Toca 'Reservar' en tu barra de navegación para ver el calendario de clases disponibles de la semana.","narration":"Para reservar una clase, toca 'Reservar' en la barra de navegación inferior. Esto te llevará al calendario de clases disponibles.","url":"/atleta/reservar","action":"navigate","duration":5,"screenshot":"02-reservar.png"},{"id":"select-day","order":3,"title":"Selecciona un Día","description":"La barra de días te muestra toda la semana. Toca el día que prefieras para ver las clases disponibles.","narration":"Arriba verás los días de la semana. Selecciona el día que prefieras entrenar para ver las clases disponibles.","url":"/atleta/reservar","action":"click","selector":"button","duration":5,"screenshot":"03-dia-seleccionado.png"},{"id":"choose-class","order":4,"title":"Elige tu Clase","description":"Verás la lista de clases del día con horario, coach y cupos disponibles. Toca la clase que quieras reservar.","narration":"Aquí ves todas las clases del día con horario, coach y cupos disponibles. Toca la clase que quieras reservar.","url":"/atleta/reservar","action":"screenshot","duration":5,"screenshot":"04-clases-lista.png"},{"id":"confirmation","order":5,"title":"¡Reserva Confirmada!","description":"Tu reserva aparece automáticamente en tu calendario. También puedes cancelarla desde aquí si cambias de planes.","narration":"¡Listo! Tu reserva está confirmada. La clase aparecerá automáticamente en tu calendario y recibirás un recordatorio antes de la hora.","url":"/atleta/reservar","action":"screenshot","duration":6,"screenshot":"05-confirmacion.png"}];
+    let current = 0;
+    const steps = window.steps;
+    let synth = window.speechSynthesis;
+    let isSpeaking = false;
+
+    function showSlide(index) {
+      document.querySelectorAll('.slide').forEach((s, i) => {
+        s.classList.toggle('active', i === index);
+      });
+      document.getElementById('prevBtn').disabled = index === 0;
+      document.getElementById('nextBtn').disabled = index === steps.length - 1;
+      document.getElementById('progressFill').style.width = ((index + 1) / steps.length * 100) + '%';
+      document.getElementById('progressText').textContent = (index + 1) + ' / ' + steps.length;
+      current = index;
+      if (isSpeaking) speakCurrent();
+    }
+
+    function goNext() { if (current < steps.length - 1) showSlide(current + 1); }
+    function goPrev() { if (current > 0) showSlide(current - 1); }
+
+    function speakCurrent() {
+      if (!synth) return;
+      synth.cancel();
+      const utter = new SpeechSynthesisUtterance(steps[current].narration);
+      utter.lang = 'es-MX';
+      utter.rate = 1;
+      utter.pitch = 1;
+      utter.onend = () => { isSpeaking = false; updateVoiceBtn(); };
+      synth.speak(utter);
+    }
+
+    function toggleVoice() {
+      if (!synth) return;
+      if (isSpeaking) {
+        synth.cancel();
+        isSpeaking = false;
+      } else {
+        isSpeaking = true;
+        speakCurrent();
+      }
+      updateVoiceBtn();
+    }
+
+    function updateVoiceBtn() {
+      const btn = document.getElementById('voiceBtn');
+      btn.classList.toggle('playing', isSpeaking);
+      btn.innerHTML = isSpeaking
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pausar'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> Escuchar';
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') goNext();
+      if (e.key === 'ArrowLeft') goPrev();
+    });
+
+    // Touch swipe
+    let touchStartX = 0;
+    document.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+    document.addEventListener('touchend', e => {
+      const diff = touchStartX - e.changedTouches[0].screenX;
+      if (Math.abs(diff) > 50) diff > 0 ? goNext() : goPrev();
+    });
+
+    showSlide(0);
+  </script>
+</body>
+</html>
