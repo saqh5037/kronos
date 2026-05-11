@@ -54,4 +54,31 @@ describe("bodyMetricSchema", () => {
       bodyMetricSchema.parse({ type: "INVALID", value: 1, unit: "x" }),
     ).toThrow();
   });
+
+  it("accepts WAIST/HIP/ARM/THIGH/CHEST perimeters", () => {
+    const types = ["WAIST", "HIP", "ARM", "THIGH", "CHEST"] as const;
+    for (const t of types) {
+      const out = bodyMetricSchema.parse({ type: t, value: 80, unit: "cm" });
+      expect(out.type).toBe(t);
+    }
+  });
+
+  it("accepts HEIGHT in cm", () => {
+    const out = bodyMetricSchema.parse({
+      type: "HEIGHT",
+      value: 175,
+      unit: "cm",
+    });
+    expect(out.type).toBe("HEIGHT");
+    expect(out.value).toBe(175);
+  });
+
+  it("does not require label for non-CUSTOM types", () => {
+    const out = bodyMetricSchema.parse({
+      type: "WAIST",
+      value: 80,
+      unit: "cm",
+    });
+    expect(out.label ?? null).toBeNull();
+  });
 });

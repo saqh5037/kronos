@@ -8,12 +8,13 @@ const DESKTOP_TABS = [
   { href: "/atleta" as Route, label: "Inicio" },
   { href: "/atleta/reservar" as Route, label: "Reservar" },
   { href: "/atleta/skills" as Route, label: "Skills" },
+  { href: "/atleta/salud" as Route, label: "Salud" },
   { href: "/atleta/wod" as Route, label: "WOD" },
-  { href: "/atleta/movimientos" as Route, label: "Movs" },
   { href: "/atleta/perfil" as Route, label: "Yo" },
 ];
 
 const DESKTOP_EXTRA = [
+  { href: "/atleta/movimientos" as Route, label: "Movs" },
   { href: "/atleta/historial" as Route, label: "Historial" },
   { href: "/atleta/leaderboard" as Route, label: "Leaderboard" },
   { href: "/atleta/pagos" as Route, label: "Pagos" },

@@ -19,6 +19,12 @@ const TYPE_LABEL: Record<BodyMetricType, string> = {
   BODY_FAT: "% Grasa",
   MUSCLE_MASS: "Masa muscular",
   BMI: "IMC",
+  HEIGHT: "Altura",
+  WAIST: "Cintura",
+  HIP: "Cadera",
+  ARM: "Brazo",
+  THIGH: "Muslo",
+  CHEST: "Pecho",
   CUSTOM: "Personalizado",
 };
 
@@ -28,8 +34,14 @@ const TYPE_DEFAULT_UNIT: Record<
 > = {
   WEIGHT: (u) => u,
   BODY_FAT: () => "%",
-  MUSCLE_MASS: (u) => u,
+  MUSCLE_MASS: () => "%",
   BMI: () => "",
+  HEIGHT: () => "cm",
+  WAIST: () => "cm",
+  HIP: () => "cm",
+  ARM: () => "cm",
+  THIGH: () => "cm",
+  CHEST: () => "cm",
   CUSTOM: () => "",
 };
 
