@@ -55,7 +55,7 @@ export default async function PhotoWodPage() {
             margin: "0 0 24px",
           }}
         >
-          Lo leemos automáticamente. Después confirmás los datos y se guarda.
+          Lo leemos automáticamente. Después confirmas los datos y se guarda.
         </p>
         <PhotoWodFlow />
       </div>

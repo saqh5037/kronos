@@ -33,7 +33,7 @@ export function renderTrialExpiringEmail(args: {
       </a>
     </p>
     <p style="font-size: 13px; color: #aaa; margin: 16px 0 0 0;">
-      Si el botón no funciona, copiá y pegá este link en tu navegador:<br/>
+      Si el botón no funciona, copia y pega este link en tu navegador:<br/>
       <a href="${args.ctaUrl}" style="color: #c8ff2d;">${args.ctaUrl}</a>
     </p>
     <p style="font-size: 12px; color: #777; margin-top: 24px;">¿Tenés dudas sobre los planes? Respondé este email y te ayudamos a elegir.</p>

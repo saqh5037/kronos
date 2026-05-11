@@ -80,7 +80,7 @@ export function renderEmailLayout(input: EmailLayoutInput): string {
 
       <tr><td style="padding:18px 28px 28px 28px;font-family:'Inter',Arial,sans-serif;font-size:11px;line-height:1.6;color:#54545c;">
         <strong style="color:#8a8a94;">Kronos</strong> · kronos-fit.com · México<br>
-        Recibís este correo porque alguien (esperemos vos) lo solicitó desde Kronos. Si no fuiste vos, podés ignorarlo sin preocupación.
+        Recibes este correo porque alguien (esperamos que tú) lo solicitó desde Kronos. Si no fuiste tú, puedes ignorarlo sin preocupación.
       </td></tr>
 
     </table>

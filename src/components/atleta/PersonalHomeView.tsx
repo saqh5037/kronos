@@ -342,7 +342,7 @@ export default async function PersonalHomeView() {
                   marginBottom: 4,
                 }}
               >
-                Todavía no tenés PRs registrados.
+                Todavía no tienes PRs registrados.
               </p>
               <p
                 style={{
@@ -351,7 +351,7 @@ export default async function PersonalHomeView() {
                   margin: 0,
                 }}
               >
-                Loggea tu primer WOD para empezar a trackearlos.
+                Registra tu primer WOD para empezar a verlos.
               </p>
             </div>
           </KCard>

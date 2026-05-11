@@ -66,8 +66,8 @@ export default async function TrophyRoomPage() {
               fontSize: 14,
             }}
           >
-            Todavía no hay logros configurados. Empezá a loggear WODs y PRs para
-            irlos desbloqueando.
+            Todavía no hay logros configurados. Empieza a registrar WODs y PRs
+            para irlos desbloqueando.
           </div>
         </div>
       )}

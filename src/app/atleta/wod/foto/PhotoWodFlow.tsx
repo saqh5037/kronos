@@ -157,7 +157,7 @@ export default function PhotoWodFlow() {
       if (scoreType === "TIME") {
         const secs = parseTimeMmSs(scoreInput);
         if (secs == null || secs <= 0) {
-          kToast.error("Tiempo inválido. Usá MM:SS o segundos.");
+          kToast.error("Tiempo inválido. Usa MM:SS o segundos.");
           setStep("review");
           return;
         }
@@ -166,7 +166,7 @@ export default function PhotoWodFlow() {
         const r = Number(scoreInput);
         const reps = Number(scoreReps || "0");
         if (!Number.isFinite(r) || r < 0) {
-          kToast.error("Rounds inválido");
+          kToast.error("Rondas inválidas");
           setStep("review");
           return;
         }
@@ -369,7 +369,7 @@ export default function PhotoWodFlow() {
             color: "var(--k-t1)",
           }}
         >
-          No pudimos leer la foto bien. Verificá / completá los datos abajo o{" "}
+          No pudimos leer la foto bien. Verifica / completa los datos abajo o{" "}
           <button
             type="button"
             onClick={() => setStep("upload")}

@@ -141,7 +141,7 @@ export default function OnboardingWizard({
         className="text-center text-[11px] mt-4"
         style={{ color: "var(--k-t3)" }}
       >
-        Podés cambiar todo después desde tu perfil.
+        Puedes cambiar todo después desde tu perfil.
       </p>
     </div>
   );
@@ -198,7 +198,7 @@ function Step1({
           Bienvenido
         </h2>
         <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
-          ¿Cómo querés que te llamemos?
+          ¿Cómo quieres que te llamemos?
         </p>
       </div>
       <Field
@@ -281,7 +281,7 @@ function Step2({
           Tus preferencias
         </h2>
         <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
-          ¿En qué unidad medís y a qué nivel entrenás?
+          ¿En qué unidad mides y a qué nivel entrenas?
         </p>
       </div>
 
@@ -376,10 +376,10 @@ function Step3({
     <div className="space-y-5">
       <div>
         <h2 className="font-display font-bold text-2xl tracking-[-0.01em]">
-          ¿Tenés un box?
+          ¿Tienes un box?
         </h2>
         <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
-          Si tu coach te dio un código, lo podés ingresar acá. Si no, podés
+          Si tu coach te dio un código, lo puedes ingresar aquí. Si no, puedes
           empezar solo y unirte después.
         </p>
       </div>

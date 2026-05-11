@@ -25,7 +25,7 @@ export function renderSubscriptionExpiredEmail(args: {
       Tu suscripción a Kronos para <strong>${box}</strong> expiró. Tu Box quedó en modo lectura — tus atletas no pueden reservar ni hacer check-in hasta que reactives.
     </p>
     <p style="font-size: 16px; line-height: 1.5; margin: 0 0 16px 0;">
-      <strong>Tus datos siguen acá esperándote.</strong> Reactivá cuando quieras y todo vuelve a la normalidad.
+      <strong>Tus datos siguen aquí esperándote.</strong> Reactiva cuando quieras y todo vuelve a la normalidad.
     </p>
     <p style="margin: 24px 0;">
       <a href="${args.ctaUrl}" style="display: inline-block; background: linear-gradient(135deg, #c8ff2d, #a8d726); color: #08080a; padding: 14px 24px; border-radius: 999px; font-weight: 700; text-decoration: none;">
@@ -33,7 +33,7 @@ export function renderSubscriptionExpiredEmail(args: {
       </a>
     </p>
     <p style="font-size: 13px; color: #aaa; margin: 16px 0 0 0;">
-      Si el botón no funciona, copiá y pegá este link en tu navegador:<br/>
+      Si el botón no funciona, copia y pega este link en tu navegador:<br/>
       <a href="${args.ctaUrl}" style="color: #c8ff2d;">${args.ctaUrl}</a>
     </p>
   </div>
