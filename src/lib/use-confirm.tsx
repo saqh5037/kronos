@@ -53,6 +53,13 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 export function useConfirm(): ConfirmFn {
   const ctx = useContext(ConfirmContext);
   if (!ctx) {
+    // Next.js RSC: durante el SSR de un client component que vive dentro
+    // de un server component, el contexto del ConfirmProvider (que vive en
+    // RootLayout) no propaga. Devolvemos un no-op para no romper el render
+    // del server — al hidratar en cliente, el contexto real toma control.
+    if (typeof window === "undefined") {
+      return async () => false;
+    }
     throw new Error("useConfirm must be used inside ConfirmProvider");
   }
   return ctx;

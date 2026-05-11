@@ -82,7 +82,7 @@ export default async function PersonalHomeView() {
             marginTop: 16,
           }}
         >
-          Empezá a trackear tus WODs y PRs.
+          Empieza a registrar tus WODs y PRs.
         </p>
         <div
           style={{
@@ -203,7 +203,7 @@ export default async function PersonalHomeView() {
             letterSpacing: "0.01em",
           }}
         >
-          Loggea tu WOD de hoy →
+          Registra tu WOD de hoy →
         </Link>
         <div style={{ display: "flex", gap: 10 }}>
           <Link
