@@ -8,7 +8,6 @@ import PwaRegister from "@/components/PwaRegister";
 import VisitTracker from "@/components/atleta/VisitTracker";
 import { getBoxMode } from "@/server/actions/box-mode";
 import AthleteDrawer from "@/components/atleta/AthleteDrawer";
-import PageTransition from "@/components/kronos/PageTransition";
 import DesktopTabBar from "@/components/atleta/DesktopTabBar";
 
 export default async function AtletaLayout({
@@ -102,9 +101,7 @@ export default async function AtletaLayout({
 
       {/* Content area */}
       <main className="lg:pt-14 pb-24 lg:pb-16">
-        <div className="mx-auto lg:max-w-3xl">
-          <PageTransition>{children}</PageTransition>
-        </div>
+        <div className="mx-auto lg:max-w-3xl">{children}</div>
       </main>
 
       {/* Mobile: bottom tab bar */}
