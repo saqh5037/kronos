@@ -222,7 +222,7 @@ export default function PaymentResultClient({
               color: "var(--k-t2)",
             }}
           >
-            {payment.amount.toLocaleString()} {payment.currency} ·{" "}
+            {payment.amount.toLocaleString("es-MX")} {payment.currency} ·{" "}
             {payment.gateway}
           </div>
         )}

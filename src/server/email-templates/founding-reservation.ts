@@ -51,7 +51,7 @@ export function renderFoundingReservationEmail(args: {
 
     <p style="font-family:'Inter',Arial,sans-serif;font-size:14px;line-height:1.6;color:#f5f5f7;margin:0 0 12px 0;font-weight:600;">¿Qué sigue?</p>
     <ol style="font-family:'Inter',Arial,sans-serif;font-size:14px;line-height:1.7;color:#8a8a94;margin:0 0 24px 0;padding-left:20px;">
-      <li><strong style="color:#f5f5f7;">Vas a recibir un magic link</strong> en otro correo para entrar a tu Box. Ya podés explorar el sistema 14 días gratis.</li>
+      <li><strong style="color:#f5f5f7;">Vas a recibir un magic link</strong> en otro correo para entrar a tu Box. Ya puedes explorar el sistema 14 días gratis.</li>
       <li><strong style="color:#f5f5f7;">El 23 de mayo</strong> te mandamos el link de pago de MercadoPago. El precio se mantiene lockeado.</li>
       <li><strong style="color:#f5f5f7;">Onboarding 1-a-1</strong>: vamos a coordinar una sesión privada para configurar tu Box (horarios, atletas, plan de membresías).</li>
     </ol>
@@ -63,7 +63,7 @@ export function renderFoundingReservationEmail(args: {
     </table>
 
     <p style="font-family:'Inter',Arial,sans-serif;font-size:12px;line-height:1.6;color:#54545c;margin:0;">
-      ¿Dudas? Respondé este correo y te respondemos directo. También podés escribirnos a <a href="mailto:contacto@kronos-fit.com" style="color:#8a8a94;text-decoration:underline;">contacto@kronos-fit.com</a>.
+      ¿Dudas? Responde este correo y te contestamos directo. También puedes escribirnos a <a href="mailto:contacto@kronos-fit.com" style="color:#8a8a94;text-decoration:underline;">contacto@kronos-fit.com</a>.
     </p>
   `;
 

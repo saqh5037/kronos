@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { OneTapBookButton } from "./OneTapBookButton";
 import { formatTime, formatDayMonth } from "@/lib/week";
@@ -26,7 +27,14 @@ export function SuggestedBookingCard({
     typeof suggestion.klass.startsAt === "string"
       ? new Date(suggestion.klass.startsAt)
       : suggestion.klass.startsAt;
-  const isToday = isSameDay(startsAt, new Date());
+  // Patrón anti hydration mismatch: server y primer render del cliente
+  // muestran el día calendárico; tras mount, si la fecha es hoy en la TZ
+  // local del navegador, sustituimos por "HOY".
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+  }, []);
+  const isToday = now !== null && isSameDay(startsAt, new Date(now));
   const dayLabel = isToday ? "HOY" : formatDayMonth(startsAt).toUpperCase();
   const timeLabel = formatTime(startsAt);
   const capacityFraction = `${suggestion.klass.bookedCount}/${suggestion.klass.capacity}`;

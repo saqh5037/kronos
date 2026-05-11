@@ -50,7 +50,7 @@ export function renderMagicLinkEmail(args: {
   const body = `
     <h1 style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:24px;font-weight:700;letter-spacing:-0.01em;color:#f5f5f7;margin:0 0 12px 0;">Tu código para entrar</h1>
     <p style="font-family:'Inter',Arial,sans-serif;font-size:15px;line-height:1.6;color:#8a8a94;margin:0 0 24px 0;">
-      Pedimos un acceso para <strong style="color:#f5f5f7;">${email}</strong>. Usá el código abajo o tocá el botón.
+      Pedimos un acceso para <strong style="color:#f5f5f7;">${email}</strong>. Usa el código de abajo o toca el botón.
     </p>
     <a href="${otpRedirect}" target="_blank" style="display:block;text-decoration:none;margin:0 0 20px 0;padding:24px 20px;background:#0f1014;border:1px solid #c8ff2d;border-radius:16px;text-align:center;">
       <span style="display:block;font-family:'Inter',Arial,sans-serif;font-size:11px;line-height:1.4;color:#8a8a94;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Tu código</span>
@@ -62,24 +62,24 @@ export function renderMagicLinkEmail(args: {
       </td></tr>
     </table>
     <p style="font-family:'Inter',Arial,sans-serif;font-size:13px;line-height:1.6;color:#8a8a94;margin:0 0 16px 0;text-align:center;">
-      O pegá el código manualmente en la pantalla de login.
+      O pega el código manualmente en la pantalla de inicio de sesión.
     </p>
     <div style="margin:24px 0 16px 0;padding:14px 16px;background:#0a0a0c;border:1px solid #1c1c24;border-radius:10px;">
       <p style="font-family:'Inter',Arial,sans-serif;font-size:12px;line-height:1.5;color:#8a8a94;margin:0 0 6px 0;">
-        ¿Preferís un link tradicional?
+        ¿Prefieres un link tradicional?
       </p>
       <a href="${url}" target="_blank" style="font-family:'Inter',Arial,sans-serif;font-size:13px;color:#c8ff2d;text-decoration:underline;word-break:break-all;">Entrar con magic link</a>
     </div>
     <p style="font-family:'Inter',Arial,sans-serif;font-size:12px;line-height:1.6;color:#54545c;margin:0 0 12px 0;">
-      El código vive 1 hora. Después del primer uso podés meterlo en otro navegador (Chrome, Safari) durante 5 minutos — útil si tenés la PWA instalada en Safari pero abrís el mail en Chrome.
+      El código vive 1 hora. Después del primer uso puedes meterlo en otro navegador (Chrome, Safari) durante 5 minutos — útil si tienes la PWA instalada en Safari pero abres el correo en Chrome.
     </p>
     <p style="font-family:'Inter',Arial,sans-serif;font-size:11px;line-height:1.6;color:#54545c;margin:0;">
-      Si no fuiste vos, ignorá este correo — nadie va a entrar sin tu código.
+      Si no fuiste tú, ignora este correo — nadie va a entrar sin tu código.
     </p>
   `;
 
   return renderEmailLayout({
-    preheader: `Tu código: ${codePretty}. Tap para copiar y entrar a Kronos como ${args.email}.`,
+    preheader: `Tu código: ${codePretty}. Toca para copiar y entrar a Kronos como ${args.email}.`,
     body,
   });
 }
@@ -101,13 +101,13 @@ export function renderMagicLinkText(args: {
     `Código: ${codePretty}`,
     `(válido 1h. Reusable los primeros 5 min en otro navegador.)`,
     ``,
-    `Tap para copiar y entrar:`,
+    `Toca para copiar y entrar:`,
     otpRedirect,
     ``,
-    `O usá el magic link tradicional:`,
+    `O usa el magic link tradicional:`,
     args.url,
     ``,
-    `Si no fuiste vos, ignorá este correo.`,
+    `Si no fuiste tú, ignora este correo.`,
     ``,
     `— Kronos · kronos-fit.com`,
     ``,

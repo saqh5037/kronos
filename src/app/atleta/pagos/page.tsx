@@ -237,7 +237,7 @@ export default async function AtletaPagosPage() {
                         letterSpacing: "-0.02em",
                       }}
                     >
-                      {m.planPrice.toLocaleString()} {m.planCurrency}
+                      {m.planPrice.toLocaleString("es-MX")} {m.planCurrency}
                     </div>
                   </div>
 
@@ -321,7 +321,7 @@ export default async function AtletaPagosPage() {
                                   color: "var(--k-t1)",
                                 }}
                               >
-                                {p.amount.toLocaleString()} {p.currency}
+                                {p.amount.toLocaleString("es-MX")} {p.currency}
                               </span>
                             </span>
                           </div>

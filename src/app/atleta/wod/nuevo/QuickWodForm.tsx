@@ -74,7 +74,7 @@ export default function QuickWodForm() {
       const secs = parseTimeMmSs(scoreInput);
       if (secs == null || secs <= 0) {
         setErrors({
-          scoreInput: "Tiempo inválido. Usá formato MM:SS o segundos.",
+          scoreInput: "Tiempo inválido. Usa formato MM:SS o segundos.",
         });
         return;
       }
@@ -83,11 +83,11 @@ export default function QuickWodForm() {
       const rounds = Number(scoreInput);
       const reps = Number(scoreReps || "0");
       if (!Number.isFinite(rounds) || rounds < 0) {
-        setErrors({ scoreInput: "Rounds inválido" });
+        setErrors({ scoreInput: "Rondas inválidas" });
         return;
       }
       if (!Number.isFinite(reps) || reps < 0) {
-        setErrors({ scoreReps: "Reps inválido" });
+        setErrors({ scoreReps: "Reps inválidas" });
         return;
       }
       scoreValue = rounds;
@@ -131,7 +131,7 @@ export default function QuickWodForm() {
       if (result.pr.isPR) {
         firePRToast(result.pr, result.scoreId);
       } else {
-        kToast.success("¡Loggeado!");
+        kToast.success("¡Registrado!");
       }
       router.push("/atleta");
       router.refresh();

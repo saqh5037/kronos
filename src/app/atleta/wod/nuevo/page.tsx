@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getBoxMode } from "@/server/actions/box-mode";
 import QuickWodForm from "./QuickWodForm";
 
-export const metadata = { title: "Kronos — Loggear WOD" };
+export const metadata = { title: "Kronos — Nuevo WOD" };
 
 /**
  * Mini editor de WOD para atletas en Box Personal. Box real usa el flow
@@ -33,7 +33,7 @@ export default async function NuevoWodPage() {
             textTransform: "uppercase",
           }}
         >
-          LOGGEA TU WOD
+          NUEVO WOD
         </span>
         <h1
           style={{
@@ -54,7 +54,7 @@ export default async function NuevoWodPage() {
             margin: "0 0 24px",
           }}
         >
-          Anotá el WOD y tu resultado en una sola pantalla.
+          Anota el WOD y tu resultado en una sola pantalla.
         </p>
         <QuickWodForm />
       </div>

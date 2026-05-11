@@ -16,7 +16,7 @@ const PALETTE: Record<Status, { glow: string; tag: string; line: string }> = {
   dormant: {
     glow: "rgba(200, 255, 45, 0.10)",
     tag: "PRIMERA RACHA",
-    line: "Empezá hoy con tu primera clase",
+    line: "Empieza hoy con tu primera clase",
   },
   safe: {
     glow: "rgba(200, 255, 45, 0.22)",
