@@ -29,6 +29,12 @@ import {
 import ReadinessChip from "@/components/atleta/ReadinessChip";
 import PersonalizedGreeting from "@/components/atleta/PersonalizedGreeting";
 import VictoryHero from "@/components/atleta/VictoryHero";
+import { WellnessHomeCard } from "@/components/atleta/WellnessHomeCard";
+import {
+  getLatestByType,
+  type LatestByType,
+} from "@/server/actions/body-metrics";
+import { isWellnessAudience } from "@/lib/validations/athlete";
 import {
   getActiveSkillForAthlete,
   getAthleteTier,
@@ -90,6 +96,8 @@ export default async function AtletaHomePage() {
   let activeSkill: Awaited<ReturnType<typeof getActiveSkillForAthlete>> = null;
   let athleteTier: Awaited<ReturnType<typeof getAthleteTier>> = "principiante";
   let featuredTrophy: FeaturedTrophy | null = null;
+  let bodyLatest: LatestByType[] = [];
+  let wellnessAudience = false;
 
   try {
     [
@@ -133,6 +141,25 @@ export default async function AtletaHomePage() {
       ]);
     } catch {
       // Ignore
+    }
+
+    // Wellness audience detection — read athlete tags + latest measurements.
+    if (session?.user?.tenantId && session.user.id) {
+      try {
+        const myAthlete = await prismaBase.athlete.findFirst({
+          where: {
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+          },
+          select: { tags: true },
+        });
+        if (myAthlete && isWellnessAudience(myAthlete.tags)) {
+          wellnessAudience = true;
+          bodyLatest = await getLatestByType().catch(() => []);
+        }
+      } catch {
+        // Ignore — wellness card is optional.
+      }
     }
   }
 
@@ -234,6 +261,9 @@ export default async function AtletaHomePage() {
         athleteTier={athleteTier}
         activeSkill={activeSkill}
       />
+
+      {/* WELLNESS audience: peso + delta + link a /atleta/salud */}
+      {wellnessAudience && <WellnessHomeCard latest={bodyLatest} />}
 
       {/* READINESS check-in chip (no-bloqueante) */}
       {readinessSurvey && !alreadyRespondedReadiness && (

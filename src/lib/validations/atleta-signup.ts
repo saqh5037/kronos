@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { passwordSchema } from "./password";
+import { FITNESS_GOAL_TAGS } from "./athlete";
 
 export const atletaSignupSchema = z.object({
   email: z.string().trim().toLowerCase().email("Email inválido"),
@@ -23,6 +24,9 @@ export const atletaSignupSchema = z.object({
       (p) => !p || passwordSchema.safeParse(p).success,
       "Mínimo 10 caracteres con letras y números",
     ),
+  // Optional fitness goal tags from signup step. Stored as `goal:<value>` in
+  // Athlete.tags so they coexist with existing prefixes (level:*).
+  fitnessGoals: z.array(z.enum(FITNESS_GOAL_TAGS)).optional(),
 });
 
 export type AtletaSignupInput = z.infer<typeof atletaSignupSchema>;

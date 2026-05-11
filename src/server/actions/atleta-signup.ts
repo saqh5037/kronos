@@ -106,7 +106,8 @@ export async function createIndependentAthlete(
     };
   }
 
-  const { email, firstName, lastName, password } = parsed.data;
+  const { email, firstName, lastName, password, fitnessGoals } = parsed.data;
+  const goalTags = (fitnessGoals ?? []).map((g) => `goal:${g}`);
 
   const existingUser = await prismaBase.user.findUnique({
     where: { email },
@@ -157,6 +158,7 @@ export async function createIndependentAthlete(
               userId: user.id,
               firstName,
               lastName: lastName ?? "",
+              tags: goalTags,
             },
           });
           await tx.movement.createMany({

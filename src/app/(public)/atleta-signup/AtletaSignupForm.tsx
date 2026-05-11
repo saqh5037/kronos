@@ -9,6 +9,11 @@ import {
 import { kToast } from "@/lib/toast";
 import { detectPwaPlatform } from "@/lib/pwa-detect";
 import MagicLinkWaiting from "@/components/auth/MagicLinkWaiting";
+import {
+  FITNESS_GOAL_TAGS,
+  FITNESS_GOAL_LABEL,
+  type FitnessGoalTag,
+} from "@/lib/validations/athlete";
 
 type FieldErrors = Partial<
   Record<"email" | "firstName" | "lastName" | "password", string>
@@ -20,7 +25,7 @@ type SuccessState = {
   existingUser: boolean;
 };
 
-type Phase = "email" | "details";
+type Phase = "email" | "details" | "goals";
 
 const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEV_LOGIN === "1";
 
@@ -40,6 +45,7 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
   const [success, setSuccess] = useState<SuccessState | null>(null);
   const [pending, startTransition] = useTransition();
   const [isIos, setIsIos] = useState(false);
+  const [selectedGoals, setSelectedGoals] = useState<FitnessGoalTag[]>([]);
 
   useEffect(() => {
     const platform = detectPwaPlatform(navigator.userAgent);
@@ -80,12 +86,28 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
   function handleDetailsSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrors({});
+    // Defer the actual create until the goals step. This keeps the goals
+    // optional but ensures the tags land in Athlete.tags from the start.
+    if (firstName.trim().length < 2 || lastName.trim().length < 2) {
+      setErrors({
+        firstName:
+          firstName.trim().length < 2 ? "Mínimo 2 caracteres" : undefined,
+        lastName:
+          lastName.trim().length < 2 ? "Mínimo 2 caracteres" : undefined,
+      });
+      return;
+    }
+    setPhase("goals");
+  }
+
+  function submitWithGoals(goals: FitnessGoalTag[]) {
     startTransition(async () => {
       const result = await createIndependentAthlete({
         email,
         firstName,
         lastName,
         password: usePassword && password.length > 0 ? password : undefined,
+        fitnessGoals: goals.length > 0 ? goals : undefined,
       });
       if (!result.ok) {
         setErrors(result.fieldErrors ?? {});
@@ -219,6 +241,96 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
           Si no, te ayudamos a crear una en 10 segundos.
         </p>
       </form>
+    );
+  }
+
+  // Fase 3: ¿Por qué entrenás? (opcional, no bloqueante)
+  if (phase === "goals") {
+    const toggle = (g: FitnessGoalTag) =>
+      setSelectedGoals((prev) =>
+        prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g],
+      );
+    return (
+      <div
+        className="flex flex-col gap-4"
+        data-testid="atleta-signup-goals-phase"
+      >
+        <div>
+          <p
+            className="text-xs font-mono uppercase tracking-wider"
+            style={{ color: "var(--k-accent)" }}
+          >
+            Paso 3 · opcional
+          </p>
+          <h2
+            className="font-display text-2xl font-bold mt-1"
+            style={{ color: "var(--k-t1)" }}
+          >
+            ¿Por qué entrenás?
+          </h2>
+          <p
+            className="text-[13px] mt-2"
+            style={{ color: "var(--k-t2)", lineHeight: 1.45 }}
+          >
+            Esto nos ayuda a mostrarte lo que importa. Podés elegir varios o
+            saltar este paso — siempre podés cambiarlo después.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {FITNESS_GOAL_TAGS.map((g) => {
+            const active = selectedGoals.includes(g);
+            return (
+              <button
+                key={g}
+                type="button"
+                onClick={() => toggle(g)}
+                aria-pressed={active}
+                className="k-tap"
+                style={{
+                  padding: "10px 14px",
+                  background: active ? "var(--k-accent)" : "transparent",
+                  color: active ? "var(--k-accent-on)" : "var(--k-t2)",
+                  border: active
+                    ? "1px solid var(--k-accent)"
+                    : "1px solid var(--k-line)",
+                  borderRadius: 999,
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.04em",
+                  cursor: "pointer",
+                }}
+              >
+                {FITNESS_GOAL_LABEL[g]}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex gap-2 mt-2">
+          <button
+            type="button"
+            onClick={() => submitWithGoals(selectedGoals)}
+            disabled={pending}
+            className="k-btn-grad flex-1 py-3 rounded-xl font-bold text-sm disabled:opacity-50"
+          >
+            {pending ? "Creando tu cuenta…" : "Crear cuenta"}
+          </button>
+          <button
+            type="button"
+            onClick={() => submitWithGoals([])}
+            disabled={pending}
+            className="px-4 rounded-xl text-xs font-mono uppercase tracking-wider"
+            style={{
+              border: "1px solid var(--k-line)",
+              color: "var(--k-t3)",
+            }}
+          >
+            Saltar
+          </button>
+        </div>
+      </div>
     );
   }
 
@@ -377,7 +489,7 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         disabled={pending}
         className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 mt-1"
       >
-        {pending ? "Creando tu cuenta…" : "Crear cuenta"}
+        Continuar →
       </button>
 
       <p
