@@ -132,9 +132,11 @@ const allTabs: Tab[] = [
 type TabBarProps = {
   /** "personal" oculta tabs marcados con hideForPersonal (ej: Reservar). */
   mode?: "personal" | "box";
+  /** Muestra un dot titilante en la tab "Yo" cuando hay notificaciones del coach. */
+  yoBadge?: boolean;
 };
 
-export default function TabBar({ mode = "box" }: TabBarProps) {
+export default function TabBar({ mode = "box", yoBadge = false }: TabBarProps) {
   const pathname = usePathname();
   const tabs = allTabs.filter(
     (t) => !t.hideAlways && !(mode === "personal" && t.hideForPersonal),
@@ -161,6 +163,7 @@ export default function TabBar({ mode = "box" }: TabBarProps) {
       <div className="flex items-stretch h-full px-1">
         {tabs.map((tab, i) => {
           const isActive = i === activeIndex;
+          const showBadge = tab.label === "Yo" && yoBadge && !isActive;
           return (
             <Link
               key={tab.href}
@@ -177,8 +180,24 @@ export default function TabBar({ mode = "box" }: TabBarProps) {
               <motion.span
                 animate={isActive ? { scale: 1.05 } : { scale: 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="relative"
               >
                 {tab.icon(isActive)}
+                {showBadge && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: -2,
+                      right: -2,
+                      width: 8,
+                      height: 8,
+                      borderRadius: 4,
+                      background: "var(--k-accent)",
+                      boxShadow: "0 0 6px rgba(200,255,45,0.6)",
+                      animation: "k-badge-pulse 1.5s ease-in-out infinite",
+                    }}
+                  />
+                )}
               </motion.span>
               <span
                 style={{

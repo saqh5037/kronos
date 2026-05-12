@@ -20,7 +20,13 @@ const DESKTOP_EXTRA = [
   { href: "/atleta/pagos" as Route, label: "Pagos" },
 ];
 
-export default function DesktopTabBar({ mode }: { mode: "personal" | "box" }) {
+export default function DesktopTabBar({
+  mode,
+  yoBadge = false,
+}: {
+  mode: "personal" | "box";
+  yoBadge?: boolean;
+}) {
   const pathname = usePathname();
   const tabs =
     mode === "personal"
@@ -52,11 +58,13 @@ export default function DesktopTabBar({ mode }: { mode: "personal" | "box" }) {
             tab.href === "/atleta"
               ? pathname === "/atleta"
               : pathname.startsWith(tab.href);
+          const showBadge = tab.label === "Yo" && yoBadge && !isActive;
           return (
             <Link
               key={tab.href}
               href={tab.href}
               style={{
+                position: "relative",
                 padding: "8px 16px",
                 borderRadius: 8,
                 background: isActive ? "var(--k-elevated)" : "transparent",
@@ -74,6 +82,21 @@ export default function DesktopTabBar({ mode }: { mode: "personal" | "box" }) {
               }}
             >
               {tab.label}
+              {showBadge && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 4,
+                    right: 4,
+                    width: 7,
+                    height: 7,
+                    borderRadius: 3.5,
+                    background: "var(--k-accent)",
+                    boxShadow: "0 0 6px rgba(200,255,45,0.6)",
+                    animation: "k-badge-pulse 1.5s ease-in-out infinite",
+                  }}
+                />
+              )}
             </Link>
           );
         })}

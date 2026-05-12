@@ -7,6 +7,7 @@ import InstallPwaBanner from "@/components/atleta/InstallPwaBanner";
 import PwaRegister from "@/components/PwaRegister";
 import VisitTracker from "@/components/atleta/VisitTracker";
 import { getBoxMode } from "@/server/actions/box-mode";
+import { getMyCoachCards } from "@/server/actions/coach-cards";
 import AthleteDrawer from "@/components/atleta/AthleteDrawer";
 import DesktopTabBar from "@/components/atleta/DesktopTabBar";
 
@@ -18,6 +19,9 @@ export default async function AtletaLayout({
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
   const { isPersonal } = await getBoxMode();
+
+  const coachCards = await getMyCoachCards().catch(() => []);
+  const yoBadge = coachCards.length > 0;
 
   return (
     <div
@@ -111,12 +115,15 @@ export default async function AtletaLayout({
 
       {/* Mobile: bottom tab bar */}
       <div className="lg:hidden">
-        <TabBar mode={isPersonal ? "personal" : "box"} />
+        <TabBar mode={isPersonal ? "personal" : "box"} yoBadge={yoBadge} />
       </div>
 
       {/* Desktop: horizontal tabs */}
       <div className="hidden lg:block">
-        <DesktopTabBar mode={isPersonal ? "personal" : "box"} />
+        <DesktopTabBar
+          mode={isPersonal ? "personal" : "box"}
+          yoBadge={yoBadge}
+        />
       </div>
     </div>
   );

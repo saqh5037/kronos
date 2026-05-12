@@ -6,6 +6,18 @@
    KRONOS FORGE v2.0 — Design Tokens (Manual de Marca)
    ═══════════════════════════════════════════════════════════ */
 
+@keyframes k-badge-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.6;
+  }
+}
+
 :root {
   /* ── Brand palette (Manual de Marca v2) ── */
   --red: #e60026;

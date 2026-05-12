@@ -12,8 +12,7 @@ import {
   getSkillContextualPRPredictions,
 } from "@/server/actions/skills";
 import type { getTop3PRPredictions } from "@/server/actions/ai";
-import { getMyCoachCards } from "@/server/actions/coach-cards";
-import CoachCardsSection from "@/components/atleta/CoachCardsSection";
+
 import type {
   ActiveSkillData,
   CatalogSkill,
@@ -47,13 +46,12 @@ const TIER_LABEL: Record<
 };
 
 export default async function SkillsPage() {
-  const [activeSkill, catalogResult, coachCards] = await Promise.all([
+  const [activeSkill, catalogResult] = await Promise.all([
     getActiveSkillForAthlete().catch(() => null),
     getSkillCatalogForAthlete().catch(() => ({
       athleteTier: "principiante" as SkillTier,
       catalog: [] as CatalogSkill[],
     })),
-    getMyCoachCards().catch(() => []),
   ]);
 
   const prPredictions: Awaited<ReturnType<typeof getTop3PRPredictions>> =
@@ -98,12 +96,6 @@ export default async function SkillsPage() {
           </span>
         </div>
       </header>
-
-      {coachCards.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <CoachCardsSection cards={coachCards} />
-        </div>
-      )}
 
       {activeSkill ? (
         <ActiveSkillView

@@ -34,6 +34,8 @@ import { MyHeatmap90d } from "./_components/MyHeatmap90d";
 import { ScoresTimeline } from "./_components/ScoresTimeline";
 import { CapabilityRadar } from "@/components/charts/CapabilityRadar";
 import BodyMetricSection from "@/components/atleta/BodyMetricSection";
+import { getMyCoachCards } from "@/server/actions/coach-cards";
+import CoachCardsSection from "@/components/atleta/CoachCardsSection";
 
 export const metadata = { title: "Kronos — Perfil" };
 
@@ -66,17 +68,26 @@ export default async function PerfilPage() {
   let capability: CapabilityProfile | null = null;
   let bodyMetrics: Awaited<ReturnType<typeof listMyBodyMetrics>> = [];
   let topMovements: RankedMovement[] = [];
+  let coachCards: Awaited<ReturnType<typeof getMyCoachCards>> = [];
 
   try {
-    [home, prs, attendance90d, scoresTimeline, bodyMetrics, topMovements] =
-      await Promise.all([
-        getAthleteHome(),
-        listMyPRs(),
-        getMyAttendanceLast90d(),
-        getMyScoresTimeline(90),
-        listMyBodyMetrics({ limit: 60 }),
-        listMyMovementsRated(6).catch(() => []),
-      ]);
+    [
+      home,
+      prs,
+      attendance90d,
+      scoresTimeline,
+      bodyMetrics,
+      topMovements,
+      coachCards,
+    ] = await Promise.all([
+      getAthleteHome(),
+      listMyPRs(),
+      getMyAttendanceLast90d(),
+      getMyScoresTimeline(90),
+      listMyBodyMetrics({ limit: 60 }),
+      listMyMovementsRated(6).catch(() => []),
+      getMyCoachCards().catch(() => []),
+    ]);
     capability = await getMyCapabilityProfile().catch(() => null);
   } catch {
     // Sesión ausente
@@ -305,6 +316,12 @@ export default async function PerfilPage() {
           </AnimatedItem>
         </AnimatedSection>
       </header>
+
+      {coachCards.length > 0 && (
+        <div className="px-3.5 mb-4">
+          <CoachCardsSection cards={coachCards} />
+        </div>
+      )}
 
       {/* ── 2. CAPABILITY RADAR ── */}
       {capability && capability.categories.length > 0 && (
