@@ -14,7 +14,7 @@
       "narration": "Bienvenido a WOD. La pantalla abre con un objetivo claro: anotar el entrenamiento que hiciste hoy y tu resultado. Todo en una sola pantalla, sin pasos extra.",
       "url": "/atleta/wod",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 10.4,
       "scrollY": 0,
       "screenshot": "01-wod.png"
     },
@@ -26,7 +26,7 @@
       "narration": "El primer campo es el nombre. Helen, Murph, Fran, o el nombre que tu coach le puso al WOD del día. Si no tiene nombre, ponle uno corto y siguiente.",
       "url": "/atleta/wod",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 10.4,
       "scrollY": 280,
       "screenshot": "02-nombre.png"
     },
@@ -38,7 +38,7 @@
       "narration": "Después eliges el tipo: for time, amrap, emom, fuerza o custom. Cada uno cambia cómo Kronos te pide registrar el resultado.",
       "url": "/atleta/wod",
       "action": "screenshot",
-      "duration": 6,
+      "duration": 12.5,
       "scrollY": 480,
       "screenshot": "03-tipo.png"
     },
@@ -50,7 +50,7 @@
       "narration": "Aquí defines cómo se mide tu resultado: tiempo, repeticiones, peso o rounds más reps. Kronos pre-selecciona según el tipo, pero puedes cambiarlo.",
       "url": "/atleta/wod",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 10.4,
       "scrollY": 720,
       "screenshot": "04-metrica.png"
     },
@@ -62,7 +62,7 @@
       "narration": "Anotas tu resultado real: tiempo, reps o peso. Marcas si fue RX, escalado o RX más. Si superas tu mejor marca anterior, Kronos lo detecta solo y lo marca como PR.",
       "url": "/atleta/wod",
       "action": "screenshot",
-      "duration": 6,
+      "duration": 12.5,
       "scrollY": 1000,
       "screenshot": "05-resultado.png"
     },
@@ -74,7 +74,7 @@
       "narration": "Un tap al botón final guarda todo. El WOD queda en tu historial, tu racha sube un día más, y si fue PR, lo verás destacado en tu Home.",
       "url": "/atleta/wod",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 10.4,
       "scrollY": 1200,
       "screenshot": "06-guardar.png"
     }

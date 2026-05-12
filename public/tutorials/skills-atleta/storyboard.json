@@ -14,7 +14,7 @@
       "narration": "Bienvenido a Skills. Arriba ves tu nivel actual: principiante, intermedio o avanzado. Más abajo, lo que Kronos te recomienda trabajar esta semana.",
       "url": "/atleta/skills",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 10.9,
       "scrollY": 0,
       "screenshot": "01-skills-home.png"
     },
@@ -26,7 +26,7 @@
       "narration": "Tu coach IA te muestra tres recomendaciones para esta semana. Qué movimiento revisar, qué PR celebrar, qué patrón mejorar. Cada tarjeta lleva a una acción concreta.",
       "url": "/atleta/skills",
       "action": "screenshot",
-      "duration": 6,
+      "duration": 13.1,
       "scrollY": 270,
       "screenshot": "02-progreso.png"
     },
@@ -38,7 +38,7 @@
       "narration": "Tu próxima victoria: el skill activo asignado por Kronos. Toes-to-Bar, Muscle-Up, Handstand. El objetivo grande, en mayúsculas, sin distracciones.",
       "url": "/atleta/skills",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 10.9,
       "scrollY": 600,
       "screenshot": "03-foco-hoy.png"
     },
@@ -50,7 +50,7 @@
       "narration": "Cada skill se divide en progresiones. Las verdes ya las completaste. La amarilla con punto es tu foco actual. Las grises siguen después. Trabaja una a la vez.",
       "url": "/atleta/skills",
       "action": "screenshot",
-      "duration": 6,
+      "duration": 13.1,
       "scrollY": 1100,
       "screenshot": "04-progresiones.png"
     },
@@ -62,7 +62,7 @@
       "narration": "Más abajo, tu plan con Kronos IA. Movimientos específicos para tu siguiente PR, basados en tu historial real. Es como tener un coach personal todo el tiempo.",
       "url": "/atleta/skills",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 10.9,
       "scrollY": 1550,
       "screenshot": "05-plan-ia.png"
     },
@@ -74,7 +74,7 @@
       "narration": "Al final, todos los skills disponibles. Double-Under, Ring Dip, Muscle-Up, Snatch. Toca cualquiera para cambiar tu foco y empezar a trabajarlo.",
       "url": "/atleta/skills",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 12.5,
       "scrollY": 1950,
       "screenshot": "06-otros-skills.png"
     }

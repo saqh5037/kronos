@@ -14,7 +14,7 @@
       "narration": "Bienvenido a Salud. Aquí registras tu peso, tu composición corporal y tus metas. Todo separado del entrenamiento, en su propia pantalla.",
       "url": "/atleta/salud",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 10.4,
       "scrollY": 0,
       "screenshot": "01-salud.png"
     },
@@ -26,7 +26,7 @@
       "narration": "Tu peso más reciente, con el cambio respecto a la última medición. Lima si bajaste, gris si subiste. Y tu IMC se calcula solo a partir de tu altura.",
       "url": "/atleta/salud",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 10.4,
       "scrollY": 100,
       "screenshot": "02-cuerpo-hoy.png"
     },
@@ -38,7 +38,7 @@
       "narration": "El gráfico muestra tu peso en los últimos noventa días. La tendencia salta a la vista. Nada de Excel, nada de apps externas. Tu progreso real, en tu app del box.",
       "url": "/atleta/salud",
       "action": "screenshot",
-      "duration": 6,
+      "duration": 12.5,
       "scrollY": 350,
       "screenshot": "03-tendencia.png"
     },
@@ -50,7 +50,7 @@
       "narration": "Toca crear meta de composición para definir un objetivo concreto. Kronos compara cada medición nueva con tu objetivo y te dice qué tan cerca estás.",
       "url": "/atleta/salud",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 10.4,
       "scrollY": 550,
       "screenshot": "04-meta.png"
     },
@@ -62,7 +62,7 @@
       "narration": "El botón superior te permite agregar una medición nueva cuando quieras: peso, body fat, masa muscular. Lo que tu coach te pida, lo guardas aquí.",
       "url": "/atleta/salud",
       "action": "screenshot",
-      "duration": 5,
+      "duration": 10.4,
       "scrollY": 0,
       "screenshot": "05-registrar.png"
     }
