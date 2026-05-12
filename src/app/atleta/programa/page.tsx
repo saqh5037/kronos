@@ -70,11 +70,11 @@ export default async function ProgramaPage() {
             gap: 10,
             padding: "12px 14px",
             background: "var(--k-surface)",
-            border: "1px solid var(--k-accent-line)",
+            border: "1px solid var(--k-line)",
             borderRadius: 12,
             textDecoration: "none",
             color: "inherit",
-            boxShadow: "var(--k-accent-glow)",
+            boxShadow: "0 0 8px rgba(255,255,255,0.06)",
           }}
         >
           <span
@@ -83,10 +83,10 @@ export default async function ProgramaPage() {
               width: 36,
               height: 36,
               borderRadius: 10,
-              background: "var(--k-accent-soft)",
+              background: "var(--k-elevated)",
               display: "grid",
               placeItems: "center",
-              color: "var(--k-accent)",
+              color: "var(--k-t2)",
               fontFamily: "var(--k-font-display)",
               fontSize: 18,
               fontWeight: 700,

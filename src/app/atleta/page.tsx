@@ -1,15 +1,14 @@
 import Link from "next/link";
-import type { Route } from "next";
 import {
   getAthleteHome,
-  getMonthlyFeaturedTrophy,
+  getAthleteTrophies,
   getSuggestedNextClass,
   type AthleteHome,
-  type FeaturedTrophy,
+  type AthleteTrophy,
   type SuggestedBooking,
 } from "@/server/actions/athlete-home";
 import { StreakHero } from "@/components/atleta/StreakHero";
-import TrophyStripV4 from "@/components/atleta/TrophyStripV4";
+import { TrophyStrip } from "@/components/atleta/TrophyStrip";
 import { SuggestedBookingCard } from "@/components/atleta/SuggestedBookingCard";
 import {
   listAvailableClasses,
@@ -26,20 +25,10 @@ import {
   hasRespondedToday,
   type SurveyRow,
 } from "@/server/actions/surveys";
-import ReadinessChip from "@/components/atleta/ReadinessChip";
+import QuickSurvey from "@/components/atleta/QuickSurvey";
 import PersonalizedGreeting from "@/components/atleta/PersonalizedGreeting";
-import VictoryHero from "@/components/atleta/VictoryHero";
-import { WellnessHomeCard } from "@/components/atleta/WellnessHomeCard";
-import {
-  getLatestByType,
-  type LatestByType,
-} from "@/server/actions/body-metrics";
-import { isWellnessAudience } from "@/lib/validations/athlete";
-import {
-  getActiveSkillForAthlete,
-  getAthleteTier,
-} from "@/server/actions/skills";
 import { getDailyGreeting, type DailyGreeting } from "@/server/actions/ai";
+import { AnimatedStats } from "@/components/kronos/AnimatedStats";
 import {
   AnimatedSection,
   AnimatedItem,
@@ -51,38 +40,10 @@ import type { ScoreType } from "@/lib/validations/wod";
 
 import KCard from "@/components/kronos/KCard";
 import RevealOnScroll from "@/components/kronos/RevealOnScroll";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "@/server/auth";
-import { db as prismaBase } from "@/server/db";
-import { isPersonalBoxSlug } from "@/lib/personal-box";
-import PersonalHomeView from "@/components/atleta/PersonalHomeView";
-// CoachCards moved to /atleta/skills in V4
 
 export const metadata = { title: "Kronos — Inicio" };
 
 export default async function AtletaHomePage() {
-  const session = await getServerSession(authOptions);
-  let isPersonal = false;
-  if (session?.user?.tenantId) {
-    const box = await prismaBase.box.findUnique({
-      where: { id: session.user.tenantId },
-      select: { slug: true, onboardingCompletedAt: true },
-    });
-    if (box && isPersonalBoxSlug(box.slug)) {
-      if (!box.onboardingCompletedAt) {
-        redirect("/atleta/onboarding");
-      }
-      isPersonal = true;
-    }
-  }
-
-  // Atleta independiente con onboarding completado: vista alternativa sin
-  // clases/reservas/leaderboard. Resto del archivo es path Box real.
-  if (isPersonal) {
-    return <PersonalHomeView />;
-  }
-
   let home: AthleteHome = null;
   let classes: AvailableClass[] = [];
   let prs: PRRow[] = [];
@@ -91,36 +52,20 @@ export default async function AtletaHomePage() {
   let readinessSurvey: SurveyRow | null = null;
   let alreadyRespondedReadiness = true;
   let greeting: DailyGreeting | null = null;
+  let trophies: AthleteTrophy[] = [];
   let suggestion: SuggestedBooking = null;
 
-  let activeSkill: Awaited<ReturnType<typeof getActiveSkillForAthlete>> = null;
-  let athleteTier: Awaited<ReturnType<typeof getAthleteTier>> = "principiante";
-  let featuredTrophy: FeaturedTrophy | null = null;
-  let bodyLatest: LatestByType[] = [];
-  let wellnessAudience = false;
-
   try {
-    [
-      home,
-      classes,
-      prs,
-      wod,
-      greeting,
-      suggestion,
-      activeSkill,
-      athleteTier,
-      featuredTrophy,
-    ] = await Promise.all([
-      getAthleteHome(),
-      listAvailableClasses(7),
-      listMyPRs(),
-      getTodayWOD(),
-      getDailyGreeting(),
-      getSuggestedNextClass().catch(() => null),
-      getActiveSkillForAthlete().catch(() => null),
-      getAthleteTier().catch(() => "principiante" as const),
-      getMonthlyFeaturedTrophy().catch(() => null),
-    ]);
+    [home, classes, prs, wod, greeting, trophies, suggestion] =
+      await Promise.all([
+        getAthleteHome(),
+        listAvailableClasses(7),
+        listMyPRs(),
+        getTodayWOD(),
+        getDailyGreeting(),
+        getAthleteTrophies(),
+        getSuggestedNextClass().catch(() => null),
+      ]);
   } catch {
     // Sesión ausente
   }
@@ -141,25 +86,6 @@ export default async function AtletaHomePage() {
       ]);
     } catch {
       // Ignore
-    }
-
-    // Wellness audience detection — read athlete tags + latest measurements.
-    if (session?.user?.tenantId && session.user.id) {
-      try {
-        const myAthlete = await prismaBase.athlete.findFirst({
-          where: {
-            tenantId: session.user.tenantId,
-            userId: session.user.id,
-          },
-          select: { tags: true },
-        });
-        if (myAthlete && isWellnessAudience(myAthlete.tags)) {
-          wellnessAudience = true;
-          bodyLatest = await getLatestByType().catch(() => []);
-        }
-      } catch {
-        // Ignore — wellness card is optional.
-      }
     }
   }
 
@@ -255,37 +181,72 @@ export default async function AtletaHomePage() {
 
   return (
     <div className="pb-28 relative">
-      {/* HERO V4 — Tu próxima victoria (tipográfico estilo Whoop) */}
-      <VictoryHero
-        athleteFirstName={home.athlete?.firstName ?? "atleta"}
-        athleteTier={athleteTier}
-        activeSkill={activeSkill}
-      />
+      {/* HERO V3 — limpio, sin particles ni gradients hardcoded */}
+      <header
+        style={{
+          padding: "56px 20px 24px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            color: "var(--k-t3)",
+            textTransform: "uppercase",
+          }}
+        >
+          INICIO · ATLETA
+        </span>
+        <h1
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 36,
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
+            color: "var(--k-t1)",
+            margin: 0,
+            lineHeight: 1.05,
+          }}
+        >
+          Hola, {home.athlete?.firstName}
+        </h1>
+      </header>
 
-      {/* WELLNESS audience: peso + delta + link a /atleta/salud */}
-      {wellnessAudience && <WellnessHomeCard latest={bodyLatest} />}
+      {/* PERSONALIZED GREETING */}
+      <PersonalizedGreeting greeting={greeting} />
 
-      {/* READINESS check-in chip (no-bloqueante) */}
+      {/* READINESS SURVEY */}
       {readinessSurvey && !alreadyRespondedReadiness && (
-        <div style={{ marginTop: 16 }}>
-          <ReadinessChip survey={readinessSurvey} />
-        </div>
+        <QuickSurvey survey={readinessSurvey} />
       )}
-
-      {/* PERSONALIZED GREETING (insight IA) */}
-      <div style={{ marginTop: 16 }}>
-        <PersonalizedGreeting greeting={greeting} />
-      </div>
 
       {/* STREAK HERO */}
       <div className="px-3.5 mt-4">
         <StreakHero count={home.streak} lastEventAt={home.streakLastEventAt} />
       </div>
 
-      {/* TROPHY V4 — logro destacado del mes (curado) */}
-      <div className="mt-4 px-3.5">
-        <TrophyStripV4 featured={featuredTrophy} />
-      </div>
+      {/* HERO STATS */}
+      <AnimatedStats
+        weekAttendance={home.weekAttendance}
+        weekGoal={home.weekGoal}
+        streak={home.streak}
+        prCount={home.prCount}
+      />
+
+      {/* TROPHY STRIP */}
+      {trophies.length > 0 && (
+        <div className="mt-4 px-3.5">
+          <div className="k-eyebrow mb-2" style={{ color: "var(--k-t2)" }}>
+            LOGROS · {home.xpTotal} XP
+          </div>
+          <TrophyStrip items={trophies} />
+        </div>
+      )}
 
       {/* NEXT BOOKING */}
       <RevealOnScroll variant="fade-up" className="mt-4 px-3.5">
@@ -307,7 +268,7 @@ export default async function AtletaHomePage() {
                 </div>
                 <div
                   className="font-display text-xl font-bold"
-                  style={{ color: "var(--k-accent)" }}
+                  style={{ color: "var(--k-t2)" }}
                 >
                   {formatTime(home.nextBooking.startsAt)}
                 </div>
@@ -326,7 +287,7 @@ export default async function AtletaHomePage() {
                   {nextClassDetail && (
                     <>
                       <span style={{ opacity: 0.4 }}>·</span>
-                      <span style={{ color: "var(--k-accent)" }}>
+                      <span style={{ color: "var(--k-t2)" }}>
                         ● {nextClassDetail.bookedCount}/
                         {nextClassDetail.capacity}
                       </span>
@@ -381,7 +342,7 @@ export default async function AtletaHomePage() {
               fontSize: 10,
               fontWeight: 700,
               letterSpacing: "0.12em",
-              color: "var(--k-accent)",
+              color: "var(--k-t2)",
             }}
           >
             {weekAttendedText}
@@ -434,23 +395,25 @@ export default async function AtletaHomePage() {
                         fontWeight: 700,
                         transition: "all 200ms ease",
                         background: isToday
-                          ? "var(--k-accent)"
+                          ? "var(--k-t2)"
                           : booked
-                            ? "var(--k-accent-soft)"
+                            ? "var(--k-elevated)"
                             : "transparent",
                         border: isToday
                           ? "none"
                           : booked
-                            ? "1px solid var(--k-accent-line)"
+                            ? "1px solid var(--k-line)"
                             : "1px solid var(--k-line)",
                         color: isToday
-                          ? "var(--k-accent-on)"
+                          ? "var(--k-bg)"
                           : booked
-                            ? "var(--k-accent)"
+                            ? "var(--k-t2)"
                             : rest
                               ? "var(--k-t3)"
                               : "var(--k-t2)",
-                        boxShadow: isToday ? "var(--k-accent-glow)" : "none",
+                        boxShadow: isToday
+                          ? "0 0 8px rgba(255,255,255,0.06)"
+                          : "none",
                       }}
                     >
                       {rest ? "·" : dayNum}
@@ -465,7 +428,7 @@ export default async function AtletaHomePage() {
                         color: isToday
                           ? "var(--k-t1)"
                           : booked
-                            ? "var(--k-accent)"
+                            ? "var(--k-t2)"
                             : "var(--k-t3)",
                       }}
                     >
@@ -509,7 +472,7 @@ export default async function AtletaHomePage() {
                 fontSize: 10,
                 fontWeight: 700,
                 letterSpacing: "0.16em",
-                color: "var(--k-accent)",
+                color: "var(--k-t2)",
                 textDecoration: "none",
               }}
             >
@@ -528,7 +491,7 @@ export default async function AtletaHomePage() {
               <AnimatedSection>
                 {topScores.map((s, i, a) => {
                   const isTop3 = i < 3;
-                  const rankColor = isTop3 ? "var(--k-accent)" : "var(--k-t3)";
+                  const rankColor = isTop3 ? "var(--k-t2)" : "var(--k-t3)";
                   return (
                     <AnimatedItem key={s.id}>
                       <div
@@ -567,10 +530,10 @@ export default async function AtletaHomePage() {
                             fontSize: 10,
                             fontWeight: 700,
                             background: isTop3
-                              ? "var(--k-accent-soft)"
+                              ? "var(--k-elevated)"
                               : "var(--k-elevated)",
-                            border: `1px solid ${isTop3 ? "var(--k-accent-line)" : "var(--k-line)"}`,
-                            color: isTop3 ? "var(--k-accent)" : "var(--k-t3)",
+                            border: `1px solid ${isTop3 ? "var(--k-line)" : "var(--k-line)"}`,
+                            color: isTop3 ? "var(--k-t2)" : "var(--k-t3)",
                           }}
                         >
                           {s.athlete.firstName[0]}
@@ -596,13 +559,13 @@ export default async function AtletaHomePage() {
                             letterSpacing: "0.1em",
                             background:
                               s.scaling === "RX"
-                                ? "var(--k-accent-soft)"
+                                ? "var(--k-elevated)"
                                 : "var(--k-elevated)",
                             color:
                               s.scaling === "RX"
-                                ? "var(--k-accent)"
+                                ? "var(--k-t2)"
                                 : "var(--k-t3)",
-                            border: `1px solid ${s.scaling === "RX" ? "var(--k-accent-line)" : "var(--k-line)"}`,
+                            border: `1px solid ${s.scaling === "RX" ? "var(--k-line)" : "var(--k-line)"}`,
                           }}
                         >
                           {s.scaling}
@@ -736,86 +699,6 @@ export default async function AtletaHomePage() {
           </KCard>
         </RevealOnScroll>
       )}
-
-      {/* ACCESO RÁPIDO */}
-      <RevealOnScroll variant="fade-up" className="mt-5 px-3.5">
-        <div
-          style={{
-            display: "flex",
-            alignItems: "baseline",
-            justifyContent: "space-between",
-            padding: "0 4px 8px",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "var(--k-font-display)",
-              fontSize: 10,
-              fontWeight: 600,
-              letterSpacing: "0.18em",
-              color: "var(--k-t3)",
-              textTransform: "uppercase",
-            }}
-          >
-            Acceso rápido
-          </span>
-        </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
-            gap: 10,
-          }}
-        >
-          <QuickLink href="/atleta/historial" icon="📊" label="Historial" />
-          <QuickLink href="/atleta/leaderboard" icon="🏆" label="Leaderboard" />
-          <QuickLink href="/atleta/pagos" icon="💳" label="Pagos" />
-        </div>
-      </RevealOnScroll>
     </div>
-  );
-}
-
-function QuickLink({
-  href,
-  icon,
-  label,
-}: {
-  href: string;
-  icon: string;
-  label: string;
-}) {
-  return (
-    <Link
-      href={href as Route}
-      className="k-tap"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 8,
-        padding: "14px 8px",
-        background: "var(--k-surface)",
-        border: "1px solid var(--k-line)",
-        borderRadius: 14,
-        textDecoration: "none",
-        color: "var(--k-t1)",
-      }}
-    >
-      <span style={{ fontSize: 22 }}>{icon}</span>
-      <span
-        style={{
-          fontFamily: "var(--k-font-display)",
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          color: "var(--k-t2)",
-          textAlign: "center",
-        }}
-      >
-        {label}
-      </span>
-    </Link>
   );
 }

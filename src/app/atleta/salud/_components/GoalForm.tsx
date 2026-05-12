@@ -281,11 +281,9 @@ function UnitChip({
       aria-pressed={active}
       style={{
         padding: "8px 14px",
-        background: active ? "var(--k-accent)" : "transparent",
-        color: active ? "var(--k-accent-on)" : "var(--k-t2)",
-        border: active
-          ? "1px solid var(--k-accent)"
-          : "1px solid var(--k-line)",
+        background: active ? "var(--k-t1)" : "transparent",
+        color: active ? "var(--k-bg)" : "var(--k-t2)",
+        border: active ? "1px solid var(--k-t2)" : "1px solid var(--k-line)",
         borderRadius: 999,
         fontFamily: "var(--k-font-display)",
         fontSize: 10,

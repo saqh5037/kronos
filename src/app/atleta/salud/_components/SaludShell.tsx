@@ -57,7 +57,7 @@ export function SaludShell({ history, latest, goals }: Props) {
               fontSize: 9,
               fontWeight: 700,
               letterSpacing: "0.18em",
-              color: "var(--k-accent)",
+              color: "var(--k-t2)",
               textTransform: "uppercase",
             }}
           >
@@ -139,8 +139,8 @@ export function SaludShell({ history, latest, goals }: Props) {
                 margin: "0 16px 18px",
                 padding: "14px 18px",
                 background: "transparent",
-                color: "var(--k-accent)",
-                border: "1px dashed var(--k-accent-line)",
+                color: "var(--k-t2)",
+                border: "1px dashed var(--k-line)",
                 borderRadius: 14,
                 fontFamily: "var(--k-font-display)",
                 fontSize: 11,

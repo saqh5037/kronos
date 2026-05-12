@@ -85,9 +85,7 @@ export default async function SkillDetailPage({
             >
               Este skill aún no tiene progresiones configuradas. Pídele al coach
               del box que las añada al movimiento{" "}
-              <span style={{ color: "var(--k-accent)" }}>
-                {skill.movementSlug}
-              </span>
+              <span style={{ color: "var(--k-t2)" }}>{skill.movementSlug}</span>
               .
             </p>
           </div>

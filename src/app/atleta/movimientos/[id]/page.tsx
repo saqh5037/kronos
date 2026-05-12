@@ -6,10 +6,7 @@ import {
   getMyPRProgression,
   type PRProgressionResult,
 } from "@/server/actions/prs";
-import type { getMovementById } from "@/server/actions/movements";
-import { getOrGenerateMovementContent } from "@/server/actions/movement-content";
-import { getMyMovementSkillTree } from "@/server/actions/skill-levels";
-import SkillTree from "@/components/atleta/SkillTree";
+import { getMovementById } from "@/server/actions/movements";
 import { getTodayWOD } from "@/server/actions/scores";
 import { PRChart, type PRChartPoint } from "@/components/charts/PRChart";
 import {
@@ -31,28 +28,14 @@ export default async function MovementDetailPage({
   let progression: PRProgressionResult | null = null;
   let movementInfo: Awaited<ReturnType<typeof getMovementById>> = null;
   let todayWod = null;
-  let skillTree: Awaited<ReturnType<typeof getMyMovementSkillTree>> = null;
 
   try {
-    const [profileR, progressionR, contentR, todayWodR] = await Promise.all([
+    [profile, progression, movementInfo, todayWod] = await Promise.all([
       getMyMovementProfile(id),
       getMyPRProgression(id, 180),
-      getOrGenerateMovementContent(id),
+      getMovementById(id),
       getTodayWOD(),
     ]);
-    profile = profileR;
-    progression = progressionR;
-    movementInfo = contentR.ok ? contentR.movement : null;
-    todayWod = todayWodR;
-
-    // SkillTree depende del slug — lookup secuencial tras tener el movement.
-    if (movementInfo?.slug) {
-      try {
-        skillTree = await getMyMovementSkillTree(movementInfo.slug);
-      } catch {
-        skillTree = null;
-      }
-    }
   } catch {
     notFound();
   }
@@ -344,9 +327,9 @@ export default async function MovementDetailPage({
                                   style={{
                                     fontFamily: "var(--k-font-mono)",
                                     fontSize: 11,
-                                    color: "var(--k-accent)",
-                                    background: "var(--k-accent-soft)",
-                                    border: "1px solid var(--k-accent-line)",
+                                    color: "var(--k-t2)",
+                                    background: "var(--k-elevated)",
+                                    border: "1px solid var(--k-line)",
                                     padding: "4px 8px",
                                     borderRadius: 6,
                                     display: "inline-block",
@@ -365,104 +348,93 @@ export default async function MovementDetailPage({
               </AnimatedSection>
             )}
 
-          {/* SKILL TREE — progresiones interactivas */}
-          {skillTree && skillTree.nodes.length > 0 && (
-            <AnimatedSection>
-              <AnimatedItem>
-                <div
-                  data-testid="movement-progressions"
-                  style={{
-                    padding: 16,
-                    background: "var(--k-surface)",
-                    border: "1px solid var(--k-line)",
-                    borderRadius: 16,
-                  }}
-                >
+          {/* PROGRESSIONS */}
+          {movementInfo?.progressions &&
+            movementInfo.progressions.length > 0 && (
+              <AnimatedSection>
+                <AnimatedItem>
                   <div
+                    data-testid="movement-progressions"
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "baseline",
-                      marginBottom: 12,
+                      padding: 16,
+                      background: "var(--k-surface)",
+                      border: "1px solid var(--k-line)",
+                      borderRadius: 16,
                     }}
                   >
                     <p
                       className="k-eyebrow"
-                      style={{ color: "var(--k-t3)", margin: 0 }}
+                      style={{ color: "var(--k-t3)", margin: "0 0 12px" }}
                     >
-                      Tu camino · progresiones
+                      Escalados / progresiones
                     </p>
-                    <span
-                      className="k-mono"
-                      style={{
-                        fontSize: 9,
-                        letterSpacing: 1.2,
-                        color: "var(--k-t3)",
-                      }}
-                    >
-                      {
-                        skillTree.nodes.filter((n) => n.status === "achieved")
-                          .length
-                      }
-                      /{skillTree.nodes.length} DOMINADOS
-                    </span>
+                    <div style={{ display: "grid", gap: 8 }}>
+                      {movementInfo.progressions.map((p, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            background: "var(--k-elevated)",
+                            border: "1px solid var(--k-line)",
+                            borderRadius: 12,
+                            padding: "10px 12px",
+                            display: "flex",
+                            gap: 10,
+                            alignItems: "flex-start",
+                          }}
+                        >
+                          <span
+                            className="k-mono"
+                            style={{
+                              fontSize: 9,
+                              letterSpacing: 1.2,
+                              padding: "3px 6px",
+                              borderRadius: 4,
+                              border: "1px solid var(--k-line)",
+                              color:
+                                p.level === "beginner"
+                                  ? "var(--k-t2)"
+                                  : p.level === "intermediate"
+                                    ? "var(--k-warning)"
+                                    : "var(--k-danger)",
+                            }}
+                          >
+                            {p.level === "beginner"
+                              ? "PRINCIPIANTE"
+                              : p.level === "intermediate"
+                                ? "INTERMEDIO"
+                                : "AVANZADO"}
+                          </span>
+                          <div style={{ flex: 1 }}>
+                            <div
+                              style={{
+                                fontFamily: "var(--k-font-body)",
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: "var(--k-t1)",
+                              }}
+                            >
+                              {p.name}
+                            </div>
+                            {p.description && (
+                              <div
+                                style={{
+                                  fontFamily: "var(--k-font-body)",
+                                  fontSize: 12,
+                                  color: "var(--k-t2)",
+                                  marginTop: 2,
+                                }}
+                              >
+                                {p.description}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <SkillTree
-                    movementId={skillTree.movementId}
-                    movementSlug={skillTree.movementSlug}
-                    nodes={skillTree.nodes}
-                  />
-                </div>
-              </AnimatedItem>
-            </AnimatedSection>
-          )}
-
-          {/* AI DISCLAIMER */}
-          {movementInfo?.contentSource === "AI_GENERATED" && (
-            <AnimatedSection>
-              <AnimatedItem>
-                <div
-                  data-testid="movement-ai-disclaimer"
-                  style={{
-                    padding: "10px 12px",
-                    background: "var(--k-elevated)",
-                    border: "1px dashed var(--k-line-2)",
-                    borderRadius: 12,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="var(--k-t3)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{ flexShrink: 0 }}
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 16v-4M12 8h.01" />
-                  </svg>
-                  <p
-                    style={{
-                      fontFamily: "var(--k-font-body)",
-                      fontSize: 11,
-                      color: "var(--k-t3)",
-                      margin: 0,
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    Generado con IA · consultá un coach certificado para casos
-                    específicos.
-                  </p>
-                </div>
-              </AnimatedItem>
-            </AnimatedSection>
-          )}
+                </AnimatedItem>
+              </AnimatedSection>
+            )}
 
           {/* MUSCLES WORKED */}
           {movementInfo?.musclesWorked &&
@@ -491,9 +463,9 @@ export default async function MovementDetailPage({
                           style={{
                             padding: "4px 10px",
                             borderRadius: 999,
-                            background: "var(--k-accent-soft)",
-                            border: "1px solid var(--k-accent-line)",
-                            color: "var(--k-accent)",
+                            background: "var(--k-elevated)",
+                            border: "1px solid var(--k-line)",
+                            color: "var(--k-t2)",
                             fontFamily: "var(--k-font-body)",
                             fontSize: 11,
                             textTransform: "capitalize",
@@ -783,7 +755,7 @@ export default async function MovementDetailPage({
                   padding: 16,
                   borderRadius: 16,
                   background: "var(--k-surface)",
-                  border: "1px solid var(--k-accent-line)",
+                  border: "1px solid var(--k-line)",
                   boxShadow: "0 0 14px rgba(200, 255, 45, 0.16)",
                   display: "flex",
                   alignItems: "center",
@@ -801,7 +773,7 @@ export default async function MovementDetailPage({
                       fontWeight: 700,
                       letterSpacing: "0.16em",
                       textTransform: "uppercase",
-                      color: "var(--k-accent)",
+                      color: "var(--k-t2)",
                       margin: 0,
                     }}
                   >
@@ -854,7 +826,7 @@ function CueList({
 }) {
   const color =
     tone === "ok"
-      ? "var(--k-accent)"
+      ? "var(--k-t2)"
       : tone === "bad"
         ? "var(--k-danger)"
         : "var(--k-t2)";
@@ -905,7 +877,7 @@ function CueList({
 function CueGlyph({ tone }: { tone: "ok" | "bad" | "neutral" }) {
   const color =
     tone === "ok"
-      ? "var(--k-accent)"
+      ? "var(--k-t2)"
       : tone === "bad"
         ? "var(--k-danger)"
         : "var(--k-t3)";
@@ -1000,7 +972,7 @@ function V3StatCard({
           fontSize: 20,
           fontWeight: 700,
           letterSpacing: "-0.02em",
-          color: accent ? "var(--k-accent)" : "var(--k-t1)",
+          color: accent ? "var(--k-t2)" : "var(--k-t1)",
         }}
       >
         {value}

@@ -279,7 +279,7 @@ export default function PhotoWodFlow() {
                 style={{
                   fontSize: 40,
                   marginBottom: 8,
-                  color: "var(--k-accent)",
+                  color: "var(--k-t2)",
                 }}
               >
                 📷
@@ -329,7 +329,7 @@ export default function PhotoWodFlow() {
             ¿Sin foto a mano?{" "}
             <Link
               href="/atleta/wod/nuevo"
-              style={{ color: "var(--k-accent)", textDecoration: "underline" }}
+              style={{ color: "var(--k-t2)", textDecoration: "underline" }}
             >
               Cargar manualmente →
             </Link>
@@ -363,8 +363,8 @@ export default function PhotoWodFlow() {
           style={{
             padding: 12,
             borderRadius: 12,
-            background: "var(--k-accent-soft)",
-            border: "1px solid var(--k-accent-line)",
+            background: "var(--k-elevated)",
+            border: "1px solid var(--k-line)",
             fontSize: 12,
             color: "var(--k-t1)",
           }}
@@ -376,7 +376,7 @@ export default function PhotoWodFlow() {
             style={{
               background: "none",
               border: "none",
-              color: "var(--k-accent)",
+              color: "var(--k-t2)",
               textDecoration: "underline",
               padding: 0,
               cursor: "pointer",
@@ -596,8 +596,8 @@ function SegmentedField<T extends string>({
                 padding: "10px 12px",
                 borderRadius: 8,
                 border: "none",
-                background: active ? "var(--k-accent)" : "transparent",
-                color: active ? "var(--k-accent-on)" : "var(--k-t2)",
+                background: active ? "var(--k-t1)" : "transparent",
+                color: active ? "var(--k-bg)" : "var(--k-t2)",
                 fontFamily: "var(--k-font-display)",
                 fontSize: 11,
                 fontWeight: 700,

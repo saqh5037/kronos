@@ -69,7 +69,7 @@ export default async function MovementsPage() {
             fontWeight: 600,
             letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: "var(--k-accent)",
+            color: "var(--k-t2)",
             margin: "4px 0 0",
           }}
         >
@@ -128,7 +128,7 @@ export default async function MovementsPage() {
                             width: `${Math.min(100, (m.frequency90d / 20) * 100)}%`,
                             background: m.isStale
                               ? "var(--k-warning)"
-                              : "var(--k-accent)",
+                              : "var(--k-t2)",
                           }}
                         />
                       </div>

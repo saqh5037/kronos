@@ -1,12 +1,10 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import {
   listAvailableClasses,
   type AvailableClass,
 } from "@/server/actions/bookings";
 import { ClassesList } from "./_components/ClassesList";
 import { Icon } from "@/components/kronos/v3/icons";
-import { getBoxMode } from "@/server/actions/box-mode";
 
 export const metadata = { title: "Kronos — Reservar" };
 
@@ -45,10 +43,6 @@ export default async function ReservarPage({
 }: {
   searchParams?: Promise<SearchParams>;
 }) {
-  // Personal Box no tiene clases programadas — redirect a home.
-  const { isPersonal } = await getBoxMode();
-  if (isPersonal) redirect("/atleta");
-
   const sp = (await searchParams) ?? {};
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -168,7 +162,7 @@ export default async function ReservarPage({
                 background: isSel ? "var(--k-elevated)" : "var(--k-surface)",
                 border:
                   !isSel && isToday
-                    ? "1px dashed var(--k-accent)"
+                    ? "1px dashed var(--k-t2)"
                     : `1px solid ${isSel ? "var(--k-line-2)" : "var(--k-line)"}`,
                 display: "flex",
                 flexDirection: "column",
@@ -197,7 +191,7 @@ export default async function ReservarPage({
                   fontSize: 22,
                   fontWeight: 700,
                   letterSpacing: "-0.03em",
-                  color: isSel ? "var(--k-accent)" : "var(--k-t1)",
+                  color: isSel ? "var(--k-t2)" : "var(--k-t1)",
                   lineHeight: 1,
                 }}
               >
@@ -211,7 +205,7 @@ export default async function ReservarPage({
                     width: 4,
                     height: 4,
                     borderRadius: "50%",
-                    background: "var(--k-accent)",
+                    background: "var(--k-t1)",
                   }}
                 />
               )}

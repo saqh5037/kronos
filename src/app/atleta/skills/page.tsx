@@ -39,10 +39,10 @@ const TIER_LABEL: Record<
   },
   escalado: {
     label: "ESCALADO",
-    color: "var(--k-accent)",
-    bg: "var(--k-accent-soft)",
+    color: "var(--k-t2)",
+    bg: "var(--k-elevated)",
   },
-  rx: { label: "RX", color: "var(--k-accent)", bg: "var(--k-accent-soft)" },
+  rx: { label: "RX", color: "var(--k-t2)", bg: "var(--k-elevated)" },
 };
 
 export default async function SkillsPage() {
@@ -159,8 +159,7 @@ function ActiveSkillView({
             margin: "0 0 20px",
           }}
         >
-          {tierVerb}{" "}
-          <span style={{ color: "var(--k-accent)" }}>{skill.name}</span>
+          {tierVerb} <span style={{ color: "var(--k-t2)" }}>{skill.name}</span>
         </h1>
 
         <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
@@ -171,10 +170,12 @@ function ActiveSkillView({
               fontWeight: 700,
               letterSpacing: "-0.06em",
               lineHeight: 1,
-              color: "var(--k-accent)",
+              color: "var(--k-t2)",
               fontFeatureSettings: '"tnum" 1',
               textShadow:
-                data.progressPercent > 0 ? "var(--k-accent-glow)" : "none",
+                data.progressPercent > 0
+                  ? "0 0 8px rgba(255,255,255,0.06)"
+                  : "none",
             }}
           >
             {data.progressPercent}
@@ -221,7 +222,7 @@ function ActiveSkillView({
             style={{
               height: "100%",
               width: `${data.progressPercent}%`,
-              background: "var(--k-accent)",
+              background: "var(--k-t1)",
               borderRadius: 2,
               transition: "width 800ms ease",
             }}
@@ -252,7 +253,7 @@ function ActiveSkillView({
                 fontSize: 9,
                 fontWeight: 600,
                 letterSpacing: "0.12em",
-                color: "var(--k-accent)",
+                color: "var(--k-t2)",
               }}
             >
               EMPIEZA HOY
@@ -266,9 +267,9 @@ function ActiveSkillView({
               marginTop: 20,
               padding: "12px 14px",
               background: "var(--k-surface)",
-              border: "1px solid var(--k-accent-line)",
+              border: "1px solid var(--k-line)",
               borderRadius: 14,
-              boxShadow: "var(--k-accent-glow)",
+              boxShadow: "0 0 8px rgba(255,255,255,0.06)",
             }}
           >
             <div
@@ -277,7 +278,7 @@ function ActiveSkillView({
                 fontSize: 9,
                 fontWeight: 600,
                 letterSpacing: "0.18em",
-                color: "var(--k-accent)",
+                color: "var(--k-t2)",
                 textTransform: "uppercase",
                 marginBottom: 4,
               }}
@@ -383,7 +384,7 @@ function ActiveSkillView({
                   fontSize: 10,
                   fontWeight: 700,
                   letterSpacing: "0.14em",
-                  color: "var(--k-accent)",
+                  color: "var(--k-t2)",
                   textDecoration: "none",
                 }}
               >
@@ -500,9 +501,9 @@ function EmptySkillView({ catalog }: { catalog: CatalogSkill[] }) {
           style={{
             padding: 28,
             background: "var(--k-surface)",
-            border: "1px solid var(--k-accent-line)",
+            border: "1px solid var(--k-line)",
             borderRadius: 20,
-            boxShadow: "var(--k-accent-glow)",
+            boxShadow: "0 0 8px rgba(255,255,255,0.06)",
             textAlign: "center",
           }}
         >
@@ -511,13 +512,13 @@ function EmptySkillView({ catalog }: { catalog: CatalogSkill[] }) {
               width: 64,
               height: 64,
               borderRadius: "50%",
-              background: "var(--k-accent-soft)",
-              border: "1px solid var(--k-accent-line)",
+              background: "var(--k-elevated)",
+              border: "1px solid var(--k-line)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               margin: "0 auto 16px",
-              boxShadow: "var(--k-accent-glow)",
+              boxShadow: "0 0 8px rgba(255,255,255,0.06)",
             }}
           >
             <svg
@@ -525,7 +526,7 @@ function EmptySkillView({ catalog }: { catalog: CatalogSkill[] }) {
               height={28}
               viewBox="0 0 24 24"
               fill="none"
-              stroke="var(--k-accent)"
+              stroke="var(--k-t2)"
               strokeWidth={1.6}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -562,15 +563,15 @@ function EmptySkillView({ catalog }: { catalog: CatalogSkill[] }) {
             style={{
               display: "inline-block",
               padding: "12px 20px",
-              background: "var(--k-accent)",
-              color: "var(--k-accent-on)",
+              background: "var(--k-t1)",
+              color: "var(--k-bg)",
               fontFamily: "var(--k-font-display)",
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               borderRadius: 12,
-              boxShadow: "var(--k-accent-glow)",
+              boxShadow: "0 0 8px rgba(255,255,255,0.06)",
             }}
           >
             Elige un objetivo ↓
@@ -642,9 +643,9 @@ function ProgressionRow({
               ? "transparent"
               : "var(--k-surface)",
           border: isAchieved
-            ? "2px solid var(--k-accent-line)"
+            ? "2px solid var(--k-line)"
             : isCurrent
-              ? "2px solid var(--k-accent)"
+              ? "2px solid var(--k-t2)"
               : "1.5px solid var(--k-line)",
         }}
       >
@@ -654,7 +655,7 @@ function ProgressionRow({
             height={13}
             viewBox="0 0 20 20"
             fill="none"
-            stroke="var(--k-accent)"
+            stroke="var(--k-t2)"
             strokeWidth={2.5}
           >
             <path d="M4 10l4 4 8-8" />
@@ -666,7 +667,7 @@ function ProgressionRow({
               width: 8,
               height: 8,
               borderRadius: "50%",
-              background: "var(--k-accent)",
+              background: "var(--k-t1)",
             }}
           />
         )}
@@ -708,7 +709,7 @@ function ProgressionRow({
             style={{
               fontFamily: "var(--k-font-body)",
               fontSize: 11,
-              color: "var(--k-accent)",
+              color: "var(--k-t2)",
               marginTop: 1,
             }}
           >
@@ -745,10 +746,10 @@ function SkillCatalogCard({
   const isLocked = skill.status === "locked";
 
   const statusConfig = {
-    completed: { label: "COMPLETADO", color: "var(--k-accent)" },
+    completed: { label: "COMPLETADO", color: "var(--k-t2)" },
     active: {
       label: `${skill.progressPercent ?? 0}%`,
-      color: "var(--k-accent)",
+      color: "var(--k-t2)",
     },
     available: { label: "DISPONIBLE", color: "var(--k-t3)" },
     locked: { label: skill.lockReason ?? "BLOQUEADO", color: "var(--k-t3)" },
@@ -760,15 +761,15 @@ function SkillCatalogCard({
       style={{
         padding: "13px 16px",
         background: isCompleted
-          ? "var(--k-accent-soft)"
+          ? "var(--k-elevated)"
           : isActive
             ? "var(--k-surface)"
             : "var(--k-elevated)",
         border: `1px solid ${
           isCompleted
-            ? "var(--k-accent-line)"
+            ? "var(--k-line)"
             : isActive
-              ? "var(--k-accent-line)"
+              ? "var(--k-line)"
               : "var(--k-line)"
         }`,
         borderRadius: 14,
@@ -776,7 +777,7 @@ function SkillCatalogCard({
         alignItems: "center",
         gap: 12,
         opacity: isLocked ? 0.55 : 1,
-        boxShadow: isActive ? "var(--k-accent-glow)" : "none",
+        boxShadow: isActive ? "0 0 8px rgba(255,255,255,0.06)" : "none",
         cursor: selectable && !isLocked ? "pointer" : "default",
       }}
     >
@@ -807,7 +808,7 @@ function SkillCatalogCard({
               style={{
                 height: "100%",
                 width: `${skill.progressPercent}%`,
-                background: "var(--k-accent)",
+                background: "var(--k-t1)",
                 borderRadius: 2,
               }}
             />

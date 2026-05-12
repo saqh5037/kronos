@@ -158,8 +158,8 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
         className="h-full transition-all"
         style={{
           width: `${pct}%`,
-          background: "var(--k-accent)",
-          boxShadow: "var(--k-accent-glow)",
+          background: "var(--k-t1)",
+          boxShadow: "0 0 8px rgba(255,255,255,0.06)",
         }}
       />
     </div>
@@ -506,8 +506,8 @@ function SegmentedControl({
             onClick={() => onChange(opt.value)}
             className="flex-1 px-3 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-colors"
             style={{
-              background: active ? "var(--k-accent)" : "transparent",
-              color: active ? "var(--k-accent-on)" : "var(--k-t2)",
+              background: active ? "var(--k-t1)" : "transparent",
+              color: active ? "var(--k-bg)" : "var(--k-t2)",
               fontWeight: active ? 700 : 500,
             }}
           >

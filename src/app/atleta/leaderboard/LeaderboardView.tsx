@@ -159,11 +159,12 @@ export default function LeaderboardPage({
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   transition: "all 150ms ease",
-                  background: tab === t.key ? "var(--k-accent)" : "transparent",
-                  color: tab === t.key ? "var(--k-accent-on)" : "var(--k-t2)",
+                  background: tab === t.key ? "var(--k-t1)" : "transparent",
+                  color: tab === t.key ? "var(--k-bg)" : "var(--k-t2)",
                   border: "none",
                   cursor: "pointer",
-                  boxShadow: tab === t.key ? "var(--k-accent-glow)" : "none",
+                  boxShadow:
+                    tab === t.key ? "0 0 8px rgba(255,255,255,0.06)" : "none",
                 }}
               >
                 {t.label}
@@ -321,7 +322,7 @@ function LeaderboardRow({
 }) {
   const isTop3 = rank <= 3;
   const isFirst = rank === 1;
-  const rankColor = isTop3 ? "var(--k-accent)" : "var(--k-t3)";
+  const rankColor = isTop3 ? "var(--k-t2)" : "var(--k-t3)";
 
   return (
     <div
@@ -341,7 +342,7 @@ function LeaderboardRow({
           width: 20,
           textAlign: "center",
           color: rankColor,
-          textShadow: isFirst ? "var(--k-accent-glow)" : "none",
+          textShadow: isFirst ? "0 0 8px rgba(255,255,255,0.06)" : "none",
         }}
       >
         {rank}
@@ -357,9 +358,9 @@ function LeaderboardRow({
           fontFamily: "var(--k-font-display)",
           fontSize: 10,
           fontWeight: 700,
-          background: isTop3 ? "var(--k-accent-soft)" : "var(--k-elevated)",
-          border: `1px solid ${isTop3 ? "var(--k-accent-line)" : "var(--k-line)"}`,
-          color: isTop3 ? "var(--k-accent)" : "var(--k-t3)",
+          background: isTop3 ? "var(--k-elevated)" : "var(--k-elevated)",
+          border: `1px solid ${isTop3 ? "var(--k-line)" : "var(--k-line)"}`,
+          color: isTop3 ? "var(--k-t2)" : "var(--k-t3)",
         }}
       >
         {entry.athleteName[0]}
@@ -388,11 +389,9 @@ function LeaderboardRow({
           fontWeight: 700,
           letterSpacing: "0.1em",
           background:
-            entry.scaling === "RX"
-              ? "var(--k-accent-soft)"
-              : "var(--k-elevated)",
-          color: entry.scaling === "RX" ? "var(--k-accent)" : "var(--k-t3)",
-          border: `1px solid ${entry.scaling === "RX" ? "var(--k-accent-line)" : "var(--k-line)"}`,
+            entry.scaling === "RX" ? "var(--k-elevated)" : "var(--k-elevated)",
+          color: entry.scaling === "RX" ? "var(--k-t2)" : "var(--k-t3)",
+          border: `1px solid ${entry.scaling === "RX" ? "var(--k-line)" : "var(--k-line)"}`,
         }}
       >
         {entry.scaling}
@@ -440,7 +439,7 @@ function AttendanceRow({
           fontWeight: 700,
           width: 20,
           textAlign: "center",
-          color: isTop3 ? "var(--k-accent)" : "var(--k-t3)",
+          color: isTop3 ? "var(--k-t2)" : "var(--k-t3)",
         }}
       >
         {rank}
@@ -456,9 +455,9 @@ function AttendanceRow({
           fontFamily: "var(--k-font-display)",
           fontSize: 10,
           fontWeight: 700,
-          background: isTop3 ? "var(--k-accent-soft)" : "var(--k-elevated)",
-          border: `1px solid ${isTop3 ? "var(--k-accent-line)" : "var(--k-line)"}`,
-          color: isTop3 ? "var(--k-accent)" : "var(--k-t3)",
+          background: isTop3 ? "var(--k-elevated)" : "var(--k-elevated)",
+          border: `1px solid ${isTop3 ? "var(--k-line)" : "var(--k-line)"}`,
+          color: isTop3 ? "var(--k-t2)" : "var(--k-t3)",
         }}
       >
         {entry.athleteName[0]}

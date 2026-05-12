@@ -119,7 +119,7 @@ export default function HistorialPage({ wodOptions }: Props) {
             fontWeight: 600,
             letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: "var(--k-accent)",
+            color: "var(--k-t2)",
             margin: "4px 0 0",
           }}
         >
@@ -200,16 +200,14 @@ export default function HistorialPage({ wodOptions }: Props) {
               className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
               style={{
                 background:
-                  s.scaling === "RX"
-                    ? "var(--k-accent-soft)"
-                    : "var(--k-surface)",
-                border: `1px solid ${s.scaling === "RX" ? "var(--k-accent-line)" : "var(--line)"}`,
+                  s.scaling === "RX" ? "var(--k-elevated)" : "var(--k-surface)",
+                border: `1px solid ${s.scaling === "RX" ? "var(--k-line)" : "var(--line)"}`,
               }}
             >
               <span
                 className="text-[10px] font-bold"
                 style={{
-                  color: s.scaling === "RX" ? "var(--k-accent)" : "var(--k-t3)",
+                  color: s.scaling === "RX" ? "var(--k-t2)" : "var(--k-t3)",
                 }}
               >
                 {s.scaling === "RX" ? "RX" : "SC"}

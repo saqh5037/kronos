@@ -193,7 +193,7 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
                       fontSize: 9,
                       fontWeight: 700,
                       letterSpacing: "0.14em",
-                      color: "var(--k-accent)",
+                      color: "var(--k-t2)",
                       textTransform: "uppercase",
                     }}
                   >
@@ -361,7 +361,7 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
                     ? "var(--k-elevated)"
                     : "var(--k-surface)",
                   border: `1px solid ${
-                    d.enabled ? "var(--k-accent-line)" : "var(--k-line)"
+                    d.enabled ? "var(--k-line)" : "var(--k-line)"
                   }`,
                   borderRadius: 12,
                   display: "flex",
@@ -446,10 +446,10 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
               role="status"
               style={{
                 padding: 10,
-                background: "var(--k-accent-soft)",
-                border: "1px solid var(--k-accent-line)",
+                background: "var(--k-elevated)",
+                border: "1px solid var(--k-line)",
                 borderRadius: 10,
-                color: "var(--k-accent)",
+                color: "var(--k-t2)",
                 fontFamily: "var(--k-font-display)",
                 fontSize: 12,
                 fontWeight: 700,

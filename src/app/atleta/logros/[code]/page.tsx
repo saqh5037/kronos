@@ -1,12 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import {
-  getBadgeDetail,
-  getMyAthleteFirstName,
-  type BadgeDetail,
-} from "@/server/actions/badges";
-import BadgeShareCanvas from "@/components/atleta/BadgeShareCanvas";
+import { getBadgeDetail, type BadgeDetail } from "@/server/actions/badges";
 
 export const dynamic = "force-dynamic";
 
@@ -27,10 +22,7 @@ export default async function BadgeDetailPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
-  const [badge, athleteFirstName] = await Promise.all([
-    getBadgeDetail(code),
-    getMyAthleteFirstName().catch(() => null),
-  ]);
+  const badge = await getBadgeDetail(code);
   if (!badge) notFound();
 
   return (
@@ -63,10 +55,7 @@ export default async function BadgeDetailPage({
 
       <div className="px-4 mt-5 flex flex-col gap-4">
         <CriteriaCard badge={badge} />
-        <DescriptionCard
-          badge={badge}
-          athleteFirstName={athleteFirstName ?? "Atleta"}
-        />
+        <DescriptionCard badge={badge} />
       </div>
     </main>
   );
@@ -88,7 +77,7 @@ function BadgeHero({ badge }: { badge: BadgeDetail }) {
         background: badge.unlocked
           ? "linear-gradient(180deg, var(--k-elevated) 0%, var(--k-surface) 100%)"
           : "var(--k-surface)",
-        borderColor: badge.unlocked ? "var(--k-accent-line)" : "var(--k-line)",
+        borderColor: badge.unlocked ? "var(--k-line)" : "var(--k-line)",
       }}
     >
       {badge.unlocked && (
@@ -97,7 +86,7 @@ function BadgeHero({ badge }: { badge: BadgeDetail }) {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse at 50% 0%, rgba(200,255,45,0.12), transparent 60%)",
+              "radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.06), transparent 60%)",
           }}
         />
       )}
@@ -109,16 +98,18 @@ function BadgeHero({ badge }: { badge: BadgeDetail }) {
             height: 120,
             borderRadius: 30,
             background: badge.unlocked
-              ? "var(--k-accent-soft)"
+              ? "var(--k-elevated)"
               : "var(--k-line-2)",
-            border: `2px solid ${badge.unlocked ? "var(--k-accent-line)" : "var(--k-line)"}`,
+            border: `2px solid ${badge.unlocked ? "var(--k-line)" : "var(--k-line)"}`,
             display: "grid",
             placeItems: "center",
-            color: badge.unlocked ? "var(--k-accent)" : "var(--k-t3)",
+            color: badge.unlocked ? "var(--k-t2)" : "var(--k-t3)",
             fontFamily: "var(--k-font-display)",
             fontSize: 48,
             fontWeight: 700,
-            boxShadow: badge.unlocked ? "var(--k-accent-glow)" : undefined,
+            boxShadow: badge.unlocked
+              ? "0 0 8px rgba(255,255,255,0.06)"
+              : undefined,
             opacity: badge.unlocked ? 1 : 0.7,
           }}
         >
@@ -131,7 +122,7 @@ function BadgeHero({ badge }: { badge: BadgeDetail }) {
             style={{
               fontSize: 9,
               letterSpacing: "0.18em",
-              color: badge.unlocked ? "var(--k-accent)" : "var(--k-t3)",
+              color: badge.unlocked ? "var(--k-t2)" : "var(--k-t3)",
               marginBottom: 6,
             }}
           >
@@ -174,8 +165,8 @@ function BadgeHero({ badge }: { badge: BadgeDetail }) {
             alignItems: "center",
             gap: 6,
             background: "var(--k-elevated)",
-            border: "1px solid var(--k-accent-line)",
-            color: "var(--k-accent)",
+            border: "1px solid var(--k-line)",
+            color: "var(--k-t2)",
             padding: "6px 12px",
             borderRadius: 999,
             fontSize: 11,
@@ -239,7 +230,7 @@ function CriteriaCard({ badge }: { badge: BadgeDetail }) {
               className="k-mono"
               style={{
                 fontSize: 11,
-                color: badge.unlocked ? "var(--k-accent)" : "var(--k-t2)",
+                color: badge.unlocked ? "var(--k-t2)" : "var(--k-t2)",
                 fontWeight: 600,
               }}
             >
@@ -260,8 +251,8 @@ function CriteriaCard({ badge }: { badge: BadgeDetail }) {
                 height: "100%",
                 width: `${ratio}%`,
                 background: badge.unlocked
-                  ? "var(--k-accent)"
-                  : "linear-gradient(90deg, var(--k-accent), var(--k-accent-press))",
+                  ? "var(--k-t2)"
+                  : "linear-gradient(90deg, var(--k-t2), var(--k-t2))",
                 transition: "width 600ms ease",
               }}
             />
@@ -272,13 +263,7 @@ function CriteriaCard({ badge }: { badge: BadgeDetail }) {
   );
 }
 
-function DescriptionCard({
-  badge,
-  athleteFirstName,
-}: {
-  badge: BadgeDetail;
-  athleteFirstName: string;
-}) {
+function DescriptionCard({ badge }: { badge: BadgeDetail }) {
   if (badge.unlocked) {
     return (
       <div className="k-card" style={{ padding: 16 }}>
@@ -286,7 +271,7 @@ function DescriptionCard({
           className="k-mono"
           style={{
             fontSize: 9,
-            color: "var(--k-accent)",
+            color: "var(--k-t2)",
             letterSpacing: "0.18em",
             marginBottom: 6,
           }}
@@ -299,19 +284,29 @@ function DescriptionCard({
             fontSize: 14,
             color: "var(--k-t1)",
             lineHeight: 1.4,
-            marginBottom: 14,
           }}
         >
           Compartí este logro con tu box. Cada PR cuenta historia.
         </div>
-        <BadgeShareCanvas
-          athleteName={athleteFirstName}
-          badgeName={badge.name}
-          badgeCode={badge.code}
-          badgeDescription={badge.description}
-          earnedAtISO={(badge.earnedAt ?? new Date()).toISOString()}
-          xp={badge.xp}
-        />
+        <button
+          disabled
+          style={{
+            marginTop: 12,
+            background: "var(--k-elevated)",
+            color: "var(--k-t3)",
+            border: "1px solid var(--k-line)",
+            borderRadius: 12,
+            padding: "10px 16px",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            cursor: "not-allowed",
+          }}
+        >
+          Compartir · Pronto
+        </button>
       </div>
     );
   }

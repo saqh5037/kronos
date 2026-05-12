@@ -225,8 +225,8 @@ export default function QuickWodForm() {
           marginTop: 8,
           padding: 16,
           borderRadius: 16,
-          background: "var(--k-accent-soft)",
-          border: "1px solid var(--k-accent-line)",
+          background: "var(--k-elevated)",
+          border: "1px solid var(--k-line)",
         }}
       >
         <div
@@ -235,7 +235,7 @@ export default function QuickWodForm() {
             fontSize: 10,
             fontWeight: 600,
             letterSpacing: "0.2em",
-            color: "var(--k-accent)",
+            color: "var(--k-t2)",
             textTransform: "uppercase",
             marginBottom: 12,
           }}
@@ -366,7 +366,7 @@ function Field({
         }}
       >
         {label}{" "}
-        {required ? <span style={{ color: "var(--k-accent)" }}>*</span> : null}
+        {required ? <span style={{ color: "var(--k-t2)" }}>*</span> : null}
       </label>
       <input
         type={type}
@@ -454,8 +454,8 @@ function SegmentedField<T extends string>({
                 padding: "10px 12px",
                 borderRadius: 8,
                 border: "none",
-                background: active ? "var(--k-accent)" : "transparent",
-                color: active ? "var(--k-accent-on)" : "var(--k-t2)",
+                background: active ? "var(--k-t1)" : "transparent",
+                color: active ? "var(--k-bg)" : "var(--k-t2)",
                 fontFamily: "var(--k-font-display)",
                 fontSize: 11,
                 fontWeight: 700,
