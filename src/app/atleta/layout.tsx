@@ -33,7 +33,7 @@ export default async function AtletaLayout({
         <div
           style={{
             position: "fixed",
-            top: 12,
+            top: "max(env(safe-area-inset-top), 12px)",
             right: 12,
             zIndex: 30,
           }}
@@ -100,7 +100,12 @@ export default async function AtletaLayout({
       <InstallPwaBanner />
 
       {/* Content area */}
-      <main className="lg:pt-14 pb-24 lg:pb-16">
+      <main
+        className="pb-24 lg:pb-16"
+        style={{
+          paddingTop: "max(env(safe-area-inset-top), 12px)",
+        }}
+      >
         <div className="mx-auto lg:max-w-3xl">{children}</div>
       </main>
 

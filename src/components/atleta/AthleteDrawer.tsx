@@ -5,11 +5,110 @@ import type { Route } from "next";
 import { useState } from "react";
 
 const EXTRA_LINKS = [
-  { href: "/atleta/movimientos" as Route, label: "Movimientos", icon: "💪" },
-  { href: "/atleta/historial" as Route, label: "Historial", icon: "📊" },
-  { href: "/atleta/leaderboard" as Route, label: "Leaderboard", icon: "🏆" },
-  { href: "/atleta/pagos" as Route, label: "Mis pagos", icon: "💳" },
-  { href: "/atleta/perfil" as Route, label: "Perfil completo", icon: "👤" },
+  {
+    href: "/atleta/movimientos" as Route,
+    label: "Movimientos",
+    icon: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M6.5 6.5h11" />
+        <path d="M6.5 17.5h11" />
+        <path d="M6 20v-2a6 6 0 1 1 12 0v2" />
+        <path d="M12 6V4a2 2 0 0 1 4 0v2" />
+      </svg>
+    ),
+  },
+  {
+    href: "/atleta/historial" as Route,
+    label: "Historial",
+    icon: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 3v18h18" />
+        <path d="M7 16v-3" />
+        <path d="M11 16V8" />
+        <path d="M15 16v-5" />
+        <path d="M19 16v-2" />
+      </svg>
+    ),
+  },
+  {
+    href: "/atleta/leaderboard" as Route,
+    label: "Leaderboard",
+    icon: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+        <path d="M4 22h16" />
+        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/atleta/pagos" as Route,
+    label: "Mis pagos",
+    icon: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect width="20" height="14" x="2" y="5" rx="2" />
+        <line x1="2" x2="22" y1="10" y2="10" />
+      </svg>
+    ),
+  },
+  {
+    href: "/atleta/perfil" as Route,
+    label: "Perfil completo",
+    icon: (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    ),
+  },
 ];
 
 export default function AthleteDrawer() {
@@ -25,7 +124,7 @@ export default function AthleteDrawer() {
         onClick={() => setOpen(true)}
         style={{
           position: "fixed",
-          top: 12,
+          top: "max(env(safe-area-inset-top), 12px)",
           left: 12,
           zIndex: 35,
           width: 40,
@@ -50,8 +149,11 @@ export default function AthleteDrawer() {
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <path d="M3 12h18M3 6h18M3 18h18" />
+          <line x1="4" y1="6" x2="20" y2="6" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="18" x2="16" y2="18" />
         </svg>
       </button>
 
@@ -121,7 +223,17 @@ export default function AthleteDrawer() {
               fontWeight: 500,
             }}
           >
-            <span style={{ fontSize: 18 }}>{link.icon}</span>
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 20,
+                color: "var(--k-t2)",
+              }}
+            >
+              {link.icon}
+            </span>
             {link.label}
           </Link>
         ))}

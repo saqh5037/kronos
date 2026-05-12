@@ -543,10 +543,10 @@ function SkillNode({
 function nodeStyles(status: ProgressionNode["status"]) {
   if (status === "achieved") {
     return {
-      bg: "var(--k-accent)",
-      border: "1px solid var(--k-accent-press)",
-      shadow: "var(--k-accent-glow)",
-      text: "var(--k-accent-on)",
+      bg: "var(--k-surface)",
+      border: "1px solid var(--k-accent-line)",
+      shadow: "none",
+      text: "var(--k-t1)",
     };
   }
   if (status === "current") {
@@ -584,7 +584,7 @@ function StatusGlyph({ status }: { status: ProgressionNode["status"] }) {
           cx={10}
           cy={10}
           r={9}
-          stroke="var(--k-accent-line)"
+          stroke="var(--k-line-2)"
           strokeWidth={1.5}
         />
         <path d="M5.5 10l3 3 6-6" />

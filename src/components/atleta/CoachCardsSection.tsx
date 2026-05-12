@@ -27,14 +27,10 @@ export default function CoachCardsSection({ cards }: Props) {
   if (visible.length === 0) return null;
 
   function handleDismiss(cardId: string) {
-    setDismissed((prev) => {
-      const n = new Set(prev);
-      n.add(cardId);
-      return n;
-    });
-    startTransition(async () => {
-      await dismissCoachCard(cardId).catch(() => {
-        // si falla, revertimos en próximo render por revalidate
+    setDismissed((prev) => new Set([...prev, cardId]));
+    startTransition(() => {
+      dismissCoachCard(cardId).catch(() => {
+        // best-effort
       });
     });
   }
@@ -81,11 +77,11 @@ export default function CoachCardsSection({ cards }: Props) {
             disabled={isPending}
             style={{
               position: "absolute",
-              top: 4,
-              right: 4,
-              width: 44,
-              height: 44,
-              borderRadius: 22,
+              top: 0,
+              right: 0,
+              width: 48,
+              height: 48,
+              borderRadius: 24,
               background: "transparent",
               border: "none",
               cursor: "pointer",
@@ -93,11 +89,13 @@ export default function CoachCardsSection({ cards }: Props) {
               alignItems: "center",
               justifyContent: "center",
               color: "var(--k-t3)",
+              zIndex: 2,
+              WebkitTapHighlightColor: "transparent",
             }}
           >
             <svg
-              width={14}
-              height={14}
+              width={16}
+              height={16}
               viewBox="0 0 14 14"
               fill="none"
               stroke="currentColor"
@@ -165,18 +163,18 @@ export default function CoachCardsSection({ cards }: Props) {
   );
 }
 
-function bgForType(t: CoachCardType): string {
-  if (t === "CELEBRATION") return "var(--k-accent-soft)";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function bgForType(_t: CoachCardType): string {
   return "var(--k-surface)";
 }
 
 function borderForType(t: CoachCardType): string {
-  if (t === "CELEBRATION") return "1px solid var(--k-accent-line)";
+  if (t === "CELEBRATION") return "1.5px solid var(--k-accent-line)";
   return "1px solid var(--k-line)";
 }
 
-function textForType(t: CoachCardType): string {
-  if (t === "CELEBRATION") return "var(--k-accent)";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function textForType(_t: CoachCardType): string {
   return "var(--k-t1)";
 }
 

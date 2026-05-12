@@ -645,12 +645,12 @@ function ProgressionRow({
           justifyContent: "center",
           flexShrink: 0,
           background: isAchieved
-            ? "var(--k-accent)"
+            ? "var(--k-surface)"
             : isLocked
               ? "transparent"
               : "var(--k-surface)",
           border: isAchieved
-            ? "none"
+            ? "2px solid var(--k-accent-line)"
             : isCurrent
               ? "2px solid var(--k-accent)"
               : "1.5px solid var(--k-line)",
@@ -662,7 +662,7 @@ function ProgressionRow({
             height={13}
             viewBox="0 0 20 20"
             fill="none"
-            stroke="var(--k-accent-on)"
+            stroke="var(--k-accent)"
             strokeWidth={2.5}
           >
             <path d="M4 10l4 4 8-8" />
