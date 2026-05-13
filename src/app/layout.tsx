@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import dynamic from "next/dynamic";
 import {
   Inter,
   Playfair_Display,
@@ -10,8 +11,13 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import GlobalEffects from "@/components/GlobalEffects";
 import { KronosToaster } from "@/components/kronos/KronosToaster";
-import { AchievementToastHost } from "@/components/atleta/AchievementToast";
 import { ConfirmProvider } from "@/lib/use-confirm";
+
+const AchievementToastHost = dynamic(() =>
+  import("@/components/atleta/AchievementToast").then(
+    (m) => m.AchievementToastHost,
+  ),
+);
 
 const inter = Inter({
   subsets: ["latin"],
@@ -86,8 +92,18 @@ export default function RootLayout({
     >
       <head>
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="192x192"
+          href="/icons/icon-192.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="512x512"
+          href="/icons/icon-512.png"
+        />
       </head>
       <body className="font-sans bg-bg text-text antialiased min-h-screen">
         <ThemeProvider

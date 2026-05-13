@@ -1,7 +1,6 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth";
+import { requireCachedSession } from "@/server/session";
 import { withTenant, db as rawDb } from "../db";
 import type { SurveyKind } from "@prisma/client";
 
@@ -27,7 +26,7 @@ export type SurveyRow = {
 };
 
 async function requireAthleteSession() {
-  const session = await getServerSession(authOptions);
+  const session = await requireCachedSession();
   if (!session?.user?.tenantId || !session.user.id)
     throw new Error("Unauthorized");
   return session;
@@ -149,8 +148,7 @@ export type ReadinessAverage = {
 export async function getReadinessAverage(opts?: {
   sinceDays?: number;
 }): Promise<ReadinessAverage> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  const session = await requireCachedSession();
   if (session.user.role === "ATHLETE") throw new Error("Forbidden");
 
   const sinceDays = opts?.sinceDays ?? 7;

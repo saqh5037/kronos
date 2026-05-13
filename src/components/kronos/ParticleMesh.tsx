@@ -51,7 +51,7 @@ function lerpColor(
 }
 
 export default function ParticleMesh({
-  density = 60,
+  density = 35,
   colorPrimary = "#e60026",
   colorSecondary = "#00bfff",
   connectionDistance = 120,
@@ -157,17 +157,23 @@ export default function ParticleMesh({
         ctx.fill();
       }
 
-      // connections
+      // connections — compare squared distances to avoid Math.sqrt
+      const connDistSq = connectionDistance * connectionDistance;
+      const maxConnectionsPerParticle = 3;
+
       for (let i = 0; i < particles.length; i++) {
+        let connectionsDrawn = 0;
         for (let j = i + 1; j < particles.length; j++) {
+          if (connectionsDrawn >= maxConnectionsPerParticle) break;
           const a = particles[i];
           const b = particles[j];
           const dx = a.x - b.x;
           const dy = a.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < connectionDistance) {
+          const distSq = dx * dx + dy * dy;
+          if (distSq < connDistSq) {
+            const dist = Math.sqrt(distSq);
             const opacity = (1 - dist / connectionDistance) * 0.55;
-            const t = ((a.hue + b.hue) / 2 + 0.0) % 1;
+            const t = ((a.hue + b.hue) / 2) % 1;
             const tt = (Math.sin(t * Math.PI * 2) + 1) / 2;
             const rgb = lerpColor(colorA, colorB, tt);
             ctx.beginPath();
@@ -176,6 +182,7 @@ export default function ParticleMesh({
             ctx.strokeStyle = `rgba(${rgb}, ${opacity.toFixed(3)})`;
             ctx.lineWidth = 0.7;
             ctx.stroke();
+            connectionsDrawn++;
           }
         }
       }

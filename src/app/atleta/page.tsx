@@ -56,16 +56,27 @@ export default async function AtletaHomePage() {
   let suggestion: SuggestedBooking = null;
 
   try {
-    [home, classes, prs, wod, greeting, trophies, suggestion] =
-      await Promise.all([
-        getAthleteHome(),
-        listAvailableClasses(7),
-        listMyPRs(),
-        getTodayWOD(),
-        getDailyGreeting(),
-        getAthleteTrophies(),
-        getSuggestedNextClass().catch(() => null),
-      ]);
+    [
+      home,
+      classes,
+      prs,
+      wod,
+      greeting,
+      trophies,
+      suggestion,
+      readinessSurvey,
+      alreadyRespondedReadiness,
+    ] = await Promise.all([
+      getAthleteHome(),
+      listAvailableClasses(7),
+      listMyPRs(),
+      getTodayWOD(),
+      getDailyGreeting(),
+      getAthleteTrophies(),
+      getSuggestedNextClass().catch(() => null),
+      getActiveSurvey("READINESS"),
+      hasRespondedToday("READINESS"),
+    ]);
   } catch {
     // Sesión ausente
   }
@@ -75,17 +86,6 @@ export default async function AtletaHomePage() {
       wodScores = await listScoresForWOD(wod.wodId);
     } catch {
       // ignore
-    }
-  }
-
-  if (home) {
-    try {
-      [readinessSurvey, alreadyRespondedReadiness] = await Promise.all([
-        getActiveSurvey("READINESS"),
-        hasRespondedToday("READINESS"),
-      ]);
-    } catch {
-      // Ignore
     }
   }
 

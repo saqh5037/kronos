@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/server/auth";
+import { getCachedSession } from "@/server/session";
 import { redirect } from "next/navigation";
 import { getSensitiveEventCount } from "@/server/actions/owner-feed";
 import { SidebarGate } from "./_components/SidebarGate";
@@ -9,7 +8,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedSession();
   if (!session) redirect("/login");
 
   const role = session.user?.role;

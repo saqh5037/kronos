@@ -1,17 +1,23 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/server/auth";
+import { getCachedSession } from "@/server/session";
 import { redirect } from "next/navigation";
-import TabBar from "@/components/kronos/TabBar";
-import NotificationBell from "@/components/atleta/NotificationBell";
-import InstallPwaBanner from "@/components/atleta/InstallPwaBanner";
+import dynamic from "next/dynamic";
 import PwaRegister from "@/components/PwaRegister";
+import AthleteDrawer from "@/components/atleta/AthleteDrawer";
+
+const TabBar = dynamic(() => import("@/components/kronos/TabBar"));
+const NotificationBell = dynamic(
+  () => import("@/components/atleta/NotificationBell"),
+);
+const InstallPwaBanner = dynamic(
+  () => import("@/components/atleta/InstallPwaBanner"),
+);
 
 export default async function AtletaLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedSession();
   if (!session) redirect("/login");
 
   return (
@@ -20,16 +26,32 @@ export default async function AtletaLayout({
       style={{ background: "var(--k-bg)", paddingBottom: 96 }}
     >
       <PwaRegister />
-      {/* Notification bell flota top-right, sin header bar */}
-      <div
-        style={{
-          position: "fixed",
-          top: 12,
-          right: 12,
-          zIndex: 30,
-        }}
-      >
-        <NotificationBell />
+      {/* Mobile: drawer trigger + notification bell */}
+      <div className="lg:hidden">
+        <AthleteDrawer />
+        <div
+          style={{
+            position: "fixed",
+            top: "max(env(safe-area-inset-top), 12px)",
+            right: 12,
+            zIndex: 30,
+          }}
+        >
+          <NotificationBell />
+        </div>
+      </div>
+      {/* Desktop: notification bell only */}
+      <div className="hidden lg:block">
+        <div
+          style={{
+            position: "fixed",
+            top: "max(env(safe-area-inset-top), 12px)",
+            right: 12,
+            zIndex: 30,
+          }}
+        >
+          <NotificationBell />
+        </div>
       </div>
       <InstallPwaBanner />
       {children}

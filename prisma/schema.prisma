@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 // ─── TENANT ──────────────────────────────────────────────────────────────────
@@ -272,6 +273,7 @@ model Class {
 
   @@index([tenantId])
   @@index([tenantId, startsAt])
+  @@index([tenantId, startsAt, isActive])
 }
 
 model Booking {
@@ -289,6 +291,8 @@ model Booking {
   @@unique([classId, athleteId])
   @@index([tenantId])
   @@index([tenantId, athleteId])
+  @@index([tenantId, classId, status])
+  @@index([tenantId, athleteId, status])
 }
 
 // ─── WODs ─────────────────────────────────────────────────────────────────────
@@ -422,6 +426,7 @@ model Score {
   @@index([tenantId])
   @@index([tenantId, wodId])
   @@index([tenantId, athleteId])
+  @@index([tenantId, wodId, scaling])
 }
 
 model PR {

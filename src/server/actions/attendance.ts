@@ -1,17 +1,15 @@
 "use server";
 
-import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
-import { authOptions } from "../auth";
+import { requireCachedSession } from "@/server/session";
 import { withTenant, db as rawDb } from "../db";
 import { computeAttendanceStreak } from "@/lib/streak";
 import { eachDayInRange, dayKey } from "@/lib/dates";
 import { subDays, startOfDay } from "date-fns";
+import { Prisma } from "@prisma/client";
 
 async function requireSession() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.tenantId) throw new Error("Unauthorized");
-  return session;
+  return requireCachedSession();
 }
 
 export type DayClass = {
@@ -40,22 +38,55 @@ export async function getTodayClasses(): Promise<DayClass[]> {
     include: {
       wod: { select: { name: true } },
       coach: { select: { name: true } },
-      bookings: { select: { status: true } },
     },
   });
 
-  return classes.map((c) => ({
-    id: c.id,
-    startsAt: c.startsAt,
-    capacity: c.capacity,
-    bookedCount: c.bookings.filter(
-      (b) => b.status === "BOOKED" || b.status === "ATTENDED",
-    ).length,
-    attendedCount: c.bookings.filter((b) => b.status === "ATTENDED").length,
-    noShowCount: c.bookings.filter((b) => b.status === "NOSHOW").length,
-    wodName: c.wod?.name ?? null,
-    coachName: c.coach?.name ?? null,
-  }));
+  const classIds = classes.map((c) => c.id);
+
+  const bookingCounts = await rawDb.booking.groupBy({
+    by: ["classId", "status"],
+    where: {
+      tenantId: session.user.tenantId,
+      classId: { in: classIds },
+    },
+    _count: { id: true },
+  });
+
+  const countMap = new Map<
+    string,
+    { booked: number; attended: number; noShow: number }
+  >();
+  for (const bc of bookingCounts) {
+    const existing = countMap.get(bc.classId) ?? {
+      booked: 0,
+      attended: 0,
+      noShow: 0,
+    };
+    if (bc.status === "BOOKED" || bc.status === "ATTENDED") {
+      existing.booked += bc._count.id;
+    }
+    if (bc.status === "ATTENDED") {
+      existing.attended += bc._count.id;
+    }
+    if (bc.status === "NOSHOW") {
+      existing.noShow += bc._count.id;
+    }
+    countMap.set(bc.classId, existing);
+  }
+
+  return classes.map((c) => {
+    const counts = countMap.get(c.id) ?? { booked: 0, attended: 0, noShow: 0 };
+    return {
+      id: c.id,
+      startsAt: c.startsAt,
+      capacity: c.capacity,
+      bookedCount: counts.booked,
+      attendedCount: counts.attended,
+      noShowCount: counts.noShow,
+      wodName: c.wod?.name ?? null,
+      coachName: c.coach?.name ?? null,
+    };
+  });
 }
 
 export type DayStats = {
@@ -133,52 +164,80 @@ export async function getAttendanceByDay(opts: {
   coachId?: string;
 }): Promise<AttendanceByDayPoint[]> {
   const session = await requireSession();
-  const db = withTenant(session.user.tenantId);
 
-  const classes = await db.class.findMany({
-    where: {
-      isActive: true,
-      startsAt: { gte: opts.dateFrom, lte: opts.dateTo },
-      ...(opts.coachId ? { coachId: opts.coachId } : {}),
-    },
-    select: {
-      startsAt: true,
-      capacity: true,
-      bookings: { select: { status: true } },
-    },
-  });
+  const classWhere: Record<string, unknown> = {
+    tenantId: session.user.tenantId,
+    isActive: true,
+    startsAt: { gte: opts.dateFrom, lte: opts.dateTo },
+  };
+  if (opts.coachId) classWhere.coachId = opts.coachId;
 
-  const byDay = new Map<
-    string,
-    { attended: number; noShow: number; booked: number; capacity: number }
-  >();
+  const coachClause = opts.coachId
+    ? Prisma.sql`AND c.coach_id = ${opts.coachId}`
+    : Prisma.sql``;
 
-  for (const c of classes) {
+  const [classCapacities, bookingCounts] = await Promise.all([
+    rawDb.class.findMany({
+      where: classWhere,
+      select: { startsAt: true, capacity: true },
+    }),
+    rawDb.$queryRaw<
+      Array<{
+        day: Date;
+        attended: bigint;
+        noShow: bigint;
+        booked: bigint;
+      }>
+    >(Prisma.sql`
+      SELECT
+        DATE(c.starts_at) as day,
+        COUNT(*) FILTER (WHERE b.status = 'ATTENDED') as attended,
+        COUNT(*) FILTER (WHERE b.status = 'NOSHOW') as noShow,
+        COUNT(*) FILTER (WHERE b.status = 'BOOKED') as booked
+      FROM bookings b
+      JOIN classes c ON b.class_id = c.id
+      WHERE b.tenant_id = ${session.user.tenantId}
+        AND c.is_active = true
+        AND c.starts_at >= ${opts.dateFrom}
+        AND c.starts_at <= ${opts.dateTo}
+        ${coachClause}
+      GROUP BY DATE(c.starts_at)
+    `),
+  ]);
+
+  const capacityByDay = new Map<string, number>();
+  for (const c of classCapacities) {
     const k = dayKey(c.startsAt);
-    const existing = byDay.get(k) ?? {
-      attended: 0,
-      noShow: 0,
-      booked: 0,
-      capacity: 0,
-    };
-    existing.capacity += c.capacity;
-    for (const b of c.bookings) {
-      if (b.status === "ATTENDED") existing.attended += 1;
-      else if (b.status === "NOSHOW") existing.noShow += 1;
-      else if (b.status === "BOOKED") existing.booked += 1;
-    }
-    byDay.set(k, existing);
+    capacityByDay.set(k, (capacityByDay.get(k) ?? 0) + c.capacity);
+  }
+
+  const bookingByDay = new Map<
+    string,
+    { attended: number; noShow: number; booked: number }
+  >();
+  for (const b of bookingCounts) {
+    const k = dayKey(b.day);
+    bookingByDay.set(k, {
+      attended: Number(b.attended),
+      noShow: Number(b.noShow),
+      booked: Number(b.booked),
+    });
   }
 
   return eachDayInRange({ from: opts.dateFrom, to: opts.dateTo }).map((d) => {
     const k = dayKey(d);
-    const v = byDay.get(k) ?? {
+    const counts = bookingByDay.get(k) ?? {
       attended: 0,
       noShow: 0,
       booked: 0,
-      capacity: 0,
     };
-    return { day: k, ...v };
+    return {
+      day: k,
+      attended: counts.attended,
+      noShow: counts.noShow,
+      booked: counts.booked,
+      capacity: capacityByDay.get(k) ?? 0,
+    };
   });
 }
 
@@ -245,48 +304,45 @@ export async function listFrequentNoShows(opts?: {
   threshold?: number;
 }): Promise<FrequentNoShow[]> {
   const session = await requireSession();
-  const db = withTenant(session.user.tenantId);
   const windowDays = opts?.windowDays ?? 30;
   const threshold = opts?.threshold ?? 3;
   const cutoff = startOfDay(subDays(new Date(), windowDays));
 
-  const noShows = await db.booking.findMany({
-    where: {
-      status: "NOSHOW",
-      class: { startsAt: { gte: cutoff } },
-    },
-    select: {
-      athleteId: true,
-      class: { select: { startsAt: true } },
-      athlete: { select: { firstName: true, lastName: true } },
-    },
-  });
+  const results = await rawDb.$queryRaw<
+    Array<{
+      athlete_id: string;
+      no_show_count: bigint;
+      last_no_show_at: Date;
+      first_name: string;
+      last_name: string;
+    }>
+  >`
+    SELECT
+      b.athlete_id,
+      COUNT(*) as no_show_count,
+      MAX(b.booked_at) as last_no_show_at,
+      a.first_name,
+      a.last_name
+    FROM bookings b
+    JOIN athletes a ON b.athlete_id = a.id
+    WHERE b.tenant_id = ${session.user.tenantId}
+      AND b.status = 'NOSHOW'
+      AND b.class_id IN (
+        SELECT id FROM classes
+        WHERE tenant_id = ${session.user.tenantId}
+          AND starts_at >= ${cutoff}
+      )
+    GROUP BY b.athlete_id, a.first_name, a.last_name
+    HAVING COUNT(*) >= ${threshold}
+    ORDER BY no_show_count DESC
+  `;
 
-  const map = new Map<string, FrequentNoShow>();
-  for (const ns of noShows) {
-    const existing = map.get(ns.athleteId);
-    const startsAt = ns.class.startsAt;
-    if (existing) {
-      existing.noShowCount += 1;
-      if (
-        existing.lastNoShowAt === null ||
-        startsAt.getTime() > existing.lastNoShowAt.getTime()
-      ) {
-        existing.lastNoShowAt = startsAt;
-      }
-    } else {
-      map.set(ns.athleteId, {
-        athleteId: ns.athleteId,
-        athleteName: `${ns.athlete.firstName} ${ns.athlete.lastName}`,
-        noShowCount: 1,
-        lastNoShowAt: startsAt,
-      });
-    }
-  }
-
-  return Array.from(map.values())
-    .filter((x) => x.noShowCount >= threshold)
-    .sort((a, b) => b.noShowCount - a.noShowCount);
+  return results.map((r) => ({
+    athleteId: r.athlete_id,
+    athleteName: `${r.first_name} ${r.last_name}`,
+    noShowCount: Number(r.no_show_count),
+    lastNoShowAt: r.last_no_show_at,
+  }));
 }
 
 export async function getAthleteStreak(athleteId: string) {

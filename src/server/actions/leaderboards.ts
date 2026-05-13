@@ -1,15 +1,12 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth";
-import { withTenant } from "../db";
+import { requireCachedSession } from "@/server/session";
+import { withTenant, db as rawDb } from "../db";
 import type { ScoreType } from "@/lib/validations/wod";
 import { isBetterScore } from "@/lib/scores";
 
 async function requireSession() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.tenantId) throw new Error("Unauthorized");
-  return session;
+  return requireCachedSession();
 }
 
 export type LeaderboardEntry = {
@@ -46,6 +43,7 @@ export async function getWODLeaderboard(
 
   const scores = await db.score.findMany({
     where: { wodId, scaling: { not: "SCALED" } },
+    take: 200,
     include: {
       athlete: { select: { id: true, firstName: true, lastName: true } },
     },
@@ -139,7 +137,6 @@ export async function getWeeklyAttendanceLeaderboard(
   weeksBack = 0,
 ): Promise<AttendanceLeader[]> {
   const session = await requireSession();
-  const db = withTenant(session.user.tenantId);
 
   const now = new Date();
   const start = new Date(now);
@@ -148,34 +145,36 @@ export async function getWeeklyAttendanceLeaderboard(
   const end = new Date(start);
   end.setDate(end.getDate() + 7);
 
-  const attended = await db.booking.findMany({
+  const attendedCounts = await rawDb.booking.groupBy({
+    by: ["athleteId"],
     where: {
+      tenantId: session.user.tenantId,
       status: "ATTENDED",
       class: { startsAt: { gte: start, lt: end } },
     },
-    include: {
-      athlete: { select: { id: true, firstName: true, lastName: true } },
-    },
+    _count: { id: true },
+    orderBy: { _count: { id: "desc" } },
+    take: 20,
   });
 
-  const counts = new Map<string, AttendanceLeader>();
-  for (const b of attended) {
-    const key = b.athleteId;
-    const existing = counts.get(key);
-    if (existing) {
-      existing.attendedCount++;
-    } else {
-      counts.set(key, {
-        athleteId: b.athleteId,
-        athleteName: `${b.athlete.firstName} ${b.athlete.lastName}`,
-        attendedCount: 1,
-      });
-    }
-  }
+  const athleteIds = attendedCounts.map((a) => a.athleteId);
+  const athletes =
+    athleteIds.length > 0
+      ? await rawDb.athlete.findMany({
+          where: { tenantId: session.user.tenantId, id: { in: athleteIds } },
+          select: { id: true, firstName: true, lastName: true },
+        })
+      : [];
 
-  return Array.from(counts.values())
-    .sort((a, b) => b.attendedCount - a.attendedCount)
-    .slice(0, 20);
+  const nameMap = new Map(
+    athletes.map((a) => [a.id, `${a.firstName} ${a.lastName}`]),
+  );
+
+  return attendedCounts.map((a) => ({
+    athleteId: a.athleteId,
+    athleteName: nameMap.get(a.athleteId) ?? "",
+    attendedCount: a._count.id,
+  }));
 }
 
 export async function listWODOptions() {

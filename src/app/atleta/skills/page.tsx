@@ -170,12 +170,11 @@ function ActiveSkillView({
               fontWeight: 700,
               letterSpacing: "-0.06em",
               lineHeight: 1,
-              color: "var(--k-t2)",
+              color:
+                data.progressPercent > 0 ? "var(--k-accent)" : "var(--k-t2)",
               fontFeatureSettings: '"tnum" 1',
               textShadow:
-                data.progressPercent > 0
-                  ? "0 0 8px rgba(255,255,255,0.06)"
-                  : "none",
+                data.progressPercent > 0 ? "var(--k-accent-glow)" : "none",
             }}
           >
             {data.progressPercent}
@@ -222,7 +221,8 @@ function ActiveSkillView({
             style={{
               height: "100%",
               width: `${data.progressPercent}%`,
-              background: "var(--k-t1)",
+              background:
+                data.progressPercent > 0 ? "var(--k-accent)" : "var(--k-t1)",
               borderRadius: 2,
               transition: "width 800ms ease",
             }}
@@ -749,7 +749,7 @@ function SkillCatalogCard({
     completed: { label: "COMPLETADO", color: "var(--k-t2)" },
     active: {
       label: `${skill.progressPercent ?? 0}%`,
-      color: "var(--k-t2)",
+      color: "var(--k-accent)",
     },
     available: { label: "DISPONIBLE", color: "var(--k-t3)" },
     locked: { label: skill.lockReason ?? "BLOQUEADO", color: "var(--k-t3)" },
@@ -777,7 +777,7 @@ function SkillCatalogCard({
         alignItems: "center",
         gap: 12,
         opacity: isLocked ? 0.55 : 1,
-        boxShadow: isActive ? "0 0 8px rgba(255,255,255,0.06)" : "none",
+        boxShadow: isActive ? "var(--k-accent-glow)" : "none",
         cursor: selectable && !isLocked ? "pointer" : "default",
       }}
     >
@@ -808,7 +808,7 @@ function SkillCatalogCard({
               style={{
                 height: "100%",
                 width: `${skill.progressPercent}%`,
-                background: "var(--k-t1)",
+                background: "var(--k-accent)",
                 borderRadius: 2,
               }}
             />

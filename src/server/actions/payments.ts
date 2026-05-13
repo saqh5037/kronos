@@ -181,24 +181,24 @@ export async function getRevenueByDay(opts: {
   dateTo: Date;
 }): Promise<RevenueByDayPoint[]> {
   const session = await requireSession();
-  const db = withTenant(session.user.tenantId);
 
-  const payments = await db.payment.findMany({
-    where: {
-      status: "PAID",
-      paidAt: { gte: opts.dateFrom, lte: opts.dateTo, not: null },
-    },
-    select: { amount: true, paidAt: true },
-  });
+  const results = await rawDb.$queryRaw<
+    Array<{ day: Date; revenue: number; count: bigint }>
+  >`
+    SELECT DATE(paid_at) as day, SUM(amount) as revenue, COUNT(*) as count
+    FROM payments
+    WHERE tenant_id = ${session.user.tenantId}
+      AND status = 'PAID'
+      AND paid_at >= ${opts.dateFrom}
+      AND paid_at <= ${opts.dateTo}
+    GROUP BY DATE(paid_at)
+    ORDER BY day ASC
+  `;
 
   const byDay = new Map<string, { revenue: number; count: number }>();
-  for (const p of payments) {
-    if (!p.paidAt) continue;
-    const k = dayKey(p.paidAt);
-    const existing = byDay.get(k) ?? { revenue: 0, count: 0 };
-    existing.revenue += Number(p.amount);
-    existing.count += 1;
-    byDay.set(k, existing);
+  for (const r of results) {
+    const k = dayKey(r.day);
+    byDay.set(k, { revenue: Number(r.revenue), count: Number(r.count) });
   }
 
   return eachDayInRange({ from: opts.dateFrom, to: opts.dateTo }).map((d) => {
@@ -270,28 +270,33 @@ export async function listOverdueMemberships(opts?: {
 
 export async function getPaymentStats(): Promise<PaymentStats> {
   const session = await requireSession();
-  const db = withTenant(session.user.tenantId);
 
   const monthStart = new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
   const [paidThisMonth, pending] = await Promise.all([
-    db.payment.findMany({
-      where: { status: "PAID", paidAt: { gte: monthStart } },
-      select: { amount: true },
+    rawDb.payment.aggregate({
+      where: {
+        tenantId: session.user.tenantId,
+        status: "PAID",
+        paidAt: { gte: monthStart },
+      },
+      _sum: { amount: true },
+      _count: { id: true },
     }),
-    db.payment.findMany({
-      where: { status: "PENDING" },
-      select: { amount: true },
+    rawDb.payment.aggregate({
+      where: { tenantId: session.user.tenantId, status: "PENDING" },
+      _sum: { amount: true },
+      _count: { id: true },
     }),
   ]);
 
   return {
-    monthRevenue: paidThisMonth.reduce((acc, p) => acc + Number(p.amount), 0),
-    monthCount: paidThisMonth.length,
-    pendingRevenue: pending.reduce((acc, p) => acc + Number(p.amount), 0),
-    pendingCount: pending.length,
+    monthRevenue: Number(paidThisMonth._sum.amount ?? 0),
+    monthCount: paidThisMonth._count.id,
+    pendingRevenue: Number(pending._sum.amount ?? 0),
+    pendingCount: pending._count.id,
   };
 }
 

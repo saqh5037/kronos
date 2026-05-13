@@ -1,8 +1,7 @@
 "use server";
 
-import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
-import { authOptions } from "../auth";
+import { requireCachedSession } from "@/server/session";
 import { withTenant, db as rawDb } from "../db";
 import {
   decideBooking,
@@ -15,9 +14,7 @@ import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
 
 async function requireSession() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.tenantId) throw new Error("Unauthorized");
-  return session;
+  return requireCachedSession();
 }
 
 /**
@@ -74,30 +71,66 @@ export async function listAvailableClasses(
     include: {
       coach: { select: { name: true } },
       wod: { select: { name: true, type: true } },
-      bookings: {
-        select: { id: true, athleteId: true, status: true },
-      },
     },
   });
 
+  const classIds = classes.map((c) => c.id);
+
+  const [bookingCounts, myBookings] = await Promise.all([
+    rawDb.booking.groupBy({
+      by: ["classId", "status"],
+      where: {
+        tenantId: session.user.tenantId,
+        classId: { in: classIds },
+      },
+      _count: { id: true },
+    }),
+    me
+      ? rawDb.booking.findMany({
+          where: {
+            tenantId: session.user.tenantId,
+            classId: { in: classIds },
+            athleteId: me.id,
+            status: { not: "CANCELLED" },
+          },
+          select: { id: true, classId: true, status: true },
+        })
+      : Promise.resolve<{ id: string; classId: string; status: string }[]>([]),
+  ]);
+
+  const countMap = new Map<string, { booked: number; waitlist: number }>();
+  for (const bc of bookingCounts) {
+    const existing = countMap.get(bc.classId) ?? { booked: 0, waitlist: 0 };
+    if (bc.status === "BOOKED" || bc.status === "ATTENDED") {
+      existing.booked += bc._count.id;
+    } else if (bc.status === "WAITLIST") {
+      existing.waitlist += bc._count.id;
+    }
+    countMap.set(bc.classId, existing);
+  }
+
+  const myBookingMap = new Map<
+    string,
+    { id: string; status: BookingSnapshot["status"] }
+  >();
+  for (const b of myBookings) {
+    myBookingMap.set(b.classId, {
+      id: b.id,
+      status: b.status as BookingSnapshot["status"],
+    });
+  }
+
   return classes.map((c) => {
-    const booked = c.bookings.filter(
-      (b) => b.status === "BOOKED" || b.status === "ATTENDED",
-    ).length;
-    const waitlist = c.bookings.filter((b) => b.status === "WAITLIST").length;
-    const mine = me
-      ? c.bookings.find(
-          (b) => b.athleteId === me.id && b.status !== "CANCELLED",
-        )
-      : null;
+    const counts = countMap.get(c.id) ?? { booked: 0, waitlist: 0 };
+    const mine = myBookingMap.get(c.id) ?? null;
     return {
       id: c.id,
       startsAt: c.startsAt,
       durationMin: c.durationMin,
       capacity: c.capacity,
       kind: c.kind,
-      bookedCount: booked,
-      waitlistCount: waitlist,
+      bookedCount: counts.booked,
+      waitlistCount: counts.waitlist,
       coach: c.coach,
       wod: c.wod,
       myBookingId: mine?.id ?? null,

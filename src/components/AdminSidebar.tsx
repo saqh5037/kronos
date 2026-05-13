@@ -217,10 +217,10 @@ export default function AdminSidebar({
           left: 0,
           right: 0,
           zIndex: 30,
-          height: 56,
+          height: "calc(56px + env(safe-area-inset-top))",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 16px",
+          padding: "env(safe-area-inset-top) 16px 0 16px",
           background: "rgba(8,8,10,0.85)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
@@ -292,7 +292,10 @@ export default function AdminSidebar({
       {/* Spacer mobile */}
       <div
         className="lg:hidden"
-        style={{ height: 56, flexShrink: 0 }}
+        style={{
+          height: "calc(56px + env(safe-area-inset-top))",
+          flexShrink: 0,
+        }}
         aria-hidden
       />
 

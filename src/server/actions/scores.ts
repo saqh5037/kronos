@@ -1,8 +1,7 @@
 "use server";
 
-import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
-import { authOptions } from "../auth";
+import { requireCachedSession } from "@/server/session";
 import { withTenant, db as rawDb } from "../db";
 import { scoreSchema } from "@/lib/validations/score";
 import { detectPR, formatScore } from "@/lib/scores";
@@ -19,9 +18,7 @@ import { type ListOpts, type ListResult, normalizePagination } from "./types";
 import type { Scaling } from "@prisma/client";
 
 async function requireSession() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.tenantId) throw new Error("Unauthorized");
-  return session;
+  return requireCachedSession();
 }
 
 async function getMyAthlete(userId: string, tenantId: string) {
@@ -274,6 +271,7 @@ export async function listScoresForWOD(wodId: string) {
   return db.score.findMany({
     where: { wodId },
     orderBy: { createdAt: "desc" },
+    take: 50,
     include: {
       athlete: { select: { id: true, firstName: true, lastName: true } },
       wod: { select: { name: true, scoreType: true } },
@@ -467,7 +465,7 @@ export async function submitScore(data: unknown) {
 // ─── Whiteboard OCR actions ───────────────────────────────────────────────────
 
 async function requireCoachSession() {
-  const session = await getServerSession(authOptions);
+  const session = await requireCachedSession();
   if (!session?.user?.tenantId) throw new Error("Unauthorized");
   const role = session.user.role;
   if (role !== "OWNER" && role !== "COACH" && role !== "STAFF") {

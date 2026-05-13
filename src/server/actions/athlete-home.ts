@@ -1,16 +1,14 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth";
+import { requireCachedSession } from "@/server/session";
+import { getCurrentAthleteCached } from "./athlete-cache";
 import { withTenant } from "../db";
 import { subDays, startOfDay } from "date-fns";
 import { pickSuggestedClass, type Suggestion } from "@/lib/booking-suggestion";
 import { listAvailableClasses, getAthleteUsualSlots } from "./bookings";
 
 async function requireSession() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.tenantId) throw new Error("Unauthorized");
-  return session;
+  return requireCachedSession();
 }
 
 export type MyAttendanceDay = { date: Date };
@@ -19,10 +17,7 @@ export async function getMyAttendanceLast90d(): Promise<MyAttendanceDay[]> {
   const session = await requireSession();
   const db = withTenant(session.user.tenantId);
 
-  const me = await db.athlete.findFirst({
-    where: { userId: session.user.id },
-    select: { id: true },
-  });
+  const me = await getCurrentAthleteCached();
   if (!me) return [];
 
   const cutoff = startOfDay(subDays(new Date(), 90));
@@ -53,10 +48,7 @@ export async function getMyScoresTimeline(
   const session = await requireSession();
   const db = withTenant(session.user.tenantId);
 
-  const me = await db.athlete.findFirst({
-    where: { userId: session.user.id },
-    select: { id: true },
-  });
+  const me = await getCurrentAthleteCached();
   if (!me) return [];
 
   const cutoff = startOfDay(subDays(new Date(), days));
@@ -75,7 +67,7 @@ export async function getMyScoresTimeline(
 }
 
 export type AthleteHome = {
-  athlete: { id: string; firstName: string; lastName: string } | null;
+  athlete: { id: string; firstName: string; lastName: string | null } | null;
   streak: number;
   streakLastEventAt: Date | null;
   xpTotal: number;
@@ -104,10 +96,7 @@ export async function getAthleteHome(): Promise<AthleteHome> {
   const tenantId = session.user.tenantId;
   const db = withTenant(tenantId);
 
-  const me = await db.athlete.findFirst({
-    where: { userId: session.user.id },
-    select: { id: true, firstName: true, lastName: true },
-  });
+  const me = await getCurrentAthleteCached();
   if (!me) return null;
 
   const now = new Date();
@@ -204,10 +193,7 @@ export async function getAthleteTrophies(): Promise<AthleteTrophy[]> {
   const tenantId = session.user.tenantId;
   const db = withTenant(tenantId);
 
-  const me = await db.athlete.findFirst({
-    where: { userId: session.user.id },
-    select: { id: true },
-  });
+  const me = await getCurrentAthleteCached();
   if (!me) return [];
 
   const [badges, achievements] = await Promise.all([
@@ -256,10 +242,7 @@ export async function getMonthlyFeaturedTrophy(): Promise<FeaturedTrophy | null>
   const tenantId = session.user.tenantId;
   const db = withTenant(tenantId);
 
-  const me = await db.athlete.findFirst({
-    where: { userId: session.user.id },
-    select: { id: true },
-  });
+  const me = await getCurrentAthleteCached();
   if (!me) return null;
 
   const now = new Date();

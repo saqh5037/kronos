@@ -1,7 +1,6 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth";
+import { requireCachedSession } from "@/server/session";
 import { withTenant } from "../db";
 import { type ListOpts, type ListResult, normalizePagination } from "./types";
 import { buildPRProgression, type PRProgressionPoint } from "@/lib/prs/log";
@@ -9,9 +8,7 @@ import { daysSinceLastAttempt } from "@/lib/prs/freshness";
 import type { ScoreType } from "@/lib/validations/wod";
 
 async function requireSession() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.tenantId) throw new Error("Unauthorized");
-  return session;
+  return requireCachedSession();
 }
 
 export type PRRow = {
