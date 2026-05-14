@@ -1,51 +1,31 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { WHY } from "../_data/copy";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-const SI = [
-  "Trackear tus PRs y ver tu progresión real",
-  "Reservar clase en tu box (si tu box usa Kronos)",
-  "Foto del pizarrón → score automático",
-  "Skills con coach IA y progresiones desbloqueables",
-  "Comparar tu rendimiento contra el promedio del box",
-  "Leer tu propio histórico sin vender tus datos",
-];
-
-const NO = [
-  "Reemplaza a tu coach humano (no arma planes, no corrige técnica)",
-  "Es app de fitness genérica (no caminas, no cuentas macros, no hay yoga)",
-  "Es red social (no hay feed de extraños, no hay influencers)",
-  "Funciona sin tu box (en Box Personal tú cargas los WODs)",
-  "Te da motivación falsa (cero «¡tú puedes!», cero emojis de fuego)",
-  "Te vende a anunciantes (tu data no entrena modelos de terceros)",
-];
-
 export default function AtletaSiNo() {
   const reduce = useReducedMotion();
   const variants = reduce ? undefined : fadeUp;
 
   return (
-    <section className="lp-section" id="si-no">
+    <section className="lp-section" id="por-que">
       <div style={{ textAlign: "center", marginBottom: 48 }}>
         <div
           className="lp-eyebrow"
           style={{ justifyContent: "center", display: "inline-flex" }}
         >
           <span className="lp-dot" />
-          /03 · ESTO SÍ · ESTO NO
+          {WHY.eyebrow}
         </div>
         <h2 style={{ marginTop: 20, textAlign: "center" }}>
-          Honestidad <span className="lp-tag-lime">antes que venta</span>.
+          {WHY.h2Line1} <span className="lp-tag-lime">{WHY.h2Line2}</span>
         </h2>
-        <p style={{ margin: "24px auto 0", textAlign: "center" }}>
-          Te decimos qué no hace Kronos para que sepas si es para ti. Si lo que
-          necesitas está en la columna derecha, hay otras apps mejores.
-        </p>
+        <p style={{ margin: "24px auto 0", textAlign: "center" }}>{WHY.sub}</p>
       </div>
 
       <div
@@ -82,7 +62,7 @@ export default function AtletaSiNo() {
               lineHeight: 1.05,
             }}
           >
-            Lo que la app hace.
+            {WHY.yesTitle}
           </h3>
           <ul
             style={{
@@ -94,7 +74,7 @@ export default function AtletaSiNo() {
               gap: 0,
             }}
           >
-            {SI.map((s) => (
+            {WHY.yesItems.map((s) => (
               <li
                 key={s}
                 style={{
@@ -169,7 +149,7 @@ export default function AtletaSiNo() {
               lineHeight: 1.05,
             }}
           >
-            Lo que <em style={{ fontStyle: "italic" }}>no</em> hace.
+            {WHY.noTitle}
           </h3>
           <ul
             style={{
@@ -181,7 +161,7 @@ export default function AtletaSiNo() {
               gap: 0,
             }}
           >
-            {NO.map((n) => (
+            {WHY.noItems.map((n) => (
               <li
                 key={n}
                 style={{

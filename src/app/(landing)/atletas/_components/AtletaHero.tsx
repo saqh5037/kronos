@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
 import PhoneFrame from "./PhoneFrame";
+import { HERO, CTA_LABEL } from "../_data/copy";
 
 const stagger = {
   hidden: {},
@@ -18,6 +19,8 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
   const variants = reduce ? undefined : stagger;
   const child = reduce ? undefined : item;
 
+  const ctaHref = boxHref ?? "/login";
+
   return (
     <section className="lp-hero" id="producto">
       <div className="lp-hero-bg" aria-hidden="true" />
@@ -25,22 +28,19 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
         <motion.div initial="hidden" animate="show" variants={variants}>
           <motion.div className="lp-eyebrow" variants={child}>
             <span className="lp-dot" />
-            KRONOS ATLETAS · GUÍA COMPLETA
+            {HERO.eyebrow}
           </motion.div>
           <motion.h1 variants={child}>
-            Tu progreso
+            {HERO.claimLineA}
             <br />
-            es <span className="lp-tag-lime">el producto</span>.
+            <span className="lp-tag-lime">{HERO.claimLineB}</span>
           </motion.h1>
           <motion.p className="lp-lead" variants={child}>
-            La app de CrossFit que <strong>no se siente como app</strong>. Anota
-            PRs reales, lee tu pizarrón con la cámara, y mejora skills con un
-            coach virtual que conoce tu nivel. Sin spam motivacional. Sin
-            gamificación tonta. Sin influencers.
+            {HERO.sub}
           </motion.p>
           <motion.div className="lp-hero-actions" variants={child}>
             <a
-              href={boxHref ?? "/atleta-signup?from=atletas-landing"}
+              href={ctaHref}
               className="lp-btn-lime lp-btn-lg"
               onClick={() =>
                 track("cta_clicked", {
@@ -49,7 +49,7 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
                 })
               }
             >
-              {boxHref ? "Abrir mi app" : "Empezar gratis"}
+              {boxHref ? "Ir a mi box" : CTA_LABEL}
               <svg
                 width="16"
                 height="16"
@@ -62,27 +62,20 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             </a>
-            <a
-              href="/atletas/manual"
-              className="lp-btn-ghost lp-btn-lg"
-              onClick={() =>
-                track("cta_clicked", { location: "atletas_hero_manual" })
-              }
+          </motion.div>
+          {!boxHref && (
+            <motion.p
+              variants={child}
+              style={{
+                marginTop: 16,
+                fontFamily: "var(--k-font-body)",
+                fontSize: 13,
+                color: "var(--k-t3)",
+              }}
             >
-              Ver el manual →
-            </a>
-          </motion.div>
-          <motion.div className="lp-hero-meta" variants={child}>
-            <span>
-              <strong>2 modos</strong> · solo o en tu box
-            </span>
-            <span>
-              <strong>9 pantallas</strong> · documentadas
-            </span>
-            <span>
-              <strong>0 anuncios</strong> · 0 influencers
-            </span>
-          </motion.div>
+              {HERO.ctaTertiary}
+            </motion.p>
+          )}
         </motion.div>
 
         <motion.div

@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
+import { FINAL_CTA, CTA_LABEL } from "../_data/copy";
 
 export default function AtletaClosingCTA({
   boxHref,
@@ -10,6 +10,7 @@ export default function AtletaClosingCTA({
   boxHref: string | null;
 }) {
   const reduce = useReducedMotion();
+  const primaryHref = boxHref ?? "/login";
 
   return (
     <section className="lp-cta-tail-shell">
@@ -25,54 +26,46 @@ export default function AtletaClosingCTA({
         >
           <div className="lp-eyebrow">
             <span className="lp-dot" />
-            EMPEZÁ HOY · SIN TARJETA · SIN LETRA CHICA
+            {FINAL_CTA.eyebrow}
           </div>
           <h2>
-            Tu próxima
+            {FINAL_CTA.h2Line1}
             <br />
-            <span className="lp-tag-lime">victoria</span> ya está cargada.
+            <span className="lp-tag-lime">{FINAL_CTA.h2Line2}</span>
           </h2>
-          <p>
-            Si entrenas solo, abres cuenta y empiezas. Si tu box todavía no usa
-            Kronos, mándale el link a tu coach — la decisión es de él, pero ya
-            tienes argumentos.
-          </p>
+          <p>{FINAL_CTA.sub}</p>
         </div>
         <div
           className="lp-cta-stack"
           style={{ position: "relative", zIndex: 1 }}
         >
-          {boxHref ? (
-            <a
-              href={boxHref}
-              className="lp-btn-lime lp-btn-lg"
-              style={{ justifyContent: "center" }}
-              onClick={() =>
-                track("cta_clicked", {
-                  location: "atletas_closing_to_box",
-                })
-              }
+          <a
+            href={primaryHref}
+            className="lp-btn-lime lp-btn-lg"
+            style={{ justifyContent: "center" }}
+            onClick={() =>
+              track("cta_clicked", {
+                location: boxHref
+                  ? "atletas_closing_to_box"
+                  : "atletas_closing_login",
+              })
+            }
+          >
+            {boxHref ? "Ir a mi box" : CTA_LABEL}
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
             >
-              Abrir mi app →
-            </a>
-          ) : (
-            <a
-              href="/atleta-signup?from=atletas-closing"
-              className="lp-btn-lime lp-btn-lg"
-              style={{ justifyContent: "center" }}
-              onClick={() =>
-                track("cta_clicked", { location: "atletas_closing_signup" })
-              }
-            >
-              Empezar gratis (Box Personal) →
-            </a>
-          )}
-          <Link
-            href={{
-              pathname: "/",
-              query: { audience: "athlete-referral" },
-              hash: "section-form",
-            }}
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+          <a
+            href={FINAL_CTA.ctaSecondaryHref}
             className="lp-btn-ghost lp-btn-lg"
             style={{ justifyContent: "center" }}
             onClick={() =>
@@ -81,8 +74,8 @@ export default function AtletaClosingCTA({
               })
             }
           >
-            Pídele Kronos a tu coach
-          </Link>
+            {FINAL_CTA.ctaSecondaryLabel}
+          </a>
           <span
             className="lp-caption"
             style={{
@@ -91,7 +84,7 @@ export default function AtletaClosingCTA({
               marginTop: 8,
             }}
           >
-            TU DATA ES TUYA · SIN ANUNCIANTES
+            {FINAL_CTA.footnote}
           </span>
         </div>
       </motion.div>

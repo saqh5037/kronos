@@ -1903,7 +1903,9 @@ button.lp-btn-lime:active {
 @media (max-width: 1100px) {
   .atletas-forwho-grid,
   .atletas-sino-grid,
-  .atletas-hits-grid {
+  .atletas-hits-grid,
+  .atletas-benefit-grid,
+  .atletas-dualquotes-grid {
     grid-template-columns: 1fr !important;
   }
   .atletas-preview-grid {
