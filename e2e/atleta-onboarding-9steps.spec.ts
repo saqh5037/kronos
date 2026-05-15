@@ -1,98 +1,252 @@
-import { test } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 /**
  * E2E tests for 9-step athlete onboarding wizard (Slice 8 Hardening)
  *
- * Scenarios to validate:
- * 1. Box Personal: signup → wizard 9 pasos → /atleta
- * 2. Box B2B: first login → Step 8 muestra box pre-loaded
- * 3. Resume parcial: exit Step 4 → re-login → resume en Step 4
- * 4. Ya onboarded: visit /atleta/onboarding → redirect a /atleta
+ * Validated flow:
+ *  - Athlete con onboardingCompletedAt NOT NULL → middleware/layout redirige
+ *    a /atleta (no permite re-entrar al wizard)
+ *  - Athlete con onboardingCompletedAt NULL → layout redirige a wizard al
+ *    visitar cualquier ruta /atleta/*
+ *  - Wizard renderiza correctamente con shell fullscreen (sin TabBar ni
+ *    drawer durante onboarding)
+ *  - Signup independiente crea Box Personal (B2C); Step 8 muestra 3 radios
+ *    SIN checkbox "También entreno solo" (que es exclusivo de B2B)
+ *
+ * Tests pendientes (require DB reset entre runs o setup adicional):
+ *  - Completar todos los 9 pasos end-to-end → /atleta home
+ *  - Resume parcial via localStorage tras exit en Step 4
+ *  - B2B box pre-loaded en Step 8 con atleta@iron-hands.demo
+ *  - Cinematic closing animation phases (creating/testimonials/complete)
+ *  - Audit logging por step
  */
 
+const DEV_PASSWORD = process.env.DEV_PASSWORD ?? "dev";
+
+function uniqueEmail(): string {
+  return `e2e-onboard-${Date.now()}-${Math.floor(Math.random() * 1e6)}@kronos.test`;
+}
+
+/**
+ * Crea un atleta independiente via /atleta-signup. Skip password phase
+ * (queda en magic link mode); el dev-login provider acepta DEV_PASSWORD
+ * sin importar lo que haya en BD para users existentes.
+ */
+async function signupNewAtleta(
+  page: Page,
+  firstName = "E2E",
+  lastName = "Onboard",
+): Promise<string> {
+  const email = uniqueEmail();
+  await page.goto("/atleta-signup");
+
+  // Phase 1: email
+  await page
+    .locator('[data-testid="atleta-signup-email-phase"] input[type="email"]')
+    .fill(email);
+  await page
+    .locator('[data-testid="atleta-signup-email-phase"]')
+    .getByRole("button", { name: /Continuar/ })
+    .click();
+
+  // Phase 2: details
+  await page.waitForSelector('[data-testid="atleta-signup-details-phase"]', {
+    timeout: 10_000,
+  });
+  await page.locator('input[name="firstName"]').fill(firstName);
+  await page.locator('input[name="lastName"]').fill(lastName);
+  await page
+    .locator('[data-testid="atleta-signup-details-phase"]')
+    .getByRole("button", { name: /Continuar/ })
+    .click();
+
+  // Phase 3: goals — skip
+  await page.waitForSelector('[data-testid="atleta-signup-goals-phase"]', {
+    timeout: 10_000,
+  });
+  await page.getByRole("button", { name: /^Saltar$/ }).click();
+
+  // Success state (magic link mode mostrará "Te enviamos un enlace mágico")
+  await expect(page.getByText(/enlace mágico|Ya puedes entrar/i)).toBeVisible({
+    timeout: 15_000,
+  });
+
+  return email;
+}
+
+async function devLoginAs(page: Page, email: string): Promise<void> {
+  await page.goto("/login");
+  await page.locator('input[placeholder="email"]').fill(email);
+  await page.locator('input[placeholder="password"]').fill(DEV_PASSWORD);
+  await Promise.all([
+    page.waitForURL(/\/atleta/, { timeout: 15_000 }),
+    page.getByRole("button", { name: /Entrar \(dev\)/ }).click(),
+  ]);
+}
+
 test.describe("Athlete Onboarding 9-Step Wizard", () => {
-  test("Scenario 1: Box Personal signup → complete wizard → /atleta", async () => {
-    test.skip(true, "Slice 8: Implement signup → wizard flow");
-    // 1. Navigate to /atleta-signup
-    // 2. Sign up as new athlete (email, password)
-    // 3. Verify middleware redirects to /atleta/onboarding
-    // 4. Complete all 9 steps with test data
-    // 5. Verify final screen shows "¡Listo! Tu primer WOD está preparado"
-    // 6. Verify animation sequence completes (3.5s + 3s + 1s)
-    // 7. Verify router.push("/atleta") executed
-    // 8. Verify /atleta loads successfully
+  test("Scenario 4: atleta seed (onboarded) NO entra al wizard", async ({
+    page,
+  }) => {
+    // Seed: atleta@iron-hands.demo tiene onboardingCompletedAt seteado tras
+    // `pnpm db:seed`. El layout `atleta/layout.tsx` debe permitir libre
+    // navegación; y un acceso directo a /atleta/onboarding debe redirigir
+    // a /atleta (bypass inverso del page.tsx onboarding).
+    await devLoginAs(page, "atleta@iron-hands.demo");
+
+    // Tras login el browser ya está en /atleta (o subpath); NO debe estar
+    // en /atleta/onboarding.
+    expect(page.url()).not.toContain("/atleta/onboarding");
+
+    // Intento directo a /atleta/onboarding → redirige a /atleta (bypass
+    // inverso del page.tsx del onboarding).
+    await page.goto("/atleta/onboarding");
+    await page.waitForURL(
+      (url) => !url.pathname.startsWith("/atleta/onboarding"),
+      { timeout: 10_000 },
+    );
+    expect(page.url()).not.toContain("/atleta/onboarding");
   });
 
-  test("Scenario 2: Box B2B first login → Step 8 shows box pre-loaded", async () => {
-    test.skip(true, "Slice 8: Implement B2B athlete first login");
-    // Seed: Iron Hands box with athlete invited but not onboarded
-    // 1. Navigate to /login
-    // 2. Use dev-login: atleta@iron-hands.demo / dev
-    // 3. Verify middleware redirects to /atleta/onboarding
-    // 4. Navigate through Steps 1-7
-    // 5. Reach Step 8 (Location)
-    // 6. Verify sticky card shows "Entrenas en Iron Hands • Coach: Lobo"
-    // 7. Verify checkbox "También entreno por mi cuenta" is present
-    // 8. Complete steps 8-9 and verify success
+  test("Scenario 1 (parcial): signup nuevo → wizard renderiza Step 1", async ({
+    page,
+  }) => {
+    // Signup crea atleta nuevo con Box Personal (B2C). El gate del
+    // `atleta/layout.tsx` debe forzar redirect a /atleta/onboarding al
+    // tocar cualquier ruta /atleta/*. El wizard debe renderizar Paso 1
+    // con título "¿Cuál es tu objetivo?" y 4 RadioCards.
+    const email = await signupNewAtleta(page, "Wizard", "Tester");
+    await devLoginAs(page, email);
+
+    // Tras login, el layout gate redirige a /atleta/onboarding
+    await page.waitForURL(/\/atleta\/onboarding/, { timeout: 15_000 });
+
+    // Page title del wizard
+    await expect(page).toHaveTitle(/Bienvenido/);
+
+    // Heading del Step 1
+    await expect(
+      page.getByRole("heading", { name: /¿Cuál es tu objetivo\?/ }),
+    ).toBeVisible();
+
+    // Indicador "Paso 1 de 9"
+    await expect(page.getByText(/Paso 1 de 9/)).toBeVisible();
+
+    // 4 RadioCards de Step1Reason
+    await expect(page.getByText(/Soy principiante/)).toBeVisible();
+    await expect(page.getByText(/Mejorar mi rutina/)).toBeVisible();
+    await expect(page.getByText(/Estoy aburrido de lo actual/)).toBeVisible();
+    await expect(page.getByText(/Plan óptimo personalizado/)).toBeVisible();
+
+    // Botón Siguiente disabled hasta seleccionar
+    const nextBtn = page.getByRole("button", { name: /^Siguiente$/ });
+    await expect(nextBtn).toBeDisabled();
+
+    // Wizard fullscreen: no debe haber TabBar inferior ni drawer
+    await expect(page.getByRole("link", { name: /^Reservar$/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Menú$/ })).toHaveCount(0);
   });
 
-  test("Scenario 3: Resume partial → exit Step 4 → re-login → resume Step 4", async () => {
-    test.skip(true, "Slice 8: Implement localStorage resume logic");
-    // 1. Start onboarding as dev athlete
-    // 2. Complete Steps 1-3
-    // 3. Fill Step 4 (Goal) but do NOT click next
-    // 4. Close the browser/page (don't complete Step 4)
-    // 5. Re-login with same credentials
-    // 6. Verify middleware redirects to /atleta/onboarding
-    // 7. Verify wizard loads at Step 4 (localStorage restored)
-    // 8. Verify Step 4 data is preserved (goal selection still there)
-    // 9. Complete remaining steps and finish
+  test("Scenario 5: B2C signup → Step 8 muestra 3 radios SIN checkbox B2B", async ({
+    page,
+  }) => {
+    // Signup crea atleta en Box Personal (B2C). Avanzamos hasta Step 8
+    // y verificamos que el render adaptativo muestre 3 radios y NO el
+    // checkbox "También entreno solo" (que es exclusivo de B2B).
+    const email = await signupNewAtleta(page, "B2C", "Step8");
+    await devLoginAs(page, email);
+    await page.waitForURL(/\/atleta\/onboarding/, { timeout: 15_000 });
+
+    // Step 1 → seleccionar "Soy principiante" → Siguiente
+    await page.getByText(/Soy principiante/).click();
+    await page.getByRole("button", { name: /^Siguiente$/ }).click();
+
+    // Step 2 → seleccionar Hombre, valores default ya cargados pero el state
+    // interno es NULL hasta interacción. Click "+" en cada stepper para
+    // setear el valor explícitamente.
+    await expect(
+      page.getByRole("heading", { name: /perfil físico/i }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: /^Hombre$/ }).click();
+    // Cada NumberStepper tiene 2 botones: "−" y "+". Click "+" en los 3.
+    const plusButtons = page.getByRole("button", { name: "+" });
+    await plusButtons.nth(0).click(); // weight
+    await plusButtons.nth(1).click(); // age
+    await plusButtons.nth(2).click(); // height
+    await page.getByRole("button", { name: /^Siguiente$/ }).click();
+
+    // Step 3 → Principiante
+    await expect(
+      page.getByRole("heading", { name: /experiencia/i }),
+    ).toBeVisible();
+    await page.getByText(/^Principiante$/).click();
+    await page.getByRole("button", { name: /^Siguiente$/ }).click();
+
+    // Step 4 → Estar en forma general
+    await expect(page.getByText(/Estar en forma general/)).toBeVisible();
+    await page.getByText(/Estar en forma general/).click();
+    await page.getByRole("button", { name: /^Siguiente$/ }).click();
+
+    // Step 5 → frequency (NumberStepper). Click "+" 1 vez para setear.
+    await expect(page.getByText(/Días por semana/)).toBeVisible();
+    await page.getByRole("button", { name: "+" }).click();
+    await page.getByRole("button", { name: /^Siguiente$/ }).click();
+
+    // Step 6 → IA elige (por defecto, scroll y siguiente)
+    // El default puede ser AUTO o requerir click. Selecciono "Enfoque en
+    // recuperación" para ser explícito.
+    await page.getByText(/Enfoque en recuperación/).click();
+    await page.getByRole("button", { name: /^Siguiente$/ }).click();
+
+    // Step 7 → músculos excluidos (opcional, skip)
+    // El step debería permitir Siguiente sin selecciones.
+    await page.getByRole("button", { name: /^Siguiente$/ }).click();
+
+    // Step 8: verificación clave del test
+    await expect(
+      page.getByRole("heading", { name: /¿Dónde entrenas\?/ }),
+    ).toBeVisible();
+
+    // 3 radios visibles (B2C path)
+    await expect(page.getByText(/^Gym grande$/)).toBeVisible();
+    await expect(page.getByText(/^Gym pequeño$/)).toBeVisible();
+    await expect(page.getByText(/^Casa$/)).toBeVisible();
+
+    // NO checkbox "También entreno solo" (es exclusivo de B2B)
+    await expect(page.getByText(/También entreno solo/)).toHaveCount(0);
+
+    // NO sticky card "Entrenas en ..." (también exclusivo B2B)
+    await expect(page.getByText(/^Entrenas en/)).toHaveCount(0);
   });
 
-  test("Scenario 4: Already onboarded → visit /atleta/onboarding → redirect /atleta", async () => {
-    test.skip(true, "Slice 8: Implement post-onboarding redirect");
-    // Seed: Athlete with onboardingCompletedAt = now
-    // 1. Navigate to /login
-    // 2. Use dev-login with completed athlete
-    // 3. Verify middleware redirects to /atleta (NOT /atleta/onboarding)
-    // 4. Manually navigate to /atleta/onboarding
-    // 5. Verify redirect to /atleta happens
+  test.skip("Scenario 2: Box B2B first login → Step 8 shows box pre-loaded", async () => {
+    // Requiere DB reset: atleta@iron-hands.demo con onboardingCompletedAt=NULL
+    // antes del test, y restaurar a NOW() después. Implementar con setup
+    // global o endpoint /api/test-helpers/reset-onboarding.
   });
 
-  test("Step 8 adaptation: B2C → 3 radio options (big gym, small gym, home)", async () => {
-    test.skip(true, "Slice 8: Validate B2C Step 8 rendering");
-    // Test with Box Personal (isB2B=false)
-    // Verify 3 radio options render correctly
-    // Verify "También entreno por mi cuenta" checkbox is NOT present
+  test.skip("Scenario 3: Resume partial — exit Step 4 → re-login → resume Step 4", async () => {
+    // Requiere localStorage persistido entre sessions distintas y un atleta
+    // con onboardingCompletedAt=NULL. Mismo requisito de DB reset que #2.
   });
 
-  test("Cinematic closing animation sequence timing", async () => {
-    test.skip(true, "Slice 8: Validate animation phases and timings");
-    // 1. Reach Step 9 (Notifications)
-    // 2. Click Continuar (triggers finish())
-    // 3. Verify phase="creating" displays (0ms)
-    // 4. Verify phase="testimonials" at ~3500ms
-    // 5. Verify phase="complete" at ~6500ms
-    // 6. Verify onComplete() callback fires at ~7500ms
-    // 7. Verify router.refresh() + router.push("/atleta") executed
+  test.skip("Scenario 6: Cinematic closing animation timing", async () => {
+    // Requiere llegar a Step 9 (completar todo el wizard). Más simple
+    // testear las phases con Playwright`s page.waitForTimeout matching
+    // las 3.5s/6.5s/7.5s del PlanCreatingScreen — pero el riesgo de
+    // flake es alto. Mejor unit test de PlanCreatingScreen con jest.
   });
 
-  test("Audit logging: Each step completion logs event", async () => {
-    test.skip(true, "Slice 8: Implement logAudit integration");
-    // Complete all 9 steps
-    // Query audit log for ATHLETE_ONBOARDING_STEP_COMPLETED events
-    // Verify 9 events recorded (one per step)
-    // Verify each event includes: step_number, athlete_id, timestamp
+  test.skip("Scenario 7: Audit logging por step completado", async () => {
+    // Requiere logAudit cableado a cada step (ATHLETE_ONBOARDING_STEP_COMPLETED)
+    // y query al modelo AuditLog post-test. Pendiente implementación del
+    // logAudit en el wizard (parte del Slice 8 pendiente).
   });
 
-  test("Responsive validation: 360/768/1280 px viewports", async () => {
-    test.skip(true, "Slice 8: Run /visual-iterate on all steps");
-    // For each breakpoint [360, 768, 1280]:
-    //   - Resize page
-    //   - Navigate through each Step 1-9
-    //   - Verify no horizontal overflow
-    //   - Verify buttons/inputs are touch-safe (≥40x40px on mobile)
-    //   - Verify text is readable (≥11px on mobile)
-    // Expected: 0 layout issues across all steps
+  test.skip("Responsive 360/768/1280 — validado vía /visual-iterate", async () => {
+    // Validado con /visual-iterate en commit 8671c75. Resultado:
+    // 360/768/1280 → 0 issues a todos los breakpoints. Conservado como
+    // referencia; la verdad funcional vive en /visual-iterate (Playwright
+    // MCP con detector de overflow + touch targets + tiny text).
   });
 });
