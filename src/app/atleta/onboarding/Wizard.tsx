@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import KCard from "@/components/kronos/KCard";
 import { kToast } from "@/lib/toast";
@@ -8,6 +8,7 @@ import { completeAtletaOnboarding } from "@/server/actions/atleta-onboarding-v2"
 import { markOnboarded } from "@/lib/pwa-visits";
 import { ProgressBar } from "@/components/kronos/forms";
 import { useWizardState } from "./lib/use-wizard-state";
+import { PlanCreatingScreen } from "./steps/PlanCreatingScreen";
 import {
   Step1Reason,
   Step2PhysicalProfile,
@@ -31,6 +32,7 @@ const TOTAL_STEPS = 9;
 export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [showPlanCreating, setShowPlanCreating] = useState(false);
   const {
     state,
     setStep,
@@ -61,7 +63,7 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
     }
   }
 
-  async function finish() {
+  function finish() {
     // Validate all required fields
     if (
       !state.fitnessReason ||
@@ -79,6 +81,10 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
       return;
     }
 
+    setShowPlanCreating(true);
+  }
+
+  async function finishWithAnimation() {
     startTransition(async () => {
       const result = await completeAtletaOnboarding({
         fitnessReason: state.fitnessReason!,
@@ -99,6 +105,7 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
 
       if (!result.ok) {
         kToast.error(result.message);
+        setShowPlanCreating(false);
         return;
       }
 
@@ -113,6 +120,10 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
       router.push("/atleta");
       router.refresh();
     });
+  }
+
+  if (showPlanCreating) {
+    return <PlanCreatingScreen onComplete={finishWithAnimation} />;
   }
 
   return (
