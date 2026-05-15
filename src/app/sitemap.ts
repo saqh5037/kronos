@@ -47,5 +47,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.6,
     },
+    // LLMO-friendly machine-readable endpoints (JSON + Markdown views)
+    {
+      url: `${base}/atletas.json`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.5,
+    },
+    {
+      url: `${base}/atletas.md`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.5,
+    },
+    {
+      url: `${base}/box.json`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.5,
+    },
+    {
+      url: `${base}/box.md`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.5,
+    },
   ];
 }

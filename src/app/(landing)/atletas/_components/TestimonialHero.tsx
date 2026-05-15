@@ -58,7 +58,7 @@ export default function TestimonialHero() {
           pointerEvents: "none",
         }}
       />
-      <div
+      <figure
         style={{
           maxWidth: 880,
           margin: "0 auto",
@@ -105,7 +105,7 @@ export default function TestimonialHero() {
           </span>
         </motion.blockquote>
 
-        <motion.div
+        <motion.figcaption
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
@@ -118,9 +118,12 @@ export default function TestimonialHero() {
             color: "var(--k-t3)",
           }}
         >
-          — {TESTIMONIAL_HERO.attribution}
-        </motion.div>
-      </div>
+          —{" "}
+          <cite style={{ fontStyle: "normal" }}>
+            {TESTIMONIAL_HERO.attribution}
+          </cite>
+        </motion.figcaption>
+      </figure>
     </section>
   );
 }

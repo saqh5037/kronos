@@ -13,6 +13,7 @@ import SectionLeadForm from "../_components/SectionLeadForm";
 import CtaTail from "../_components/CtaTail";
 import Footer from "../_components/Footer";
 import DominusPromoBanner from "../_components/DominusPromoBanner";
+import BoxJsonLd from "./_components/BoxJsonLd";
 
 export default async function BoxLanding() {
   const session = await getServerSession(authOptions);
@@ -25,6 +26,7 @@ export default async function BoxLanding() {
 
   return (
     <>
+      <BoxJsonLd />
       <a href="#main" className="lp-skip">
         Saltar al contenido
       </a>
