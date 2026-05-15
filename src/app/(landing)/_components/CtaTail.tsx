@@ -17,10 +17,10 @@ export default function CtaTail() {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <DuotoneImage
-          src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1800&q=80"
+          src="/images/landing/box-closing-hero-class.webp"
           alt=""
-          intensity="soft"
-          position="center 40%"
+          intensity="strong"
+          position="center 45%"
           sizes="(max-width: 1100px) 100vw, 1200px"
           style={{ borderRadius: "inherit" }}
         />

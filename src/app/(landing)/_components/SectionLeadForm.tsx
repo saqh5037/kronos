@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -311,9 +312,43 @@ export default function SectionLeadForm() {
   const reduce = useReducedMotion();
 
   return (
-    <section className="lp-section lp-lead-section" id="section-form">
+    <section
+      className="lp-section lp-lead-section"
+      id="section-form"
+      style={{ position: "relative", overflow: "hidden" }}
+    >
+      {/* Atmospheric backdrop — gym vacío con luces ambient verde/amarillo.
+          Comunica "tu box, tu espacio". Opacidad media (0.15) con mask radial
+          que ilumina el centro donde está el form. */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+          maskImage:
+            "radial-gradient(ellipse at 50% 70%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 75%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse at 50% 70%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 75%)",
+        }}
+      >
+        <Image
+          src="/images/landing/box-testimonial-bg.webp"
+          alt=""
+          fill
+          sizes="100vw"
+          style={{
+            objectFit: "cover",
+            objectPosition: "center 60%",
+            opacity: 0.15,
+            filter: "contrast(1.1) brightness(0.7) saturate(0.6)",
+          }}
+        />
+      </div>
       <motion.div
         className="lp-lead-head"
+        style={{ position: "relative", zIndex: 1 }}
         initial={reduce ? false : { y: 14 }}
         whileInView={{ y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
@@ -331,7 +366,10 @@ export default function SectionLeadForm() {
         </p>
       </motion.div>
 
-      <div className="lp-lead-form-shell">
+      <div
+        className="lp-lead-form-shell"
+        style={{ position: "relative", zIndex: 1 }}
+      >
         {submitted ? (
           <LeadFormSuccess />
         ) : (

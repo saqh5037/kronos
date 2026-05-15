@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { WHITE_LABEL_PALETTES } from "../_data/mock";
 
@@ -13,9 +14,42 @@ export default function SectionWhiteLabel() {
   const v = reduce ? undefined : fadeUp;
 
   return (
-    <section className="lp-section lp-wl-section" id="section-whitelabel">
+    <section
+      className="lp-section lp-wl-section"
+      id="section-whitelabel"
+      style={{ position: "relative", overflow: "hidden" }}
+    >
+      {/* Ambient backdrop — rack de medicine balls + textura gym. Muy sutil
+          (opacity 0.12) para no competir con la grid de pilares + paletas. */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+          maskImage:
+            "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0) 100%)",
+          WebkitMaskImage:
+            "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0) 100%)",
+        }}
+      >
+        <Image
+          src="/images/landing/box-community-celebration.webp"
+          alt=""
+          fill
+          sizes="100vw"
+          style={{
+            objectFit: "cover",
+            objectPosition: "center",
+            opacity: 0.12,
+            filter: "grayscale(100%) contrast(1.05) brightness(0.55)",
+          }}
+        />
+      </div>
       <motion.div
         className="lp-wl-head"
+        style={{ position: "relative", zIndex: 1 }}
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, margin: "-100px" }}
@@ -50,6 +84,7 @@ export default function SectionWhiteLabel() {
             ? undefined
             : { show: { transition: { staggerChildren: 0.08 } } }
         }
+        style={{ position: "relative", zIndex: 1 }}
       >
         {[
           {
@@ -105,7 +140,13 @@ export default function SectionWhiteLabel() {
             ? undefined
             : { show: { transition: { staggerChildren: 0.06 } } }
         }
-        style={{ padding: "0 48px", maxWidth: 1320, margin: "32px auto 0" }}
+        style={{
+          padding: "0 48px",
+          maxWidth: 1320,
+          margin: "32px auto 0",
+          position: "relative",
+          zIndex: 1,
+        }}
       >
         {WHITE_LABEL_PALETTES.map((p) => (
           <motion.div key={p.name} className="lp-palette-card" variants={v}>
@@ -131,6 +172,7 @@ export default function SectionWhiteLabel() {
         whileInView={{ y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.55, ease: "easeOut" }}
+        style={{ position: "relative", zIndex: 1 }}
       >
         <span className="lp-dot" />
         <div className="text">

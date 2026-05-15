@@ -33,10 +33,10 @@ export default function Hero({
   return (
     <section className="lp-hero" id="producto">
       <DuotoneImage
-        src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1800&q=80"
+        src="/images/landing/box-hero-coach-tablet.webp"
         alt=""
-        intensity="ambient"
-        position="center 30%"
+        intensity="soft"
+        position="center 35%"
         priority
         sizes="100vw"
       />
