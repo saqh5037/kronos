@@ -41,7 +41,9 @@ export default function Step3Confirm({ count, prDetected }: Props) {
   const animatedCount = useCountUp(count);
 
   useEffect(() => {
-    const confetti = (window as unknown as Record<string, unknown>).confetti;
+    const confetti = (
+      window as unknown as { confetti?: (opts: unknown) => void }
+    ).confetti;
     if (!confetti) return;
 
     // Confetti burst
