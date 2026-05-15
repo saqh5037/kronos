@@ -4,7 +4,10 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import KCard from "@/components/kronos/KCard";
 import { kToast } from "@/lib/toast";
-import { completeAtletaOnboarding } from "@/server/actions/atleta-onboarding-v2";
+import {
+  completeAtletaOnboarding,
+  logOnboardingStep,
+} from "@/server/actions/atleta-onboarding-v2";
 import { markOnboarded } from "@/lib/pwa-visits";
 import { ProgressBar } from "@/components/kronos/forms";
 import { useWizardState } from "./lib/use-wizard-state";
@@ -53,6 +56,13 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
 
   function next() {
     if (state.step < TOTAL_STEPS) {
+      // Fire-and-forget: el log de progreso no debe bloquear la navegación.
+      // logAudit ya catchea internamente, así que el .catch acá es defensivo
+      // contra errores de red durante el fetch del server action.
+      const stepCompleted = state.step;
+      void logOnboardingStep(stepCompleted).catch((err) => {
+        console.warn("[onboarding] step audit failed:", err);
+      });
       setStep(state.step + 1);
     }
   }
@@ -80,6 +90,13 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
       kToast.error("Completa todos los campos para continuar");
       return;
     }
+
+    // Step 9 cierra el flow — disparar el último STEP_COMPLETED antes de
+    // arrancar la animación. completeAtletaOnboarding agrega el evento
+    // ATHLETE_ONBOARDING_COMPLETED en el server action.
+    void logOnboardingStep(TOTAL_STEPS).catch((err) => {
+      console.warn("[onboarding] step 9 audit failed:", err);
+    });
 
     setShowPlanCreating(true);
   }

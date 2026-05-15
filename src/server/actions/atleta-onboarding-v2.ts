@@ -3,6 +3,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import { db as prismaBase } from "../db";
+import { logAudit } from "../audit";
 import type {
   FitnessReason,
   BiologicalSex,
@@ -75,6 +76,20 @@ export async function completeAtletaOnboarding(
       },
     });
 
+    await logAudit({
+      tenantId,
+      actorId: userId,
+      action: "ATHLETE_ONBOARDING_COMPLETED",
+      targetType: "Athlete",
+      targetId: athlete.id,
+      metadata: {
+        fitnessReason: input.fitnessReason,
+        fitnessGoal: input.fitnessGoal,
+        trainingLocation: input.trainingLocation,
+        weeklyFrequency: input.weeklyFrequency,
+      },
+    });
+
     return { ok: true };
   } catch (err) {
     console.error("[onboarding-v2] error:", err);
@@ -84,4 +99,33 @@ export async function completeAtletaOnboarding(
       message: "Error guardando datos",
     };
   }
+}
+
+/**
+ * Logger ligero por step. Fire-and-forget desde el wizard. No bloquea la
+ * navegación si falla — logAudit ya catchea y no rethrowa.
+ */
+export async function logOnboardingStep(stepNumber: number): Promise<void> {
+  if (stepNumber < 1 || stepNumber > 9) return;
+
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || !session.user.tenantId) return;
+
+  const tenantId = session.user.tenantId;
+  const userId = session.user.id;
+
+  const athlete = await prismaBase.athlete.findFirst({
+    where: { tenantId, userId },
+    select: { id: true },
+  });
+  if (!athlete) return;
+
+  await logAudit({
+    tenantId,
+    actorId: userId,
+    action: "ATHLETE_ONBOARDING_STEP_COMPLETED",
+    targetType: "Athlete",
+    targetId: athlete.id,
+    metadata: { step_number: stepNumber },
+  });
 }
