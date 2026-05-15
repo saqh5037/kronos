@@ -365,4 +365,98 @@ export const Icon = {
       <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
     </svg>
   ),
+  Instagram: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...p}
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" />
+      <path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM17.5 6.5h.01" />
+    </svg>
+  ),
+  Facebook: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...p}
+    >
+      <path d="M18 2h-3a6 6 0 0 0-6 6v3H6v4h3v8h4v-8h3l1-4h-4V8a1 1 0 0 1 1-1h3z" />
+    </svg>
+  ),
+  TikTok: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...p}
+    >
+      <path d="M9 12a4 4 0 1 0 4 4V4M15.502 1.94s.503 1.977 1.97 2.29" />
+    </svg>
+  ),
+  Google: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...p}
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 6v12M6 12h12" />
+    </svg>
+  ),
+  Dumbbell: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="square"
+      {...p}
+    >
+      <path d="M6 8h1v8H6M17 8h1v8h-1M7 6v12M17 6v12M8 6h8v12H8" />
+    </svg>
+  ),
+  Target: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...p}
+    >
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  ),
+  Muscle: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...p}
+    >
+      <path d="M6 13.5V6a2 2 0 0 1 2-2h1v9.5M16 13.5V6a2 2 0 0 0-2-2h-1v9.5M11 6v11.5M13 6v11.5M8 17.5h8" />
+    </svg>
+  ),
+  AppleHealth: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="square"
+      {...p}
+    >
+      <path d="M12 2c3 0 7 1 7 4s-2 6-7 8c-5-2-7-5-7-8s4-4 7-4zM12 10c2 1 4 2 4 4s-1 3-4 4c-3-1-4-2-4-4s2-3 4-4zM12 18v3M9 21h6" />
+    </svg>
+  ),
 };

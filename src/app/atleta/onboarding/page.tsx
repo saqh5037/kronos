@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/server/auth";
 import { db as prismaBase } from "@/server/db";
-import { readPrefs } from "@/lib/atleta-prefs";
+import { isPersonalBoxSlug } from "@/lib/personal-box";
 import OnboardingWizard from "./Wizard";
 
 export const metadata = { title: "Kronos — Bienvenido" };
@@ -28,7 +28,21 @@ export default async function AtletaOnboardingPage() {
   // JWT está rezagado, doble check aquí evita render del wizard.
   if (athlete?.onboardingCompletedAt) redirect("/atleta");
 
-  const prefs = athlete ? readPrefs(athlete.tags) : { unit: null, level: null };
+  const box = await prismaBase.box.findUnique({
+    where: { id: session.user.tenantId },
+    select: {
+      slug: true,
+      name: true,
+      users: {
+        where: { role: "COACH" },
+        select: { name: true },
+        take: 1,
+      },
+    },
+  });
+
+  const isB2B = box ? !isPersonalBoxSlug(box.slug) : false;
+  const coachName = box?.users[0]?.name ?? null;
 
   return (
     <main
@@ -36,11 +50,9 @@ export default async function AtletaOnboardingPage() {
       style={{ background: "var(--k-bg)" }}
     >
       <OnboardingWizard
-        initialFirstName={athlete?.firstName ?? ""}
-        initialLastName={athlete?.lastName ?? ""}
-        initialUnit={prefs.unit}
-        initialLevel={prefs.level}
-        initialPhotoUrl={athlete?.photoUrl ?? null}
+        isB2B={isB2B}
+        boxName={box?.name ?? ""}
+        coachName={coachName}
       />
     </main>
   );
