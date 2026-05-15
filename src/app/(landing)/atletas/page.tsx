@@ -9,6 +9,7 @@ import AtletaSiNo from "./_components/AtletaSiNo";
 import DualQuotes from "./_components/DualQuotes";
 import AtletaClosingCTA from "./_components/AtletaClosingCTA";
 import FooterMinimal from "./_components/FooterMinimal";
+import MovementStrip from "./_components/MovementStrip";
 import { BENEFIT_SKILLS, BENEFIT_WOD } from "./_data/copy";
 
 export default async function AtletasLanding() {
@@ -58,7 +59,10 @@ export default async function AtletasLanding() {
           ctaHref={ctaHref}
         />
 
-        {/* 4 — Testimonial destacado */}
+        {/* 4 — Movement strip (6 movimientos: skills + wod) */}
+        <MovementStrip />
+
+        {/* 5 — Testimonial destacado */}
         <TestimonialHero />
 
         {/* 5 — Por qué Kronos (SÍ / NO) */}
