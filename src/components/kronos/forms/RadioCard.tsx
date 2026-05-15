@@ -1,3 +1,5 @@
+"use client";
+
 type RadioCardProps = {
   selected: boolean;
   onChange: (selected: boolean) => void;

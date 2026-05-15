@@ -53,7 +53,7 @@ export default function ErrorPage({
             marginBottom: 24,
           }}
         >
-          Hubo un error inesperado. Intentá de nuevo o volvé al inicio.
+          Hubo un error inesperado. Intenta de nuevo o vuelve al inicio.
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
           <button

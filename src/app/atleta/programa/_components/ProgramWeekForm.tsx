@@ -105,7 +105,7 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
       .filter((x): x is NonNullable<typeof x> => x !== null);
 
     if (payload.length === 0) {
-      setError("Activa al menos un día y dale nombre.");
+      setError("Activa al menos un día y va nombre.");
       return;
     }
 

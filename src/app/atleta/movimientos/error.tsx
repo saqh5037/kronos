@@ -24,7 +24,7 @@ export default function MovimientosError({
           La biblioteca no quiso abrirse
         </h1>
         <p className="text-sm text-[var(--k-t2)]">
-          Intentá de nuevo o volvé al home.
+          Intenta de nuevo o vuelve al home.
         </p>
         <div className="flex gap-2 justify-center pt-2">
           <button onClick={reset} className="k-btn-grad">

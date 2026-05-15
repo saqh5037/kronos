@@ -59,13 +59,13 @@ export default async function LoginPage() {
           className="text-center text-xs mt-6"
           style={{ color: "var(--k-t3)" }}
         >
-          ¿Aún no tenés box?{" "}
+          ¿Aún no tienes box?{" "}
           <Link
             href="/signup"
             className="underline"
             style={{ color: "var(--k-t2)" }}
           >
-            Empezá tu trial de 14 días
+            Empieza tu trial de 14 días
           </Link>
         </p>
       </div>

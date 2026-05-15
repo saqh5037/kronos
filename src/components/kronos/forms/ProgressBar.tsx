@@ -1,3 +1,5 @@
+"use client";
+
 export function ProgressBar({ step, total }: { step: number; total: number }) {
   const pct = (step / total) * 100;
   return (

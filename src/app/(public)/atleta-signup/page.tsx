@@ -10,7 +10,7 @@ import IosPwaTip from "./IosPwaTip";
 export const metadata = {
   title: "Kronos — Soy atleta",
   description:
-    "Registrate gratis y empezá a trackear tus PRs, movimientos y avances. Si tenés box, podés unirte después.",
+    "Regístrate gratis y empieza a trackear tus PRs, movimientos y avances. Si tienes box, puedes unirte después.",
 };
 
 type AtletaSignupPageProps = {
@@ -42,8 +42,8 @@ export default async function AtletaSignupPage({
             Atleta Kronos
           </h1>
           <p className="mt-2 text-sm" style={{ color: "var(--k-t2)" }}>
-            Tus PRs, tus movimientos, tu progreso. Si ya tenés cuenta entrás con
-            tu email — si no, te ayudamos a crearla.
+            Tus PRs, tus movimientos, tu progreso. Si ya tienes cuenta entras
+            con tu email — si no, te ayudamos a crearla.
           </p>
         </div>
 
@@ -59,13 +59,13 @@ export default async function AtletaSignupPage({
           className="text-center text-xs mt-6"
           style={{ color: "var(--k-t3)" }}
         >
-          ¿Sos dueño de un box?{" "}
+          ¿Eres dueño de un box?{" "}
           <Link
             href="/signup"
             className="underline"
             style={{ color: "var(--k-t2)" }}
           >
-            Registrá tu box acá
+            Registra tu box aquí
           </Link>
         </p>
       </div>

@@ -24,8 +24,6 @@ export default async function AtletaOnboardingPage() {
     },
   });
 
-  // Defensa: middleware ya redirige si athleteOnboardedAt=true, pero por si el
-  // JWT está rezagado, doble check aquí evita render del wizard.
   if (athlete?.onboardingCompletedAt) redirect("/atleta");
 
   const box = await prismaBase.box.findUnique({

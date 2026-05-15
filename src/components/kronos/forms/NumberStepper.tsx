@@ -1,3 +1,5 @@
+"use client";
+
 type NumberStepperProps = {
   label: string;
   value: number;

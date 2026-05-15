@@ -1,3 +1,5 @@
+"use client";
+
 type SegmentedOption = { value: string; label: string };
 
 type SegmentedControlProps = {

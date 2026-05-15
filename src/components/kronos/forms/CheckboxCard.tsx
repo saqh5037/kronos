@@ -1,3 +1,5 @@
+"use client";
+
 type CheckboxCardProps = {
   checked: boolean;
   onChange: (checked: boolean) => void;

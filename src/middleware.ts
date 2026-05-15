@@ -38,32 +38,23 @@ const authMiddleware = withAuth(
       return NextResponse.redirect(new URL("/admin", req.url));
     }
 
-    // Athlete onboarding gate — forzar wizard si el atleta no completó
-    // onboardingCompletedAt. La ruta /atleta/onboarding queda exenta para
-    // evitar bucles. Cuando completa, el siguiente request refresca el JWT
-    // (callback en auth.ts) y este bloque deja de aplicar.
-    const athleteOnboardedAt = token?.athleteOnboardedAt as boolean | undefined;
-    if (
-      role === "ATHLETE" &&
-      isAtletaSurface &&
-      !athleteOnboardedAt &&
-      pathname !== "/atleta/onboarding"
-    ) {
-      return NextResponse.redirect(new URL("/atleta/onboarding", req.url));
-    }
-    if (
-      role === "ATHLETE" &&
-      athleteOnboardedAt &&
-      pathname === "/atleta/onboarding"
-    ) {
-      return NextResponse.redirect(new URL("/atleta", req.url));
-    }
+    // Athlete onboarding gate: el JWT en cookie puede estar stale (se refresca
+    // solo cada SESSION_UPDATE_AGE_SECONDS), por eso el gate real vive en
+    // src/app/atleta/layout.tsx, que consulta Athlete.onboardingCompletedAt
+    // directo del DB. Acá solo exponemos el pathname via header para que el
+    // layout sepa si está en la ruta /atleta/onboarding (excluida del gate).
 
     if (shouldRedirectToBilling(subscriptionStatus, pathname)) {
       return NextResponse.redirect(new URL("/admin/billing", req.url));
     }
 
-    return NextResponse.next();
+    // x-pathname debe ir en REQUEST headers (no response) para que los server
+    // components puedan leerlo via headers() — los res.headers van al cliente.
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-pathname", pathname);
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    });
   },
   {
     pages: { signIn: "/login" },

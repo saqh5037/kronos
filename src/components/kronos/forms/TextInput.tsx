@@ -1,3 +1,5 @@
+"use client";
+
 type TextInputProps = {
   label: string;
   value: string;
