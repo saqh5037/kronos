@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import confetti from "canvas-confetti";
 
 type Props = {
   count: number;
@@ -42,6 +41,9 @@ export default function Step3Confirm({ count, prDetected }: Props) {
   const animatedCount = useCountUp(count);
 
   useEffect(() => {
+    const confetti = (window as unknown as Record<string, unknown>).confetti;
+    if (!confetti) return;
+
     // Confetti burst
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
     const randomInRange = (min: number, max: number) =>

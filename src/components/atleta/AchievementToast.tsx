@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
 
 export type AchievementBadge = {
@@ -196,6 +195,9 @@ export function AchievementToastEmitter({
 }
 
 function fireConfetti() {
+  const confetti = (window as unknown as Record<string, unknown>).confetti;
+  if (!confetti) return;
+
   const opts = {
     particleCount: 60,
     spread: 70,

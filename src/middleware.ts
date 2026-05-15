@@ -38,6 +38,27 @@ const authMiddleware = withAuth(
       return NextResponse.redirect(new URL("/admin", req.url));
     }
 
+    // Athlete onboarding gate — forzar wizard si el atleta no completó
+    // onboardingCompletedAt. La ruta /atleta/onboarding queda exenta para
+    // evitar bucles. Cuando completa, el siguiente request refresca el JWT
+    // (callback en auth.ts) y este bloque deja de aplicar.
+    const athleteOnboardedAt = token?.athleteOnboardedAt as boolean | undefined;
+    if (
+      role === "ATHLETE" &&
+      isAtletaSurface &&
+      !athleteOnboardedAt &&
+      pathname !== "/atleta/onboarding"
+    ) {
+      return NextResponse.redirect(new URL("/atleta/onboarding", req.url));
+    }
+    if (
+      role === "ATHLETE" &&
+      athleteOnboardedAt &&
+      pathname === "/atleta/onboarding"
+    ) {
+      return NextResponse.redirect(new URL("/atleta", req.url));
+    }
+
     if (shouldRedirectToBilling(subscriptionStatus, pathname)) {
       return NextResponse.redirect(new URL("/admin/billing", req.url));
     }
