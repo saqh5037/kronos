@@ -5,8 +5,7 @@ import KronosLogo from "@/components/brand/KronosLogo";
 import { track } from "../_lib/track";
 
 const NAV_LINKS = [
-  { label: "Para el atleta", href: "#section-atleta" },
-  { label: "Para el owner", href: "#section-owner" },
+  { label: "Para tu box", href: "#section-owner" },
   { label: "White-label", href: "#section-whitelabel" },
   { label: "Precios", href: "#section-pricing" },
 ];

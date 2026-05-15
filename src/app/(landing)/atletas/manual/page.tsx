@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import LandingTracker from "../../_components/LandingTracker";
-import Nav from "../../_components/Nav";
-import Footer from "../../_components/Footer";
+import NavAtletas from "../_components/NavAtletas";
+import FooterMinimal from "../_components/FooterMinimal";
 import ManualHero from "../_components/ManualHero";
 import ManualTOC from "../_components/ManualTOC";
 import ManualScreen from "../_components/ManualScreen";
@@ -35,7 +35,7 @@ export default async function ManualPage() {
         Saltar al contenido
       </a>
       <LandingTracker />
-      <Nav boxHref={boxHref} />
+      <NavAtletas boxHref={boxHref} />
       <main id="main">
         <ManualHero />
         <div className="manual-shell">
@@ -53,7 +53,7 @@ export default async function ManualPage() {
         </div>
         <AtletaClosingCTA boxHref={boxHref} />
       </main>
-      <Footer />
+      <FooterMinimal />
     </>
   );
 }

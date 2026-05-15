@@ -99,5 +99,7 @@ export const FOOTER = {
     { label: "Privacidad", href: "/legal/privacidad" },
     { label: "Manual", href: "/atletas/manual" },
   ],
-  coachLine: "¿Eres coach? Próximamente: kronos-fit.com/box",
+  coachLine: "¿Eres coach?",
+  coachLinkLabel: "Kronos para boxes",
+  coachLinkHref: "/box",
 } as const;

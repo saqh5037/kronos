@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getServerSession, type Session } from "next-auth";
+import * as Sentry from "@sentry/nextjs";
 import { authOptions } from "@/server/auth";
 import { getDashboardData } from "@/server/actions/dashboard";
 import { getBox } from "@/server/actions/box";
@@ -16,8 +17,14 @@ import AdminDashboardV3, {
 import { CoachClassesTodayCard } from "./_components/CoachClassesTodayCard";
 import { CoachAttendanceTodayCard } from "./_components/CoachAttendanceTodayCard";
 import { AtRiskCard } from "./_components/AtRiskCard";
+import AdminErrorState from "./_components/AdminErrorState";
 import OnboardingBanner from "@/components/admin/OnboardingBanner";
 import { db as prismaBase } from "@/server/db";
+import {
+  isUnauthorizedError,
+  isBoxNotFoundError,
+  type AdminDashboardErrorKind,
+} from "@/lib/errors";
 
 export const metadata = { title: "Kronos — Dashboard" };
 
@@ -98,6 +105,8 @@ export default async function AdminDashboardPage({
   let revenuePrev: Awaited<ReturnType<typeof getRevenueByDay>> = [];
   let attendancePrev: Awaited<ReturnType<typeof getAttendanceByDay>> = [];
   let snapshot: Awaited<ReturnType<typeof getOwnerDashboardSnapshot>> = null;
+  let dashboardError: AdminDashboardErrorKind | null = null;
+  let dashboardErrorDetail: string | null = null;
 
   try {
     [
@@ -117,47 +126,39 @@ export default async function AdminDashboardPage({
       getAttendanceByDay({ dateFrom: prev.from, dateTo: prev.to }),
       getOwnerDashboardSnapshot(),
     ]);
-  } catch {
-    // BD/sesión ausente — fallback en render
+  } catch (err) {
+    if (isUnauthorizedError(err)) {
+      dashboardError = "UNAUTHORIZED";
+    } else if (isBoxNotFoundError(err)) {
+      dashboardError = "BOX_NOT_FOUND";
+    } else {
+      dashboardError = "DB_ERROR";
+    }
+    dashboardErrorDetail =
+      err instanceof Error
+        ? `${err.name}: ${err.message}\n${err.stack ?? ""}`
+        : String(err);
+    Sentry.captureException(err, {
+      tags: {
+        feature: "admin_dashboard",
+        kind: dashboardError,
+        userId: session.user.id ?? "unknown",
+        tenantId: session.user.tenantId ?? "unknown",
+      },
+    });
   }
 
-  if (!data || !box) {
+  if (dashboardError || !data || !box) {
+    const kind: AdminDashboardErrorKind = dashboardError ?? "DB_ERROR";
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "var(--k-bg)",
-          color: "var(--k-t1)",
-          padding: 48,
-          fontFamily: "var(--k-font-body)",
-        }}
-      >
-        <p
-          style={{
-            fontFamily: "var(--k-font-display)",
-            fontSize: 11,
-            letterSpacing: "0.2em",
-            color: "var(--k-t3)",
-            marginBottom: 12,
-          }}
-        >
-          DASHBOARD
-        </p>
-        <h1
-          style={{
-            fontFamily: "var(--k-font-display)",
-            fontSize: 32,
-            fontWeight: 700,
-            letterSpacing: "-0.04em",
-            margin: 0,
-          }}
-        >
-          Sin datos
-        </h1>
-        <p style={{ marginTop: 12, color: "var(--k-t2)", fontSize: 14 }}>
-          No se pudo cargar el dashboard. Verificá conexión con la BD.
-        </p>
-      </div>
+      <AdminErrorState
+        kind={kind}
+        userEmail={session.user.email ?? null}
+        userId={session.user.id ?? null}
+        devDetail={
+          process.env.NODE_ENV === "development" ? dashboardErrorDetail : null
+        }
+      />
     );
   }
 
@@ -218,7 +219,7 @@ export default async function AdminDashboardPage({
       severity: "warning",
       text: `${data.waitlistedClassesToday} clase${
         data.waitlistedClassesToday === 1 ? "" : "s"
-      } con waitlist hoy · revisá promociones`,
+      } con waitlist hoy · revisa promociones`,
       cta: "Ver reservas",
       href: "/admin/reservas",
     });

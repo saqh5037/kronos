@@ -1908,6 +1908,12 @@ button.lp-btn-lime:active {
   .atletas-dualquotes-grid {
     grid-template-columns: 1fr !important;
   }
+  .router-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .router-card h2 {
+    font-size: 30px !important;
+  }
   .atletas-preview-grid {
     grid-template-columns: repeat(2, 1fr) !important;
   }

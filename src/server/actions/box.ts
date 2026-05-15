@@ -5,6 +5,7 @@ import { authOptions } from "../auth";
 import { db as prismaBase } from "../db";
 import { boxSettingsSchema } from "@/lib/validations/box";
 import { revalidatePath } from "next/cache";
+import { UnauthorizedError, BoxNotFoundError, DBError } from "@/lib/errors";
 
 export type BoxSettings = {
   id: string;
@@ -20,24 +21,31 @@ export type BoxSettings = {
 
 export async function getBox(): Promise<BoxSettings> {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  if (!session?.user?.tenantId) throw new UnauthorizedError();
 
-  // Box queries bypass withTenant — Box is the tenant itself, scoped by id
-  const box = await prismaBase.box.findUnique({
-    where: { id: session.user.tenantId },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      locale: true,
-      currency: true,
-      timezone: true,
-      defaultClassCapacity: true,
-      brandColor: true,
-      logoUrl: true,
-    },
-  });
-  if (!box) throw new Error("Box not found");
+  const tenantId = session.user.tenantId;
+
+  let box: BoxSettings | null;
+  try {
+    box = await prismaBase.box.findUnique({
+      where: { id: tenantId },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        locale: true,
+        currency: true,
+        timezone: true,
+        defaultClassCapacity: true,
+        brandColor: true,
+        logoUrl: true,
+      },
+    });
+  } catch (e) {
+    throw new DBError(e, "getBox: prisma.box.findUnique failed");
+  }
+
+  if (!box) throw new BoxNotFoundError(tenantId);
   return box;
 }
 

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import KronosLogo from "@/components/brand/KronosLogo";
 import { FOOTER } from "../_data/copy";
 
@@ -35,7 +34,7 @@ export default function FooterMinimal() {
           }}
         >
           {FOOTER.links.map((l) => (
-            <Link
+            <a
               key={l.href}
               href={l.href}
               style={{
@@ -45,7 +44,7 @@ export default function FooterMinimal() {
               }}
             >
               {l.label}
-            </Link>
+            </a>
           ))}
         </div>
 
@@ -71,7 +70,17 @@ export default function FooterMinimal() {
             maxWidth: 480,
           }}
         >
-          {FOOTER.coachLine}
+          {FOOTER.coachLine}{" "}
+          <a
+            href={FOOTER.coachLinkHref}
+            style={{
+              color: "var(--k-accent)",
+              textDecoration: "none",
+              fontWeight: 600,
+            }}
+          >
+            {FOOTER.coachLinkLabel} →
+          </a>
         </p>
       </div>
     </footer>
