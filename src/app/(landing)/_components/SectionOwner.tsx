@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { OWNER_KPIS, OWNER_OCCUPANCY } from "../_data/mock";
 import { track } from "../_lib/track";
+import CountUp from "./CountUp";
 
 const fadeUp = {
   hidden: { y: 14 },
@@ -106,7 +107,12 @@ export default function SectionOwner() {
               <div key={k.label} className="lp-kpi">
                 <div className="l">{k.label}</div>
                 <div className="v">
-                  {k.value}
+                  <CountUp
+                    to={k.displayTo}
+                    prefix={k.prefix}
+                    suffix={k.suffix}
+                    decimals={k.decimals}
+                  />
                   {k.pct ? <span className="pct">{k.pct}</span> : null}
                 </div>
                 <div className={`delta${k.up ? " up" : ""}`}>{k.delta}</div>

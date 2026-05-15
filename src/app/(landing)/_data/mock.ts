@@ -118,11 +118,46 @@ export const PRICING: PriceTier[] = [
   },
 ];
 
+export type OwnerKpi = {
+  label: string;
+  /** Display fallback string (no-JS / reduce-motion render). */
+  value: string;
+  /** Number to count to when entering viewport. */
+  displayTo: number;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  /** Static percent suffix shown next to the counter (e.g. " %" for Churn). */
+  pct?: string;
+  delta: string;
+  up?: boolean;
+};
+
 // @mock — KPIs ilustrativos del admin dashboard preview en /02. NO son tracción real de Kronos.
-export const OWNER_KPIS = [
-  { label: "MRR", value: "$184K", delta: "↑12% MoM", up: true },
-  { label: "Atletas", value: "412", delta: "↑28 neto" },
-  { label: "Churn", value: "3.1", pct: "%", delta: "↓0.4% MoM" },
+export const OWNER_KPIS: OwnerKpi[] = [
+  {
+    label: "MRR",
+    value: "$184K",
+    displayTo: 184,
+    prefix: "$",
+    suffix: "K",
+    delta: "↑12% MoM",
+    up: true,
+  },
+  {
+    label: "Atletas",
+    value: "412",
+    displayTo: 412,
+    delta: "↑28 neto",
+  },
+  {
+    label: "Churn",
+    value: "3.1",
+    displayTo: 3.1,
+    decimals: 1,
+    pct: "%",
+    delta: "↓0.4% MoM",
+  },
 ];
 
 // @mock — bars 14 days, valor 0-100. Lima si activo, gris si fin de semana.
