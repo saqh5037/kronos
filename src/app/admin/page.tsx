@@ -145,13 +145,6 @@ export default async function AdminDashboardPage({
       err instanceof Error
         ? `${err.name}: ${err.message}\n${err.stack ?? ""}`
         : String(err);
-    // TODO: remove after debug — temporal para identificar query rota en prod
-    console.error("[admin/page.tsx] dashboard error", {
-      kind: dashboardError,
-      name: err instanceof Error ? err.name : "unknown",
-      message: err instanceof Error ? err.message : String(err),
-      stack: err instanceof Error ? err.stack?.split("\n").slice(0, 5) : null,
-    });
     Sentry.captureException(err, {
       tags: {
         feature: "admin_dashboard",
@@ -169,7 +162,9 @@ export default async function AdminDashboardPage({
         kind={kind}
         userEmail={session.user.email ?? null}
         userId={session.user.id ?? null}
-        devDetail={dashboardErrorDetail}
+        devDetail={
+          process.env.NODE_ENV === "development" ? dashboardErrorDetail : null
+        }
       />
     );
   }

@@ -190,18 +190,18 @@ export async function getAttendanceByDay(opts: {
       }>
     >(Prisma.sql`
       SELECT
-        DATE(c.starts_at) as day,
+        DATE(c."startsAt") as day,
         COUNT(*) FILTER (WHERE b.status = 'ATTENDED') as attended,
-        COUNT(*) FILTER (WHERE b.status = 'NOSHOW') as noShow,
+        COUNT(*) FILTER (WHERE b.status = 'NOSHOW') as "noShow",
         COUNT(*) FILTER (WHERE b.status = 'BOOKED') as booked
-      FROM bookings b
-      JOIN classes c ON b.class_id = c.id
-      WHERE b.tenant_id = ${session.user.tenantId}
-        AND c.is_active = true
-        AND c.starts_at >= ${opts.dateFrom}
-        AND c.starts_at <= ${opts.dateTo}
+      FROM "Booking" b
+      JOIN "Class" c ON b."classId" = c.id
+      WHERE b."tenantId" = ${session.user.tenantId}
+        AND c."isActive" = true
+        AND c."startsAt" >= ${opts.dateFrom}
+        AND c."startsAt" <= ${opts.dateTo}
         ${coachClause}
-      GROUP BY DATE(c.starts_at)
+      GROUP BY DATE(c."startsAt")
     `),
   ]);
 
@@ -310,38 +310,38 @@ export async function listFrequentNoShows(opts?: {
 
   const results = await rawDb.$queryRaw<
     Array<{
-      athlete_id: string;
-      no_show_count: bigint;
-      last_no_show_at: Date;
-      first_name: string;
-      last_name: string;
+      athleteId: string;
+      noShowCount: bigint;
+      lastNoShowAt: Date;
+      firstName: string;
+      lastName: string;
     }>
   >`
     SELECT
-      b.athlete_id,
-      COUNT(*) as no_show_count,
-      MAX(b.booked_at) as last_no_show_at,
-      a.first_name,
-      a.last_name
-    FROM bookings b
-    JOIN athletes a ON b.athlete_id = a.id
-    WHERE b.tenant_id = ${session.user.tenantId}
+      b."athleteId" as "athleteId",
+      COUNT(*) as "noShowCount",
+      MAX(b."bookedAt") as "lastNoShowAt",
+      a."firstName" as "firstName",
+      a."lastName" as "lastName"
+    FROM "Booking" b
+    JOIN "Athlete" a ON b."athleteId" = a.id
+    WHERE b."tenantId" = ${session.user.tenantId}
       AND b.status = 'NOSHOW'
-      AND b.class_id IN (
-        SELECT id FROM classes
-        WHERE tenant_id = ${session.user.tenantId}
-          AND starts_at >= ${cutoff}
+      AND b."classId" IN (
+        SELECT id FROM "Class"
+        WHERE "tenantId" = ${session.user.tenantId}
+          AND "startsAt" >= ${cutoff}
       )
-    GROUP BY b.athlete_id, a.first_name, a.last_name
+    GROUP BY b."athleteId", a."firstName", a."lastName"
     HAVING COUNT(*) >= ${threshold}
-    ORDER BY no_show_count DESC
+    ORDER BY "noShowCount" DESC
   `;
 
   return results.map((r) => ({
-    athleteId: r.athlete_id,
-    athleteName: `${r.first_name} ${r.last_name}`,
-    noShowCount: Number(r.no_show_count),
-    lastNoShowAt: r.last_no_show_at,
+    athleteId: r.athleteId,
+    athleteName: `${r.firstName} ${r.lastName}`,
+    noShowCount: Number(r.noShowCount),
+    lastNoShowAt: r.lastNoShowAt,
   }));
 }
 
