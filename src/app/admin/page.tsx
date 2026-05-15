@@ -131,6 +131,13 @@ export default async function AdminDashboardPage({
       dashboardError = "UNAUTHORIZED";
     } else if (isBoxNotFoundError(err)) {
       dashboardError = "BOX_NOT_FOUND";
+    } else if (err instanceof Error && err.message === "Unauthorized") {
+      // Fallback: otras server actions del Promise.all (getDashboardData,
+      // getRevenueByDay, getAttendanceByDay, getOwnerDashboardSnapshot) aún
+      // tiran Error genérico — clasificamos por mensaje hasta tiparlas.
+      dashboardError = "UNAUTHORIZED";
+    } else if (err instanceof Error && err.message === "Box not found") {
+      dashboardError = "BOX_NOT_FOUND";
     } else {
       dashboardError = "DB_ERROR";
     }
