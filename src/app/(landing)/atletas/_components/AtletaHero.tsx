@@ -115,7 +115,6 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
             src="/manual/atleta/home.png"
             alt="Pantalla de inicio de Kronos Atletas mostrando la racha, próxima clase y leaderboard del WOD del día"
             size="lg"
-            priority
             glow
             width={320}
           />

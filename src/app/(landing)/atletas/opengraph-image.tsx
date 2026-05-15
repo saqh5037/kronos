@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Kronos — CrossFit con datos duros. Atletas + Boxes.";
+export const alt = "Kronos Atletas — La app de CrossFit que entrena contigo";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -18,20 +18,36 @@ export default function OpenGraphImage() {
         fontFamily: "monospace",
       }}
     >
+      {/* Glow accent superior derecho */}
       <div
         style={{
           position: "absolute",
-          top: -200,
-          right: -200,
-          width: 600,
-          height: 600,
+          top: -220,
+          right: -180,
+          width: 640,
+          height: 640,
           borderRadius: "50%",
           background: "#C8FF2D",
-          filter: "blur(160px)",
-          opacity: 0.25,
+          filter: "blur(180px)",
+          opacity: 0.28,
+        }}
+      />
+      {/* Glow accent inferior izquierdo (refuerza V3 lima) */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: -260,
+          left: -200,
+          width: 560,
+          height: 560,
+          borderRadius: "50%",
+          background: "#C8FF2D",
+          filter: "blur(200px)",
+          opacity: 0.18,
         }}
       />
 
+      {/* Brand lockup */}
       <div
         style={{
           display: "flex",
@@ -65,15 +81,16 @@ export default function OpenGraphImage() {
             letterSpacing: "-0.04em",
           }}
         >
-          KRONOS
+          KRONOS · ATLETAS
         </div>
       </div>
 
+      {/* Claim principal */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 24,
+          gap: 28,
           marginTop: "auto",
           zIndex: 1,
         }}
@@ -82,15 +99,15 @@ export default function OpenGraphImage() {
           style={{
             display: "flex",
             flexDirection: "column",
-            fontSize: 88,
+            fontSize: 92,
             fontWeight: 700,
             color: "#F5F5F7",
             letterSpacing: "-0.03em",
-            lineHeight: 1.05,
+            lineHeight: 1.02,
           }}
         >
-          CrossFit
-          <span style={{ color: "#C8FF2D" }}>con datos duros.</span>
+          Tu progreso
+          <span style={{ color: "#C8FF2D" }}>es el producto.</span>
         </div>
 
         <div
@@ -98,14 +115,15 @@ export default function OpenGraphImage() {
             fontSize: 26,
             color: "#8a8a94",
             letterSpacing: "-0.01em",
-            maxWidth: 900,
+            maxWidth: 920,
           }}
         >
-          App del atleta. Sistema operativo del Box. Una sola plataforma para
-          PRs, reservas, programación y operación de tu CrossFit.
+          Anota PRs. Reserva clases. Mejora skills con coach IA. Foto del
+          pizarrón → score automático.
         </div>
       </div>
 
+      {/* Footer brand */}
       <div
         style={{
           display: "flex",
@@ -119,11 +137,9 @@ export default function OpenGraphImage() {
           zIndex: 1,
         }}
       >
-        <span>kronos-fit.com</span>
+        <span>kronos-fit.com/atletas</span>
         <span>·</span>
-        <span>ATLETAS · BOXES</span>
-        <span>·</span>
-        <span>LATAM</span>
+        <span>HECHO EN MÉXICO</span>
       </div>
     </div>,
     { ...size },
