@@ -44,14 +44,38 @@ export default async function AtletaOnboardingPage() {
 
   return (
     <main
-      className="min-h-screen flex items-start justify-center p-4 pt-12"
+      className="relative min-h-screen flex items-start justify-center p-4 pt-12 overflow-hidden"
       style={{ background: "var(--k-bg)" }}
     >
-      <OnboardingWizard
-        isB2B={isB2B}
-        boxName={box?.name ?? ""}
-        coachName={coachName}
+      {/* Backdrop ambient — gym dark con neón lima, opacity baja para que el
+          contenido del wizard siga siendo el foco. Sutil pero le da textura
+          al fondo sin competir con el branding V3. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          backgroundImage: "url(/images/wizard/step1-bg-motivation.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.18,
+        }}
       />
+      {/* Gradient overlay para que el contenido del card destaque por encima */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(8,8,10,0.55) 0%, rgba(8,8,10,0.85) 100%)",
+        }}
+      />
+      <div className="relative z-10 w-full flex justify-center">
+        <OnboardingWizard
+          isB2B={isB2B}
+          boxName={box?.name ?? ""}
+          coachName={coachName}
+        />
+      </div>
     </main>
   );
 }

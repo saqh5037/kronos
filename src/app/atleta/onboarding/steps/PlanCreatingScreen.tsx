@@ -8,16 +8,19 @@ const TESTIMONIALS = [
     name: "Laura M.",
     role: "Atleta • Iron Hands Box",
     quote: "En 3 meses mejoré mis PRs 15kg en squat",
+    image: "/images/wizard/cierre-collage-04-deadlift.webp",
   },
   {
     name: "Carlos R.",
     role: "Atleta • CrossFit Central",
     quote: "El plan AI se adapta a mi ritmo de vida",
+    image: "/images/wizard/cierre-collage-02-pullup.webp",
   },
   {
     name: "Sofia L.",
     role: "Atleta • Summit CrossFit",
     quote: "Finalmente entiendo cómo entrenar inteligente",
+    image: "/images/wizard/cierre-collage-06-overhead.webp",
   },
 ];
 
@@ -41,14 +44,32 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
   }, [onComplete]);
 
   return (
-    <div className="w-full max-w-md min-h-screen flex items-center justify-center">
+    <div className="relative w-full max-w-md min-h-screen flex items-center justify-center">
+      {/* Backdrop específico de la phase "creating" — gym dark con barbell
+          centrada. Sale con fade cuando entra "testimonials". */}
+      {phase === "creating" && (
+        <motion.div
+          aria-hidden
+          key="creating-bg"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.32 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{
+            backgroundImage: "url(/images/wizard/cierre-bg-loader.webp)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+      )}
       {phase === "creating" && (
         <motion.div
           key="creating"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="space-y-8 w-full px-4"
+          className="relative z-10 space-y-8 w-full px-4"
         >
           <div className="text-center space-y-2">
             <h2 className="font-display font-bold text-2xl tracking-[-0.01em]">
@@ -98,7 +119,7 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="space-y-6 w-full px-4"
+          className="relative z-10 space-y-6 w-full px-4"
         >
           <div className="text-center mb-6">
             <p
@@ -116,18 +137,42 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.2 }}
-                className="p-4 rounded-lg"
-                style={{ background: "var(--k-surface)" }}
+                className="relative overflow-hidden rounded-lg flex items-stretch"
+                style={{
+                  background: "var(--k-surface)",
+                  border: "1px solid var(--k-line-2)",
+                }}
               >
-                <p
-                  className="text-sm font-semibold"
-                  style={{ color: "var(--k-t1)" }}
+                {/* Imagen del movimiento — lado izquierdo, fade hacia el texto */}
+                <div
+                  aria-hidden
+                  className="relative shrink-0"
+                  style={{
+                    width: 96,
+                    backgroundImage: `url(${testimonial.image})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
                 >
-                  &quot;{testimonial.quote}&quot;
-                </p>
-                <p className="text-xs mt-2" style={{ color: "var(--k-t3)" }}>
-                  {testimonial.name} • {testimonial.role}
-                </p>
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, rgba(15,16,20,0.35) 0%, rgba(15,16,20,0.95) 100%)",
+                    }}
+                  />
+                </div>
+                <div className="flex-1 p-4 min-w-0">
+                  <p
+                    className="text-sm font-semibold"
+                    style={{ color: "var(--k-t1)" }}
+                  >
+                    &quot;{testimonial.quote}&quot;
+                  </p>
+                  <p className="text-xs mt-2" style={{ color: "var(--k-t3)" }}>
+                    {testimonial.name} • {testimonial.role}
+                  </p>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -139,7 +184,7 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
           key="complete"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center space-y-6 px-4"
+          className="relative z-10 text-center space-y-6 px-4"
         >
           <div>
             <motion.div
