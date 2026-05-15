@@ -63,7 +63,7 @@ function QuoteCard({ q, delay }: { q: Quote; delay: number }) {
           borderTop: "1px solid var(--k-line)",
         }}
       >
-        — {q.attribution}
+        — <cite style={{ fontStyle: "normal" }}>{q.attribution}</cite>
       </figcaption>
     </motion.figure>
   );

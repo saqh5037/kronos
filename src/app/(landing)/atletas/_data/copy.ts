@@ -20,7 +20,12 @@ export const BENEFIT_SKILLS = {
   eyebrow: "/01 · SKILLS",
   h2: "Aprende. Perfecciona. Domina.",
   body: "Eliges el skill — snatch, muscle-up, pistol, handstand walk. Kronos calcula las progresiones que te tocan hoy según tu nivel, no según un PDF genérico. Las que ya dominaste se marcan; las bloqueadas te dicen exactamente por qué.",
-  detail: { label: "PROGRESIÓN", value: "27%" },
+  detail: {
+    label: "PROGRESIÓN",
+    value: "27%",
+    /** CountUp config opcional — si está, anima 0→to al entrar al viewport. */
+    numeric: { to: 27, suffix: "%" },
+  },
   phoneSrc: "/manual/atleta/skills.png",
   phoneAlt:
     "Pantalla de Skills mostrando el catálogo de movimientos con coach virtual y progresiones desbloqueables",

@@ -158,7 +158,7 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
           <p className="text-sm" style={{ color: "var(--k-t2)" }}>
             Cuenta creada para{" "}
             <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>.
-            Ya podés entrar.
+            Ya puedes entrar.
           </p>
           <a
             href={`/login?email=${encodeURIComponent(success.email)}`}
@@ -194,7 +194,7 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
             <>
               Te enviamos un enlace mágico a{" "}
               <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>.
-              Tocalo desde tu teléfono — o usá el código del email si el link no
+              Tócalo desde tu teléfono — o usá el código del email si el link no
               funciona.
             </>
           )
@@ -236,7 +236,7 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
           className="text-center text-[11px] leading-relaxed"
           style={{ color: "var(--k-t3)" }}
         >
-          Si ya tenés cuenta te enviamos el código para entrar.
+          Si ya tienes cuenta te enviamos el código para entrar.
           <br />
           Si no, te ayudamos a crear una en 10 segundos.
         </p>
@@ -244,7 +244,7 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
     );
   }
 
-  // Fase 3: ¿Por qué entrenás? (opcional, no bloqueante)
+  // Fase 3: ¿Por qué entrenas? (opcional, no bloqueante)
   if (phase === "goals") {
     const toggle = (g: FitnessGoalTag) =>
       setSelectedGoals((prev) =>
@@ -266,14 +266,14 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
             className="font-display text-2xl font-bold mt-1"
             style={{ color: "var(--k-t1)" }}
           >
-            ¿Por qué entrenás?
+            ¿Por qué entrenas?
           </h2>
           <p
             className="text-[13px] mt-2"
             style={{ color: "var(--k-t2)", lineHeight: 1.45 }}
           >
-            Esto nos ayuda a mostrarte lo que importa. Podés elegir varios o
-            saltar este paso — siempre podés cambiarlo después.
+            Esto nos ayuda a mostrarte lo que importa. Puedes elegir varios o
+            saltar este paso — siempre puedes cambiarlo después.
           </p>
         </div>
 
@@ -476,8 +476,8 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
                 style={{ color: "var(--k-t3)" }}
               >
                 {isIos
-                  ? "En iPhone los magic links pueden saltar entre Chrome y Safari. Con contraseña entrás directo desde cualquier navegador."
-                  : "Con contraseña podés entrar sin esperar el email. Mínimo 10 caracteres con letras y números."}
+                  ? "En iPhone los magic links pueden saltar entre Chrome y Safari. Con contraseña entras directo desde cualquier navegador."
+                  : "Con contraseña puedes entrar sin esperar el email. Mínimo 10 caracteres con letras y números."}
               </p>
             )}
           </div>

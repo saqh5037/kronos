@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { OWNER_KPIS, OWNER_OCCUPANCY } from "../_data/mock";
 import { track } from "../_lib/track";
+import CountUp from "./CountUp";
 
 const fadeUp = {
   hidden: { y: 14 },
@@ -34,8 +36,41 @@ export default function SectionOwner() {
     <section
       className="lp-section"
       id="section-owner"
-      style={{ borderTop: "1px solid var(--k-line)" }}
+      style={{
+        borderTop: "1px solid var(--k-line)",
+        position: "relative",
+        overflow: "hidden",
+      }}
     >
+      {/* Ambient backdrop — coach corrigiendo forma (B&W). Opacidad baja para
+          que el frame admin y la columna de texto sigan siendo el foco. Mask
+          radial hace fade hacia el centro donde está el contenido. */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+          maskImage:
+            "radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 70%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 70%)",
+        }}
+      >
+        <Image
+          src="/images/landing/box-coach-correcting-form.webp"
+          alt=""
+          fill
+          sizes="100vw"
+          style={{
+            objectFit: "cover",
+            objectPosition: "right center",
+            opacity: 0.18,
+            filter: "grayscale(100%) contrast(1.05) brightness(0.6)",
+          }}
+        />
+      </div>
       <motion.div
         className="lp-section-grid"
         initial="hidden"
@@ -46,6 +81,7 @@ export default function SectionOwner() {
             ? undefined
             : { show: { transition: { staggerChildren: 0.1 } } }
         }
+        style={{ position: "relative", zIndex: 1 }}
       >
         <motion.div className="lp-owner-frame lp-grain" variants={v}>
           <div
@@ -71,7 +107,12 @@ export default function SectionOwner() {
               <div key={k.label} className="lp-kpi">
                 <div className="l">{k.label}</div>
                 <div className="v">
-                  {k.value}
+                  <CountUp
+                    to={k.displayTo}
+                    prefix={k.prefix}
+                    suffix={k.suffix}
+                    decimals={k.decimals}
+                  />
                   {k.pct ? <span className="pct">{k.pct}</span> : null}
                 </div>
                 <div className={`delta${k.up ? " up" : ""}`}>{k.delta}</div>

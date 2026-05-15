@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
 import PhoneFrame from "./PhoneFrame";
@@ -23,6 +24,31 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
 
   return (
     <section className="lp-hero" id="producto">
+      <Image
+        src="/images/landing/atletas-hero-snatch-kronos.webp"
+        alt=""
+        fill
+        priority
+        sizes="(max-width: 768px) 100vw, 1320px"
+        style={{
+          objectFit: "cover",
+          objectPosition: "right center",
+          opacity: 0.5,
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(to right, rgba(8,8,10,0.95) 0%, rgba(8,8,10,0.75) 45%, rgba(8,8,10,0.25) 100%)",
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      />
       <div className="lp-hero-bg" aria-hidden="true" />
       <div className="lp-hero-grid">
         <motion.div initial="hidden" animate="show" variants={variants}>
@@ -89,7 +115,6 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
             src="/manual/atleta/home.png"
             alt="Pantalla de inicio de Kronos Atletas mostrando la racha, próxima clase y leaderboard del WOD del día"
             size="lg"
-            priority
             glow
             width={320}
           />

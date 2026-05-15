@@ -157,6 +157,27 @@ model Athlete {
   tags             String[]
   photoUrl         String?
   notes            String?
+
+  // ─── Onboarding wizard (9 steps) ────────────────────────────────────────────
+  onboardingStartedAt      DateTime?
+  onboardingCompletedAt    DateTime?
+  onboardingStep           Int       @default(0)
+  fitnessReason            FitnessReason?
+  biologicalSex            BiologicalSex?
+  weightKg                 Float?
+  heightCm                 Float?
+  ageYears                 Int?
+  trackMenstrualCycle      Boolean   @default(false)
+  fitnessExperience        FitnessExperience?
+  fitnessGoal              FitnessGoal?
+  weeklyFrequency          Int?
+  routinePreference        RoutinePreference?
+  excludedMuscles          String[]
+  trainingLocation         TrainingLocation?
+  trainsOnOwnToo           Boolean   @default(false)
+  pushNotificationsEnabled Boolean   @default(false)
+  appleHealthLinkedAt      DateTime?
+
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
@@ -857,6 +878,8 @@ enum AuditAction {
   USER_LOGOUT
   PASSWORD_SET
   PASSWORD_CLEARED
+  ATHLETE_ONBOARDING_STEP_COMPLETED
+  ATHLETE_ONBOARDING_COMPLETED
 }
 
 model AuditEvent {
@@ -1186,4 +1209,47 @@ model Lead {
   @@index([createdAt])
   @@index([status])
   @@map("leads")
+}
+
+// ─── ATLETA ONBOARDING WIZARD ────────────────────────────────────────────────
+// Enums usados por el wizard de 9 pasos en /atleta/onboarding.
+
+enum FitnessReason {
+  BEGINNER_START
+  IMPROVE_ROUTINE
+  BORED_CURRENT
+  OPTIMAL_PLAN
+}
+
+enum BiologicalSex {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum FitnessExperience {
+  NONE
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum FitnessGoal {
+  GROW_TONE
+  GENERAL_FITNESS
+  CONDITIONING
+  CROSSFIT_PRS
+}
+
+enum RoutinePreference {
+  AUTO
+  RECOVERY
+  LIBRARY
+}
+
+enum TrainingLocation {
+  BOX_B2B
+  BIG_GYM
+  SMALL_GYM
+  HOME
 }

@@ -147,6 +147,7 @@ export const authOptions: NextAuthOptions = {
             role: true,
             tenantId: true,
             box: { select: { subscriptionStatus: true } },
+            athlete: { select: { onboardingCompletedAt: true } },
           },
         });
         if (dbUser) {
@@ -154,10 +155,12 @@ export const authOptions: NextAuthOptions = {
           token.role = dbUser.role;
           token.tenantId = dbUser.tenantId;
           token.subscriptionStatus = dbUser.box?.subscriptionStatus ?? null;
+          token.athleteOnboardedAt = !!dbUser.athlete?.onboardingCompletedAt;
         }
       } else if (token.id) {
         // Subsequent request: revalidate that the user still exists and refresh
-        // subscription status from the box (catches expirations between requests).
+        // subscription status + athlete onboarding state from DB (catches
+        // expirations and onboarding completion between requests).
         const exists = await db.user.findUnique({
           where: { id: token.id as string },
           select: {
@@ -165,6 +168,7 @@ export const authOptions: NextAuthOptions = {
             role: true,
             tenantId: true,
             box: { select: { subscriptionStatus: true } },
+            athlete: { select: { onboardingCompletedAt: true } },
           },
         });
         if (!exists) {
@@ -174,6 +178,7 @@ export const authOptions: NextAuthOptions = {
             role: undefined,
             tenantId: undefined,
             subscriptionStatus: undefined,
+            athleteOnboardedAt: undefined,
           };
         }
         if (exists.tenantId !== token.tenantId) {
@@ -183,6 +188,7 @@ export const authOptions: NextAuthOptions = {
           token.role = exists.role;
         }
         token.subscriptionStatus = exists.box?.subscriptionStatus ?? null;
+        token.athleteOnboardedAt = !!exists.athlete?.onboardingCompletedAt;
       }
       return token;
     },
@@ -192,6 +198,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string;
         session.user.tenantId = token.tenantId as string;
         session.user.subscriptionStatus = token.subscriptionStatus ?? null;
+        session.user.athleteOnboardedAt = token.athleteOnboardedAt ?? false;
       }
       return session;
     },

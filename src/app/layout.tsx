@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import dynamic from "next/dynamic";
 import {
   Inter,
   Playfair_Display,
@@ -13,11 +12,12 @@ import GlobalEffects from "@/components/GlobalEffects";
 import { KronosToaster } from "@/components/kronos/KronosToaster";
 import { ConfirmProvider } from "@/lib/use-confirm";
 
-const AchievementToastHost = dynamic(() =>
-  import("@/components/atleta/AchievementToast").then(
-    (m) => m.AchievementToastHost,
-  ),
-);
+// TODO: Fix canvas-confetti webpack bundling issue
+// const AchievementToastHost = dynamic(() =>
+//   import("@/components/atleta/AchievementToast").then(
+//     (m) => m.AchievementToastHost,
+//   ),
+// );
 
 const inter = Inter({
   subsets: ["latin"],
@@ -117,7 +117,8 @@ export default function RootLayout({
           <ConfirmProvider>
             {children}
             <KronosToaster />
-            <AchievementToastHost />
+            {/* TODO: Fix canvas-confetti webpack bundling issue */}
+            {/* <AchievementToastHost /> */}
           </ConfirmProvider>
         </ThemeProvider>
       </body>

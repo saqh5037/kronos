@@ -1,6 +1,8 @@
 import { getCachedSession } from "@/server/session";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import dynamic from "next/dynamic";
+import { db } from "@/server/db";
 import PwaRegister from "@/components/PwaRegister";
 import AthleteDrawer from "@/components/atleta/AthleteDrawer";
 
@@ -19,6 +21,40 @@ export default async function AtletaLayout({
 }) {
   const session = await getCachedSession();
   if (!session) redirect("/login");
+
+  // Gate de onboarding: el JWT en cookie puede estar stale, así que el gate
+  // real consulta DB. La ruta /atleta/onboarding queda exenta del gate; su
+  // page.tsx hace el bypass inverso (redirige a /atleta cuando ya completed).
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  const isOnboarding = pathname.startsWith("/atleta/onboarding");
+
+  if (session.user.role === "ATHLETE" && !isOnboarding) {
+    const athlete = await db.athlete.findFirst({
+      where: {
+        userId: session.user.id,
+        tenantId: session.user.tenantId,
+      },
+      select: { onboardingCompletedAt: true },
+    });
+    if (!athlete?.onboardingCompletedAt) {
+      redirect("/atleta/onboarding");
+    }
+  }
+
+  // El onboarding es un flow fullscreen — sin drawer/tabbar/install banner
+  // para que el atleta complete los 9 pasos sin distracción ni navegación
+  // a rutas que aún no debería visitar.
+  if (isOnboarding) {
+    return (
+      <div
+        className="relative min-h-screen"
+        style={{ background: "var(--k-bg)" }}
+      >
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div

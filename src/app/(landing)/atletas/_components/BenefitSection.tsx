@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
 import PhoneFrame from "./PhoneFrame";
+import CountUp from "../../_components/CountUp";
 import { CTA_LABEL } from "../_data/copy";
 
 const textVariants = {
@@ -19,7 +20,17 @@ const phoneVariants = {
   },
 };
 
-type Detail = { label: string; value: string };
+type Detail = {
+  label: string;
+  value: string;
+  /** Opcional: si está, el value se renderiza con CountUp al entrar al viewport. */
+  numeric?: {
+    to: number;
+    prefix?: string;
+    suffix?: string;
+    decimals?: number;
+  };
+};
 
 export type BenefitSectionProps = {
   /** id usado como anchor (sin #) */
@@ -134,7 +145,16 @@ export default function BenefitSection({
             color: "var(--k-accent)",
           }}
         >
-          {detail.value}
+          {detail.numeric ? (
+            <CountUp
+              to={detail.numeric.to}
+              prefix={detail.numeric.prefix}
+              suffix={detail.numeric.suffix}
+              decimals={detail.numeric.decimals}
+            />
+          ) : (
+            detail.value
+          )}
         </span>
       </div>
 

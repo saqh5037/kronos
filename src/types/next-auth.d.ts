@@ -8,6 +8,7 @@ declare module "next-auth" {
       role: string;
       tenantId: string;
       subscriptionStatus: SubscriptionStatus | null;
+      athleteOnboardedAt: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -18,5 +19,6 @@ declare module "next-auth/jwt" {
     role?: string;
     tenantId?: string;
     subscriptionStatus?: SubscriptionStatus | null;
+    athleteOnboardedAt?: boolean;
   }
 }

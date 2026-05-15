@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Kronos — Software invisible para CrossFit Boxes";
+export const alt = "Kronos — CrossFit con datos duros. Atletas + Boxes.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -89,9 +89,8 @@ export default function OpenGraphImage() {
             lineHeight: 1.05,
           }}
         >
-          Software invisible
-          <br />
-          <span style={{ color: "#C8FF2D" }}>para tu CrossFit Box.</span>
+          CrossFit
+          <span style={{ color: "#C8FF2D" }}>con datos duros.</span>
         </div>
 
         <div
@@ -102,8 +101,8 @@ export default function OpenGraphImage() {
             maxWidth: 900,
           }}
         >
-          Software para CrossFit Boxes en LATAM. White-label visual real. Pagos
-          Stripe + Mercado Pago + OXXO.
+          App del atleta. Sistema operativo del Box. Una sola plataforma para
+          PRs, reservas, programación y operación de tu CrossFit.
         </div>
       </div>
 
@@ -122,7 +121,9 @@ export default function OpenGraphImage() {
       >
         <span>kronos-fit.com</span>
         <span>·</span>
-        <span>HECHO EN MÉXICO</span>
+        <span>ATLETAS · BOXES</span>
+        <span>·</span>
+        <span>LATAM</span>
       </div>
     </div>,
     { ...size },

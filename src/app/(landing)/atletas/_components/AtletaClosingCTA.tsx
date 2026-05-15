@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
 import { FINAL_CTA, CTA_LABEL } from "../_data/copy";
@@ -21,6 +22,31 @@ export default function AtletaClosingCTA({
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
+        <Image
+          src="/images/landing/atletas-closing-hero-deadlift.webp"
+          alt=""
+          fill
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, 1320px"
+          style={{
+            objectFit: "cover",
+            objectPosition: "right center",
+            opacity: 0.4,
+            zIndex: 0,
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to right, rgba(15,16,20,0.95) 0%, rgba(15,16,20,0.7) 50%, rgba(15,16,20,0.3) 100%)",
+            zIndex: 0,
+            pointerEvents: "none",
+          }}
+        />
         <div
           style={{ flex: 1, minWidth: 320, position: "relative", zIndex: 1 }}
         >

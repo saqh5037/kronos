@@ -80,6 +80,11 @@ export function StreakHero({
   const palette = PALETTE[status];
   const flameKey = `${status}-${reduce ? "static" : "anim"}`;
 
+  // Fire backdrop sólo cuando hay racha activa (status !== dormant). Las light
+  // trails verdes refuerzan la sensación de energía/velocidad sin saturar el
+  // estado dormant (que debe verse calmado, esperando).
+  const showFireBackdrop = status !== "dormant";
+
   return (
     <div
       className="k-card relative overflow-hidden"
@@ -91,6 +96,24 @@ export function StreakHero({
       data-testid="streak-hero"
       data-status={status}
     >
+      {showFireBackdrop && (
+        <motion.div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{
+            opacity:
+              status === "critical" ? 0.32 : status === "warning" ? 0.24 : 0.18,
+          }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          style={{
+            backgroundImage: "url(/images/app/streaks-fire-backdrop.webp)",
+            backgroundSize: "cover",
+            backgroundPosition: "center right",
+            mixBlendMode: "screen",
+          }}
+        />
+      )}
       <motion.div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"

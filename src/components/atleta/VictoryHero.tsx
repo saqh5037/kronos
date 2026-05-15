@@ -20,9 +20,35 @@ export default function VictoryHero({
   activeSkill,
 }: Props) {
   return (
-    <section style={{ padding: "56px 20px 0" }}>
+    <section
+      style={{
+        position: "relative",
+        padding: "56px 20px 24px",
+        overflow: "hidden",
+      }}
+    >
+      {/* Backdrop cinemático — barbell en sombras geométricas. Opacity baja
+          para que el texto y los stats sigan siendo el foco. El bottom
+          gradient suaviza el corte hacia el resto de la home. */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: "url(/images/app/wod-card-default.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.18,
+          pointerEvents: "none",
+          maskImage:
+            "linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0) 100%)",
+          WebkitMaskImage:
+            "linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0) 100%)",
+        }}
+      />
       <div
         style={{
+          position: "relative",
           fontFamily: "var(--k-font-display)",
           fontSize: 10,
           fontWeight: 600,

@@ -24,7 +24,7 @@ export default function LeaderboardError({
           No pudimos cargar el ranking
         </h1>
         <p className="text-sm text-[var(--k-t2)]">
-          Intentá refrescar o volvé en un momento.
+          Intenta refrescar o vuelve en un momento.
         </p>
         <div className="flex gap-2 justify-center pt-2">
           <button onClick={reset} className="k-btn-grad">

@@ -438,6 +438,7 @@ async function main() {
       phone: `55${String(10000000 + Math.floor(Math.random() * 90000000))}`,
       status,
       createdAt,
+      onboardingCompletedAt: createdAt,
     });
   }
   await prisma.athlete.createMany({ data: athleteData });
@@ -472,6 +473,7 @@ async function main() {
       firstName: "Atlas",
       lastName: "BoxB",
       status: "ACTIVE",
+      onboardingCompletedAt: seedNow,
     },
   });
 

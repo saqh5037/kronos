@@ -126,14 +126,15 @@ export async function completeOnboarding(
     }
   }
 
+  const now = new Date();
   await prismaBase.$transaction([
     prismaBase.athlete.update({
       where: { id: athlete.id },
-      data: profileUpdate,
+      data: { ...profileUpdate, onboardingCompletedAt: now },
     }),
     prismaBase.box.update({
       where: { id: tenantId },
-      data: { onboardingCompletedAt: new Date() },
+      data: { onboardingCompletedAt: now },
     }),
   ]);
 
@@ -144,13 +145,20 @@ export async function markOnboardingCompleted(): Promise<
   { ok: true } | { ok: false; message: string }
 > {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.tenantId) {
+  if (!session?.user?.tenantId || !session.user.id) {
     return { ok: false, message: "Sesión expirada" };
   }
-  await prismaBase.box.update({
-    where: { id: session.user.tenantId },
-    data: { onboardingCompletedAt: new Date() },
-  });
+  const now = new Date();
+  await prismaBase.$transaction([
+    prismaBase.athlete.updateMany({
+      where: { tenantId: session.user.tenantId, userId: session.user.id },
+      data: { onboardingCompletedAt: now },
+    }),
+    prismaBase.box.update({
+      where: { id: session.user.tenantId },
+      data: { onboardingCompletedAt: now },
+    }),
+  ]);
   return { ok: true };
 }
 

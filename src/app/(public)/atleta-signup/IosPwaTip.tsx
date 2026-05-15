@@ -67,7 +67,7 @@ export default function IosPwaTip() {
             className="text-[10px] text-center"
             style={{ color: "var(--k-t3)" }}
           >
-            (también podés seguir acá y crear contraseña abajo)
+            (también puedes seguir acá y crear contraseña abajo)
           </p>
         </div>
       ) : (
@@ -102,7 +102,7 @@ export default function IosPwaTip() {
                   Agregar a inicio
                 </strong>
                 <br />
-                3. Volvé y registrate desde la app instalada
+                3. Volvé y regístrate desde la app instalada
               </p>
               <p className="text-[10px] pt-1" style={{ color: "var(--k-t3)" }}>
                 Si preferís seguir sin instalar, también funciona — recomendamos

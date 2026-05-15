@@ -37,13 +37,30 @@ export function AnimatedStats({
 
   return (
     <motion.div
-      className="grid grid-cols-3 gap-2 sm:gap-3 mt-6 px-3 sm:px-4"
+      className="relative grid grid-cols-3 gap-2 sm:gap-3 mt-6 px-3 sm:px-4"
       variants={container}
       initial={false}
       animate="show"
     >
+      {/* Backdrop dust + lima sparks — textura sutil detrás de los HaloRings.
+          Las cards (var(--k-surface)) tapan la parte central; el backdrop se
+          ve apenas en los bordes y entre cards. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -mx-3 sm:-mx-4 rounded-2xl overflow-hidden"
+        style={{
+          backgroundImage: "url(/images/app/home-stats-backdrop.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.22,
+          maskImage:
+            "radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 80%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 80%)",
+        }}
+      />
       <motion.div
-        className="k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
+        className="relative k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
         variants={item}
       >
         <HaloRing
@@ -55,7 +72,7 @@ export function AnimatedStats({
         />
       </motion.div>
       <motion.div
-        className="k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
+        className="relative k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
         variants={item}
       >
         <HaloRing
@@ -67,7 +84,7 @@ export function AnimatedStats({
         />
       </motion.div>
       <motion.div
-        className="k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
+        className="relative k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
         variants={item}
       >
         <HaloRing

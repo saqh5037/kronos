@@ -5,84 +5,142 @@ import { useRouter } from "next/navigation";
 import KCard from "@/components/kronos/KCard";
 import { kToast } from "@/lib/toast";
 import {
-  completeOnboarding,
-  markOnboardingCompleted,
-} from "@/server/actions/atleta-onboarding";
-import type { Unit, Level } from "@/lib/atleta-prefs";
-import AvatarUpload from "@/components/atleta/AvatarUpload";
+  completeAtletaOnboarding,
+  logOnboardingStep,
+} from "@/server/actions/atleta-onboarding-v2";
 import { markOnboarded } from "@/lib/pwa-visits";
+import { ProgressBar } from "@/components/kronos/forms";
+import { useWizardState } from "./lib/use-wizard-state";
+import { PlanCreatingScreen } from "./steps/PlanCreatingScreen";
+import {
+  Step1Reason,
+  Step2PhysicalProfile,
+  Step3Experience,
+  Step4Goal,
+  Step5Frequency,
+  Step6Routine,
+  Step7ExcludedMuscles,
+  Step8Location,
+  Step9Notifications,
+} from "./steps";
 
 type Props = {
-  initialFirstName: string;
-  initialLastName: string;
-  initialUnit: Unit | null;
-  initialLevel: Level | null;
-  initialPhotoUrl: string | null;
+  isB2B: boolean;
+  boxName: string;
+  coachName: string | null;
 };
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 9;
 
-export default function OnboardingWizard({
-  initialFirstName,
-  initialLastName,
-  initialUnit,
-  initialLevel,
-  initialPhotoUrl,
-}: Props) {
+export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
   const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [firstName, setFirstName] = useState(initialFirstName);
-  const [lastName, setLastName] = useState(initialLastName);
-  const [unit, setUnit] = useState<Unit>(initialUnit ?? "kg");
-  const [level, setLevel] = useState<Level>(initialLevel ?? "scaled");
-  const [joinSlug, setJoinSlug] = useState("");
-  const [photoUrl, setPhotoUrl] = useState<string | null>(initialPhotoUrl);
   const [pending, startTransition] = useTransition();
+  const [showPlanCreating, setShowPlanCreating] = useState(false);
+  const {
+    state,
+    setStep,
+    setFitnessReason,
+    setBiologicalSex,
+    setWeight,
+    setHeight,
+    setAge,
+    setTrackMenstrualCycle,
+    setFitnessExperience,
+    setFitnessGoal,
+    setWeeklyFrequency,
+    setRoutinePreference,
+    setExcludedMuscles,
+    setTrainingLocation,
+    setTrainsOwnToo,
+  } = useWizardState();
 
   function next() {
-    setStep((s) => Math.min(s + 1, TOTAL_STEPS));
-  }
-  function prev() {
-    setStep((s) => Math.max(s - 1, 1));
+    if (state.step < TOTAL_STEPS) {
+      // Fire-and-forget: el log de progreso no debe bloquear la navegación.
+      // logAudit ya catchea internamente, así que el .catch acá es defensivo
+      // contra errores de red durante el fetch del server action.
+      const stepCompleted = state.step;
+      void logOnboardingStep(stepCompleted).catch((err) => {
+        console.warn("[onboarding] step audit failed:", err);
+      });
+      setStep(state.step + 1);
+    }
   }
 
-  function finish(joinSlugOverride?: string | null) {
+  function prev() {
+    if (state.step > 1) {
+      setStep(state.step - 1);
+    }
+  }
+
+  function finish() {
+    // Validate all required fields
+    if (
+      !state.fitnessReason ||
+      !state.biologicalSex ||
+      !state.weightKg ||
+      !state.heightCm ||
+      !state.ageYears ||
+      !state.fitnessExperience ||
+      !state.fitnessGoal ||
+      !state.weeklyFrequency ||
+      !state.routinePreference ||
+      !state.trainingLocation
+    ) {
+      kToast.error("Completa todos los campos para continuar");
+      return;
+    }
+
+    // Step 9 cierra el flow — disparar el último STEP_COMPLETED antes de
+    // arrancar la animación. completeAtletaOnboarding agrega el evento
+    // ATHLETE_ONBOARDING_COMPLETED en el server action.
+    void logOnboardingStep(TOTAL_STEPS).catch((err) => {
+      console.warn("[onboarding] step 9 audit failed:", err);
+    });
+
+    setShowPlanCreating(true);
+  }
+
+  async function finishWithAnimation() {
     startTransition(async () => {
-      const result = await completeOnboarding({
-        firstName,
-        lastName,
-        unit,
-        level,
-        joinBoxSlug: joinSlugOverride ?? (joinSlug.trim() || null),
+      const result = await completeAtletaOnboarding({
+        fitnessReason: state.fitnessReason!,
+        biologicalSex: state.biologicalSex!,
+        weightKg: state.weightKg!,
+        heightCm: state.heightCm!,
+        ageYears: state.ageYears!,
+        trackMenstrualCycle: state.trackMenstrualCycle,
+        fitnessExperience: state.fitnessExperience!,
+        fitnessGoal: state.fitnessGoal!,
+        weeklyFrequency: state.weeklyFrequency!,
+        routinePreference: state.routinePreference!,
+        excludedMuscles: state.excludedMuscles,
+        trainingLocation: state.trainingLocation!,
+        trainsOnOwnToo: state.trainsOnOwnToo,
+        pushNotificationsEnabled: state.pushNotificationsEnabled,
       });
+
       if (!result.ok) {
         kToast.error(result.message);
+        setShowPlanCreating(false);
         return;
       }
-      if (result.joinedBoxRequested && result.joinBoxName) {
-        kToast.success(`Le avisamos al coach de ${result.joinBoxName}`);
-      } else {
-        kToast.success("¡Listo! Bienvenido a Kronos");
-      }
-      // Flag para gatear el banner PWA — al completar onboarding habilitamos
-      // que el banner aparezca en la próxima visita a /atleta/*.
+
       markOnboarded();
+      // Clear wizard state from localStorage
+      try {
+        localStorage.removeItem("kronos_wizard_state");
+      } catch {
+        // ignore
+      }
+      kToast.success("¡Listo! Bienvenido a Kronos");
       router.push("/atleta");
       router.refresh();
     });
   }
 
-  function skipAll() {
-    startTransition(async () => {
-      const r = await markOnboardingCompleted();
-      if (r.ok) {
-        markOnboarded();
-        router.push("/atleta");
-        router.refresh();
-      } else {
-        kToast.error(r.message);
-      }
-    });
+  if (showPlanCreating) {
+    return <PlanCreatingScreen onComplete={finishWithAnimation} />;
   }
 
   return (
@@ -92,48 +150,105 @@ export default function OnboardingWizard({
           className="font-mono text-[11px] uppercase tracking-wider mb-2"
           style={{ color: "var(--k-t3)" }}
         >
-          Paso {step} de {TOTAL_STEPS}
+          Paso {state.step} de {TOTAL_STEPS}
         </p>
-        <ProgressBar step={step} total={TOTAL_STEPS} />
+        <ProgressBar step={state.step} total={TOTAL_STEPS} />
       </div>
 
       <KCard animate={false}>
         <div className="p-6">
-          {step === 1 ? (
-            <Step1
-              firstName={firstName}
-              lastName={lastName}
-              photoUrl={photoUrl}
-              onPhotoChange={setPhotoUrl}
-              setFirstName={setFirstName}
-              setLastName={setLastName}
+          {state.step === 1 && (
+            <Step1Reason
+              reason={state.fitnessReason}
+              onReasonChange={setFitnessReason}
               onNext={next}
-              onSkip={skipAll}
               pending={pending}
             />
-          ) : null}
-          {step === 2 ? (
-            <Step2
-              unit={unit}
-              level={level}
-              setUnit={setUnit}
-              setLevel={setLevel}
+          )}
+          {state.step === 2 && (
+            <Step2PhysicalProfile
+              biologicalSex={state.biologicalSex}
+              weightKg={state.weightKg}
+              heightCm={state.heightCm}
+              ageYears={state.ageYears}
+              trackMenstrualCycle={state.trackMenstrualCycle}
+              onBiologicalSexChange={setBiologicalSex}
+              onWeightChange={setWeight}
+              onHeightChange={setHeight}
+              onAgeChange={setAge}
+              onMenstrualCycleChange={setTrackMenstrualCycle}
               onPrev={prev}
               onNext={next}
-              onSkip={skipAll}
               pending={pending}
             />
-          ) : null}
-          {step === 3 ? (
-            <Step3
-              joinSlug={joinSlug}
-              setJoinSlug={setJoinSlug}
+          )}
+          {state.step === 3 && (
+            <Step3Experience
+              experience={state.fitnessExperience}
+              onExperienceChange={setFitnessExperience}
               onPrev={prev}
-              onFinish={() => finish()}
-              onSkipBox={() => finish(null)}
+              onNext={next}
               pending={pending}
             />
-          ) : null}
+          )}
+          {state.step === 4 && (
+            <Step4Goal
+              goal={state.fitnessGoal}
+              onGoalChange={setFitnessGoal}
+              onPrev={prev}
+              onNext={next}
+              pending={pending}
+            />
+          )}
+          {state.step === 5 && (
+            <Step5Frequency
+              frequency={state.weeklyFrequency}
+              experience={state.fitnessExperience}
+              onFrequencyChange={setWeeklyFrequency}
+              onPrev={prev}
+              onNext={next}
+              pending={pending}
+            />
+          )}
+          {state.step === 6 && (
+            <Step6Routine
+              preference={state.routinePreference}
+              onPreferenceChange={setRoutinePreference}
+              onPrev={prev}
+              onNext={next}
+              pending={pending}
+            />
+          )}
+          {state.step === 7 && (
+            <Step7ExcludedMuscles
+              excluded={state.excludedMuscles}
+              onExcludedChange={setExcludedMuscles}
+              onPrev={prev}
+              onNext={next}
+              pending={pending}
+            />
+          )}
+          {state.step === 8 && (
+            <Step8Location
+              isB2B={isB2B}
+              boxName={boxName}
+              coachName={coachName}
+              trainingLocation={state.trainingLocation}
+              trainsOnOwnToo={state.trainsOnOwnToo}
+              onLocationChange={setTrainingLocation}
+              onTrainsOwnChange={setTrainsOwnToo}
+              onPrev={prev}
+              onNext={next}
+              pending={pending}
+            />
+          )}
+          {state.step === 9 && (
+            <Step9Notifications
+              onPrev={prev}
+              onNext={finish}
+              pending={pending}
+            />
+          )}
         </div>
       </KCard>
 
@@ -143,378 +258,6 @@ export default function OnboardingWizard({
       >
         Puedes cambiar todo después desde tu perfil.
       </p>
-    </div>
-  );
-}
-
-function ProgressBar({ step, total }: { step: number; total: number }) {
-  const pct = (step / total) * 100;
-  return (
-    <div
-      className="h-1.5 rounded-full overflow-hidden"
-      style={{ background: "var(--k-line)" }}
-    >
-      <div
-        className="h-full transition-all"
-        style={{
-          width: `${pct}%`,
-          background: "var(--k-t1)",
-          boxShadow: "0 0 8px rgba(255,255,255,0.06)",
-        }}
-      />
-    </div>
-  );
-}
-
-type Step1Props = {
-  firstName: string;
-  lastName: string;
-  photoUrl: string | null;
-  onPhotoChange: (url: string | null) => void;
-  setFirstName: (v: string) => void;
-  setLastName: (v: string) => void;
-  onNext: () => void;
-  onSkip: () => void;
-  pending: boolean;
-};
-
-function Step1({
-  firstName,
-  lastName,
-  photoUrl,
-  onPhotoChange,
-  setFirstName,
-  setLastName,
-  onNext,
-  onSkip,
-  pending,
-}: Step1Props) {
-  const canContinue = firstName.trim().length >= 2;
-  const initials = (firstName.trim()[0] ?? "") + (lastName.trim()[0] ?? "");
-  return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="font-display font-bold text-2xl tracking-[-0.01em]">
-          Bienvenido
-        </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
-          ¿Cómo quieres que te llamemos?
-        </p>
-      </div>
-      <Field
-        label="Nombre"
-        value={firstName}
-        onChange={setFirstName}
-        placeholder="Tu nombre"
-        required
-      />
-      <Field
-        label="Apellido"
-        value={lastName}
-        onChange={setLastName}
-        placeholder="Tu apellido"
-        required
-      />
-      <div className="space-y-2">
-        <label
-          className="text-xs font-mono uppercase tracking-wider"
-          style={{ color: "var(--k-t3)" }}
-        >
-          Foto (opcional)
-        </label>
-        <AvatarUpload
-          initialPhotoUrl={photoUrl}
-          initials={initials.toUpperCase() || "?"}
-          size={72}
-          showRemove={false}
-          onChange={onPhotoChange}
-        />
-      </div>
-      <div className="flex flex-col gap-2 pt-2">
-        <button
-          type="button"
-          onClick={onNext}
-          disabled={!canContinue || pending}
-          className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50"
-        >
-          Siguiente
-        </button>
-        <button
-          type="button"
-          onClick={onSkip}
-          disabled={pending}
-          className="text-xs underline disabled:opacity-50"
-          style={{ color: "var(--k-t3)" }}
-        >
-          Saltar y empezar
-        </button>
-      </div>
-    </div>
-  );
-}
-
-type Step2Props = {
-  unit: Unit;
-  level: Level;
-  setUnit: (v: Unit) => void;
-  setLevel: (v: Level) => void;
-  onPrev: () => void;
-  onNext: () => void;
-  onSkip: () => void;
-  pending: boolean;
-};
-
-function Step2({
-  unit,
-  level,
-  setUnit,
-  setLevel,
-  onPrev,
-  onNext,
-  onSkip,
-  pending,
-}: Step2Props) {
-  return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="font-display font-bold text-2xl tracking-[-0.01em]">
-          Tus preferencias
-        </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
-          ¿En qué unidad mides y a qué nivel entrenas?
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <label
-          className="text-xs font-mono uppercase tracking-wider"
-          style={{ color: "var(--k-t3)" }}
-        >
-          Unidad
-        </label>
-        <SegmentedControl
-          options={[
-            { value: "kg", label: "Kilogramos" },
-            { value: "lb", label: "Libras" },
-          ]}
-          value={unit}
-          onChange={(v) => setUnit(v as Unit)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label
-          className="text-xs font-mono uppercase tracking-wider"
-          style={{ color: "var(--k-t3)" }}
-        >
-          Nivel
-        </label>
-        <SegmentedControl
-          options={[
-            { value: "beginner", label: "Empezando" },
-            { value: "scaled", label: "Scaled" },
-            { value: "rx", label: "RX" },
-          ]}
-          value={level}
-          onChange={(v) => setLevel(v as Level)}
-        />
-      </div>
-
-      <div className="flex flex-col gap-2 pt-2">
-        <button
-          type="button"
-          onClick={onNext}
-          disabled={pending}
-          className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50"
-        >
-          Siguiente
-        </button>
-        <div className="flex justify-between">
-          <button
-            type="button"
-            onClick={onPrev}
-            disabled={pending}
-            className="text-xs underline disabled:opacity-50"
-            style={{ color: "var(--k-t3)" }}
-          >
-            ← Atrás
-          </button>
-          <button
-            type="button"
-            onClick={onSkip}
-            disabled={pending}
-            className="text-xs underline disabled:opacity-50"
-            style={{ color: "var(--k-t3)" }}
-          >
-            Saltar y empezar
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-type Step3Props = {
-  joinSlug: string;
-  setJoinSlug: (v: string) => void;
-  onPrev: () => void;
-  onFinish: () => void;
-  onSkipBox: () => void;
-  pending: boolean;
-};
-
-function Step3({
-  joinSlug,
-  setJoinSlug,
-  onPrev,
-  onFinish,
-  onSkipBox,
-  pending,
-}: Step3Props) {
-  const hasSlug = joinSlug.trim().length > 0;
-  return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="font-display font-bold text-2xl tracking-[-0.01em]">
-          ¿Tienes un box?
-        </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
-          Si tu coach te dio un código, lo puedes ingresar aquí. Si no, puedes
-          empezar solo y unirte después.
-        </p>
-      </div>
-
-      <Field
-        label="Código del box (opcional)"
-        value={joinSlug}
-        onChange={(v) => setJoinSlug(v.toLowerCase())}
-        placeholder="ej: iron-hands"
-        autoComplete="off"
-      />
-      <p className="text-[11px] -mt-3" style={{ color: "var(--k-t3)" }}>
-        Le mandamos un email al coach para que te apruebe.
-      </p>
-
-      <div className="flex flex-col gap-2 pt-2">
-        <button
-          type="button"
-          onClick={onFinish}
-          disabled={pending}
-          className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50"
-        >
-          {hasSlug
-            ? pending
-              ? "Mandando solicitud…"
-              : "Solicitar unirme y empezar"
-            : pending
-              ? "Empezando…"
-              : "Empezar sin box"}
-        </button>
-        <div className="flex justify-between">
-          <button
-            type="button"
-            onClick={onPrev}
-            disabled={pending}
-            className="text-xs underline disabled:opacity-50"
-            style={{ color: "var(--k-t3)" }}
-          >
-            ← Atrás
-          </button>
-          <button
-            type="button"
-            onClick={onSkipBox}
-            disabled={pending}
-            className="text-xs underline disabled:opacity-50"
-            style={{ color: "var(--k-t3)" }}
-          >
-            Saltar
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-type FieldProps = {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  required?: boolean;
-  autoComplete?: string;
-};
-
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-  required,
-  autoComplete,
-}: FieldProps) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label
-        className="text-xs font-mono uppercase tracking-wider"
-        style={{ color: "var(--k-t3)" }}
-      >
-        {label}
-      </label>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        autoComplete={autoComplete}
-        className="w-full px-4 py-3 rounded-xl text-sm border focus:outline-none transition-colors"
-        style={{
-          background: "var(--k-surface)",
-          borderColor: "var(--k-line-2)",
-          color: "var(--k-t1)",
-        }}
-      />
-    </div>
-  );
-}
-
-type SegmentedOption = { value: string; label: string };
-
-function SegmentedControl({
-  options,
-  value,
-  onChange,
-}: {
-  options: SegmentedOption[];
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div
-      className="flex gap-1 p-1 rounded-xl"
-      style={{
-        background: "var(--k-surface)",
-        border: "1px solid var(--k-line-2)",
-      }}
-    >
-      {options.map((opt) => {
-        const active = opt.value === value;
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => onChange(opt.value)}
-            className="flex-1 px-3 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-colors"
-            style={{
-              background: active ? "var(--k-t1)" : "transparent",
-              color: active ? "var(--k-bg)" : "var(--k-t2)",
-              fontWeight: active ? 700 : 500,
-            }}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
     </div>
   );
 }

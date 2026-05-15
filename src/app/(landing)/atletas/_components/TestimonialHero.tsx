@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { TESTIMONIAL_HERO } from "../_data/copy";
 
@@ -30,15 +31,41 @@ export default function TestimonialHero() {
         position: "relative",
         borderTop: "1px solid var(--k-line)",
         borderBottom: "1px solid var(--k-line)",
+        overflow: "hidden",
       }}
     >
+      <Image
+        src="/images/landing/atletas-testimonial-bg.webp"
+        alt=""
+        fill
+        loading="lazy"
+        sizes="100vw"
+        style={{
+          objectFit: "cover",
+          opacity: 0.2,
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      />
       <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(to bottom, rgba(8,8,10,0.85) 0%, rgba(8,8,10,0.6) 50%, rgba(8,8,10,0.85) 100%)",
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      />
+      <figure
         style={{
           maxWidth: 880,
           margin: "0 auto",
           textAlign: "center",
           padding: "0 24px",
           position: "relative",
+          zIndex: 1,
         }}
       >
         <div
@@ -78,7 +105,7 @@ export default function TestimonialHero() {
           </span>
         </motion.blockquote>
 
-        <motion.div
+        <motion.figcaption
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
@@ -91,9 +118,12 @@ export default function TestimonialHero() {
             color: "var(--k-t3)",
           }}
         >
-          — {TESTIMONIAL_HERO.attribution}
-        </motion.div>
-      </div>
+          —{" "}
+          <cite style={{ fontStyle: "normal" }}>
+            {TESTIMONIAL_HERO.attribution}
+          </cite>
+        </motion.figcaption>
+      </figure>
     </section>
   );
 }
