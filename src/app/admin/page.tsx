@@ -169,9 +169,7 @@ export default async function AdminDashboardPage({
         kind={kind}
         userEmail={session.user.email ?? null}
         userId={session.user.id ?? null}
-        devDetail={
-          process.env.NODE_ENV === "development" ? dashboardErrorDetail : null
-        }
+        devDetail={dashboardErrorDetail}
       />
     );
   }
