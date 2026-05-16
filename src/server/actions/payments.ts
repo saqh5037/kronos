@@ -185,13 +185,13 @@ export async function getRevenueByDay(opts: {
   const results = await rawDb.$queryRaw<
     Array<{ day: Date; revenue: number; count: bigint }>
   >`
-    SELECT DATE(paid_at) as day, SUM(amount) as revenue, COUNT(*) as count
-    FROM payments
-    WHERE tenant_id = ${session.user.tenantId}
+    SELECT DATE("paidAt") as day, SUM(amount) as revenue, COUNT(*) as count
+    FROM "Payment"
+    WHERE "tenantId" = ${session.user.tenantId}
       AND status = 'PAID'
-      AND paid_at >= ${opts.dateFrom}
-      AND paid_at <= ${opts.dateTo}
-    GROUP BY DATE(paid_at)
+      AND "paidAt" >= ${opts.dateFrom}
+      AND "paidAt" <= ${opts.dateTo}
+    GROUP BY DATE("paidAt")
     ORDER BY day ASC
   `;
 

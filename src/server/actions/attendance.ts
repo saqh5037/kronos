@@ -173,7 +173,7 @@ export async function getAttendanceByDay(opts: {
   if (opts.coachId) classWhere.coachId = opts.coachId;
 
   const coachClause = opts.coachId
-    ? Prisma.sql`AND c.coach_id = ${opts.coachId}`
+    ? Prisma.sql`AND c."coachId" = ${opts.coachId}`
     : Prisma.sql``;
 
   const [classCapacities, bookingCounts] = await Promise.all([
