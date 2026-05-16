@@ -5,7 +5,10 @@ import { signIn } from "next-auth/react";
 import { reserveFoundingPlan } from "@/server/actions/founding-dominus";
 import { slugify } from "@/lib/slug";
 import { kToast } from "@/lib/toast";
-import type { BillingCycle } from "@/lib/validations/founding-dominus";
+import type {
+  BillingCycle,
+  FoundingDisciplineSlugType,
+} from "@/lib/validations/founding-dominus";
 
 type FieldErrors = Partial<
   Record<"email" | "ownerName" | "boxName" | "slug" | "phone", string>
@@ -29,7 +32,11 @@ function formatMxn(value: number): string {
   }).format(value);
 }
 
-export default function FoundingForm() {
+export default function FoundingForm({
+  defaultDiscipline = "crossfit",
+}: {
+  defaultDiscipline?: FoundingDisciplineSlugType;
+} = {}) {
   const [email, setEmail] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [boxName, setBoxName] = useState("");
@@ -37,6 +44,8 @@ export default function FoundingForm() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [phone, setPhone] = useState("");
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+  const [disciplineSlug, setDisciplineSlug] =
+    useState<FoundingDisciplineSlugType>(defaultDiscipline);
   const [website, setWebsite] = useState(""); // honeypot — debe quedar vacío
   const [errors, setErrors] = useState<FieldErrors>({});
   const [success, setSuccess] = useState<SuccessState | null>(null);
@@ -57,6 +66,7 @@ export default function FoundingForm() {
         boxName,
         slug,
         billingCycle,
+        disciplineSlug,
         phone,
         website,
       });
@@ -156,6 +166,33 @@ export default function FoundingForm() {
             onChange={(e) => setWebsite(e.target.value)}
           />
         </label>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label
+          className="text-xs font-mono uppercase tracking-wider"
+          style={{ color: "var(--k-t3)" }}
+        >
+          Disciplina principal de tu Box
+        </label>
+        <div
+          className="grid grid-cols-2 gap-2"
+          role="radiogroup"
+          aria-label="Disciplina principal"
+        >
+          <DisciplineOption
+            active={disciplineSlug === "crossfit"}
+            label="CrossFit"
+            sublabel="Box CrossFit clásico"
+            onClick={() => setDisciplineSlug("crossfit")}
+          />
+          <DisciplineOption
+            active={disciplineSlug === "hyrox"}
+            label="Hyrox"
+            sublabel="Race format + stations"
+            onClick={() => setDisciplineSlug("hyrox")}
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -326,6 +363,40 @@ function CycleOption({
       </div>
       <div className="text-xs mt-1 font-mono" style={{ color: "var(--k-t2)" }}>
         {price}
+      </div>
+    </button>
+  );
+}
+
+type DisciplineOptionProps = {
+  active: boolean;
+  label: string;
+  sublabel: string;
+  onClick: () => void;
+};
+
+function DisciplineOption({
+  active,
+  label,
+  sublabel,
+  onClick,
+}: DisciplineOptionProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      role="radio"
+      aria-checked={active}
+      className="text-left px-4 py-3 rounded-xl border transition-colors"
+      style={{
+        background: active ? "var(--k-accent-soft)" : "var(--k-surface)",
+        borderColor: active ? "var(--k-accent)" : "var(--k-line-2)",
+        color: "var(--k-t1)",
+      }}
+    >
+      <div className="font-display font-bold text-sm">{label}</div>
+      <div className="text-[11px] mt-0.5" style={{ color: "var(--k-t2)" }}>
+        {sublabel}
       </div>
     </button>
   );

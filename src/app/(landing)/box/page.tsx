@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import { isDominusPromoActive } from "@/lib/dominus-promo";
+import { getDisciplineBranding } from "@/lib/branding";
 import LandingTracker from "../_components/LandingTracker";
 import Nav from "../_components/Nav";
 import Hero from "../_components/Hero";
@@ -16,32 +17,53 @@ import Footer from "../_components/Footer";
 import DominusPromoBanner from "../_components/DominusPromoBanner";
 import BoxJsonLd from "./_components/BoxJsonLd";
 
-export const metadata: Metadata = {
-  title: "Kronos para Boxes — El sistema operativo de tu CrossFit Box",
-  description:
-    "Software invisible para CrossFit Boxes en LATAM. White-label real, multi-tenant, pagos Stripe + Mercado Pago + OXXO. Tus atletas usan la app gratis incluida.",
-  alternates: {
-    canonical: "https://www.kronos-fit.com/box",
-  },
-  openGraph: {
-    title: "Kronos para Boxes — El sistema operativo de tu CrossFit Box",
-    description:
-      "White-label real, multi-tenant, pagos LATAM nativos. La app del atleta GRATIS incluida — sin costo extra por usuario.",
-    url: "https://www.kronos-fit.com/box",
-    type: "website",
-    locale: "es_MX",
-    siteName: "Kronos",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Kronos para Boxes — El sistema operativo de tu CrossFit Box",
-    description:
-      "White-label real para CrossFit Boxes en LATAM. App atleta GRATIS incluida. Stripe + Mercado Pago + OXXO.",
-  },
-};
+type BoxLandingSearchParams = Promise<{ discipline?: string }>;
 
-export default async function BoxLanding() {
-  const session = await getServerSession(authOptions);
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: BoxLandingSearchParams;
+}): Promise<Metadata> {
+  const { discipline } = await searchParams;
+  const branding = getDisciplineBranding(discipline);
+  // Canonical = /box (crossfit) o /box?discipline=hyrox para que Google
+  // no indexe duplicado.
+  const canonicalPath =
+    branding.slug === "crossfit" ? "/box" : `/box?discipline=${branding.slug}`;
+  const url = `https://www.kronos-fit.com${canonicalPath}`;
+
+  return {
+    title: branding.metaTitle,
+    description: branding.metaDescription,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: branding.metaTitle,
+      description: branding.metaDescription,
+      url,
+      type: "website",
+      locale: "es_MX",
+      siteName: "Kronos",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: branding.metaTitle,
+      description: branding.metaDescription,
+    },
+  };
+}
+
+export default async function BoxLanding({
+  searchParams,
+}: {
+  searchParams: BoxLandingSearchParams;
+}) {
+  const [{ discipline }, session] = await Promise.all([
+    searchParams,
+    getServerSession(authOptions),
+  ]);
+  const branding = getDisciplineBranding(discipline);
   const boxHref = session?.user
     ? session.user.role === "ATHLETE"
       ? "/atleta"
@@ -59,13 +81,17 @@ export default async function BoxLanding() {
       <DominusPromoBanner />
       <Nav boxHref={boxHref} />
       <main id="main">
-        <Hero boxHref={boxHref} dominusActive={dominusActive} />
+        <Hero
+          boxHref={boxHref}
+          dominusActive={dominusActive}
+          branding={branding}
+        />
         <FoundingPartners />
         <SectionOwner />
         <SectionWhiteLabel />
         <Pricing />
         <CtaTail />
-        <SectionFAQ />
+        <SectionFAQ branding={branding} />
         <SectionLeadForm />
       </main>
       <Footer />

@@ -127,12 +127,18 @@ export async function reserveFoundingPlan(
     };
   }
 
-  const [existingBox, existingUser, plan] = await Promise.all([
+  const { disciplineSlug } = parsed.data;
+
+  const [existingBox, existingUser, plan, discipline] = await Promise.all([
     prismaBase.box.findUnique({ where: { slug }, select: { id: true } }),
     prismaBase.user.findUnique({ where: { email }, select: { id: true } }),
     prismaBase.saasPlan.findUnique({
       where: { slug: PROMO_PLAN_SLUG },
       select: { id: true, priceMxnCents: true },
+    }),
+    prismaBase.discipline.findUnique({
+      where: { slug: disciplineSlug },
+      select: { id: true, isActive: true },
     }),
   ]);
 
@@ -166,6 +172,11 @@ export async function reserveFoundingPlan(
     now.getTime() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000,
   );
 
+  // Auto-activar feature hyrox cuando la disciplina elegida es hyrox.
+  // Mismo patrón que pilot-onboarding (createPilotBox).
+  const features: Record<string, boolean> = {};
+  if (disciplineSlug === "hyrox") features.hyrox = true;
+
   let result: { id: string; slug: string };
   try {
     result = await prismaBase.$transaction(async (tx) => {
@@ -176,6 +187,11 @@ export async function reserveFoundingPlan(
           subscriptionStatus: "TRIAL",
           trialStartedAt: now,
           trialEndsAt,
+          // Si discipline no existe o no está activa, dejamos disciplineId
+          // nulo (igual que Boxes pre-F1.1). Backfill via super-admin tool.
+          disciplineId:
+            discipline && discipline.isActive ? discipline.id : null,
+          features: features as Prisma.InputJsonValue,
         },
         select: { id: true, slug: true },
       });

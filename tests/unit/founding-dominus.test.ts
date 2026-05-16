@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   foundingReservationSchema,
   BillingCycle,
+  FoundingDisciplineSlug,
 } from "@/lib/validations/founding-dominus";
 
 describe("foundingReservationSchema", () => {
@@ -86,5 +87,37 @@ describe("foundingReservationSchema", () => {
     expect(BillingCycle.safeParse("monthly").success).toBe(true);
     expect(BillingCycle.safeParse("annual").success).toBe(true);
     expect(BillingCycle.safeParse("biannual").success).toBe(false);
+  });
+
+  it("FoundingDisciplineSlug enum solo acepta crossfit|hyrox", () => {
+    expect(FoundingDisciplineSlug.safeParse("crossfit").success).toBe(true);
+    expect(FoundingDisciplineSlug.safeParse("hyrox").success).toBe(true);
+    expect(FoundingDisciplineSlug.safeParse("yoga").success).toBe(false);
+    expect(FoundingDisciplineSlug.safeParse("").success).toBe(false);
+  });
+
+  it("disciplineSlug default = crossfit cuando se omite (retrocompat)", () => {
+    const out = foundingReservationSchema.safeParse(valid);
+    if (!out.success) throw new Error("schema should parse");
+    expect(out.data.disciplineSlug).toBe("crossfit");
+  });
+
+  it("acepta disciplineSlug=hyrox explícito", () => {
+    const out = foundingReservationSchema.safeParse({
+      ...valid,
+      disciplineSlug: "hyrox",
+    });
+    expect(out.success).toBe(true);
+    if (out.success) {
+      expect(out.data.disciplineSlug).toBe("hyrox");
+    }
+  });
+
+  it("rechaza disciplineSlug no soportada", () => {
+    const out = foundingReservationSchema.safeParse({
+      ...valid,
+      disciplineSlug: "yoga",
+    });
+    expect(out.success).toBe(false);
   });
 });
