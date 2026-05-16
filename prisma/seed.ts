@@ -293,6 +293,57 @@ async function main() {
     },
   });
 
+  // ─── Disciplines (catálogo global, F1.1 2026-05-16) ──────────────────────────
+  // Multi-disciplina: cada Box practica UNA disciplina. CrossFit + Hyrox son
+  // el MVP. Agregar yoga/pilates = nuevo upsert acá + DisciplineStrategy en
+  // src/lib/disciplines/{slug}.ts.
+  const crossfitDiscipline = await prisma.discipline.upsert({
+    where: { slug: "crossfit" },
+    update: {
+      name: "CrossFit",
+      strategy: "crossfit",
+      measurements: ["TIME", "REPS", "WEIGHT", "ROUNDS_REPS"],
+      leaderboardType: "PR",
+      isActive: true,
+    },
+    create: {
+      slug: "crossfit",
+      name: "CrossFit",
+      strategy: "crossfit",
+      measurements: ["TIME", "REPS", "WEIGHT", "ROUNDS_REPS"],
+      leaderboardType: "PR",
+      brandColor: "#c8ff2d",
+      isActive: true,
+    },
+  });
+
+  const hyroxDiscipline = await prisma.discipline.upsert({
+    where: { slug: "hyrox" },
+    update: {
+      name: "Hyrox",
+      strategy: "hyrox",
+      measurements: ["TIME", "DISTANCE"],
+      leaderboardType: "PR",
+      isActive: true,
+    },
+    create: {
+      slug: "hyrox",
+      name: "Hyrox",
+      strategy: "hyrox",
+      measurements: ["TIME", "DISTANCE"],
+      leaderboardType: "PR",
+      brandColor: "#c8ff2d",
+      isActive: true,
+    },
+  });
+
+  // Backfill defensivo: cualquier Box pre-existente sin disciplineId queda como
+  // CrossFit (era el único caso antes de F1.1).
+  await prisma.box.updateMany({
+    where: { disciplineId: null },
+    data: { disciplineId: crossfitDiscipline.id },
+  });
+
   // ─── Boxes ────────────────────────────────────────────────────────────────────
   // Default operating schedule: 6 WOD slots Mon-Fri (3 AM + 3 PM),
   // 3 Open Box slots Saturday, Sunday closed.
@@ -316,6 +367,9 @@ async function main() {
       weeklySchedule: WEEKLY_SCHEDULE_DEFAULT,
       subscriptionStatus: "ACTIVE",
       onboardingCompletedAt: seedNow,
+      disciplineId: crossfitDiscipline.id,
+      city: "Ciudad de México",
+      country: "MX",
     },
     create: {
       slug: "iron-hands-polanco",
@@ -329,6 +383,9 @@ async function main() {
       weeklySchedule: WEEKLY_SCHEDULE_DEFAULT,
       subscriptionStatus: "ACTIVE",
       onboardingCompletedAt: seedNow,
+      disciplineId: crossfitDiscipline.id,
+      city: "Ciudad de México",
+      country: "MX",
     },
   });
 
@@ -337,6 +394,7 @@ async function main() {
     update: {
       subscriptionStatus: "ACTIVE",
       onboardingCompletedAt: seedNow,
+      disciplineId: crossfitDiscipline.id,
     },
     create: {
       slug: "demo-box-b",
@@ -345,8 +403,14 @@ async function main() {
       currency: "MXN",
       subscriptionStatus: "ACTIVE",
       onboardingCompletedAt: seedNow,
+      disciplineId: crossfitDiscipline.id,
     },
   });
+
+  // Silence linter: hyroxDiscipline reservada para seed de Box Hyrox demo en F1.7
+  // (wizard pilotos). Por ahora se siembra solo el catálogo para tener la opción
+  // disponible en producto.
+  void hyroxDiscipline;
 
   // Wipe seed-prefixed data for box1 to make seed idempotent + reproducible
   await prisma.bodyMetric.deleteMany({ where: { tenantId: box1.id } });
@@ -501,6 +565,7 @@ async function main() {
     const wod = await prisma.wOD.create({
       data: {
         tenantId: box1.id,
+        disciplineId: crossfitDiscipline.id,
         name: recipe.name,
         type: recipe.type,
         scoreType: recipe.scoreType,
