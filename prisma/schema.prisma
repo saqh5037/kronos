@@ -18,6 +18,34 @@ enum SubscriptionStatus {
   EXPIRED
 }
 
+// Multi-disciplina: cada Box practica UNA disciplina primaria (CrossFit, Hyrox,
+// Yoga, Pilates, etc.). Agregar nueva disciplina = INSERT en esta tabla + nueva
+// clase DisciplineStrategy en src/lib/disciplines/{slug}.ts + entry en
+// src/lib/branding/index.ts. Cero migrations adicionales.
+//
+// `measurements` y `leaderboardType` son hints semánticos para la UI; la
+// validación dura vive en la DisciplineStrategy de TS.
+model Discipline {
+  id              String   @id @default(cuid())
+  slug            String   @unique // "crossfit", "hyrox", "yoga", "pilates"
+  name            String
+  iconUrl         String?
+  brandColor      String   @default("#c8ff2d")
+  strategy        String // referencia a clase TS en src/lib/disciplines/{strategy}.ts
+  measurements    Json // ej: ["TIME", "REPS", "WEIGHT", "ROUNDS_REPS"]
+  leaderboardType String   @default("PR") // "PR" | "STREAK" | "CONSISTENCY"
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  boxes              Box[]
+  primaryAthletes    Athlete[]  @relation("PrimaryDiscipline")
+  wods               WOD[]
+  movements          Movement[]
+
+  @@index([slug])
+  @@index([isActive])
+}
+
 model Box {
   id                         String             @id @default(cuid())
   slug                       String             @unique
@@ -39,6 +67,20 @@ model Box {
   transactionalEmailsEnabled Boolean            @default(true)
   createdAt                  DateTime           @default(now())
 
+  // ─── Multi-disciplina + geofencing pilotos (F1.1, 2026-05-16) ───────────────
+  // disciplineId nullable durante backfill — promover a NOT NULL en sprint
+  // siguiente una vez que todos los Boxes existentes hayan sido backfilleados.
+  disciplineId              String?
+  country                   String    @default("MX")
+  city                      String?
+  region                    String?
+  lat                       Float?
+  lng                       Float?
+  pilotExclusivityExpiresAt DateTime?
+  pilotBetaSignedAt         DateTime?
+  features                  Json      @default("{}")
+
+  discipline              Discipline?              @relation(fields: [disciplineId], references: [id])
   users                   User[]
   athletes                Athlete[]
   membershipPlans         MembershipPlan[]
@@ -57,6 +99,9 @@ model Box {
   staffInvitations        StaffInvitation[]
   saasSubscriptions       SaasSubscription[]
   saasInvoices            SaasInvoice[]
+
+  @@index([disciplineId])
+  @@index([city, disciplineId])
 }
 
 // ─── USERS / AUTH ─────────────────────────────────────────────────────────────
@@ -178,28 +223,36 @@ model Athlete {
   pushNotificationsEnabled Boolean   @default(false)
   appleHealthLinkedAt      DateTime?
 
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  // ─── Multi-disciplina (F1.1, 2026-05-16) ────────────────────────────────────
+  // Primary discipline = la que el atleta más practica. F2 agregará M:M
+  // Athlete↔Box, lo cual permitirá tener disciplinas adicionales via cada
+  // membership.
+  primaryDisciplineId String?
 
-  box             Box              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user            User?            @relation(fields: [userId], references: [id])
-  memberships     Membership[]
-  bookings        Booking[]
-  scores          Score[]
-  prs             PR[]
-  prAttempts      PRAttempt[]
-  achievements    Achievement[]
-  streaks         Streak[]
-  goals           Goal[]
-  bodyMetrics     BodyMetric[]
-  aliases         AthleteAlias[]
-  surveyResponses SurveyResponse[]
-  xpLedger        XPLedger[]
-  dailyMissions   DailyMission[]
-  skillLevels     AthleteSkillLevel[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  box               Box                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  primaryDiscipline Discipline?         @relation("PrimaryDiscipline", fields: [primaryDisciplineId], references: [id])
+  user              User?               @relation(fields: [userId], references: [id])
+  memberships       Membership[]
+  bookings          Booking[]
+  scores            Score[]
+  prs               PR[]
+  prAttempts        PRAttempt[]
+  achievements      Achievement[]
+  streaks           Streak[]
+  goals             Goal[]
+  bodyMetrics       BodyMetric[]
+  aliases           AthleteAlias[]
+  surveyResponses   SurveyResponse[]
+  xpLedger          XPLedger[]
+  dailyMissions     DailyMission[]
+  skillLevels       AthleteSkillLevel[]
 
   @@index([tenantId])
   @@index([tenantId, status])
+  @@index([primaryDisciplineId])
 }
 
 // ─── MEMBERSHIPS ──────────────────────────────────────────────────────────────
@@ -369,15 +422,23 @@ model WOD {
   scheduledFor DateTime? @db.Date
   /** When set, this WOD is part of an athlete's personal program. */
   ownerAthleteId String?
-  createdAt    DateTime  @default(now())
+  createdAt      DateTime @default(now())
 
-  box       Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  classes   Class[]
-  scores    Score[]
-  movements WODMovement[]
+  // ─── Multi-disciplina (F1.1, 2026-05-16) ────────────────────────────────────
+  // Hereda de Box.discipline al crear pero se almacena explícito para queries
+  // y para soportar WODs cross-disciplina futuros. F1.2 introducirá `Session`
+  // como evolución de WOD con payload validado por strategy.
+  disciplineId String?
+
+  box        Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  discipline Discipline?   @relation(fields: [disciplineId], references: [id])
+  classes    Class[]
+  scores     Score[]
+  movements  WODMovement[]
 
   @@index([tenantId])
   @@index([tenantId, ownerAthleteId, scheduledFor])
+  @@index([disciplineId])
 }
 
 model Movement {
@@ -402,7 +463,14 @@ model Movement {
   contentSource      MovementContentSource @default(EMPTY)
   contentGeneratedAt DateTime?
 
+  // ─── Multi-disciplina (F1.1, 2026-05-16) ────────────────────────────────────
+  // disciplineId null = movimiento agnóstico (ej. running, rowing comparten
+  // CrossFit y Hyrox). disciplineId set = movimiento exclusivo de esa
+  // disciplina (ej. snatch solo CrossFit, sled push solo Hyrox).
+  disciplineId String?
+
   box          Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  discipline   Discipline?   @relation(fields: [disciplineId], references: [id])
   wodMovements WODMovement[]
   prs          PR[]
   prAttempts   PRAttempt[]
@@ -411,6 +479,7 @@ model Movement {
   @@unique([tenantId, slug])
   @@index([tenantId])
   @@index([tenantId, category])
+  @@index([tenantId, disciplineId])
 }
 
 model WODMovement {
