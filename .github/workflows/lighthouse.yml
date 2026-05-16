@@ -38,11 +38,8 @@ jobs:
           NEXTAUTH_SECRET: ci-stub-secret-not-used
           NEXTAUTH_URL: http://localhost:3000
 
-      - name: Install Lighthouse CI
-        run: pnpm add -D -w @lhci/cli@0.14.x
-
       - name: Run Lighthouse CI
-        run: pnpm exec lhci autorun --config=lighthouserc.json
+        run: pnpm dlx @lhci/cli@0.14.x autorun --config=lighthouserc.json
         env:
           DATABASE_URL: postgresql://lhci:lhci@localhost:5432/lhci_stub
           DIRECT_DATABASE_URL: postgresql://lhci:lhci@localhost:5432/lhci_stub
