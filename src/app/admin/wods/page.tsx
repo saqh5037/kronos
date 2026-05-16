@@ -1,9 +1,12 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auth";
 import { listWODs } from "@/server/actions/wods";
 import type { WODSummary } from "@/server/actions/wods";
 import { listMovements } from "@/server/actions/movements";
-import WODForm from "@/components/WODForm";
+import SmartWODForm from "@/components/wod-form/SmartWODForm";
 import MovementForm from "@/components/MovementForm";
 import { WODHeroCard } from "@/components/kronos/WODHeroCard";
+import { getCachedBoxDiscipline } from "@/server/cache";
 
 export const metadata = { title: "Kronos — WODs" };
 
@@ -18,9 +21,19 @@ type MovementRow = {
 export default async function WODsPage() {
   let wods: WODSummary[] = [];
   let movements: MovementRow[] = [];
+  let disciplineSlug: string | null = null;
 
   try {
-    [wods, movements] = await Promise.all([listWODs(), listMovements()]);
+    const session = await getServerSession(authOptions);
+    const tenantId = session?.user?.tenantId;
+    const [w, m, disc] = await Promise.all([
+      listWODs(),
+      listMovements(),
+      tenantId ? getCachedBoxDiscipline(tenantId) : Promise.resolve(null),
+    ]);
+    wods = w;
+    movements = m;
+    disciplineSlug = disc?.slug ?? null;
   } catch {
     // BD ausente o sin sesión — render vacío
   }
@@ -48,7 +61,7 @@ export default async function WODsPage() {
             Biblioteca de WODs y movimientos del box
           </p>
         </div>
-        <WODForm movements={movements} />
+        <SmartWODForm movements={movements} disciplineSlug={disciplineSlug} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
