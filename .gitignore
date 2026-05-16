@@ -56,7 +56,10 @@ test-results/
 # OS
 Thumbs.db
 /screenshots/
-/scripts/
+# /scripts/ ignorado por default (efímeros locales). Excepciones explícitas
+# para scripts de operación permanente:
+/scripts/*
+!/scripts/generate-pilot-beta-link.ts
 /.playwright-mcp/
 /tour-*.png
 /tour2-*.png
