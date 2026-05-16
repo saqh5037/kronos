@@ -863,7 +863,7 @@
 
   /* ── Eyebrow label ── */
   .k-eyebrow {
-    font-family: var(--font-jetbrains-mono), monospace;
+    font-family: var(--font-plex-mono), monospace;
     font-size: 10px;
     letter-spacing: 0.16em;
     font-weight: 700;
@@ -947,7 +947,7 @@
     gap: 6px;
     padding: 5px 11px;
     border-radius: 100px;
-    font-family: var(--font-jetbrains-mono), monospace;
+    font-family: var(--font-plex-mono), monospace;
     font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -1048,7 +1048,7 @@
     border-spacing: 0;
   }
   .k-table thead th {
-    font-family: var(--font-jetbrains-mono), monospace;
+    font-family: var(--font-plex-mono), monospace;
     font-size: 10px;
     letter-spacing: 0.12em;
     font-weight: 700;
@@ -1111,7 +1111,7 @@
 
   /* ── Eyebrow with leading bar ── */
   .k-eyebrow-bar {
-    font-family: var(--font-jetbrains-mono), monospace;
+    font-family: var(--font-plex-mono), monospace;
     font-size: 10px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -1127,23 +1127,6 @@
     width: 24px;
     height: 1.5px;
     background: var(--grad);
-  }
-
-  /* ── Script accent ── */
-  .k-script {
-    font-family: var(--font-dancing), cursive;
-    font-weight: 600;
-    background: var(--grad);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    line-height: 1;
-  }
-  .k-script-red {
-    font-family: var(--font-dancing), cursive;
-    font-weight: 600;
-    color: var(--red);
-    line-height: 1;
   }
 
   /* ── Italic em with gradient ── */
