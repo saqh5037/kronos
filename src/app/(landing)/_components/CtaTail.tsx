@@ -47,7 +47,7 @@ export default function CtaTail() {
           style={{ position: "relative", zIndex: 1 }}
         >
           <a
-            href="mailto:demo@kronos.app?subject=Demo%20Kronos"
+            href="mailto:demo@kronos-fit.com?subject=Demo%20Kronos"
             className="lp-btn-lime lp-btn-lg"
             style={{ justifyContent: "center" }}
             onClick={() => track("landing_demo_booked", { source: "cta_tail" })}
@@ -55,7 +55,7 @@ export default function CtaTail() {
             Reservar demo →
           </a>
           <a
-            href="mailto:ventas@kronos.app"
+            href="mailto:ventas@kronos-fit.com"
             className="lp-btn-ghost lp-btn-lg"
             style={{ justifyContent: "center" }}
             onClick={() =>

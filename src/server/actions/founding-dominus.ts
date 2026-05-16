@@ -59,6 +59,25 @@ export type FoundingReservationResult =
 export async function reserveFoundingPlan(
   input: FoundingReservationInput,
 ): Promise<FoundingReservationResult> {
+  // Honeypot — si el bot rellenó el campo oculto, devolver fake-success
+  // sin tocar DB ni enviar email. El bot cree que ganó y se va.
+  if (input.website && input.website.length > 0) {
+    const hdrs = await headers();
+    const ipPrefix = getClientIp(hdrs).split(".").slice(0, 2).join(".");
+    console.warn(`[founding-dominus] honeypot triggered ip=${ipPrefix}.x.x`);
+    const fakeTrialEnd = new Date(
+      Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000,
+    );
+    return {
+      ok: true,
+      boxId: "honeypot-rejected",
+      slug: input.slug ?? "honeypot",
+      email: input.email ?? "honeypot@example.com",
+      trialEndsAt: fakeTrialEnd,
+      billingCycle: input.billingCycle ?? "monthly",
+    };
+  }
+
   // Rate limit por IP — protege Resend + DB durante el evento.
   // 5 reservas/min/IP es generoso para uso humano y bloquea bots.
   const ip = getClientIp(await headers());
@@ -67,7 +86,7 @@ export async function reserveFoundingPlan(
     return {
       ok: false,
       error: "RATE_LIMITED",
-      message: `Demasiados intentos. Probá de nuevo en ${rl.retryAfterSec} segundos.`,
+      message: `Demasiados intentos. Prueba de nuevo en ${rl.retryAfterSec} segundos.`,
     };
   }
 
@@ -76,7 +95,7 @@ export async function reserveFoundingPlan(
       ok: false,
       error: "PROMO_CLOSED",
       message:
-        "La oferta Founding Dominus se cerró. Escribinos a contacto@kronos-fit.com para próximas promociones.",
+        "La oferta Founding Dominus se cerró. Escríbenos a contacto@kronos-fit.com para próximas promociones.",
     };
   }
 
@@ -92,7 +111,7 @@ export async function reserveFoundingPlan(
     return {
       ok: false,
       error: "VALIDATION",
-      message: "Revisá los campos del formulario",
+      message: "Revisa los campos del formulario",
       fieldErrors,
     };
   }
@@ -103,7 +122,7 @@ export async function reserveFoundingPlan(
     return {
       ok: false,
       error: "SLUG_RESERVED",
-      message: "Ese slug está reservado, elegí otro",
+      message: "Ese slug está reservado, elige otro",
       fieldErrors: { slug: "Slug reservado" },
     };
   }
@@ -138,7 +157,7 @@ export async function reserveFoundingPlan(
       ok: false,
       error: "PLAN_NOT_FOUND",
       message:
-        "No encontramos el plan Founding. Si seguís acá, escribinos a contacto@kronos-fit.com.",
+        "No encontramos el plan Founding. Si sigues acá, escríbenos a contacto@kronos-fit.com.",
     };
   }
 
@@ -203,7 +222,7 @@ export async function reserveFoundingPlan(
         ok: false,
         error: "EMAIL_TAKEN",
         message:
-          "Ya tenemos tu reserva — revisá tu correo o escribinos a contacto@kronos-fit.com",
+          "Ya tenemos tu reserva — revisa tu correo o escríbenos a contacto@kronos-fit.com",
       };
     }
     throw e;

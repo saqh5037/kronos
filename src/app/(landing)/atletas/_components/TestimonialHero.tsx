@@ -34,19 +34,27 @@ export default function TestimonialHero() {
         overflow: "hidden",
       }}
     >
-      <Image
-        src="/images/landing/atletas-testimonial-bg.webp"
-        alt=""
-        fill
-        loading="lazy"
-        sizes="100vw"
+      <div
+        aria-hidden="true"
         style={{
-          objectFit: "cover",
-          opacity: 0.2,
+          position: "absolute",
+          inset: 0,
           zIndex: 0,
           pointerEvents: "none",
         }}
-      />
+      >
+        <Image
+          src="/images/landing/atletas-testimonial-bg.webp"
+          alt=""
+          fill
+          loading="lazy"
+          sizes="100vw"
+          style={{
+            objectFit: "cover",
+            opacity: 0.2,
+          }}
+        />
+      </div>
       <div
         aria-hidden="true"
         style={{

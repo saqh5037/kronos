@@ -244,7 +244,7 @@ function LeadForm({ onSuccess }: { onSuccess: () => void }) {
         <div className="lp-form-error" role="alert">
           {serverError}
           <br />
-          <span style={{ fontSize: 13 }}>Escríbenos a hola@kronos.app</span>
+          <span style={{ fontSize: 13 }}>Escríbenos a hola@kronos-fit.com</span>
         </div>
       )}
 

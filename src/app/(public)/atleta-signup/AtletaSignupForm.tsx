@@ -194,7 +194,7 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
             <>
               Te enviamos un enlace mágico a{" "}
               <strong style={{ color: "var(--k-t1)" }}>{success.email}</strong>.
-              Tócalo desde tu teléfono — o usá el código del email si el link no
+              Tócalo desde tu teléfono — o usa el código del email si el link no
               funciona.
             </>
           )

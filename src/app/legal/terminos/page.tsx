@@ -156,9 +156,9 @@ export default function TerminosPage() {
 
           <Section title="10. Contacto">
             <p>
-              Para preguntas sobre estos términos, escribinos a{" "}
-              <a href="mailto:hola@kronos.app" className="lp-link-lime">
-                hola@kronos.app
+              Para preguntas sobre estos términos, escríbenos a{" "}
+              <a href="mailto:hola@kronos-fit.com" className="lp-link-lime">
+                hola@kronos-fit.com
               </a>
               .
             </p>

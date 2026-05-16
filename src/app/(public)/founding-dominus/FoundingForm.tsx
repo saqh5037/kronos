@@ -37,6 +37,7 @@ export default function FoundingForm() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [phone, setPhone] = useState("");
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+  const [website, setWebsite] = useState(""); // honeypot — debe quedar vacío
   const [errors, setErrors] = useState<FieldErrors>({});
   const [success, setSuccess] = useState<SuccessState | null>(null);
   const [pending, startTransition] = useTransition();
@@ -57,6 +58,7 @@ export default function FoundingForm() {
         slug,
         billingCycle,
         phone,
+        website,
       });
       if (!result.ok) {
         setErrors(result.fieldErrors ?? {});
@@ -115,7 +117,7 @@ export default function FoundingForm() {
           </strong>
         </div>
         <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-          ¿No te llegaron los correos en 5 min? Revisá spam o escribinos a{" "}
+          ¿No te llegaron los correos en 5 min? Revisa spam o escríbenos a{" "}
           <a
             href="mailto:contacto@kronos-fit.com"
             className="underline"
@@ -130,6 +132,32 @@ export default function FoundingForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {/* Honeypot — invisible al usuario, bot-trap. Si se rellena, server
+          devuelve fake-success sin escribir DB. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          width: 1,
+          height: 1,
+          overflow: "hidden",
+        }}
+      >
+        <label htmlFor="website">
+          Sitio web (no llenar):
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+          />
+        </label>
+      </div>
+
       <div className="flex flex-col gap-2">
         <label
           className="text-xs font-mono uppercase tracking-wider"
@@ -156,8 +184,8 @@ export default function FoundingForm() {
         </div>
         <p className="text-[11px]" style={{ color: "var(--k-t3)" }}>
           {billingCycle === "annual"
-            ? "Pagás 12, recibís 15 meses. El cargo se procesa cuando MercadoPago esté listo (te avisamos por correo)."
-            : "Pagás mes a mes al precio fundador, sin aumentos durante 12 meses."}
+            ? "Pagas 12, recibes 15 meses. El cargo se procesa cuando MercadoPago esté listo (te avisamos por correo)."
+            : "Pagas mes a mes al precio fundador, sin aumentos durante 12 meses."}
         </p>
       </div>
 

@@ -136,12 +136,12 @@ export default function PrivacidadPage() {
 
           <Section title="5. Tus derechos">
             <p>
-              Como Box o atleta, tenés derecho a: acceder a tu información,
+              Como Box o atleta, tienes derecho a: acceder a tu información,
               corregir datos inexactos, solicitar la eliminación de tu cuenta, y
               exportar tu data en formato CSV. Para ejercer estos derechos,
-              escribinos a{" "}
-              <a href="mailto:hola@kronos.app" className="lp-link-lime">
-                hola@kronos.app
+              escríbenos a{" "}
+              <a href="mailto:hola@kronos-fit.com" className="lp-link-lime">
+                hola@kronos-fit.com
               </a>
               .
             </p>
@@ -152,7 +152,8 @@ export default function PrivacidadPage() {
               Usamos cookies esenciales para la operación de la plataforma
               (sesión, preferencias). Usamos PostHog para analytics de producto
               de forma anónima. No usamos cookies de terceros para publicidad.
-              Podés desactivar analytics desde la configuración de tu navegador.
+              Puedes desactivar analytics desde la configuración de tu
+              navegador.
             </p>
           </Section>
 
@@ -175,9 +176,9 @@ export default function PrivacidadPage() {
 
           <Section title="9. Contacto">
             <p>
-              Para preguntas sobre privacidad, escribinos a{" "}
-              <a href="mailto:hola@kronos.app" className="lp-link-lime">
-                hola@kronos.app
+              Para preguntas sobre privacidad, escríbenos a{" "}
+              <a href="mailto:hola@kronos-fit.com" className="lp-link-lime">
+                hola@kronos-fit.com
               </a>
               .
             </p>

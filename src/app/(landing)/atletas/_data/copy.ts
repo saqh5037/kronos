@@ -6,14 +6,14 @@
  * Samuel reemplace con consentimiento firmado de atletas reales.
  */
 
-export const CTA_LABEL = "ENTRAR" as const;
+export const CTA_LABEL = "Empezar gratis" as const;
 
 export const HERO = {
-  eyebrow: "KRONOS · ATLETAS",
+  eyebrow: "GRATIS PARA SIEMPRE · NO NECESITAS QUE TU BOX USE KRONOS",
   claimLineA: "Tu progreso",
   claimLineB: "es el producto.",
-  sub: "Tu racha. Tus PRs. Tu WOD. Sin spam, sin gamificación cringe, sin influencers.",
-  ctaTertiary: "¿No la tienes? Pídela a tu coach.",
+  sub: "Tu racha, tus PRs, tu WOD del día. Crea tu cuenta gratis en 30 segundos. Sin tarjeta, sin spam, sin gamificación cringe.",
+  ctaTertiary: "Aunque tu Box todavía no use Kronos, tú ya puedes empezar.",
 } as const;
 
 export const BENEFIT_SKILLS = {
@@ -87,14 +87,14 @@ export const DUAL_QUOTES = {
 } as const;
 
 export const FINAL_CTA = {
-  eyebrow: "EMPIEZA HOY · SIN TARJETA · SIN LETRA CHICA",
-  h2Line1: "Entra",
-  h2Line2: "o pídela.",
-  sub: "Si tu box ya usa Kronos, entras con tu correo. Si no, pásale el link a tu coach — la decisión es de él, pero ya tienes argumentos.",
+  eyebrow: "EMPIEZA HOY · GRATIS · SIN TARJETA · SIN LETRA CHICA",
+  h2Line1: "Crea tu cuenta",
+  h2Line2: "gratis hoy.",
+  sub: "30 segundos. Sin tarjeta. Sin permiso de tu Box. Si tu Box ya usa Kronos, todo se cablea solo. Si no, tú empiezas a llevar tu progreso desde ya.",
   ctaSecondaryLabel: "Que mi box la pida",
   ctaSecondaryHref:
     "mailto:hola@kronos-fit.com?subject=Quiero%20Kronos%20en%20mi%20box",
-  footnote: "TU DATA ES TUYA · SIN ANUNCIANTES",
+  footnote: "TU DATA ES TUYA · SIN ANUNCIANTES · GRATIS PARA SIEMPRE",
 } as const;
 
 export const FOOTER = {

@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
 
     // Send email to admin
     await sendEmail({
-      to: [process.env.LEADS_EMAIL ?? "hola@kronos.app"],
+      to: [process.env.LEADS_EMAIL ?? "hola@kronos-fit.com"],
       subject: `Nuevo lead · ${data.boxName} · ${athletesLabel(data.athletes)} atletas · ${planLabel(data.planInterest)}`,
       html: `<pre style="font-family:monospace;font-size:14px;line-height:1.6;color:#08080A">
 Lead recibido:
@@ -166,7 +166,7 @@ Ver en admin: https://kronos.app/admin/leads/${lead.id}
   <p style="color:#8A8A94;line-height:1.6;margin-bottom:16px">Recibimos tus datos para ${data.boxName}. En menos de 24 horas hábiles te escribimos por WhatsApp (${data.whatsapp}) para coordinar una demo de 20 minutos.</p>
   <p style="color:#8A8A94;line-height:1.6;margin-bottom:32px">Si quieres ver el admin en vivo antes de la llamada, te lo compartimos por WhatsApp.</p>
   <p style="color:#54545C;font-size:13px;line-height:1.6">Cualquier cosa, responde este email.</p>
-  <p style="color:#54545C;font-size:13px;line-height:1.6;margin-top:24px">— Equipo Kronos<br/>hola@kronos.app</p>
+  <p style="color:#54545C;font-size:13px;line-height:1.6;margin-top:24px">— Equipo Kronos<br/>hola@kronos-fit.com</p>
 </div>`,
     });
 

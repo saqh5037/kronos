@@ -44,10 +44,10 @@ export function GET() {
     },
     faq: FAQ_ITEMS.map((f) => ({ question: f.question, answer: f.answer })),
     cta: {
-      primary: { label: "Reservar demo", href: "mailto:demo@kronos.app" },
+      primary: { label: "Reservar demo", href: "mailto:demo@kronos-fit.com" },
       secondary: {
         label: "Hablar con ventas",
-        href: "mailto:ventas@kronos.app",
+        href: "mailto:ventas@kronos-fit.com",
       },
       trial: "30 días sin cargo. Sin tarjeta. Sin contrato anual.",
     },

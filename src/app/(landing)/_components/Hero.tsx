@@ -34,7 +34,7 @@ export default function Hero({
     <section className="lp-hero" id="producto">
       <DuotoneImage
         src="/images/landing/box-hero-coach-tablet.webp"
-        alt=""
+        alt="Coach revisando programación de Kronos en una tablet, dentro de un Box de CrossFit"
         intensity="soft"
         position="center 35%"
         priority
@@ -79,47 +79,33 @@ export default function Hero({
                 </svg>
               </a>
             ) : (
-              <>
-                <a
-                  href="/atleta-signup"
-                  className="lp-btn-lime lp-btn-lg"
-                  onClick={() =>
-                    track("cta_clicked", {
-                      location: "hero_split",
-                      audience: "atleta",
-                    })
-                  }
+              <a
+                href={ownerHref}
+                className="lp-btn-lime lp-btn-lg"
+                onClick={() =>
+                  track("cta_clicked", {
+                    location: "box_hero_primary",
+                    audience: "owner",
+                  })
+                }
+              >
+                {ownerLabel}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
                 >
-                  Soy atleta · Empezar gratis
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
-                </a>
-                <a
-                  href={ownerHref}
-                  className="lp-btn-ghost lp-btn-lg"
-                  onClick={() =>
-                    track("cta_clicked", {
-                      location: "hero_split",
-                      audience: "owner",
-                    })
-                  }
-                >
-                  {ownerLabel}
-                </a>
-              </>
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </a>
             )}
             {boxHref ? (
               <a
-                href="#section-atleta"
+                href="#section-owner"
                 className="lp-btn-ghost lp-btn-lg"
                 onClick={() =>
                   track("cta_clicked", { location: "hero_secondary" })
@@ -129,7 +115,7 @@ export default function Hero({
               </a>
             ) : (
               <a
-                href="#section-atleta"
+                href="#section-owner"
                 className="lp-link-tertiary"
                 onClick={() =>
                   track("cta_clicked", { location: "hero_tertiary" })
