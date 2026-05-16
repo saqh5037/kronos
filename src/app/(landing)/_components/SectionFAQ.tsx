@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { FAQ_ITEMS } from "../_data/mock";
 import { track } from "../_lib/track";
+import {
+  DEFAULT_DISCIPLINE_BRANDING,
+  type DisciplineBranding,
+} from "@/lib/branding";
 
 function FAQItem({
   question,
@@ -68,9 +72,25 @@ function FAQItem({
   );
 }
 
-export default function SectionFAQ() {
+export default function SectionFAQ({
+  branding = DEFAULT_DISCIPLINE_BRANDING,
+}: {
+  branding?: DisciplineBranding;
+}) {
   const [openId, setOpenId] = useState<number | null>(null);
   const reduce = useReducedMotion();
+
+  // FAQ base + extras de disciplina (Hyrox-specific al final). Cada extra
+  // recibe un id sintético arriba del rango base para no colisionar.
+  const items = useMemo(() => {
+    const baseMaxId = FAQ_ITEMS.reduce((max, it) => Math.max(max, it.id), 0);
+    const extras = branding.faqExtras.map((extra, idx) => ({
+      id: baseMaxId + idx + 1,
+      question: extra.q,
+      answer: extra.a,
+    }));
+    return [...FAQ_ITEMS, ...extras];
+  }, [branding.faqExtras]);
 
   return (
     <section className="lp-section" id="section-faq">
@@ -89,7 +109,7 @@ export default function SectionFAQ() {
       </motion.div>
 
       <div className="lp-faq-list">
-        {FAQ_ITEMS.map((item) => (
+        {items.map((item) => (
           <FAQItem
             key={item.id}
             questionId={item.id}

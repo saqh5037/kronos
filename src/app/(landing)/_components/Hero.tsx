@@ -5,6 +5,10 @@ import HeroPhone from "./HeroPhone";
 import DuotoneImage from "./DuotoneImage";
 import { HERO_META } from "../_data/mock";
 import { track } from "../_lib/track";
+import {
+  DEFAULT_DISCIPLINE_BRANDING,
+  type DisciplineBranding,
+} from "@/lib/branding";
 
 const stagger = {
   hidden: {},
@@ -18,9 +22,11 @@ const item = {
 export default function Hero({
   boxHref,
   dominusActive = false,
+  branding = DEFAULT_DISCIPLINE_BRANDING,
 }: {
   boxHref: string | null;
   dominusActive?: boolean;
+  branding?: DisciplineBranding;
 }) {
   const reduce = useReducedMotion();
   const variants = reduce ? undefined : stagger;
@@ -34,7 +40,7 @@ export default function Hero({
     <section className="lp-hero" id="producto">
       <DuotoneImage
         src="/images/landing/box-hero-coach-tablet.webp"
-        alt="Coach revisando programación de Kronos en una tablet, dentro de un Box de CrossFit"
+        alt={`Coach revisando programación de Kronos en una tablet, dentro de un Box de ${branding.name}`}
         intensity="soft"
         position="center 35%"
         priority
@@ -45,16 +51,15 @@ export default function Hero({
         <motion.div initial="hidden" animate="show" variants={variants}>
           <motion.div className="lp-eyebrow" variants={child}>
             <span className="lp-dot" />
-            PILOTO PRIVADO · MÉXICO · CUPO LIMITADO
+            {branding.heroEyebrow}
           </motion.div>
           <motion.h1 variants={child}>
-            Software invisible
+            {branding.heroTitleLine1}
             <br />
-            para tu CrossFit Box.
+            {branding.heroTitleLine2}
           </motion.h1>
           <motion.p className="lp-lead" variants={child}>
-            Reservas, WODs, pagos, racha y admin en una sola app, en español,
-            con tu logo y tu color. Diseñada para CrossFit en México.
+            {branding.heroSubtitle}
           </motion.p>
           <motion.div className="lp-hero-actions" variants={child}>
             {boxHref ? (
