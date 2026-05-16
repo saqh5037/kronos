@@ -46,7 +46,7 @@ export default function NotFoundPage() {
             marginBottom: 24,
           }}
         >
-          La ruta que buscás no existe o fue movida.
+          La ruta que buscas no existe o fue movida.
         </p>
         <Link
           href="/"
