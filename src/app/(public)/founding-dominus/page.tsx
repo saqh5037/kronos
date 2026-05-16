@@ -19,7 +19,7 @@ export const metadata = {
 
 export default async function FoundingDominusPage() {
   const session = await getServerSession(authOptions);
-  if (session) {
+  if (session?.user?.id) {
     redirect(session.user.role === "ATHLETE" ? "/atleta" : "/admin");
   }
 

@@ -21,7 +21,7 @@ export default async function AtletaSignupPage({
   searchParams,
 }: AtletaSignupPageProps) {
   const session = await getServerSession(authOptions);
-  if (session) {
+  if (session?.user?.id) {
     redirect(session.user.role === "ATHLETE" ? "/atleta" : "/admin");
   }
 

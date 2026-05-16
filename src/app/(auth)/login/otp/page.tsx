@@ -25,7 +25,7 @@ export default async function OtpRedirectPage({
   } catch {
     // Cookie corrupta — dejar al client component crear la sesión nueva.
   }
-  if (session) {
+  if (session?.user?.id) {
     const target = session.user.role === "ATHLETE" ? "/atleta" : "/admin";
     redirect(target);
   }

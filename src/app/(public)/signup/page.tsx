@@ -14,7 +14,7 @@ type SignupPageProps = {
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {
   const session = await getServerSession(authOptions);
-  if (session) {
+  if (session?.user?.id) {
     redirect(session.user.role === "ATHLETE" ? "/atleta" : "/admin");
   }
 

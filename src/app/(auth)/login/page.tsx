@@ -15,7 +15,7 @@ export default async function LoginPage() {
     // Cookie corrupta (otro app NextAuth en mismo host, secret rotado, etc.)
     // — dejarla pasar al form; al loguearse se sobrescribe.
   }
-  if (session) {
+  if (session?.user?.id) {
     const role = session.user?.role;
     if (role === "ATHLETE") redirect("/atleta");
     redirect("/admin");
