@@ -25,7 +25,7 @@ export function renderTrialExpiringEmail(args: {
     <p style="font-size: 12px; color: #c8ff2d; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 12px 0;">Trial por terminar</p>
     <h1 style="font-size: 22px; margin: 0 0 16px 0;">${greeting}</h1>
     <p style="font-size: 16px; line-height: 1.5; margin: 0 0 16px 0;">
-      Tu trial de Kronos para <strong>${box}</strong> termina en <strong>${daysLabel}</strong>. Activá una suscripción ahora y mantené tu Box online sin interrupciones.
+      Tu trial de Kronos para <strong>${box}</strong> termina en <strong>${daysLabel}</strong>. Activa una suscripción ahora y mantén tu Box online sin interrupciones.
     </p>
     <p style="margin: 24px 0;">
       <a href="${args.ctaUrl}" style="display: inline-block; background: linear-gradient(135deg, #c8ff2d, #a8d726); color: #08080a; padding: 14px 24px; border-radius: 999px; font-weight: 700; text-decoration: none;">
@@ -36,7 +36,7 @@ export function renderTrialExpiringEmail(args: {
       Si el botón no funciona, copia y pega este link en tu navegador:<br/>
       <a href="${args.ctaUrl}" style="color: #c8ff2d;">${args.ctaUrl}</a>
     </p>
-    <p style="font-size: 12px; color: #777; margin-top: 24px;">¿Tenés dudas sobre los planes? Respondé este email y te ayudamos a elegir.</p>
+    <p style="font-size: 12px; color: #777; margin-top: 24px;">¿Tienes dudas sobre los planes? Responde este email y te ayudamos a elegir.</p>
   </div>
 </body></html>
 `;

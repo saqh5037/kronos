@@ -120,6 +120,13 @@ export async function notifyTrialExpiring(
     }),
     auditKind: "EMAIL_SENT_TRIAL_EXPIRING",
   });
+  // Marca current state para que el cron throttle (24h) sea consulta directa
+  // sobre Box en vez de scan sobre auditEvent. El auditEvent queda como
+  // historial inmutable.
+  await prismaBase.box.update({
+    where: { id: tenantId },
+    data: { trialLastNotifiedAt: new Date() },
+  });
 }
 
 /**

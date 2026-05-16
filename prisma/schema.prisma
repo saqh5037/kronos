@@ -61,6 +61,7 @@ model Box {
   logoUrl                    String?
   trialStartedAt             DateTime?
   trialEndsAt                DateTime?
+  trialLastNotifiedAt        DateTime?
   subscriptionStatus         SubscriptionStatus @default(TRIAL)
   onboardingCompletedAt      DateTime?
   weeklyDigestEnabled        Boolean            @default(true)
