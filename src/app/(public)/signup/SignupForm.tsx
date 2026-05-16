@@ -108,7 +108,7 @@ export default function SignupForm({
         </div>
         {DEV_LOGIN_ENABLED ? (
           <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-            (Dev: si no llega email, podés entrar con tu email + password{" "}
+            (Dev: si no llega email, puedes entrar con tu email + password{" "}
             <code>dev</code> en{" "}
             <a href="/login?dev=1" className="underline">
               /login
@@ -133,14 +133,14 @@ export default function SignupForm({
         >
           Detectamos que intentaste entrar con{" "}
           <strong style={{ color: "var(--k-accent)" }}>{initialEmail}</strong>{" "}
-          pero todavía no tenés cuenta. Si sos dueño de un box, completá tu
-          registro acá. Si sos atleta,{" "}
+          pero todavía no tienes cuenta. Si eres dueño de un box, completa tu
+          registro aquí. Si eres atleta,{" "}
           <a
             href={`/atleta-signup?email=${encodeURIComponent(initialEmail)}`}
             className="underline"
             style={{ color: "var(--k-accent)" }}
           >
-            registrate gratis acá →
+            regístrate gratis aquí →
           </a>
         </div>
       ) : null}

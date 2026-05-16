@@ -142,7 +142,7 @@ export default function Pricing() {
         Precios en MXN, sin IVA. Sin contratos anuales. Sin setup fee. Sin cargo
         por integración con Stripe o Mercado Pago. Si tu Box crece y supera el
         cap de atletas, te avisamos antes de pasar al tier siguiente. Si
-        decrece, también — pagás lo que corresponde al volumen real del mes.
+        decrece, también — pagas lo que corresponde al volumen real del mes.
         <br />
         <br />
         Para 5+ sedes o casos enterprise, escríbenos.

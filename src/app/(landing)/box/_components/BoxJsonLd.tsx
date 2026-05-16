@@ -65,6 +65,7 @@ export default function BoxJsonLd() {
       description:
         "Software invisible para CrossFit Boxes: reservas con waitlist, WODs, pagos (Stripe, Mercado Pago, OXXO, SPEI), asistencia, admin de operación y white-label real.",
       featureList: [
+        "App atleta nativa GRATIS para todos los miembros del Box — sin costo extra por usuario",
         "Reservas con waitlist FIFO",
         "WOD del día + biblioteca",
         "Control de asistencia (QR + manual)",

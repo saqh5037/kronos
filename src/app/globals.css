@@ -1866,3 +1866,17 @@ body {
 body {
   font-family: var(--k-font-body);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ROUTER DUAL GRID — Home `/` chooser atleta (60%) / box (40%)
+   ═══════════════════════════════════════════════════════════ */
+
+.router-dual-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .router-dual-grid {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  }
+}

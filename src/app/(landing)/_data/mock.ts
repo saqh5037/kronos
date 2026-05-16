@@ -56,6 +56,7 @@ export const PRICING: PriceTier[] = [
     unit: "MXN · al mes",
     desc: "Para Boxes independientes hasta 80 atletas activos. El motor base para operar como profesional desde el día uno.",
     features: [
+      "App atleta GRATIS para todos tus miembros — sin costo por usuario",
       "App del atleta con tu logo, color y nombre del Box",
       "Subdominio tubox.kronos.app",
       "Reservas con waitlist FIFO",
@@ -77,6 +78,7 @@ export const PRICING: PriceTier[] = [
     unit: "MXN · al mes",
     desc: "Para Boxes consolidados hasta 200 atletas. La operación profesional para los que ya escalaron y necesitan dejar de perder atletas.",
     features: [
+      "App atleta GRATIS para todos tus miembros — sin costo por usuario",
       "Todo lo de Hierro, más:",
       "Admin completo con MRR, churn y ocupación",
       "Programación de bloques (12 semanas)",
@@ -100,6 +102,7 @@ export const PRICING: PriceTier[] = [
     unit: "MXN · al mes",
     desc: "Para multi-sede, franquicias y redes de Boxes. Atletas activos sin límite, white-label total y multi-tenant cross-Box. Un atleta, varias ciudades, una sola racha.",
     features: [
+      "App atleta GRATIS para todos tus miembros — sin costo por usuario",
       "Todo lo de Acero, más:",
       "White-label completo · dominio propio (app.tubox.mx)",
       "Cero marca Kronos en pantalla, footer ni emails",
@@ -193,7 +196,7 @@ export const FOOTER_LINKS = {
     { label: "Changelog", href: "#", comingSoon: true },
   ],
   kronos: [
-    { label: "Contacto", href: "mailto:hola@kronos.app" },
+    { label: "Contacto", href: "mailto:hola@kronos-fit.com" },
     { label: "Términos", href: "/legal/terminos" },
     { label: "Privacidad", href: "/legal/privacidad" },
   ],
@@ -229,7 +232,7 @@ export const FAQ_ITEMS = [
     id: 5,
     question: "¿Qué tan blanco es el white-label?",
     answer:
-      "Hierro y Acero: tu logo, color y nombre dominan la app, en un subdominio tubox.kronos.app con un footer discreto 'Powered by Kronos'. Los emails llegan desde no-reply@kronos.app firmados por el Box. En Acero, además, apps móviles cobranded (tu logo + sub-marca Kronos). Titanio: dominio propio (app.tubox.mx), emails desde tu dominio, apps publicadas con tu nombre en App Store y Play Store, sin Kronos en ninguna pantalla. El atleta de Titanio nunca lee Kronos.",
+      "Hierro y Acero: tu logo, color y nombre dominan la app, en un subdominio tubox.kronos.app con un footer discreto 'Powered by Kronos'. Los emails llegan desde no-reply@kronos-fit.com firmados por el Box. En Acero, además, apps móviles cobranded (tu logo + sub-marca Kronos). Titanio: dominio propio (app.tubox.mx), emails desde tu dominio, apps publicadas con tu nombre en App Store y Play Store, sin Kronos en ninguna pantalla. El atleta de Titanio nunca lee Kronos.",
   },
   {
     id: 6,

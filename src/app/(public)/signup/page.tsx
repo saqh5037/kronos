@@ -50,7 +50,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
           className="text-center text-xs mt-6"
           style={{ color: "var(--k-t3)" }}
         >
-          ¿Ya tenés cuenta?{" "}
+          ¿Ya tienes cuenta?{" "}
           <Link
             href="/login"
             className="underline"

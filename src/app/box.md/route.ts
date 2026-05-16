@@ -60,8 +60,8 @@ function renderMarkdown(): string {
     "30 días sin cargo. Sin tarjeta. Sin contrato anual. Te llamamos en menos de 24 horas hábiles para entender tu Box y armar el setup.",
   );
   lines.push("");
-  lines.push("- Reservar demo: mailto:demo@kronos.app");
-  lines.push("- Hablar con ventas: mailto:ventas@kronos.app");
+  lines.push("- Reservar demo: mailto:demo@kronos-fit.com");
+  lines.push("- Hablar con ventas: mailto:ventas@kronos-fit.com");
   lines.push("");
   lines.push("*TU DATA ES TUYA POR CONTRATO*");
   lines.push("");

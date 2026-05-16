@@ -119,7 +119,7 @@ function Layout({
         )}
         <div className="k-card p-6">{children}</div>
         <p className="mt-4 text-xs text-center text-[var(--k-t3)]">
-          ¿Ya tenés cuenta?{" "}
+          ¿Ya tienes cuenta?{" "}
           <Link
             href="/login"
             className="text-[var(--k-accent)] hover:underline"

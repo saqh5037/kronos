@@ -80,9 +80,64 @@ export default function Footer() {
             <li>
               <a href="/atleta">App atleta</a>
             </li>
+            <li>
+              <a
+                href="/atleta-signup"
+                style={{
+                  color: "var(--k-accent)",
+                  fontWeight: 600,
+                }}
+              >
+                ¿Eres atleta? Empezar gratis →
+              </a>
+            </li>
           </ul>
         </div>
       </footer>
+
+      <div
+        style={{
+          borderTop: "1px solid var(--k-line)",
+          borderBottom: "1px solid var(--k-line)",
+          padding: "20px 32px",
+          textAlign: "center",
+          background: "var(--k-elevated)",
+        }}
+      >
+        <a
+          href="/atleta-signup"
+          style={{
+            fontFamily: "var(--k-font-body)",
+            fontSize: 15,
+            color: "var(--k-t1)",
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 12,
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.22em",
+              color: "var(--k-accent-on)",
+              background: "var(--k-accent)",
+              padding: "4px 10px",
+              borderRadius: 999,
+            }}
+          >
+            GRATIS
+          </span>
+          ¿Eres atleta? Crea tu cuenta en 30 segundos —{" "}
+          <span style={{ color: "var(--k-accent)", fontWeight: 600 }}>
+            sin pedirle permiso a tu Box.
+          </span>
+        </a>
+      </div>
 
       <div className="lp-foot-bottom">
         <span>

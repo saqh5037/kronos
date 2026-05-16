@@ -105,7 +105,7 @@ export default function SectionWhiteLabel() {
           {
             tier: "TITANIO",
             title: "Tus comunicaciones, tu nombre",
-            body: "Emails desde no-reply@tubox.mx, no desde Kronos. Push notifications firmadas como el Box. SMS desde tu sender ID si lo configuras. En Hierro y Acero los emails llegan desde no-reply@kronos.app firmados por el Box.",
+            body: "Emails desde no-reply@tubox.mx, no desde Kronos. Push notifications firmadas como el Box. SMS desde tu sender ID si lo configuras. En Hierro y Acero los emails llegan desde no-reply@kronos-fit.com firmados por el Box.",
           },
           {
             tier: "TITANIO",

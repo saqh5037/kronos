@@ -11,7 +11,7 @@ export default function AtletaClosingCTA({
   boxHref: string | null;
 }) {
   const reduce = useReducedMotion();
-  const primaryHref = boxHref ?? "/login";
+  const primaryHref = boxHref ?? "/atleta-signup";
 
   return (
     <section className="lp-cta-tail-shell">
@@ -22,20 +22,28 @@ export default function AtletaClosingCTA({
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <Image
-          src="/images/landing/atletas-closing-hero-deadlift.webp"
-          alt=""
-          fill
-          loading="lazy"
-          sizes="(max-width: 768px) 100vw, 1320px"
+        <div
+          aria-hidden="true"
           style={{
-            objectFit: "cover",
-            objectPosition: "right center",
-            opacity: 0.4,
+            position: "absolute",
+            inset: 0,
             zIndex: 0,
             pointerEvents: "none",
           }}
-        />
+        >
+          <Image
+            src="/images/landing/atletas-closing-hero-deadlift.webp"
+            alt=""
+            fill
+            loading="lazy"
+            sizes="(max-width: 768px) 100vw, 1320px"
+            style={{
+              objectFit: "cover",
+              objectPosition: "right center",
+              opacity: 0.4,
+            }}
+          />
+        </div>
         <div
           aria-hidden="true"
           style={{

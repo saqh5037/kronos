@@ -22,6 +22,9 @@ export type EmailResult = {
   error?: string;
 };
 
+// TODO(D3): cambiar default a "Kronos <noreply@kronos-fit.com>" cuando DNS
+// (DKIM + SPF + Return-Path) esté propagado en Resend. Mientras tanto, el ENV
+// EMAIL_FROM puede ya estar configurado al nuevo dominio en producción.
 const DEFAULT_FROM = process.env.EMAIL_FROM ?? "Kronos <noreply@kronos.app>";
 
 let _resend: Resend | null = null;

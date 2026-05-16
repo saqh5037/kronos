@@ -20,13 +20,13 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
   const variants = reduce ? undefined : stagger;
   const child = reduce ? undefined : item;
 
-  const ctaHref = boxHref ?? "/login";
+  const ctaHref = boxHref ?? "/atleta-signup";
 
   return (
     <section className="lp-hero" id="producto">
       <Image
         src="/images/landing/atletas-hero-snatch-kronos.webp"
-        alt=""
+        alt="Atleta de CrossFit ejecutando un snatch con barra olímpica en un Box"
         fill
         priority
         sizes="(max-width: 768px) 100vw, 1320px"

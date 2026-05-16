@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import { isDominusPromoActive } from "@/lib/dominus-promo";
@@ -14,6 +15,30 @@ import CtaTail from "../_components/CtaTail";
 import Footer from "../_components/Footer";
 import DominusPromoBanner from "../_components/DominusPromoBanner";
 import BoxJsonLd from "./_components/BoxJsonLd";
+
+export const metadata: Metadata = {
+  title: "Kronos para Boxes — El sistema operativo de tu CrossFit Box",
+  description:
+    "Software invisible para CrossFit Boxes en LATAM. White-label real, multi-tenant, pagos Stripe + Mercado Pago + OXXO. Tus atletas usan la app gratis incluida.",
+  alternates: {
+    canonical: "https://www.kronos-fit.com/box",
+  },
+  openGraph: {
+    title: "Kronos para Boxes — El sistema operativo de tu CrossFit Box",
+    description:
+      "White-label real, multi-tenant, pagos LATAM nativos. La app del atleta GRATIS incluida — sin costo extra por usuario.",
+    url: "https://www.kronos-fit.com/box",
+    type: "website",
+    locale: "es_MX",
+    siteName: "Kronos",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kronos para Boxes — El sistema operativo de tu CrossFit Box",
+    description:
+      "White-label real para CrossFit Boxes en LATAM. App atleta GRATIS incluida. Stripe + Mercado Pago + OXXO.",
+  },
+};
 
 export default async function BoxLanding() {
   const session = await getServerSession(authOptions);

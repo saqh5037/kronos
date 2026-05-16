@@ -69,6 +69,7 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     EmailProvider({
+      // TODO(D3): default a "Kronos <noreply@kronos-fit.com>" cuando DNS Resend listo.
       from: process.env.EMAIL_FROM ?? "Kronos <noreply@kronos.app>",
       // Token vive 1h. OTP es reusable los primeros 5 min post-primer-uso
       // (ver REUSE_GRACE_MS en src/server/otp.ts).

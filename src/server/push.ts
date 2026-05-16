@@ -12,7 +12,7 @@ function ensureVapid() {
   if (vapidInitialized) return;
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
-  const subject = process.env.VAPID_SUBJECT ?? "mailto:hola@kronos.app";
+  const subject = process.env.VAPID_SUBJECT ?? "mailto:hola@kronos-fit.com";
 
   if (!publicKey || !privateKey) {
     // No VAPID keys configured — push is disabled. Not an error in dev.

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import LandingTracker from "../_components/LandingTracker";
@@ -13,6 +14,31 @@ import MovementStrip from "./_components/MovementStrip";
 import AtletasJsonLd from "./_components/AtletasJsonLd";
 import { BENEFIT_SKILLS, BENEFIT_WOD } from "./_data/copy";
 
+export const metadata: Metadata = {
+  title:
+    "Kronos para atletas — Gratis para siempre. Tu progreso es el producto.",
+  description:
+    "App gratuita de CrossFit para atletas: registra tus PRs, sigue tu racha, compite en el leaderboard. Funciona aunque tu Box todavía no use Kronos.",
+  alternates: {
+    canonical: "https://www.kronos-fit.com/atletas",
+  },
+  openGraph: {
+    title: "Kronos para atletas — Gratis para siempre",
+    description:
+      "Registra tus PRs, sigue tu racha y compite en el leaderboard. Crea tu cuenta en 30 segundos. Sin tarjeta. Sin permiso de tu Box.",
+    url: "https://www.kronos-fit.com/atletas",
+    type: "website",
+    locale: "es_MX",
+    siteName: "Kronos",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kronos para atletas — Gratis para siempre",
+    description:
+      "App de CrossFit gratis. Tus PRs, tu racha, tu progreso. Aunque tu Box todavía no use Kronos, tú ya puedes empezar.",
+  },
+};
+
 export default async function AtletasLanding() {
   const session = await getServerSession(authOptions);
   const boxHref = session?.user
@@ -20,7 +46,7 @@ export default async function AtletasLanding() {
       ? "/atleta"
       : "/admin"
     : null;
-  const ctaHref = boxHref ?? "/login";
+  const ctaHref = boxHref ?? "/atleta-signup";
 
   return (
     <>
