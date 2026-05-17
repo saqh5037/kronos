@@ -15,28 +15,32 @@ export type BoxMode = {
  * Resuelve si el atleta está en su Box Personal (auto-creado en signup
  * independiente, slug `me-*`) o en un Box real con coach.
  *
- * Cacheado por request via React.cache para que múltiples páginas/componentes
- * que lo llamen en el mismo render compartan el mismo resultado sin re-query.
- *
- * Devuelve isPersonal=false + nulls si no hay sesión — caller decide cómo
- * tratar (probablemente redirect a /login antes de llegar acá).
+ * Cache keyed por `tenantId` explícito — necesario para evitar el cross-tenant
+ * leak detectado en E2E 2026-05-17 (cache() sin args podía compartir
+ * resultados entre requests en el mismo worker PM2).
  */
-export const getBoxMode = cache(async (): Promise<BoxMode> => {
+const _getBoxModeByTenant = cache(
+  async (tenantId: string): Promise<BoxMode> => {
+    const box = await db.box.findUnique({
+      where: { id: tenantId },
+      select: { id: true, slug: true, name: true },
+    });
+    if (!box) {
+      return { isPersonal: false, boxId: null, boxSlug: null, boxName: null };
+    }
+    return {
+      isPersonal: isPersonalBoxSlug(box.slug),
+      boxId: box.id,
+      boxSlug: box.slug,
+      boxName: box.name,
+    };
+  },
+);
+
+export async function getBoxMode(): Promise<BoxMode> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.tenantId) {
     return { isPersonal: false, boxId: null, boxSlug: null, boxName: null };
   }
-  const box = await db.box.findUnique({
-    where: { id: session.user.tenantId },
-    select: { id: true, slug: true, name: true },
-  });
-  if (!box) {
-    return { isPersonal: false, boxId: null, boxSlug: null, boxName: null };
-  }
-  return {
-    isPersonal: isPersonalBoxSlug(box.slug),
-    boxId: box.id,
-    boxSlug: box.slug,
-    boxName: box.name,
-  };
-});
+  return _getBoxModeByTenant(session.user.tenantId);
+}

@@ -1,22 +1,27 @@
-import { cache } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
 import type { Session } from "next-auth";
 
 /**
- * Request-scoped cached session.
+ * Session lookup wrapper sin cache compartido entre requests.
  *
- * NextAuth's `getServerSession` triggers the `jwt` callback on every call,
- * which hits PostgreSQL. In a single render, layout + page + server actions
- * may call it 3-5 times. Wrapping with React.cache deduplicates to a single
- * DB round-trip per request.
+ * Versión previa: `cache(async () => getServerSession())` sin argumentos.
+ * Bug observado E2E 2026-05-17: en PM2 cluster (8 workers), el `cache()` de
+ * React con key vacía `[]` podía servir la session de un request al
+ * siguiente request del mismo worker. Atleta nuevo logueado veía la session
+ * de Bernardo Q. (atleta seed DOMINUS) — cross-tenant data leak.
  *
- * Use this instead of `getServerSession(authOptions)` in all App Router
- * server components and server actions.
+ * Fix: llamar `getServerSession` directo. NextAuth ya optimiza el JWT
+ * decode internamente. El overhead de N llamadas en un render es aceptable
+ * vs el riesgo de servir session ajena.
+ *
+ * Si el perf se vuelve un issue, mover el `cache()` al nivel del Server
+ * Component padre con args explícitos (cookie hash o similar), nunca a
+ * nivel de módulo compartido entre requests.
  */
-export const getCachedSession = cache(async (): Promise<Session | null> => {
+export async function getCachedSession(): Promise<Session | null> {
   return getServerSession(authOptions);
-});
+}
 
 /**
  * Convenience wrapper that throws if the session is missing or has no tenant.
