@@ -1,14 +1,18 @@
 /**
  * Cache layer — Next.js `unstable_cache` + `revalidateTag` wrappers.
  *
- * Estado F1.5 (2026-05-16): wrappers listos pero NO consumidos por UI todavía.
- * El wiring real (reemplazar lookups directos en server actions / page.tsx)
- * queda para el sprint de perf que viene con F2 + multi-Box scale.
+ * Estado F1.5+ (2026-05-16 fix): wrappers consumidos por `/admin/wods`
+ * (ver F1.4 SmartWODForm) y disponibles para otros call-sites.
  *
  * Tags convention: `{model}:{id}:{aspect}` — invalida granular por entidad.
  *
  *   box:{boxId}:discipline           → Box.discipline lookup
  *   athlete:{athleteId}:memberships  → Membership[] del athlete
+ *
+ * IMPLEMENTACIÓN: `unstable_cache` recibe sus tags al MOMENTO de configurar
+ * la fn cacheada, no al invocarla. Para que cada `boxId` registre su tag
+ * granular, envolvemos `unstable_cache(...)` dentro de una factory que
+ * cierra sobre el arg y construye la entrada con tags específicos.
  *
  * Revalidate por tiempo (5 min) Y por tag explícito tras mutaciones.
  */
@@ -28,26 +32,29 @@ export const cacheTags = {
 // ─── Box discipline ──────────────────────────────────────────────────────────
 
 /**
- * Resuelve la Discipline de un Box (objeto completo o null si el Box no tiene
- * disciplineId backfilled todavía). Cacheado 5 min + revalidate por tag.
+ * Resuelve la Discipline de un Box (objeto completo o null si el Box no
+ * tiene disciplineId backfilled todavía). Cacheado 5 min + revalidate por
+ * tag granular `box:${boxId}:discipline` + tag global `box-discipline`.
  *
  * Invalidar tras: Box.disciplineId update (pilot onboarding wizard, admin
  * settings, super-admin tools).
  */
-export const getCachedBoxDiscipline = unstable_cache(
-  async (boxId: string) => {
-    const box = await db.box.findUnique({
-      where: { id: boxId },
-      select: { discipline: true },
-    });
-    return box?.discipline ?? null;
-  },
-  ["box-discipline"],
-  {
-    revalidate: FIVE_MINUTES,
-    tags: ["box-discipline"], // tag global (sweep) — granular se agrega abajo
-  },
-);
+export function getCachedBoxDiscipline(boxId: string) {
+  return unstable_cache(
+    async () => {
+      const box = await db.box.findUnique({
+        where: { id: boxId },
+        select: { discipline: true },
+      });
+      return box?.discipline ?? null;
+    },
+    ["box-discipline", boxId],
+    {
+      revalidate: FIVE_MINUTES,
+      tags: [cacheTags.boxDiscipline(boxId), "box-discipline"],
+    },
+  )();
+}
 
 export function invalidateBoxDiscipline(boxId: string): void {
   revalidateTag(cacheTags.boxDiscipline(boxId));
@@ -57,25 +64,28 @@ export function invalidateBoxDiscipline(boxId: string): void {
 // ─── Athlete memberships ─────────────────────────────────────────────────────
 
 /**
- * Memberships ACTIVE de un athlete. Cacheado 5 min + revalidate por tag.
+ * Memberships ACTIVE de un athlete. Cacheado 5 min + revalidate por tag
+ * granular `athlete:${athleteId}:memberships` + tag global.
  *
  * Invalidar tras: Membership create/update/cancel (server actions de admin
  * o checkout de planes).
  */
-export const getCachedAthleteMemberships = unstable_cache(
-  async (athleteId: string) => {
-    return db.membership.findMany({
-      where: { athleteId, status: "ACTIVE" },
-      include: { plan: true },
-      orderBy: { startDate: "desc" },
-    });
-  },
-  ["athlete-memberships"],
-  {
-    revalidate: FIVE_MINUTES,
-    tags: ["athlete-memberships"],
-  },
-);
+export function getCachedAthleteMemberships(athleteId: string) {
+  return unstable_cache(
+    async () => {
+      return db.membership.findMany({
+        where: { athleteId, status: "ACTIVE" },
+        include: { plan: true },
+        orderBy: { startDate: "desc" },
+      });
+    },
+    ["athlete-memberships", athleteId],
+    {
+      revalidate: FIVE_MINUTES,
+      tags: [cacheTags.athleteMemberships(athleteId), "athlete-memberships"],
+    },
+  )();
+}
 
 export function invalidateAthleteMemberships(athleteId: string): void {
   revalidateTag(cacheTags.athleteMemberships(athleteId));

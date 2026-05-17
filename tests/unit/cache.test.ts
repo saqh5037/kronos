@@ -11,16 +11,33 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { boxFindUnique, membershipFindMany, revalidateTagMock } = vi.hoisted(
-  () => ({
-    boxFindUnique: vi.fn(),
-    membershipFindMany: vi.fn(),
-    revalidateTagMock: vi.fn(),
-  }),
-);
+const {
+  boxFindUnique,
+  membershipFindMany,
+  revalidateTagMock,
+  unstableCacheConfigs,
+} = vi.hoisted(() => ({
+  boxFindUnique: vi.fn(),
+  membershipFindMany: vi.fn(),
+  revalidateTagMock: vi.fn(),
+  // Captura la config (key + options) con la que cada call wrapper invoca
+  // unstable_cache. Nos deja verificar que los tags granulares por boxId/
+  // athleteId SÍ se registran (regresión del bug F1.5 fix 2026-05-16).
+  unstableCacheConfigs: [] as Array<{
+    keys: unknown;
+    options: { tags?: string[]; revalidate?: number };
+  }>,
+}));
 
 vi.mock("next/cache", () => ({
-  unstable_cache: <T extends (...args: unknown[]) => unknown>(fn: T) => fn,
+  unstable_cache: <T extends (...args: unknown[]) => unknown>(
+    fn: T,
+    keys: unknown,
+    options: { tags?: string[]; revalidate?: number },
+  ) => {
+    unstableCacheConfigs.push({ keys, options });
+    return fn;
+  },
   revalidateTag: revalidateTagMock,
 }));
 
@@ -49,6 +66,55 @@ describe("cache layer — tags", () => {
     expect(cacheTags.athleteMemberships("ath_xyz")).toBe(
       "athlete:ath_xyz:memberships",
     );
+  });
+});
+
+describe("cache layer — tags granulares se registran al config time (regresión)", () => {
+  beforeEach(() => {
+    unstableCacheConfigs.length = 0;
+    boxFindUnique.mockReset();
+    membershipFindMany.mockReset();
+  });
+
+  it("getCachedBoxDiscipline(boxId) registra tag granular box:${id}:discipline + global", async () => {
+    boxFindUnique.mockResolvedValue({ discipline: null });
+    await getCachedBoxDiscipline("box_xyz");
+
+    const cfg = unstableCacheConfigs.at(-1);
+    expect(cfg).toBeDefined();
+    expect(cfg!.options.tags).toEqual([
+      "box:box_xyz:discipline",
+      "box-discipline",
+    ]);
+    // El keys array también debe incluir el id para isolation
+    expect(cfg!.keys).toEqual(["box-discipline", "box_xyz"]);
+  });
+
+  it("getCachedAthleteMemberships(athleteId) registra tag granular athlete:${id}:memberships + global", async () => {
+    membershipFindMany.mockResolvedValue([]);
+    await getCachedAthleteMemberships("ath_xyz");
+
+    const cfg = unstableCacheConfigs.at(-1);
+    expect(cfg).toBeDefined();
+    expect(cfg!.options.tags).toEqual([
+      "athlete:ath_xyz:memberships",
+      "athlete-memberships",
+    ]);
+    expect(cfg!.keys).toEqual(["athlete-memberships", "ath_xyz"]);
+  });
+
+  it("dos boxId distintos producen tags distintos (granularidad real)", async () => {
+    boxFindUnique.mockResolvedValue({ discipline: null });
+    await getCachedBoxDiscipline("box_a");
+    await getCachedBoxDiscipline("box_b");
+
+    const tagsA =
+      unstableCacheConfigs[unstableCacheConfigs.length - 2].options.tags;
+    const tagsB =
+      unstableCacheConfigs[unstableCacheConfigs.length - 1].options.tags;
+    expect(tagsA).toContain("box:box_a:discipline");
+    expect(tagsB).toContain("box:box_b:discipline");
+    expect(tagsA).not.toEqual(tagsB);
   });
 });
 

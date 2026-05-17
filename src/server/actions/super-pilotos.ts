@@ -1,6 +1,30 @@
 "use server";
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auth";
 import { db as prismaBase } from "@/server/db";
+import { isSuperAdmin } from "@/lib/super-admin";
+
+/**
+ * Gate dedicado para server actions de super-admin.
+ *
+ * IMPORTANTE: Las server actions con `"use server"` son endpoints HTTP
+ * públicos invocables por cualquier sesión válida — el layout `/admin/super/*`
+ * que llama notFound() protege el RENDER de la page, NO al RPC de las
+ * actions importadas. Cada server action sensible debe validar por sí misma.
+ *
+ * Devuelve `{ ok: false, error: "UNAUTHORIZED" }` para que los callers
+ * tipen el resultado de forma consistente.
+ */
+async function requireSuperAdmin(): Promise<
+  true | { ok: false; error: "UNAUTHORIZED" }
+> {
+  const session = await getServerSession(authOptions);
+  if (!isSuperAdmin(session?.user?.email)) {
+    return { ok: false, error: "UNAUTHORIZED" };
+  }
+  return true;
+}
 
 /**
  * Tipo retornado por listPilotBoxes — métricas agregadas por Box piloto.
@@ -47,13 +71,20 @@ function daysBetween(future: Date, now: Date): number {
 /**
  * Lista Box pilotos ordenados por createdAt desc (más recientes primero).
  *
- * NO requiere super-admin gate aquí — el layout de /admin/super/* ya lo
- * aplica via notFound(). Esta action queda invocable solo por código
- * server que ya pasó el layout.
+ * Defensa en profundidad: además del layout `/admin/super/*` que renderiza
+ * notFound() para no-super-admins, esta action revalida la sesión porque
+ * server actions son endpoints RPC invocables independientes del page que
+ * las importa.
+ *
+ * Retorna `[]` si el caller no es super-admin (preserva semántica del
+ * page que renderiza EmptyState ante lista vacía — no leak de existencia).
  */
 export async function listPilotBoxes(
   now: Date = new Date(),
 ): Promise<PilotBoxRow[]> {
+  const gate = await requireSuperAdmin();
+  if (gate !== true) return [];
+
   const boxes = await prismaBase.box.findMany({
     where: {
       pilotExclusivityExpiresAt: { not: null },
@@ -138,8 +169,14 @@ export async function generatePilotBetaTokenForBox(args: {
   expiresInSec?: number;
 }): Promise<
   | { ok: true; url: string; expiresAt: Date }
-  | { ok: false; error: "BOX_NOT_FOUND" | "NOT_PILOT" | "MISSING_SECRET" }
+  | {
+      ok: false;
+      error: "UNAUTHORIZED" | "BOX_NOT_FOUND" | "NOT_PILOT" | "MISSING_SECRET";
+    }
 > {
+  const gate = await requireSuperAdmin();
+  if (gate !== true) return gate;
+
   const { signPilotBetaToken } = await import("@/lib/pilot-beta-token");
   const expiresInSec = args.expiresInSec ?? 7 * 24 * 60 * 60;
 

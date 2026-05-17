@@ -10,13 +10,21 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { boxFindMany, boxFindUnique, pushGroupBy, signPilotBetaTokenMock } =
-  vi.hoisted(() => ({
-    boxFindMany: vi.fn(),
-    boxFindUnique: vi.fn(),
-    pushGroupBy: vi.fn(),
-    signPilotBetaTokenMock: vi.fn(),
-  }));
+const {
+  boxFindMany,
+  boxFindUnique,
+  pushGroupBy,
+  signPilotBetaTokenMock,
+  getServerSessionMock,
+  isSuperAdminMock,
+} = vi.hoisted(() => ({
+  boxFindMany: vi.fn(),
+  boxFindUnique: vi.fn(),
+  pushGroupBy: vi.fn(),
+  signPilotBetaTokenMock: vi.fn(),
+  getServerSessionMock: vi.fn(),
+  isSuperAdminMock: vi.fn(),
+}));
 
 vi.mock("../../src/server/db", () => ({
   db: {
@@ -27,6 +35,18 @@ vi.mock("../../src/server/db", () => ({
 
 vi.mock("../../src/lib/pilot-beta-token", () => ({
   signPilotBetaToken: signPilotBetaTokenMock,
+}));
+
+vi.mock("next-auth", () => ({
+  getServerSession: getServerSessionMock,
+}));
+
+vi.mock("../../src/server/auth", () => ({
+  authOptions: {},
+}));
+
+vi.mock("../../src/lib/super-admin", () => ({
+  isSuperAdmin: isSuperAdminMock,
 }));
 
 import {
@@ -63,6 +83,22 @@ describe("listPilotBoxes", () => {
   beforeEach(() => {
     boxFindMany.mockReset();
     pushGroupBy.mockReset();
+    // Default: caller es super-admin. Tests específicos sobrescriben.
+    getServerSessionMock.mockResolvedValue({
+      user: { email: "super@kronos.test" },
+    });
+    isSuperAdminMock.mockReturnValue(true);
+  });
+
+  it("retorna [] (defensa silenciosa) si el caller NO es super-admin", async () => {
+    isSuperAdminMock.mockReturnValueOnce(false);
+
+    const result = await listPilotBoxes(NOW);
+
+    expect(result).toEqual([]);
+    // NO debe haber query DB cuando el gate falla
+    expect(boxFindMany).not.toHaveBeenCalled();
+    expect(pushGroupBy).not.toHaveBeenCalled();
   });
 
   it("filtra solo Boxes con pilotExclusivityExpiresAt set", async () => {
@@ -154,6 +190,22 @@ describe("generatePilotBetaTokenForBox", () => {
   beforeEach(() => {
     boxFindUnique.mockReset();
     signPilotBetaTokenMock.mockReset();
+    getServerSessionMock.mockResolvedValue({
+      user: { email: "super@kronos.test" },
+    });
+    isSuperAdminMock.mockReturnValue(true);
+  });
+
+  it("UNAUTHORIZED si el caller NO es super-admin (defensa en profundidad)", async () => {
+    isSuperAdminMock.mockReturnValueOnce(false);
+
+    const result = await generatePilotBetaTokenForBox({ boxId: "box_a" });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("UNAUTHORIZED");
+    // NO debe haber query DB ni firma de token
+    expect(boxFindUnique).not.toHaveBeenCalled();
+    expect(signPilotBetaTokenMock).not.toHaveBeenCalled();
   });
 
   it("BOX_NOT_FOUND si el Box no existe", async () => {

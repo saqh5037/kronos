@@ -15,6 +15,7 @@ export default function CopyMagicLinkButton({ boxId }: { boxId: string }) {
       const result = await generatePilotBetaTokenForBox({ boxId });
       if (!result.ok) {
         const messages: Record<typeof result.error, string> = {
+          UNAUTHORIZED: "Acceso restringido a super-admins",
           BOX_NOT_FOUND: "Box no encontrado",
           NOT_PILOT: "Este Box no es piloto",
           MISSING_SECRET: "PILOT_BETA_TOKEN_SECRET no configurado en server",

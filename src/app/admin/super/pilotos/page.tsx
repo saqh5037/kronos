@@ -196,7 +196,7 @@ function PilotCard({ pilot }: { pilot: PilotBoxRow }) {
             fontSize: 12,
             color: "var(--k-t3)",
             margin: 0,
-            fontFamily: "var(--k-font-plex-mono), monospace",
+            fontFamily: "var(--k-font-display), monospace",
           }}
         >
           {pilot.city ? `${pilot.city}, ` : ""}
@@ -264,7 +264,7 @@ function PilotCard({ pilot }: { pilot: PilotBoxRow }) {
             fontSize: 11,
             color: "var(--k-t3)",
             margin: 0,
-            fontFamily: "var(--k-font-plex-mono), monospace",
+            fontFamily: "var(--k-font-display), monospace",
           }}
         >
           {pilot.ownerEmail}
@@ -344,7 +344,7 @@ function Metric({
           color: "var(--k-t3)",
           textTransform: "uppercase",
           letterSpacing: "0.1em",
-          fontFamily: "var(--k-font-plex-mono), monospace",
+          fontFamily: "var(--k-font-display), monospace",
         }}
       >
         {label}
