@@ -411,7 +411,7 @@ export const Icon = {
       <path d="M12 6v12M6 12h12" />
     </svg>
   ),
-  Dumbbell: (p: Props) => (
+  Left: (p: Props) => (
     <svg
       viewBox="0 0 24 24"
       fill="none"
@@ -420,7 +420,82 @@ export const Icon = {
       strokeLinecap="square"
       {...p}
     >
-      <path d="M6 8h1v8H6M17 8h1v8h-1M7 6v12M17 6v12M8 6h8v12H8" />
+      <path d="M15 6l-6 6 6 6" />
+    </svg>
+  ),
+  Dumbbell: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+      {...p}
+    >
+      <rect x="2" y="9" width="3" height="6" />
+      <rect x="5" y="7" width="3" height="10" />
+      <rect x="16" y="7" width="3" height="10" />
+      <rect x="19" y="9" width="3" height="6" />
+      <path d="M8 12h8" />
+    </svg>
+  ),
+  Trophy: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+      {...p}
+    >
+      <path d="M8 4h8v6a4 4 0 0 1-8 0z" />
+      <path d="M16 6h3v2a3 3 0 0 1-3 3M8 6H5v2a3 3 0 0 0 3 3M10 14h4v3h-4zM7 20h10" />
+    </svg>
+  ),
+  Bars: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...p}
+    >
+      <path d="M4 20V10M10 20V4M16 20v-8M22 20v-4" />
+    </svg>
+  ),
+  Phone: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...p}
+    >
+      <rect x="7" y="2" width="10" height="20" rx="2" />
+      <path d="M11 18h2" />
+    </svg>
+  ),
+  Globe: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...p}
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3a13 13 0 0 1 0 18M12 3a13 13 0 0 0 0 18" />
+    </svg>
+  ),
+  Logout: (p: Props) => (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...p}
+    >
+      <path d="M14 8V5H4v14h10v-3M9 12h12m0 0l-3-3m3 3l-3 3" />
     </svg>
   ),
   Target: (p: Props) => (
