@@ -1,11 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import type { ComponentProps } from "react";
+import { useState, useEffect } from "react";
 import { Icon } from "./icons";
 
 type LinkHref = ComponentProps<typeof Link>["href"];
 
 const ACC = "var(--k-accent)";
-const ACC_GLOW = "var(--k-accent-glow)";
 const WARN = "var(--k-warning)";
 const DANGER = "var(--k-danger)";
 
@@ -119,6 +121,99 @@ function Sparkline({
   );
 }
 
+function KronosLogo({
+  size = 34,
+  glow = true,
+}: {
+  size?: number;
+  glow?: boolean;
+}) {
+  return (
+    <div
+      style={{ position: "relative", width: size, height: size, flexShrink: 0 }}
+    >
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 36 36"
+        style={{ position: "absolute", inset: 0, color: ACC }}
+      >
+        <path
+          d="M2 6 L2 2 L6 2"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          fill="none"
+          strokeLinecap="square"
+          opacity="0.55"
+        />
+        <path
+          d="M34 30 L34 34 L30 34"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          fill="none"
+          strokeLinecap="square"
+          opacity="0.55"
+        />
+        <path
+          d="M30 2 L34 2 L34 6"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          fill="none"
+          strokeLinecap="square"
+          opacity="0.55"
+        />
+        <path
+          d="M6 34 L2 34 L2 30"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          fill="none"
+          strokeLinecap="square"
+          opacity="0.55"
+        />
+        <line
+          x1="11"
+          y1="9"
+          x2="11"
+          y2="27"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="square"
+        />
+        <line
+          x1="11"
+          y1="18"
+          x2="22"
+          y2="9"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="square"
+        />
+        <line
+          x1="11"
+          y1="18"
+          x2="22"
+          y2="27"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="square"
+        />
+        <circle cx="11" cy="18" r="1.8" fill="currentColor" />
+      </svg>
+      {glow && (
+        <div
+          style={{
+            position: "absolute",
+            inset: -4,
+            borderRadius: 8,
+            boxShadow: "0 0 18px rgba(200,255,45,0.22)",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 function KronosMark({ collapsed = false }: { collapsed?: boolean }) {
   return (
     <div
@@ -130,26 +225,7 @@ function KronosMark({ collapsed = false }: { collapsed?: boolean }) {
         justifyContent: collapsed ? "center" : "flex-start",
       }}
     >
-      <div
-        style={{
-          width: 30,
-          height: 30,
-          borderRadius: 8,
-          background: "var(--k-bg)",
-          border: `1.5px solid ${ACC}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "var(--k-font-display)",
-          fontSize: 15,
-          fontWeight: 700,
-          color: ACC,
-          letterSpacing: "-0.04em",
-          boxShadow: ACC_GLOW,
-        }}
-      >
-        K
-      </div>
+      <KronosLogo size={30} />
       {!collapsed && (
         <div
           style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}
@@ -205,7 +281,8 @@ function NavItem({
   return (
     <Link
       href={href}
-      className="k-tap"
+      className="k-nav-item k-tap"
+      data-active={active ? "1" : "0"}
       style={{
         height: 38,
         padding: collapsed ? 0 : "0 16px",
@@ -312,18 +389,187 @@ function NavGroup({
   );
 }
 
+function BoxCard({ collapsed }: { collapsed: boolean }) {
+  return (
+    <div
+      className="k-tap"
+      style={{
+        margin: collapsed ? "4px 10px 10px" : "0 14px 12px",
+        padding: collapsed ? "10px 0" : "12px 12px",
+        background: "var(--k-bg)",
+        border: "1px solid var(--k-line)",
+        borderRadius: 10,
+        display: "flex",
+        alignItems: "center",
+        gap: collapsed ? 0 : 10,
+        cursor: "pointer",
+        justifyContent: collapsed ? "center" : "flex-start",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <span
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: 2,
+          background: ACC,
+          boxShadow: `0 0 8px ${ACC}`,
+        }}
+      />
+      <div
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: 6,
+          background: "rgba(200,255,45,0.10)",
+          border: "1px solid rgba(200,255,45,0.30)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--k-font-display)",
+          fontSize: 11,
+          fontWeight: 700,
+          color: ACC,
+          letterSpacing: "-0.04em",
+          flexShrink: 0,
+        }}
+      >
+        B
+      </div>
+      {!collapsed && (
+        <>
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              minWidth: 0,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 11,
+                fontWeight: 700,
+                color: "var(--k-t1)",
+                letterSpacing: "0.04em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              TU BOX
+            </span>
+            <span
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 8.5,
+                fontWeight: 500,
+                color: "var(--k-t3)",
+                letterSpacing: "0.12em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              OWNER
+            </span>
+          </div>
+          <Icon.Down
+            width="12"
+            height="12"
+            style={{ color: "var(--k-t3)", flexShrink: 0 }}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+function LiveStrip({ collapsed }: { collapsed: boolean }) {
+  const [time, setTime] = useState("");
+  useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      setTime(
+        now.toLocaleTimeString("es-MX", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }),
+      );
+    };
+    update();
+    const t = setInterval(update, 60000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div
+      style={{
+        padding: collapsed ? "10px 8px" : "10px 14px",
+        borderTop: "1px solid var(--k-line)",
+        background: "#0a0a0c",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <span
+        className="k-pulse-dot"
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background: ACC,
+          boxShadow: `0 0 8px ${ACC}`,
+          flexShrink: 0,
+        }}
+      />
+      {!collapsed && (
+        <>
+          <span
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 600,
+              color: ACC,
+              letterSpacing: "0.06em",
+              whiteSpace: "nowrap",
+            }}
+          >
+            EN BOX
+          </span>
+          <span
+            style={{
+              flex: 1,
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              color: "var(--k-t2)",
+              letterSpacing: "0.04em",
+              textAlign: "right",
+            }}
+          >
+            {time}
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
 function Sidebar({
   collapsed = false,
-  ownerName,
-  ownerInitial,
-  ownerRole,
   athletesBadge,
   reservasBadge,
 }: {
   collapsed?: boolean;
-  ownerName: string;
-  ownerInitial?: string;
-  ownerRole?: string;
   athletesBadge?: NavBadge;
   reservasBadge?: NavBadge;
 }) {
@@ -341,7 +587,17 @@ function Sidebar({
       }}
     >
       <KronosMark collapsed={collapsed} />
-      <div style={{ flex: 1, overflowY: "auto", paddingTop: 6 }}>
+      <BoxCard collapsed={collapsed} />
+      <div
+        className="k-scroll"
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          paddingTop: 6,
+          paddingBottom: 8,
+        }}
+      >
         <NavGroup title="PRINCIPAL" collapsed={collapsed}>
           <NavItem
             href="/admin"
@@ -366,9 +622,35 @@ function Sidebar({
           <NavItem
             href="/admin/reservas"
             icon={Icon.Calendar}
-            label="Reservas hoy"
+            label="Reservas"
             collapsed={collapsed}
             badge={reservasBadge}
+          />
+        </NavGroup>
+        <NavGroup title="ENTRENAMIENTO" collapsed={collapsed}>
+          <NavItem
+            href="/admin/wods"
+            icon={Icon.Bolt}
+            label="WODs"
+            collapsed={collapsed}
+          />
+          <NavItem
+            href="/admin/movimientos"
+            icon={Icon.Dumbbell}
+            label="Movimientos"
+            collapsed={collapsed}
+          />
+          <NavItem
+            href="/admin/prs"
+            icon={Icon.Trophy}
+            label="PRs"
+            collapsed={collapsed}
+          />
+          <NavItem
+            href="/admin/leaderboards"
+            icon={Icon.Bars}
+            label="Leaderboards"
+            collapsed={collapsed}
           />
         </NavGroup>
         <NavGroup title="GESTIÓN" collapsed={collapsed}>
@@ -412,85 +694,26 @@ function Sidebar({
           />
         </NavGroup>
       </div>
+      <LiveStrip collapsed={collapsed} />
       <div
         style={{
           borderTop: "1px solid var(--k-line)",
-          padding: collapsed ? "12px" : "14px 18px",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          cursor: "pointer",
-          justifyContent: collapsed ? "center" : "flex-start",
+          padding: "6px 0 10px",
+          background: "var(--k-surface)",
         }}
       >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            background: "var(--k-line)",
-            border: "1px solid var(--k-line-2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontFamily: "var(--k-font-body)",
-            fontSize: 12,
-            fontWeight: 600,
-            color: "var(--k-t1)",
-            flexShrink: 0,
-          }}
-        >
-          {ownerInitial ?? ownerName.charAt(0).toUpperCase()}
-        </div>
-        {!collapsed && (
-          <>
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                lineHeight: 1.2,
-                minWidth: 0,
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "var(--k-font-body)",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "var(--k-t1)",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {ownerName}
-              </span>
-              {ownerRole && (
-                <span
-                  style={{
-                    fontFamily: "var(--k-font-display)",
-                    fontSize: 9,
-                    fontWeight: 500,
-                    color: "var(--k-t3)",
-                    letterSpacing: "0.04em",
-                    marginTop: 3,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {ownerRole}
-                </span>
-              )}
-            </div>
-            <Icon.Down
-              width={14}
-              height={14}
-              style={{ color: "var(--k-t3)" }}
-            />
-          </>
-        )}
+        <NavItem
+          href="/atleta"
+          icon={Icon.Phone}
+          label="App del atleta"
+          collapsed={collapsed}
+        />
+        <NavItem
+          href="/"
+          icon={Icon.Globe}
+          label="Landing pública"
+          collapsed={collapsed}
+        />
       </div>
     </div>
   );
@@ -1874,9 +2097,6 @@ export default function AdminDashboardV3(props: AdminDashboardV3Props) {
       }}
     >
       <Sidebar
-        ownerName={props.ownerName}
-        ownerInitial={props.ownerInitial}
-        ownerRole={props.ownerRole}
         athletesBadge={props.activeAthletes}
         reservasBadge={props.attendanceToday.taken}
       />

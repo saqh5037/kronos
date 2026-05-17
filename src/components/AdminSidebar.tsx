@@ -3,9 +3,9 @@
 import Link from "next/link";
 import type { ComponentProps } from "react";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useTransition } from "react";
+import { signOut } from "next-auth/react";
 import { Icon } from "@/components/kronos/v3/icons";
-import { SignOutButton } from "@/components/auth/SignOutButton";
 
 type LinkHref = ComponentProps<typeof Link>["href"];
 
@@ -21,6 +21,12 @@ type IconKey =
   | "settings"
   | "history"
   | "bolt"
+  | "dumbbell"
+  | "trophy"
+  | "bars"
+  | "phone"
+  | "globe"
+  | "logout"
   | "share";
 
 type ModuleEntry = {
@@ -51,9 +57,9 @@ const groups: ModuleGroup[] = [
     title: "ENTRENAMIENTO",
     items: [
       { href: "/admin/wods", label: "WODs", icon: "bolt" },
-      { href: "/admin/movimientos", label: "Movimientos", icon: "bolt" },
-      { href: "/admin/prs", label: "PRs", icon: "chart" },
-      { href: "/admin/leaderboards", label: "Leaderboards", icon: "chart" },
+      { href: "/admin/movimientos", label: "Movimientos", icon: "dumbbell" },
+      { href: "/admin/prs", label: "PRs", icon: "trophy" },
+      { href: "/admin/leaderboards", label: "Leaderboards", icon: "bars" },
     ],
   },
   {
@@ -78,6 +84,11 @@ const groups: ModuleGroup[] = [
       },
     ],
   },
+];
+
+const footerItems: { href: LinkHref; label: string; icon: IconKey }[] = [
+  { href: "/atleta", label: "App del atleta", icon: "phone" },
+  { href: "/", label: "Landing pública", icon: "globe" },
 ];
 
 function NavIcon({ kind, active }: { kind: IconKey; active: boolean }) {
@@ -106,6 +117,18 @@ function NavIcon({ kind, active }: { kind: IconKey; active: boolean }) {
       return <Icon.History {...props} />;
     case "bolt":
       return <Icon.Bolt {...props} />;
+    case "dumbbell":
+      return <Icon.Dumbbell {...props} />;
+    case "trophy":
+      return <Icon.Trophy {...props} />;
+    case "bars":
+      return <Icon.Bars {...props} />;
+    case "phone":
+      return <Icon.Phone {...props} />;
+    case "globe":
+      return <Icon.Globe {...props} />;
+    case "logout":
+      return <Icon.Logout {...props} />;
     case "share":
       return <Icon.Share {...props} />;
     default:
@@ -113,61 +136,611 @@ function NavIcon({ kind, active }: { kind: IconKey; active: boolean }) {
   }
 }
 
-function KronosMark() {
+function KronosLogo({
+  size = 34,
+  glow = true,
+}: {
+  size?: number;
+  glow?: boolean;
+}) {
+  return (
+    <div
+      style={{ position: "relative", width: size, height: size, flexShrink: 0 }}
+    >
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 36 36"
+        style={{ position: "absolute", inset: 0, color: "var(--k-accent)" }}
+      >
+        <path
+          d="M2 6 L2 2 L6 2"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          fill="none"
+          strokeLinecap="square"
+          opacity="0.55"
+        />
+        <path
+          d="M34 30 L34 34 L30 34"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          fill="none"
+          strokeLinecap="square"
+          opacity="0.55"
+        />
+        <path
+          d="M30 2 L34 2 L34 6"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          fill="none"
+          strokeLinecap="square"
+          opacity="0.55"
+        />
+        <path
+          d="M6 34 L2 34 L2 30"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          fill="none"
+          strokeLinecap="square"
+          opacity="0.55"
+        />
+        <line
+          x1="11"
+          y1="9"
+          x2="11"
+          y2="27"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="square"
+        />
+        <line
+          x1="11"
+          y1="18"
+          x2="22"
+          y2="9"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="square"
+        />
+        <line
+          x1="11"
+          y1="18"
+          x2="22"
+          y2="27"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="square"
+        />
+        <circle cx="11" cy="18" r="1.8" fill="currentColor" />
+      </svg>
+      {glow && (
+        <div
+          style={{
+            position: "absolute",
+            inset: -4,
+            borderRadius: 8,
+            boxShadow: "0 0 18px rgba(200,255,45,0.22)",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function KronosMark({
+  collapsed,
+  onToggle,
+}: {
+  collapsed: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div
       style={{
+        padding: collapsed ? "18px 0 14px" : "20px 18px 16px",
+        position: "relative",
         display: "flex",
-        alignItems: "center",
-        gap: 10,
-        padding: "20px 24px",
+        flexDirection: "column",
+        gap: 8,
       }}
     >
       <div
         style={{
-          width: 30,
-          height: 30,
-          borderRadius: 8,
-          background: "var(--k-bg)",
-          border: "1.5px solid var(--k-accent)",
+          display: "flex",
+          alignItems: "center",
+          gap: 11,
+          justifyContent: collapsed ? "center" : "space-between",
+        }}
+      >
+        <div
+          onClick={onToggle}
+          title={collapsed ? "Expandir" : "Colapsar"}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 11,
+            minWidth: 0,
+            cursor: "pointer",
+          }}
+        >
+          <KronosLogo size={36} />
+          {!collapsed && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                lineHeight: 1,
+                minWidth: 0,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                  color: "var(--k-t1)",
+                }}
+              >
+                KRONOS
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 8.5,
+                  fontWeight: 500,
+                  letterSpacing: "0.22em",
+                  color: "var(--k-t3)",
+                  marginTop: 4,
+                }}
+              >
+                OS · v1.0
+              </span>
+            </div>
+          )}
+        </div>
+        {!collapsed && (
+          <button
+            onClick={onToggle}
+            title="Colapsar"
+            className="k-btn-icon"
+            style={{
+              width: 26,
+              height: 26,
+              borderRadius: 6,
+              background: "transparent",
+              border: "1px solid var(--k-line)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: "var(--k-t3)",
+              padding: 0,
+              flexShrink: 0,
+            }}
+          >
+            <Icon.Left width="12" height="12" />
+          </button>
+        )}
+      </div>
+      {collapsed && (
+        <button
+          onClick={onToggle}
+          title="Expandir"
+          className="k-btn-icon"
+          style={{
+            margin: "4px auto 0",
+            width: 26,
+            height: 22,
+            borderRadius: 6,
+            background: "transparent",
+            border: "1px solid var(--k-line)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            color: "var(--k-t3)",
+            padding: 0,
+          }}
+        >
+          <Icon.Right width="12" height="12" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function BoxCard({ collapsed }: { collapsed: boolean }) {
+  return (
+    <div
+      className="k-tap"
+      style={{
+        margin: collapsed ? "4px 10px 10px" : "0 14px 12px",
+        padding: collapsed ? "10px 0" : "12px 12px",
+        background: "var(--k-bg)",
+        border: "1px solid var(--k-line)",
+        borderRadius: 10,
+        display: "flex",
+        alignItems: "center",
+        gap: collapsed ? 0 : 10,
+        cursor: "pointer",
+        justifyContent: collapsed ? "center" : "flex-start",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <span
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: 2,
+          background: "var(--k-accent)",
+          boxShadow: "0 0 8px var(--k-accent)",
+        }}
+      />
+      <div
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: 6,
+          background: "rgba(200,255,45,0.10)",
+          border: "1px solid rgba(200,255,45,0.30)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           fontFamily: "var(--k-font-display)",
-          fontSize: 15,
+          fontSize: 11,
           fontWeight: 700,
           color: "var(--k-accent)",
           letterSpacing: "-0.04em",
-          boxShadow: "var(--k-accent-glow)",
+          flexShrink: 0,
         }}
       >
-        K
+        B
       </div>
-      <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+      {!collapsed && (
+        <>
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              minWidth: 0,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 11,
+                fontWeight: 700,
+                color: "var(--k-t1)",
+                letterSpacing: "0.04em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              TU BOX
+            </span>
+            <span
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 8.5,
+                fontWeight: 500,
+                color: "var(--k-t3)",
+                letterSpacing: "0.12em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              OWNER
+            </span>
+          </div>
+          <Icon.Down
+            width="12"
+            height="12"
+            style={{ color: "var(--k-t3)", flexShrink: 0 }}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+function LiveStrip({ collapsed }: { collapsed: boolean }) {
+  return (
+    <div
+      style={{
+        padding: collapsed ? "10px 8px" : "10px 14px",
+        borderTop: "1px solid var(--k-line)",
+        background: "#0a0a0c",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <span
+        className="k-pulse-dot"
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background: "var(--k-accent)",
+          boxShadow: "0 0 8px var(--k-accent)",
+          flexShrink: 0,
+        }}
+      />
+      {!collapsed && (
+        <>
+          <span
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 600,
+              color: "var(--k-accent)",
+              letterSpacing: "0.06em",
+              whiteSpace: "nowrap",
+            }}
+          >
+            EN BOX
+          </span>
+          <span
+            style={{
+              flex: 1,
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              color: "var(--k-t2)",
+              letterSpacing: "0.04em",
+              textAlign: "right",
+            }}
+          >
+            <LiveClock />
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
+function LiveClock() {
+  const [time, setTime] = useState("");
+  useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      setTime(
+        now.toLocaleTimeString("es-MX", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }),
+      );
+    };
+    update();
+    const t = setInterval(update, 60000);
+    return () => clearInterval(t);
+  }, []);
+  return <>{time}</>;
+}
+
+function NavItem({
+  item,
+  active,
+  collapsed,
+  badge,
+}: {
+  item: { label: string; icon: IconKey; href?: LinkHref; onClick?: () => void };
+  active: boolean;
+  collapsed: boolean;
+  badge?: string | number | null;
+}) {
+  const content = (
+    <>
+      {active && (
         <span
           style={{
-            fontFamily: "var(--k-font-display)",
-            fontSize: 14,
-            fontWeight: 700,
-            letterSpacing: "-0.02em",
-            color: "var(--k-t1)",
+            position: "absolute",
+            left: -10,
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 3,
+            height: 18,
+            borderRadius: "0 2px 2px 0",
+            background: "var(--k-accent)",
+            boxShadow: "0 0 10px rgba(200,255,45,0.7)",
+          }}
+        />
+      )}
+      <NavIcon kind={item.icon} active={active} />
+      {!collapsed && (
+        <span
+          style={{
+            flex: 1,
+            fontFamily: "var(--k-font-body)",
+            fontSize: 12.5,
+            fontWeight: active ? 600 : 500,
+            letterSpacing: "-0.005em",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
           }}
         >
-          KRONOS
+          {item.label}
         </span>
+      )}
+      {!collapsed && badge !== undefined && badge !== null && (
         <span
           style={{
             fontFamily: "var(--k-font-display)",
-            fontSize: 8,
+            fontSize: 9,
+            fontWeight: 600,
+            color: active ? "var(--k-accent)" : "var(--k-t3)",
+            background: active ? "rgba(200,255,45,0.10)" : "transparent",
+            padding: "1px 6px",
+            borderRadius: 999,
+            letterSpacing: "0.04em",
+            border: active
+              ? "1px solid rgba(200,255,45,0.20)"
+              : "1px solid var(--k-line)",
+            flexShrink: 0,
+          }}
+        >
+          {badge}
+        </span>
+      )}
+    </>
+  );
+
+  const style: React.CSSProperties = {
+    height: collapsed ? 38 : 34,
+    padding: collapsed ? 0 : "0 12px",
+    display: "flex",
+    alignItems: "center",
+    gap: 11,
+    background: active ? "var(--k-elevated)" : "transparent",
+    color: active ? "var(--k-t1)" : "var(--k-t2)",
+    cursor: "pointer",
+    margin: "0 10px 1px",
+    borderRadius: 7,
+    position: "relative",
+    textDecoration: "none",
+    justifyContent: collapsed ? "center" : "flex-start",
+  };
+
+  if (item.href) {
+    return (
+      <Link
+        href={item.href}
+        className="k-nav-item k-tap"
+        data-active={active ? "1" : "0"}
+        title={collapsed ? item.label : ""}
+        style={style}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      onClick={item.onClick}
+      className="k-nav-item k-tap"
+      data-active={active ? "1" : "0"}
+      title={collapsed ? item.label : ""}
+      style={{ ...style, border: "none", width: "100%" }}
+    >
+      {content}
+    </button>
+  );
+}
+
+function SignOutNavItem({ collapsed }: { collapsed: boolean }) {
+  const [isPending, startTransition] = useTransition();
+  const handleClick = () => {
+    startTransition(async () => {
+      await signOut({ callbackUrl: "/login" });
+    });
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={isPending}
+      className="k-nav-item k-tap"
+      data-active="0"
+      title={collapsed ? "Cerrar sesión" : ""}
+      style={{
+        height: collapsed ? 38 : 34,
+        padding: collapsed ? 0 : "0 12px",
+        display: "flex",
+        alignItems: "center",
+        gap: 11,
+        background: "transparent",
+        color: "var(--k-t2)",
+        cursor: "pointer",
+        margin: "0 10px 1px",
+        borderRadius: 7,
+        position: "relative",
+        textDecoration: "none",
+        justifyContent: collapsed ? "center" : "flex-start",
+        border: "none",
+        width: "100%",
+      }}
+    >
+      <Icon.Logout
+        width={16}
+        height={16}
+        style={{ flexShrink: 0, color: "var(--k-t3)" }}
+      />
+      {!collapsed && (
+        <span
+          style={{
+            flex: 1,
+            fontFamily: "var(--k-font-body)",
+            fontSize: 12.5,
             fontWeight: 500,
-            letterSpacing: "0.2em",
-            color: "var(--k-t3)",
-            marginTop: 3,
+            letterSpacing: "-0.005em",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            textAlign: "left",
           }}
         >
-          ADMIN · v1.0
+          {isPending ? "Cerrando sesión…" : "Cerrar sesión"}
         </span>
-      </div>
+      )}
+    </button>
+  );
+}
+
+function NavGroup({
+  section,
+  collapsed,
+  children,
+}: {
+  section: string;
+  collapsed: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div style={{ marginBottom: 8 }}>
+      {!collapsed && (
+        <div
+          style={{
+            padding: "8px 22px 4px",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 8.5,
+            fontWeight: 600,
+            letterSpacing: "0.24em",
+            color: "var(--k-t4)",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          {section}
+          <span
+            style={{ flex: 1, height: 1, background: "var(--k-elevated)" }}
+          />
+        </div>
+      )}
+      {collapsed && (
+        <div
+          style={{
+            height: 1,
+            margin: "8px 16px 4px",
+            background: "var(--k-elevated)",
+          }}
+        />
+      )}
+      {children}
     </div>
   );
 }
@@ -183,13 +756,26 @@ export default function AdminSidebar({
 }: AdminSidebarProps = {}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem("kronos-sidebar-collapsed") === "1";
+    } catch {
+      return false;
+    }
+  });
 
-  const visibleGroups = groups
-    .map((g) => ({
-      ...g,
-      items: g.items.filter((it) => !it.ownerOnly || role === "OWNER"),
-    }))
-    .filter((g) => g.items.length > 0);
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((c) => {
+      const next = !c;
+      try {
+        localStorage.setItem("kronos-sidebar-collapsed", next ? "1" : "0");
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     setOpen(false);
@@ -205,6 +791,15 @@ export default function AdminSidebar({
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  const visibleGroups = groups
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((it) => !it.ownerOnly || role === "OWNER"),
+    }))
+    .filter((g) => g.items.length > 0);
+
+  const sidebarWidth = collapsed ? 64 : 228;
 
   return (
     <>
@@ -228,24 +823,7 @@ export default function AdminSidebar({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: 7,
-              border: "1.5px solid var(--k-accent)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontFamily: "var(--k-font-display)",
-              fontSize: 13,
-              fontWeight: 700,
-              color: "var(--k-accent)",
-              letterSpacing: "-0.04em",
-            }}
-          >
-            K
-          </div>
+          <KronosLogo size={26} glow={false} />
           <span
             style={{
               fontFamily: "var(--k-font-display)",
@@ -318,10 +896,10 @@ export default function AdminSidebar({
       {/* Sidebar */}
       <nav
         aria-label="Menú principal"
-        className={`${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+        className={`k-sidebar ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
         style={{
-          width: 240,
-          background: "var(--k-surface)",
+          width: sidebarWidth,
+          background: "#0B0B0E",
           borderRight: "1px solid var(--k-line)",
           display: "flex",
           flexDirection: "column",
@@ -330,26 +908,25 @@ export default function AdminSidebar({
           top: 0,
           left: 0,
           zIndex: 50,
-          overflowY: "auto",
-          transition: "transform 0.3s ease",
+          overflow: "hidden",
+          transition:
+            "width 220ms cubic-bezier(0.4,0,0.2,1), transform 0.3s ease",
         }}
       >
-        <KronosMark />
-        <div style={{ flex: 1, overflowY: "auto", paddingTop: 4 }}>
+        <KronosMark collapsed={collapsed} onToggle={toggleCollapsed} />
+        <BoxCard collapsed={collapsed} />
+        <div
+          className="k-scroll"
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+            paddingTop: 2,
+            paddingBottom: 8,
+          }}
+        >
           {visibleGroups.map((g) => (
-            <div key={g.title} style={{ marginBottom: 14 }}>
-              <div
-                style={{
-                  padding: "10px 28px 6px",
-                  fontFamily: "var(--k-font-display)",
-                  fontSize: 9,
-                  fontWeight: 600,
-                  letterSpacing: "0.18em",
-                  color: "var(--k-t4)",
-                }}
-              >
-                {g.title}
-              </div>
+            <NavGroup key={g.title} section={g.title} collapsed={collapsed}>
               {g.items.map((it) => {
                 const hrefStr =
                   typeof it.href === "string"
@@ -360,161 +937,54 @@ export default function AdminSidebar({
                   : pathname.startsWith(hrefStr);
                 const badgeValue =
                   it.badgeKey === "sensitive" && sensitiveCount > 0
-                    ? sensitiveCount
-                    : null;
+                    ? sensitiveCount > 99
+                      ? "99+"
+                      : sensitiveCount
+                    : undefined;
                 return (
-                  <Link
+                  <NavItem
                     key={hrefStr}
-                    href={it.href}
-                    className="k-tap"
-                    style={{
-                      minHeight: 44,
-                      padding: "10px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
-                      background: isActive
-                        ? "var(--k-elevated)"
-                        : "transparent",
-                      color: isActive ? "var(--k-t1)" : "var(--k-t2)",
-                      cursor: "pointer",
-                      margin: "0 12px",
-                      borderRadius: 8,
-                      position: "relative",
-                      textDecoration: "none",
-                    }}
-                  >
-                    {isActive && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          left: -12,
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          width: 3,
-                          height: 18,
-                          borderRadius: "0 2px 2px 0",
-                          background: "var(--k-accent)",
-                          boxShadow: "0 0 10px rgba(200,255,45,0.6)",
-                        }}
-                      />
-                    )}
-                    <NavIcon kind={it.icon} active={isActive} />
-                    <span
-                      style={{
-                        flex: 1,
-                        fontFamily: "var(--k-font-body)",
-                        fontSize: 13,
-                        fontWeight: isActive ? 600 : 500,
-                        letterSpacing: "-0.005em",
-                      }}
-                    >
-                      {it.label}
-                    </span>
-                    {badgeValue !== null && (
-                      <span
-                        style={{
-                          fontFamily: "var(--k-font-display)",
-                          fontSize: 9,
-                          fontWeight: 600,
-                          color: "var(--k-warning)",
-                          background: "rgba(255,176,32,0.12)",
-                          padding: "2px 7px",
-                          borderRadius: 999,
-                          letterSpacing: "0.04em",
-                          border: "1px solid rgba(255,176,32,0.35)",
-                        }}
-                      >
-                        {badgeValue > 99 ? "99+" : badgeValue}
-                      </span>
-                    )}
-                  </Link>
+                    item={{ label: it.label, icon: it.icon, href: it.href }}
+                    active={isActive}
+                    collapsed={collapsed}
+                    badge={badgeValue}
+                  />
                 );
               })}
-            </div>
+            </NavGroup>
           ))}
         </div>
+        <LiveStrip collapsed={collapsed} />
         <div
           style={{
             borderTop: "1px solid var(--k-line)",
-            padding: "12px 16px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
+            padding: "6px 0 10px",
+            background: "#0B0B0E",
           }}
         >
-          <Link
-            href="/atleta"
-            className="k-tap"
-            style={{
-              minHeight: 40,
-              padding: "10px 12px",
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              borderRadius: 8,
-              color: "var(--k-t2)",
-              textDecoration: "none",
-              fontFamily: "var(--k-font-body)",
-              fontSize: 13,
-              fontWeight: 500,
-            }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H10v7H4a1 1 0 0 1-1-1z" />
-            </svg>
-            App del atleta
-          </Link>
-          <Link
-            href="/"
-            className="k-tap"
-            style={{
-              minHeight: 40,
-              padding: "10px 12px",
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              borderRadius: 8,
-              color: "var(--k-t2)",
-              textDecoration: "none",
-              fontFamily: "var(--k-font-body)",
-              fontSize: 13,
-              fontWeight: 500,
-            }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
-            Landing pública
-          </Link>
-          <SignOutButton variant="menu" />
+          {footerItems.map((it) => {
+            const isActive = pathname === it.href;
+            return (
+              <NavItem
+                key={it.label}
+                item={{ label: it.label, icon: it.icon, href: it.href }}
+                active={isActive}
+                collapsed={collapsed}
+              />
+            );
+          })}
+          <SignOutNavItem collapsed={collapsed} />
         </div>
       </nav>
 
-      {/* Static placeholder for layout flow on desktop (sidebar is fixed) */}
+      {/* Static placeholder for layout flow on desktop */}
       <div
         className="hidden lg:block"
-        style={{ width: 240, flexShrink: 0 }}
+        style={{
+          width: sidebarWidth,
+          flexShrink: 0,
+          transition: "width 220ms cubic-bezier(0.4,0,0.2,1)",
+        }}
         aria-hidden
       />
     </>
