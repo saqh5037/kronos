@@ -254,7 +254,7 @@ export default function OnboardingWizard({
           Onboarding · Paso {step} de {TOTAL_STEPS}
         </Eyebrow>
         <h1 className="mt-3 font-display font-extrabold text-[36px] md:text-[44px] leading-[1.05] tracking-[-0.02em]">
-          Configurá tu box en {TOTAL_STEPS} pasos
+          Configura tu box en {TOTAL_STEPS} pasos
         </h1>
         <Stepper current={step} />
       </div>
@@ -405,7 +405,7 @@ function Step1(p: Step1Props) {
     <div className="space-y-5">
       <div>
         <h2 className="font-display font-bold text-2xl mb-1">
-          Empezá por lo básico
+          Empieza por lo básico
         </h2>
         <p className="text-sm" style={{ color: "var(--k-t2)" }}>
           Estos datos van en tu marca, mails y reportes.
@@ -500,8 +500,8 @@ function Step2(p: Step2Props) {
         </h2>
         <p className="text-sm" style={{ color: "var(--k-t2)" }}>
           {p.hasSchedule
-            ? "Ya tenés horarios cargados. Podés ajustarlos en Ajustes → Horarios."
-            : "Te dejamos un preset CrossFit-friendly. Podés afinarlo después."}
+            ? "Ya tienes horarios cargados. Puedes ajustarlos en Ajustes → Horarios."
+            : "Te dejamos un preset CrossFit-friendly. Puedes afinarlo después."}
         </p>
       </div>
       <div
@@ -574,8 +574,8 @@ function StepWods(p: StepWodsProps) {
       <div>
         <h2 className="font-display font-bold text-2xl mb-1">WODs benchmark</h2>
         <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-          Importá los WODs clásicos para arrancar con biblioteca cargada.
-          Después podés crear los tuyos. Tildá los que querés.
+          Importa los WODs clásicos para arrancar con biblioteca cargada.
+          Después puedes crear los tuyos. Marca los que quieras.
         </p>
       </div>
       <div className="grid sm:grid-cols-2 gap-2 max-h-[420px] overflow-y-auto pr-1">
@@ -689,7 +689,7 @@ function Step3(p: Step3Props) {
           Tu primer plan de membresía
         </h2>
         <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-          Vas a poder crear más planes desde Pagos. Empezá con uno.
+          Vas a poder crear más planes desde Pagos. Empieza con uno.
         </p>
       </div>
       <Field

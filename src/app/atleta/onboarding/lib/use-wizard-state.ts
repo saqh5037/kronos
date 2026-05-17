@@ -86,9 +86,13 @@ const INITIAL_STATE: WizardState = {
   step: 1,
   fitnessReason: null,
   biologicalSex: null,
-  weightKg: null,
-  heightCm: null,
-  ageYears: null,
+  // Defaults razonables: el atleta los ve pre-llenados en los NumberSteppers y
+  // puede continuar sin tener que tocar +/- para "registrar" cada campo.
+  // Antes estaban en null y solo eran visibles via `value ?? 70` en el child,
+  // lo que requería interacción con cada stepper para activar "Siguiente".
+  weightKg: 70,
+  heightCm: 170,
+  ageYears: 25,
   trackMenstrualCycle: false,
   fitnessExperience: null,
   fitnessGoal: null,

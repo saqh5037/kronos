@@ -146,8 +146,9 @@ export function InviteForm() {
       {/* Result */}
       {state.kind === "ok" && (
         <div className="rounded-lg border border-[var(--k-accent-line)] bg-[var(--k-accent-soft)] p-3 text-sm">
-          ✓ {state.created} invitacion{state.created === 1 ? "" : "es"} enviada
-          {state.created === 1 ? "" : "s"}.
+          ✓ {state.created}{" "}
+          {state.created === 1 ? "invitación enviada" : "invitaciones enviadas"}
+          .
           {state.skipped > 0 &&
             ` ${state.skipped} omitida${state.skipped === 1 ? "" : "s"}.`}
         </div>
@@ -167,7 +168,7 @@ export function InviteForm() {
         >
           {pending
             ? "Enviando…"
-            : `Enviar ${validCount} invitacion${validCount === 1 ? "" : "es"}`}
+            : `Enviar ${validCount} ${validCount === 1 ? "invitación" : "invitaciones"}`}
         </button>
       </div>
     </div>

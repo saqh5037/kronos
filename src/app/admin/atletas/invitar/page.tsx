@@ -37,7 +37,7 @@ export default async function InvitarAtletasPage() {
           </h1>
         </div>
         <p className="mt-2 text-sm text-[var(--k-t2)]">
-          Pegá emails (uno por línea) para enviar invitaciones por correo. Cada
+          Pega emails (uno por línea) para enviar invitaciones por correo. Cada
           atleta recibirá un link para confirmar nombre y empezar a usar la app.
         </p>
       </div>

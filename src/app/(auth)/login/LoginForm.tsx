@@ -9,8 +9,12 @@ const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEV_LOGIN === "1";
 
 type Mode = "magic" | "password";
 
-export default function LoginForm() {
-  const [email, setEmail] = useState("");
+type LoginFormProps = {
+  initialEmail?: string;
+};
+
+export default function LoginForm({ initialEmail = "" }: LoginFormProps) {
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<Mode>("magic");
   const [sent, setSent] = useState(false);

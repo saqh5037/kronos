@@ -43,7 +43,7 @@ export default async function InvitationPage({
             Tu cuenta ya está creada
           </h1>
           <p className="text-[var(--k-t2)] mb-6">
-            Iniciá sesión con tu email <strong>{inv.email}</strong> para entrar
+            Inicia sesión con tu email <strong>{inv.email}</strong> para entrar
             a la app.
           </p>
           <Link
@@ -57,7 +57,7 @@ export default async function InvitationPage({
     }
     const message =
       check.reason === "EXPIRED"
-        ? "Esta invitación expiró. Pedile a tu Box que te envíe una nueva."
+        ? "Esta invitación expiró. Pídele a tu Box que te envíe una nueva."
         : "Esta invitación fue revocada por tu Box.";
     return (
       <Layout boxName={inv.box.name}>
@@ -82,7 +82,7 @@ export default async function InvitationPage({
         <span style={{ color: "var(--k-accent)" }}>{inv.box.name}</span>
       </h1>
       <p className="text-[var(--k-t2)] mb-6">
-        Confirmá tus datos para entrar a la app del atleta.
+        Confirma tus datos para entrar a la app del atleta.
       </p>
 
       <AcceptInvitationForm

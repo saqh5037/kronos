@@ -54,7 +54,7 @@ export function AcceptInvitationForm({
           </p>
         </div>
         <p className="text-sm text-[var(--k-t2)]">
-          Iniciá sesión con tu email para entrar a la app:
+          Inicia sesión con tu email para entrar a la app:
         </p>
         <Link
           href={`/login?email=${encodeURIComponent(email)}`}

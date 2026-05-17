@@ -220,7 +220,7 @@ export default function SignupForm({
         className="text-center text-[11px] mt-1"
         style={{ color: "var(--k-t3)" }}
       >
-        Sin tarjeta de crédito. Cancelás cuando quieras.
+        Sin tarjeta de crédito. Cancelas cuando quieras.
       </p>
     </form>
   );

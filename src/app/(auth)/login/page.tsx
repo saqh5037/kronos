@@ -7,7 +7,11 @@ import KCard from "@/components/kronos/KCard";
 
 export const metadata = { title: "Kronos — Iniciar sesión" };
 
-export default async function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{ email?: string; callbackUrl?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   let session = null;
   try {
     session = await getServerSession(authOptions);
@@ -20,6 +24,10 @@ export default async function LoginPage() {
     if (role === "ATHLETE") redirect("/atleta");
     redirect("/admin");
   }
+
+  const params = await searchParams;
+  const initialEmail =
+    typeof params.email === "string" ? params.email.trim().toLowerCase() : "";
 
   return (
     <main
@@ -51,7 +59,7 @@ export default async function LoginPage() {
 
         <KCard>
           <div className="p-5">
-            <LoginForm />
+            <LoginForm initialEmail={initialEmail} />
           </div>
         </KCard>
 

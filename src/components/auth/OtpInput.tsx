@@ -69,7 +69,7 @@ export default function OtpInput({
     // Sin dígitos = no hay nada que rescatar. Avisar en vez de borrar silente.
     if (digitsOnly.length === 0) {
       e.preventDefault();
-      kToast.error("Pegá los 6 dígitos del email — no tu password.");
+      kToast.error("Pega los 6 dígitos del email — no tu password.");
       return;
     }
 

@@ -6,7 +6,7 @@ import { getOnboardingStatus } from "@/server/actions/onboarding";
 import { getBenchmarkWodPresets } from "@/lib/wod-presets-data";
 import OnboardingWizard from "./OnboardingWizard";
 
-export const metadata = { title: "Kronos — Configurá tu box" };
+export const metadata = { title: "Kronos — Configura tu box" };
 
 export default async function OnboardingPage() {
   const session = await getServerSession(authOptions);

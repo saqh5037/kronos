@@ -296,15 +296,20 @@ export default async function AdminDashboardPage({
 
     attendanceToday: {
       taken: data.todayStats.totalAttended,
-      capacity: Math.max(
-        data.todayStats.totalBooked,
-        data.todayStats.totalAttended,
-        1,
-      ),
-      pct: pct(
-        data.todayStats.totalAttended,
-        Math.max(data.todayStats.totalBooked, 1),
-      ),
+      // Si no hay clases hoy, capacity = 0 (mostrar "0 / 0", no "0 / 1").
+      // Si hay clases, el divisor es el max real entre booked y attended.
+      capacity:
+        data.todayStats.totalClasses > 0
+          ? Math.max(
+              data.todayStats.totalBooked,
+              data.todayStats.totalAttended,
+              1,
+            )
+          : 0,
+      pct:
+        data.todayStats.totalBooked > 0
+          ? pct(data.todayStats.totalAttended, data.todayStats.totalBooked)
+          : 0,
     },
     classesProgrammed: data.todayStats.totalClasses,
     classesWithWaitlist: data.waitlistedClassesToday,

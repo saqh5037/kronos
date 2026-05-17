@@ -22,7 +22,7 @@ import OtpInput from "./OtpInput";
 
 type Props = {
   email: string;
-  /** Copy del título. Cambia según contexto (signup nuevo vs ya tenés cuenta). */
+  /** Copy del título. Cambia según contexto (signup nuevo vs ya tiene cuenta). */
   title?: string;
   /** Subtítulo descriptivo arriba del flow. */
   subtitle?: React.ReactNode;
@@ -68,7 +68,7 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
       setResendCooldown(RESEND_COOLDOWN_SECONDS);
       setError(null);
     } catch {
-      kToast.error("No pudimos reenviar. Probá de nuevo.");
+      kToast.error("No pudimos reenviar. Intenta de nuevo.");
     } finally {
       setResendBusy(false);
     }
@@ -93,7 +93,7 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
           typeof data.redirectTo === "string" ? data.redirectTo : "/atleta";
         window.location.href = target;
       } catch {
-        setError("Error de conexión. Probá de nuevo.");
+        setError("Error de conexión. Intenta de nuevo.");
       }
     });
   }
@@ -112,7 +112,7 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
         </span>
       </div>
       <h2 className="font-display font-bold text-xl">
-        {title ?? "Revisá tu correo"}
+        {title ?? "Revisa tu correo"}
       </h2>
 
       {subtitle ? (
@@ -122,7 +122,7 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
       ) : (
         <p className="text-sm" style={{ color: "var(--k-t2)" }}>
           Te mandamos un código de 6 dígitos a{" "}
-          <strong style={{ color: "var(--k-t1)" }}>{email}</strong>. Pegalo
+          <strong style={{ color: "var(--k-t1)" }}>{email}</strong>. Pégalo
           abajo para entrar.
         </p>
       )}
@@ -133,7 +133,7 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
             className="text-xs font-mono uppercase tracking-wider"
             style={{ color: "var(--k-t3)" }}
           >
-            Pegá los 6 dígitos del email
+            Pega los 6 dígitos del email
           </p>
           <OtpInput
             value={code}
@@ -159,8 +159,8 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
             </p>
           ) : null}
           <p className="text-[11px]" style={{ color: "var(--k-t3)" }}>
-            El código vive 1 hora. Lo podés usar en Chrome y Safari los primeros
-            5 minutos.
+            El código vive 1 hora. Lo puedes usar en Chrome y Safari los
+            primeros 5 minutos.
           </p>
           <div className="flex flex-col gap-2 pt-1">
             <button
@@ -198,7 +198,7 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
             Magic link
           </p>
           <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-            Tocá el botón <strong>Entrar a Kronos</strong> en el mail desde el
+            Toca el botón <strong>Entrar a Kronos</strong> en el mail desde el
             mismo dispositivo. El link es válido 1 hora.
           </p>
           <div className="flex flex-col gap-2 pt-2">
@@ -248,7 +248,7 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
             className="underline"
             style={{ color: "var(--k-accent)" }}
           >
-            Escribinos por WhatsApp
+            Escríbenos por WhatsApp
           </a>
         </p>
       ) : null}

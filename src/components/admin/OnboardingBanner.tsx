@@ -46,10 +46,10 @@ export default function OnboardingBanner({
           className="text-[10px] font-mono uppercase tracking-[0.22em]"
           style={{ color: "var(--k-accent)" }}
         >
-          Configurá tu box · {doneCount} de {steps.length}
+          Configura tu box · {doneCount} de {steps.length}
         </div>
         <p className="mt-1 text-sm md:text-base font-medium">
-          Completá el onboarding para que Kronos se sienta tuyo desde el día
+          Completa el onboarding para que Kronos se sienta tuyo desde el día
           uno.
         </p>
         <div className="flex flex-wrap gap-1.5 mt-3">
