@@ -71,8 +71,8 @@ export default async function SeguridadPage() {
         </h2>
         <p className="text-sm mb-5" style={{ color: "var(--k-t2)" }}>
           {hasPassword
-            ? "Ya tenés una contraseña configurada. Podés cambiarla o eliminarla."
-            : "Magic link funciona perfecto, pero seteá una contraseña para entrar más rápido sin esperar el email."}
+            ? "Ya tienes una contraseña configurada. Puedes cambiarla o eliminarla."
+            : "Magic link funciona perfecto, pero configura una contraseña para entrar más rápido sin esperar el email."}
         </p>
         <PasswordForm hasPassword={hasPassword} />
       </div>

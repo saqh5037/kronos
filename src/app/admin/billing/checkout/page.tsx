@@ -20,10 +20,10 @@ export default async function BillingCheckoutPage() {
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <p className="k-eyebrow text-[var(--k-t3)] mb-2">Activar suscripción</p>
       <h1 className="font-display font-extrabold text-[32px] md:text-[40px] leading-[1.05] tracking-[-0.02em] mb-3">
-        Elegí tu <em style={{ color: "var(--k-warning)" }}>plan</em>
+        Elige tu <em style={{ color: "var(--k-warning)" }}>plan</em>
       </h1>
       <p className="mb-6 md:mb-8 text-base text-[var(--k-t2)] leading-relaxed">
-        Mantené tu Box online, sin interrupciones. Podés cambiar de plan o
+        Mantén tu Box online, sin interrupciones. Puedes cambiar de plan o
         cancelar cuando quieras.
         {mockMode && (
           <>
@@ -31,7 +31,7 @@ export default async function BillingCheckoutPage() {
             <strong className="text-[var(--k-warning)]">
               Modo demo activo:
             </strong>{" "}
-            podés simular el pago para activar la suscripción sin cargo real.
+            puedes simular el pago para activar la suscripción sin cargo real.
           </>
         )}
       </p>

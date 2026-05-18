@@ -83,7 +83,7 @@ export function DayView({
             day: "numeric",
             month: "long",
           })}`}
-          description="Si este día no opera, configúralo en Ajustes › Horarios. Si querés agregar una clase puntual, usá ‘+ Nueva clase’."
+          description="Si este día no opera, configúralo en Ajustes › Horarios. Si quieres agregar una clase puntual, usa ‘+ Nueva clase’."
         />
       ) : (
         <div className="relative grid grid-cols-[60px_1fr] gap-3">

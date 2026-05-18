@@ -25,7 +25,7 @@ export async function setPassword(input: {
     return {
       ok: false,
       error: "UNAUTHENTICATED",
-      message: "Iniciá sesión primero",
+      message: "Inicia sesión primero",
     };
   }
 
@@ -41,7 +41,7 @@ export async function setPassword(input: {
     return {
       ok: false,
       error: "VALIDATION",
-      message: "Revisá los campos del formulario",
+      message: "Revisa los campos del formulario",
       fieldErrors,
     };
   }
@@ -71,7 +71,7 @@ export async function clearPassword(): Promise<PasswordResult> {
     return {
       ok: false,
       error: "UNAUTHENTICATED",
-      message: "Iniciá sesión primero",
+      message: "Inicia sesión primero",
     };
   }
 
@@ -83,7 +83,7 @@ export async function clearPassword(): Promise<PasswordResult> {
     return {
       ok: false,
       error: "NOT_SET",
-      message: "No tenés contraseña configurada",
+      message: "No tienes contraseña configurada",
     };
   }
 

@@ -45,7 +45,7 @@ function copyForStatus(
           days != null
             ? `Tu prueba termina en ${days} día${days === 1 ? "" : "s"}`
             : "Estás en período de prueba",
-        body: "Convertí tu trial en una suscripción para que tu box no se interrumpa cuando se acabe la prueba.",
+        body: "Convierte tu trial en una suscripción para que tu box no se interrumpa cuando se acabe la prueba.",
         cta: { label: "Activar suscripción", href: "/admin/billing/checkout" },
         tone: "info",
       };
@@ -54,7 +54,7 @@ function copyForStatus(
       return {
         eyebrow: "Suscripción activa",
         title: "Tu box está al día",
-        body: "Tu plan está vigente. Acá vas a ver las facturas y el método de pago cuando esté wired el cobro.",
+        body: "Tu plan está vigente. Aquí verás las facturas y el método de pago cuando esté configurado el cobro.",
         cta: null,
         tone: "success",
       };
@@ -62,7 +62,7 @@ function copyForStatus(
       return {
         eyebrow: "Pago pendiente",
         title: "Necesitamos actualizar tu pago",
-        body: "El último cobro falló. Actualizá tu método de pago para evitar que tu box quede en EXPIRED.",
+        body: "El último cobro falló. Actualiza tu método de pago para evitar que tu box quede en EXPIRED.",
         cta: {
           label: "Actualizar pago",
           href: "/admin/billing/payment-method",
@@ -73,7 +73,7 @@ function copyForStatus(
       return {
         eyebrow: "Suscripción cancelada",
         title: "Cancelaste tu plan",
-        body: "Podés reactivar tu suscripción cuando quieras y seguís manteniendo tus datos.",
+        body: "Puedes reactivar tu suscripción cuando quieras y seguirás manteniendo tus datos.",
         cta: { label: "Reactivar", href: "/admin/billing/checkout" },
         tone: "warning",
       };
@@ -81,15 +81,15 @@ function copyForStatus(
       return {
         eyebrow: "Acceso bloqueado",
         title: "Tu suscripción expiró",
-        body: "Para volver a operar tu box, activá una suscripción. Tus datos siguen acá esperándote.",
+        body: "Para volver a operar tu box, activa una suscripción. Tus datos siguen aquí esperándote.",
         cta: { label: "Reactivar ahora", href: "/admin/billing/checkout" },
         tone: "danger",
       };
     default:
       return {
         eyebrow: "Suscripción",
-        title: "Configurá tu suscripción",
-        body: "Aún no tenés un estado de suscripción registrado.",
+        title: "Configura tu suscripción",
+        body: "Aún no tienes un estado de suscripción registrado.",
         cta: null,
         tone: "info",
       };
@@ -158,7 +158,7 @@ export default async function BillingPage() {
               style={{ color: "var(--k-t2)" }}
             >
               $3,500 MXN/mes lock 12 meses + 3 meses gratis al pagar anual.
-              Onboarding 1-a-1 incluido. Si te interesa, escribinos para
+              Onboarding 1-a-1 incluido. Si te interesa, escríbenos para
               activarte el plan Founding sobre tu Box actual.
             </div>
           </div>

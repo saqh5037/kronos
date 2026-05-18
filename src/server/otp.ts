@@ -37,7 +37,7 @@ export const REUSE_GRACE_MS = 5 * 60_000; // 5 min de reuso post-primer-uso
  * Reproduce el hashing interno de NextAuth EmailProvider:
  * `sha256(token_raw + secret)`. NextAuth almacena ESTE hash en
  * VerificationToken.token (no el raw), pero pasa el raw a
- * `sendVerificationRequest`. Si querés derivar un OTP que matchee con el
+ * `sendVerificationRequest`. Si quieres derivar un OTP que matchee con el
  * registro en DB, hashear primero con esta función.
  *
  * Ref: https://github.com/nextauthjs/next-auth/blob/v4/packages/next-auth/src/core/lib/email/signin.ts

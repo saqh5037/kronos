@@ -36,10 +36,10 @@ export function CoachClassesTodayCard({ classes }: Props) {
       {classes.length === 0 ? (
         <div className="py-2">
           <p className="text-sm text-[var(--k-t2)]">
-            No tenés clases asignadas hoy.
+            No tienes clases asignadas hoy.
           </p>
           <p className="text-xs text-[var(--k-t3)] mt-1">
-            Revisá la programación si esperabas alguna.
+            Revisa la programación si esperabas alguna.
           </p>
         </div>
       ) : (

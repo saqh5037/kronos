@@ -25,7 +25,7 @@ export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
         setSuccess(
           hasPassword
             ? "Contraseña actualizada"
-            : "Contraseña configurada — ahora podés entrar con email + contraseña",
+            : "Contraseña configurada — ahora puedes entrar con email + contraseña",
         );
         setPasswordValue("");
         setConfirmValue("");
@@ -42,7 +42,7 @@ export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
   function handleClear() {
     if (
       !confirm &&
-      !window.confirm("¿Seguro? Vas a volver a depender solo del magic link.")
+      !window.confirm("¿Seguro? Volverás a depender solo del magic link.")
     ) {
       return;
     }

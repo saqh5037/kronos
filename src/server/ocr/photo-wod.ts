@@ -36,12 +36,12 @@ export type PhotoWodAIResult = {
 
 function buildPrompt(): string {
   return `Eres un experto en lectura de pizarras de boxes de CrossFit.
-La foto que recibís fue tomada por un atleta independiente (sin coach) que
+La foto que recibes fue tomada por un atleta independiente (sin coach) que
 quiere loggear su WOD personal en su app. Tu tarea es extraer la estructura
 del WOD principal de la imagen y el resultado del atleta si está visible.
 
-IMPORTANTE: solo extraé UN WOD (el principal). Si hay múltiples WODs en la
-foto, elegí el que tenga mayor protagonismo visual o el primero.
+IMPORTANTE: solo extrae UN WOD (el principal). Si hay múltiples WODs en la
+foto, elige el que tenga mayor protagonismo visual o el primero.
 
 Devolvé SOLO un objeto JSON con esta estructura exacta (sin texto extra):
 {
@@ -61,7 +61,7 @@ Reglas para inferir wodType y scoreType cuando no es obvio:
 - Si dice "AMRAP X min" → AMRAP, scoreType ROUNDS_REPS
 - Si dice "EMOM X min" → EMOM, scoreType REPS
 - Si es trabajo de fuerza (3RM, 1RM, "max") → STRENGTH, scoreType WEIGHT
-- Si no podés inferir, usá CUSTOM + TIME
+- Si no puedes inferir, usa CUSTOM + TIME
 
 Responde SOLO con el JSON, sin markdown, sin explicaciones, sin \`\`\`.`;
 }

@@ -85,6 +85,8 @@ export default function LoginForm({ initialEmail = "" }: LoginFormProps) {
         <form onSubmit={handleMagicLink} className="flex flex-col gap-3">
           <input
             type="email"
+            id="email-magic"
+            aria-label="Correo electrónico"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="correo@tubox.com"
@@ -120,6 +122,8 @@ export default function LoginForm({ initialEmail = "" }: LoginFormProps) {
         <form onSubmit={handlePassword} className="flex flex-col gap-3">
           <input
             type="email"
+            id="email-password"
+            aria-label="Correo electrónico"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="correo@tubox.com"
@@ -134,6 +138,8 @@ export default function LoginForm({ initialEmail = "" }: LoginFormProps) {
           />
           <input
             type="password"
+            id="password"
+            aria-label="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="contraseña"
@@ -217,6 +223,8 @@ function DevLoginForm() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <input
           type="email"
+          id="dev-email"
+          aria-label="Correo electrónico (dev)"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="email"
@@ -230,6 +238,8 @@ function DevLoginForm() {
         />
         <input
           type="password"
+          id="dev-password"
+          aria-label="Contraseña (dev)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="password"

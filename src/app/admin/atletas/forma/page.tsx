@@ -49,7 +49,7 @@ export default async function FormaPage() {
       {movements.length === 0 ? (
         <div className="k-card p-6 text-center">
           <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-            No tenés permisos o no hay movimientos cargados. Verificá que seas
+            No tienes permisos o no hay movimientos cargados. Verifica que seas
             COACH/OWNER.
           </p>
         </div>

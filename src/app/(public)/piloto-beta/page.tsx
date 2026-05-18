@@ -24,7 +24,7 @@ export default async function PilotoBetaPage({
     return <InvalidStateScreen reason="missing" />;
   }
 
-  const tokenResult = verifyPilotBetaToken(token);
+  const tokenResult = await verifyPilotBetaToken(token);
   if (!tokenResult.ok) {
     return (
       <InvalidStateScreen

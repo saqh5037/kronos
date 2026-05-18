@@ -83,10 +83,10 @@ export function CheckoutClient({ plans, mockMode }: Props) {
       <div className="k-card p-6 max-w-2xl">
         <p className="k-eyebrow text-[var(--k-t3)] mb-2">Modo demo</p>
         <h2 className="font-display text-2xl font-bold mb-3">
-          Confirmá la activación de <strong>{plan?.name}</strong>
+          Confirma la activación de <strong>{plan?.name}</strong>
         </h2>
         <p className="text-[var(--k-t2)] mb-4">
-          MercadoPago no está configurado en este servidor, así que podés
+          MercadoPago no está configurado en este servidor, así que puedes
           simular el cobro acá. Esto activa la suscripción inmediatamente sin
           cargo real.
         </p>
@@ -145,7 +145,7 @@ export function CheckoutClient({ plans, mockMode }: Props) {
       </div>
       {mockMode && (
         <p className="mt-6 text-xs text-[var(--k-t3)]">
-          Para activar cobros reales con MercadoPago, configurá la variable de
+          Para activar cobros reales con MercadoPago, configura la variable de
           entorno <code className="font-mono">MERCADOPAGO_ACCESS_TOKEN</code>.
         </p>
       )}

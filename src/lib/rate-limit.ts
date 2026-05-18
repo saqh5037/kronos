@@ -51,7 +51,7 @@ export function rateLimit(
 }
 
 /**
- * Read-only check: lee el bucket sin incrementar. Útil cuando querés decidir
+ * Read-only check: lee el bucket sin incrementar. Útil cuando quieres decidir
  * si bloquear ANTES de hacer la operación, e incrementar SOLO cuando la
  * operación falla (penalizar fallos, no éxitos — caso típico OTP verify).
  */
@@ -78,7 +78,7 @@ export function rateLimitCheck(
 
 /**
  * Incrementa el bucket sin chequear el cap. Llamar después de un fallo
- * cuando ya pasaste `rateLimitCheck` y querés contar este intento.
+ * cuando ya pasaste `rateLimitCheck` y quieres contar este intento.
  */
 export function rateLimitHit(key: string, windowMs: number): void {
   const now = Date.now();
