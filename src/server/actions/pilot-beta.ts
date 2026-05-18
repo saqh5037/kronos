@@ -1,8 +1,10 @@
 "use server";
 
+import { headers } from "next/headers";
 import { db as prismaBase } from "@/server/db";
 import { logAudit } from "@/server/audit";
 import { verifyPilotBetaToken } from "@/lib/pilot-beta-token";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import {
   pilotBetaSignSchema,
   type PilotBetaSignInput,
@@ -61,7 +63,18 @@ export async function signPilotBeta(
     };
   }
 
-  const tokenResult = verifyPilotBetaToken(parsed.data.token);
+  // Rate-limit por IP — 5 intentos / 15 min.
+  const ip = getClientIp((await headers()) as unknown as Headers);
+  const rlIp = rateLimit(`pilot-beta-sign:ip:${ip}`, 5, 15 * 60_000);
+  if (!rlIp.ok) {
+    return {
+      ok: false,
+      error: "INTERNAL" as const,
+      message: `Demasiados intentos. Vuelve en ${rlIp.retryAfterSec}s.`,
+    };
+  }
+
+  const tokenResult = await verifyPilotBetaToken(parsed.data.token);
   if (!tokenResult.ok) {
     if (tokenResult.reason === "EXPIRED") {
       return {
@@ -69,6 +82,14 @@ export async function signPilotBeta(
         error: "EXPIRED_TOKEN",
         message:
           "Tu link de firma expiró. Pídeselo a Samuel para que te mande uno nuevo.",
+      };
+    }
+    if (tokenResult.reason === "REVOKED") {
+      return {
+        ok: false,
+        error: "INVALID_TOKEN",
+        message:
+          "Este link ya no es válido. Contacta a Samuel para solicitar uno nuevo.",
       };
     }
     return {
@@ -79,6 +100,16 @@ export async function signPilotBeta(
   }
 
   const { boxId } = tokenResult.payload;
+
+  // Rate-limit por boxId — cierra el caso de attacker rotando IPs contra el mismo box.
+  const rlBox = rateLimit(`pilot-beta-sign:box:${boxId}`, 5, 15 * 60_000);
+  if (!rlBox.ok) {
+    return {
+      ok: false,
+      error: "INTERNAL" as const,
+      message: `Demasiados intentos. Vuelve en ${rlBox.retryAfterSec}s.`,
+    };
+  }
 
   const box = await prismaBase.box.findUnique({
     where: { id: boxId },

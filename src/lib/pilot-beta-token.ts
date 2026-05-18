@@ -5,7 +5,9 @@
  *
  * Token format: base64url(payload).hex(hmac-sha256)
  *
- * Payload: { boxId, exp } donde exp = unix seconds.
+ * Payload: { boxId, exp, jti? } donde exp = unix seconds y jti = UUID v4.
+ * jti es opcional en el payload para compatibilidad con tokens emitidos antes
+ * de esta versión. Tokens sin jti saltan el chequeo de revocación.
  *
  * Uso: Samuel genera el link manualmente (CLI script o admin tool futuro)
  * con `signPilotBetaToken({ boxId, expiresInSec })`, manda al owner.
@@ -16,11 +18,13 @@
  * para que no pueda forjarse session tokens si se filtra).
  */
 
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { db } from "@/server/db";
 
 export type PilotBetaTokenPayload = {
   boxId: string;
   exp: number; // unix seconds
+  jti?: string; // UUID v4 — presente en tokens emitidos desde esta versión
 };
 
 export type VerifyResult =
@@ -31,7 +35,8 @@ export type VerifyResult =
         | "INVALID_FORMAT"
         | "INVALID_SIGNATURE"
         | "EXPIRED"
-        | "MISSING_SECRET";
+        | "MISSING_SECRET"
+        | "REVOKED";
     };
 
 function getSecret(): string | null {
@@ -76,16 +81,17 @@ export function signPilotBetaToken(args: {
   const payload: PilotBetaTokenPayload = {
     boxId: args.boxId,
     exp: nowSec + args.expiresInSec,
+    jti: randomUUID(),
   };
   const encoded = base64UrlEncode(JSON.stringify(payload));
   const sig = hmacHex(encoded, secret);
   return `${encoded}.${sig}`;
 }
 
-export function verifyPilotBetaToken(
+export async function verifyPilotBetaToken(
   token: string,
   now: Date = new Date(),
-): VerifyResult {
+): Promise<VerifyResult> {
   const secret = getSecret();
   if (!secret) return { ok: false, reason: "MISSING_SECRET" };
 
@@ -120,5 +126,23 @@ export function verifyPilotBetaToken(
   const nowSec = Math.floor(now.getTime() / 1000);
   if (payload.exp <= nowSec) return { ok: false, reason: "EXPIRED" };
 
+  // Revocation check: tokens sin jti (legacy) saltan este paso.
+  if (payload.jti) {
+    const revoked = await db.revokedPilotBetaJti.findUnique({
+      where: { jti: payload.jti },
+    });
+    if (revoked) return { ok: false, reason: "REVOKED" };
+  }
+
   return { ok: true, payload };
+}
+
+export async function revokePilotBetaToken(
+  jti: string,
+  boxId: string,
+  reason?: string,
+): Promise<void> {
+  await db.revokedPilotBetaJti.create({
+    data: { jti, boxId, reason },
+  });
 }

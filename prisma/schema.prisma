@@ -1260,6 +1260,17 @@ model Announcement {
   @@index([tenantId, status])
 }
 
+// ─── PILOT BETA REVOCATION ───────────────────────────────────────────────────
+
+model RevokedPilotBetaJti {
+  jti       String   @id
+  boxId     String
+  revokedAt DateTime @default(now())
+  reason    String?
+
+  @@index([boxId])
+}
+
 // ─── LANDING LEADS ───────────────────────────────────────────────────────────
 
 model Lead {
