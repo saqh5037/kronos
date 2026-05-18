@@ -70,4 +70,34 @@ describe("validateMagicLinkSignIn", () => {
     if (out.type !== "redirect") throw new Error("expected redirect");
     expect(out.url).toContain("user%2Bpromo%40example.com");
   });
+
+  it("redirect URL: usa baseUrl absoluto cuando se pasa (next-auth/react v4 requiere URL absoluta para new URL())", async () => {
+    const lookup = vi.fn().mockResolvedValue(null);
+    const out = await validateMagicLinkSignIn(
+      "email",
+      "tester@example.com",
+      lookup,
+      "https://www.kronos-fit.com",
+    );
+    if (out.type !== "redirect") throw new Error("expected redirect");
+    expect(out.url).toBe(
+      "https://www.kronos-fit.com/signup?email=tester%40example.com&reason=no_account",
+    );
+    // Validar que es URL absoluta parseable (lo que el cliente NextAuth hace)
+    expect(() => new URL(out.url)).not.toThrow();
+  });
+
+  it("redirect URL: normaliza trailing slash del baseUrl", async () => {
+    const lookup = vi.fn().mockResolvedValue(null);
+    const out = await validateMagicLinkSignIn(
+      "email",
+      "tester@example.com",
+      lookup,
+      "https://www.kronos-fit.com/",
+    );
+    if (out.type !== "redirect") throw new Error("expected redirect");
+    expect(out.url).toBe(
+      "https://www.kronos-fit.com/signup?email=tester%40example.com&reason=no_account",
+    );
+  });
 });

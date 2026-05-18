@@ -134,6 +134,7 @@ export const authOptions: NextAuthOptions = {
         user.email,
         (email) =>
           db.user.findUnique({ where: { email }, select: { tenantId: true } }),
+        process.env.NEXTAUTH_URL ?? "",
       );
       if (decision.type === "allow") return true;
       if (decision.type === "redirect") return decision.url;
