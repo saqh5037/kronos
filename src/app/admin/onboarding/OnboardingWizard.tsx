@@ -7,6 +7,7 @@ import {
   updateBoxSchedule,
   type BoxSettings,
   type BoxScheduleSettings,
+  type DaySchedule,
   type WeeklySchedule,
 } from "@/server/actions/box";
 import {
@@ -87,6 +88,11 @@ export default function OnboardingWizard({
   const [brandColor, setBrandColor] = useState(box.brandColor ?? "#c8ff2d");
   const [logoUrl, setLogoUrl] = useState<string | null>(box.logoUrl ?? null);
 
+  // Step 2 — Weekly schedule (editable)
+  const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule>(
+    () => schedule.weeklySchedule ?? DEFAULT_SCHEDULE,
+  );
+
   // Step 3 — Plan
   const [planName, setPlanName] = useState("Mensualidad");
   const [planType, setPlanType] =
@@ -133,20 +139,53 @@ export default function OnboardingWizard({
     });
   }
 
-  function submitStep2(useDefault: boolean) {
+  function submitStep2() {
     startTransition(async () => {
       try {
         await updateBoxSchedule({
           ...schedule,
-          weeklySchedule: useDefault
-            ? DEFAULT_SCHEDULE
-            : schedule.weeklySchedule,
+          weeklySchedule,
         });
-        kToast.success(useDefault ? "Horario aplicado" : "Horario guardado");
+        kToast.success("Horario guardado");
         next();
       } catch (err) {
         kToast.error(err instanceof Error ? err.message : "Error");
       }
+    });
+  }
+
+  function resetSchedulePreset() {
+    setWeeklySchedule(DEFAULT_SCHEDULE);
+    kToast.info("Preset CrossFit aplicado");
+  }
+
+  function setDayKind(key: keyof WeeklySchedule, kind: "WOD" | "OPEN_BOX") {
+    setWeeklySchedule((s) => {
+      const day = s[key];
+      if (!day) return s;
+      return { ...s, [key]: { ...day, kind } };
+    });
+  }
+
+  function toggleDayOpen(key: keyof WeeklySchedule) {
+    setWeeklySchedule((s) => {
+      if (s[key]) return { ...s, [key]: null };
+      return { ...s, [key]: { kind: "WOD" as const, hours: [] } };
+    });
+  }
+
+  function toggleHour(key: keyof WeeklySchedule, hour: number) {
+    setWeeklySchedule((s) => {
+      const day = s[key];
+      const current: DaySchedule = day ?? { kind: "WOD", hours: [] };
+      const has = current.hours.includes(hour);
+      const newHours = has
+        ? current.hours.filter((h) => h !== hour)
+        : [...current.hours, hour].sort((a, b) => a - b);
+      return {
+        ...s,
+        [key]: newHours.length === 0 ? null : { ...current, hours: newHours },
+      };
     });
   }
 
@@ -278,8 +317,13 @@ export default function OnboardingWizard({
         ) : null}
         {step === 2 ? (
           <Step2
+            weeklySchedule={weeklySchedule}
+            onToggleDayOpen={toggleDayOpen}
+            onSetDayKind={setDayKind}
+            onToggleHour={toggleHour}
+            onResetPreset={resetSchedulePreset}
             pending={pending}
-            onApplyDefault={() => submitStep2(true)}
+            onSave={submitStep2}
             onSkip={next}
             onBack={back}
             hasSchedule={status.hasSchedule}
@@ -484,12 +528,29 @@ function Step1(p: Step1Props) {
 }
 
 type Step2Props = {
+  weeklySchedule: WeeklySchedule;
+  onToggleDayOpen: (key: keyof WeeklySchedule) => void;
+  onSetDayKind: (key: keyof WeeklySchedule, kind: "WOD" | "OPEN_BOX") => void;
+  onToggleHour: (key: keyof WeeklySchedule, hour: number) => void;
+  onResetPreset: () => void;
   pending: boolean;
-  onApplyDefault: () => void;
+  onSave: () => void;
   onSkip: () => void;
   onBack: () => void;
   hasSchedule: boolean;
 };
+
+const DOW_LABELS: { key: keyof WeeklySchedule; label: string }[] = [
+  { key: "mon", label: "Lunes" },
+  { key: "tue", label: "Martes" },
+  { key: "wed", label: "Miércoles" },
+  { key: "thu", label: "Jueves" },
+  { key: "fri", label: "Viernes" },
+  { key: "sat", label: "Sábado" },
+  { key: "sun", label: "Domingo" },
+];
+
+const STEP2_HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 function Step2(p: Step2Props) {
   return (
@@ -500,27 +561,139 @@ function Step2(p: Step2Props) {
         </h2>
         <p className="text-sm" style={{ color: "var(--k-t2)" }}>
           {p.hasSchedule
-            ? "Ya tienes horarios cargados. Puedes ajustarlos en Ajustes → Horarios."
-            : "Te dejamos un preset CrossFit-friendly. Puedes afinarlo después."}
+            ? "Ajusta cada día. Marca/desmarca horas, elige WOD u Open Box, o cierra el día."
+            : "Empezamos con un preset CrossFit-friendly. Ajusta cada día a tu medida."}
         </p>
       </div>
-      <div
-        className="rounded-xl p-4 space-y-2"
-        style={{ background: "var(--k-elevated)" }}
-      >
-        <div className="flex justify-between text-sm">
-          <span style={{ color: "var(--k-t2)" }}>Lun–Vie</span>
-          <span className="font-mono">06 · 07 · 09 · 17 · 18 · 19</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span style={{ color: "var(--k-t2)" }}>Sábado · Open Box</span>
-          <span className="font-mono">08 · 09 · 10</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span style={{ color: "var(--k-t2)" }}>Domingo</span>
-          <span style={{ color: "var(--k-t3)" }}>cerrado</span>
-        </div>
+
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span
+          className="font-mono uppercase tracking-wider"
+          style={{ color: "var(--k-t3)" }}
+        >
+          Leyenda:
+        </span>
+        <span
+          className="px-2 py-0.5 rounded font-mono font-bold"
+          style={{
+            background: "var(--k-accent)",
+            color: "var(--k-accent-on)",
+          }}
+        >
+          WOD
+        </span>
+        <span
+          className="px-2 py-0.5 rounded font-mono font-bold"
+          style={{
+            background: "var(--k-warning)",
+            color: "var(--k-accent-on)",
+          }}
+        >
+          OPEN BOX
+        </span>
+        <span style={{ color: "var(--k-t3)" }}>
+          · click en hora para agregar/quitar
+        </span>
       </div>
+
+      <div className="flex flex-col gap-2">
+        {DOW_LABELS.map(({ key, label }) => {
+          const day = p.weeklySchedule[key];
+          return (
+            <div
+              key={key}
+              className="rounded-xl p-3 border"
+              style={{
+                background: day ? "var(--k-elevated)" : "transparent",
+                borderColor: "var(--k-line-2)",
+              }}
+            >
+              <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!day}
+                      onChange={() => p.onToggleDayOpen(key)}
+                      style={{ accentColor: "var(--k-accent)" }}
+                    />
+                    <span className="font-display text-sm font-bold">
+                      {label}
+                    </span>
+                  </label>
+                  {!day ? (
+                    <span className="text-xs" style={{ color: "var(--k-t3)" }}>
+                      cerrado
+                    </span>
+                  ) : null}
+                </div>
+                {day ? (
+                  <div className="flex gap-1">
+                    <Step2KindToggle
+                      active={day.kind === "WOD"}
+                      onClick={() => p.onSetDayKind(key, "WOD")}
+                    >
+                      WOD
+                    </Step2KindToggle>
+                    <Step2KindToggle
+                      active={day.kind === "OPEN_BOX"}
+                      onClick={() => p.onSetDayKind(key, "OPEN_BOX")}
+                    >
+                      Open Box
+                    </Step2KindToggle>
+                  </div>
+                ) : null}
+              </div>
+              {day ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {STEP2_HOURS.map((h) => {
+                    const on = day.hours.includes(h);
+                    return (
+                      <button
+                        key={h}
+                        type="button"
+                        onClick={() => p.onToggleHour(key, h)}
+                        className="font-mono text-[11px] font-bold rounded-md transition-all"
+                        style={{
+                          width: 38,
+                          height: 30,
+                          background: on
+                            ? day.kind === "OPEN_BOX"
+                              ? "var(--k-warning)"
+                              : "var(--k-accent)"
+                            : "var(--k-elevated)",
+                          color: on ? "var(--k-accent-on)" : "var(--k-t3)",
+                          border: `1px solid ${on ? "transparent" : "var(--k-line)"}`,
+                          cursor: "pointer",
+                        }}
+                        aria-pressed={on}
+                        aria-label={`${label} ${String(h).padStart(2, "0")}:00`}
+                      >
+                        {String(h).padStart(2, "0")}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={p.onResetPreset}
+          className="text-xs underline"
+          style={{ color: "var(--k-t3)" }}
+        >
+          ↺ Volver al preset CrossFit
+        </button>
+        <p className="text-[11px]" style={{ color: "var(--k-t3)" }}>
+          Puedes afinarlo después en Ajustes → Horarios.
+        </p>
+      </div>
+
       <NavRow
         left={
           <button
@@ -545,16 +718,43 @@ function Step2(p: Step2Props) {
               Saltar
             </button>
             <button
-              onClick={p.onApplyDefault}
+              onClick={p.onSave}
               disabled={p.pending}
               className="k-btn-grad px-5 py-2.5 rounded-full font-bold text-sm disabled:opacity-50"
             >
-              {p.pending ? "Aplicando…" : "Aplicar este horario"}
+              {p.pending ? "Guardando…" : "Guardar y continuar"}
             </button>
           </div>
         }
       />
     </div>
+  );
+}
+
+function Step2KindToggle({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase transition-all"
+      style={{
+        background: active ? "var(--k-surface)" : "transparent",
+        color: active ? "var(--k-t1)" : "var(--k-t3)",
+        border: `1px solid ${active ? "var(--k-line-2)" : "var(--k-line)"}`,
+        cursor: "pointer",
+      }}
+      aria-pressed={active}
+    >
+      {children}
+    </button>
   );
 }
 

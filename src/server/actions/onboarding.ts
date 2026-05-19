@@ -15,12 +15,15 @@ import {
   type OnboardingPlanInput,
   type OnboardingInviteInput,
 } from "@/lib/validations/onboarding";
+import { UnauthorizedError, DBError } from "@/lib/errors";
 
 async function requireOwner() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  if (!session?.user?.tenantId) throw new UnauthorizedError();
   if (session.user.role !== "OWNER") {
-    throw new Error("Forbidden: solo OWNER puede ejecutar onboarding");
+    throw new UnauthorizedError(
+      "Forbidden: solo OWNER puede ejecutar onboarding",
+    );
   }
   return session.user.tenantId;
 }
@@ -35,19 +38,25 @@ export type OnboardingStatus = {
 export async function getOnboardingStatus(): Promise<OnboardingStatus> {
   const tenantId = await requireOwner();
 
-  const [box, plan, staffCount] = await Promise.all([
-    prismaBase.box.findUnique({
-      where: { id: tenantId },
-      select: { onboardingCompletedAt: true, weeklySchedule: true },
-    }),
-    prismaBase.membershipPlan.findFirst({
-      where: { tenantId, isActive: true },
-      select: { id: true },
-    }),
-    prismaBase.user.count({
-      where: { tenantId, role: { in: ["COACH", "STAFF"] } },
-    }),
-  ]);
+  let result;
+  try {
+    result = await Promise.all([
+      prismaBase.box.findUnique({
+        where: { id: tenantId },
+        select: { onboardingCompletedAt: true, weeklySchedule: true },
+      }),
+      prismaBase.membershipPlan.findFirst({
+        where: { tenantId, isActive: true },
+        select: { id: true },
+      }),
+      prismaBase.user.count({
+        where: { tenantId, role: { in: ["COACH", "STAFF"] } },
+      }),
+    ]);
+  } catch (e) {
+    throw new DBError(e, "getOnboardingStatus: prisma queries failed");
+  }
+  const [box, plan, staffCount] = result;
 
   return {
     completedAt: box?.onboardingCompletedAt ?? null,
