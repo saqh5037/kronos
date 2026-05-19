@@ -120,18 +120,24 @@ const EMPTY_SCHEDULE: WeeklySchedule = {
 
 export async function getBoxSchedule(): Promise<BoxScheduleSettings> {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  if (!session?.user?.tenantId) throw new UnauthorizedError();
 
-  const box = await prismaBase.box.findUnique({
-    where: { id: session.user.tenantId },
-    select: {
-      defaultClassCapacity: true,
-      bookingOpenHoursAhead: true,
-      cancelCloseMinBefore: true,
-      weeklySchedule: true,
-    },
-  });
-  if (!box) throw new Error("Box not found");
+  const tenantId = session.user.tenantId;
+  let box;
+  try {
+    box = await prismaBase.box.findUnique({
+      where: { id: tenantId },
+      select: {
+        defaultClassCapacity: true,
+        bookingOpenHoursAhead: true,
+        cancelCloseMinBefore: true,
+        weeklySchedule: true,
+      },
+    });
+  } catch (e) {
+    throw new DBError(e, "getBoxSchedule: prisma.box.findUnique failed");
+  }
+  if (!box) throw new BoxNotFoundError(tenantId);
 
   return {
     defaultClassCapacity: box.defaultClassCapacity,
