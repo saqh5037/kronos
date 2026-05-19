@@ -37,10 +37,10 @@ model Discipline {
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
 
-  boxes              Box[]
-  primaryAthletes    Athlete[]  @relation("PrimaryDiscipline")
-  wods               WOD[]
-  movements          Movement[]
+  boxes           Box[]
+  primaryAthletes Athlete[]  @relation("PrimaryDiscipline")
+  wods            WOD[]
+  movements       Movement[]
 
   @@index([slug])
   @@index([isActive])
@@ -207,22 +207,25 @@ model Athlete {
   // ─── Onboarding wizard (9 steps) ────────────────────────────────────────────
   onboardingStartedAt      DateTime?
   onboardingCompletedAt    DateTime?
-  onboardingStep           Int       @default(0)
+  onboardingStep           Int                @default(0)
   fitnessReason            FitnessReason?
   biologicalSex            BiologicalSex?
   weightKg                 Float?
   heightCm                 Float?
   ageYears                 Int?
-  trackMenstrualCycle      Boolean   @default(false)
+  trackMenstrualCycle      Boolean            @default(false)
   fitnessExperience        FitnessExperience?
   fitnessGoal              FitnessGoal?
   weeklyFrequency          Int?
   routinePreference        RoutinePreference?
   excludedMuscles          String[]
   trainingLocation         TrainingLocation?
-  trainsOnOwnToo           Boolean   @default(false)
-  pushNotificationsEnabled Boolean   @default(false)
+  trainsOnOwnToo           Boolean            @default(false)
+  pushNotificationsEnabled Boolean            @default(false)
   appleHealthLinkedAt      DateTime?
+
+  // Wearables (Whoop / Garmin / Apple Health / Oura). Opt-in privacy.
+  shareWearableWithCoach Boolean @default(false)
 
   // ─── Multi-disciplina (F1.1, 2026-05-16) ────────────────────────────────────
   // Primary discipline = la que el atleta más practica. F2 agregará M:M
@@ -233,9 +236,9 @@ model Athlete {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  box               Box                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  primaryDiscipline Discipline?         @relation("PrimaryDiscipline", fields: [primaryDisciplineId], references: [id])
-  user              User?               @relation(fields: [userId], references: [id])
+  box               Box                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  primaryDiscipline Discipline?          @relation("PrimaryDiscipline", fields: [primaryDisciplineId], references: [id])
+  user              User?                @relation(fields: [userId], references: [id])
   memberships       Membership[]
   bookings          Booking[]
   scores            Score[]
@@ -250,6 +253,11 @@ model Athlete {
   xpLedger          XPLedger[]
   dailyMissions     DailyMission[]
   skillLevels       AthleteSkillLevel[]
+  wearables         WearableConnection[]
+  whoopCycles       WhoopCycle[]
+  whoopRecoveries   WhoopRecovery[]
+  whoopSleeps       WhoopSleep[]
+  whoopWorkouts     WhoopWorkout[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -410,20 +418,24 @@ enum Scaling {
 }
 
 model WOD {
-  id           String    @id @default(cuid())
-  tenantId     String
-  name         String
-  type         WODType
-  description  String?
-  scoreType    ScoreType @default(TIME)
-  scaleOptions Json?
-  timeCap      Int?
-  isActive     Boolean   @default(true)
-  /** Optional date for personal-program WODs (atleta sin box). */
-  scheduledFor DateTime? @db.Date
-  /** When set, this WOD is part of an athlete's personal program. */
+  id             String    @id @default(cuid())
+  tenantId       String
+  name           String
+  type           WODType
+  description    String?
+  scoreType      ScoreType @default(TIME)
+  scaleOptions   Json?
+  timeCap        Int?
+  isActive       Boolean   @default(true)
+  /**
+   * Optional date for personal-program WODs (atleta sin box).
+   */
+  scheduledFor   DateTime? @db.Date
+  /**
+   * When set, this WOD is part of an athlete's personal program.
+   */
   ownerAthleteId String?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime  @default(now())
 
   // ─── Multi-disciplina (F1.1, 2026-05-16) ────────────────────────────────────
   // Hereda de Box.discipline al crear pero se almacena explícito para queries
@@ -511,8 +523,9 @@ model Score {
   mediaUrl  String?
   createdAt DateTime @default(now())
 
-  wod     WOD     @relation(fields: [wodId], references: [id])
-  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  wod          WOD           @relation(fields: [wodId], references: [id])
+  athlete      Athlete       @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  whoopWorkout WhoopWorkout?
 
   @@index([tenantId])
   @@index([tenantId, wodId])
@@ -1274,19 +1287,19 @@ model RevokedPilotBetaJti {
 // ─── LANDING LEADS ───────────────────────────────────────────────────────────
 
 model Lead {
-  id            String   @id @default(dbgenerated("gen_random_uuid()"))
-  createdAt     DateTime @default(now()) @map("created_at")
-  ownerName     String   @map("owner_name")
-  email         String
-  whatsapp      String
-  boxName       String   @map("box_name")
-  athletes      String
-  currentSw     String?  @map("current_sw")
-  planInterest  String?  @map("plan_interest")
-  notes         String?
-  consent       Boolean
-  source        String   @default("landing")
-  status        String   @default("new")
+  id           String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt    DateTime @default(now()) @map("created_at")
+  ownerName    String   @map("owner_name")
+  email        String
+  whatsapp     String
+  boxName      String   @map("box_name")
+  athletes     String
+  currentSw    String?  @map("current_sw")
+  planInterest String?  @map("plan_interest")
+  notes        String?
+  consent      Boolean
+  source       String   @default("landing")
+  status       String   @default("new")
 
   @@index([createdAt])
   @@index([status])
@@ -1334,4 +1347,131 @@ enum TrainingLocation {
   BIG_GYM
   SMALL_GYM
   HOME
+}
+
+// ─── WEARABLES ────────────────────────────────────────────────────────────────
+// Whoop (Fase 0). Garmin / Apple Health / Oura quedan reservados en el enum
+// pero sin implementación. Tokens cifrados AES-256-GCM via token-vault.
+
+enum WearableProvider {
+  WHOOP
+  GARMIN
+  APPLE_HEALTH
+  OURA
+}
+
+enum WearableStatus {
+  CONNECTED
+  REVOKED
+  ERROR
+  RECONNECT_REQUIRED
+}
+
+model WearableConnection {
+  id               String           @id @default(cuid())
+  tenantId         String
+  athleteId        String
+  provider         WearableProvider
+  externalUserId   String
+  accessToken      String           @db.Text
+  refreshToken     String           @db.Text
+  expiresAt        DateTime
+  scopes           String[]
+  status           WearableStatus   @default(CONNECTED)
+  lastSyncedAt     DateTime?
+  lastErrorAt      DateTime?
+  lastErrorMessage String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, externalUserId])
+  @@unique([athleteId, provider])
+  @@index([tenantId, status])
+  @@index([tenantId, athleteId])
+}
+
+model WhoopCycle {
+  id         String    @id @default(cuid())
+  tenantId   String
+  athleteId  String
+  externalId String    @unique
+  start      DateTime
+  end        DateTime?
+  strain     Float?
+  kilojoule  Float?
+  averageHr  Int?
+  maxHr      Int?
+  scoreState String?
+  raw        Json
+  syncedAt   DateTime  @default(now())
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, athleteId, start])
+}
+
+model WhoopRecovery {
+  id              String   @id @default(cuid())
+  tenantId        String
+  athleteId       String
+  cycleExternalId String   @unique
+  sleepExternalId String?
+  recoveredAt     DateTime
+  score           Int?
+  hrvRmssd        Float?
+  restingHr       Int?
+  spo2            Float?
+  skinTempC       Float?
+  raw             Json
+  syncedAt        DateTime @default(now())
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, athleteId, recoveredAt])
+}
+
+model WhoopSleep {
+  id            String   @id @default(cuid())
+  tenantId      String
+  athleteId     String
+  externalId    String   @unique
+  start         DateTime
+  end           DateTime
+  nap           Boolean  @default(false)
+  performance   Int?
+  efficiency    Float?
+  totalInBedMs  Int?
+  totalAsleepMs Int?
+  disturbances  Int?
+  raw           Json
+  syncedAt      DateTime @default(now())
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, athleteId, start])
+}
+
+model WhoopWorkout {
+  id             String   @id @default(cuid())
+  tenantId       String
+  athleteId      String
+  externalId     String   @unique
+  sportId        Int?
+  start          DateTime
+  end            DateTime
+  strain         Float?
+  averageHr      Int?
+  maxHr          Int?
+  kilojoule      Float?
+  zoneDurationMs Json?
+  scoreId        String?  @unique
+  raw            Json
+  syncedAt       DateTime @default(now())
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  score   Score?  @relation(fields: [scoreId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, athleteId, start])
 }
