@@ -123,6 +123,162 @@ export async function toggleShareWithCoach(value: boolean): Promise<void> {
   revalidatePath("/atleta/ajustes");
 }
 
+export type RecoverySnapshot = {
+  recoveredAt: Date;
+  score: number | null;
+  hrvRmssd: number | null;
+  restingHr: number | null;
+  spo2: number | null;
+  band: "GREEN" | "YELLOW" | "RED" | "UNSCORED";
+};
+
+function recoveryBand(score: number | null): RecoverySnapshot["band"] {
+  if (score == null) return "UNSCORED";
+  if (score >= 67) return "GREEN";
+  if (score >= 34) return "YELLOW";
+  return "RED";
+}
+
+export async function getMyLatestRecovery(): Promise<RecoverySnapshot | null> {
+  const session = await requireCachedSession();
+  const tenantId = session.user.tenantId;
+  const me = await getMyAthlete(session.user.id, tenantId);
+  if (!me) return null;
+
+  const db = withTenant(tenantId);
+  const r = await db.whoopRecovery.findFirst({
+    where: { athleteId: me.id },
+    orderBy: { recoveredAt: "desc" },
+  });
+  if (!r) return null;
+  return {
+    recoveredAt: r.recoveredAt,
+    score: r.score,
+    hrvRmssd: r.hrvRmssd,
+    restingHr: r.restingHr,
+    spo2: r.spo2,
+    band: recoveryBand(r.score),
+  };
+}
+
+export type WhoopOverviewPoint = {
+  date: Date;
+  recovery: number | null;
+  strain: number | null;
+  sleepPerformance: number | null;
+};
+
+export type WhoopOverview = {
+  athleteId: string;
+  shared: true;
+  range: { from: Date; to: Date };
+  points: WhoopOverviewPoint[];
+  latestRecovery: RecoverySnapshot | null;
+};
+
+export type WhoopOverviewBlocked = { athleteId: string; shared: false };
+
+/**
+ * For admin/coach view in /admin/atletas/[id]. Gated by the athlete's
+ * shareWearableWithCoach flag. Returns null when the caller is not OWNER /
+ * COACH / STAFF of the athlete's tenant.
+ */
+export async function getAthleteWhoopOverview(
+  athleteId: string,
+  range: { from: Date; to: Date },
+): Promise<WhoopOverview | WhoopOverviewBlocked | null> {
+  const session = await requireCachedSession();
+  const tenantId = session.user.tenantId;
+  const role = session.user.role;
+  if (role !== "OWNER" && role !== "COACH" && role !== "STAFF") return null;
+
+  const db = withTenant(tenantId);
+  const athlete = await db.athlete.findUnique({
+    where: { id: athleteId },
+    select: { id: true, shareWearableWithCoach: true },
+  });
+  if (!athlete) return null;
+  if (!athlete.shareWearableWithCoach) {
+    return { athleteId, shared: false };
+  }
+
+  const [recoveries, cycles, sleeps] = await Promise.all([
+    db.whoopRecovery.findMany({
+      where: {
+        athleteId,
+        recoveredAt: { gte: range.from, lte: range.to },
+      },
+      orderBy: { recoveredAt: "asc" },
+    }),
+    db.whoopCycle.findMany({
+      where: { athleteId, start: { gte: range.from, lte: range.to } },
+      orderBy: { start: "asc" },
+    }),
+    db.whoopSleep.findMany({
+      where: { athleteId, start: { gte: range.from, lte: range.to } },
+      orderBy: { start: "asc" },
+    }),
+  ]);
+
+  const byDay = new Map<string, WhoopOverviewPoint>();
+  for (const r of recoveries) {
+    const day = r.recoveredAt.toISOString().slice(0, 10);
+    const point: WhoopOverviewPoint = byDay.get(day) ?? {
+      date: new Date(`${day}T00:00:00.000Z`),
+      recovery: null,
+      strain: null,
+      sleepPerformance: null,
+    };
+    point.recovery = r.score ?? null;
+    byDay.set(day, point);
+  }
+  for (const c of cycles) {
+    const day = c.start.toISOString().slice(0, 10);
+    const point: WhoopOverviewPoint = byDay.get(day) ?? {
+      date: new Date(`${day}T00:00:00.000Z`),
+      recovery: null,
+      strain: null,
+      sleepPerformance: null,
+    };
+    point.strain = c.strain ?? null;
+    byDay.set(day, point);
+  }
+  for (const s of sleeps) {
+    if (s.nap) continue;
+    const day = s.start.toISOString().slice(0, 10);
+    const point: WhoopOverviewPoint = byDay.get(day) ?? {
+      date: new Date(`${day}T00:00:00.000Z`),
+      recovery: null,
+      strain: null,
+      sleepPerformance: null,
+    };
+    point.sleepPerformance = s.performance ?? null;
+    byDay.set(day, point);
+  }
+
+  const points = Array.from(byDay.values()).sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  );
+
+  const latest = recoveries.at(-1);
+  return {
+    athleteId,
+    shared: true,
+    range,
+    points,
+    latestRecovery: latest
+      ? {
+          recoveredAt: latest.recoveredAt,
+          score: latest.score,
+          hrvRmssd: latest.hrvRmssd,
+          restingHr: latest.restingHr,
+          spo2: latest.spo2,
+          band: recoveryBand(latest.score),
+        }
+      : null,
+  };
+}
+
 export type SyncTrigger = {
   ok: boolean;
   message: string;
