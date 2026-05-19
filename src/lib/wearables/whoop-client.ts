@@ -334,6 +334,34 @@ export async function fetchWorkoutPage(
   return getJson(buildQuery("/v2/activity/workout", q), accessToken);
 }
 
+export async function fetchCycleById(
+  accessToken: string,
+  id: string | number,
+): Promise<WhoopCyclePayload> {
+  return getJson(`${API_BASE}/v2/cycle/${id}`, accessToken);
+}
+
+export async function fetchRecoveryByCycleId(
+  accessToken: string,
+  cycleId: string | number,
+): Promise<WhoopRecoveryPayload> {
+  return getJson(`${API_BASE}/v2/cycle/${cycleId}/recovery`, accessToken);
+}
+
+export async function fetchSleepById(
+  accessToken: string,
+  id: string | number,
+): Promise<WhoopSleepPayload> {
+  return getJson(`${API_BASE}/v2/activity/sleep/${id}`, accessToken);
+}
+
+export async function fetchWorkoutById(
+  accessToken: string,
+  id: string | number,
+): Promise<WhoopWorkoutPayload> {
+  return getJson(`${API_BASE}/v2/activity/workout/${id}`, accessToken);
+}
+
 /**
  * Fully paginate a Whoop list endpoint into one in-memory array.
  * Caller supplies the page-fetcher. Safety cap of 50 pages × 25 = 1250 records.

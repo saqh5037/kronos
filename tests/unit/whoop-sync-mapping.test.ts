@@ -31,8 +31,8 @@ describe("whoop payload → Prisma data mapping", () => {
     expect(out.externalId).toBe("101");
     expect(out.tenantId).toBe("tenant-1");
     expect(out.athleteId).toBe("athlete-1");
-    expect(out.start.toISOString()).toBe("2026-05-19T05:00:00.000Z");
-    expect(out.end?.toISOString()).toBe("2026-05-20T05:00:00.000Z");
+    expect((out.start as Date).toISOString()).toBe("2026-05-19T05:00:00.000Z");
+    expect((out.end as Date).toISOString()).toBe("2026-05-20T05:00:00.000Z");
     expect(out.strain).toBe(12.5);
     expect(out.maxHr).toBe(168);
     expect(out.scoreState).toBe("SCORED");
@@ -82,7 +82,9 @@ describe("whoop payload → Prisma data mapping", () => {
     );
     expect(out.cycleExternalId).toBe("555");
     expect(out.sleepExternalId).toBe("999");
-    expect(out.recoveredAt.toISOString()).toBe("2026-05-19T08:30:00.000Z");
+    expect((out.recoveredAt as Date).toISOString()).toBe(
+      "2026-05-19T08:30:00.000Z",
+    );
     expect(out.score).toBe(72);
     expect(out.hrvRmssd).toBe(64.4);
     expect(out.restingHr).toBe(52);
