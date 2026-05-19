@@ -32,3 +32,18 @@ export async function signOut(page: Page): Promise<void> {
   await page.getByRole("button", { name: "Sign out" }).click();
   await page.waitForURL(/\/login/);
 }
+
+/**
+ * Login vía dev CredentialsProvider con email arbitrario.
+ * Útil para atletas creados dinámicamente (p.ej. via inviteAthletes).
+ * Requiere que el User exista en DB y NODE_ENV=development + NEXT_PUBLIC_DEV_LOGIN=1.
+ */
+export async function loginAsEmail(page: Page, email: string): Promise<void> {
+  await page.goto("/login");
+  await page.locator('input[placeholder="email"]').fill(email);
+  await page.locator('input[placeholder="password"]').fill(DEV_PASSWORD);
+  await Promise.all([
+    page.waitForURL(/\/(admin|atleta)/, { timeout: 10_000 }),
+    page.getByRole("button", { name: /Entrar \(dev\)/ }).click(),
+  ]);
+}
