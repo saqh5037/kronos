@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { cookies } from "next/headers";
 import { requireCachedSession } from "@/server/session";
 import { withTenant } from "@/server/db";
@@ -12,6 +12,7 @@ import {
   parseScopes,
   WhoopApiError,
 } from "@/lib/wearables/whoop-client";
+import { runInitialBackfill } from "@/lib/wearables/whoop-sync";
 
 export const dynamic = "force-dynamic";
 
@@ -146,6 +147,19 @@ export async function GET(req: Request) {
     tenantId,
     actorId: session.user.id,
     provider: "WHOOP",
+  });
+
+  const connId = conn.id;
+  after(async () => {
+    try {
+      await runInitialBackfill(connId);
+    } catch (err) {
+      console.error(
+        "[wearables] initial backfill failed for connection",
+        connId,
+        err,
+      );
+    }
   });
 
   return redirectWithStatus(reqUrl, {

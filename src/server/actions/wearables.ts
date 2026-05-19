@@ -9,6 +9,10 @@ import { logAudit } from "@/server/audit";
 import { trackEvent } from "@/lib/analytics";
 import { decryptToken } from "@/lib/crypto/token-vault";
 import { revokeAccessToken } from "@/lib/wearables/whoop-client";
+import {
+  runIncrementalSync,
+  WhoopReconnectRequiredError,
+} from "@/lib/wearables/whoop-sync";
 
 const providerSchema = z.enum(["WHOOP", "GARMIN", "APPLE_HEALTH", "OURA"]);
 
@@ -122,12 +126,15 @@ export async function toggleShareWithCoach(value: boolean): Promise<void> {
 export type SyncTrigger = {
   ok: boolean;
   message: string;
+  counts?: {
+    cycles: number;
+    recoveries: number;
+    sleeps: number;
+    workouts: number;
+    linkedScores: number;
+  };
 };
 
-/**
- * Manual sync trigger. Implementación completa en Fase C (whoop-sync).
- * Por ahora marca lastSyncedAt como hint y devuelve mensaje placeholder.
- */
 export async function triggerManualSync(
   providerInput: WearableProvider,
 ): Promise<SyncTrigger> {
@@ -145,8 +152,35 @@ export async function triggerManualSync(
     return { ok: false, message: "No hay conexión activa para sincronizar" };
   }
 
-  return {
-    ok: true,
-    message: "Sincronización pendiente (Fase C). Conexión activa OK.",
-  };
+  if (provider !== "WHOOP") {
+    return { ok: false, message: `Provider ${provider} aún no soportado` };
+  }
+
+  try {
+    const outcome = await runIncrementalSync(conn.id);
+    revalidatePath("/atleta/dispositivos");
+    revalidatePath("/atleta");
+    return {
+      ok: true,
+      message: "Sincronización completada",
+      counts: {
+        cycles: outcome.cycles,
+        recoveries: outcome.recoveries,
+        sleeps: outcome.sleeps,
+        workouts: outcome.workouts,
+        linkedScores: outcome.linkedScores,
+      },
+    };
+  } catch (err) {
+    if (err instanceof WhoopReconnectRequiredError) {
+      return {
+        ok: false,
+        message: "Reconectá tu Whoop para seguir sincronizando",
+      };
+    }
+    return {
+      ok: false,
+      message: err instanceof Error ? err.message : "Error desconocido",
+    };
+  }
 }
