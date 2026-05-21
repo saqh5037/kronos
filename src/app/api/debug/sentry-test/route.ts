@@ -33,18 +33,19 @@ export async function GET(req: Request) {
   }
 
   const dsnPresent = Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN);
-  const eventId = Sentry.captureException(
-    new Error(
-      `Sentry validation probe @ ${new Date().toISOString()} — safe to ignore`,
-    ),
+  const ts = new Date().toISOString();
+  const messageId = Sentry.captureMessage(`Sentry probe message @ ${ts}`);
+  const errorId = Sentry.captureException(
+    new Error(`Sentry probe error @ ${ts} — safe to ignore`),
   );
-  const flushed = await Sentry.flush(5000);
+  const flushed = await Sentry.flush(20000);
 
   return NextResponse.json({
     ok: true,
     dsnPresent,
-    eventId,
+    messageId,
+    errorId,
     flushed,
-    note: "If eventId is non-empty and flushed=true, Sentry SDK is working.",
+    note: "flushed=true means envelopes were ACKed by Sentry servers.",
   });
 }
