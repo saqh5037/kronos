@@ -287,7 +287,6 @@ async function main(): Promise<void> {
       passwordHash,
       passwordSetAt: daysAgo(120),
       emailVerified: daysAgo(120),
-      createdAt: daysAgo(120),
     },
   });
   log("owner", `${owner.email}`);
@@ -308,7 +307,6 @@ async function main(): Promise<void> {
           passwordHash,
           passwordSetAt: daysAgo(118 - i),
           emailVerified: daysAgo(118 - i),
-          createdAt: daysAgo(118 - i),
         },
       }),
     ),
@@ -420,7 +418,6 @@ async function main(): Promise<void> {
           passwordHash,
           passwordSetAt: joinedAt,
           emailVerified: joinedAt,
-          createdAt: joinedAt,
         },
       });
 
