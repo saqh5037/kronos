@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
+import * as Sentry from "@sentry/nextjs";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,19 @@ export async function GET(req: Request) {
     );
   }
 
-  throw new Error(
-    `Sentry validation probe @ ${new Date().toISOString()} — safe to ignore`,
+  const dsnPresent = Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN);
+  const eventId = Sentry.captureException(
+    new Error(
+      `Sentry validation probe @ ${new Date().toISOString()} — safe to ignore`,
+    ),
   );
+  const flushed = await Sentry.flush(5000);
+
+  return NextResponse.json({
+    ok: true,
+    dsnPresent,
+    eventId,
+    flushed,
+    note: "If eventId is non-empty and flushed=true, Sentry SDK is working.",
+  });
 }

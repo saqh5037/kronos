@@ -10,6 +10,6 @@ if (dsn) {
     replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 0,
     sendDefaultPii: false,
-    enabled: process.env.NODE_ENV === "production",
+    debug: false,
   });
 }
