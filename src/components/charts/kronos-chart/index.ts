@@ -1,10 +1,9 @@
-export {
-  KronosLineChart,
-  KronosAreaChart,
-  type KronosLineChartProps,
-  type KronosSeriesDef,
-  type KronosReferenceLine,
-  type KronosChartVariant,
+export { KronosLineChart, KronosAreaChart } from "./KronosLineChart.dynamic";
+export type {
+  KronosLineChartProps,
+  KronosSeriesDef,
+  KronosReferenceLine,
+  KronosChartVariant,
 } from "./KronosLineChart";
 export {
   buildSmoothPath,
