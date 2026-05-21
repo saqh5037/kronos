@@ -69,3 +69,20 @@ Samuel (humano blocker):
 
 - Claude Code: schema, server actions, OAuth handlers, webhook, cron, libs, tests.
 - Kimi: UI de `/atleta/dispositivos`, `<RecoveryCard>` en home, sparkline en `/admin/atletas/[id]/wearables`. Brief: `KIMI_VISUAL_BRIEF_WEARABLES.md` al cerrar Fase E.
+
+## Deuda post-merge (tickets pendientes)
+
+Items detectados en review pre-merge (security-guard + code-reviewer 2026-05-20).
+Aceptados como deuda acotada porque hoy solo existe el proveedor `WHOOP`
+en producción y los riesgos solo materializan cuando se agreguen más
+proveedores o cuando los volúmenes superen los umbrales actuales.
+
+1. **Unique constraint multi-provider en tablas Whoop.** `WhoopCycle/Recovery/Sleep/Workout.externalId` es `@unique` global. Si entra Garmin/Oura/AppleHealth con IDs numéricos colisionables, los upserts pisan data cross-provider. Acción: migrar a `@@unique([provider, externalId])` con columna `provider` agregada. Requiere migración Prisma + backfill.
+2. **Unique constraint por athlete en tablas Whoop.** Caso edge: atleta cambia de Box manteniendo el mismo Whoop account. El `externalId` global hace que el row quede con `tenantId/athleteId` del primer Box. Acción: incluir en la migración del punto 1 → `@@unique([athleteId, externalId])`.
+3. **Idempotencia por `event.id` en webhook.** Whoop puede reentregar eventos. Hoy se procesa 2× (fetch upstream duplicado, audit log duplicado). Upserts son idempotentes por record, así que no hay corrupción, solo ruido + rate. Acción: pre-check `WebhookEvent` por `(source, externalId)` o catch P2002 con unique parcial.
+4. **Concurrencia + timeout per-connection en cron.** `maxDuration=300s` con loop secuencial. Si una connection cuelga, mata el batch. Acción: `Promise.allSettled` con concurrency 5–10 + `AbortSignal.timeout(30_000)` en `whoop-client.getJson`.
+5. **Rate limit en backfill inicial.** `runInitialBackfill` dispara 4 paginaciones en paralelo (`Promise.all`). Documentar límites de Whoop o secuenciar.
+6. **Timezone en `getAthleteWhoopOverview` buckets diarios.** Hoy bucketea en UTC con `toISOString().slice(0,10)`. Para Boxes en zonas !=UTC los buckets cortan a destiempo. Acción: usar `box.timezone` para el slice.
+7. **Retención de `WebhookEvent.rawPayload`.** Guarda el JSON crudo de Whoop indefinidamente (contiene `user_id` upstream). Acción: job de purge a 90 días.
+8. **Rotación de `WEARABLES_TOKEN_ENCRYPTION_KEY`.** No hay path para re-cifrar tokens con key nueva. Documentar el procedimiento (probable: forzar `RECONNECT_REQUIRED` masivo + key bump).
+9. **Tests faltantes.** OAuth flow integration (connect → callback → backfill), `ensureFreshToken` reconnect branch, `syncConnection` orquestador, cron endpoint, webhook route handler completo. Los tests puros (token-vault, state, mapping, HMAC, paginate) están sólidos.

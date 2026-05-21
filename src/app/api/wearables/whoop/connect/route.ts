@@ -28,6 +28,10 @@ export async function GET() {
     select: { id: true },
   });
   if (!athlete) {
+    console.warn("[wearables/connect] athlete profile missing for session", {
+      userId: session.user.id,
+      tenantId: session.user.tenantId,
+    });
     return NextResponse.json(
       { ok: false, error: "Athlete profile not found" },
       { status: 404 },
@@ -39,7 +43,7 @@ export async function GET() {
   const cookieStore = await cookies();
   cookieStore.set(WEARABLE_STATE_COOKIE, state, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "lax",
     path: "/",
     maxAge: Math.floor(WEARABLE_STATE_TTL_MS / 1000),

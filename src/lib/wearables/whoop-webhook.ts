@@ -49,9 +49,15 @@ export function verifyWebhookSignature(opts: {
     .update(String(ts) + rawBody)
     .digest("base64");
 
-  const expectedBuf = Buffer.from(expected, "utf8");
-  const actualBuf = Buffer.from(signature, "utf8");
-  if (expectedBuf.length !== actualBuf.length) {
+  let expectedBuf: Buffer;
+  let actualBuf: Buffer;
+  try {
+    expectedBuf = Buffer.from(expected, "base64");
+    actualBuf = Buffer.from(signature, "base64");
+  } catch {
+    return { ok: false, reason: "BAD_SIGNATURE" };
+  }
+  if (expectedBuf.length === 0 || expectedBuf.length !== actualBuf.length) {
     return { ok: false, reason: "BAD_SIGNATURE" };
   }
   if (!timingSafeEqual(expectedBuf, actualBuf)) {

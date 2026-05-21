@@ -11,6 +11,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 import { db } from "@/server/db";
 import { logAudit } from "@/server/audit";
 import { trackEvent } from "@/lib/analytics";
@@ -43,7 +44,14 @@ export async function GET(req: Request) {
   const auth = req.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) return unauthorized("Missing Bearer token");
   const token = auth.slice("Bearer ".length).trim();
-  if (token !== secret) return unauthorized("Invalid token");
+  const tokenBuf = Buffer.from(token);
+  const secretBuf = Buffer.from(secret);
+  if (
+    tokenBuf.length !== secretBuf.length ||
+    !timingSafeEqual(tokenBuf, secretBuf)
+  ) {
+    return unauthorized("Invalid token");
+  }
 
   const cutoff = new Date(Date.now() - STALE_THRESHOLD_MS);
   const connections = await db.wearableConnection.findMany({

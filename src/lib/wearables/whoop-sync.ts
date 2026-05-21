@@ -309,6 +309,7 @@ export async function upsertWorkouts(
  * workout's start..end window. Idempotent — only writes when scoreId changes.
  */
 export async function linkScoresForWorkouts(
+  tenantId: string,
   athleteId: string,
   workouts: WhoopWorkout[],
 ): Promise<{ linked: number }> {
@@ -319,6 +320,7 @@ export async function linkScoresForWorkouts(
     const windowEnd = new Date(w.end.getTime() + SCORE_LINK_WINDOW_MS);
     const candidate = await rawDb.score.findFirst({
       where: {
+        tenantId,
         athleteId,
         createdAt: { gte: windowStart, lte: windowEnd },
         whoopWorkout: null,
@@ -327,7 +329,7 @@ export async function linkScoresForWorkouts(
     });
     if (!candidate) continue;
     await rawDb.whoopWorkout.update({
-      where: { id: w.id },
+      where: { id: w.id, tenantId },
       data: { scoreId: candidate.id },
     });
     linked++;
@@ -379,7 +381,11 @@ export async function syncConnection(
     upsertWorkouts(workouts, conn.tenantId, conn.athleteId),
   ]);
 
-  const { linked } = await linkScoresForWorkouts(conn.athleteId, workoutRows);
+  const { linked } = await linkScoresForWorkouts(
+    conn.tenantId,
+    conn.athleteId,
+    workoutRows,
+  );
 
   await rawDb.wearableConnection.update({
     where: { id: conn.id },

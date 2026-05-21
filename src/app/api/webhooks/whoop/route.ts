@@ -73,8 +73,10 @@ async function processEvent(
   event: WhoopWebhookEvent,
 ): Promise<{ ok: boolean; reason: string; tenantId: string | null }> {
   const externalUserId = String(event.user_id);
-  const conn = await db.wearableConnection.findFirst({
-    where: { provider: "WHOOP", externalUserId },
+  const conn = await db.wearableConnection.findUnique({
+    where: {
+      provider_externalUserId: { provider: "WHOOP", externalUserId },
+    },
   });
   if (!conn) {
     return {
@@ -111,7 +113,8 @@ async function processEvent(
         conn.tenantId,
         conn.athleteId,
       );
-      if (row) await linkScoresForWorkouts(conn.athleteId, [row]);
+      if (row)
+        await linkScoresForWorkouts(conn.tenantId, conn.athleteId, [row]);
       return { ok: true, reason: "workout_upserted", tenantId: conn.tenantId };
     }
     case "sleep.updated": {
@@ -191,6 +194,17 @@ export async function POST(req: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown_error";
     const isApi = err instanceof WhoopApiError;
+    if (isApi && err.status === 404) {
+      await persistRawEvent(
+        null,
+        rawBody,
+        true,
+        true,
+        "payload_404_ignored",
+        String(event.id),
+      );
+      return NextResponse.json({ ok: false, error: "upstream_not_found" });
+    }
     await persistRawEvent(
       null,
       rawBody,
@@ -200,8 +214,8 @@ export async function POST(req: Request) {
       String(event.id),
     );
     return NextResponse.json(
-      { ok: false, error: message, status: isApi ? err.status : 500 },
-      { status: isApi && err.status === 404 ? 200 : 500 },
+      { ok: false, error: "process_error" },
+      { status: 500 },
     );
   }
 
