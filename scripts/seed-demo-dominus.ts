@@ -455,10 +455,10 @@ async function main(): Promise<void> {
             "ADVANCED",
           ]) as never,
           fitnessGoal: pick([
-            "LOSE_WEIGHT",
-            "BUILD_MUSCLE",
-            "PERFORMANCE",
+            "GROW_TONE",
             "GENERAL_FITNESS",
+            "CONDITIONING",
+            "CROSSFIT_PRS",
           ]) as never,
           weeklyFrequency: randInt(3, 5),
           onboardingStartedAt: joinedAt,
