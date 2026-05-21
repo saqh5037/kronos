@@ -336,24 +336,27 @@ async function main(): Promise<void> {
       },
     });
 
-    // Link movements via WODMovement pivot
+    // Link movements via WODMovement pivot (dedupe pairs — some WODs like
+    // Murph repeat the same movement at different positions)
+    const seenMovementIds = new Set<string>();
     for (let i = 0; i < recipe.movements.length; i++) {
       const m = recipe.movements[i]!;
       const slug = m.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       const movement = await prisma.movement.findUnique({
         where: { tenantId_slug: { tenantId: box.id, slug } },
       });
-      if (movement) {
-        await prisma.wODMovement.create({
-          data: {
-            wodId: wod.id,
-            movementId: movement.id,
-            reps: m.reps ?? null,
-            weight: m.weight ? String(m.weight) : null,
-            order: i,
-          },
-        });
-      }
+      if (!movement) continue;
+      if (seenMovementIds.has(movement.id)) continue;
+      seenMovementIds.add(movement.id);
+      await prisma.wODMovement.create({
+        data: {
+          wodId: wod.id,
+          movementId: movement.id,
+          reps: m.reps ?? null,
+          weight: m.weight ? String(m.weight) : null,
+          order: i,
+        },
+      });
     }
     wods.push({ id: wod.id, name: wod.name, scoreType: wod.scoreType });
   }
