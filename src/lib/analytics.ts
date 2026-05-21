@@ -23,7 +23,11 @@ export type EventName =
   | "pr_achieved"
   | "payment_registered"
   | "membership_assigned"
-  | "class_cancelled";
+  | "class_cancelled"
+  | "wearable_connected"
+  | "wearable_disconnected"
+  | "wearable_sync_failed"
+  | "wearable_sync_completed";
 
 type EventProperties = Record<string, string | number | boolean | null>;
 

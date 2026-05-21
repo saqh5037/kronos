@@ -101,5 +101,19 @@ Thumbs.db
 /verify-*.png
 /verify-*.jpg
 
+# Capturas de auditorías/E2E/post-deploy/post-fix (efímeras locales)
+/e2e-*.png
+/post-deploy-*.png
+/post-fix-*.png
+/guia-*.png
+/guia-v2-*.png
+
+# Material de comunicación temporal (mails a testers, guías HTML)
+/email-testers-*.html
+/guia-testers-*.html
+
+# Cache local del agent layer
+/.atl/
+
 # Proyecto paralelo de scratch — NO trackear
 kronos-atleta-self-serve/
