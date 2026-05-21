@@ -62,6 +62,7 @@ Thumbs.db
 # para scripts de operación permanente:
 /scripts/*
 !/scripts/generate-pilot-beta-link.ts
+!/scripts/seed-demo-dominus.ts
 /.playwright-mcp/
 /tour-*.png
 /tour2-*.png
