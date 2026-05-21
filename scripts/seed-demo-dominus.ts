@@ -38,7 +38,7 @@ const prisma = new PrismaClient();
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const SAFE_SLUG = "dominus";
+const SAFE_SLUG = "dominus-demo";
 const DEMO_EMAIL_DOMAIN = "demo.kronos-fit.com";
 const DEMO_PASSWORD = "DemoBox2026!";
 const BCRYPT_ROUNDS = 10;
@@ -254,7 +254,7 @@ async function main(): Promise<void> {
   const box = await prisma.box.create({
     data: {
       slug: SAFE_SLUG,
-      name: "Dominus CrossFit",
+      name: "Dominus CrossFit Demo",
       locale: "es-MX",
       currency: "MXN",
       timezone: "America/Mexico_City",
