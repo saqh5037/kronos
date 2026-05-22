@@ -5,6 +5,8 @@ import {
 } from "@/server/actions/bookings";
 import { ClassesList } from "./_components/ClassesList";
 import { Icon } from "@/components/kronos/v3/icons";
+import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
+import { reservarTour } from "@/components/tour/tours/reservar";
 
 export const metadata = { title: "Kronos — Reservar" };
 
@@ -127,11 +129,12 @@ export default async function ReservarPage({
         >
           RESERVAR
         </span>
-        <span aria-hidden style={{ width: 36, height: 36 }} />
+        <TourTriggerButton tourId={reservarTour.id} />
       </div>
 
       {/* Week strip */}
       <div
+        data-tour="reservar.week-strip"
         style={{
           padding: "0 20px",
           display: "flex",

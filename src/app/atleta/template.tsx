@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { TourProvider } from "@/components/tour/TourProvider";
+import { TourAutoStart } from "@/components/tour/TourAutoStart";
 
 /**
  * Subtle fade-in/up on route transitions. CSS-only on purpose: depending on
@@ -8,5 +10,10 @@ import type { ReactNode } from "react";
  * if the JS chunk never lands the content still becomes visible.
  */
 export default function AtletaTemplate({ children }: { children: ReactNode }) {
-  return <div className="k-fade-in-up">{children}</div>;
+  return (
+    <TourProvider>
+      <TourAutoStart />
+      <div className="k-fade-in-up">{children}</div>
+    </TourProvider>
+  );
 }

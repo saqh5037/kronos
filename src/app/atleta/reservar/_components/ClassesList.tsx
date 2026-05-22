@@ -131,10 +131,16 @@ export function ClassesList({
 
   const hasFilters = type || coach || bucket !== "all" || onlyUsual;
 
+  // Tour anchors: the first visible card carries `reservar.class-card`,
+  // the first card that still needs booking carries `reservar.book-button`.
+  const tourCardId = filtered[0]?.id ?? null;
+  const tourBookId =
+    filtered.find((c) => c.myBookingStatus !== "BOOKED")?.id ?? null;
+
   return (
     <div style={{ padding: "0 16px" }}>
       {/* Filtros — en mobile: selects stack vertical, botones en fila aparte */}
-      <div className="mb-3 space-y-2">
+      <div data-tour="reservar.time-filter" className="mb-3 space-y-2">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <select
             value={type}
@@ -318,6 +324,8 @@ export function ClassesList({
                     isUsual={usualHours.includes(
                       new Date(c.startsAt).getHours(),
                     )}
+                    isTourCardAnchor={c.id === tourCardId}
+                    isTourBookAnchor={c.id === tourBookId}
                   />
                 ))}
               </div>
@@ -333,10 +341,14 @@ function ClassRow({
   c,
   isUsual = false,
   now,
+  isTourCardAnchor = false,
+  isTourBookAnchor = false,
 }: {
   c: AvailableClass;
   isUsual?: boolean;
   now: number | null;
+  isTourCardAnchor?: boolean;
+  isTourBookAnchor?: boolean;
 }) {
   const full = c.bookedCount >= c.capacity;
   const fillRatio = c.bookedCount / c.capacity;
@@ -369,6 +381,7 @@ function ClassRow({
   return (
     <AnimatedItem>
       <div
+        {...(isTourCardAnchor ? { "data-tour": "reservar.class-card" } : {})}
         style={{
           position: "relative",
           background: "var(--k-surface)",
@@ -549,7 +562,12 @@ function ClassRow({
           </div>
 
           {/* CTA */}
-          <div style={{ flexShrink: 0 }}>
+          <div
+            {...(isTourBookAnchor
+              ? { "data-tour": "reservar.book-button" }
+              : {})}
+            style={{ flexShrink: 0 }}
+          >
             {isBooked ? (
               <div
                 style={{
