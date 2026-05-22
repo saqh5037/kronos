@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import HeroPhone from "./HeroPhone";
+import HeroVideo from "./HeroVideo";
 import DuotoneImage from "./DuotoneImage";
 import { HERO_META } from "../_data/mock";
 import { track } from "../_lib/track";
@@ -142,7 +142,7 @@ export default function Hero({
           </motion.div>
         </motion.div>
 
-        <HeroPhone />
+        <HeroVideo />
       </div>
     </section>
   );
