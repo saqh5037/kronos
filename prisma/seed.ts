@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import {
   PrismaClient,
   type Prisma,
@@ -1225,6 +1226,43 @@ async function main() {
     }
   }
 
+  // ─── SPORT EVENTS (platform-level) ────────────────────────────────────────
+  // Dominus Murph 2026 — idempotente. El accessToken se genera solo si el
+  // evento no existe todavía, para preservar el QR entre re-seeds.
+  const murphSlug = "dominus-murph-2026";
+  const existingMurph = await prisma.sportEvent.findUnique({
+    where: { slug: murphSlug },
+  });
+  const murph = await prisma.sportEvent.upsert({
+    where: { slug: murphSlug },
+    update: {
+      name: "Dominus Murph 2026",
+      partnerName: "Dominus",
+      description:
+        "Hero WOD anual: 1 milla de carrera + 100 pull-ups + 200 push-ups + 300 air squats + 1 milla de carrera. Para tiempo. RX: con chaleco 20lb/14lb. Scaled: sin chaleco o con menos peso. Partitioned: dividir reps libremente.",
+      startDate: new Date("2026-05-23T13:00:00.000Z"),
+      endDate: new Date("2026-05-24T05:00:00.000Z"),
+      scoreType: "TIME",
+      scoreUnit: "tiempo total",
+      divisions: ["RX", "Scaled", "Partitioned"],
+      status: "OPEN",
+    },
+    create: {
+      slug: murphSlug,
+      name: "Dominus Murph 2026",
+      partnerName: "Dominus",
+      description:
+        "Hero WOD anual: 1 milla de carrera + 100 pull-ups + 200 push-ups + 300 air squats + 1 milla de carrera. Para tiempo. RX: con chaleco 20lb/14lb. Scaled: sin chaleco o con menos peso. Partitioned: dividir reps libremente.",
+      startDate: new Date("2026-05-23T13:00:00.000Z"),
+      endDate: new Date("2026-05-24T05:00:00.000Z"),
+      scoreType: "TIME",
+      scoreUnit: "tiempo total",
+      divisions: ["RX", "Scaled", "Partitioned"],
+      accessToken: `evt_${randomBytes(16).toString("hex")}`,
+      status: "OPEN",
+    },
+  });
+
   console.log(`✅ Seed extendido completo:
   Box 1: ${box1.name} (${box1.id})
   Box 2: ${box2.name} (isolation)
@@ -1239,7 +1277,9 @@ async function main() {
   Goals: ${goalRows.length} (mix ACTIVE + ACHIEVED, PR + ATTENDANCE)
   BodyMetrics: ${bodyMetricRows.length} (~13 weights + 3 body-fat por atleta tracked)
   Badges: ${badgesData.length}
-  Surveys: READINESS + RPE por box`);
+  Surveys: READINESS + RPE por box
+  Sport events: 1 (${murph.name}) — accessToken${existingMurph ? " preservado" : ` nuevo: ${murph.accessToken}`}
+  QR URL: http://localhost:3000/eventos/${murph.accessToken}`);
 }
 
 main()

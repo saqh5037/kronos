@@ -258,6 +258,7 @@ model Athlete {
   whoopRecoveries   WhoopRecovery[]
   whoopSleeps       WhoopSleep[]
   whoopWorkouts     WhoopWorkout[]
+  eventEntries      EventEntry[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -1478,4 +1479,75 @@ model WhoopWorkout {
   score   Score?  @relation(fields: [scoreId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, athleteId, start])
+}
+
+// ─── SPORT EVENTS (PLATFORM-LEVEL, CROSS-TENANT) ─────────────────────────────
+// Eventos deportivos administrados por Kronos / partner (Dominus, etc.).
+// `SportEvent` NO lleva tenantId — un evento aparece para TODOS los boxes.
+// `EventEntry` sí guarda tenantId del atleta al momento de inscribirse, para
+// auditoría ("¿qué box trajo a este atleta al evento?").
+// Inscripción self-service vía `accessToken` (código QR). Cualquier atleta
+// autenticado que escanee el QR queda registrado.
+enum EventScoreType {
+  TIME
+  REPS
+  ROUNDS_REPS
+  WEIGHT
+  TEXT
+}
+
+enum EventStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
+model SportEvent {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  name        String
+  partnerName String?
+  description String?
+  coverUrl    String?
+  startDate   DateTime
+  endDate     DateTime?
+  scoreType   EventScoreType
+  scoreUnit   String?
+  divisions   String[]
+  accessToken String         @unique
+  status      EventStatus    @default(DRAFT)
+  kitUrl      String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  entries EventEntry[]
+
+  @@index([accessToken])
+  @@index([status])
+}
+
+model EventEntry {
+  id            String    @id @default(cuid())
+  eventId       String
+  athleteId     String
+  tenantId      String
+  division      String?
+  scoreValue    Decimal?  @db.Decimal(10, 2)
+  scoreText     String?
+  notes         String?
+  mediaUrl      String?
+  mediaPathname String?
+  registeredVia String?
+  submittedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  event   SportEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  athlete Athlete    @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, athleteId])
+  @@index([eventId])
+  @@index([athleteId])
+  @@index([tenantId])
 }
