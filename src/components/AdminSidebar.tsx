@@ -66,6 +66,7 @@ const groups: ModuleGroup[] = [
     title: "GESTIÓN",
     items: [
       { href: "/admin/asistencia", label: "Asistencia", icon: "check" },
+      { href: "/admin/eventos", label: "Eventos", icon: "trophy" },
       { href: "/admin/pagos", label: "Pagos", icon: "card" },
       { href: "/admin/comunicaciones", label: "Comunicaciones", icon: "mail" },
       { href: "/admin/reportes", label: "Reportes", icon: "chart" },
