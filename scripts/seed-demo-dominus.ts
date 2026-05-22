@@ -45,17 +45,24 @@ const BCRYPT_ROUNDS = 10;
 
 const TODAY = new Date();
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const DAYS_OF_HISTORY = 90;
+const DAYS_OF_HISTORY = 180;
 const DAYS_OF_FUTURE = 14;
 
 // Class schedule: 4 horarios/día, lun-sab
 const CLASS_HOURS = [6, 12, 17, 18];
 const ACTIVE_WEEKDAYS = [1, 2, 3, 4, 5, 6]; // Mon-Sat (0=Sun)
 
-// Athlete waves
-const WAVE_1_COUNT = 20; // hace ~90 días
-const WAVE_2_COUNT = 5; // hace ~60 días
-const WAVE_3_COUNT = 5; // hace ~30 días
+// Athlete waves — distribuidos en 6 meses para chart "12m" rico
+type Wave = { count: number; joinedDaysAgo: number; label: string };
+const WAVES: Wave[] = [
+  { count: 5, joinedDaysAgo: 178, label: "wave-1 (mes -6)" },
+  { count: 3, joinedDaysAgo: 148, label: "wave-2 (mes -5)" },
+  { count: 5, joinedDaysAgo: 118, label: "wave-3 (mes -4)" },
+  { count: 5, joinedDaysAgo: 88, label: "wave-4 (mes -3)" },
+  { count: 5, joinedDaysAgo: 58, label: "wave-5 (mes -2)" },
+  { count: 5, joinedDaysAgo: 28, label: "wave-6 (mes -1)" },
+  { count: 2, joinedDaysAgo: 10, label: "wave-7 (mes actual)" },
+];
 
 // ─── Pseudo-random (deterministic for reproducibility) ─────────────────────
 
@@ -379,11 +386,7 @@ async function main(): Promise<void> {
   log("plan", `${plan.name} $${plan.price} ${plan.currency}`);
 
   // ─── Athletes en 3 oleadas ───────────────────────────────────────────────
-  const waves = [
-    { count: WAVE_1_COUNT, joinedDaysAgo: 88, label: "wave-1 (mes -3)" },
-    { count: WAVE_2_COUNT, joinedDaysAgo: 58, label: "wave-2 (mes -2)" },
-    { count: WAVE_3_COUNT, joinedDaysAgo: 28, label: "wave-3 (mes -1)" },
-  ];
+  const waves = WAVES;
 
   const athletes: {
     id: string;
@@ -851,7 +854,7 @@ async function deleteBoxCascade(boxId: string): Promise<void> {
 function previewSummary(): void {
   log(
     "preview",
-    `Crearía Box '${SAFE_SLUG}', 1 owner, 3 coaches, ~95 movements, ${WOD_LIBRARY.length} WODs, 1 plan, ${WAVE_1_COUNT + WAVE_2_COUNT + WAVE_3_COUNT} atletas, ~310 clases, ~600 bookings, ~450 scores, ~120 PRs.`,
+    `Crearía Box '${SAFE_SLUG}', 1 owner, 3 coaches, ~95 movements, ${WOD_LIBRARY.length} WODs, 1 plan, ${WAVES.reduce((s, w) => s + w.count, 0)} atletas en 7 oleadas (6 meses), ~600 clases, ~1200 bookings, ~900 scores, ~120 PRs, ~150 payments.`,
   );
 }
 
