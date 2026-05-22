@@ -14,6 +14,8 @@ import {
 } from "@/components/kronos/AnimatedSection";
 import { formatScore } from "@/lib/scores";
 import type { ScoreType } from "@/lib/validations/wod";
+import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
+import { historialTour } from "@/components/tour/tours/historial";
 
 type WODOption = { id: string; name: string; scoreType: ScoreType };
 
@@ -80,13 +82,18 @@ export default function HistorialPage({ wodOptions }: Props) {
     <div className="pb-28 relative">
       {/* HERO V3 — limpio */}
       <header
+        data-tour="historial.header"
         style={{
           padding: "56px 20px 20px",
           display: "flex",
           flexDirection: "column",
           gap: 8,
+          position: "relative",
         }}
       >
+        <div style={{ position: "absolute", top: 56, right: 20 }}>
+          <TourTriggerButton tourId={historialTour.id} />
+        </div>
         <span
           style={{
             fontFamily: "var(--k-font-display)",
@@ -128,7 +135,7 @@ export default function HistorialPage({ wodOptions }: Props) {
       </header>
 
       {/* Filters */}
-      <AnimatedSection className="px-3.5">
+      <AnimatedSection data-tour="historial.filtros" className="px-3.5">
         <AnimatedItem>
           <div className="flex gap-2">
             <select
@@ -173,7 +180,7 @@ export default function HistorialPage({ wodOptions }: Props) {
       </AnimatedSection>
 
       {/* Scores list */}
-      <div className="px-3.5 mt-3 space-y-2">
+      <div data-tour="historial.lista" className="px-3.5 mt-3 space-y-2">
         {isPending && scores.length === 0 && (
           <KCard variant="ghost" className="p-6 text-center">
             <div className="text-sm" style={{ color: "var(--k-t3)" }}>
@@ -245,7 +252,10 @@ export default function HistorialPage({ wodOptions }: Props) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="px-3.5 mt-4 flex items-center justify-between">
+        <div
+          data-tour="historial.paginacion"
+          className="px-3.5 mt-4 flex items-center justify-between"
+        >
           <button
             onClick={() => load(page - 1)}
             disabled={page <= 1 || isPending}

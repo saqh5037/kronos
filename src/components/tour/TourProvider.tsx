@@ -14,6 +14,7 @@ import { perfilTour } from "./tours/perfil";
 import { homeTour } from "./tours/home";
 import { skillsTour } from "./tours/skills";
 import { saludTour } from "./tours/salud";
+import { historialTour } from "./tours/historial";
 import type { TourDefinition } from "./types";
 import { TourOverlay } from "./TourOverlay";
 
@@ -24,6 +25,7 @@ const REGISTRY: Record<string, TourDefinition> = {
   [homeTour.id]: homeTour,
   [skillsTour.id]: skillsTour,
   [saludTour.id]: saludTour,
+  [historialTour.id]: historialTour,
 };
 
 type TourContextValue = {
