@@ -4,6 +4,8 @@ import { authOptions } from "@/server/auth";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import Eyebrow from "@/components/kronos/Eyebrow";
+import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
+import { ajustesTour } from "@/components/tour/tours/ajustes";
 
 export const metadata = { title: "Kronos — Ajustes" };
 
@@ -14,7 +16,7 @@ export default async function AjustesAtletaPage() {
 
   return (
     <div className="pb-28 px-4 pt-10">
-      <div className="flex items-center gap-3 mb-6">
+      <div data-tour="ajustes.header" className="flex items-center gap-3 mb-6">
         <Link
           href="/atleta/perfil"
           aria-label="Volver"
@@ -39,10 +41,13 @@ export default async function AjustesAtletaPage() {
             Ajustes
           </h1>
         </div>
+        <div className="ml-auto">
+          <TourTriggerButton tourId={ajustesTour.id} />
+        </div>
       </div>
 
       {/* User card */}
-      <section className="k-card p-5 mb-4">
+      <section data-tour="ajustes.user-card" className="k-card p-5 mb-4">
         <div className="flex items-center gap-3">
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center font-display text-lg font-bold"
@@ -65,7 +70,7 @@ export default async function AjustesAtletaPage() {
       </section>
 
       {/* Preferences */}
-      <section className="k-card p-5 mb-4">
+      <section data-tour="ajustes.preferencias" className="k-card p-5 mb-4">
         <p
           className="font-mono text-[10px] font-bold uppercase tracking-wider mb-3"
           style={{ color: "var(--k-t3)" }}
@@ -84,7 +89,7 @@ export default async function AjustesAtletaPage() {
       </section>
 
       {/* Session */}
-      <section className="k-card p-5">
+      <section data-tour="ajustes.sesion" className="k-card p-5">
         <p
           className="font-mono text-[10px] font-bold uppercase tracking-wider mb-3"
           style={{ color: "var(--k-t3)" }}

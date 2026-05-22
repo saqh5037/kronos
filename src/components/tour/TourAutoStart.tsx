@@ -13,6 +13,7 @@ import { historialTour } from "./tours/historial";
 import { leaderboardTour } from "./tours/leaderboard";
 import { movimientosTour } from "./tours/movimientos";
 import { pagosTour } from "./tours/pagos";
+import { ajustesTour } from "./tours/ajustes";
 
 type AutoStartEntry = {
   tourId: string;
@@ -71,6 +72,11 @@ const AUTO_START_MAP: Record<string, AutoStartEntry> = {
     tourId: pagosTour.id,
     storageKey: pagosTour.storageKey,
     firstAnchor: pagosTour.steps[0].anchor,
+  },
+  "/atleta/ajustes": {
+    tourId: ajustesTour.id,
+    storageKey: ajustesTour.storageKey,
+    firstAnchor: ajustesTour.steps[0].anchor,
   },
 };
 
