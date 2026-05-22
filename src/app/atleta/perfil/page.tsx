@@ -32,6 +32,8 @@ import PRPredictionCard from "@/components/atleta/PRPredictionCard";
 import { listMyGoals, type GoalRow } from "@/server/actions/goals";
 import Link from "next/link";
 import type { Route } from "next";
+import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
+import { perfilTour } from "@/components/tour/tours/perfil";
 
 export const metadata = { title: "Kronos — Perfil" };
 
@@ -106,72 +108,78 @@ export default async function PerfilPage() {
             </span>
           </AnimatedItem>
           <AnimatedItem className="mt-3 flex items-center gap-3.5">
-            <div className="relative shrink-0">
-              <div
-                style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: "50%",
-                  background: "var(--k-elevated)",
-                  border: "1.5px solid var(--k-line)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: "var(--k-font-display)",
-                  fontSize: 26,
-                  fontWeight: 700,
-                  letterSpacing: "-0.02em",
-                  color: "var(--k-t2)",
-                  boxShadow: "0 0 8px rgba(255,255,255,0.06)",
-                }}
-              >
-                {initials}
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h1
-                style={{
-                  fontFamily: "var(--k-font-display)",
-                  fontSize: 26,
-                  fontWeight: 700,
-                  letterSpacing: "-0.04em",
-                  lineHeight: 1.1,
-                  color: "var(--k-t1)",
-                  margin: 0,
-                }}
-              >
-                {home.athlete.firstName} {home.athlete.lastName ?? ""}
-              </h1>
-              <div className="mt-1.5">
-                <span
+            <div
+              data-tour="perfil.hero"
+              className="flex items-center gap-3.5 flex-1 min-w-0"
+            >
+              <div className="relative shrink-0">
+                <div
                   style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    fontFamily: "var(--k-font-display)",
-                    fontSize: 9,
-                    fontWeight: 600,
-                    letterSpacing: "0.18em",
-                    color: "var(--k-t2)",
+                    width: 72,
+                    height: 72,
+                    borderRadius: "50%",
                     background: "var(--k-elevated)",
-                    border: "1px solid var(--k-line)",
-                    padding: "3px 8px",
-                    borderRadius: 999,
-                    textTransform: "uppercase",
+                    border: "1.5px solid var(--k-line)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "var(--k-font-display)",
+                    fontSize: 26,
+                    fontWeight: 700,
+                    letterSpacing: "-0.02em",
+                    color: "var(--k-t2)",
+                    boxShadow: "0 0 8px rgba(255,255,255,0.06)",
                   }}
                 >
+                  {initials}
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h1
+                  style={{
+                    fontFamily: "var(--k-font-display)",
+                    fontSize: 26,
+                    fontWeight: 700,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.1,
+                    color: "var(--k-t1)",
+                    margin: 0,
+                  }}
+                >
+                  {home.athlete.firstName} {home.athlete.lastName ?? ""}
+                </h1>
+                <div className="mt-1.5">
                   <span
                     style={{
-                      width: 5,
-                      height: 5,
-                      borderRadius: "50%",
-                      background: "var(--k-t1)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      fontFamily: "var(--k-font-display)",
+                      fontSize: 9,
+                      fontWeight: 600,
+                      letterSpacing: "0.18em",
+                      color: "var(--k-t2)",
+                      background: "var(--k-elevated)",
+                      border: "1px solid var(--k-line)",
+                      padding: "3px 8px",
+                      borderRadius: 999,
+                      textTransform: "uppercase",
                     }}
-                  />
-                  Activo
-                </span>
+                  >
+                    <span
+                      style={{
+                        width: 5,
+                        height: 5,
+                        borderRadius: "50%",
+                        background: "var(--k-t1)",
+                      }}
+                    />
+                    Activo
+                  </span>
+                </div>
               </div>
             </div>
+            <TourTriggerButton tourId={perfilTour.id} />
             <Link
               href="/atleta/ajustes"
               aria-label="Ajustes"
@@ -208,6 +216,7 @@ export default async function PerfilPage() {
       <AnimatedSection className="px-3.5 pb-3.5">
         <AnimatedItem>
           <div
+            data-tour="perfil.racha"
             className="k-grain"
             style={{
               background: "var(--k-surface)",
@@ -276,7 +285,10 @@ export default async function PerfilPage() {
       </AnimatedSection>
 
       {/* STATS GRID — dynamic layout */}
-      <AnimatedSection className="px-3.5 pb-3.5 grid grid-cols-2 gap-2">
+      <AnimatedSection
+        data-tour="perfil.stats"
+        className="px-3.5 pb-3.5 grid grid-cols-2 gap-2"
+      >
         <AnimatedItem className="col-span-1">
           <StatCard
             label="ASISTENCIAS"
@@ -691,7 +703,7 @@ export default async function PerfilPage() {
       )}
 
       {/* HUB DE EXPLORACIÓN — accesos al resto de la app del atleta */}
-      <AnimatedSection className="mt-6 px-3.5">
+      <AnimatedSection data-tour="perfil.explorar" className="mt-6 px-3.5">
         <AnimatedItem>
           <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
             EXPLORAR

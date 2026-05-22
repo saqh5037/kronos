@@ -33,6 +33,7 @@ interface AnimatedSectionProps {
   className?: string;
   stagger?: number;
   delay?: number;
+  [dataAttr: `data-${string}`]: string | undefined;
 }
 
 export function AnimatedSection({
@@ -40,6 +41,7 @@ export function AnimatedSection({
   className = "",
   stagger = 0.06,
   delay = 0.05,
+  ...rest
 }: AnimatedSectionProps) {
   return (
     <motion.div
@@ -53,6 +55,7 @@ export function AnimatedSection({
       }}
       initial={false}
       animate="show"
+      {...rest}
     >
       {children}
     </motion.div>

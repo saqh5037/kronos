@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTour } from "./TourProvider";
 import { reservarTour } from "./tours/reservar";
 import { wodTour } from "./tours/wod";
+import { perfilTour } from "./tours/perfil";
 
 type AutoStartEntry = {
   tourId: string;
@@ -23,6 +24,11 @@ const AUTO_START_MAP: Record<string, AutoStartEntry> = {
     tourId: wodTour.id,
     storageKey: wodTour.storageKey,
     firstAnchor: wodTour.steps[0].anchor,
+  },
+  "/atleta/perfil": {
+    tourId: perfilTour.id,
+    storageKey: perfilTour.storageKey,
+    firstAnchor: perfilTour.steps[0].anchor,
   },
 };
 

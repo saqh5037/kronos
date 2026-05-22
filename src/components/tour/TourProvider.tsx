@@ -10,12 +10,14 @@ import {
 } from "react";
 import { reservarTour } from "./tours/reservar";
 import { wodTour } from "./tours/wod";
+import { perfilTour } from "./tours/perfil";
 import type { TourDefinition } from "./types";
 import { TourOverlay } from "./TourOverlay";
 
 const REGISTRY: Record<string, TourDefinition> = {
   [reservarTour.id]: reservarTour,
   [wodTour.id]: wodTour,
+  [perfilTour.id]: perfilTour,
 };
 
 type TourContextValue = {
