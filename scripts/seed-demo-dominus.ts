@@ -388,6 +388,7 @@ async function main(): Promise<void> {
   const athletes: {
     id: string;
     userId: string;
+    membershipId: string;
     name: string;
     joinedAt: Date;
   }[] = [];
@@ -469,7 +470,7 @@ async function main(): Promise<void> {
       });
 
       // Membership
-      await prisma.membership.create({
+      const membership = await prisma.membership.create({
         data: {
           tenantId: box.id,
           athleteId: athlete.id,
@@ -485,6 +486,7 @@ async function main(): Promise<void> {
       athletes.push({
         id: athlete.id,
         userId: user.id,
+        membershipId: membership.id,
         name: `${firstName} ${lastName}`,
         joinedAt,
       });
@@ -699,6 +701,74 @@ async function main(): Promise<void> {
   }
   log("prs", `${prCount} PRs`);
 
+  // ─── Payments (revenue histórico realista) ───────────────────────────────
+  log("payments", "Generando pagos mensuales...");
+  let paymentCount = 0;
+  let paidCount = 0;
+  let pendingCount = 0;
+  let failedCount = 0;
+  let cashCount = 0;
+  let mpCount = 0;
+
+  for (const athlete of athletes) {
+    // Para cada mes desde joinedAt hasta hoy, generar un pago
+    const cursor = new Date(athlete.joinedAt);
+    cursor.setDate(1); // Primer día del mes de alta
+    cursor.setHours(8, 0, 0, 0);
+
+    while (cursor <= TODAY) {
+      const createdAt = new Date(cursor);
+      // randomize day of month slightly (1-5) — los cobros caen en primera semana
+      createdAt.setDate(randInt(1, 5));
+
+      // Skip si el created es antes del joinedAt (caso edge del primer mes)
+      if (createdAt < athlete.joinedAt) {
+        cursor.setMonth(cursor.getMonth() + 1);
+        continue;
+      }
+
+      // Distribución: 90% PAID, 5% PENDING, 5% FAILED
+      const r = rand();
+      const status = r < 0.9 ? "PAID" : r < 0.95 ? "PENDING" : "FAILED";
+
+      // 80% efectivo (cobranza in-person fundador), 20% MercadoPago
+      const gateway = chance(0.8) ? "CASH" : "MERCADOPAGO";
+
+      const paidAt =
+        status === "PAID"
+          ? new Date(createdAt.getTime() + randInt(0, 4) * MS_PER_DAY)
+          : null;
+
+      await prisma.payment.create({
+        data: {
+          tenantId: box.id,
+          membershipId: athlete.membershipId,
+          amount: "1500.00",
+          currency: "MXN",
+          gateway: gateway as never,
+          status: status as never,
+          paidAt,
+          createdAt,
+        },
+      });
+
+      paymentCount++;
+      if (status === "PAID") paidCount++;
+      else if (status === "PENDING") pendingCount++;
+      else failedCount++;
+      if (gateway === "CASH") cashCount++;
+      else mpCount++;
+
+      // Next month
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+  }
+  log(
+    "payments",
+    `${paymentCount} pagos · ${paidCount} PAID · ${pendingCount} PENDING · ${failedCount} FAILED`,
+  );
+  log("payments", `${cashCount} efectivo · ${mpCount} MercadoPago`);
+
   // ─── Summary ──────────────────────────────────────────────────────────────
   bar();
   log("done", "Seed completado.");
@@ -761,6 +831,7 @@ function scoreUnitFor(scoreType: string): string {
 
 async function deleteBoxCascade(boxId: string): Promise<void> {
   // Borrar en orden inverso de dependencias
+  await prisma.payment.deleteMany({ where: { tenantId: boxId } });
   await prisma.pR.deleteMany({ where: { tenantId: boxId } });
   await prisma.score.deleteMany({ where: { tenantId: boxId } });
   await prisma.booking.deleteMany({ where: { tenantId: boxId } });
