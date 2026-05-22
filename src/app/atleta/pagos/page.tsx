@@ -4,6 +4,8 @@ import PayMembershipButton from "@/components/atleta/PayMembershipButton";
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
 import { getBoxMode } from "@/server/actions/box-mode";
 import AthleteBackLink from "@/components/atleta/AthleteBackLink";
+import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
+import { pagosTour } from "@/components/tour/tours/pagos";
 
 export const metadata = { title: "Kronos — Mis pagos" };
 export const dynamic = "force-dynamic";
@@ -90,13 +92,18 @@ export default async function AtletaPagosPage() {
     <div style={{ paddingBottom: 96 }}>
       {/* HERO V3 — limpio */}
       <header
+        data-tour="pagos.header"
         style={{
           padding: "48px 20px 20px",
           display: "flex",
           flexDirection: "column",
           gap: 8,
+          position: "relative",
         }}
       >
+        <div style={{ position: "absolute", top: 48, right: 20 }}>
+          <TourTriggerButton tourId={pagosTour.id} />
+        </div>
         <AthleteBackLink href="/atleta" label="Inicio" />
         <span
           style={{
@@ -158,11 +165,14 @@ export default async function AtletaPagosPage() {
             gap: 12,
           }}
         >
-          {memberships.map((m) => {
+          {memberships.map((m, idx) => {
             const statusInfo = STATUS_LABEL[m.status] ?? STATUS_LABEL.PENDING;
             return (
               <AnimatedItem key={m.id}>
                 <div
+                  {...(idx === 0
+                    ? { "data-tour": "pagos.membresia-card" }
+                    : {})}
                   style={{
                     padding: 16,
                     background: "var(--k-surface)",
@@ -244,15 +254,20 @@ export default async function AtletaPagosPage() {
                   </div>
 
                   {m.status === "PENDING" && m.pendingPaymentId && (
-                    <PayMembershipButton
-                      paymentId={m.pendingPaymentId}
-                      amount={m.planPrice}
-                      currency={m.planCurrency}
-                    />
+                    <div data-tour="pagos.cta-pagar">
+                      <PayMembershipButton
+                        paymentId={m.pendingPaymentId}
+                        amount={m.planPrice}
+                        currency={m.planCurrency}
+                      />
+                    </div>
                   )}
 
                   {m.payments.length > 0 && (
-                    <details style={{ marginTop: 16 }}>
+                    <details
+                      data-tour="pagos.historial"
+                      style={{ marginTop: 16 }}
+                    >
                       <summary
                         style={{
                           cursor: "pointer",
