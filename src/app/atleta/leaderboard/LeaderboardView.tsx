@@ -14,6 +14,8 @@ import {
 } from "@/components/kronos/AnimatedSection";
 import { formatScore } from "@/lib/scores";
 import type { ScoreType } from "@/lib/validations/wod";
+import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
+import { leaderboardTour } from "@/components/tour/tours/leaderboard";
 
 type Tab = "wod" | "movement" | "attendance";
 
@@ -98,13 +100,18 @@ export default function LeaderboardPage({
     <div className="pb-28 relative">
       {/* HERO V3 — limpio */}
       <header
+        data-tour="leaderboard.header"
         style={{
           padding: "56px 20px 20px",
           display: "flex",
           flexDirection: "column",
           gap: 8,
+          position: "relative",
         }}
       >
+        <div style={{ position: "absolute", top: 56, right: 20 }}>
+          <TourTriggerButton tourId={leaderboardTour.id} />
+        </div>
         <span
           style={{
             fontFamily: "var(--k-font-display)",
@@ -133,7 +140,7 @@ export default function LeaderboardPage({
       </header>
 
       {/* Tabs */}
-      <AnimatedSection className="px-3.5">
+      <AnimatedSection data-tour="leaderboard.tabs" className="px-3.5">
         <AnimatedItem>
           <div
             style={{
@@ -176,7 +183,7 @@ export default function LeaderboardPage({
 
       {/* Filters */}
       {(tab === "wod" || tab === "movement") && (
-        <div className="px-3.5 mt-3">
+        <div data-tour="leaderboard.filters" className="px-3.5 mt-3">
           {tab === "wod" && (
             <select
               value={wodId}
@@ -225,7 +232,7 @@ export default function LeaderboardPage({
 
       {/* WOD Ranking */}
       {!isPending && tab === "wod" && wodData && (
-        <div className="px-3.5 mt-3">
+        <div data-tour="leaderboard.ranking" className="px-3.5 mt-3">
           <KCard className="overflow-hidden">
             <AnimatedSection key={`wod-${wodId}`}>
               {wodData.entries.map((e, i, arr) => (
@@ -253,7 +260,7 @@ export default function LeaderboardPage({
 
       {/* Movement Ranking */}
       {!isPending && tab === "movement" && movementData && (
-        <div className="px-3.5 mt-3">
+        <div data-tour="leaderboard.ranking" className="px-3.5 mt-3">
           <KCard className="overflow-hidden">
             <AnimatedSection key={`mov-${movementId}`}>
               {movementData.entries.map((e, i, arr) => (
@@ -281,7 +288,7 @@ export default function LeaderboardPage({
 
       {/* Attendance Ranking */}
       {!isPending && tab === "attendance" && (
-        <div className="px-3.5 mt-3">
+        <div data-tour="leaderboard.ranking" className="px-3.5 mt-3">
           <KCard className="overflow-hidden">
             <AnimatedSection>
               {attendanceData.map((e, i, arr) => (
