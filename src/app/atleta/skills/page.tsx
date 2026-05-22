@@ -6,6 +6,8 @@ import {
   AnimatedItem,
 } from "@/components/kronos/AnimatedSection";
 import RevealOnScroll from "@/components/kronos/RevealOnScroll";
+import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
+import { skillsTour } from "@/components/tour/tours/skills";
 import {
   getActiveSkillForAthlete,
   getSkillCatalogForAthlete,
@@ -94,6 +96,9 @@ export default async function SkillsPage() {
           >
             {tierCfg.label}
           </span>
+          <div style={{ marginLeft: "auto" }}>
+            <TourTriggerButton tourId={skillsTour.id} />
+          </div>
         </div>
       </header>
 
@@ -132,7 +137,7 @@ function ActiveSkillView({
 
   return (
     <>
-      <section style={{ padding: "0 20px 32px" }}>
+      <section data-tour="skills.hero" style={{ padding: "0 20px 32px" }}>
         <div
           style={{
             fontFamily: "var(--k-font-display)",
@@ -263,6 +268,7 @@ function ActiveSkillView({
 
         {currentProg && (
           <div
+            data-tour="skills.foco"
             style={{
               marginTop: 20,
               padding: "12px 14px",
@@ -363,7 +369,11 @@ function ActiveSkillView({
         )}
       </section>
 
-      <RevealOnScroll variant="fade-up" className="px-3.5 mb-4">
+      <RevealOnScroll
+        data-tour="skills.progresiones"
+        variant="fade-up"
+        className="px-3.5 mb-4"
+      >
         <KCard>
           <div className="p-4">
             <div
@@ -406,7 +416,11 @@ function ActiveSkillView({
       </RevealOnScroll>
 
       {prPredictions && prPredictions.length > 0 && (
-        <RevealOnScroll variant="fade-up" className="px-3.5 mb-4">
+        <RevealOnScroll
+          data-tour="skills.ai-plan"
+          variant="fade-up"
+          className="px-3.5 mb-4"
+        >
           <div
             style={{
               display: "flex",
