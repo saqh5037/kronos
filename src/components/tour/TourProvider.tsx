@@ -11,6 +11,7 @@ import {
 import { reservarTour } from "./tours/reservar";
 import { wodTour } from "./tours/wod";
 import { perfilTour } from "./tours/perfil";
+import { homeTour } from "./tours/home";
 import type { TourDefinition } from "./types";
 import { TourOverlay } from "./TourOverlay";
 
@@ -18,6 +19,7 @@ const REGISTRY: Record<string, TourDefinition> = {
   [reservarTour.id]: reservarTour,
   [wodTour.id]: wodTour,
   [perfilTour.id]: perfilTour,
+  [homeTour.id]: homeTour,
 };
 
 type TourContextValue = {

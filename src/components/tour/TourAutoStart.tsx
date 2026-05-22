@@ -6,6 +6,7 @@ import { useTour } from "./TourProvider";
 import { reservarTour } from "./tours/reservar";
 import { wodTour } from "./tours/wod";
 import { perfilTour } from "./tours/perfil";
+import { homeTour } from "./tours/home";
 
 type AutoStartEntry = {
   tourId: string;
@@ -29,6 +30,11 @@ const AUTO_START_MAP: Record<string, AutoStartEntry> = {
     tourId: perfilTour.id,
     storageKey: perfilTour.storageKey,
     firstAnchor: perfilTour.steps[0].anchor,
+  },
+  "/atleta": {
+    tourId: homeTour.id,
+    storageKey: homeTour.storageKey,
+    firstAnchor: homeTour.steps[0].anchor,
   },
 };
 

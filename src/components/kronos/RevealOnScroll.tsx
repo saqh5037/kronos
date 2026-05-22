@@ -12,6 +12,7 @@ interface RevealOnScrollProps {
   className?: string;
   threshold?: number;
   once?: boolean;
+  [dataAttr: `data-${string}`]: string | undefined;
 }
 
 export default function RevealOnScroll({
@@ -22,6 +23,7 @@ export default function RevealOnScroll({
   className = "",
   threshold = 0.1,
   once = true,
+  ...rest
 }: RevealOnScrollProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -81,6 +83,7 @@ export default function RevealOnScroll({
         ...baseStyle,
         ...(visible ? visibleStyle : hiddenStyle),
       }}
+      {...rest}
     >
       {children}
     </div>

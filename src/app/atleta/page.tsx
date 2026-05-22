@@ -40,6 +40,8 @@ import type { ScoreType } from "@/lib/validations/wod";
 
 import KCard from "@/components/kronos/KCard";
 import RevealOnScroll from "@/components/kronos/RevealOnScroll";
+import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
+import { homeTour } from "@/components/tour/tours/home";
 
 export const metadata = { title: "Kronos — Inicio" };
 
@@ -183,13 +185,18 @@ export default async function AtletaHomePage() {
     <div className="pb-28 relative">
       {/* HERO V3 — limpio, sin particles ni gradients hardcoded */}
       <header
+        data-tour="home.hero"
         style={{
           padding: "56px 20px 24px",
           display: "flex",
           flexDirection: "column",
           gap: 8,
+          position: "relative",
         }}
       >
+        <div style={{ position: "absolute", top: 56, right: 20 }}>
+          <TourTriggerButton tourId={homeTour.id} />
+        </div>
         <span
           style={{
             fontFamily: "var(--k-font-display)",
@@ -225,18 +232,21 @@ export default async function AtletaHomePage() {
         <QuickSurvey survey={readinessSurvey} />
       )}
 
-      {/* STREAK HERO */}
-      <div className="px-3.5 mt-4">
-        <StreakHero count={home.streak} lastEventAt={home.streakLastEventAt} />
+      {/* STREAK HERO + STATS */}
+      <div data-tour="home.stats">
+        <div className="px-3.5 mt-4">
+          <StreakHero
+            count={home.streak}
+            lastEventAt={home.streakLastEventAt}
+          />
+        </div>
+        <AnimatedStats
+          weekAttendance={home.weekAttendance}
+          weekGoal={home.weekGoal}
+          streak={home.streak}
+          prCount={home.prCount}
+        />
       </div>
-
-      {/* HERO STATS */}
-      <AnimatedStats
-        weekAttendance={home.weekAttendance}
-        weekGoal={home.weekGoal}
-        streak={home.streak}
-        prCount={home.prCount}
-      />
 
       {/* TROPHY STRIP */}
       {trophies.length > 0 && (
@@ -249,7 +259,11 @@ export default async function AtletaHomePage() {
       )}
 
       {/* NEXT BOOKING */}
-      <RevealOnScroll variant="fade-up" className="mt-4 px-3.5">
+      <RevealOnScroll
+        data-tour="home.next-booking"
+        variant="fade-up"
+        className="mt-4 px-3.5"
+      >
         {home.nextBooking ? (
           <KCard variant="featured">
             <div className="p-3.5 flex items-center gap-3.5">
@@ -315,7 +329,11 @@ export default async function AtletaHomePage() {
       </RevealOnScroll>
 
       {/* WEEK STRIP */}
-      <RevealOnScroll variant="fade-up" className="mt-5">
+      <RevealOnScroll
+        data-tour="home.week-strip"
+        variant="fade-up"
+        className="mt-5"
+      >
         <div
           style={{
             display: "flex",
