@@ -919,6 +919,7 @@ export default function AdminSidebar({
           className="k-scroll"
           style={{
             flex: 1,
+            minHeight: 0,
             overflowY: "auto",
             overflowX: "hidden",
             paddingTop: 2,
@@ -960,6 +961,7 @@ export default function AdminSidebar({
             borderTop: "1px solid var(--k-line)",
             padding: "6px 0 10px",
             background: "#0B0B0E",
+            flexShrink: 0,
           }}
         >
           {footerItems.map((it) => {
