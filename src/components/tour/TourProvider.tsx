@@ -16,6 +16,7 @@ import { skillsTour } from "./tours/skills";
 import { saludTour } from "./tours/salud";
 import { historialTour } from "./tours/historial";
 import { leaderboardTour } from "./tours/leaderboard";
+import { movimientosTour } from "./tours/movimientos";
 import type { TourDefinition } from "./types";
 import { TourOverlay } from "./TourOverlay";
 
@@ -28,6 +29,7 @@ const REGISTRY: Record<string, TourDefinition> = {
   [saludTour.id]: saludTour,
   [historialTour.id]: historialTour,
   [leaderboardTour.id]: leaderboardTour,
+  [movimientosTour.id]: movimientosTour,
 };
 
 type TourContextValue = {

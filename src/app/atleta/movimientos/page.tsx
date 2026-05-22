@@ -11,6 +11,8 @@ import {
 } from "@/components/kronos/AnimatedSection";
 import KCard from "@/components/kronos/KCard";
 import MovementCatalog from "@/components/atleta/MovementCatalog";
+import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
+import { movimientosTour } from "@/components/tour/tours/movimientos";
 
 export const metadata = { title: "Kronos — Mis Movimientos" };
 
@@ -30,13 +32,18 @@ export default async function MovementsPage() {
     <div className="pb-28 relative">
       {/* HERO V3 — limpio */}
       <header
+        data-tour="movimientos.header"
         style={{
           padding: "56px 20px 20px",
           display: "flex",
           flexDirection: "column",
           gap: 8,
+          position: "relative",
         }}
       >
+        <div style={{ position: "absolute", top: 56, right: 20 }}>
+          <TourTriggerButton tourId={movimientosTour.id} />
+        </div>
         <span
           style={{
             fontFamily: "var(--k-font-display)",
@@ -78,7 +85,10 @@ export default async function MovementsPage() {
       </header>
 
       {/* List — personal movements */}
-      <AnimatedSection className="px-3.5 mt-2 space-y-2">
+      <AnimatedSection
+        data-tour="movimientos.lista-personal"
+        className="px-3.5 mt-2 space-y-2"
+      >
         {movements.length === 0 && (
           <AnimatedItem>
             <KCard variant="ghost" className="p-6 text-center">
@@ -92,7 +102,12 @@ export default async function MovementsPage() {
 
         {movements.map((m, i) => (
           <AnimatedItem key={m.movementId}>
-            <Link href={`/atleta/movimientos/${m.movementId}` as Route}>
+            <Link
+              {...(i === 0
+                ? { "data-tour": "movimientos.card-movimiento" }
+                : {})}
+              href={`/atleta/movimientos/${m.movementId}` as Route}
+            >
               <KCard
                 variant="ghost"
                 className="p-3.5 flex items-center gap-3"
@@ -170,7 +185,10 @@ export default async function MovementsPage() {
 
       {/* CATÁLOGO COMPLETO */}
       {catalog.length > 0 && (
-        <AnimatedSection className="px-3.5 mt-8">
+        <AnimatedSection
+          data-tour="movimientos.catalogo"
+          className="px-3.5 mt-8"
+        >
           <div className="flex items-baseline justify-between mb-4">
             <p className="k-eyebrow text-[var(--k-t2)]">
               BIBLIOTECA DE MOVIMIENTOS
