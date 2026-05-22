@@ -14,6 +14,8 @@ import { LogMeasurementModal } from "./LogMeasurementModal";
 import { EmptyState } from "./EmptyState";
 import { GoalCard } from "./GoalCard";
 import { GoalForm } from "./GoalForm";
+import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
+import { saludTour } from "@/components/tour/tours/salud";
 
 type Props = {
   history: BodyMetricHistoryPoint[];
@@ -77,50 +79,60 @@ export function SaludShell({ history, latest, goals }: Props) {
             Tu cuerpo en el tiempo
           </h1>
         </div>
-        {!isEmpty && (
-          <button
-            type="button"
-            onClick={() => setLogOpen(true)}
-            className="k-tap"
-            aria-label="Registrar nueva medición"
-            style={{
-              padding: "10px 16px",
-              background: "var(--k-accent)",
-              color: "var(--k-accent-on)",
-              border: "none",
-              borderRadius: 10,
-              fontFamily: "var(--k-font-display)",
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              cursor: "pointer",
-              boxShadow: "var(--k-accent-glow)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            + Registrar
-          </button>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <TourTriggerButton tourId={saludTour.id} />
+          {!isEmpty && (
+            <button
+              type="button"
+              data-tour="salud.register"
+              onClick={() => setLogOpen(true)}
+              className="k-tap"
+              aria-label="Registrar nueva medición"
+              style={{
+                padding: "10px 16px",
+                background: "var(--k-accent)",
+                color: "var(--k-accent-on)",
+                border: "none",
+                borderRadius: 10,
+                fontFamily: "var(--k-font-display)",
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                boxShadow: "var(--k-accent-glow)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              + Registrar
+            </button>
+          )}
+        </div>
       </header>
 
       {isEmpty ? (
         <EmptyState onLog={() => setLogOpen(true)} />
       ) : (
         <>
-          <WellnessHero latest={latest} />
-          <WeightChart
-            data={history}
-            targetValue={activeWeightGoal?.targetValue ?? null}
-            unit="kg"
-          />
+          <div data-tour="salud.hero">
+            <WellnessHero latest={latest} />
+          </div>
+          <div data-tour="salud.chart">
+            <WeightChart
+              data={history}
+              targetValue={activeWeightGoal?.targetValue ?? null}
+              unit="kg"
+            />
+          </div>
 
           {activeWeightGoal && (
-            <GoalCard
-              goal={activeWeightGoal}
-              onEdit={() => setGoalOpen(true)}
-              onChanged={handleSaved}
-            />
+            <div data-tour="salud.goal">
+              <GoalCard
+                goal={activeWeightGoal}
+                onEdit={() => setGoalOpen(true)}
+                onChanged={handleSaved}
+              />
+            </div>
           )}
           {otherGoals.map((g) => (
             <GoalCard
@@ -133,6 +145,7 @@ export function SaludShell({ history, latest, goals }: Props) {
           {goals.length === 0 && (
             <button
               type="button"
+              data-tour="salud.goal"
               onClick={() => setGoalOpen(true)}
               className="k-tap"
               style={{
