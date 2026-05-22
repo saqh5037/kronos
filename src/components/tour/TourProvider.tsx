@@ -9,11 +9,13 @@ import {
   useState,
 } from "react";
 import { reservarTour } from "./tours/reservar";
+import { wodTour } from "./tours/wod";
 import type { TourDefinition } from "./types";
 import { TourOverlay } from "./TourOverlay";
 
 const REGISTRY: Record<string, TourDefinition> = {
   [reservarTour.id]: reservarTour,
+  [wodTour.id]: wodTour,
 };
 
 type TourContextValue = {

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ComponentProps } from "react";
 import { Icon } from "./icons";
+import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
+import { wodTour } from "@/components/tour/tours/wod";
 
 const ACC = "var(--k-accent)";
 const ACC_ON = "var(--k-accent-on)";
@@ -125,28 +127,32 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
           >
             WOD · HOY
           </span>
-          <button
-            type="button"
-            aria-label="Compartir"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              background: "transparent",
-              border: 0,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "var(--k-t1)",
-            }}
-          >
-            <Icon.Share width={18} height={18} />
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <TourTriggerButton tourId={wodTour.id} />
+            <button
+              type="button"
+              aria-label="Compartir"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: "transparent",
+                border: 0,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--k-t1)",
+              }}
+            >
+              <Icon.Share width={18} height={18} />
+            </button>
+          </div>
         </div>
 
         {/* Hero */}
         <div
+          data-tour="wod.hero"
           style={{
             margin: "0 20px",
             display: "flex",
@@ -284,6 +290,7 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
         {/* Movements */}
         {props.movements.length > 0 && (
           <div
+            data-tour="wod.movements"
             className="k-grain"
             style={{
               margin: "0 20px",
@@ -645,7 +652,9 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
 
         {/* Score form slot (provided by page) */}
         {props.scoreFormSlot && (
-          <div style={{ margin: "0 20px" }}>{props.scoreFormSlot}</div>
+          <div data-tour="wod.score-form" style={{ margin: "0 20px" }}>
+            {props.scoreFormSlot}
+          </div>
         )}
 
         {/* CTAs */}
@@ -685,6 +694,7 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
           )}
           {props.leaderboardHref && (
             <Link
+              data-tour="wod.leaderboard"
               href={props.leaderboardHref}
               className="k-tap"
               style={{
