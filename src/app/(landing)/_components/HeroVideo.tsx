@@ -59,6 +59,7 @@ export default function HeroVideo() {
           onClick={toggleMute}
           aria-label={muted ? "Activar sonido" : "Silenciar"}
           aria-pressed={!muted}
+          className={muted ? "lp-mute-cta-pulse" : undefined}
           style={{
             position: "absolute",
             bottom: 16,
