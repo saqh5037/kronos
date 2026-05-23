@@ -211,6 +211,14 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
         className="flex flex-col gap-4"
         data-testid="atleta-signup-email-phase"
       >
+        <p
+          className="text-[13px] leading-relaxed"
+          style={{ color: "var(--k-t2)" }}
+        >
+          Pon tu email. Si ya tienes cuenta entras directo. Si no, te creamos
+          una en 10 segundos.
+        </p>
+
         <Field
           label="Email"
           name="email"
@@ -226,19 +234,21 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
 
         <button
           type="submit"
-          disabled={pending || email.length === 0}
-          className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 mt-1"
+          disabled={pending}
+          className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-60 mt-1"
         >
-          {pending ? "Verificando…" : "Continuar"}
+          {pending
+            ? "Verificando…"
+            : email.length === 0
+              ? "Empezar"
+              : "Continuar →"}
         </button>
 
-        <p
-          className="text-center text-[11px] leading-relaxed"
-          style={{ color: "var(--k-t3)" }}
-        >
-          Si ya tienes cuenta te enviamos el código para entrar.
-          <br />
-          Si no, te ayudamos a crear una en 10 segundos.
+        <p className="text-center text-xs leading-relaxed">
+          <span style={{ color: "var(--k-t3)" }}>¿Primera vez?</span>{" "}
+          <span style={{ color: "var(--k-accent)", fontWeight: 600 }}>
+            Te lleva 10 segundos →
+          </span>
         </p>
       </form>
     );
