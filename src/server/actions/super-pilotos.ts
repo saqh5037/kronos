@@ -1,30 +1,7 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/server/auth";
 import { db as prismaBase } from "@/server/db";
-import { isSuperAdmin } from "@/lib/super-admin";
-
-/**
- * Gate dedicado para server actions de super-admin.
- *
- * IMPORTANTE: Las server actions con `"use server"` son endpoints HTTP
- * públicos invocables por cualquier sesión válida — el layout `/admin/super/*`
- * que llama notFound() protege el RENDER de la page, NO al RPC de las
- * actions importadas. Cada server action sensible debe validar por sí misma.
- *
- * Devuelve `{ ok: false, error: "UNAUTHORIZED" }` para que los callers
- * tipen el resultado de forma consistente.
- */
-async function requireSuperAdmin(): Promise<
-  true | { ok: false; error: "UNAUTHORIZED" }
-> {
-  const session = await getServerSession(authOptions);
-  if (!isSuperAdmin(session?.user?.email)) {
-    return { ok: false, error: "UNAUTHORIZED" };
-  }
-  return true;
-}
+import { requireSuperAdmin } from "@/server/super-admin-guard";
 
 /**
  * Tipo retornado por listPilotBoxes — métricas agregadas por Box piloto.
