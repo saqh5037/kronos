@@ -28,7 +28,7 @@ export function TourOverlay({
       if (stepIndex < tour.steps.length - 1) {
         next();
       } else {
-        endTour({ completed: false });
+        endTour();
       }
     }
   }, [missing, stepIndex, tour.steps.length, next, endTour]);
@@ -64,7 +64,7 @@ export function TourOverlay({
           opacity: 1,
         }}
         transition={SPRING}
-        onClick={() => endTour({ completed: false })}
+        onClick={() => endTour()}
         style={{
           position: "fixed",
           top: 0,
@@ -84,7 +84,7 @@ export function TourOverlay({
           top: measured ? spotTop + spotH : 0,
         }}
         transition={SPRING}
-        onClick={() => endTour({ completed: false })}
+        onClick={() => endTour()}
         style={{
           position: "fixed",
           left: 0,
@@ -106,7 +106,7 @@ export function TourOverlay({
           width: measured ? spotLeft : 0,
         }}
         transition={SPRING}
-        onClick={() => endTour({ completed: false })}
+        onClick={() => endTour()}
         style={{
           position: "fixed",
           left: 0,
@@ -126,7 +126,7 @@ export function TourOverlay({
           left: measured ? spotLeft + spotW : "100vw",
         }}
         transition={SPRING}
-        onClick={() => endTour({ completed: false })}
+        onClick={() => endTour()}
         style={{
           position: "fixed",
           right: 0,

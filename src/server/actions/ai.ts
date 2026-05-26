@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
 import { withTenant, db as rawDb } from "../db";
 import { startOfDay, subDays } from "date-fns";
+import { isStreakCurrent } from "@/lib/streak";
 import {
   buildFallbackText,
   buildGeminiPrompt,
@@ -163,7 +164,7 @@ async function buildGreetingContext(
     await Promise.all([
       db.streak.findFirst({
         where: { athleteId, type: "ATTENDANCE" },
-        select: { count: true },
+        select: { count: true, lastEventAt: true },
       }),
       db.booking.count({
         where: {
@@ -204,7 +205,9 @@ async function buildGreetingContext(
 
   return {
     firstName,
-    attendanceStreakDays: streak?.count ?? 0,
+    attendanceStreakDays: isStreakCurrent(streak?.lastEventAt ?? null, now)
+      ? (streak?.count ?? 0)
+      : 0,
     weekAttendance: weekAttended,
     weekGoal: 5,
     lastPRDaysAgo,

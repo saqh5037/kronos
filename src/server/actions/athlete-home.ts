@@ -6,6 +6,7 @@ import { withTenant } from "../db";
 import { subDays, startOfDay } from "date-fns";
 import { pickSuggestedClass, type Suggestion } from "@/lib/booking-suggestion";
 import { listAvailableClasses, getAthleteUsualSlots } from "./bookings";
+import { isStreakCurrent } from "@/lib/streak";
 
 async function requireSession() {
   return requireCachedSession();
@@ -148,10 +149,19 @@ export async function getAthleteHome(): Promise<AthleteHome> {
       }),
     ]);
 
+  // The cached Streak row only recomputes on check-in, so the raw count goes
+  // stale (athlete who stopped attending kept showing a phantom streak). Gate
+  // it at read time: a streak is only "current" if the last event was today or
+  // yesterday.
+  const streakLastEventAt = streak?.lastEventAt ?? null;
+  const currentStreak = isStreakCurrent(streakLastEventAt, now)
+    ? (streak?.count ?? 0)
+    : 0;
+
   return {
     athlete: me,
-    streak: streak?.count ?? 0,
-    streakLastEventAt: streak?.lastEventAt ?? null,
+    streak: currentStreak,
+    streakLastEventAt,
     xpTotal: xpAgg._sum.amount ?? 0,
     weekAttendance: weekAttended,
     weekGoal: 5,

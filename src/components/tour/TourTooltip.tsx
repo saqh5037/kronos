@@ -113,7 +113,7 @@ export function TourTooltip({
             </span>
             <button
               type="button"
-              onClick={() => endTour({ completed: false })}
+              onClick={() => endTour()}
               aria-label="Cerrar tour"
               style={{
                 width: 24,
@@ -203,7 +203,7 @@ export function TourTooltip({
 
             <button
               type="button"
-              onClick={isLast ? () => endTour({ completed: true }) : next}
+              onClick={isLast ? () => endTour() : next}
               style={{
                 fontFamily: "var(--k-font-display)",
                 fontSize: 10,

@@ -21,6 +21,7 @@ import { pagosTour } from "./tours/pagos";
 import { ajustesTour } from "./tours/ajustes";
 import type { TourDefinition } from "./types";
 import { TourOverlay } from "./TourOverlay";
+import { markTourSeen } from "./persistence";
 
 const REGISTRY: Record<string, TourDefinition> = {
   [reservarTour.id]: reservarTour,
@@ -41,7 +42,7 @@ type TourContextValue = {
   activeTour: TourDefinition | null;
   stepIndex: number;
   startTour: (id: string) => void;
-  endTour: (opts?: { completed?: boolean }) => void;
+  endTour: () => void;
   next: () => void;
   prev: () => void;
   goTo: (index: number) => void;
@@ -71,37 +72,23 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     setActiveTour(tour);
   }, []);
 
-  const endTour = useCallback(
-    (opts?: { completed?: boolean }) => {
-      if (activeTour && opts?.completed) {
-        try {
-          window.localStorage.setItem(
-            activeTour.storageKey,
-            new Date().toISOString(),
-          );
-        } catch {
-          // localStorage blocked — silently ignore
-        }
-      }
-      setActiveTour(null);
-      setStepIndex(0);
-    },
-    [activeTour],
-  );
+  // ANY end — skip via X/backdrop/Escape, natural completion, or auto-skip on
+  // a missing anchor — marks the tour seen. The old code only persisted on
+  // completion, so skipped tours reappeared on every navigation.
+  const endTour = useCallback(() => {
+    if (activeTour) {
+      markTourSeen(activeTour.storageKey);
+    }
+    setActiveTour(null);
+    setStepIndex(0);
+  }, [activeTour]);
 
   const next = useCallback(() => {
     if (!activeTour) return;
     setStepIndex((idx) => {
       const last = activeTour.steps.length - 1;
       if (idx >= last) {
-        try {
-          window.localStorage.setItem(
-            activeTour.storageKey,
-            new Date().toISOString(),
-          );
-        } catch {
-          // ignore
-        }
+        markTourSeen(activeTour.storageKey);
         setActiveTour(null);
         return 0;
       }
@@ -126,7 +113,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     if (!activeTour) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        endTour({ completed: false });
+        endTour();
       } else if (e.key === "ArrowRight" || e.key === "Enter") {
         next();
       } else if (e.key === "ArrowLeft") {

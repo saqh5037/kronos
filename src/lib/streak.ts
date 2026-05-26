@@ -60,3 +60,20 @@ export function computeAttendanceStreak(
   }
   return streak;
 }
+
+/**
+ * Whether a cached streak is still "current" given its last event date.
+ *
+ * The streak count is persisted in the DB (`Streak.count`) and only recomputed
+ * on check-in. Reading the raw count is wrong: an athlete who stopped attending
+ * keeps showing a stale streak forever. Apply this gate at read time — the
+ * streak is alive only if the last event was today or yesterday (same 1-day
+ * grace as `computeAttendanceStreak`).
+ */
+export function isStreakCurrent(
+  lastEventAt: Date | null,
+  now: Date = new Date(),
+): boolean {
+  if (!lastEventAt) return false;
+  return diffDaysUTC(startOfDayUTC(now), startOfDayUTC(lastEventAt)) <= 1;
+}

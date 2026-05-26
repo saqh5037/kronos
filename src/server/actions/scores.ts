@@ -280,6 +280,24 @@ export async function listScoresForWOD(wodId: string) {
 }
 
 /**
+ * Today's WOD plus its scoreboard, in a single action. The two queries still
+ * run sequentially internally (scores need the wodId the first query resolves),
+ * but folding them into one action lets the athlete home await it inside its
+ * `Promise.all` batch instead of running the scores query serially AFTER the
+ * whole batch resolves — removing that tail round-trip from the cold-start
+ * render path the PWA hits on every launch.
+ */
+export async function getTodayWODWithScores(): Promise<{
+  wod: TodayWOD;
+  scores: Awaited<ReturnType<typeof listScoresForWOD>>;
+}> {
+  const wod = await getTodayWOD();
+  if (!wod) return { wod: null, scores: [] };
+  const scores = await listScoresForWOD(wod.wodId);
+  return { wod, scores };
+}
+
+/**
  * Submit a score. If the WOD is STRENGTH (single movement), auto-detect a
  * PR for that movement. PR detection for non-strength WODs is per-WOD only
  * (the "Fran PR" pattern) and lives outside the Movement-PR table.

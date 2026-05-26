@@ -16,7 +16,7 @@ import {
 } from "@/server/actions/bookings";
 import { listMyPRs, type PRRow } from "@/server/actions/prs";
 import {
-  getTodayWOD,
+  getTodayWODWithScores,
   listScoresForWOD,
   type TodayWOD,
 } from "@/server/actions/scores";
@@ -49,6 +49,10 @@ export default async function AtletaHomePage() {
   let home: AthleteHome = null;
   let classes: AvailableClass[] = [];
   let prs: PRRow[] = [];
+  let wodWithScores: Awaited<ReturnType<typeof getTodayWODWithScores>> = {
+    wod: null,
+    scores: [],
+  };
   let wod: TodayWOD = null;
   let wodScores: Awaited<ReturnType<typeof listScoresForWOD>> = [];
   let readinessSurvey: SurveyRow | null = null;
@@ -62,7 +66,7 @@ export default async function AtletaHomePage() {
       home,
       classes,
       prs,
-      wod,
+      wodWithScores,
       greeting,
       trophies,
       suggestion,
@@ -72,7 +76,7 @@ export default async function AtletaHomePage() {
       getAthleteHome(),
       listAvailableClasses(7),
       listMyPRs(),
-      getTodayWOD(),
+      getTodayWODWithScores(),
       getDailyGreeting(),
       getAthleteTrophies(),
       getSuggestedNextClass().catch(() => null),
@@ -83,13 +87,8 @@ export default async function AtletaHomePage() {
     // Sesión ausente
   }
 
-  if (wod) {
-    try {
-      wodScores = await listScoresForWOD(wod.wodId);
-    } catch {
-      // ignore
-    }
-  }
+  wod = wodWithScores.wod;
+  wodScores = wodWithScores.scores;
 
   if (!home) {
     return (
