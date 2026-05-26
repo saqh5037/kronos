@@ -973,6 +973,10 @@ enum AuditAction {
   ATHLETE_STATUS_CHANGED
   SUPPORT_SESSION_OPENED
   SUPPORT_SESSION_CLOSED
+  SAAS_SUB_MARKED_PAID
+  SAAS_SUB_PLAN_CHANGED
+  SAAS_SUB_CANCELLED
+  SAAS_TRIAL_EXTENDED
 }
 
 model AuditEvent {
@@ -1133,6 +1137,7 @@ model SaasInvoice {
   box          Box              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   subscription SaasSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
+  @@unique([subscriptionId, periodStart])
   @@index([tenantId])
   @@index([tenantId, paidAt(sort: Desc)])
 }
