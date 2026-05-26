@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import { getBox } from "@/server/actions/box";
 import BoxSettingsForm from "@/components/admin/BoxSettingsForm";
+import { SupportCodeCard } from "./_components/SupportCodeCard";
 
 export const metadata = { title: "Kronos — Ajustes" };
 
@@ -54,6 +55,7 @@ export default async function AjustesPage() {
           </Link>
         ))}
       </nav>
+      <SupportCodeCard code={box.supportCode} />
       <BoxSettingsForm box={box} canEdit={canEdit} />
     </div>
   );

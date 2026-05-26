@@ -17,6 +17,7 @@ export type BoxSettings = {
   defaultClassCapacity: number;
   brandColor: string | null;
   logoUrl: string | null;
+  supportCode: string | null;
 };
 
 export async function getBox(): Promise<BoxSettings> {
@@ -39,6 +40,7 @@ export async function getBox(): Promise<BoxSettings> {
         defaultClassCapacity: true,
         brandColor: true,
         logoUrl: true,
+        supportCode: true,
       },
     });
   } catch (e) {
