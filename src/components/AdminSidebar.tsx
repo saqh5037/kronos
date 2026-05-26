@@ -92,6 +92,53 @@ const footerItems: { href: LinkHref; label: string; icon: IconKey }[] = [
   { href: "/", label: "Landing pública", icon: "globe" },
 ];
 
+const superGroups: ModuleGroup[] = [
+  {
+    title: "SISTEMA",
+    items: [
+      {
+        href: "/admin/super/platform" as unknown as LinkHref,
+        label: "Plataforma",
+        icon: "dashboard",
+      },
+      {
+        href: "/admin/super/boxes" as unknown as LinkHref,
+        label: "Boxes",
+        icon: "settings",
+      },
+      {
+        href: "/admin/super/atletas" as unknown as LinkHref,
+        label: "Atletas",
+        icon: "users",
+      },
+      {
+        href: "/admin/super/pagos" as unknown as LinkHref,
+        label: "Pagos",
+        icon: "card",
+      },
+    ],
+  },
+  {
+    title: "OPERACIÓN",
+    items: [
+      {
+        href: "/admin/super/soporte" as unknown as LinkHref,
+        label: "Soporte",
+        icon: "mail",
+      },
+      {
+        href: "/admin/super/pilotos" as unknown as LinkHref,
+        label: "Pilotos",
+        icon: "bolt",
+      },
+    ],
+  },
+];
+
+const superFooterItems: { href: LinkHref; label: string; icon: IconKey }[] = [
+  { href: "/admin", label: "Volver a mi box", icon: "share" },
+];
+
 function NavIcon({ kind, active }: { kind: IconKey; active: boolean }) {
   const color = active ? "var(--k-accent)" : "var(--k-t3)";
   const props = { width: 16, height: 16, style: { color } };
@@ -221,7 +268,7 @@ function KronosLogo({
             position: "absolute",
             inset: -4,
             borderRadius: 8,
-            boxShadow: "0 0 18px rgba(200,255,45,0.22)",
+            boxShadow: "var(--k-accent-glow)",
             pointerEvents: "none",
           }}
         />
@@ -353,10 +400,17 @@ function KronosMark({
   );
 }
 
-function BoxCard({ collapsed }: { collapsed: boolean }) {
+function BoxCard({
+  collapsed,
+  mode = "box",
+}: {
+  collapsed: boolean;
+  mode?: "box" | "super";
+}) {
+  const isSuper = mode === "super";
   return (
     <div
-      className="k-tap"
+      className={isSuper ? undefined : "k-tap"}
       style={{
         margin: collapsed ? "4px 10px 10px" : "0 14px 12px",
         padding: collapsed ? "10px 0" : "12px 12px",
@@ -366,7 +420,7 @@ function BoxCard({ collapsed }: { collapsed: boolean }) {
         display: "flex",
         alignItems: "center",
         gap: collapsed ? 0 : 10,
-        cursor: "pointer",
+        cursor: isSuper ? "default" : "pointer",
         justifyContent: collapsed ? "center" : "flex-start",
         position: "relative",
         overflow: "hidden",
@@ -388,8 +442,8 @@ function BoxCard({ collapsed }: { collapsed: boolean }) {
           width: 28,
           height: 28,
           borderRadius: 6,
-          background: "rgba(200,255,45,0.10)",
-          border: "1px solid rgba(200,255,45,0.30)",
+          background: "var(--k-accent-soft)",
+          border: "1px solid var(--k-accent-line)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -401,7 +455,7 @@ function BoxCard({ collapsed }: { collapsed: boolean }) {
           flexShrink: 0,
         }}
       >
-        B
+        {isSuper ? "S" : "B"}
       </div>
       {!collapsed && (
         <>
@@ -426,7 +480,7 @@ function BoxCard({ collapsed }: { collapsed: boolean }) {
                 textOverflow: "ellipsis",
               }}
             >
-              TU BOX
+              {isSuper ? "PLATAFORMA" : "TU BOX"}
             </span>
             <span
               style={{
@@ -440,21 +494,30 @@ function BoxCard({ collapsed }: { collapsed: boolean }) {
                 textOverflow: "ellipsis",
               }}
             >
-              OWNER
+              {isSuper ? "SUPER-ADMIN" : "OWNER"}
             </span>
           </div>
-          <Icon.Down
-            width="12"
-            height="12"
-            style={{ color: "var(--k-t3)", flexShrink: 0 }}
-          />
+          {!isSuper && (
+            <Icon.Down
+              width="12"
+              height="12"
+              style={{ color: "var(--k-t3)", flexShrink: 0 }}
+            />
+          )}
         </>
       )}
     </div>
   );
 }
 
-function LiveStrip({ collapsed }: { collapsed: boolean }) {
+function LiveStrip({
+  collapsed,
+  mode = "box",
+}: {
+  collapsed: boolean;
+  mode?: "box" | "super";
+}) {
+  const label = mode === "super" ? "SISTEMA" : "EN BOX";
   return (
     <div
       style={{
@@ -491,7 +554,7 @@ function LiveStrip({ collapsed }: { collapsed: boolean }) {
               whiteSpace: "nowrap",
             }}
           >
-            EN BOX
+            {label}
           </span>
           <span
             style={{
@@ -555,7 +618,7 @@ function NavItem({
             height: 18,
             borderRadius: "0 2px 2px 0",
             background: "var(--k-accent)",
-            boxShadow: "0 0 10px rgba(200,255,45,0.7)",
+            boxShadow: "var(--k-accent-glow)",
           }}
         />
       )}
@@ -583,12 +646,12 @@ function NavItem({
             fontSize: 9,
             fontWeight: 600,
             color: active ? "var(--k-accent)" : "var(--k-t3)",
-            background: active ? "rgba(200,255,45,0.10)" : "transparent",
+            background: active ? "var(--k-accent-soft)" : "transparent",
             padding: "1px 6px",
             borderRadius: 999,
             letterSpacing: "0.04em",
             border: active
-              ? "1px solid rgba(200,255,45,0.20)"
+              ? "1px solid var(--k-accent-line)"
               : "1px solid var(--k-line)",
             flexShrink: 0,
           }}
@@ -749,11 +812,13 @@ function NavGroup({
 type AdminSidebarProps = {
   sensitiveCount?: number;
   role?: string;
+  mode?: "box" | "super";
 };
 
 export default function AdminSidebar({
   sensitiveCount = 0,
   role,
+  mode = "box",
 }: AdminSidebarProps = {}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -793,12 +858,19 @@ export default function AdminSidebar({
     };
   }, [open]);
 
-  const visibleGroups = groups
-    .map((g) => ({
-      ...g,
-      items: g.items.filter((it) => !it.ownerOnly || role === "OWNER"),
-    }))
-    .filter((g) => g.items.length > 0);
+  const activeGroups = mode === "super" ? superGroups : groups;
+  const activeFooterItems = mode === "super" ? superFooterItems : footerItems;
+
+  // In super mode, gate is already guaranteed by layout — no ownerOnly filter needed
+  const visibleGroups =
+    mode === "super"
+      ? activeGroups
+      : activeGroups
+          .map((g) => ({
+            ...g,
+            items: g.items.filter((it) => !it.ownerOnly || role === "OWNER"),
+          }))
+          .filter((g) => g.items.length > 0);
 
   const sidebarWidth = collapsed ? 64 : 228;
 
@@ -897,6 +969,7 @@ export default function AdminSidebar({
       {/* Sidebar */}
       <nav
         aria-label="Menú principal"
+        data-mode={mode === "super" ? "super" : undefined}
         className={`k-sidebar ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
         style={{
           width: sidebarWidth,
@@ -915,7 +988,7 @@ export default function AdminSidebar({
         }}
       >
         <KronosMark collapsed={collapsed} onToggle={toggleCollapsed} />
-        <BoxCard collapsed={collapsed} />
+        <BoxCard collapsed={collapsed} mode={mode} />
         <div
           className="k-scroll"
           style={{
@@ -956,7 +1029,7 @@ export default function AdminSidebar({
             </NavGroup>
           ))}
         </div>
-        <LiveStrip collapsed={collapsed} />
+        <LiveStrip collapsed={collapsed} mode={mode} />
         <div
           style={{
             borderTop: "1px solid var(--k-line)",
@@ -965,7 +1038,7 @@ export default function AdminSidebar({
             flexShrink: 0,
           }}
         >
-          {footerItems.map((it) => {
+          {activeFooterItems.map((it) => {
             const isActive = pathname === it.href;
             return (
               <NavItem

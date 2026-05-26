@@ -1693,6 +1693,15 @@
   --k-border: 1px;
 }
 
+/* — SUPER-ADMIN chrome: amber accent override — */
+[data-mode="super"] {
+  --k-accent: #ffb020;
+  --k-accent-press: #d68f17;
+  --k-accent-soft: rgba(255, 176, 32, 0.1);
+  --k-accent-line: rgba(255, 176, 32, 0.3);
+  --k-accent-glow: 0 0 16px rgba(255, 176, 32, 0.18);
+}
+
 /* En kronos forzamos dark global con la nueva paleta */
 html.dark,
 html {
