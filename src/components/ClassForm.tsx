@@ -153,6 +153,7 @@ export default function ClassForm(props: Props) {
           kToast.success("Clase actualizada");
           props.onUpdated?.();
           close();
+          router.refresh();
         } else {
           await createClass(data);
           kToast.success("Clase creada");

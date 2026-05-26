@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { useMemo, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { DataTable } from "@/components/data/DataTable";
 import { Pagination } from "@/components/data/Pagination";
 import { ExportCSVButton } from "@/components/data/ExportCSVButton";
@@ -51,6 +51,8 @@ const csvColumns: CSVColumn<PaymentRow>[] = [
 
 function VoidPaymentButton({ payment }: { payment: PaymentRow }) {
   const [isPending, startTransition] = useTransition();
+  // Lock the row once a void enters the approval queue to avoid duplicate requests.
+  const [requested, setRequested] = useState(false);
   const confirm = useConfirm();
 
   // Only voidable when PAID or PENDING
@@ -69,6 +71,7 @@ function VoidPaymentButton({ payment }: { payment: PaymentRow }) {
       try {
         const result = await voidPayment(payment.id);
         if ("status" in result && result.status === "pending_approval") {
+          setRequested(true);
           kToast.warning("Solicitud enviada — requiere aprobación del owner");
         } else {
           kToast.info("Pago anulado");
@@ -82,12 +85,12 @@ function VoidPaymentButton({ payment }: { payment: PaymentRow }) {
   return (
     <button
       onClick={handleVoid}
-      disabled={isPending}
+      disabled={isPending || requested}
       className="text-xs px-2 py-1 rounded-md disabled:opacity-50 transition-colors"
       style={{ color: "var(--k-danger)" }}
       title="Anular pago"
     >
-      {isPending ? "…" : "Anular"}
+      {requested ? "Solicitado" : isPending ? "…" : "Anular"}
     </button>
   );
 }
@@ -191,7 +194,7 @@ export function PaymentsTable({
         <div className="p-6">
           <EmptyState
             title="Sin pagos en el rango"
-            description="Ajustá fechas o filtros para ver más resultados."
+            description="Ajusta fechas o filtros para ver más resultados."
           />
         </div>
       ) : (

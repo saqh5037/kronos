@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { useMemo, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { DataTable } from "@/components/data/DataTable";
 import { Pagination } from "@/components/data/Pagination";
 import { ExportCSVButton } from "@/components/data/ExportCSVButton";
@@ -52,6 +52,9 @@ type Props = {
 
 function MembershipActions({ membership }: { membership: MembershipRow }) {
   const [isPending, startTransition] = useTransition();
+  // Once a cancel falls into the approval queue, lock the row so the owner
+  // can't fire duplicate PermissionGrantRequests by re-clicking.
+  const [requested, setRequested] = useState(false);
   const confirm = useConfirm();
 
   function handlePause() {
@@ -88,6 +91,7 @@ function MembershipActions({ membership }: { membership: MembershipRow }) {
       try {
         const result = await cancelMembership(membership.id);
         if ("status" in result && result.status === "pending_approval") {
+          setRequested(true);
           kToast.warning("Solicitud enviada — requiere aprobación del owner");
         } else {
           kToast.info("Membresía cancelada");
@@ -128,12 +132,12 @@ function MembershipActions({ membership }: { membership: MembershipRow }) {
       )}
       <button
         onClick={handleCancel}
-        disabled={isPending}
+        disabled={isPending || requested}
         className="text-xs px-2 py-1 rounded-md disabled:opacity-50 transition-colors"
         style={{ color: "var(--k-danger)" }}
         title="Cancelar membresía"
       >
-        {isPending ? "…" : "Cancelar"}
+        {requested ? "Solicitado" : isPending ? "…" : "Cancelar"}
       </button>
     </div>
   );
