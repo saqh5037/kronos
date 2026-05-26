@@ -50,6 +50,7 @@ model Box {
   id                         String             @id @default(cuid())
   slug                       String             @unique
   name                       String
+  supportCode                String?            @unique
   locale                     String             @default("es-MX")
   currency                   String             @default("MXN")
   timezone                   String             @default("America/Mexico_City")
@@ -969,6 +970,9 @@ enum AuditAction {
   WEARABLE_DISCONNECTED
   WEARABLE_SYNC_FAILED
   WEARABLE_RECONNECT_REQUIRED
+  ATHLETE_STATUS_CHANGED
+  SUPPORT_SESSION_OPENED
+  SUPPORT_SESSION_CLOSED
 }
 
 model AuditEvent {
@@ -1276,6 +1280,27 @@ model Announcement {
   @@index([tenantId])
   @@index([tenantId, createdAt])
   @@index([tenantId, status])
+}
+
+// ─── SUPPORT SESSIONS ────────────────────────────────────────────────────────
+// Super-admin support sessions are intentionally stored WITHOUT a Prisma FK
+// relation to Box. Same pattern as RevokedPilotBetaJti — cross-tenant model,
+// foreign key enforcement would couple the cascade rules of the Box model.
+// Integrity enforced at the application layer (requireSupportSession guard).
+
+model SupportSession {
+  id         String    @id @default(cuid())
+  boxId      String
+  agentId    String
+  agentEmail String
+  reason     String?
+  openedAt   DateTime  @default(now())
+  expiresAt  DateTime
+  closedAt   DateTime?
+
+  @@index([boxId])
+  @@index([agentId])
+  @@index([boxId, closedAt])
 }
 
 // ─── PILOT BETA REVOCATION ───────────────────────────────────────────────────
