@@ -6,12 +6,19 @@ const HOUR_HEIGHT = 56;
 const START_HOUR = 5;
 const END_HOUR = 22;
 
+type Coach = { id: string; name: string | null; email: string };
+type WOD = { id: string; name: string; type: string };
+
 export function DayView({
   date,
   classes,
+  coaches,
+  wods,
 }: {
   date: Date;
   classes: ClassRow[];
+  coaches?: Coach[];
+  wods?: WOD[];
 }) {
   const sorted = [...classes].sort(
     (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
@@ -130,7 +137,7 @@ export function DayView({
                   className="absolute left-0 right-0 px-1"
                   style={{ top, height }}
                 >
-                  <ClassCard c={c} />
+                  <ClassCard c={c} coaches={coaches} wods={wods} />
                 </div>
               );
             })}

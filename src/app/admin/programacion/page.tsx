@@ -127,7 +127,9 @@ export default async function ProgramacionPage({
         <ScheduleViewSwitch view={view} date={date} />
       </div>
 
-      {view === "day" && <DayView date={date} classes={classes} />}
+      {view === "day" && (
+        <DayView date={date} classes={classes} coaches={coaches} wods={wods} />
+      )}
       {view === "week" && (
         <WeekView weekStart={from} classes={classes} today={new Date()} />
       )}
