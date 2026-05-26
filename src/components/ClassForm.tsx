@@ -2,52 +2,125 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { createClass } from "@/server/actions/classes";
+import { createClass, updateClass } from "@/server/actions/classes";
 import { kToast } from "@/lib/toast";
 import { KModal } from "@/components/kronos/KModal";
+import type { ClassRow } from "@/server/actions/classes";
 
 type Coach = { id: string; name: string | null; email: string };
 type WOD = { id: string; name: string; type: string };
 
-export default function ClassForm({
-  coaches,
-  wods,
-  defaultDate,
-}: {
+type BaseProps = {
   coaches: Coach[];
   wods: WOD[];
+};
+
+type CreateProps = BaseProps & {
+  mode?: "create";
   defaultDate?: string;
-}) {
+  initialClass?: never;
+};
+
+type EditProps = BaseProps & {
+  mode: "edit";
+  initialClass: ClassRow;
+  defaultDate?: never;
+  /** Called after a successful update so the parent can close/refresh */
+  onUpdated?: () => void;
+  /** Whether to render the trigger button or be driven externally via open prop */
+  open?: boolean;
+  onClose?: () => void;
+};
+
+type Props = CreateProps | EditProps;
+
+export default function ClassForm(props: Props) {
+  const { coaches, wods } = props;
+  const isEdit = props.mode === "edit";
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+
+  // For edit mode, the modal may be controlled externally (ClassCard handles open state)
+  // For create mode, this component owns the open state
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open =
+    isEdit && "open" in props && props.open !== undefined
+      ? props.open
+      : internalOpen;
+
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const today = new Date().toISOString().slice(0, 10);
-  const [date, setDate] = useState(defaultDate ?? today);
-  const [time, setTime] = useState("07:00");
-  const [durationMin, setDurationMin] = useState("60");
-  const [capacity, setCapacity] = useState("16");
-  const [coachId, setCoachId] = useState("");
-  const [wodId, setWodId] = useState("");
+  // Derive initial values from initialClass or defaults
+  function getInitialDate(): string {
+    if (isEdit && props.initialClass) {
+      return props.initialClass.startsAt.toISOString().slice(0, 10);
+    }
+    return (
+      (props as CreateProps).defaultDate ??
+      new Date().toISOString().slice(0, 10)
+    );
+  }
+
+  function getInitialTime(): string {
+    if (isEdit && props.initialClass) {
+      const d = props.initialClass.startsAt;
+      return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    }
+    return "07:00";
+  }
+
+  const [date, setDate] = useState(getInitialDate);
+  const [time, setTime] = useState(getInitialTime);
+  const [durationMin, setDurationMin] = useState(
+    isEdit && props.initialClass
+      ? String(props.initialClass.durationMin)
+      : "60",
+  );
+  const [capacity, setCapacity] = useState(
+    isEdit && props.initialClass ? String(props.initialClass.capacity) : "16",
+  );
+  const [coachId, setCoachId] = useState(
+    isEdit && props.initialClass ? (props.initialClass.coach?.id ?? "") : "",
+  );
+  const [wodId, setWodId] = useState(
+    isEdit && props.initialClass ? (props.initialClass.wod?.id ?? "") : "",
+  );
+  // Recurrence only in create mode
   const [recFreq, setRecFreq] = useState("NONE");
   const [recCount, setRecCount] = useState("8");
 
   function reset() {
-    setDate(defaultDate ?? today);
-    setTime("07:00");
-    setDurationMin("60");
-    setCapacity("16");
-    setCoachId("");
-    setWodId("");
-    setRecFreq("NONE");
-    setRecCount("8");
+    if (isEdit && props.initialClass) {
+      setDate(props.initialClass.startsAt.toISOString().slice(0, 10));
+      const d = props.initialClass.startsAt;
+      setTime(
+        `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`,
+      );
+      setDurationMin(String(props.initialClass.durationMin));
+      setCapacity(String(props.initialClass.capacity));
+      setCoachId(props.initialClass.coach?.id ?? "");
+      setWodId(props.initialClass.wod?.id ?? "");
+    } else {
+      const defaultDate = (props as CreateProps).defaultDate;
+      setDate(defaultDate ?? new Date().toISOString().slice(0, 10));
+      setTime("07:00");
+      setDurationMin("60");
+      setCapacity("16");
+      setCoachId("");
+      setWodId("");
+      setRecFreq("NONE");
+      setRecCount("8");
+    }
     setError(null);
   }
 
   function close() {
     if (pending) return;
-    setOpen(false);
+    if (isEdit && props.onClose) {
+      props.onClose();
+    } else {
+      setInternalOpen(false);
+    }
     reset();
   }
 
@@ -68,39 +141,67 @@ export default function ClassForm({
       coachId,
       wodId,
       recurrence:
-        recFreq && recFreq !== "NONE"
+        !isEdit && recFreq && recFreq !== "NONE"
           ? { freq: recFreq, count: recCount || 8 }
           : { freq: "NONE" },
     };
 
     startTransition(async () => {
       try {
-        await createClass(data);
-        kToast.success("Clase creada");
-        reset();
-        setOpen(false);
-        router.refresh();
+        if (isEdit && props.initialClass) {
+          await updateClass(props.initialClass.id, data);
+          kToast.success("Clase actualizada");
+          props.onUpdated?.();
+          close();
+          router.refresh();
+        } else {
+          await createClass(data);
+          kToast.success("Clase creada");
+          reset();
+          setInternalOpen(false);
+          router.refresh();
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al crear clase");
+        setError(
+          err instanceof Error
+            ? err.message
+            : isEdit
+              ? "Error al actualizar clase"
+              : "Error al crear clase",
+        );
       }
     });
   }
 
+  const modalTitle = isEdit ? "Editar clase" : "Nueva clase";
+  const modalDescription = isEdit
+    ? "Modifica los datos de esta clase. Solo afecta esta instancia."
+    : "Programa una clase puntual o recurrente.";
+  const submitLabel = isEdit
+    ? pending
+      ? "Guardando…"
+      : "Guardar cambios"
+    : pending
+      ? "Creando…"
+      : "Crear clase";
+
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="k-btn-grad px-4 py-2 rounded-xl text-sm"
-      >
-        + Nueva clase
-      </button>
+      {!isEdit && (
+        <button
+          type="button"
+          onClick={() => setInternalOpen(true)}
+          className="k-btn-grad px-4 py-2 rounded-xl text-sm"
+        >
+          + Nueva clase
+        </button>
+      )}
 
       <KModal
         open={open}
         onClose={close}
-        title="Nueva clase"
-        description="Programá una clase puntual o recurrente."
+        title={modalTitle}
+        description={modalDescription}
         size="lg"
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -168,30 +269,46 @@ export default function ClassForm({
             ]}
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <FieldSelect
-              label="Recurrencia"
-              value={recFreq}
-              onChange={setRecFreq}
-              options={[
-                { value: "NONE", label: "Una sola vez" },
-                { value: "DAILY", label: "Diaria" },
-                { value: "WEEKLY", label: "Semanal" },
-              ]}
-            />
-            {recFreq !== "NONE" ? (
-              <FieldInput
-                label="Repeticiones"
-                type="number"
-                value={recCount}
-                onChange={setRecCount}
-                min={1}
-                max={52}
+          {!isEdit && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <FieldSelect
+                label="Recurrencia"
+                value={recFreq}
+                onChange={setRecFreq}
+                options={[
+                  { value: "NONE", label: "Una sola vez" },
+                  { value: "DAILY", label: "Diaria" },
+                  { value: "WEEKLY", label: "Semanal" },
+                ]}
               />
-            ) : (
-              <div className="hidden sm:block" aria-hidden="true" />
-            )}
-          </div>
+              {recFreq !== "NONE" ? (
+                <FieldInput
+                  label="Repeticiones"
+                  type="number"
+                  value={recCount}
+                  onChange={setRecCount}
+                  min={1}
+                  max={52}
+                />
+              ) : (
+                <div className="hidden sm:block" aria-hidden="true" />
+              )}
+            </div>
+          )}
+
+          {isEdit && (
+            <p
+              className="text-xs px-3 py-2 rounded-lg"
+              style={{
+                color: "var(--k-t3)",
+                background: "var(--k-elevated)",
+                border: "1px solid var(--k-line)",
+              }}
+            >
+              Solo se edita esta clase. Las demás instancias de la recurrencia
+              no se ven afectadas.
+            </p>
+          )}
 
           {error ? (
             <p
@@ -224,7 +341,7 @@ export default function ClassForm({
               disabled={pending}
               className="k-btn-grad px-5 py-2.5 rounded-full font-bold text-sm disabled:opacity-50"
             >
-              {pending ? "Creando…" : "Crear clase"}
+              {submitLabel}
             </button>
           </div>
         </form>

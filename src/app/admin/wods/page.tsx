@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
-import { listWODs } from "@/server/actions/wods";
-import type { WODSummary } from "@/server/actions/wods";
+import { listWODsWithMovements } from "@/server/actions/wods";
+import type { WODSummaryWithMovements } from "@/server/actions/wods";
 import { listMovements } from "@/server/actions/movements";
 import SmartWODForm from "@/components/wod-form/SmartWODForm";
 import MovementForm from "@/components/MovementForm";
@@ -19,7 +19,7 @@ type MovementRow = {
 };
 
 export default async function WODsPage() {
-  let wods: WODSummary[] = [];
+  let wods: WODSummaryWithMovements[] = [];
   let movements: MovementRow[] = [];
   let disciplineSlug: string | null = null;
 
@@ -27,7 +27,7 @@ export default async function WODsPage() {
     const session = await getServerSession(authOptions);
     const tenantId = session?.user?.tenantId;
     const [w, m, disc] = await Promise.all([
-      listWODs(),
+      listWODsWithMovements(),
       listMovements(),
       tenantId ? getCachedBoxDiscipline(tenantId) : Promise.resolve(null),
     ]);
@@ -80,7 +80,7 @@ export default async function WODsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {wods.map((w) => (
-                <WODHeroCard key={w.id} w={w} />
+                <WODHeroCard key={w.id} w={w} movements={movements} />
               ))}
             </div>
           )}

@@ -1,17 +1,22 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { useMemo } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { DataTable } from "@/components/data/DataTable";
 import { Pagination } from "@/components/data/Pagination";
 import { ExportCSVButton } from "@/components/data/ExportCSVButton";
 import { EmptyState } from "@/components/data/EmptyState";
 import {
   listMembershipsPaged,
+  pauseMembership,
+  resumeMembership,
+  cancelMembership,
   type MembershipRow,
 } from "@/server/actions/memberships";
 import type { CSVColumn } from "@/lib/csv";
 import { useUrlPatch } from "@/lib/url-state";
+import { kToast } from "@/lib/toast";
+import { useConfirm } from "@/lib/use-confirm";
 
 const fmtDate = (d: Date | null) =>
   d ? d.toLocaleDateString("es-MX", { day: "2-digit", month: "short" }) : "∞";
@@ -44,6 +49,99 @@ type Props = {
     planId?: string;
   };
 };
+
+function MembershipActions({ membership }: { membership: MembershipRow }) {
+  const [isPending, startTransition] = useTransition();
+  // Once a cancel falls into the approval queue, lock the row so the owner
+  // can't fire duplicate PermissionGrantRequests by re-clicking.
+  const [requested, setRequested] = useState(false);
+  const confirm = useConfirm();
+
+  function handlePause() {
+    startTransition(async () => {
+      try {
+        await pauseMembership(membership.id);
+        kToast.info("Membresía pausada");
+      } catch (err) {
+        kToast.error(err instanceof Error ? err.message : "Error al pausar");
+      }
+    });
+  }
+
+  function handleResume() {
+    startTransition(async () => {
+      try {
+        await resumeMembership(membership.id);
+        kToast.success("Membresía reactivada");
+      } catch (err) {
+        kToast.error(err instanceof Error ? err.message : "Error al reactivar");
+      }
+    });
+  }
+
+  async function handleCancel() {
+    const ok = await confirm({
+      title: "¿Cancelar esta membresía?",
+      message: `Se cancelará la membresía de ${membership.athleteName}. Esta acción no se puede deshacer.`,
+      confirmLabel: "Sí, cancelar",
+      tone: "danger",
+    });
+    if (!ok) return;
+    startTransition(async () => {
+      try {
+        const result = await cancelMembership(membership.id);
+        if ("status" in result && result.status === "pending_approval") {
+          setRequested(true);
+          kToast.warning("Solicitud enviada — requiere aprobación del owner");
+        } else {
+          kToast.info("Membresía cancelada");
+        }
+      } catch (err) {
+        kToast.error(err instanceof Error ? err.message : "Error al cancelar");
+      }
+    });
+  }
+
+  const canAct =
+    membership.status === "ACTIVE" || membership.status === "PAUSED";
+  if (!canAct) return null;
+
+  return (
+    <div className="flex items-center gap-1">
+      {membership.status === "ACTIVE" && (
+        <button
+          onClick={handlePause}
+          disabled={isPending}
+          className="text-xs px-2 py-1 rounded-md disabled:opacity-50 transition-colors"
+          style={{ color: "var(--k-t2)" }}
+          title="Pausar membresía"
+        >
+          {isPending ? "…" : "Pausar"}
+        </button>
+      )}
+      {membership.status === "PAUSED" && (
+        <button
+          onClick={handleResume}
+          disabled={isPending}
+          className="text-xs px-2 py-1 rounded-md disabled:opacity-50 transition-colors"
+          style={{ color: "var(--k-accent)" }}
+          title="Reanudar membresía"
+        >
+          {isPending ? "…" : "Reanudar"}
+        </button>
+      )}
+      <button
+        onClick={handleCancel}
+        disabled={isPending || requested}
+        className="text-xs px-2 py-1 rounded-md disabled:opacity-50 transition-colors"
+        style={{ color: "var(--k-danger)" }}
+        title="Cancelar membresía"
+      >
+        {requested ? "Solicitado" : isPending ? "…" : "Cancelar"}
+      </button>
+    </div>
+  );
+}
 
 export function MembershipsTable({
   rows,
@@ -105,6 +203,11 @@ export function MembershipsTable({
         cell: ({ row }) => (
           <span className="font-mono">{fmtMoney(row.original.amountPaid)}</span>
         ),
+      },
+      {
+        id: "actions",
+        header: "",
+        cell: ({ row }) => <MembershipActions membership={row.original} />,
       },
     ],
     [],
