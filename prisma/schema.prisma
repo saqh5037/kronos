@@ -10,6 +10,19 @@ datasource db {
 
 // ─── TENANT ──────────────────────────────────────────────────────────────────
 
+// ─── AI PROGRAMMING CYCLE ────────────────────────────────────────────────────
+
+enum ProgrammingCycleStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ProgrammingCycleSource {
+  AI
+  MANUAL
+}
+
 enum SubscriptionStatus {
   TRIAL
   ACTIVE
@@ -100,9 +113,34 @@ model Box {
   staffInvitations        StaffInvitation[]
   saasSubscriptions       SaasSubscription[]
   saasInvoices            SaasInvoice[]
+  programmingCycles       ProgrammingCycle[]
 
   @@index([disciplineId])
   @@index([city, disciplineId])
+}
+
+model ProgrammingCycle {
+  id          String                 @id @default(cuid())
+  tenantId    String
+  name        String
+  status      ProgrammingCycleStatus @default(DRAFT)
+  source      ProgrammingCycleSource @default(AI)
+  startDate   DateTime               @db.Date
+  endDate     DateTime               @db.Date
+  overview    String?
+  draftPlan   Json?
+  params      Json?
+  publishedAt DateTime?
+  createdById String?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  box     Box     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  classes Class[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, startDate])
 }
 
 // ─── USERS / AUTH ─────────────────────────────────────────────────────────────
@@ -348,16 +386,19 @@ model Class {
   recurrenceRule String?
   isActive       Boolean   @default(true)
   createdAt      DateTime  @default(now())
+  cycleId        String?
 
-  box               Box                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  box               Box               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   coach             User?              @relation(fields: [coachId], references: [id])
   wod               WOD?               @relation(fields: [wodId], references: [id])
+  cycle             ProgrammingCycle?  @relation(fields: [cycleId], references: [id], onDelete: SetNull)
   bookings          Booking[]
   whiteboardUploads WhiteboardUpload[]
 
   @@index([tenantId])
   @@index([tenantId, startsAt])
   @@index([tenantId, startsAt, isActive])
+  @@index([tenantId, cycleId])
 }
 
 model Booking {
@@ -444,8 +485,13 @@ model WOD {
   // como evolución de WOD con payload validado por strategy.
   disciplineId String?
 
-  box        Box           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  discipline Discipline?   @relation(fields: [disciplineId], references: [id])
+  // ─── AI Programming Cycle ────────────────────────────────────────────────────
+  aiGenerated  Boolean @default(false)
+  cycleId      String?
+  energySystem String?
+
+  box        Box              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  discipline Discipline?      @relation(fields: [disciplineId], references: [id])
   classes    Class[]
   scores     Score[]
   movements  WODMovement[]
@@ -453,6 +499,7 @@ model WOD {
   @@index([tenantId])
   @@index([tenantId, ownerAthleteId, scheduledFor])
   @@index([disciplineId])
+  @@index([tenantId, aiGenerated])
 }
 
 model Movement {
