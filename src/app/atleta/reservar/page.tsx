@@ -1,12 +1,10 @@
+import { Suspense } from "react";
 import Link from "next/link";
-import {
-  listAvailableClasses,
-  type AvailableClass,
-} from "@/server/actions/bookings";
-import { ClassesList } from "./_components/ClassesList";
 import { Icon } from "@/components/kronos/v3/icons";
 import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
 import { reservarTour } from "@/components/tour/tours/reservar";
+import { DayContentSection } from "./_components/sections/DayContentSection";
+import { DayContentSkeleton } from "./skeletons";
 
 export const metadata = { title: "Kronos — Reservar" };
 
@@ -50,33 +48,12 @@ export default async function ReservarPage({
   today.setHours(0, 0, 0, 0);
   const selected = parseDate(sp.date);
 
-  // 7 days starting today
+  // 7 days starting today — pure computation, no fetch
   const days: Date[] = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     return d;
   });
-
-  // Fetch classes for selected day
-  let dayClasses: AvailableClass[] = [];
-  let weekClasses: AvailableClass[] = [];
-  try {
-    const all = await listAvailableClasses(7, today);
-    weekClasses = all;
-    dayClasses = all.filter((c) => sameDay(c.startsAt, selected));
-  } catch {
-    // sin sesión
-  }
-
-  const hasReservedOn = (d: Date) =>
-    weekClasses.some(
-      (c) => sameDay(c.startsAt, d) && c.myBookingStatus === "BOOKED",
-    );
-
-  const dayLabel = new Intl.DateTimeFormat("es-MX", {
-    weekday: "long",
-    day: "numeric",
-  }).format(selected);
 
   return (
     <div
@@ -88,7 +65,7 @@ export default async function ReservarPage({
         paddingBottom: 96,
       }}
     >
-      {/* Header */}
+      {/* Header — paints immediately */}
       <div
         style={{
           height: 48,
@@ -132,7 +109,7 @@ export default async function ReservarPage({
         <TourTriggerButton tourId={reservarTour.id} />
       </div>
 
-      {/* Week strip */}
+      {/* Week strip — paints immediately (pure Date math, no fetch) */}
       <div
         data-tour="reservar.week-strip"
         style={{
@@ -146,7 +123,6 @@ export default async function ReservarPage({
         {days.map((d) => {
           const isSel = sameDay(d, selected);
           const isToday = sameDay(d, today);
-          const reserved = hasReservedOn(d);
           return (
             <Link
               key={d.toISOString()}
@@ -200,101 +176,18 @@ export default async function ReservarPage({
               >
                 {d.getDate()}
               </span>
-              {reserved && (
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: 8,
-                    width: 4,
-                    height: 4,
-                    borderRadius: "50%",
-                    background: "var(--k-t1)",
-                  }}
-                />
-              )}
             </Link>
           );
         })}
       </div>
 
-      {/* Eyebrow del día */}
-      <div style={{ padding: "0 20px", marginTop: 16 }}>
-        <span
-          style={{
-            fontFamily: "var(--k-font-display)",
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: "0.18em",
-            color: "var(--k-t3)",
-            textTransform: "uppercase",
-          }}
-        >
-          {dayLabel} · {dayClasses.length} CLASE
-          {dayClasses.length === 1 ? "" : "S"}
-        </span>
-      </div>
-
-      {/* Lista de clases del día */}
-      <div style={{ marginTop: 14 }}>
-        {dayClasses.length === 0 ? (
-          <div
-            style={{
-              margin: "12px 20px 0",
-              padding: "48px 24px",
-              background: "var(--k-surface)",
-              border: "1px dashed var(--k-line)",
-              borderRadius: 16,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 18,
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 14,
-                background: "var(--k-elevated)",
-                border: "1px solid var(--k-line)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--k-t3)",
-              }}
-            >
-              <Icon.CalX width={28} height={28} />
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span
-                style={{
-                  fontFamily: "var(--k-font-body)",
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: "var(--k-t1)",
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                Sin clases programadas
-              </span>
-              <span
-                style={{
-                  fontFamily: "var(--k-font-display)",
-                  fontSize: 10,
-                  fontWeight: 500,
-                  color: "var(--k-t3)",
-                  letterSpacing: "0.14em",
-                }}
-              >
-                ELEGÍ OTRO DÍA EN LA SEMANA
-              </span>
-            </div>
-          </div>
-        ) : (
-          <ClassesList classes={dayClasses} usualHours={[]} />
-        )}
-      </div>
+      {/* Day content (eyebrow + class list) — streams in as fetch resolves */}
+      <Suspense fallback={<DayContentSkeleton />}>
+        <DayContentSection
+          selectedIso={selected.toISOString()}
+          todayIso={today.toISOString()}
+        />
+      </Suspense>
     </div>
   );
 }
