@@ -22,7 +22,7 @@ export default function PerfilError({
           Algo se rompió cargando tu perfil
         </h1>
         <p className="text-sm text-[var(--k-t2)]">
-          Probá de nuevo en un momento. Si persiste, contactá a tu coach.
+          Intenta de nuevo en un momento. Si persiste, contacta a tu coach.
         </p>
         <div className="flex gap-2 justify-center pt-2">
           <button onClick={reset} className="k-btn-grad">
