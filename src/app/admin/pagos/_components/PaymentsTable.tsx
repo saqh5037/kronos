@@ -1,17 +1,23 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { useMemo } from "react";
+import { useMemo, useTransition } from "react";
 import { DataTable } from "@/components/data/DataTable";
 import { Pagination } from "@/components/data/Pagination";
 import { ExportCSVButton } from "@/components/data/ExportCSVButton";
 import { EmptyState } from "@/components/data/EmptyState";
-import { listPaymentsPaged, type PaymentRow } from "@/server/actions/payments";
+import {
+  listPaymentsPaged,
+  voidPayment,
+  type PaymentRow,
+} from "@/server/actions/payments";
 import type { PaymentGateway, PaymentStatus } from "@/lib/validations/payment";
 import type { CSVColumn } from "@/lib/csv";
 import { useUrlPatch } from "@/lib/url-state";
 import { useSearchParams } from "next/navigation";
 import { GatewayChip, StatusChip } from "./chips";
+import { kToast } from "@/lib/toast";
+import { useConfirm } from "@/lib/use-confirm";
 
 type Props = {
   rows: PaymentRow[];
@@ -42,6 +48,49 @@ const csvColumns: CSVColumn<PaymentRow>[] = [
   { key: "amount", header: "Monto", value: (r) => r.amount },
   { key: "currency", header: "Moneda", value: (r) => r.currency },
 ];
+
+function VoidPaymentButton({ payment }: { payment: PaymentRow }) {
+  const [isPending, startTransition] = useTransition();
+  const confirm = useConfirm();
+
+  // Only voidable when PAID or PENDING
+  const canVoid = payment.status === "PAID" || payment.status === "PENDING";
+  if (!canVoid) return null;
+
+  async function handleVoid() {
+    const ok = await confirm({
+      title: "¿Anular este pago?",
+      message: `Se marcará como anulado el pago de ${fmtMoney(payment.amount)} de ${payment.athleteName ?? "—"}. Esta acción puede requerir aprobación.`,
+      confirmLabel: "Sí, anular",
+      tone: "danger",
+    });
+    if (!ok) return;
+    startTransition(async () => {
+      try {
+        const result = await voidPayment(payment.id);
+        if ("status" in result && result.status === "pending_approval") {
+          kToast.warning("Solicitud enviada — requiere aprobación del owner");
+        } else {
+          kToast.info("Pago anulado");
+        }
+      } catch (err) {
+        kToast.error(err instanceof Error ? err.message : "Error al anular");
+      }
+    });
+  }
+
+  return (
+    <button
+      onClick={handleVoid}
+      disabled={isPending}
+      className="text-xs px-2 py-1 rounded-md disabled:opacity-50 transition-colors"
+      style={{ color: "var(--k-danger)" }}
+      title="Anular pago"
+    >
+      {isPending ? "…" : "Anular"}
+    </button>
+  );
+}
 
 export function PaymentsTable({
   rows,
@@ -106,6 +155,11 @@ export function PaymentsTable({
             </span>
           );
         },
+      },
+      {
+        id: "actions",
+        header: "",
+        cell: ({ row }) => <VoidPaymentButton payment={row.original} />,
       },
     ],
     [],

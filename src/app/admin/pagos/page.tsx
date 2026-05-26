@@ -26,6 +26,7 @@ import { RevenueChart } from "./_components/RevenueChart";
 import { PlanDonut } from "./_components/PlanDonut";
 import { PaymentsTable } from "./_components/PaymentsTable";
 import { MembershipsTable } from "./_components/MembershipsTable";
+import { PlanCard } from "./_components/PlanCard";
 
 export const metadata = { title: "Kronos — Pagos" };
 
@@ -114,7 +115,7 @@ export default async function PagosPage({
       stats,
       athletes,
     ] = await Promise.all([
-      listPlans(),
+      listPlans({ includeArchived: true }),
       listPaymentsPaged({
         dateFrom: range.from,
         dateTo: range.to,
@@ -352,19 +353,25 @@ export default async function PagosPage({
       {/* Planes */}
       <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="k-eyebrow">Planes ({activePlans.length})</p>
+          <p className="k-eyebrow">
+            Planes ({activePlans.length} activo
+            {activePlans.length === 1 ? "" : "s"}
+            {plans.length > activePlans.length
+              ? ` · ${plans.length - activePlans.length} archivado${plans.length - activePlans.length === 1 ? "" : "s"}`
+              : ""}
+            )
+          </p>
           <PlanForm />
         </div>
-        {activePlans.length === 0 ? (
+        {plans.length === 0 ? (
           <div className="k-card p-6 text-center">
             <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-              No hay planes activos. Crea el primero para empezar a asignar
-              memberships.
+              No hay planes. Crea el primero para empezar a asignar memberships.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {activePlans.map((p) => (
+            {plans.map((p) => (
               <PlanCard key={p.id} p={p} />
             ))}
           </div>
@@ -409,50 +416,6 @@ function KpiCard({
       {subtitle ? (
         <p className="mt-1 text-xs text-[var(--k-t3)]">{subtitle}</p>
       ) : null}
-    </div>
-  );
-}
-
-function PlanCard({ p }: { p: PlanRow }) {
-  return (
-    <div className="k-card flex flex-col p-4">
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="font-display text-base font-bold">{p.name}</h3>
-        <span className="k-chip k-chip-strain text-[10px]">{p.type}</span>
-      </div>
-      <p
-        className="font-display mt-3 text-3xl font-bold"
-        style={{
-          background: "var(--k-accent)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
-      >
-        ${p.price.toLocaleString("es-MX")}
-        <span
-          className="ml-1 font-mono text-xs font-normal"
-          style={{ color: "var(--k-t3)" }}
-        >
-          {p.currency}
-        </span>
-      </p>
-      <div
-        className="mt-2 flex items-center gap-3 text-xs"
-        style={{ color: "var(--k-t3)" }}
-      >
-        {p.classesPerMonth && <span>{p.classesPerMonth} clases/mes</span>}
-        {p.durationDays && <span>{p.durationDays} días</span>}
-      </div>
-      <div
-        className="mt-3 flex items-center justify-between border-t pt-3 text-xs"
-        style={{ borderColor: "var(--k-line)", color: "var(--k-t2)" }}
-      >
-        <span>
-          {p.activeMembershipCount} membership
-          {p.activeMembershipCount === 1 ? "" : "s"} activa
-          {p.activeMembershipCount === 1 ? "" : "s"}
-        </span>
-      </div>
     </div>
   );
 }
