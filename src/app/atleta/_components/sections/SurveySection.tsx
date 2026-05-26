@@ -9,12 +9,15 @@ import { getActiveSurvey, hasRespondedToday } from "@/server/actions/surveys";
 import QuickSurvey from "@/components/atleta/QuickSurvey";
 
 export async function SurveySection() {
-  const [survey, alreadyResponded] = await Promise.all([
-    getActiveSurvey("READINESS"),
-    hasRespondedToday("READINESS"),
-  ]);
-
-  if (!survey || alreadyResponded) return null;
-
-  return <QuickSurvey survey={survey} />;
+  try {
+    const [survey, alreadyResponded] = await Promise.all([
+      getActiveSurvey("READINESS"),
+      hasRespondedToday("READINESS"),
+    ]);
+    if (!survey || alreadyResponded) return null;
+    return <QuickSurvey survey={survey} />;
+  } catch {
+    // Survey is optional — never let it break the page.
+    return null;
+  }
 }

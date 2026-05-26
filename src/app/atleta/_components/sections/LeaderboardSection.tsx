@@ -15,7 +15,14 @@ import { formatScore } from "@/lib/scores";
 import type { ScoreType } from "@/lib/validations/wod";
 
 export async function LeaderboardSection() {
-  const { wod, scores } = await getTodayWODWithScoresCached();
+  let wod: Awaited<ReturnType<typeof getTodayWODWithScoresCached>>["wod"];
+  let scores: Awaited<ReturnType<typeof getTodayWODWithScoresCached>>["scores"];
+  try {
+    ({ wod, scores } = await getTodayWODWithScoresCached());
+  } catch {
+    // Optional section — skip on failure rather than blanking the page.
+    return null;
+  }
   const topScores = scores.slice(0, 4);
 
   if (!wod || topScores.length === 0) return null;

@@ -10,6 +10,11 @@ import { getDailyGreeting } from "@/server/actions/ai";
 import PersonalizedGreeting from "@/components/atleta/PersonalizedGreeting";
 
 export async function GreetingSection() {
-  const greeting = await getDailyGreeting();
-  return <PersonalizedGreeting greeting={greeting} />;
+  // Gemini/network can fail — degrade silently so the rest of the page is unaffected.
+  try {
+    const greeting = await getDailyGreeting();
+    return <PersonalizedGreeting greeting={greeting} />;
+  } catch {
+    return null;
+  }
 }
