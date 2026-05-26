@@ -1,0 +1,53 @@
+{
+  "__mock_source": "getPlatformStats() cross-tenant — boxes recién creados sin owner ni plan",
+  "__mock_shape": "PlatformBoxRow + { planName: string | null }",
+  "__mock_state": "neutral",
+  "boxes": [
+    {
+      "id": "clx0099nuevo1",
+      "name": "Box Sin Nombre Aún",
+      "slug": "box-sin-nombre-1",
+      "city": null,
+      "country": "MX",
+      "subscriptionStatus": "TRIAL",
+      "ownerEmail": null,
+      "athleteCount": 0,
+      "userCount": 0,
+      "planName": null,
+      "createdAt": "2025-05-24T18:00:00.000Z"
+    },
+    {
+      "id": "clx0099nuevo2",
+      "name": "Onboarding Incompleto CF",
+      "slug": "onboarding-cf-2",
+      "city": null,
+      "country": "MX",
+      "subscriptionStatus": "TRIAL",
+      "ownerEmail": null,
+      "athleteCount": 1,
+      "userCount": 1,
+      "planName": null,
+      "createdAt": "2025-05-25T08:30:00.000Z"
+    },
+    {
+      "id": "clx0099nuevo3",
+      "name": "Prueba Demo Box",
+      "slug": "prueba-demo-box",
+      "city": "Ciudad de México",
+      "country": "MX",
+      "subscriptionStatus": "TRIAL",
+      "ownerEmail": null,
+      "athleteCount": 0,
+      "userCount": 1,
+      "planName": null,
+      "createdAt": "2025-05-25T10:00:00.000Z"
+    }
+  ],
+  "total": 3,
+  "kpis": {
+    "totalBoxes": 3,
+    "active": 0,
+    "trial": 3,
+    "expired": 0
+  }
+}
