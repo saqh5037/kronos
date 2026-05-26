@@ -5,10 +5,8 @@
  * Fetches listAvailableClasses once; used by only ONE section, so no cache needed.
  */
 
-import {
-  listAvailableClasses,
-  type AvailableClass,
-} from "@/server/actions/bookings";
+import { type AvailableClass } from "@/server/actions/bookings";
+import { listWeekClassesCached } from "../request-cache";
 import { ClassesList } from "../ClassesList";
 import { Icon } from "@/components/kronos/v3/icons";
 
@@ -28,11 +26,10 @@ export async function DayContentSection({
   todayIso: string;
 }) {
   const selected = new Date(selectedIso);
-  const today = new Date(todayIso);
 
   let dayClasses: AvailableClass[] = [];
   try {
-    const all = await listAvailableClasses(7, today);
+    const all = await listWeekClassesCached(todayIso);
     dayClasses = all.filter((c) => sameDay(c.startsAt, selected));
   } catch {
     // no session
