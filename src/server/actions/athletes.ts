@@ -291,7 +291,8 @@ export type AthleteDetail = {
     createdAt: Date;
   }[];
   nextClass: {
-    id: string;
+    bookingId: string;
+    classId: string;
     startsAt: Date;
     wodName: string | null;
   } | null;
@@ -436,7 +437,8 @@ export async function getAthleteDetail(
     })),
     nextClass: nextBooking
       ? {
-          id: nextBooking.class.id,
+          bookingId: nextBooking.id,
+          classId: nextBooking.class.id,
           startsAt: nextBooking.class.startsAt,
           wodName: nextBooking.class.wod?.name ?? null,
         }

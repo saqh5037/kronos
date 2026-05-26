@@ -1,0 +1,7 @@
+{
+  "__mock_source": "error path de getPlatformStats() / listAllBoxesCrossTenant()",
+  "__mock_shape": "{ error: string, message: string }",
+  "__mock_state": "negative",
+  "error": "INTERNAL_ERROR",
+  "message": "No se pudo cargar la lista de boxes. Intenta de nuevo."
+}

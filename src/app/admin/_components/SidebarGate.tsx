@@ -4,8 +4,8 @@ import { usePathname } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
 
 /**
- * Renderiza el AdminSidebar legacy SALVO en `/admin` (que ya tiene su propia
- * sidebar v3 dentro del componente AdminDashboardV3).
+ * Renders AdminSidebar except on exact `/admin` (dashboard v3 brings its own).
+ * Detects super-admin routes and switches the sidebar to "super" mode.
  */
 export function SidebarGate({
   sensitiveCount,
@@ -15,7 +15,11 @@ export function SidebarGate({
   role: string | undefined;
 }) {
   const pathname = usePathname();
-  // Exclude exact `/admin` (dashboard v3 ya trae sidebar)
+  // Exclude exact `/admin` (dashboard v3 already includes sidebar)
   if (pathname === "/admin") return null;
-  return <AdminSidebar sensitiveCount={sensitiveCount} role={role} />;
+
+  const mode = pathname.startsWith("/admin/super") ? "super" : "box";
+  return (
+    <AdminSidebar sensitiveCount={sensitiveCount} role={role} mode={mode} />
+  );
 }

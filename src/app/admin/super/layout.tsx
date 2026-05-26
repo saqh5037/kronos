@@ -19,5 +19,5 @@ export default async function SuperAdminLayout({
   if (!isSuperAdmin(session?.user?.email)) {
     notFound();
   }
-  return <>{children}</>;
+  return <div data-mode="super">{children}</div>;
 }
