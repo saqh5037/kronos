@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, StreakType } from "@prisma/client";
 
 let _client: PrismaClient | null = null;
 
@@ -202,5 +202,45 @@ export async function clearScoresAndPR(
   });
   await db().pR.deleteMany({
     where: { athleteId: athlete.id, movementId },
+  });
+}
+
+/**
+ * Mark the demo athlete's onboarding as complete so /atleta/* renders the real
+ * surface. Without this the layout redirects to /atleta/onboarding and the home
+ * (streak hero, tour anchors) never mounts.
+ */
+export async function ensureDemoAthleteOnboarded(): Promise<void> {
+  const athlete = await getDemoAthlete();
+  await db().athlete.update({
+    where: { id: athlete.id },
+    data: { onboardingCompletedAt: new Date() },
+  });
+}
+
+/**
+ * Set the demo athlete's ATTENDANCE streak to a known count + lastEventAt so
+ * the home hero is deterministic. `lastEventAt` controls whether the read-time
+ * gate (`isStreakCurrent`) keeps the streak alive: today/yesterday → shown,
+ * 2+ days ago → gated to 0.
+ */
+export async function setDemoAthleteAttendanceStreak(
+  count: number,
+  lastEventAt: Date | null,
+): Promise<void> {
+  const athlete = await getDemoAthlete();
+  const tenantId = await getSeedBoxId();
+  await db().streak.upsert({
+    where: {
+      athleteId_type: { athleteId: athlete.id, type: StreakType.ATTENDANCE },
+    },
+    update: { count, lastEventAt },
+    create: {
+      tenantId,
+      athleteId: athlete.id,
+      type: StreakType.ATTENDANCE,
+      count,
+      lastEventAt,
+    },
   });
 }

@@ -22,7 +22,9 @@ export async function loginAs(page: Page, role: Role): Promise<void> {
   await page.locator('input[placeholder="email"]').fill(user.email);
   await page.locator('input[placeholder="password"]').fill(DEV_PASSWORD);
   await Promise.all([
-    page.waitForURL(/\/(admin|atleta)/, { timeout: 10_000 }),
+    // Generous timeout: the first navigation after login may hit a cold Next
+    // dev compile of the destination route, which can exceed 10s.
+    page.waitForURL(/\/(admin|atleta)/, { timeout: 30_000 }),
     page.getByRole("button", { name: /Entrar \(dev\)/ }).click(),
   ]);
 }
