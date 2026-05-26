@@ -15,6 +15,9 @@ import { type ListOpts, type ListResult, normalizePagination } from "./types";
 import type { AthleteStatus } from "@prisma/client";
 import { eachDayInRange, dayKey } from "@/lib/dates";
 import { subDays, startOfDay } from "date-fns";
+import { buildAthleteOrderBy } from "@/lib/athlete-helpers";
+
+export { buildAthleteOrderBy };
 
 export async function listAthletes() {
   const session = await getServerSession(authOptions);
@@ -92,12 +95,7 @@ export async function listAthletesPaged(
   const sortBy = opts?.sortBy ?? "createdAt";
   const sortDir = opts?.sortDir ?? "desc";
 
-  const orderBy =
-    sortBy === "name"
-      ? [{ firstName: sortDir }, { lastName: sortDir }]
-      : sortBy === "createdAt"
-        ? { createdAt: sortDir }
-        : { createdAt: sortDir };
+  const orderBy = buildAthleteOrderBy(sortBy, sortDir);
 
   const [total, athletes] = await Promise.all([
     db.athlete.count({ where }),
@@ -510,4 +508,40 @@ export async function createAthlete(data: unknown) {
   });
   revalidatePath("/admin/atletas");
   return athlete;
+}
+
+/**
+ * Updates an athlete's profile fields.
+ * Email lives on the linked User, not on Athlete, so we do NOT update it here
+ * (changing auth email requires a separate flow).
+ * Ownership is enforced by withTenant scoping the update.
+ */
+export async function updateAthleteProfile(
+  athleteId: string,
+  data: unknown,
+): Promise<{ ok: true }> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+
+  const parsed = athleteSchema.parse(data);
+  const db = withTenant(session.user.tenantId);
+
+  // withTenant injects tenantId into the WHERE, guarding cross-tenant edits
+  await db.athlete.update({
+    where: { id: athleteId },
+    data: {
+      firstName: parsed.firstName,
+      lastName: parsed.lastName,
+      phone: parsed.phone,
+      dob: parsed.dob,
+      healthHistory: parsed.healthHistory,
+      emergencyContact: parsed.emergencyContact,
+      notes: parsed.notes,
+      tags: parsed.tags,
+      status: parsed.status,
+    },
+  });
+
+  revalidatePath("/admin/atletas");
+  return { ok: true };
 }
