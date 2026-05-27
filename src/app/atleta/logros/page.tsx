@@ -1,10 +1,11 @@
-import Link from "next/link";
-import type { Route } from "next";
 import type { Metadata } from "next";
 import {
   listBadgesWithProgress,
   type BadgeDetail,
 } from "@/server/actions/badges";
+import { EmptyStateCTA } from "@/components/kronos/EmptyStateCTA";
+import Link from "next/link";
+import type { Route } from "next";
 
 export const metadata: Metadata = { title: "Logros · Kronos" };
 export const dynamic = "force-dynamic";
@@ -61,19 +62,14 @@ export default async function TrophyRoomPage() {
 
       {total === 0 && (
         <div className="px-4">
-          <div
-            className="k-card"
-            style={{
-              padding: 24,
-              textAlign: "center",
-              color: "var(--k-t2)",
-              fontFamily: "var(--k-font-body)",
-              fontSize: 14,
-            }}
-          >
-            Tu box todavía no tiene logros configurados. Pedile al coach que
-            agregue badges para empezar a coleccionar.
-          </div>
+          <EmptyStateCTA
+            title="Aún no hay logros disponibles"
+            description="Los logros se desbloquean cuando alcanzas metas de entrenamiento. Mientras tanto, sigue registrando tus WODs y PRs."
+            ctaLabel="Ver WOD de hoy"
+            ctaHref="/atleta/wod"
+            secondaryLabel="Explorar movimientos"
+            secondaryHref="/atleta/movimientos"
+          />
         </div>
       )}
 

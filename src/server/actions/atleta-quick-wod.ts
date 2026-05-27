@@ -64,7 +64,12 @@ export type QuickWodResult =
   | { ok: true; wodId: string; scoreId: string; pr: QuickWodPR }
   | {
       ok: false;
-      error: "UNAUTH" | "NOT_PERSONAL" | "VALIDATION" | "NO_ATHLETE";
+      error:
+        | "UNAUTH"
+        | "NOT_PERSONAL"
+        | "VALIDATION"
+        | "NO_ATHLETE"
+        | "SAVE_FAILED";
       message: string;
       fieldErrors?: Record<string, string>;
     };
@@ -147,75 +152,93 @@ export async function createMyQuickWod(
     canonicalValue = data.scoreValue + data.scoreReps / 1000;
   }
 
-  // PR detection: buscar el mejor score previo del atleta en WODs anteriores
-  // con el MISMO name (case-insensitive) + scoreType. Si el nuevo supera al
-  // mejor previo, es PR. Si no había scores previos, es "primer score".
-  const previousScores = await db.score.findMany({
-    where: {
-      athleteId: athlete.id,
-      wod: {
-        name: { equals: data.name, mode: "insensitive" },
-        scoreType: data.scoreType,
-      },
-    },
-    select: { value: true },
-  });
-
-  const previousBest = previousScores.reduce<number | null>((best, s) => {
-    const v = Number(s.value);
-    if (best === null) return v;
-    return isBetterScore(best, v, data.scoreType) ? v : best;
-  }, null);
-
-  const isFirst = previousBest === null;
-  const isPR = detectPR(previousBest, canonicalValue, data.scoreType) !== null;
-
-  const result = await prismaBase.$transaction(async (tx) => {
-    const wod = await tx.wOD.create({
-      data: {
-        tenantId,
-        name: data.name,
-        type: data.type,
-        scoreType: data.scoreType,
-        timeCap: data.timeCapSeconds ?? null,
-      },
-      select: { id: true },
-    });
-    const score = await tx.score.create({
-      data: {
-        tenantId,
-        wodId: wod.id,
+  // Toda la escritura va dentro de try/catch: un atleta sin Box (Box Personal,
+  // sin programación del coach) no debe poder tumbar la app con un 500 si una
+  // query falla. Ante cualquier error de DB devolvemos SAVE_FAILED estructurado
+  // — el form muestra un toast y nunca llega al error boundary (que disparaba
+  // el React #310 en producción).
+  try {
+    // PR detection: buscar el mejor score previo del atleta en WODs anteriores
+    // con el MISMO name (case-insensitive) + scoreType. Si el nuevo supera al
+    // mejor previo, es PR. Si no había scores previos, es "primer score".
+    const previousScores = await db.score.findMany({
+      where: {
         athleteId: athlete.id,
-        value: canonicalValue,
-        unit: unitForScoreType(data.scoreType),
-        scaling: data.scaling,
-        notes: data.notes ?? null,
+        wod: {
+          name: { equals: data.name, mode: "insensitive" },
+          scoreType: data.scoreType,
+        },
       },
-      select: { id: true },
+      select: { value: true },
     });
-    return { wodId: wod.id, scoreId: score.id };
-  });
 
-  await logAudit({
-    tenantId,
-    actorId: session.user.id,
-    action: "BULK_SCORES_FROM_WHITEBOARD",
-    targetType: "WOD",
-    targetId: result.wodId,
-    metadata: { source: "atleta-quick-wod", scoreId: result.scoreId },
-  });
+    const previousBest = previousScores.reduce<number | null>((best, s) => {
+      const v = Number(s.value);
+      if (best === null) return v;
+      return isBetterScore(best, v, data.scoreType) ? v : best;
+    }, null);
 
-  return {
-    ok: true,
-    wodId: result.wodId,
-    scoreId: result.scoreId,
-    pr: {
-      isPR,
-      isFirst,
-      previousBest,
-      newValue: canonicalValue,
-      scoreType: data.scoreType,
-      wodName: data.name,
-    },
-  };
+    const isFirst = previousBest === null;
+    // Un primer registro NO es un PR (no hay marca previa que vencer). Solo es
+    // PR cuando ya existía un score previo y el nuevo lo supera.
+    const isPR =
+      !isFirst &&
+      detectPR(previousBest, canonicalValue, data.scoreType) !== null;
+
+    const result = await prismaBase.$transaction(async (tx) => {
+      const wod = await tx.wOD.create({
+        data: {
+          tenantId,
+          name: data.name,
+          type: data.type,
+          scoreType: data.scoreType,
+          timeCap: data.timeCapSeconds ?? null,
+        },
+        select: { id: true },
+      });
+      const score = await tx.score.create({
+        data: {
+          tenantId,
+          wodId: wod.id,
+          athleteId: athlete.id,
+          value: canonicalValue,
+          unit: unitForScoreType(data.scoreType),
+          scaling: data.scaling,
+          notes: data.notes ?? null,
+        },
+        select: { id: true },
+      });
+      return { wodId: wod.id, scoreId: score.id };
+    });
+
+    await logAudit({
+      tenantId,
+      actorId: session.user.id,
+      action: "BULK_SCORES_FROM_WHITEBOARD",
+      targetType: "WOD",
+      targetId: result.wodId,
+      metadata: { source: "atleta-quick-wod", scoreId: result.scoreId },
+    });
+
+    return {
+      ok: true,
+      wodId: result.wodId,
+      scoreId: result.scoreId,
+      pr: {
+        isPR,
+        isFirst,
+        previousBest,
+        newValue: canonicalValue,
+        scoreType: data.scoreType,
+        wodName: data.name,
+      },
+    };
+  } catch (err) {
+    console.error("[atleta-quick-wod] save failed:", err);
+    return {
+      ok: false,
+      error: "SAVE_FAILED",
+      message: "No pudimos guardar tu WOD. Intenta de nuevo en un momento.",
+    };
+  }
 }

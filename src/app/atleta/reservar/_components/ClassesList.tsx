@@ -6,6 +6,7 @@ import type { AvailableClass } from "@/server/actions/bookings";
 import { BookButton } from "@/components/BookingActions";
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
 import { EmptyState } from "@/components/kronos/EmptyState";
+import { JargonTip } from "@/components/kronos/JargonTip";
 
 const formatTime = (d: Date) =>
   new Date(d).toLocaleTimeString("es-MX", {
@@ -259,8 +260,8 @@ export function ClassesList({
             }
             description={
               hasFilters
-                ? "Probá ampliar el rango de horas o cambiar el tipo."
-                : "Cambiá la fecha o vista para ver más opciones."
+                ? "Prueba ampliar el rango de horas o cambiar el tipo."
+                : "Cambia la fecha o vista para ver más opciones."
             }
             action={
               hasFilters ? (
@@ -451,26 +452,27 @@ function ClassRow({
               {c.durationMin} MIN
             </div>
             {c.wod?.type && (
-              <div
-                style={{
-                  marginTop: 2,
-                  width: 24,
-                  height: 24,
-                  borderRadius: 8,
-                  background: "var(--k-elevated)",
-                  border: "1px solid var(--k-line)",
-                  color: "var(--k-accent)",
-                  fontFamily: "var(--k-font-display)",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-                title={c.wod.type}
-              >
-                {typeInitial}
-              </div>
+              <JargonTip term={c.wod.type}>
+                <div
+                  style={{
+                    marginTop: 2,
+                    width: 24,
+                    height: 24,
+                    borderRadius: 8,
+                    background: "var(--k-elevated)",
+                    border: "1px solid var(--k-line)",
+                    color: "var(--k-accent)",
+                    fontFamily: "var(--k-font-display)",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {typeInitial}
+                </div>
+              </JargonTip>
             )}
           </div>
 
@@ -544,7 +546,11 @@ function ClassRow({
             >
               {c.coach?.name && <span>Coach {c.coach.name}</span>}
               {c.coach?.name && c.wod?.type && <span aria-hidden>·</span>}
-              {c.wod?.type && <span>{c.wod.type}</span>}
+              {c.wod?.type && (
+                <JargonTip term={c.wod.type}>
+                  <span>{c.wod.type}</span>
+                </JargonTip>
+              )}
               {past && (
                 <span
                   style={{

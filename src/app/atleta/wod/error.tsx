@@ -1,43 +1,38 @@
 "use client";
 
+import { useEffect } from "react";
+import Link from "next/link";
+
 export default function WodError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error("[atleta/wod] error:", error);
+  }, [error]);
+
   return (
-    <div
-      style={{
-        padding: "72px 20px",
-        textAlign: "center",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 16,
-      }}
-    >
-      <p
-        style={{
-          fontFamily: "var(--k-font-display)",
-          fontSize: 13,
-          fontWeight: 600,
-          letterSpacing: "0.04em",
-          color: "var(--k-t2)",
-          maxWidth: 280,
-          lineHeight: 1.5,
-        }}
-      >
-        No pudimos cargar el WOD de hoy. Revisa tu conexión e inténtalo de
-        nuevo.
-      </p>
-      <button
-        type="button"
-        onClick={reset}
-        className="k-btn-grad px-5 py-2.5 rounded-xl text-sm"
-      >
-        Reintentar
-      </button>
+    <div className="pb-28 px-4 pt-14">
+      <div className="k-card p-6 text-center space-y-4">
+        <div className="k-eyebrow text-[var(--k-danger)]">ERROR · WOD</div>
+        <h1 className="text-2xl font-display tracking-tight text-[var(--k-t1)]">
+          No pudimos cargar tu WOD
+        </h1>
+        <p className="text-sm text-[var(--k-t2)]">
+          Intenta de nuevo o vuelve a tu inicio. Tu progreso está a salvo.
+        </p>
+        <div className="flex gap-2 justify-center pt-2">
+          <button onClick={reset} className="k-btn-grad">
+            Reintentar
+          </button>
+          <Link href="/atleta" className="k-btn-ghost">
+            Ir al inicio
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

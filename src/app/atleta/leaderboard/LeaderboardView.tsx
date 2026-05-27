@@ -97,7 +97,7 @@ export default function LeaderboardPage({
   ];
 
   return (
-    <div className="pb-28 relative">
+    <div className="pb-28 relative" style={{ overflowX: "hidden" }}>
       {/* HERO V3 — limpio */}
       <header
         data-tour="leaderboard.header"
@@ -336,17 +336,21 @@ function LeaderboardRow({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 12,
-        padding: "12px 16px",
+        gap: 8,
+        padding: "10px 12px",
         borderBottom: isLast ? "none" : "1px solid var(--k-line)",
+        minWidth: 0,
+        overflow: "hidden",
       }}
     >
+      {/* Rank number — fixed width */}
       <div
         style={{
           fontFamily: "var(--k-font-display)",
-          fontSize: 18,
+          fontSize: 16,
           fontWeight: 700,
-          width: 20,
+          width: 18,
+          flexShrink: 0,
           textAlign: "center",
           color: rankColor,
           textShadow: isFirst ? "0 0 8px rgba(255,255,255,0.06)" : "none",
@@ -354,10 +358,12 @@ function LeaderboardRow({
       >
         {rank}
       </div>
+      {/* Avatar initial — fixed */}
       <div
         style={{
           width: 28,
           height: 28,
+          flexShrink: 0,
           borderRadius: 999,
           display: "flex",
           alignItems: "center",
@@ -365,16 +371,18 @@ function LeaderboardRow({
           fontFamily: "var(--k-font-display)",
           fontSize: 10,
           fontWeight: 700,
-          background: isTop3 ? "var(--k-elevated)" : "var(--k-elevated)",
-          border: `1px solid ${isTop3 ? "var(--k-line)" : "var(--k-line)"}`,
+          background: "var(--k-elevated)",
+          border: "1px solid var(--k-line)",
           color: isTop3 ? "var(--k-t2)" : "var(--k-t3)",
         }}
       >
         {entry.athleteName[0]}
       </div>
+      {/* Name — truncates, takes remaining space */}
       <div
         style={{
           flex: 1,
+          minWidth: 0,
           fontSize: 13,
           fontFamily: "var(--k-font-body)",
           fontWeight: 500,
@@ -386,29 +394,34 @@ function LeaderboardRow({
       >
         {entry.athleteName}
       </div>
+      {/* Scaling chip — fixed, hidden on very narrow screens via maxWidth trick */}
       <span
         style={{
           flexShrink: 0,
-          padding: "3px 8px",
+          padding: "3px 6px",
           borderRadius: 999,
           fontFamily: "var(--k-font-display)",
           fontSize: 9,
           fontWeight: 700,
           letterSpacing: "0.1em",
-          background:
-            entry.scaling === "RX" ? "var(--k-elevated)" : "var(--k-elevated)",
+          background: "var(--k-elevated)",
           color: entry.scaling === "RX" ? "var(--k-t2)" : "var(--k-t3)",
-          border: `1px solid ${entry.scaling === "RX" ? "var(--k-line)" : "var(--k-line)"}`,
+          border: "1px solid var(--k-line)",
+          maxWidth: 40,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
         }}
       >
         {entry.scaling}
       </span>
+      {/* Score — fixed, right-aligned */}
       <div
         style={{
           fontFamily: "var(--k-font-display)",
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: 700,
-          minWidth: 54,
+          flexShrink: 0,
           textAlign: "right",
           color: "var(--k-t1)",
         }}
@@ -434,17 +447,20 @@ function AttendanceRow({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 12,
-        padding: "12px 16px",
+        gap: 8,
+        padding: "10px 12px",
         borderBottom: isLast ? "none" : "1px solid var(--k-line)",
+        minWidth: 0,
+        overflow: "hidden",
       }}
     >
       <div
         style={{
           fontFamily: "var(--k-font-display)",
-          fontSize: 18,
+          fontSize: 16,
           fontWeight: 700,
-          width: 20,
+          width: 18,
+          flexShrink: 0,
           textAlign: "center",
           color: isTop3 ? "var(--k-t2)" : "var(--k-t3)",
         }}
@@ -455,6 +471,7 @@ function AttendanceRow({
         style={{
           width: 28,
           height: 28,
+          flexShrink: 0,
           borderRadius: 999,
           display: "flex",
           alignItems: "center",
@@ -462,8 +479,8 @@ function AttendanceRow({
           fontFamily: "var(--k-font-display)",
           fontSize: 10,
           fontWeight: 700,
-          background: isTop3 ? "var(--k-elevated)" : "var(--k-elevated)",
-          border: `1px solid ${isTop3 ? "var(--k-line)" : "var(--k-line)"}`,
+          background: "var(--k-elevated)",
+          border: "1px solid var(--k-line)",
           color: isTop3 ? "var(--k-t2)" : "var(--k-t3)",
         }}
       >
@@ -472,6 +489,7 @@ function AttendanceRow({
       <div
         style={{
           flex: 1,
+          minWidth: 0,
           fontSize: 13,
           fontFamily: "var(--k-font-body)",
           fontWeight: 500,
@@ -486,9 +504,9 @@ function AttendanceRow({
       <div
         style={{
           fontFamily: "var(--k-font-display)",
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: 700,
-          minWidth: 54,
+          flexShrink: 0,
           textAlign: "right",
           color: "var(--k-t1)",
         }}
@@ -498,14 +516,15 @@ function AttendanceRow({
       <div
         style={{
           fontFamily: "var(--k-font-display)",
-          fontSize: 10,
+          fontSize: 9,
           fontWeight: 700,
+          flexShrink: 0,
           letterSpacing: "0.1em",
           color: "var(--k-t3)",
           textTransform: "uppercase",
         }}
       >
-        clases
+        cls
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { defaultUnit, timeStringToSeconds } from "@/lib/validations/score";
 import type { ScoreType } from "@/lib/validations/wod";
 import { kToast } from "@/lib/toast";
 import { fireAchievementToast } from "@/components/atleta/AchievementToast";
+import { JargonTip } from "@/components/kronos/JargonTip";
 
 const ERROR_RED = "#ff5e5e";
 
@@ -151,13 +152,7 @@ export default function ScoreForm({
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: 12 }}
       >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr",
-            gap: 8,
-          }}
-        >
+        <div className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-[2fr_1fr]">
           <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <span style={labelStyle}>Resultado · {scoreType}</span>
             <input
@@ -199,7 +194,12 @@ export default function ScoreForm({
         </div>
 
         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={labelStyle}>Escalado</span>
+          <span style={{ ...labelStyle, display: "inline-flex", gap: 6 }}>
+            Escalado
+            <JargonTip term="RX" />
+            <JargonTip term="SCALED" />
+            <JargonTip term="RXPLUS" />
+          </span>
           <select
             name="scaling"
             defaultValue="RX"

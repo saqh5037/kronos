@@ -9,6 +9,7 @@ import {
 } from "@/server/actions/atleta-quick-wod";
 import { fireAchievementToast } from "@/components/atleta/AchievementToast";
 import { formatScore } from "@/lib/scores";
+import { JargonTip } from "@/components/kronos/JargonTip";
 
 type WodType = "FORTIME" | "AMRAP" | "EMOM" | "TABATA" | "STRENGTH" | "CUSTOM";
 type ScoreType = "TIME" | "REPS" | "WEIGHT" | "ROUNDS_REPS";
@@ -201,6 +202,7 @@ export default function QuickWodForm() {
         value={wodType}
         onChange={(v) => setWodType(v as WodType)}
         options={WOD_TYPES}
+        tips={{ FORTIME: "FORTIME", AMRAP: "AMRAP", EMOM: "EMOM" }}
       />
 
       <SegmentedField
@@ -273,6 +275,7 @@ export default function QuickWodForm() {
             value={scaling}
             onChange={(v) => setScaling(v as Scaling)}
             options={SCALINGS}
+            tips={{ RX: "RX", SCALED: "SCALED", RXPLUS: "RXPLUS" }}
           />
         </div>
       </div>
@@ -407,6 +410,8 @@ type SegmentedProps<T extends string> = {
   value: T;
   onChange: (v: T) => void;
   options: { value: T; label: string }[];
+  /** Maps option value → glossary term for an inline "¿qué significa?" legend. */
+  tips?: Partial<Record<T, string>>;
 };
 
 function SegmentedField<T extends string>({
@@ -414,7 +419,13 @@ function SegmentedField<T extends string>({
   value,
   onChange,
   options,
+  tips,
 }: SegmentedProps<T>) {
+  const tipEntries = tips
+    ? options
+        .filter((opt) => tips[opt.value])
+        .map((opt) => ({ label: opt.label, term: tips[opt.value] as string }))
+    : [];
   return (
     <div>
       <label
@@ -470,6 +481,33 @@ function SegmentedField<T extends string>({
           );
         })}
       </div>
+      {tipEntries.length > 0 ? (
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 12,
+            marginTop: 8,
+          }}
+        >
+          {tipEntries.map((t) => (
+            <span
+              key={t.term}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+                fontFamily: "var(--k-font-body)",
+                fontSize: 11,
+                color: "var(--k-t3)",
+              }}
+            >
+              {t.label}
+              <JargonTip term={t.term} />
+            </span>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useMemo, useRef, useState, useTransition } from "react";
 import { useConfirm } from "@/lib/use-confirm";
 import { formatSecondsToTime, parseTimeToSeconds } from "@/lib/event-score";
 import { submitEventResult } from "@/server/actions/events";
+import { dispatchToast } from "@/components/kronos/KronosToaster";
 
 type Props = {
   entryId: string;
@@ -48,6 +49,7 @@ export default function EventResultForm({
   );
   const [notes, setNotes] = useState(initialNotes ?? "");
   const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(alreadySubmitted);
   const [pending, startTransition] = useTransition();
 
   const parsedSeconds = useMemo(
@@ -93,8 +95,19 @@ export default function EventResultForm({
 
       try {
         await submitEventResult(fd);
-        router.refresh();
+        setSubmitted(true);
         if (fileRef.current) fileRef.current.value = "";
+        dispatchToast({
+          variant: "success",
+          title: alreadySubmitted
+            ? "Resultado actualizado"
+            : "Resultado guardado",
+          options: {
+            description: "Tu tiempo quedó registrado correctamente.",
+            duration: 4000,
+          },
+        });
+        router.refresh();
       } catch (err) {
         setError(
           err instanceof Error
@@ -229,7 +242,7 @@ export default function EventResultForm({
       >
         {pending
           ? "Guardando…"
-          : alreadySubmitted
+          : submitted
             ? "Actualizar resultado"
             : "Guardar resultado"}
       </button>

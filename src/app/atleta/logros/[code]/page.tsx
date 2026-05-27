@@ -286,7 +286,7 @@ function DescriptionCard({ badge }: { badge: BadgeDetail }) {
             lineHeight: 1.4,
           }}
         >
-          Compartí este logro con tu box. Cada PR cuenta historia.
+          Comparte este logro. Cada PR cuenta una historia.
         </div>
         <button
           disabled
@@ -332,7 +332,7 @@ function DescriptionCard({ badge }: { badge: BadgeDetail }) {
           lineHeight: 1.4,
         }}
       >
-        Seguí entrenando. Tu próxima clase, score o PR puede acercarte. Cuando
+        Sigue entrenando. Tu próxima clase, score o PR puede acercarte. Cuando
         cumplas el criterio, el logro se desbloquea automáticamente.
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
 import {
   bookClass,
@@ -10,6 +10,7 @@ import {
 } from "@/server/actions/bookings";
 import { kToast } from "@/lib/toast";
 import { useConfirm } from "@/lib/use-confirm";
+import { JargonTip } from "@/components/kronos/JargonTip";
 
 export function BookButton({
   classId,
@@ -25,13 +26,18 @@ export function BookButton({
   myBookingId: string | null;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [justBooked, setJustBooked] = useState(false);
+  const [justCancelled, setJustCancelled] = useState(false);
   const confirm = useConfirm();
 
   function handleBook() {
     startTransition(async () => {
       try {
         await bookClass(classId);
+        setJustBooked(true);
         kToast.success("Reserva confirmada");
+        // Reset the optimistic confirmation after 4s so it reflects server state
+        setTimeout(() => setJustBooked(false), 4000);
       } catch (err) {
         kToast.error(err instanceof Error ? err.message : "Error al reservar");
       }
@@ -51,7 +57,9 @@ export function BookButton({
     startTransition(async () => {
       try {
         await cancelBooking(myBookingId);
+        setJustCancelled(true);
         kToast.info("Reserva cancelada");
+        setTimeout(() => setJustCancelled(false), 3000);
       } catch (err) {
         kToast.error(err instanceof Error ? err.message : "Error");
       }
@@ -71,37 +79,167 @@ export function BookButton({
     transition: "background 120ms ease, box-shadow 120ms ease",
   };
 
-  if (myStatus === "BOOKED") {
+  // Optimistic "Reservado ✓" — shown right after booking while page revalidates
+  if (myStatus === "BOOKED" || justBooked) {
+    if (justCancelled) {
+      // Show brief "Cancelado" feedback before server revalidation
+      return (
+        <button
+          disabled
+          style={{
+            ...v3Base,
+            background: "transparent",
+            color: "var(--k-t3)",
+            border: "1px solid var(--k-line)",
+            cursor: "default",
+          }}
+          aria-label="Reserva cancelada"
+        >
+          Cancelado
+        </button>
+      );
+    }
     return (
-      <button
-        onClick={handleCancel}
-        disabled={isPending}
+      <div
         style={{
-          ...v3Base,
-          background: "transparent",
-          color: "var(--k-t2)",
-          border: "1px solid var(--k-line-2)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+          alignItems: "flex-end",
         }}
       >
-        {isPending ? "…" : "Cancelar"}
-      </button>
+        {/* Confirmed checkmark badge */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            padding: "6px 12px",
+            borderRadius: 10,
+            background: "var(--k-accent-soft)",
+            border: "1px solid var(--k-accent-line)",
+          }}
+          aria-label="Reservado"
+        >
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--k-accent)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+          <span
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              color: "var(--k-accent)",
+            }}
+          >
+            RESERVADO
+          </span>
+        </div>
+        {/* Cancel affordance — smaller, subdued */}
+        <button
+          onClick={handleCancel}
+          disabled={isPending}
+          style={{
+            background: "none",
+            border: "none",
+            padding: "2px 4px",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 9,
+            fontWeight: 600,
+            letterSpacing: "0.12em",
+            color: "var(--k-t3)",
+            cursor: isPending ? "wait" : "pointer",
+            textDecoration: "underline",
+            textDecorationColor: "var(--k-line-2)",
+            textUnderlineOffset: 2,
+          }}
+        >
+          {isPending ? "…" : "Cancelar"}
+        </button>
+      </div>
     );
   }
 
   if (myStatus === "WAITLIST") {
     return (
-      <button
-        onClick={handleCancel}
-        disabled={isPending}
+      <div
         style={{
-          ...v3Base,
-          background: "transparent",
-          color: "var(--k-t2)",
-          border: "1px solid var(--k-line-2)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+          alignItems: "flex-end",
         }}
       >
-        {isPending ? "…" : "Quitar"}
-      </button>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            padding: "6px 12px",
+            borderRadius: 10,
+            background: "var(--k-elevated)",
+            border: "1px solid var(--k-line-2)",
+          }}
+          aria-label="En lista de espera"
+        >
+          <svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--k-t2)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              color: "var(--k-t2)",
+            }}
+          >
+            EN ESPERA
+          </span>
+        </div>
+        <button
+          onClick={handleCancel}
+          disabled={isPending}
+          style={{
+            background: "none",
+            border: "none",
+            padding: "2px 4px",
+            fontFamily: "var(--k-font-display)",
+            fontSize: 9,
+            fontWeight: 600,
+            letterSpacing: "0.12em",
+            color: "var(--k-t3)",
+            cursor: isPending ? "wait" : "pointer",
+            textDecoration: "underline",
+            textDecorationColor: "var(--k-line-2)",
+            textUnderlineOffset: 2,
+          }}
+        >
+          {isPending ? "…" : "Salir de espera"}
+        </button>
+      </div>
     );
   }
 
@@ -118,7 +256,13 @@ export function BookButton({
         boxShadow: full || isPending ? "none" : "var(--k-accent-glow)",
       }}
     >
-      {isPending ? "…" : full ? "Waitlist" : "Reservar"}
+      {isPending ? (
+        "…"
+      ) : full ? (
+        <JargonTip term="WAITLIST">Waitlist</JargonTip>
+      ) : (
+        "Reservar"
+      )}
     </button>
   );
 }
