@@ -31,11 +31,11 @@ export async function PRsSection() {
           className="font-mono text-[10px] font-bold tracking-[0.08em]"
           style={{ color: "var(--k-t3)" }}
         >
-          TOP {Math.min(prs.length, 6)} DE {prs.length}
+          {prs.length} {prs.length === 1 ? "RÉCORD" : "RÉCORDS"}
         </div>
       </div>
       <div className="px-3.5 grid grid-cols-2 gap-2">
-        {prs.slice(0, 6).map((pr, i) => (
+        {prs.map((pr, i) => (
           <AnimatedItem key={pr.id}>
             <KCard>
               <div className="p-3 relative">
