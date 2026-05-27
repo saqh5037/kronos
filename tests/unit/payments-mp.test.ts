@@ -122,6 +122,7 @@ vi.mock("../../src/server/db", () => ({
 vi.mock("../../src/lib/payments/mp-client", () => ({
   isMpConfigured: vi.fn(() => true),
   getPreferenceClient: vi.fn(() => ({ create: preferenceCreateMock })),
+  resolveMpBackUrlBase: vi.fn(() => "https://www.kronos-fit.com"),
 }));
 
 vi.mock("../../src/server/audit", () => ({

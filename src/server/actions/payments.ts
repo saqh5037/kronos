@@ -12,7 +12,11 @@ import type { PaymentGateway, PaymentStatus } from "@/lib/validations/payment";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
 import { can, createGrantRequest } from "../permissions";
-import { getPreferenceClient, isMpConfigured } from "@/lib/payments/mp-client";
+import {
+  getPreferenceClient,
+  isMpConfigured,
+  resolveMpBackUrlBase,
+} from "@/lib/payments/mp-client";
 import { type ListOpts, type ListResult, normalizePagination } from "./types";
 import { eachDayInRange, dayKey } from "@/lib/dates";
 
@@ -455,7 +459,7 @@ export async function initMpCheckout(
     });
   }
 
-  const baseUrl = process.env.MP_BACK_URL_BASE ?? "http://localhost:3000";
+  const baseUrl = resolveMpBackUrlBase();
   const isHttps = baseUrl.startsWith("https://");
 
   // If we already have a preference for this payment AND the back URL didn't change, reuse it.

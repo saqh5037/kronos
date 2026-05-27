@@ -262,18 +262,13 @@ export async function reserveFoundingPlan(
       }),
     });
   } catch (e) {
-    console.error(
-      `[founding-dominus] email failed box=${result.slug} email=${email}:`,
-      e,
-    );
+    console.error(`[founding-dominus] email failed box=${result.slug}:`, e);
   }
 
-  // Log con detalle solo en server (no expuesto al cliente)
-  if (phone) {
-    console.log(
-      `[founding-dominus] reserved box=${result.slug} email=${email} cycle=${billingCycle} phone=${phone}`,
-    );
-  }
+  // Log no-PII: slug + ciclo + si traía teléfono (sin email ni teléfono en claro).
+  console.log(
+    `[founding-dominus] reserved box=${result.slug} cycle=${billingCycle} hasPhone=${Boolean(phone)}`,
+  );
 
   return {
     ok: true,

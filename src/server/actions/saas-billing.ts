@@ -10,7 +10,11 @@ import {
   nextBillingDate,
   type SaasPlanFeatures,
 } from "@/lib/saas-billing";
-import { isMpConfigured, getPreferenceClient } from "@/lib/payments/mp-client";
+import {
+  isMpConfigured,
+  getPreferenceClient,
+  resolveMpBackUrlBase,
+} from "@/lib/payments/mp-client";
 
 async function requireOwner(): Promise<{ tenantId: string; actorId: string }> {
   const session = await getServerSession(authOptions);
@@ -153,7 +157,7 @@ export async function createSaasCheckout(
     };
   }
 
-  const baseUrl = process.env.MP_BACK_URL_BASE ?? "http://localhost:3000";
+  const baseUrl = resolveMpBackUrlBase();
   const isHttps = baseUrl.startsWith("https://");
   const preferenceClient = getPreferenceClient();
   const preference = await preferenceClient.create({
