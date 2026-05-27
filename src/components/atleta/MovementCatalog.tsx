@@ -1,11 +1,79 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { motion, AnimatePresence } from "framer-motion";
 import { extractYouTubeId, getYouTubeThumbnail } from "@/lib/youtube";
 import type { MovementRow } from "@/server/actions/movements";
+
+/** Thumbnail card — shows the YouTube thumbnail and falls back to a branded
+ *  placeholder for broken video IDs. Handles both failure modes: a hard 404
+ *  (onError) and YouTube's 120x90 gray "no thumbnail" image served with a 200
+ *  (detected on load via naturalWidth).                                       */
+function MovementThumbnail({ src, name }: { src: string; name: string }) {
+  const [broken, setBroken] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const initial = name.charAt(0).toUpperCase();
+
+  // Catch images that finished loading before React attached the handlers
+  // (cached responses), including YouTube's 120x90 gray placeholder (HTTP 200).
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img?.complete && (img.naturalWidth === 0 || img.naturalWidth <= 120)) {
+      setBroken(true);
+    }
+  }, []);
+
+  if (broken) {
+    return (
+      <div
+        className="w-full h-full flex flex-col items-center justify-center gap-1"
+        style={{ background: "var(--k-surface)" }}
+      >
+        <span
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 28,
+            fontWeight: 700,
+            color: "var(--k-t3)",
+            lineHeight: 1,
+          }}
+        >
+          {initial}
+        </span>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--k-t3)"
+          strokeWidth="1.5"
+          style={{ opacity: 0.5 }}
+        >
+          <polygon points="5 3 19 12 5 21 5 3" />
+        </svg>
+      </div>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      ref={imgRef}
+      src={src}
+      alt={name}
+      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+      loading="lazy"
+      onError={() => setBroken(true)}
+      onLoad={(e) => {
+        // YouTube serves a 120x90 gray placeholder (HTTP 200) for video IDs
+        // with no real thumbnail. A valid hqdefault is 480x360.
+        if (e.currentTarget.naturalWidth <= 120) setBroken(true);
+      }}
+    />
+  );
+}
 
 type Category =
   | "ALL"
@@ -228,27 +296,28 @@ export default function MovementCatalog({
                     {/* Thumbnail */}
                     <div className="relative aspect-video bg-[var(--k-surface)] overflow-hidden">
                       {thumbnail ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={thumbnail}
-                          alt={m.name}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy"
-                          onError={(e) => {
-                            (
-                              e.currentTarget as HTMLImageElement
-                            ).style.display = "none";
-                          }}
-                        />
+                        <MovementThumbnail src={thumbnail} name={m.name} />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-full h-full flex flex-col items-center justify-center gap-1">
+                          <span
+                            style={{
+                              fontFamily: "var(--k-font-display)",
+                              fontSize: 28,
+                              fontWeight: 700,
+                              color: "var(--k-t3)",
+                              lineHeight: 1,
+                            }}
+                          >
+                            {m.name.charAt(0).toUpperCase()}
+                          </span>
                           <svg
-                            width="24"
-                            height="24"
+                            width="14"
+                            height="14"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="var(--k-t3)"
                             strokeWidth="1.5"
+                            style={{ opacity: 0.5 }}
                           >
                             <polygon points="5 3 19 12 5 21 5 3" />
                           </svg>
