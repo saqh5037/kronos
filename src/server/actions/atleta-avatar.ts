@@ -12,7 +12,13 @@ export type AvatarUploadResult =
   | { ok: true; photoUrl: string }
   | {
       ok: false;
-      error: "UNAUTH" | "NO_FILE" | "BAD_TYPE" | "TOO_LARGE" | "NOT_FOUND" | "STORAGE_FAILED";
+      error:
+        | "UNAUTH"
+        | "NO_FILE"
+        | "BAD_TYPE"
+        | "TOO_LARGE"
+        | "NOT_FOUND"
+        | "STORAGE_FAILED";
       message: string;
     };
 
@@ -32,7 +38,11 @@ export async function uploadAtletaAvatar(
 
   const file = formData.get("file") as File | null;
   if (!file) {
-    return { ok: false, error: "NO_FILE", message: "No se recibió ningún archivo" };
+    return {
+      ok: false,
+      error: "NO_FILE",
+      message: "No se recibió ningún archivo",
+    };
   }
 
   if (!ALLOWED_MIME.includes(file.type)) {
@@ -56,28 +66,37 @@ export async function uploadAtletaAvatar(
     select: { id: true, photoUrl: true },
   });
   if (!athlete) {
-    return { ok: false, error: "NOT_FOUND", message: "No encontramos tu perfil" };
+    return {
+      ok: false,
+      error: "NOT_FOUND",
+      message: "No encontramos tu perfil",
+    };
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const ext = file.type === "image/png"
-    ? "png"
-    : file.type === "image/webp"
-      ? "webp"
-      : "jpg";
+  const ext =
+    file.type === "image/png"
+      ? "png"
+      : file.type === "image/webp"
+        ? "webp"
+        : "jpg";
   const pathname = `avatars/${tenantId}/${userId}/${Date.now()}-${safeName(file.name || `avatar.${ext}`)}`;
 
   let storedUrl: string;
   try {
     const storage = getStorage();
-    const stored = await storage.put({ buffer, contentType: file.type, pathname });
+    const stored = await storage.put({
+      buffer,
+      contentType: file.type,
+      pathname,
+    });
     storedUrl = stored.url;
   } catch (e) {
     console.error("[atleta-avatar] storage failed:", e);
     return {
       ok: false,
       error: "STORAGE_FAILED",
-      message: "No pudimos guardar la imagen. Probá de nuevo.",
+      message: "No pudimos guardar la imagen. Inténtalo de nuevo.",
     };
   }
 

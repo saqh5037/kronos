@@ -84,7 +84,7 @@ export async function uploadAndAnalyzePhotoWod(
     return {
       ok: false,
       error: "RATE_LIMITED",
-      message: "Llegaste al límite de 10 fotos por día. Probá mañana.",
+      message: "Llegaste al límite de 10 fotos por día. Inténtalo mañana.",
     };
   }
 
@@ -96,7 +96,7 @@ export async function uploadAndAnalyzePhotoWod(
     return {
       ok: false,
       error: "INVALID_FILE",
-      message: "Formato no soportado. Subí JPG, PNG o WEBP.",
+      message: "Formato no soportado. Sube JPG, PNG o WEBP.",
     };
   }
   if (file.size > MAX_FILE_SIZE) {
@@ -130,7 +130,7 @@ export async function uploadAndAnalyzePhotoWod(
     return {
       ok: false,
       error: "OCR_FAILED",
-      message: "No pudimos guardar la foto. Probá de nuevo.",
+      message: "No pudimos guardar la foto. Inténtalo de nuevo.",
     };
   }
 
@@ -150,7 +150,7 @@ export async function uploadAndAnalyzePhotoWod(
       ok: false,
       error: "OCR_FAILED",
       message:
-        "No pudimos leer la foto. Probá con otra con mejor luz, o ingresá el WOD manualmente.",
+        "No pudimos leer la foto. Inténtalo con otra con mejor luz, o ingresa el WOD manualmente.",
     };
   }
 

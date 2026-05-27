@@ -121,7 +121,7 @@ export async function createMyQuickWod(
     return {
       ok: false,
       error: "VALIDATION",
-      message: "Revisá los campos del formulario",
+      message: "Revisa los campos del formulario",
       fieldErrors,
     };
   }
@@ -140,12 +140,12 @@ export async function createMyQuickWod(
       ok: false,
       error: "NO_ATHLETE",
       message:
-        "No encontramos tu perfil de atleta. Probá completar el onboarding.",
+        "No encontramos tu perfil de atleta. Intenta completar tu perfil.",
     };
   }
 
   // Para ROUNDS_REPS, el value canónico es rounds.reps formato decimal
-  // (ej: 5 rounds + 12 reps → 5.012). Mantenemos consistencia con cómo
+  // (ej: 5 rounds + 12 reps → 5.12). Mantenemos consistencia con cómo
   // el Score se interpreta en /atleta/wod actual.
   let canonicalValue = data.scoreValue;
   if (data.scoreType === "ROUNDS_REPS" && data.scoreReps != null) {

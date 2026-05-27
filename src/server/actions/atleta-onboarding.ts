@@ -180,7 +180,7 @@ function renderJoinRequestEmail(args: {
         solicitó unirse a tu box <strong style="color:#f5f5f7;">${args.boxName}</strong> desde Kronos.
       </p>
       <p style="margin:0 0 24px;line-height:1.6;color:#8a8a94;">
-        Para agregarlo, ingresá a tu panel admin y mandale una invitación o respondé a este email para coordinar.
+        Para agregarlo, ingresa a tu panel admin y mándale una invitación o responde a este email para coordinar.
       </p>
       <p style="margin:0;font-size:12px;color:#54545c;">Kronos · kronos-fit.com</p>
     </div>

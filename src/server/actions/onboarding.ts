@@ -86,7 +86,7 @@ export async function createFirstPlan(
     }
     return {
       ok: false,
-      message: "Revisá los campos del plan",
+      message: "Revisa los campos del plan",
       fieldErrors,
     };
   }

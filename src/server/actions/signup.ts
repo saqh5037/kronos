@@ -57,7 +57,7 @@ export async function createBoxAndOwner(
     return {
       ok: false,
       error: "VALIDATION",
-      message: "Revisá los campos del formulario",
+      message: "Revisa los campos del formulario",
       fieldErrors,
     };
   }
@@ -68,7 +68,7 @@ export async function createBoxAndOwner(
     return {
       ok: false,
       error: "SLUG_RESERVED",
-      message: "Ese slug está reservado, elegí otro",
+      message: "Ese slug está reservado, elige otro",
       fieldErrors: { slug: "Slug reservado" },
     };
   }

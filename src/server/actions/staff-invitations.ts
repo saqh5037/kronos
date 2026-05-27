@@ -75,7 +75,7 @@ export async function acceptStaffInvitation(
     return {
       ok: false,
       reason: "VALIDATION",
-      message: "Revisá los campos",
+      message: "Revisa los campos",
       fieldErrors,
     };
   }

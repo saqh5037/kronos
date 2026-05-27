@@ -55,7 +55,7 @@ export async function checkEmailExists(
     return {
       ok: false,
       error: "INVALID_EMAIL",
-      message: "Ingresá un email válido.",
+      message: "Ingresa un email válido.",
     };
   }
 
@@ -65,7 +65,7 @@ export async function checkEmailExists(
     return {
       ok: false,
       error: "RATE_LIMITED",
-      message: `Demasiados intentos. Probá de nuevo en ${rl.retryAfterSec} segundos.`,
+      message: `Demasiados intentos. Inténtalo de nuevo en ${rl.retryAfterSec} segundos.`,
     };
   }
 
@@ -85,7 +85,7 @@ export async function createIndependentAthlete(
     return {
       ok: false,
       error: "RATE_LIMITED",
-      message: `Demasiados intentos. Probá de nuevo en ${rl.retryAfterSec} segundos.`,
+      message: `Demasiados intentos. Inténtalo de nuevo en ${rl.retryAfterSec} segundos.`,
     };
   }
 
@@ -101,7 +101,7 @@ export async function createIndependentAthlete(
     return {
       ok: false,
       error: "VALIDATION",
-      message: "Revisá los campos del formulario",
+      message: "Revisa los campos del formulario",
       fieldErrors,
     };
   }
@@ -211,6 +211,6 @@ export async function createIndependentAthlete(
   return {
     ok: false,
     error: "UNKNOWN",
-    message: "No pudimos crear tu cuenta. Probá de nuevo en un momento.",
+    message: "No pudimos crear tu cuenta. Inténtalo de nuevo en un momento.",
   };
 }
