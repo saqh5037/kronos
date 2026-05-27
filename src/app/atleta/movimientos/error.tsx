@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 
 export default function MovimientosError({
@@ -11,6 +12,7 @@ export default function MovimientosError({
   reset: () => void;
 }) {
   useEffect(() => {
+    Sentry.captureException(error);
     console.error("[atleta/movimientos] error:", error);
   }, [error]);
 
