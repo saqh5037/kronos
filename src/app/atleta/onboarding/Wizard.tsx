@@ -106,10 +106,19 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
   async function handleSkip() {
     setSkipping(true);
     try {
-      await skipAtletaOnboarding();
+      const result = await skipAtletaOnboarding();
+      if (!result.ok) {
+        kToast.error(
+          result.message ??
+            "No pudimos saltar el onboarding. Intenta de nuevo.",
+        );
+        setSkipping(false);
+        return;
+      }
     } catch {
-      // Best-effort — even if the action fails, clear local state and navigate.
-      // The layout gate will retry on next load; worst case the wizard shows again.
+      kToast.error("Error de red al saltar el onboarding. Intenta de nuevo.");
+      setSkipping(false);
+      return;
     }
     try {
       localStorage.removeItem("kronos_wizard_state");

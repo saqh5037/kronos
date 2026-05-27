@@ -30,7 +30,7 @@ const wodTypeEnum = z.enum([
 const scoreTypeEnum = z.enum(["TIME", "REPS", "WEIGHT", "ROUNDS_REPS"]);
 const scalingEnum = z.enum(["RX", "SCALED", "RXPLUS"]);
 
-export const quickWodSchema = z.object({
+const quickWodSchema = z.object({
   name: z
     .string()
     .trim()
@@ -44,7 +44,7 @@ export const quickWodSchema = z.object({
   // float donde la parte entera son rounds y los decimales reps. Para simplicidad
   // del MVP recibimos rounds + reps separados y convertimos).
   scoreValue: z.number().min(0).max(99999),
-  scoreReps: z.number().int().min(0).max(999).optional().nullable(),
+  scoreReps: z.number().int().min(0).max(99).optional().nullable(),
   scaling: scalingEnum.default("RX"),
   notes: z.string().max(500).optional().nullable(),
 });
@@ -149,7 +149,7 @@ export async function createMyQuickWod(
   // el Score se interpreta en /atleta/wod actual.
   let canonicalValue = data.scoreValue;
   if (data.scoreType === "ROUNDS_REPS" && data.scoreReps != null) {
-    canonicalValue = data.scoreValue + data.scoreReps / 1000;
+    canonicalValue = data.scoreValue + data.scoreReps / 100;
   }
 
   // Toda la escritura va dentro de try/catch: un atleta sin Box (Box Personal,
@@ -214,7 +214,7 @@ export async function createMyQuickWod(
     await logAudit({
       tenantId,
       actorId: session.user.id,
-      action: "BULK_SCORES_FROM_WHITEBOARD",
+      action: "ATHLETE_QUICK_WOD_SAVED",
       targetType: "WOD",
       targetId: result.wodId,
       metadata: { source: "atleta-quick-wod", scoreId: result.scoreId },

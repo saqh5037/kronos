@@ -287,8 +287,8 @@ export function CheckInButton({ bookingId }: { bookingId: string }) {
       className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-semibold"
       style={{
         color: "var(--k-accent)",
-        background: "var(--recovery-soft)",
-        border: "1px solid var(--recovery-line)",
+        background: "var(--k-accent-soft)",
+        border: "1px solid var(--k-accent-line)",
       }}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -364,8 +364,8 @@ export function CancelBookingButton({ bookingId }: { bookingId: string }) {
       className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-medium"
       style={{
         color: "var(--k-t3)",
-        background: "var(--btn-ghost-bg)",
-        border: "1px solid var(--line)",
+        background: "var(--k-elevated)",
+        border: "1px solid var(--k-line)",
       }}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}

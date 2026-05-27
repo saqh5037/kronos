@@ -264,6 +264,7 @@ export default function QuickWodForm() {
                 onChange={setScoreReps}
                 placeholder="12"
                 type="number"
+                max={99}
                 error={errors.scoreReps}
               />
             </div>
@@ -343,6 +344,7 @@ type FieldProps = {
   required?: boolean;
   error?: string;
   type?: "text" | "number";
+  max?: number;
 };
 
 function Field({
@@ -353,6 +355,7 @@ function Field({
   required,
   error,
   type = "text",
+  max,
 }: FieldProps) {
   return (
     <div>
@@ -377,6 +380,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
+        max={max}
         inputMode={type === "number" ? "decimal" : undefined}
         style={{
           width: "100%",

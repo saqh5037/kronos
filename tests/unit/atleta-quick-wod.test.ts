@@ -125,4 +125,72 @@ describe("createMyQuickWod — boxless athlete (Personal Box)", () => {
     const result = await createMyQuickWod(FRAN_INPUT);
     expect(result.ok).toBe(false);
   });
+
+  it("ROUNDS_REPS: 5 rounds + 12 reps encodes to 5.12, not 5.012", async () => {
+    const input = {
+      name: "Cindy",
+      type: "AMRAP" as const,
+      scoreType: "ROUNDS_REPS" as const,
+      timeCapSeconds: 1200,
+      scoreValue: 5,
+      scoreReps: 12,
+      scaling: "RX" as const,
+      notes: null,
+    };
+
+    let savedValue: number | undefined;
+    transactionMock.mockImplementationOnce(
+      async (cb: (tx: unknown) => unknown) => {
+        const tx = {
+          wOD: { create: vi.fn().mockResolvedValue({ id: "wod-2" }) },
+          score: {
+            create: vi
+              .fn()
+              .mockImplementation(
+                async ({ data }: { data: { value: number } }) => {
+                  savedValue = data.value;
+                  return { id: "score-2" };
+                },
+              ),
+          },
+        };
+        return cb(tx);
+      },
+    );
+
+    const result = await createMyQuickWod(input);
+    expect(result.ok).toBe(true);
+    // Codec: rounds + reps/100 — 5 + 12/100 = 5.12
+    expect(savedValue).toBeCloseTo(5.12, 5);
+    if (result.ok) {
+      // formatScore must round-trip: 5.12 → "5+12"
+      const { formatScore } = await import("../../src/lib/scores");
+      expect(formatScore(result.pr.newValue, "ROUNDS_REPS")).toBe("5+12");
+    }
+  });
+
+  it("ROUNDS_REPS: isPR=true when new score beats previous best", async () => {
+    // Previous best: 4 rounds + 20 reps = 4.20
+    scoreFindMany.mockResolvedValueOnce([{ value: 4.2 }]);
+
+    const input = {
+      name: "Cindy",
+      type: "AMRAP" as const,
+      scoreType: "ROUNDS_REPS" as const,
+      timeCapSeconds: 1200,
+      scoreValue: 5,
+      scoreReps: 12,
+      scaling: "RX" as const,
+      notes: null,
+    };
+
+    const result = await createMyQuickWod(input);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.pr.isPR).toBe(true);
+      expect(result.pr.isFirst).toBe(false);
+      expect(result.pr.previousBest).toBeCloseTo(4.2, 5);
+      expect(result.pr.newValue).toBeCloseTo(5.12, 5);
+    }
+  });
 });
