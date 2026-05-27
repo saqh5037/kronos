@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
+import { db } from "@/server/db";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import Eyebrow from "@/components/kronos/Eyebrow";
@@ -13,6 +14,19 @@ export default async function AjustesAtletaPage() {
   const session = await getServerSession(authOptions);
   const userName = session?.user?.name ?? session?.user?.email ?? "Atleta";
   const userEmail = session?.user?.email ?? null;
+
+  // Check if onboarding is pending (skipped but not completed)
+  let showCompleteProfile = false;
+  if (session?.user?.id && session?.user?.tenantId) {
+    const athlete = await db.athlete.findFirst({
+      where: { userId: session.user.id, tenantId: session.user.tenantId },
+      select: { onboardingCompletedAt: true, onboardingSkippedAt: true },
+    });
+    showCompleteProfile =
+      !!athlete &&
+      !athlete.onboardingCompletedAt &&
+      !!athlete.onboardingSkippedAt;
+  }
 
   return (
     <div className="pb-28 px-4 pt-10">
@@ -77,6 +91,38 @@ export default async function AjustesAtletaPage() {
         >
           Preferencias
         </p>
+        {showCompleteProfile && (
+          <Link
+            href="/atleta/onboarding"
+            className="flex items-center justify-between gap-3 py-2 -mx-1 px-1 rounded-lg transition-colors"
+            style={{ color: "var(--k-accent)" }}
+          >
+            <div>
+              <p
+                className="font-medium text-sm"
+                style={{ color: "var(--k-accent)" }}
+              >
+                Completar mi perfil
+              </p>
+              <p className="text-xs" style={{ color: "var(--k-t3)" }}>
+                Terminar el asistente de configuración
+              </p>
+            </div>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </Link>
+        )}
         <div className="flex items-center justify-between gap-3 py-2">
           <div>
             <p className="font-medium text-sm">Tema</p>

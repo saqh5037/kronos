@@ -52,7 +52,7 @@ export function Step4Goal({
           selected={goal === "CROSSFIT_PRS"}
           onChange={(selected) => selected && onGoalChange("CROSSFIT_PRS")}
           label="Mejorar mis WODs y PRs"
-          description="Dominance en CrossFit"
+          description="Dominio en CrossFit"
         />
       </div>
 

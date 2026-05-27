@@ -69,8 +69,13 @@ export function Step5Frequency({
       <div className="flex flex-col gap-2 pt-2">
         <button
           type="button"
-          onClick={onNext}
-          disabled={!frequency || pending}
+          onClick={() => {
+            // If the user never touched the stepper, commit the displayed
+            // recommended value before advancing so the state is non-null.
+            if (frequency === null) onFrequencyChange(displayFrequency);
+            onNext();
+          }}
+          disabled={pending}
           className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50"
         >
           Siguiente

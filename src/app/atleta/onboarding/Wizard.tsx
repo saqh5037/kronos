@@ -7,6 +7,7 @@ import { kToast } from "@/lib/toast";
 import {
   completeAtletaOnboarding,
   logOnboardingStep,
+  skipAtletaOnboarding,
 } from "@/server/actions/atleta-onboarding-v2";
 import { markOnboarded } from "@/lib/pwa-visits";
 import { ProgressBar } from "@/components/kronos/forms";
@@ -36,6 +37,7 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [showPlanCreating, setShowPlanCreating] = useState(false);
+  const [skipping, setSkipping] = useState(false);
   const {
     state,
     setStep,
@@ -99,6 +101,23 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
     });
 
     setShowPlanCreating(true);
+  }
+
+  async function handleSkip() {
+    setSkipping(true);
+    try {
+      await skipAtletaOnboarding();
+    } catch {
+      // Best-effort — even if the action fails, clear local state and navigate.
+      // The layout gate will retry on next load; worst case the wizard shows again.
+    }
+    try {
+      localStorage.removeItem("kronos_wizard_state");
+    } catch {
+      // ignore
+    }
+    router.push("/atleta");
+    router.refresh();
   }
 
   async function finishWithAnimation() {
@@ -252,12 +271,20 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
         </div>
       </KCard>
 
-      <p
-        className="text-center text-[11px] mt-4"
-        style={{ color: "var(--k-t3)" }}
-      >
-        Puedes cambiar todo después desde tu perfil.
-      </p>
+      <div className="mt-4 flex flex-col items-center gap-2">
+        <p className="text-center text-[11px]" style={{ color: "var(--k-t3)" }}>
+          Puedes cambiar todo después desde tu perfil.
+        </p>
+        <button
+          type="button"
+          onClick={handleSkip}
+          disabled={skipping || pending}
+          className="text-xs underline disabled:opacity-40"
+          style={{ color: "var(--k-t3)" }}
+        >
+          {skipping ? "Cargando..." : "Saltar por ahora"}
+        </button>
+      </div>
     </div>
   );
 }

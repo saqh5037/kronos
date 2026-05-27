@@ -102,6 +102,56 @@ export async function completeAtletaOnboarding(
 }
 
 /**
+ * Skip onboarding — marks the athlete as having opted out of the wizard.
+ * The gate in layout.tsx checks onboardingSkippedAt alongside
+ * onboardingCompletedAt so skipped athletes access the full app.
+ * The athlete can still complete the wizard later via /atleta/onboarding.
+ */
+export async function skipAtletaOnboarding(): Promise<OnboardingResult> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || !session.user.tenantId) {
+    return { ok: false, error: "UNAUTH", message: "Sesión expirada" };
+  }
+
+  const tenantId = session.user.tenantId;
+  const userId = session.user.id;
+
+  try {
+    const athlete = await prismaBase.athlete.findFirst({
+      where: { tenantId, userId },
+      select: { id: true },
+    });
+
+    if (!athlete) {
+      return { ok: false, error: "NOT_FOUND", message: "Atleta no encontrado" };
+    }
+
+    await prismaBase.athlete.update({
+      where: { id: athlete.id },
+      data: { onboardingSkippedAt: new Date() },
+    });
+
+    await logAudit({
+      tenantId,
+      actorId: userId,
+      action: "ATHLETE_ONBOARDING_SKIPPED",
+      targetType: "Athlete",
+      targetId: athlete.id,
+      metadata: {},
+    });
+
+    return { ok: true };
+  } catch (err) {
+    console.error("[onboarding-v2] skip error:", err);
+    return {
+      ok: false,
+      error: "INTERNAL",
+      message: "Error al saltar el onboarding",
+    };
+  }
+}
+
+/**
  * Logger ligero por step. Fire-and-forget desde el wizard. No bloquea la
  * navegación si falla — logAudit ya catchea y no rethrowa.
  */

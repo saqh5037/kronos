@@ -6,6 +6,7 @@ import { BookingSection } from "./_components/sections/BookingSection";
 import { WeekStripSection } from "./_components/sections/WeekStripSection";
 import { LeaderboardSection } from "./_components/sections/LeaderboardSection";
 import { RecentActivitySection } from "./_components/sections/RecentActivitySection";
+import { CompleteProfileBannerSection } from "./_components/sections/CompleteProfileBannerSection";
 import {
   HeroSkeleton,
   GreetingSkeleton,
@@ -35,6 +36,11 @@ export const metadata = { title: "Kronos — Inicio" };
 export default function AtletaHomePage() {
   return (
     <div className="pb-28 relative">
+      {/* COMPLETE PROFILE BANNER — only shown when onboarding was skipped */}
+      <Suspense fallback={null}>
+        <CompleteProfileBannerSection />
+      </Suspense>
+
       {/* HERO + STATS + TROPHIES — largest block, paints as soon as it resolves */}
       <Suspense fallback={<HeroSkeleton />}>
         <HeroSection />

@@ -207,6 +207,7 @@ model Athlete {
   // ─── Onboarding wizard (9 steps) ────────────────────────────────────────────
   onboardingStartedAt      DateTime?
   onboardingCompletedAt    DateTime?
+  onboardingSkippedAt      DateTime?
   onboardingStep           Int                @default(0)
   fitnessReason            FitnessReason?
   biologicalSex            BiologicalSex?
@@ -964,6 +965,7 @@ enum AuditAction {
   PASSWORD_CLEARED
   ATHLETE_ONBOARDING_STEP_COMPLETED
   ATHLETE_ONBOARDING_COMPLETED
+  ATHLETE_ONBOARDING_SKIPPED
   PILOT_BETA_SIGNED
   WEARABLE_CONNECTED
   WEARABLE_DISCONNECTED

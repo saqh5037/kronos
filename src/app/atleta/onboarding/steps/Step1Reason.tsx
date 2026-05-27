@@ -20,7 +20,7 @@ export function Step1Reason({
     <div className="space-y-5">
       <div>
         <h2 className="font-display font-bold text-2xl tracking-[-0.01em]">
-          ¿Cuál es tu objetivo?
+          ¿Por qué empiezas ahora?
         </h2>
         <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
           Esto nos ayuda a personalizar tu experiencia.

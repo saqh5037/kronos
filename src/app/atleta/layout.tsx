@@ -35,9 +35,11 @@ export default async function AtletaLayout({
         userId: session.user.id,
         tenantId: session.user.tenantId,
       },
-      select: { onboardingCompletedAt: true },
+      select: { onboardingCompletedAt: true, onboardingSkippedAt: true },
     });
-    if (!athlete?.onboardingCompletedAt) {
+    // Gate: redirect to onboarding only when the athlete has neither completed
+    // nor explicitly skipped. A skipped athlete gets full access immediately.
+    if (!athlete?.onboardingCompletedAt && !athlete?.onboardingSkippedAt) {
       redirect("/atleta/onboarding");
     }
   }

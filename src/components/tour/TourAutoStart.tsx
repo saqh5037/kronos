@@ -1,129 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { useTour } from "./TourProvider";
-import { reservarTour } from "./tours/reservar";
-import { wodTour } from "./tours/wod";
-import { perfilTour } from "./tours/perfil";
-import { homeTour } from "./tours/home";
-import { skillsTour } from "./tours/skills";
-import { saludTour } from "./tours/salud";
-import { historialTour } from "./tours/historial";
-import { leaderboardTour } from "./tours/leaderboard";
-import { movimientosTour } from "./tours/movimientos";
-import { pagosTour } from "./tours/pagos";
-import { ajustesTour } from "./tours/ajustes";
-
-type AutoStartEntry = {
-  tourId: string;
-  storageKey: string;
-  /** First-step anchor; we wait for it to mount before auto-starting. */
-  firstAnchor: string;
-};
-
-const AUTO_START_MAP: Record<string, AutoStartEntry> = {
-  "/atleta/reservar": {
-    tourId: reservarTour.id,
-    storageKey: reservarTour.storageKey,
-    firstAnchor: reservarTour.steps[0].anchor,
-  },
-  "/atleta/wod": {
-    tourId: wodTour.id,
-    storageKey: wodTour.storageKey,
-    firstAnchor: wodTour.steps[0].anchor,
-  },
-  "/atleta/perfil": {
-    tourId: perfilTour.id,
-    storageKey: perfilTour.storageKey,
-    firstAnchor: perfilTour.steps[0].anchor,
-  },
-  "/atleta": {
-    tourId: homeTour.id,
-    storageKey: homeTour.storageKey,
-    firstAnchor: homeTour.steps[0].anchor,
-  },
-  "/atleta/skills": {
-    tourId: skillsTour.id,
-    storageKey: skillsTour.storageKey,
-    firstAnchor: skillsTour.steps[0].anchor,
-  },
-  "/atleta/salud": {
-    tourId: saludTour.id,
-    storageKey: saludTour.storageKey,
-    firstAnchor: saludTour.steps[0].anchor,
-  },
-  "/atleta/historial": {
-    tourId: historialTour.id,
-    storageKey: historialTour.storageKey,
-    firstAnchor: historialTour.steps[0].anchor,
-  },
-  "/atleta/leaderboard": {
-    tourId: leaderboardTour.id,
-    storageKey: leaderboardTour.storageKey,
-    firstAnchor: leaderboardTour.steps[0].anchor,
-  },
-  "/atleta/movimientos": {
-    tourId: movimientosTour.id,
-    storageKey: movimientosTour.storageKey,
-    firstAnchor: movimientosTour.steps[0].anchor,
-  },
-  "/atleta/pagos": {
-    tourId: pagosTour.id,
-    storageKey: pagosTour.storageKey,
-    firstAnchor: pagosTour.steps[0].anchor,
-  },
-  "/atleta/ajustes": {
-    tourId: ajustesTour.id,
-    storageKey: ajustesTour.storageKey,
-    firstAnchor: ajustesTour.steps[0].anchor,
-  },
-};
-
-const POLL_INTERVAL_MS = 200;
-const POLL_TIMEOUT_MS = 4000;
-
+/**
+ * TourAutoStart — intentionally NO-OP.
+ *
+ * Tours are now opt-in: the user launches them manually via the "?" TourTriggerButton
+ * rendered on each screen. Auto-starting on every first-visit caused a poor UX
+ * (tour firing over home immediately after onboarding, re-firing after dismissal
+ * because persistence was unreliable).
+ *
+ * The component is kept as a named export so the import in template.tsx compiles
+ * without changes. If auto-start needs to be re-enabled in the future, restore
+ * the polling logic here — the persistence layer (markTourSeen / storageKey check)
+ * is still intact in TourProvider and persistence.ts.
+ */
 export function TourAutoStart() {
-  const pathname = usePathname();
-  const { startTour, isOpen } = useTour();
-
-  useEffect(() => {
-    if (!pathname) return;
-    if (isOpen) return;
-    const entry = AUTO_START_MAP[pathname];
-    if (!entry) return;
-
-    try {
-      if (window.localStorage.getItem(entry.storageKey)) return;
-    } catch {
-      return;
-    }
-
-    // Poll for the first anchor up to POLL_TIMEOUT_MS. If it never appears
-    // (empty state, redirect, conditional render), bail silently — the user
-    // can still launch the tour manually via the "?" button.
-    const startedAt = Date.now();
-    let cancelled = false;
-
-    const tryStart = () => {
-      if (cancelled) return;
-      const target = document.querySelector(
-        `[data-tour="${entry.firstAnchor}"]`,
-      );
-      if (target) {
-        startTour(entry.tourId);
-        return;
-      }
-      if (Date.now() - startedAt >= POLL_TIMEOUT_MS) return;
-      window.setTimeout(tryStart, POLL_INTERVAL_MS);
-    };
-
-    const initial = window.setTimeout(tryStart, 300);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(initial);
-    };
-  }, [pathname, startTour, isOpen]);
-
   return null;
 }
