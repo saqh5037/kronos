@@ -18,6 +18,7 @@ import {
   verifyMpSignature,
 } from "@/lib/payments/mp-webhook";
 import { logAudit } from "@/server/audit";
+import { reportError } from "@/lib/observability";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -109,10 +110,7 @@ export async function POST(request: NextRequest) {
     });
     eventId = event.id;
   } catch (err) {
-    console.error(
-      "[mp-webhook] WebhookEvent persist failed:",
-      err instanceof Error ? err.message : err,
-    );
+    reportError("mp-webhook/persist-event", err);
   }
 
   if (parseError) {
@@ -193,7 +191,7 @@ export async function POST(request: NextRequest) {
     mpPayment = await getPaymentClient().get({ id: dataId });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unknown";
-    console.error(`[mp-webhook] mp fetch failed dataId=${dataId}:`, msg);
+    reportError("mp-webhook/fetch-payment", err, { dataId });
     await markEventProcessed(eventId, {
       processingStatus: "failed",
       errorMsg: `mp fetch failed: ${msg}`,
@@ -287,10 +285,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unknown";
-    console.error(
-      `[mp-webhook] transaction failed paymentId=${payment.id}:`,
-      msg,
-    );
+    reportError("mp-webhook/db-transaction", err, { paymentId: payment.id });
     await markEventProcessed(eventId, {
       processingStatus: "failed",
       errorMsg: `db transaction failed: ${msg}`,

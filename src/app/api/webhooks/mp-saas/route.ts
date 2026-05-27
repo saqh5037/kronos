@@ -19,6 +19,7 @@ import { getPaymentClient, isMpConfigured } from "@/lib/payments/mp-client";
 import { verifyMpSignature } from "@/lib/payments/mp-webhook";
 import { nextBillingDate } from "@/lib/saas-billing";
 import { logAudit } from "@/server/audit";
+import { reportError } from "@/lib/observability";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -115,10 +116,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
     eventId = event.id;
   } catch (err) {
-    console.error(
-      "[mp-saas-webhook] WebhookEvent persist failed:",
-      err instanceof Error ? err.message : err,
-    );
+    reportError("mp-saas-webhook/persist-event", err);
   }
 
   if (parseError) {
@@ -205,6 +203,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       external_reference: fetched.external_reference,
     };
   } catch (err) {
+    reportError("mp-saas-webhook/fetch-payment", err, { dataId });
     await markEventProcessed(eventId, {
       processingStatus: "failed",
       errorMsg: `failed to fetch MP payment: ${String(err)}`,

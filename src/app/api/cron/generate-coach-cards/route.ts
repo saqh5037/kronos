@@ -12,6 +12,7 @@
 
 import { NextResponse } from "next/server";
 import { generateCoachCardsBatch } from "@/server/actions/coach-cards";
+import { reportError } from "@/lib/observability";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -53,7 +54,7 @@ export async function GET(req: Request) {
       durationMs: ms,
     });
   } catch (err) {
-    console.error("[cron/generate-coach-cards] failed:", err);
+    reportError("cron/generate-coach-cards", err);
     return NextResponse.json(
       {
         ok: false,

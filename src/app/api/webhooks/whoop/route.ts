@@ -10,6 +10,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/server/db";
 import { logAudit } from "@/server/audit";
+import { reportError } from "@/lib/observability";
 import {
   parseWebhookBody,
   verifyWebhookSignature,
@@ -205,6 +206,10 @@ export async function POST(req: Request) {
       );
       return NextResponse.json({ ok: false, error: "upstream_not_found" });
     }
+    reportError("whoop-webhook/process-event", err, {
+      eventId: String(event.id),
+      eventType: event.type,
+    });
     await persistRawEvent(
       null,
       rawBody,
