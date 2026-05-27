@@ -27,6 +27,16 @@ export interface EmptyStateCTAProps {
   ctaHref?: Route;
   /** Client-side action when the CTA is clicked (used when `ctaHref` is not provided). */
   onCta?: () => void;
+  /**
+   * Optional secondary CTA, rendered as a ghost button below the primary one.
+   * Use sparingly — only when there are two genuinely useful next actions.
+   * Label is required to render it; pair with `secondaryHref` or `onSecondary`.
+   */
+  secondaryLabel?: string;
+  /** Navigate to this URL for the secondary CTA (renders as <Link>). */
+  secondaryHref?: Route;
+  /** Client-side action for the secondary CTA (used when `secondaryHref` is absent). */
+  onSecondary?: () => void;
   /** Extra class on the outermost container. */
   className?: string;
 }
@@ -40,9 +50,13 @@ export function EmptyStateCTA({
   ctaLabel,
   ctaHref,
   onCta,
+  secondaryLabel,
+  secondaryHref,
+  onSecondary,
   className,
 }: EmptyStateCTAProps) {
   const hasCta = ctaLabel && (ctaHref || onCta);
+  const hasSecondary = secondaryLabel && (secondaryHref || onSecondary);
 
   return (
     <div
@@ -94,7 +108,7 @@ export function EmptyStateCTA({
       {description && (
         <p
           style={{
-            margin: hasCta ? "0 0 20px" : 0,
+            margin: hasCta || hasSecondary ? "0 0 20px" : 0,
             fontFamily: "var(--k-font-body)",
             fontSize: 14,
             lineHeight: 1.5,
@@ -106,60 +120,77 @@ export function EmptyStateCTA({
         </p>
       )}
 
-      {/* CTA */}
-      {hasCta &&
-        (ctaHref ? (
-          <Link
-            href={ctaHref}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: 44,
-              paddingInline: 24,
-              paddingBlock: 10,
-              borderRadius: 12,
-              background: "var(--k-accent)",
-              color: "var(--k-accent-on)",
-              fontFamily: "var(--k-font-display)",
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              textDecoration: "none",
-              boxShadow: "var(--k-accent-glow)",
-              cursor: "pointer",
-            }}
-          >
-            {ctaLabel}
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={onCta}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: 44,
-              paddingInline: 24,
-              paddingBlock: 10,
-              borderRadius: 12,
-              background: "var(--k-accent)",
-              color: "var(--k-accent-on)",
-              fontFamily: "var(--k-font-display)",
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              border: "none",
-              boxShadow: "var(--k-accent-glow)",
-              cursor: "pointer",
-            }}
-          >
-            {ctaLabel}
-          </button>
-        ))}
+      {/* CTAs */}
+      {(hasCta || hasSecondary) && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
+          {hasCta &&
+            (ctaHref ? (
+              <Link href={ctaHref} style={primaryCtaStyle}>
+                {ctaLabel}
+              </Link>
+            ) : (
+              <button type="button" onClick={onCta} style={primaryCtaStyle}>
+                {ctaLabel}
+              </button>
+            ))}
+
+          {hasSecondary &&
+            (secondaryHref ? (
+              <Link href={secondaryHref} style={secondaryCtaStyle}>
+                {secondaryLabel}
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={onSecondary}
+                style={secondaryCtaStyle}
+              >
+                {secondaryLabel}
+              </button>
+            ))}
+        </div>
+      )}
     </div>
   );
 }
+
+// ─── Shared CTA styles ──────────────────────────────────────────────────────
+
+const ctaBase = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: 44,
+  paddingInline: 24,
+  paddingBlock: 10,
+  borderRadius: 12,
+  fontFamily: "var(--k-font-display)",
+  fontSize: 12,
+  fontWeight: 700,
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  textDecoration: "none",
+  cursor: "pointer",
+} as const;
+
+const primaryCtaStyle = {
+  ...ctaBase,
+  background: "var(--k-accent)",
+  color: "var(--k-accent-on)",
+  border: "none",
+  boxShadow: "var(--k-accent-glow)",
+} as const;
+
+const secondaryCtaStyle = {
+  ...ctaBase,
+  background: "transparent",
+  color: "var(--k-t2)",
+  border: "1px solid var(--k-line)",
+} as const;

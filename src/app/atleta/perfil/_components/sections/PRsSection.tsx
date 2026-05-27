@@ -31,7 +31,7 @@ export async function PRsSection() {
           className="font-mono text-[10px] font-bold tracking-[0.08em]"
           style={{ color: "var(--k-t3)" }}
         >
-          VER TODOS →
+          TOP {Math.min(prs.length, 6)} DE {prs.length}
         </div>
       </div>
       <div className="px-3.5 grid grid-cols-2 gap-2">

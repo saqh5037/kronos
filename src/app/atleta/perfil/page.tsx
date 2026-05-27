@@ -8,6 +8,7 @@ import {
 } from "@/components/kronos/AnimatedSection";
 import { PerfilHeroSection } from "./_components/sections/PerfilHeroSection";
 import { PRsSection } from "./_components/sections/PRsSection";
+import { EmptyProfileSection } from "./_components/sections/EmptyProfileSection";
 import { GoalsSection } from "./_components/sections/GoalsSection";
 import { PredictionsSection } from "./_components/sections/PredictionsSection";
 import { ScoresSection } from "./_components/sections/ScoresSection";
@@ -75,6 +76,11 @@ export default function PerfilPage() {
       {/* Attendance heatmap */}
       <Suspense fallback={<ChartSkeleton />}>
         <HeatmapSection />
+      </Suspense>
+
+      {/* First-run empty state — renders only when zero PRs AND zero scores */}
+      <Suspense fallback={null}>
+        <EmptyProfileSection />
       </Suspense>
 
       {/* Exploration hub — static links, no fetch needed */}
