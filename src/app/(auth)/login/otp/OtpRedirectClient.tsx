@@ -213,7 +213,7 @@ export default function OtpRedirectClient({ code, email }: Props) {
                   Falta info
                 </h2>
                 <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-                  Este link no trae código. Andá al login para pedir uno nuevo.
+                  Este link no trae código. Ve al login para pedir uno nuevo.
                 </p>
                 <a
                   href="/login"

@@ -146,7 +146,7 @@ export default async function FoundingDominusPage() {
               <KCard animate={false}>
                 <div className="p-6 md:p-8">
                   <h2 className="font-display font-bold text-xl mb-1">
-                    Reservá tu Box
+                    Reserva tu Box
                   </h2>
                   <p className="text-sm mb-6" style={{ color: "var(--k-t2)" }}>
                     Sin cargo hoy. Te llegan 2 correos: confirmación + magic

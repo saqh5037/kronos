@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: "RATE_LIMITED",
-        message: `Demasiados intentos. Probá en ${rlIp.retryAfterSec} segundos.`,
+        message: `Demasiados intentos. Intenta en ${rlIp.retryAfterSec} segundos.`,
       },
       { status: 429 },
     );
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: "RATE_LIMITED",
-        message: `Demasiados intentos para este email. Probá en ${rlEmail.retryAfterSec} segundos.`,
+        message: `Demasiados intentos para este email. Intenta en ${rlEmail.retryAfterSec} segundos.`,
       },
       { status: 429 },
     );
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: "NO_USER",
-        message: "No encontramos tu cuenta. Probá con /atleta-signup.",
+        message: "No encontramos tu cuenta. Prueba con /atleta-signup.",
       },
       { status: 400 },
     );

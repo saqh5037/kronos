@@ -51,7 +51,7 @@ export function WellnessHomeCard({ latest }: Props) {
             letterSpacing: "-0.01em",
           }}
         >
-          Empezá a llevar tu peso
+          Empieza a llevar tu peso
         </div>
         <div
           style={{
@@ -62,7 +62,7 @@ export function WellnessHomeCard({ latest }: Props) {
             lineHeight: 1.4,
           }}
         >
-          Registrá una medición esta semana y ve cómo evolucionás.
+          Registra una medición esta semana y ve cómo evolucionas.
         </div>
       </Link>
     );

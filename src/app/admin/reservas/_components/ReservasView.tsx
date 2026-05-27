@@ -346,7 +346,7 @@ export function ReservasView({
                   }
                   description={
                     search || statusFilter !== "ALL"
-                      ? "Probá con otro nombre o cambiá el estado."
+                      ? "Prueba con otro nombre o cambia el estado."
                       : "Cuando los atletas reserven, aparecerán acá para hacer check-in."
                   }
                   action={

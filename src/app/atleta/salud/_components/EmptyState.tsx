@@ -69,7 +69,7 @@ export function EmptyState({ onLog }: Props) {
           lineHeight: 1.5,
         }}
       >
-        Registra tu peso, perímetros y composición para ver cómo evolucionás en
+        Registra tu peso, perímetros y composición para ver cómo evolucionas en
         el tiempo. Sin obsesión con números: progreso real.
       </div>
 

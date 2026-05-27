@@ -92,7 +92,7 @@ export default async function InvoiceHistoryPage({
           title={hasFilters ? "Sin resultados" : "Aún no hay cobros"}
           description={
             hasFilters
-              ? "Ningún cobro coincide con los filtros aplicados. Probá ampliar el rango o cambiar el plan."
+              ? "Ningún cobro coincide con los filtros aplicados. Prueba ampliar el rango o cambiar el plan."
               : "Cuando se confirme el primer cobro de tu suscripción aparecerá acá con el detalle del período y monto."
           }
           tone="neutral"

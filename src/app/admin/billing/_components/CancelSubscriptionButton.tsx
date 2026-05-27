@@ -15,7 +15,7 @@ export function CancelSubscriptionButton() {
     const ok = await confirm({
       title: "¿Cancelar suscripción?",
       message:
-        "Tu Box quedará en modo lectura al final del período actual. Podés reactivar cuando quieras y los datos se mantienen.",
+        "Tu Box quedará en modo lectura al final del período actual. Puedes reactivar cuando quieras y los datos se mantienen.",
       confirmLabel: "Sí, cancelar",
       cancelLabel: "Volver",
       tone: "danger",

@@ -916,7 +916,7 @@ function Step3(p: Step3Props) {
         value={p.planClasses}
         onChange={p.setPlanClasses}
         type="number"
-        hint="Dejá vacío si es plan ilimitado"
+        hint="Deja vacío si es plan ilimitado"
       />
       <NavRow
         left={
@@ -1084,8 +1084,8 @@ function Step5(p: Step5Props) {
         Tu box <em>{p.boxName}</em> está listo
       </h2>
       <p className="text-sm max-w-md mx-auto" style={{ color: "var(--k-t2)" }}>
-        Podés afinar todo desde Ajustes cuando quieras. Llevate tu trial al
-        máximo: cargá WODs, anunciá clases y empezá a operar.
+        Puedes afinar todo desde Ajustes cuando quieras. Llévate tu trial al
+        máximo: carga WODs, anuncia clases y empieza a operar.
       </p>
       <NavRow
         left={

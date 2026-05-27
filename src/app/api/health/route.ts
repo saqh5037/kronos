@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         status: "rate_limited",
-        error: `Demasiadas consultas. Probá en ${rl.retryAfterSec} segundos.`,
+        error: `Demasiadas consultas. Intenta en ${rl.retryAfterSec} segundos.`,
       },
       { status: 429 },
     );

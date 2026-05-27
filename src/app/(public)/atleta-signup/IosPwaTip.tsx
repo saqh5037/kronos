@@ -102,11 +102,11 @@ export default function IosPwaTip() {
                   Agregar a inicio
                 </strong>
                 <br />
-                3. Volvé y regístrate desde la app instalada
+                3. Vuelve y regístrate desde la app instalada
               </p>
               <p className="text-[10px] pt-1" style={{ color: "var(--k-t3)" }}>
-                Si preferís seguir sin instalar, también funciona — recomendamos
-                crear contraseña abajo.
+                Si prefieres seguir sin instalar, también funciona —
+                recomendamos crear contraseña abajo.
               </p>
             </div>
           ) : null}

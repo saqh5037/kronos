@@ -96,7 +96,7 @@ export default function FormAnalyzerClient({
             required
             className="w-full rounded-md border border-[var(--k-line-2)] bg-[var(--k-surface)] px-3 py-2 text-sm"
           >
-            <option value="">— Elegí el movimiento —</option>
+            <option value="">— Elige el movimiento —</option>
             {movements.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.category} · {m.name}

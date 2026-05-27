@@ -33,7 +33,7 @@ export async function POST(
     return NextResponse.json(
       {
         ok: false,
-        error: `Demasiados intentos. Probá en ${rl.retryAfterSec} segundos.`,
+        error: `Demasiados intentos. Intenta en ${rl.retryAfterSec} segundos.`,
       },
       { status: 429 },
     );

@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   if (!rl.ok) {
     return NextResponse.json(
       {
-        error: `Demasiados intentos. Probá en ${rl.retryAfterSec} segundos.`,
+        error: `Demasiados intentos. Intenta en ${rl.retryAfterSec} segundos.`,
       },
       { status: 429 },
     );

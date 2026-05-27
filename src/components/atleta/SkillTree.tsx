@@ -686,7 +686,7 @@ function translateReason(reason: string): string {
     "no-progressions": "Este movimiento no tiene progresiones aún.",
     "progression-not-found": "Progresión no encontrada.",
     "previous-not-achieved":
-      "Tenés que dominar la progresión anterior primero.",
+      "Tienes que dominar la progresión anterior primero.",
   };
   return map[reason] ?? `Error: ${reason}`;
 }

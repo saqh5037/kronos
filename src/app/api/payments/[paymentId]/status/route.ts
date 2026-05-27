@@ -23,7 +23,7 @@ export async function GET(
     return NextResponse.json(
       {
         ok: false,
-        error: `Demasiadas consultas. Probá en ${rl.retryAfterSec} segundos.`,
+        error: `Demasiadas consultas. Intenta en ${rl.retryAfterSec} segundos.`,
       },
       { status: 429 },
     );
