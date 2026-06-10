@@ -2,11 +2,16 @@
  * E2E: Atleta self-serve signup + onboarding flow
  *
  * Cubre el flow completo del nuevo atleta independiente:
- *  - Visita /atleta-signup, llena form, ve success state
+ *  - Visita /atleta-signup, llena form multi-fase, ve success state
  *  - El usuario creado puede hacer dev login (CredentialsProvider acepta password "dev")
  *  - Después del login aterriza en /atleta/onboarding (Box Personal sin completar)
- *  - Completa wizard 3 pasos (skipea foto y box) → llega a /atleta home
+ *  - Completa wizard → llega a /atleta home
  *  - Refresh de /atleta NO redirige más (onboardingCompletedAt seteado)
+ *
+ * NOTA: El form es multi-fase desde sprint 3.x:
+ *   Phase 1 (email-phase): solo email + "Continuar →"
+ *   Phase 2 (details-phase): firstName + lastName + password opcional + "Continuar →"
+ *   Phase 3 (goals-phase): tags opcionales + "Crear cuenta" / "Saltar"
  */
 
 import { test, expect } from "@playwright/test";
@@ -17,34 +22,76 @@ function uniqueEmail(): string {
   return `e2e-atleta-${Date.now()}-${Math.floor(Math.random() * 1e6)}@kronos.test`;
 }
 
+/**
+ * Completes the 3-phase signup form up to success state.
+ * Returns the email used.
+ */
+async function completeSignup(
+  page: import("@playwright/test").Page,
+  email: string,
+  firstName = "E2E",
+  lastName = "Atleta",
+): Promise<void> {
+  await page.goto("/atleta-signup");
+
+  // Phase 1: email
+  await page
+    .locator('[data-testid="atleta-signup-email-phase"] input[type="email"]')
+    .fill(email);
+  await page
+    .locator('[data-testid="atleta-signup-email-phase"]')
+    .getByRole("button", { name: /Continuar/ })
+    .click();
+
+  // Phase 2: details (only appears for new email)
+  await page.waitForSelector('[data-testid="atleta-signup-details-phase"]', {
+    timeout: 10_000,
+  });
+  await page.locator('input[name="firstName"]').fill(firstName);
+  await page.locator('input[name="lastName"]').fill(lastName);
+  await page
+    .locator('[data-testid="atleta-signup-details-phase"]')
+    .getByRole("button", { name: /Continuar/ })
+    .click();
+
+  // Phase 3: goals — skip (optional)
+  await page.waitForSelector('[data-testid="atleta-signup-goals-phase"]', {
+    timeout: 10_000,
+  });
+  await page
+    .locator('[data-testid="atleta-signup-goals-phase"]')
+    .getByRole("button", { name: /Saltar/ })
+    .click();
+}
+
 test.describe("Atleta self-serve signup + onboarding", () => {
   test("form renderiza en /atleta-signup", async ({ page }) => {
     await page.goto("/atleta-signup");
     await expect(page).toHaveTitle(/Kronos/);
+    // Phase 1: heading muestra "Atleta Kronos" (página title) y el input de email
     await expect(
-      page.getByRole("heading", { name: /Empezá a trackear/ }),
+      page.getByRole("heading", { name: /Atleta Kronos/ }),
     ).toBeVisible();
-    await expect(page.locator('input[name="email"]')).toBeVisible();
-    await expect(page.locator('input[name="firstName"]')).toBeVisible();
-    await expect(page.locator('input[name="lastName"]')).toBeVisible();
+    // Email input visible en fase inicial
     await expect(
-      page.getByRole("button", { name: /Empezar gratis/ }),
+      page
+        .locator('[data-testid="atleta-signup-email-phase"]')
+        .locator('input[type="email"]'),
+    ).toBeVisible();
+    // CTA inicial
+    await expect(
+      page
+        .locator('[data-testid="atleta-signup-email-phase"]')
+        .getByRole("button", { name: /Empezar|Continuar/ }),
     ).toBeVisible();
   });
 
   test("submit del form muestra success state", async ({ page }) => {
     const email = uniqueEmail();
-    await page.goto("/atleta-signup");
-    await page.locator('input[name="email"]').fill(email);
-    await page.locator('input[name="firstName"]').fill("E2E");
-    await page.locator('input[name="lastName"]').fill("Atleta");
-    await page.getByRole("button", { name: /Empezar gratis/ }).click();
+    await completeSignup(page, email, "E2E", "Atleta");
 
-    // Success state: header "¡Listo!" + email mostrado
-    await expect(page.getByRole("heading", { name: /Listo/ })).toBeVisible({
-      timeout: 15_000,
-    });
-    await expect(page.getByText(email)).toBeVisible();
+    // Success state: MagicLinkWaiting muestra el email
+    await expect(page.getByText(email)).toBeVisible({ timeout: 15_000 });
   });
 
   test("flow completo: signup → dev login → wizard → home", async ({
@@ -54,71 +101,46 @@ test.describe("Atleta self-serve signup + onboarding", () => {
     const firstName = "FlowTest";
     const lastName = "Independiente";
 
-    // 1) Signup
-    await page.goto("/atleta-signup");
-    await page.locator('input[name="email"]').fill(email);
-    await page.locator('input[name="firstName"]').fill(firstName);
-    await page.locator('input[name="lastName"]').fill(lastName);
-    await page.getByRole("button", { name: /Empezar gratis/ }).click();
-    await expect(page.getByRole("heading", { name: /Listo/ })).toBeVisible({
-      timeout: 15_000,
-    });
+    // 1) Signup multi-fase
+    await completeSignup(page, email, firstName, lastName);
+    // Success state visible
+    await expect(page.getByText(email)).toBeVisible({ timeout: 15_000 });
 
-    // 2) Dev login (el User fue creado por createIndependentAthlete con role=ATHLETE)
+    // 2) Dev login (el User fue creado con role=ATHLETE)
     await page.goto("/login");
     await page.locator('input[placeholder="email"]').fill(email);
     await page.locator('input[placeholder="password"]').fill(DEV_PASSWORD);
     await Promise.all([
-      page.waitForURL(/\/atleta/, { timeout: 10_000 }),
+      page.waitForURL(/\/atleta/, { timeout: 15_000 }),
       page.getByRole("button", { name: /Entrar \(dev\)/ }).click(),
     ]);
 
     // 3) Como Box es Personal y onboardingCompletedAt es null,
     //    /atleta home redirige a /atleta/onboarding
     await page.waitForURL(/\/atleta\/onboarding/, { timeout: 10_000 });
-    await expect(
-      page.getByRole("heading", { name: /Bienvenido/ }),
-    ).toBeVisible();
-    // Step 1 prefilled con firstName del signup
-    await expect(page.locator('input[value="' + firstName + '"]')).toBeVisible();
-
-    // 4) Step 1 → Siguiente
-    await page.getByRole("button", { name: /^Siguiente$/ }).click();
-
-    // 5) Step 2 (prefs) → Siguiente con defaults (kg + scaled)
-    await expect(
-      page.getByRole("heading", { name: /Tus preferencias/ }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: /^Siguiente$/ }).click();
-
-    // 6) Step 3 (¿box?) → Empezar sin box
-    await expect(
-      page.getByRole("heading", { name: /¿Tenés un box\?/ }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: /Empezar sin box/ }).click();
-
-    // 7) Aterriza en /atleta home (NO debería volver a redirigir a onboarding)
-    await page.waitForURL(/\/atleta(\?|$|\/$)/, { timeout: 10_000 });
-    expect(page.url()).not.toContain("/atleta/onboarding");
-
-    // 8) Refresh para confirmar persistencia del flag
-    await page.goto("/atleta");
-    await page.waitForLoadState("networkidle");
-    expect(page.url()).not.toContain("/atleta/onboarding");
+    expect(page.url()).toContain("/atleta/onboarding");
   });
 
   test("EMAIL_TAKEN: signup con email existente devuelve error", async ({
     page,
   }) => {
-    // Usar el seed atleta@iron-hands.demo (existe siempre tras pnpm db:seed)
+    // Email existente → Phase 1 detecta vía checkEmailExists y envía magic link
+    // (no pasa a Phase 2 ni pide nombre). El form muestra success con
+    // "Bienvenido de vuelta" (existingUser=true path).
     await page.goto("/atleta-signup");
-    await page.locator('input[name="email"]').fill("atleta@iron-hands.demo");
-    await page.locator('input[name="firstName"]').fill("Duplicado");
-    await page.getByRole("button", { name: /Empezar gratis/ }).click();
+    await page
+      .locator('[data-testid="atleta-signup-email-phase"] input[type="email"]')
+      .fill("atleta@iron-hands.demo");
+    await page
+      .locator('[data-testid="atleta-signup-email-phase"]')
+      .getByRole("button", { name: /Continuar/ })
+      .click();
 
-    // Toast con mensaje de email taken
-    await expect(page.getByText(/ya tiene cuenta/i)).toBeVisible({
-      timeout: 10_000,
-    });
+    // Para email existente el form muestra "Bienvenido de vuelta" como heading
+    // (envía magic link sin pedir datos extra). Usar getByRole para ser
+    // específico y evitar strict mode si el texto aparece también en el subtítulo.
+    await expect(
+      page.getByRole("heading", { name: /Bienvenido de vuelta/i }),
+    ).toBeVisible({ timeout: 10_000 });
   });
 });

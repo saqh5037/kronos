@@ -15,6 +15,31 @@ export async function disconnect(): Promise<void> {
 }
 
 const SEED_BOX_SLUG = "iron-hands-polanco";
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+
+/**
+ * Bust the server-side today-WOD cache (10 min TTL) after mutating classes
+ * or WODs directly via Prisma. Without this, a page warmed by an earlier
+ * spec keeps serving the pre-mutation WOD for up to 10 minutes.
+ * Best-effort: the dev-only endpoint 404s outside development.
+ */
+export async function invalidateTodayWodCache(tenantId: string): Promise<void> {
+  const box = await db().box.findUnique({
+    where: { id: tenantId },
+    select: { timezone: true },
+  });
+  const dateKey = new Intl.DateTimeFormat("en-CA", {
+    timeZone: box?.timezone ?? "UTC",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  await fetch(`${BASE_URL}/api/dev/revalidate`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ tenantId, dateKey }),
+  }).catch(() => {});
+}
 
 export async function getSeedBoxId(): Promise<string> {
   const box = await db().box.findUnique({
@@ -138,10 +163,14 @@ export async function ensureTodayStrengthClass(): Promise<{
   // 2) Reuse a previously-injected E2E class (00:01 today) if it exists,
   //    pointing to the same 1RM WOD. Cleanup happens between tests via
   //    clearScoresAndPR — we keep the class itself for idempotence.
+  //    IMPORTANT: only match the first minutes of the day. A seed class with
+  //    the same WOD later today must NOT satisfy this check — the page shows
+  //    the FIRST class of the local day, so the injected class has to be it.
+  const reuseCutoff = new Date(start.getTime() + 5 * 60 * 1000);
   const existing = await db().class.findFirst({
     where: {
       tenantId,
-      startsAt: { gte: start, lt: end },
+      startsAt: { gte: start, lt: reuseCutoff },
       isActive: true,
       wodId: wod.id,
     },
@@ -149,6 +178,7 @@ export async function ensureTodayStrengthClass(): Promise<{
   });
 
   if (existing?.wod) {
+    await invalidateTodayWodCache(tenantId);
     return {
       classId: existing.id,
       wodId: existing.wod.id,
@@ -179,6 +209,8 @@ export async function ensureTodayStrengthClass(): Promise<{
       isActive: true,
     },
   });
+
+  await invalidateTodayWodCache(tenantId);
 
   return {
     classId: klass.id,

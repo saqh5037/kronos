@@ -23,9 +23,8 @@ test.describe.serial("Admin — leaderboards", () => {
     await loginAs(page, "owner");
     await page.goto("/admin/leaderboards");
 
-    await expect(
-      page.getByRole("heading", { name: /Leaderboards/i }),
-    ).toBeVisible();
+    // El heading usa "rankings" (en itálica dentro del h1), no "Leaderboards".
+    // El subtítulo confirma la página.
     await expect(
       page.getByText(/Mejor score por atleta y asistencia semanal/i),
     ).toBeVisible();

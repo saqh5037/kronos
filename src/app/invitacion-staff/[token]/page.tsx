@@ -85,7 +85,7 @@ export default async function StaffInvitationPage({
         <em style={{ color: "var(--k-accent)" }}>{roleLabel}</em>
       </h1>
       <p className="text-[var(--k-t2)] mb-6">
-        Confirmá tu nombre para activar tu cuenta y entrar al admin del Box.
+        Confirma tu nombre para activar tu cuenta y entrar al admin del Box.
       </p>
 
       <AcceptStaffInvitationForm

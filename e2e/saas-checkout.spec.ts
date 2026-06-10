@@ -35,7 +35,10 @@ test.describe.serial("SaaS checkout", () => {
     await loginAs(page, "owner");
     await page.goto("/admin/billing/checkout");
 
-    await expect(page.getByRole("heading", { name: /Elegí tu/ })).toBeVisible();
+    // Heading usa "Elige tu plan" (no voseo "Elegí")
+    await expect(
+      page.getByRole("heading", { name: /Elige tu/i }),
+    ).toBeVisible();
 
     // Los 3 planes están visibles
     await expect(
@@ -71,7 +74,7 @@ test.describe.serial("SaaS checkout", () => {
     await proCard.getByRole("button").click();
 
     // Aparece la pantalla de mock-confirm
-    await expect(page.getByText(/Confirmá la activación de/)).toBeVisible({
+    await expect(page.getByText(/Confirma la activación de/)).toBeVisible({
       timeout: 5_000,
     });
     await expect(
@@ -134,7 +137,7 @@ test.describe.serial("SaaS checkout", () => {
       .locator(".k-card", { hasText: "Pro" })
       .getByRole("button")
       .click();
-    await expect(page.getByText(/Confirmá la activación de/)).toBeVisible({
+    await expect(page.getByText(/Confirma la activación de/)).toBeVisible({
       timeout: 5_000,
     });
     await page.getByRole("button", { name: /Confirmar pago/ }).click();
@@ -157,9 +160,12 @@ test.describe.serial("SaaS checkout", () => {
     await expect(
       page.getByRole("heading", { name: /Historial de cobros/i }),
     ).toBeVisible();
-    await expect(page.getByText(/^Pro$/).first()).toBeVisible();
-    await expect(page.getByText(/\$499 MXN/).first()).toBeVisible();
-    await expect(page.getByText("Pagado").first()).toBeVisible();
+    // Scope to the invoices table — a bare /^Pro$/ also matches the hidden
+    // <option> in the plan filter select.
+    const table = page.getByRole("table");
+    await expect(table.getByText(/^Pro$/).first()).toBeVisible();
+    await expect(table.getByText(/\$499 MXN/).first()).toBeVisible();
+    await expect(table.getByText("Pagado").first()).toBeVisible();
     await expect(
       page.getByRole("button", { name: /Descargar CSV/i }),
     ).toBeVisible();

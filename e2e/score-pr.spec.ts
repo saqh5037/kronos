@@ -46,9 +46,11 @@ test.describe.serial("Atleta — score submission + PR detection (1RM)", () => {
     await page.locator('input[name="value"]').fill("100");
     await page.getByRole("button", { name: /Guardar score/i }).click();
 
-    await expect(page.getByText(/Nuevo PR registrado/i)).toBeVisible({
-      timeout: 10_000,
-    });
+    // "Nuevo PR registrado" aparece tanto en el label del ScoreForm como en el
+    // toast. Usamos el toast (.k-toast__title) para evitar strict mode violation.
+    await expect(
+      page.locator(".k-toast__title", { hasText: /Nuevo PR registrado/i }),
+    ).toBeVisible({ timeout: 10_000 });
 
     await expect
       .poll(
@@ -74,9 +76,9 @@ test.describe.serial("Atleta — score submission + PR detection (1RM)", () => {
     await page.locator('input[name="value"]').fill("120");
     await page.getByRole("button", { name: /Guardar score/i }).click();
 
-    await expect(page.getByText(/Nuevo PR registrado/i)).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator(".k-toast__title", { hasText: /Nuevo PR registrado/i }),
+    ).toBeVisible({ timeout: 10_000 });
 
     await expect
       .poll(
@@ -108,9 +110,11 @@ test.describe.serial("Atleta — score submission + PR detection (1RM)", () => {
     await page.locator('input[name="value"]').fill("80");
     await page.getByRole("button", { name: /Guardar score/i }).click();
 
-    await expect(page.getByText(/Score guardado/i)).toBeVisible({
-      timeout: 10_000,
-    });
+    // "Score guardado" aparece tanto como feedback inline como en el toast.
+    // Usar el toast específicamente para evitar strict mode violation.
+    await expect(
+      page.locator(".k-toast__title", { hasText: /Score guardado/i }),
+    ).toBeVisible({ timeout: 10_000 });
 
     const pr = await db().pR.findUnique({
       where: { athleteId_movementId: { athleteId: athlete.id, movementId } },

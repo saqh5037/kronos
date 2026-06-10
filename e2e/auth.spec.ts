@@ -48,8 +48,12 @@ test.describe("Auth — guards y dev login", () => {
   test("dev login COACH → /admin con acceso a módulos", async ({ page }) => {
     await loginAs(page, "coach");
     await expect(page).toHaveURL(/\/admin/);
-    // Sidebar muestra Reservas (verifica que el layout admin cargó)
-    await expect(page.getByRole("link", { name: /Reservas/ })).toBeVisible();
+    // Coach dashboard cargó: heading h1 visible. El sidebar legacy no aparece
+    // en /admin (SidebarGate lo omite — el dashboard v3 o el CoachDashboard
+    // incluyen su propia nav). Verificamos que el CoachDashboard renderizó.
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("dev login ATHLETE → middleware redirige a /atleta", async ({
@@ -90,9 +94,12 @@ test.describe("Auth — guards y dev login", () => {
       .fill(SEED_USERS.owner.email);
     await page.locator('input[placeholder="password"]').fill("wrong-password");
     await page.getByRole("button", { name: /Entrar \(dev\)/ }).click();
-    await expect(page.getByText(/Credenciales inválidas/i)).toBeVisible({
-      timeout: 5000,
-    });
+    // El error se muestra como texto inline en el dev-login form (no solo el toast).
+    // Usar locator específico dentro del form para evitar strict-mode violation
+    // cuando el toast también muestra el mismo texto.
+    await expect(
+      page.getByRole("main").getByText(/Credenciales inválidas/i),
+    ).toBeVisible({ timeout: 5000 });
     await expect(page).toHaveURL(/login/);
   });
 });

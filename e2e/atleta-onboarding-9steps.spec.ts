@@ -114,7 +114,7 @@ test.describe("Athlete Onboarding 9-Step Wizard", () => {
     // Signup crea atleta nuevo con Box Personal (B2C). El gate del
     // `atleta/layout.tsx` debe forzar redirect a /atleta/onboarding al
     // tocar cualquier ruta /atleta/*. El wizard debe renderizar Paso 1
-    // con título "¿Cuál es tu objetivo?" y 4 RadioCards.
+    // con título "¿Por qué empiezas ahora?" y 4 RadioCards.
     const email = await signupNewAtleta(page, "Wizard", "Tester");
     await devLoginAs(page, email);
 
@@ -124,9 +124,9 @@ test.describe("Athlete Onboarding 9-Step Wizard", () => {
     // Page title del wizard
     await expect(page).toHaveTitle(/Bienvenido/);
 
-    // Heading del Step 1
+    // Heading del Step 1 (Step1Reason.tsx usa "¿Por qué empiezas ahora?")
     await expect(
-      page.getByRole("heading", { name: /¿Cuál es tu objetivo\?/ }),
+      page.getByRole("heading", { name: /¿Por qué empiezas ahora\?/ }),
     ).toBeVisible();
 
     // Indicador "Paso 1 de 9"

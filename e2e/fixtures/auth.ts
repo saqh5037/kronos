@@ -24,13 +24,18 @@ export async function loginAs(page: Page, role: Role): Promise<void> {
   await Promise.all([
     // Generous timeout: the first navigation after login may hit a cold Next
     // dev compile of the destination route, which can exceed 10s.
-    page.waitForURL(/\/(admin|atleta)/, { timeout: 30_000 }),
+    // Regex matches /admin, /admin/, /admin/*, /atleta, /atleta/, /atleta/*
+    page.waitForURL(/\/(admin|atleta)(\/|$|\?)/, { timeout: 30_000 }),
     page.getByRole("button", { name: /Entrar \(dev\)/ }).click(),
   ]);
 }
 
 export async function signOut(page: Page): Promise<void> {
-  await page.goto("/api/auth/signout");
-  await page.getByRole("button", { name: "Sign out" }).click();
-  await page.waitForURL(/\/login/);
+  // The app uses a custom /logout page (not the NextAuth /api/auth/signout
+  // default). Pass callbackUrl=/login so after signout we land on /login.
+  await page.goto("/logout?callbackUrl=/login");
+  await page
+    .getByRole("button", { name: /cerrar sesión/i })
+    .click({ timeout: 10_000 });
+  await page.waitForURL(/\/login/, { timeout: 15_000 });
 }
