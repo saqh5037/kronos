@@ -888,6 +888,436 @@ export const MOVEMENT_ENRICHMENTS: Record<string, MovementEnrichment> = {
     musclesWorked: ["shoulders", "triceps", "core", "upper back"],
     difficulty: 3,
   },
+  "double-under": {
+    cues: {
+      setup: [
+        "Cuerda ajustada: al pisarla, los mangos llegan a la axila",
+        "Pies juntos o ligeramente separados, cuerpo recto",
+      ],
+      dos: [
+        "Muñecas hacen el trabajo — giro rápido y pequeño",
+        "Salto neutro: rodillas ligeramente dobladas, cabeza en línea",
+        "Ritmo constante: no saltar más alto, girar más rápido",
+      ],
+      donts: [
+        "Patear hacia atrás (donkey kick) — acorta el ciclo",
+        "Doblar el torso hacia adelante",
+        "Girar los brazos en vez de las muñecas",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Donkey kick",
+        description: "Los talones van hacia atrás al saltar, enredando la cuerda.",
+        fixCue: "Aprieta glúteos, mantén piernas rectas hacia abajo",
+      },
+      {
+        title: "Salto exagerado",
+        description: "Intentar ganar tiempo subiendo más alto en vez de girar más rápido.",
+        fixCue: "Mismo salto que en single-under, solo más rápido de muñecas",
+      },
+    ],
+    progressions: [
+      {
+        name: "Single-under consistente (50+ sin fallo)",
+        level: "beginner",
+        description: "Establece ritmo y postura base antes de introducir el doble giro.",
+      },
+      {
+        name: "Single-single-double (1-1-2)",
+        level: "beginner",
+        description: "Patrón de transición: dos singles normales y un double-under. Permite sentir el doble giro sin perder el ritmo.",
+      },
+      {
+        name: "Double-under en series cortas (5-10 consecutivos)",
+        level: "intermediate",
+        description: "Dobles consecutivos con pequeñas pausas de recuperación entre sets.",
+      },
+      {
+        name: "Double-under en series de 30+ consecutivos",
+        level: "advanced",
+        description: "Ritmo sostenido sin interrupciones. Velocidad de muñeca estable.",
+      },
+    ],
+    musclesWorked: ["calves", "core", "shoulders", "forearms"],
+    difficulty: 3,
+  },
+  "toes-to-bar": {
+    cues: {
+      setup: [
+        "Colgado en barra con agarre prono, hombros activos hacia abajo",
+        "Cuerpo en posición hollow antes de iniciar el kip",
+      ],
+      dos: [
+        "Activar el ciclo hollow-arch para generar momentum",
+        "Ambos pies tocan la barra simultáneamente",
+        "Mirar ligeramente al frente, no hacia arriba",
+      ],
+      donts: [
+        "Llevar solo un pie (barre a la barra con piernas separadas)",
+        "Balancear sin control en el kip",
+        "Soltar los hombros al recibirte — hombros siempre activos",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Piernas separadas al tocar la barra",
+        description: "Solo una pierna llega. El estándar CrossFit exige que ambos pies toquen juntos.",
+        fixCue: "Junta los talones antes de subir",
+      },
+      {
+        title: "Kip sin hollow-arch",
+        description: "El balanceo viene de las piernas sueltas, no del ciclo de cuerpo.",
+        fixCue: "Empuja la barra lejos durante el arch, luego recógela en hollow",
+      },
+    ],
+    progressions: [
+      {
+        name: "Dead hang knee raise",
+        level: "beginner",
+        description: "Desde colgado, llevar las rodillas al pecho de forma estricta. Activa el core y acostumbra los hombros al colgado activo.",
+      },
+      {
+        name: "Kipping knee raise",
+        level: "beginner",
+        description: "Knee raise con ciclo hollow-arch. Introduce el kip antes de exigir el ROM completo.",
+      },
+      {
+        name: "Knees-to-elbows",
+        level: "intermediate",
+        description: "Las rodillas tocan los codos. Progresión intermedia que exige más flexión de cadera.",
+      },
+      {
+        name: "Toes-to-bar kipping",
+        level: "advanced",
+        description: "Ambos pies tocan la barra simultáneamente con kip eficiente. Estándar CrossFit completo.",
+      },
+    ],
+    musclesWorked: ["core", "hip flexors", "lats", "forearms"],
+    difficulty: 4,
+  },
+  "ring-dip": {
+    cues: {
+      setup: [
+        "Anillas a la altura de las caderas, brazos extendidos al tope",
+        "Turnout en la posición de soporte: anillas rotadas hacia afuera",
+      ],
+      dos: [
+        "Mantén el turnout (anillas rotando hacia afuera) durante todo el movimiento",
+        "Baja con control: pecho hacia adelante, codos hacia atrás",
+        "Empuja a lockout completo arriba con shrug al final",
+      ],
+      donts: [
+        "Dejar que las anillas se abran demasiado al bajar",
+        "Bajar con torso completamente vertical (convierte en tricep dip puro)",
+        "Rebotar en el bottom sin control",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Anillas inestables — sin turnout",
+        description: "Sin rotación, el hombro queda en posición vulnerable y la fuerza es menor.",
+        fixCue: "Gira las muñecas hacia afuera activamente al subir",
+      },
+      {
+        title: "Rango incompleto",
+        description: "El hombro no baja por debajo del codo.",
+        fixCue: "Pecho hacia adelante en el bottom, hombro por debajo del codo",
+      },
+    ],
+    progressions: [
+      {
+        name: "Ring support hold (soporte estático)",
+        level: "beginner",
+        description: "Mantener el soporte arriba con lockout y turnout por 10-30 seg. Construye estabilidad de hombro.",
+      },
+      {
+        name: "Bar dip estricto",
+        level: "beginner",
+        description: "Dip en barras paralelas para construir fuerza sin la inestabilidad de anillas.",
+      },
+      {
+        name: "Ring dip asistido con bandas",
+        level: "intermediate",
+        description: "Banda elástica bajo los pies reduce el porcentaje de peso corporal. Permite sentir el turnout.",
+      },
+      {
+        name: "Ring dip estricto sin asistencia",
+        level: "advanced",
+        description: "Dip completo en anillas: turnout, ROM completo, lockout limpio arriba.",
+      },
+    ],
+    musclesWorked: ["triceps", "chest", "shoulders", "core"],
+    difficulty: 4,
+  },
+  "pistol-squat": {
+    cues: {
+      setup: [
+        "De pie en una pierna, pierna libre extendida al frente",
+        "Brazos al frente para contrabalancear",
+      ],
+      dos: [
+        "Baja con control — el trasero busca el talón de la pierna de apoyo",
+        "Pierna libre extendida y paralela al suelo en el bottom",
+        "Sube empujando el suelo con el talón",
+      ],
+      donts: [
+        "Dejar que la rodilla colapse hacia adentro",
+        "Inclinarte excesivamente hacia adelante perdiendo el torso",
+        "Bajar sin control y rebotar en el bottom",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Rodilla cayendo hacia adentro (valgus)",
+        fixCue: "Empuja la rodilla hacia afuera en línea con el pie",
+      },
+      {
+        title: "Talón se despega en el bottom",
+        description: "Falta movilidad de tobillo o cadera.",
+        fixCue: "Trabaja dorsiflexión de tobillo; prueba sobre una superficie elevada",
+      },
+    ],
+    progressions: [
+      {
+        name: "Box pistol (sentadilla a caja baja)",
+        level: "beginner",
+        description: "Sentadilla a una pierna bajando a una caja o banco. Elimina el miedo al fondo y controla el rango.",
+      },
+      {
+        name: "Pistol asistido con banda o soporte",
+        level: "beginner",
+        description: "Sostener una banda del techo o la barra del rack para asistencia de balance. Permite el patrón completo con apoyo.",
+      },
+      {
+        name: "Pistol en superfice elevada (déficit reducido)",
+        level: "intermediate",
+        description: "De pie sobre un pequeño step: la pierna libre puede colgar sin tocar el suelo, aliviando la exigencia de movilidad.",
+      },
+      {
+        name: "Pistol squat completo sin asistencia",
+        level: "advanced",
+        description: "Desde el suelo, descenso controlado hasta el fondo y subida sin apoyo. Ambas piernas.",
+      },
+    ],
+    musclesWorked: ["quads", "glutes", "core", "hip flexors", "calves"],
+    difficulty: 5,
+  },
+  "handstand-walk": {
+    cues: {
+      setup: [
+        "Kick-up controlado a la pared para calibrar posición invertida",
+        "Manos a ancho de hombros, dedos abiertos para grip",
+      ],
+      dos: [
+        "Hombros abiertos — empuja el suelo activamente",
+        "Mirada al suelo entre las manos",
+        "Pasos pequeños y rápidos con alternancia de manos",
+      ],
+      donts: [
+        "Mirar hacia adelante — pierde alineación",
+        "Pasos grandes — desestabilizan más que ayudan",
+        "Perder la tensión del core en posición invertida",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Banana-back (hiperextensión lumbar)",
+        description: "La cadera cae adelante del stack vertical, hace la caminata ineficiente.",
+        fixCue: "Costillas abajo, glúteos apretados, cuerpo en línea recta",
+      },
+      {
+        title: "Mirar al frente en vez del suelo",
+        fixCue: "Ojos entre las manos — el cuello sigue al torso",
+      },
+    ],
+    progressions: [
+      {
+        name: "Wall walk (caminar manos hacia la pared)",
+        level: "beginner",
+        description: "Desde el suelo en push-up, caminar las manos hacia la pared a posición invertida y bajar. Introduce la inversión de forma segura.",
+      },
+      {
+        name: "Handstand hold contra pared (10-30 seg)",
+        level: "beginner",
+        description: "Mantener el balance invertido contra la pared trabajando alineación y tensión corporal.",
+      },
+      {
+        name: "Handstand shoulder taps contra pared",
+        level: "intermediate",
+        description: "Desde el handstand en pared, levantar una mano y tocar el hombro alternando. Introduce el balance unilateral.",
+      },
+      {
+        name: "Handstand walk freestanding 5m+",
+        level: "advanced",
+        description: "Caminata sin apoyo de pared. Distancia mínima estándar en competencia: 5m.",
+      },
+    ],
+    musclesWorked: ["shoulders", "core", "triceps", "wrist flexors", "traps"],
+    difficulty: 5,
+  },
+  "muscle-up-ring": {
+    cues: {
+      setup: [
+        "False grip: muñeca apoyada en las anillas para acortar el pull",
+        "Anillas a la altura de la cadera, cuerpo recto colgado",
+      ],
+      dos: [
+        "Pull agresivo y alto: pecho hacia las anillas",
+        "Transición rápida: inclinar el torso adelante al llegar al pecho",
+        "Empujar a lockout con turnout al final",
+      ],
+      donts: [
+        "Perder el false grip — convierte el movimiento en imposible",
+        "Pull demasiado vertical (como pull-up) en vez de inclinado",
+        "Quedarse debajo de las anillas en la transición",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "No pasar la transición (queda atascado en el pecho)",
+        description: "El momento más difícil del MU. Se necesita inclinar el torso hacia adelante para pasar las anillas.",
+        fixCue: "Inclina el torso sobre las anillas al llegar al nivel del pecho",
+      },
+      {
+        title: "Pull sin false grip",
+        description: "Sin false grip, el pull necesita ser mucho más alto y el movimiento se vuelve casi imposible.",
+        fixCue: "False grip estricto: el hueso del radio apoyado sobre la anilla",
+      },
+    ],
+    progressions: [
+      {
+        name: "False grip ring row",
+        level: "beginner",
+        description: "Ring row con false grip mantenido. Construye fuerza del pull y acostumbra la muñeca a la posición.",
+      },
+      {
+        name: "Transition drill con banda (banded MU)",
+        level: "beginner",
+        description: "Banda elástica bajo los pies o caderas reduce el peso. Permite practicar la transición completa.",
+      },
+      {
+        name: "Jumping muscle-up en anillas bajas",
+        level: "intermediate",
+        description: "Con anillas a nivel del pecho, usar un pequeño salto para generar momentum. Énfasis en la transición.",
+      },
+      {
+        name: "Strict ring muscle-up",
+        level: "advanced",
+        description: "Muscle-up completo sin momentum de kip. Máxima expresión de fuerza: pull + transición + dip.",
+      },
+    ],
+    musclesWorked: ["lats", "biceps", "triceps", "chest", "core", "forearms"],
+    difficulty: 5,
+  },
+  "muscle-up-bar": {
+    cues: {
+      setup: [
+        "Agarre prono, manos ligeramente más amplias que hombros",
+        "Cuerpo en arco (arch) como posición de salida del kip",
+      ],
+      dos: [
+        "Kip agresivo: hips-to-bar en el pull — las caderas van a la barra",
+        "Lean adelante del torso al llegar arriba para facilitar la transición",
+        "Press-out limpio: empujar a lockout completo",
+      ],
+      donts: [
+        "Pull vertical como pull-up estándar (no alcanza la barra)",
+        "Codos muy abiertos durante la transición",
+        "Bloquear el kip antes de que la cadera llegue a la barra",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Hips no llegan a la barra",
+        description: "El pull no es suficientemente alto. En bar MU, las caderas deben ir a nivel de la barra para hacer la transición.",
+        fixCue: "Piensa 'caderas a la barra', no 'mentón a la barra'",
+      },
+      {
+        title: "Transición con torso vertical",
+        description: "Quedarse derecho no permite pasar los codos sobre la barra.",
+        fixCue: "Inclina el torso sobre la barra en el momento del pull alto",
+      },
+    ],
+    progressions: [
+      {
+        name: "Kipping pull-up alto (hip-to-bar)",
+        level: "beginner",
+        description: "Pull-up con kip llevando la cadera a tocar la barra. Construye la mecánica del pull alto sin hacer la transición.",
+      },
+      {
+        name: "Chest-to-bar con kip agresivo",
+        level: "intermediate",
+        description: "El pecho toca la barra con kip potente. Un paso antes del MU.",
+      },
+      {
+        name: "Bar muscle-up con banda",
+        level: "intermediate",
+        description: "Banda elástica en los pies reduce el peso. Permite practicar el pull alto y la transición.",
+      },
+      {
+        name: "Bar muscle-up estándar",
+        level: "advanced",
+        description: "Muscle-up completo en barra fija: kip, hips-to-bar, transición, press-out limpio.",
+      },
+    ],
+    musclesWorked: ["lats", "biceps", "triceps", "shoulders", "core"],
+    difficulty: 5,
+  },
+  "clean-and-jerk": {
+    cues: {
+      setup: [
+        "Mismo setup que el clean: barra sobre el medio del pie, espalda neutra",
+        "Antes del jerk: recuperar completamente del clean, respirar",
+      ],
+      dos: [
+        "Clean completo primero: rack frontal sólido con codos altos",
+        "Jerk: dip corto y vertical, drive explosivo, recibir en split o push jerk",
+        "Bloquear overhead antes de recuperar el split",
+      ],
+      donts: [
+        "Hacer el jerk sin recuperarse completamente del clean",
+        "Dip horizontal en el jerk (carga la espalda baja)",
+        "Flexionar brazos antes de que las piernas completen el drive",
+      ],
+    },
+    commonMistakes: [
+      {
+        title: "Jerk inmediato sin recuperar del clean",
+        description: "El atleta no completa la posición de rack frontal antes de hacer el jerk, perdiendo eficiencia.",
+        fixCue: "Pausa de 1-2 seg en el rack, estabiliza y luego jerk",
+      },
+      {
+        title: "Barra hacia adelante en el jerk",
+        description: "El drive no es vertical, la barra sale al frente del overhead.",
+        fixCue: "Empuja la cabeza por la 'ventana' al finalizar el drive",
+      },
+    ],
+    progressions: [
+      {
+        name: "Clean + pause front squat",
+        level: "beginner",
+        description: "Practicar el clean llegando a rack frontal sólido sin jerk. Foco en la postura de recepción.",
+      },
+      {
+        name: "Clean + push press",
+        level: "beginner",
+        description: "Clean seguido de push press (no jerk). Introduce el overhead sin la complejidad del split.",
+      },
+      {
+        name: "Clean + push jerk",
+        level: "intermediate",
+        description: "Clean completo seguido de push jerk con recepción en press position. El patrón base del C&J competitivo.",
+      },
+      {
+        name: "Clean and jerk con split jerk",
+        level: "advanced",
+        description: "Clean completo + split jerk. Permite manejar pesos máximos con mayor estabilidad overhead.",
+      },
+    ],
+    musclesWorked: ["hamstrings", "glutes", "quads", "traps", "shoulders", "triceps", "core"],
+    difficulty: 5,
+  },
   "handstand-push-up": {
     cues: {
       setup: [
