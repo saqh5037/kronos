@@ -17,14 +17,20 @@ import {
   AnimatedItem,
 } from "@/components/kronos/AnimatedSection";
 import KCard from "@/components/kronos/KCard";
-import MovementCatalog from "@/components/atleta/MovementCatalog";
+import MovementCatalogCached from "@/components/atleta/MovementCatalogCached";
 import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
 import { movimientosTour } from "@/components/tour/tours/movimientos";
+import { getCachedSession } from "@/server/session";
 
 export async function MovimientosContentSection() {
   let movements: RankedMovement[] = [];
   let catalog: MovementRow[] = [];
+  let tenantId = "";
+  let userId = "";
   try {
+    const session = await getCachedSession();
+    tenantId = session?.user?.tenantId ?? "";
+    userId = session?.user?.id ?? "";
     [movements, catalog] = await Promise.all([
       listMyMovementsRated(50),
       listMovements(),
@@ -194,7 +200,11 @@ export async function MovimientosContentSection() {
               {catalog.length} MOVIMIENTOS
             </span>
           </div>
-          <MovementCatalog movements={catalog} />
+          <MovementCatalogCached
+            tenantId={tenantId}
+            userId={userId}
+            initialData={catalog}
+          />
         </AnimatedSection>
       )}
     </div>

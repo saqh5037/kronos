@@ -1,4 +1,5 @@
 import LogoutClient from "./LogoutClient";
+import { getCachedSession } from "@/server/session";
 
 export const metadata = { title: "Kronos — Cerrar sesión" };
 
@@ -12,6 +13,11 @@ export default async function LogoutPage({ searchParams }: LogoutPageProps) {
     typeof params.callbackUrl === "string" && params.callbackUrl
       ? params.callbackUrl
       : "/";
+
+  // Read userId server-side so LogoutClient doesn't need useSession()
+  // (the /logout page has no SessionProvider in its layout tree).
+  const session = await getCachedSession();
+  const userId = session?.user?.id;
 
   return (
     <main
@@ -40,7 +46,7 @@ export default async function LogoutPage({ searchParams }: LogoutPageProps) {
           <p className="k-eyebrow mt-1">El tiempo es tu rival</p>
         </div>
 
-        <LogoutClient callbackUrl={callbackUrl} />
+        <LogoutClient callbackUrl={callbackUrl} userId={userId} />
       </div>
     </main>
   );

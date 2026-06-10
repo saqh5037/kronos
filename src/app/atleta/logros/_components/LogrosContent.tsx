@@ -3,22 +3,16 @@ import { EmptyStateCTA } from "@/components/kronos/EmptyStateCTA";
 import Link from "next/link";
 import type { Route } from "next";
 import type { BadgeDetail } from "@/server/actions/badges";
+import { getCachedSession } from "@/server/session";
+import LogrosCatalogCached from "@/components/atleta/LogrosCatalogCached";
 
 export async function LogrosContent() {
+  const session = await getCachedSession();
+  const tenantId = session?.user?.tenantId ?? "";
+  const userId = session?.user?.id ?? "";
   const all = await listBadgesWithProgress();
 
-  const unlocked = all
-    .filter((b) => b.unlocked)
-    .sort(
-      (a, b) => (b.earnedAt?.getTime() ?? 0) - (a.earnedAt?.getTime() ?? 0),
-    );
-  const locked = all
-    .filter((b) => !b.unlocked)
-    .sort((a, b) => (b.progress?.ratio ?? 0) - (a.progress?.ratio ?? 0));
-
-  const total = all.length;
-
-  if (total === 0) {
+  if (all.length === 0) {
     return (
       <div className="px-4">
         <EmptyStateCTA
@@ -34,22 +28,41 @@ export async function LogrosContent() {
   }
 
   return (
-    <>
-      {unlocked.length > 0 && (
-        <LogrosSection
-          title="Desbloqueados"
-          eyebrow={`${unlocked.length}`}
-          accent
-        >
-          <LogrosGrid items={unlocked} />
-        </LogrosSection>
-      )}
-      {locked.length > 0 && (
-        <LogrosSection title="Por desbloquear" eyebrow={`${locked.length}`}>
-          <LogrosGrid items={locked} />
-        </LogrosSection>
-      )}
-    </>
+    <LogrosCatalogCached tenantId={tenantId} userId={userId} initialData={all}>
+      {(badges) => {
+        const unlocked = badges
+          .filter((b) => b.unlocked)
+          .sort(
+            (a, b) =>
+              (b.earnedAt?.getTime() ?? 0) - (a.earnedAt?.getTime() ?? 0),
+          );
+        const locked = badges
+          .filter((b) => !b.unlocked)
+          .sort((a, b) => (b.progress?.ratio ?? 0) - (a.progress?.ratio ?? 0));
+
+        return (
+          <>
+            {unlocked.length > 0 && (
+              <LogrosSection
+                title="Desbloqueados"
+                eyebrow={`${unlocked.length}`}
+                accent
+              >
+                <LogrosGrid items={unlocked} />
+              </LogrosSection>
+            )}
+            {locked.length > 0 && (
+              <LogrosSection
+                title="Por desbloquear"
+                eyebrow={`${locked.length}`}
+              >
+                <LogrosGrid items={locked} />
+              </LogrosSection>
+            )}
+          </>
+        );
+      }}
+    </LogrosCatalogCached>
   );
 }
 

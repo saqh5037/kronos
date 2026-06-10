@@ -2,17 +2,26 @@
 
 import { useState } from "react";
 import { signOut } from "next-auth/react";
+import { clearQueryCacheAndStorage } from "@/components/providers/QueryProvider";
 
 type Props = {
   callbackUrl: string;
+  /** userId is passed from the server component so we avoid useSession() here
+   *  (the /logout page has no SessionProvider in its layout tree). */
+  userId?: string;
 };
 
-export default function LogoutClient({ callbackUrl }: Props) {
+export default function LogoutClient({ callbackUrl, userId }: Props) {
   const [pending, setPending] = useState(false);
 
   async function handleSignOut() {
     setPending(true);
     try {
+      // Clear IndexedDB device cache BEFORE signing out so the next user
+      // cannot restore cached data belonging to the current user.
+      if (userId) {
+        await clearQueryCacheAndStorage(userId);
+      }
       await signOut({ callbackUrl, redirect: true });
     } catch {
       setPending(false);
