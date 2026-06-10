@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { submitSurveyResponse } from "@/server/actions/surveys";
 import type { SurveyRow } from "@/server/actions/surveys";
 
@@ -35,13 +35,13 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
 
   if (showThankYou) {
     return (
-      <motion.div
+      <m.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         className="mx-3.5 rounded-2xl p-6 text-center border border-[var(--k-accent-line)]"
         style={{ background: "var(--k-accent-soft)" }}
       >
-        <motion.div
+        <m.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 15 }}
@@ -56,14 +56,14 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
               strokeLinejoin="round"
             />
           </svg>
-        </motion.div>
+        </m.div>
         <p className="text-sm font-semibold text-[var(--k-accent)]">
           ¡Gracias por tu feedback!
         </p>
         <p className="text-xs text-[var(--k-t3)] mt-1">
           Tu opinión nos ayuda a mejorar
         </p>
-      </motion.div>
+      </m.div>
     );
   }
 
@@ -102,7 +102,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
       <div className="flex items-center justify-center gap-2 pt-4 pb-1">
         {questions.map((_, i) => (
           <div key={i} className="flex items-center gap-2">
-            <motion.div
+            <m.div
               className={`h-2 rounded-full transition-colors ${
                 i <= questionIndex
                   ? "bg-[var(--k-accent)]"
@@ -125,7 +125,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
 
         {/* Question with slide animation */}
         <AnimatePresence mode="wait" custom={direction}>
-          <motion.div
+          <m.div
             key={questionIndex}
             custom={direction}
             variants={slideVariants}
@@ -140,7 +140,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
 
             <div className="flex gap-2">
               {currentQuestion.options.map((opt) => (
-                <motion.button
+                <m.button
                   key={opt.value}
                   onClick={() => handleOption(currentQuestion.id, opt.value)}
                   disabled={isPending}
@@ -149,7 +149,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
                   whileTap={{ scale: 0.92 }}
                 >
                   {opt.emoji && (
-                    <motion.span
+                    <m.span
                       className="text-2xl leading-none"
                       whileHover={{
                         y: [0, -4, 0],
@@ -160,15 +160,15 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
                       }}
                     >
                       {opt.emoji}
-                    </motion.span>
+                    </m.span>
                   )}
                   <span className="text-[11px] font-semibold text-center leading-tight text-[var(--k-t2)]">
                     {opt.label}
                   </span>
-                </motion.button>
+                </m.button>
               ))}
             </div>
-          </motion.div>
+          </m.div>
         </AnimatePresence>
       </div>
     </div>

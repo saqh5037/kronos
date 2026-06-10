@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { type ReactNode } from "react";
 
 type CardVariant = "default" | "featured" | "ghost" | "flat";
@@ -31,7 +31,7 @@ export default function KCard({
 
   if (animate) {
     return (
-      <motion.div
+      <m.div
         className={baseClass}
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.995 }}
@@ -39,7 +39,7 @@ export default function KCard({
         onClick={onClick}
       >
         {children}
-      </motion.div>
+      </m.div>
     );
   }
 

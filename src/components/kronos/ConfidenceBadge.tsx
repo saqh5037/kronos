@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 interface ConfidenceBadgeProps {
   confidence: number;
@@ -45,7 +45,7 @@ export default function ConfidenceBadge({
   }
 
   return (
-    <motion.div
+    <m.div
       className="flex items-center gap-1.5"
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -62,7 +62,7 @@ export default function ConfidenceBadge({
         }
       >
         {showCheck && (
-          <motion.svg
+          <m.svg
             width="12"
             height="12"
             viewBox="0 0 12 12"
@@ -71,7 +71,7 @@ export default function ConfidenceBadge({
             animate={{ pathLength: 1 }}
             transition={{ delay: delay + 0.15, duration: 0.3 }}
           >
-            <motion.path
+            <m.path
               d="M2.5 6.5L5 9L9.5 3.5"
               stroke={color}
               strokeWidth="1.5"
@@ -81,10 +81,10 @@ export default function ConfidenceBadge({
               animate={{ pathLength: 1 }}
               transition={{ delay: delay + 0.15, duration: 0.3 }}
             />
-          </motion.svg>
+          </m.svg>
         )}
         {pct}%
       </span>
-    </motion.div>
+    </m.div>
   );
 }

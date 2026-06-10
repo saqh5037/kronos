@@ -9,7 +9,7 @@ import {
   shift,
   type Placement,
 } from "@floating-ui/react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import type { TourStep } from "./types";
 import { useTour } from "./TourProvider";
 
@@ -74,7 +74,7 @@ export function TourTooltip({
       }}
     >
       <AnimatePresence mode="wait">
-        <motion.div
+        <m.div
           key={stepIndex}
           initial={{ opacity: 0, y: 6, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -222,7 +222,7 @@ export function TourTooltip({
               {isLast ? "Listo" : "Siguiente"}
             </button>
           </div>
-        </motion.div>
+        </m.div>
       </AnimatePresence>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { useRef, type ReactNode } from "react";
 
 export default function AdminTransition({ children }: { children: ReactNode }) {
@@ -10,7 +10,7 @@ export default function AdminTransition({ children }: { children: ReactNode }) {
   if (reduce) return <>{children}</>;
 
   return (
-    <motion.div
+    <m.div
       ref={ref}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -21,6 +21,6 @@ export default function AdminTransition({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }

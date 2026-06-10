@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 interface BarSpec {
   x: number;
@@ -52,7 +52,7 @@ export function ChartBars({
               },
             };
         return (
-          <motion.rect
+          <m.rect
             key={`bar-${i}`}
             x={b.x}
             y={b.y}

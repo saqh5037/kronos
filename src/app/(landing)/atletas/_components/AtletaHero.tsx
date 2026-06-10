@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
 import PhoneFrame from "./PhoneFrame";
 import { HERO, CTA_LABEL } from "../_data/copy";
@@ -51,20 +51,20 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
       />
       <div className="lp-hero-bg" aria-hidden="true" />
       <div className="lp-hero-grid">
-        <motion.div initial="hidden" animate="show" variants={variants}>
-          <motion.div className="lp-eyebrow" variants={child}>
+        <m.div initial="hidden" animate="show" variants={variants}>
+          <m.div className="lp-eyebrow" variants={child}>
             <span className="lp-dot" />
             {HERO.eyebrow}
-          </motion.div>
-          <motion.h1 variants={child}>
+          </m.div>
+          <m.h1 variants={child}>
             {HERO.claimLineA}
             <br />
             <span className="lp-tag-lime">{HERO.claimLineB}</span>
-          </motion.h1>
-          <motion.p className="lp-lead" variants={child}>
+          </m.h1>
+          <m.p className="lp-lead" variants={child}>
             {HERO.sub}
-          </motion.p>
-          <motion.div className="lp-hero-actions" variants={child}>
+          </m.p>
+          <m.div className="lp-hero-actions" variants={child}>
             <a
               href={ctaHref}
               className="lp-btn-lime lp-btn-lg"
@@ -88,9 +88,9 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             </a>
-          </motion.div>
+          </m.div>
           {!boxHref && (
-            <motion.p
+            <m.p
               variants={child}
               style={{
                 marginTop: 16,
@@ -100,11 +100,11 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
               }}
             >
               {HERO.ctaTertiary}
-            </motion.p>
+            </m.p>
           )}
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           className="lp-phone-wrap"
           initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -118,7 +118,7 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
             glow
             width={320}
           />
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

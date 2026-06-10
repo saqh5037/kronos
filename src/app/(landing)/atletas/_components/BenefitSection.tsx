@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
 import PhoneFrame from "./PhoneFrame";
 import CountUp from "../../_components/CountUp";
@@ -66,7 +66,7 @@ export default function BenefitSection({
   const phone = reduce ? undefined : phoneVariants;
 
   const Phone = (
-    <motion.div
+    <m.div
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, margin: "-80px" }}
@@ -74,11 +74,11 @@ export default function BenefitSection({
       style={{ display: "flex", justifyContent: "center" }}
     >
       <PhoneFrame src={phoneSrc} alt={phoneAlt} size="lg" glow width={300} />
-    </motion.div>
+    </m.div>
   );
 
   const Text = (
-    <motion.div
+    <m.div
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, margin: "-80px" }}
@@ -176,7 +176,7 @@ export default function BenefitSection({
           <path d="M5 12h14M13 6l6 6-6 6" />
         </svg>
       </a>
-    </motion.div>
+    </m.div>
   );
 
   return (

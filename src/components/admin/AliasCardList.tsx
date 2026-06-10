@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { removeAlias } from "@/server/actions/aliases";
 
 type Alias = {
@@ -89,7 +89,7 @@ export default function AliasCardList({
       <div className="space-y-2">
         <AnimatePresence>
           {filtered.map((a) => (
-            <motion.div
+            <m.div
               key={a.id}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -165,13 +165,13 @@ export default function AliasCardList({
                   )}
                 </div>
               )}
-            </motion.div>
+            </m.div>
           ))}
         </AnimatePresence>
       </div>
 
       {filtered.length === 0 && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="k-card p-8 text-center"
@@ -180,7 +180,7 @@ export default function AliasCardList({
           <p className="text-sm text-text-2">
             No encontramos apodos con &quot;{search}&quot;
           </p>
-        </motion.div>
+        </m.div>
       )}
     </div>
   );

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import {
   ATHLETES_OPTIONS,
   SOFTWARE_OPTIONS,
@@ -262,7 +262,7 @@ function LeadForm({ onSuccess }: { onSuccess: () => void }) {
 
 function LeadFormSuccess() {
   return (
-    <motion.div
+    <m.div
       className="lp-lead-success"
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -303,7 +303,7 @@ function LeadFormSuccess() {
         En el primer mensaje te compartimos el link de la demo grabada y
         coordinamos la llamada.
       </p>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -346,7 +346,7 @@ export default function SectionLeadForm() {
           }}
         />
       </div>
-      <motion.div
+      <m.div
         className="lp-lead-head"
         style={{ position: "relative", zIndex: 1 }}
         initial={reduce ? false : { y: 14 }}
@@ -364,7 +364,7 @@ export default function SectionLeadForm() {
           menos de 24 horas hábiles para entender tu Box y armar el setup. Si no
           funciona, exportamos tu data en CSV y cancelas cuando quieras.
         </p>
-      </motion.div>
+      </m.div>
 
       <div
         className="lp-lead-form-shell"

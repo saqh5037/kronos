@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 const TESTIMONIALS = [
   {
@@ -48,7 +48,7 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
       {/* Backdrop específico de la phase "creating" — gym dark con barbell
           centrada. Sale con fade cuando entra "testimonials". */}
       {phase === "creating" && (
-        <motion.div
+        <m.div
           aria-hidden
           key="creating-bg"
           initial={{ opacity: 0 }}
@@ -64,7 +64,7 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
         />
       )}
       {phase === "creating" && (
-        <motion.div
+        <m.div
           key="creating"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -82,7 +82,7 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
 
           <div className="space-y-3">
             {[0, 1, 2].map((i) => (
-              <motion.div
+              <m.div
                 key={i}
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
@@ -97,7 +97,7 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
             ))}
           </div>
 
-          <motion.div
+          <m.div
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 1.5, repeat: Infinity }}
             className="flex justify-center gap-1"
@@ -109,12 +109,12 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
                 style={{ background: "var(--k-accent)" }}
               />
             ))}
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
 
       {phase === "testimonials" && (
-        <motion.div
+        <m.div
           key="testimonials"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -132,7 +132,7 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
 
           <div className="space-y-3">
             {TESTIMONIALS.map((testimonial, i) => (
-              <motion.div
+              <m.div
                 key={i}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -173,27 +173,27 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
                     {testimonial.name} • {testimonial.role}
                   </p>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
-        </motion.div>
+        </m.div>
       )}
 
       {phase === "complete" && (
-        <motion.div
+        <m.div
           key="complete"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="relative z-10 text-center space-y-6 px-4"
         >
           <div>
-            <motion.div
+            <m.div
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 0.6 }}
               className="text-6xl mb-4 inline-block"
             >
               ✓
-            </motion.div>
+            </m.div>
             <h2 className="font-display font-bold text-2xl tracking-[-0.01em]">
               ¡Listo!
             </h2>
@@ -202,15 +202,15 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
             </p>
           </div>
 
-          <motion.div
+          <m.div
             animate={{ opacity: [1, 0] }}
             transition={{ duration: 1, delay: 0.5 }}
             className="text-xs"
             style={{ color: "var(--k-t3)" }}
           >
             Redirigiendo...
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </div>
   );

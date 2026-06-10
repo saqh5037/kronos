@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { bookClass } from "@/server/actions/bookings";
 import { kToast } from "@/lib/toast";
 
@@ -96,7 +96,7 @@ export function OneTapBookButton({
 
   return (
     <div style={{ width: fullWidth ? "100%" : undefined }}>
-      <motion.button
+      <m.button
         type="button"
         onClick={handleClick}
         disabled={disabled}
@@ -142,10 +142,10 @@ export function OneTapBookButton({
           {state === "pending" && <Spinner />}
           {label}
         </span>
-      </motion.button>
+      </m.button>
       <AnimatePresence>
         {state === "error" && errorMsg && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
@@ -157,7 +157,7 @@ export function OneTapBookButton({
             }}
           >
             {errorMsg}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
@@ -166,7 +166,7 @@ export function OneTapBookButton({
 
 function Spinner() {
   return (
-    <motion.svg
+    <m.svg
       width={14}
       height={14}
       viewBox="0 0 24 24"
@@ -178,6 +178,6 @@ function Spinner() {
       transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
     >
       <path d="M21 12a9 9 0 1 1-6.2-8.5" />
-    </motion.svg>
+    </m.svg>
   );
 }

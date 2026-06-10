@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 
 interface Athlete {
   athleteId: string;
@@ -100,7 +100,7 @@ export default function AthleteCombobox({
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: -4, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
@@ -150,7 +150,7 @@ export default function AthleteCombobox({
                 -- Sin match --
               </button>
               {filtered.map((athlete, i) => (
-                <motion.button
+                <m.button
                   key={athlete.athleteId}
                   type="button"
                   onClick={() => handleSelect(athlete.athleteId)}
@@ -177,7 +177,7 @@ export default function AthleteCombobox({
                   <span>
                     {athlete.firstName} {athlete.lastName}
                   </span>
-                </motion.button>
+                </m.button>
               ))}
               {filtered.length === 0 && (
                 <div className="px-3 py-4 text-sm text-[var(--k-t3)] text-center">
@@ -185,7 +185,7 @@ export default function AthleteCombobox({
                 </div>
               )}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

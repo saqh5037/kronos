@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { OneTapBookButton } from "./OneTapBookButton";
 import { formatTime, formatDayMonth } from "@/lib/week";
 
@@ -40,7 +40,7 @@ export function SuggestedBookingCard({
   const capacityFraction = `${suggestion.klass.bookedCount}/${suggestion.klass.capacity}`;
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.32, ease: "easeOut" }}
@@ -171,7 +171,7 @@ export function SuggestedBookingCard({
           />
         </div>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 

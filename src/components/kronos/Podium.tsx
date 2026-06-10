@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { formatScore } from "@/lib/scores";
 import type { ScoreType } from "@/lib/validations/wod";
 
@@ -32,7 +32,7 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
         const delay = i * 0.1;
 
         return (
-          <motion.div
+          <m.div
             key={e.rank}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -77,7 +77,7 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
                 borderBottom: "none",
               }}
             />
-          </motion.div>
+          </m.div>
         );
       })}
     </div>

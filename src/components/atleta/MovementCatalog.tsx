@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import type { Route } from "next";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { extractYouTubeId, getYouTubeThumbnail } from "@/lib/youtube";
 import type { MovementRow } from "@/server/actions/movements";
 
@@ -164,11 +164,11 @@ export default function MovementCatalog({
   const filtered = useMemo(() => {
     let result = movements;
     if (activeCategory !== "ALL") {
-      result = result.filter((m) => m.category === activeCategory);
+      result = result.filter((mv) => mv.category === activeCategory);
     }
     if (search.trim()) {
       const q = search.toLowerCase();
-      result = result.filter((m) => m.name.toLowerCase().includes(q));
+      result = result.filter((mv) => mv.name.toLowerCase().includes(q));
     }
     return result;
   }, [movements, activeCategory, search]);
@@ -241,7 +241,7 @@ export default function MovementCatalog({
               }`}
             >
               {activeCategory === cat.key && (
-                <motion.div
+                <m.div
                   layoutId="movement-cat-pill"
                   className="absolute inset-0 bg-[var(--k-elevated)] border border-[var(--k-line-2)] rounded-full"
                   transition={{
@@ -264,28 +264,28 @@ export default function MovementCatalog({
 
       {/* Grid */}
       <AnimatePresence mode="wait">
-        <motion.div
+        <m.div
           key={activeCategory + search}
           variants={container}
           initial="hidden"
           animate="show"
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
         >
-          {filtered.map((m) => {
-            const videoId = extractYouTubeId(m.videoUrl);
+          {filtered.map((mv) => {
+            const videoId = extractYouTubeId(mv.videoUrl);
             const thumbnail = videoId ? getYouTubeThumbnail(videoId) : null;
 
             return (
-              <motion.div key={m.id} variants={item} layout>
+              <m.div key={mv.id} variants={item} layout>
                 <Link
-                  href={`/atleta/movimientos/${m.id}` as Route}
+                  href={`/atleta/movimientos/${mv.id}` as Route}
                   className="group block"
                 >
-                  <motion.div
+                  <m.div
                     className="rounded-xl border border-[var(--line)] bg-[var(--card)] overflow-hidden"
                     whileHover={{
                       scale: 1.03,
-                      boxShadow: `0 8px 32px ${categoryGlow(m.category)}`,
+                      boxShadow: `0 8px 32px ${categoryGlow(mv.category)}`,
                     }}
                     transition={{
                       type: "spring",
@@ -296,7 +296,7 @@ export default function MovementCatalog({
                     {/* Thumbnail */}
                     <div className="relative aspect-video bg-[var(--k-surface)] overflow-hidden">
                       {thumbnail ? (
-                        <MovementThumbnail src={thumbnail} name={m.name} />
+                        <MovementThumbnail src={thumbnail} name={mv.name} />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center gap-1">
                           <span
@@ -308,7 +308,7 @@ export default function MovementCatalog({
                               lineHeight: 1,
                             }}
                           >
-                            {m.name.charAt(0).toUpperCase()}
+                            {mv.name.charAt(0).toUpperCase()}
                           </span>
                           <svg
                             width="14"
@@ -325,7 +325,7 @@ export default function MovementCatalog({
                       )}
                       {/* Play overlay on hover */}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                        <motion.div
+                        <m.div
                           className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                           whileHover={{ scale: 1.1 }}
                         >
@@ -337,39 +337,39 @@ export default function MovementCatalog({
                           >
                             <polygon points="5 3 19 12 5 21 5 3" />
                           </svg>
-                        </motion.div>
+                        </m.div>
                       </div>
                     </div>
 
                     {/* Info */}
                     <div className="p-3">
                       <h3 className="text-[13px] font-semibold text-[var(--text)] truncate">
-                        {m.name}
+                        {mv.name}
                       </h3>
                       <div className="flex items-center gap-2 mt-1.5">
                         <span
-                          className={`k-chip text-[9px] py-0.5 px-1.5 ${categoryChipClass(m.category)}`}
+                          className={`k-chip text-[9px] py-0.5 px-1.5 ${categoryChipClass(mv.category)}`}
                         >
-                          {categoryLabel(m.category)}
+                          {categoryLabel(mv.category)}
                         </span>
-                        {m.equipment.length > 0 && (
+                        {mv.equipment.length > 0 && (
                           <span className="text-[10px] text-[var(--k-t3)] truncate">
-                            {m.equipment.slice(0, 2).join(" · ")}
+                            {mv.equipment.slice(0, 2).join(" · ")}
                           </span>
                         )}
                       </div>
                     </div>
-                  </motion.div>
+                  </m.div>
                 </Link>
-              </motion.div>
+              </m.div>
             );
           })}
-        </motion.div>
+        </m.div>
       </AnimatePresence>
 
       {/* Empty state */}
       {filtered.length === 0 && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           className="k-card p-8 text-center"
@@ -381,7 +381,7 @@ export default function MovementCatalog({
           <p className="text-xs text-[var(--k-t3)] mt-1">
             Prueba con otro término o cambia el filtro de categoría
           </p>
-        </motion.div>
+        </m.div>
       )}
     </div>
   );

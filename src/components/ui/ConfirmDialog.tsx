@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
 
 export type ConfirmTone = "danger" | "warning" | "info";
@@ -46,7 +46,7 @@ export function ConfirmDialog({
   return (
     <AnimatePresence>
       {open && options && (
-        <motion.div
+        <m.div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -64,7 +64,7 @@ export function ConfirmDialog({
               backdropFilter: "blur(8px)",
             }}
           />
-          <motion.div
+          <m.div
             className="relative w-full max-w-sm rounded-2xl p-6"
             style={{
               background: "var(--card)",
@@ -123,8 +123,8 @@ export function ConfirmDialog({
                 {options.confirmLabel ?? "Confirmar"}
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

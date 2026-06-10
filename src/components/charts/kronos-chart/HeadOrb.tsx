@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 interface HeadOrbProps {
   cx: number;
@@ -35,7 +35,7 @@ export function HeadOrb({
   return (
     <g style={{ pointerEvents: "none" }}>
       {intense && (
-        <motion.circle
+        <m.circle
           cx={cx}
           cy={cy}
           r={outerR * 1.7}
@@ -64,7 +64,7 @@ export function HeadOrb({
           }}
         />
       )}
-      <motion.circle
+      <m.circle
         cx={cx}
         cy={cy}
         r={outerR}
@@ -95,7 +95,7 @@ export function HeadOrb({
         }
         style={{ transformOrigin: `${cx}px ${cy}px`, transformBox: "fill-box" }}
       />
-      <motion.circle
+      <m.circle
         cx={cx}
         cy={cy}
         r={coreR}
@@ -109,7 +109,7 @@ export function HeadOrb({
             : { duration: 0.5, ease: [0.16, 1, 0.3, 1], delay }
         }
       />
-      <motion.circle
+      <m.circle
         cx={cx}
         cy={cy}
         r={dotR}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { Route } from "next";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 export type TrophyItem = {
   id: string;
@@ -90,7 +90,7 @@ function TrophyCard({ item, index }: { item: TrophyItem; index: number }) {
         scrollSnapAlign: "start",
       }}
     >
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         whileHover={{ scale: 1.02 }}
@@ -184,7 +184,7 @@ function TrophyCard({ item, index }: { item: TrophyItem; index: number }) {
             />
           </div>
         )}
-      </motion.div>
+      </m.div>
     </Link>
   );
 }

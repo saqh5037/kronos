@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
+import { m, type Variants } from "framer-motion";
 import { type ReactNode } from "react";
 
 const containerVariants: Variants = {
@@ -44,7 +44,7 @@ export function AnimatedSection({
   ...rest
 }: AnimatedSectionProps) {
   return (
-    <motion.div
+    <m.div
       className={className}
       variants={{
         hidden: { opacity: 0 },
@@ -58,7 +58,7 @@ export function AnimatedSection({
       {...rest}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -70,14 +70,14 @@ export function AnimatedItem({
   className?: string;
 }) {
   return (
-    <motion.div
+    <m.div
       className={className}
       variants={itemVariants}
       initial={false}
       animate="show"
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 

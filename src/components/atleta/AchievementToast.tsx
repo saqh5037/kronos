@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 
 export type AchievementBadge = {
   badgeId: string;
@@ -94,7 +94,7 @@ export function AchievementToastHost() {
     >
       <AnimatePresence initial={false}>
         {items.map((t) => (
-          <motion.div
+          <m.div
             key={t.toastId}
             initial={{ scale: 0.92, opacity: 0, y: -10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -171,7 +171,7 @@ export function AchievementToastHost() {
                 {t.description}
               </div>
             </div>
-          </motion.div>
+          </m.div>
         ))}
       </AnimatePresence>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { CHART_COLORS } from "@/components/charts/tokens";
 import HaloRing from "./HaloRing";
 
@@ -36,7 +36,7 @@ export function AnimatedStats({
   const weekRatio = Math.min(1, weekAttendance / weekGoal);
 
   return (
-    <motion.div
+    <m.div
       className="relative grid grid-cols-3 gap-2 sm:gap-3 mt-6 px-3 sm:px-4"
       variants={container}
       initial={false}
@@ -59,7 +59,7 @@ export function AnimatedStats({
             "radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 80%)",
         }}
       />
-      <motion.div
+      <m.div
         className="relative k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
         variants={item}
       >
@@ -70,8 +70,8 @@ export function AnimatedStats({
           displayValue={String(weekAttendance)}
           label="ESTA SEM"
         />
-      </motion.div>
-      <motion.div
+      </m.div>
+      <m.div
         className="relative k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
         variants={item}
       >
@@ -82,8 +82,8 @@ export function AnimatedStats({
           displayValue={String(streak)}
           label="RACHA"
         />
-      </motion.div>
-      <motion.div
+      </m.div>
+      <m.div
         className="relative k-card p-2 sm:p-3 flex items-center justify-center min-w-0"
         variants={item}
       >
@@ -94,7 +94,7 @@ export function AnimatedStats({
           displayValue={String(prCount)}
           label="PRs"
         />
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   );
 }

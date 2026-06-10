@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   bookClass,
   cancelBooking,
@@ -270,7 +270,7 @@ export function BookButton({
 export function CheckInButton({ bookingId }: { bookingId: string }) {
   const [isPending, startTransition] = useTransition();
   return (
-    <motion.button
+    <m.button
       onClick={() =>
         startTransition(async () => {
           try {
@@ -294,7 +294,7 @@ export function CheckInButton({ bookingId }: { bookingId: string }) {
       whileTap={{ scale: 0.95 }}
     >
       {isPending ? "…" : "Check-in"}
-    </motion.button>
+    </m.button>
   );
 }
 
@@ -320,7 +320,7 @@ export function NoShowButton({ bookingId }: { bookingId: string }) {
     });
   };
   return (
-    <motion.button
+    <m.button
       onClick={handleClick}
       disabled={isPending}
       className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-semibold"
@@ -333,7 +333,7 @@ export function NoShowButton({ bookingId }: { bookingId: string }) {
       whileTap={{ scale: 0.95 }}
     >
       {isPending ? "…" : "No-show"}
-    </motion.button>
+    </m.button>
   );
 }
 
@@ -358,7 +358,7 @@ export function CancelBookingButton({ bookingId }: { bookingId: string }) {
     });
   };
   return (
-    <motion.button
+    <m.button
       onClick={handleClick}
       disabled={isPending}
       className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-50 font-medium"
@@ -371,6 +371,6 @@ export function CancelBookingButton({ bookingId }: { bookingId: string }) {
       whileTap={{ scale: 0.95 }}
     >
       {isPending ? "…" : "Quitar"}
-    </motion.button>
+    </m.button>
   );
 }

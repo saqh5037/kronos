@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import DuotoneImage from "./DuotoneImage";
 import { track } from "../_lib/track";
 
@@ -9,7 +9,7 @@ export default function CtaTail() {
 
   return (
     <section className="lp-cta-tail-shell">
-      <motion.div
+      <m.div
         className="lp-cta-tail lp-grain"
         initial={reduce ? false : { y: 14 }}
         whileInView={{ y: 0 }}
@@ -71,7 +71,7 @@ export default function CtaTail() {
             TU DATA ES TUYA POR CONTRATO
           </span>
         </div>
-      </motion.div>
+      </m.div>
     </section>
   );
 }

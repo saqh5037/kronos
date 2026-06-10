@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import KronosLogo from "@/components/brand/KronosLogo";
 import { track } from "../../_lib/track";
 
@@ -31,7 +31,7 @@ const cardItem = {
   },
 };
 
-const MotionLink = motion(Link);
+const MotionLink = m.create(Link);
 
 type AthleteCardProps = { audience: "athlete" };
 type BoxCardProps = { audience: "box" };
@@ -321,7 +321,7 @@ export default function RouterSplit() {
           padding: "56px 24px",
         }}
       >
-        <motion.div
+        <m.div
           initial="hidden"
           animate="show"
           variants={containerVariants}
@@ -334,7 +334,7 @@ export default function RouterSplit() {
             alignItems: "center",
           }}
         >
-          <motion.div
+          <m.div
             variants={itemVariants}
             style={{ textAlign: "center", maxWidth: 720 }}
           >
@@ -376,7 +376,7 @@ export default function RouterSplit() {
               </span>{" "}
               Premium para tu Box.
             </p>
-          </motion.div>
+          </m.div>
 
           <div
             className="router-dual-grid"
@@ -389,7 +389,7 @@ export default function RouterSplit() {
             <AthleteCard audience="athlete" />
             <BoxCard audience="box" />
           </div>
-        </motion.div>
+        </m.div>
       </main>
 
       <footer

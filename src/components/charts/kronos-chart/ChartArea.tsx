@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 interface ChartAreaProps {
   d: string;
@@ -38,7 +38,7 @@ export function ChartArea({
           <stop offset="100%" stopColor={color} stopOpacity={0} />
         </linearGradient>
         <clipPath id={clipId}>
-          <motion.rect
+          <m.rect
             x={0}
             y={0}
             height={height}

@@ -8,7 +8,7 @@ import {
   flip,
   shift,
 } from "@floating-ui/react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { lookupTerm, GLOSSARY_KEYS } from "@/lib/crossfit-glossary";
 
@@ -154,7 +154,7 @@ export function JargonTip({ term, children, className }: JargonTipProps) {
               pointerEvents: "auto",
             }}
           >
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 4, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 4, scale: 0.97 }}
@@ -196,7 +196,7 @@ export function JargonTip({ term, children, className }: JargonTipProps) {
               >
                 {definition}
               </p>
-            </motion.div>
+            </m.div>
           </div>
         )}
       </AnimatePresence>

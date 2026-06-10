@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { WHY } from "../_data/copy";
 
 const fadeUp = {
@@ -36,7 +36,7 @@ export default function AtletaSiNo() {
           gap: 24,
         }}
       >
-        <motion.div
+        <m.div
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
@@ -108,9 +108,9 @@ export default function AtletaSiNo() {
               </li>
             ))}
           </ul>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
@@ -195,7 +195,7 @@ export default function AtletaSiNo() {
               </li>
             ))}
           </ul>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

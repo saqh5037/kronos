@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 
 const fadeUp = {
   hidden: { y: 14 },
@@ -13,7 +13,7 @@ export default function SectionAtleta() {
 
   return (
     <section className="lp-section" id="section-atleta">
-      <motion.div
+      <m.div
         className="lp-section-grid lp-flip"
         initial="hidden"
         whileInView="show"
@@ -24,7 +24,7 @@ export default function SectionAtleta() {
             : { show: { transition: { staggerChildren: 0.1 } } }
         }
       >
-        <motion.div variants={v}>
+        <m.div variants={v}>
           <div className="lp-eyebrow">
             <span className="lp-dot" />
             /01 · PARA EL ATLETA
@@ -134,9 +134,9 @@ export default function SectionAtleta() {
           >
             Guía completa de Kronos Atletas →
           </a>
-        </motion.div>
+        </m.div>
 
-        <motion.div className="lp-card-frame lp-grain" variants={v}>
+        <m.div className="lp-card-frame lp-grain" variants={v}>
           <div className="lp-caption" style={{ color: "var(--k-accent)" }}>
             <span className="lp-dot" style={{ marginRight: 10 }} />
             PREVIEW · MULTI-TENANT CROSS-BOX
@@ -269,8 +269,8 @@ export default function SectionAtleta() {
               RACHA UNIFICADA · 23 DÍAS · 3 BOXES · 0 FRICCIONES
             </span>
           </div>
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
     </section>
   );
 }

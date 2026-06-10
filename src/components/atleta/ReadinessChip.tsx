@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import QuickSurvey from "./QuickSurvey";
 import type { SurveyRow } from "@/server/actions/surveys";
 
@@ -78,7 +78,7 @@ export default function ReadinessChip({ survey }: Props) {
       <AnimatePresence>
         {open && (
           <>
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -94,7 +94,7 @@ export default function ReadinessChip({ survey }: Props) {
               }}
               aria-hidden
             />
-            <motion.div
+            <m.div
               role="dialog"
               aria-label="Check-in del día"
               initial={{ y: "100%" }}
@@ -178,7 +178,7 @@ export default function ReadinessChip({ survey }: Props) {
                   }}
                 />
               </div>
-            </motion.div>
+            </m.div>
           </>
         )}
       </AnimatePresence>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { type ReactNode } from "react";
 
 interface StatPillProps {
@@ -19,7 +19,7 @@ export default function StatPill({
   className = "",
 }: StatPillProps) {
   return (
-    <motion.div
+    <m.div
       className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${className}`}
       style={{
         background: "var(--card)",
@@ -44,6 +44,6 @@ export default function StatPill({
       >
         {label}
       </span>
-    </motion.div>
+    </m.div>
   );
 }

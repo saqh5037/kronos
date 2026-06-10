@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 type Tab = {
   href: string;
@@ -177,7 +177,7 @@ export default function TabBar({ mode = "box", yoBadge = false }: TabBarProps) {
                 minWidth: 0,
               }}
             >
-              <motion.span
+              <m.span
                 animate={isActive ? { scale: 1.05 } : { scale: 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 className="relative"
@@ -198,7 +198,7 @@ export default function TabBar({ mode = "box", yoBadge = false }: TabBarProps) {
                     }}
                   />
                 )}
-              </motion.span>
+              </m.span>
               <span
                 style={{
                   fontFamily: "var(--k-font-display)",

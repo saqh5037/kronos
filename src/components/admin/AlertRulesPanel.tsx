@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import {
   createAlertRule,
   updateAlertRule,
@@ -131,7 +131,7 @@ export default function AlertRulesPanel({
       {/* Create form */}
       <AnimatePresence>
         {showForm && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
@@ -231,7 +231,7 @@ export default function AlertRulesPanel({
                 </button>
               </div>
             </form>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -245,7 +245,7 @@ export default function AlertRulesPanel({
             const channel = CHANNEL_CONFIG[rule.channel];
 
             return (
-              <motion.div
+              <m.div
                 key={rule.id}
                 layout
                 initial={{ opacity: 0, y: 8 }}
@@ -293,7 +293,7 @@ export default function AlertRulesPanel({
                           : "var(--track)",
                       }}
                     >
-                      <motion.div
+                      <m.div
                         className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md"
                         animate={{ x: rule.enabled ? 20 : 0 }}
                         transition={{
@@ -325,7 +325,7 @@ export default function AlertRulesPanel({
                     </button>
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             );
           })}
         </AnimatePresence>

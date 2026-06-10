@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import type { ChartScale } from "./useChartScale";
 
 interface AxisTicksProps {
@@ -31,7 +31,7 @@ export function AxisTicks({
         const y = yScale(tick);
         const label = formatY ? formatY(tick) : formatTickValue(tick);
         return (
-          <motion.text
+          <m.text
             key={`y-${i}`}
             x={padding.left - 8}
             y={y + 3}
@@ -55,7 +55,7 @@ export function AxisTicks({
             }
           >
             {label}
-          </motion.text>
+          </m.text>
         );
       })}
       {xTicks.map((tick, i) => {
@@ -63,7 +63,7 @@ export function AxisTicks({
         const rawValue = pickRawXForTick(rawXValues, tick, i, xTicks.length);
         const label = formatX ? formatX(rawValue ?? tick) : `${tick}`;
         return (
-          <motion.text
+          <m.text
             key={`x-${i}`}
             x={x}
             y={padding.top + innerHeight + 18}
@@ -93,7 +93,7 @@ export function AxisTicks({
             }
           >
             {label}
-          </motion.text>
+          </m.text>
         );
       })}
     </g>

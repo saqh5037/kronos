@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import type { CSSProperties, ReactNode } from "react";
 
 interface TooltipBubbleProps {
@@ -35,7 +35,7 @@ export function TooltipBubble({
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
+        <m.div
           key="bubble"
           initial={{ opacity: 0, y: 4, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -56,7 +56,7 @@ export function TooltipBubble({
           >
             {children}
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );
@@ -82,7 +82,7 @@ export function TooltipCrosshair({
   return (
     <AnimatePresence>
       {visible && (
-        <motion.g
+        <m.g
           key="crosshair"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -109,7 +109,7 @@ export function TooltipCrosshair({
             style={{ filter: `drop-shadow(0 0 6px ${color})` }}
           />
           <circle cx={x} cy={y} r={1.4} fill="#ffffff" />
-        </motion.g>
+        </m.g>
       )}
     </AnimatePresence>
   );

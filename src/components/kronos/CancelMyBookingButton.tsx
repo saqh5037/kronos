@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { cancelBooking } from "@/server/actions/bookings";
 import { kToast } from "@/lib/toast";
 import { useConfirm } from "@/lib/use-confirm";
@@ -33,7 +33,7 @@ export default function CancelMyBookingButton({
   }
 
   return (
-    <motion.button
+    <m.button
       onClick={handleClick}
       disabled={isPending}
       className="text-[11px] font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50"
@@ -46,6 +46,6 @@ export default function CancelMyBookingButton({
       whileTap={{ scale: 0.95 }}
     >
       {isPending ? "…" : "Cancelar"}
-    </motion.button>
+    </m.button>
   );
 }

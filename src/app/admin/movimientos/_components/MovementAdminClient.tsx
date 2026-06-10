@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import {
   updateMovementVideoUrl,
   restoreStandardMovement,
@@ -288,7 +288,7 @@ export default function MovementAdminClient({
       {/* Edit Modal */}
       <AnimatePresence>
         {selectedId && selected && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -298,7 +298,7 @@ export default function MovementAdminClient({
               if (e.target === e.currentTarget) closeEdit();
             }}
           >
-            <motion.div
+            <m.div
               initial={{ y: 40, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 40, opacity: 0 }}
@@ -345,7 +345,7 @@ export default function MovementAdminClient({
 
               <AnimatePresence>
                 {message && (
-                  <motion.p
+                  <m.p
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
@@ -356,12 +356,12 @@ export default function MovementAdminClient({
                     }`}
                   >
                     {message}
-                  </motion.p>
+                  </m.p>
                 )}
               </AnimatePresence>
 
               <div className="flex gap-2 flex-wrap">
-                <motion.button
+                <m.button
                   onClick={handleSave}
                   disabled={isPending}
                   className="k-btn-grad flex-1 py-2.5 text-sm font-semibold disabled:opacity-50"
@@ -369,8 +369,8 @@ export default function MovementAdminClient({
                   whileTap={{ scale: 0.98 }}
                 >
                   {isPending ? "Guardando..." : "Guardar video"}
-                </motion.button>
-                <motion.button
+                </m.button>
+                <m.button
                   type="button"
                   onClick={() => openContentEditor(selected.id)}
                   disabled={isPending || editorLoading}
@@ -379,9 +379,9 @@ export default function MovementAdminClient({
                   whileTap={{ scale: 0.98 }}
                 >
                   {editorLoading ? "Cargando..." : "Editar contenido AI"}
-                </motion.button>
+                </m.button>
                 {selected.isStandard && (
-                  <motion.button
+                  <m.button
                     onClick={handleRestore}
                     disabled={isPending}
                     className="k-btn-ghost px-4 py-2.5 text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50"
@@ -400,7 +400,7 @@ export default function MovementAdminClient({
                       <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
                     </svg>
                     Restaurar
-                  </motion.button>
+                  </m.button>
                 )}
                 <button
                   onClick={closeEdit}
@@ -409,8 +409,8 @@ export default function MovementAdminClient({
                   Cerrar
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
 

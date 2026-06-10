@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 
 const STREAK_DAYS = 14;
 // 14 cells: first 5 muted (warm-up), rest active. Visual weight on the lima fill.
@@ -33,7 +33,7 @@ export default function HeroPhone() {
   return (
     <div className="lp-phone-wrap">
       <div className="lp-phone-glow" aria-hidden="true" />
-      <motion.div
+      <m.div
         className="lp-phone lp-grain"
         initial={reduceMotion ? false : { y: 18 }}
         animate={{ y: 0 }}
@@ -241,7 +241,7 @@ export default function HeroPhone() {
             </div>
           </div>
         </div>
-      </motion.div>
+      </m.div>
 
       <div
         className="lp-phone-anno"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 
 export default function PushSubscribeButton() {
   const [status, setStatus] = useState<
@@ -68,7 +68,7 @@ export default function PushSubscribeButton() {
   return (
     <AnimatePresence mode="wait">
       {status === "subscribed" && (
-        <motion.div
+        <m.div
           key="subscribed"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -95,11 +95,11 @@ export default function PushSubscribeButton() {
           <span className="text-xs font-semibold text-[var(--k-accent)]">
             Notificaciones activadas
           </span>
-        </motion.div>
+        </m.div>
       )}
 
       {status === "denied" && (
-        <motion.div
+        <m.div
           key="denied"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -119,11 +119,11 @@ export default function PushSubscribeButton() {
           >
             ¿Cómo habilitar?
           </a>
-        </motion.div>
+        </m.div>
       )}
 
       {(status === "idle" || status === "requesting") && (
-        <motion.button
+        <m.button
           key="idle"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -145,7 +145,7 @@ export default function PushSubscribeButton() {
             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" />
           </svg>
           {status === "requesting" ? "Activando..." : "Activar notificaciones"}
-        </motion.button>
+        </m.button>
       )}
     </AnimatePresence>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { type ReactNode } from "react";
 
 interface GradientCTAProps {
@@ -19,7 +19,7 @@ export default function GradientCTA({
   type = "button",
 }: GradientCTAProps) {
   return (
-    <motion.button
+    <m.button
       type={type}
       onClick={onClick}
       disabled={disabled}
@@ -33,6 +33,6 @@ export default function GradientCTA({
       }}
     >
       {children}
-    </motion.button>
+    </m.button>
   );
 }

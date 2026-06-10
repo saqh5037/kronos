@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 type Status = "dormant" | "safe" | "warning" | "critical";
@@ -97,7 +97,7 @@ export function StreakHero({
       data-status={status}
     >
       {showFireBackdrop && (
-        <motion.div
+        <m.div
           aria-hidden="true"
           className="absolute inset-0 pointer-events-none"
           initial={{ opacity: 0 }}
@@ -114,7 +114,7 @@ export function StreakHero({
           }}
         />
       )}
-      <motion.div
+      <m.div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -197,7 +197,7 @@ function Flame({ status, reduce }: { status: Status; reduce: boolean }) {
   const outerDuration = status === "dormant" ? 3.2 : 1.6;
 
   return (
-    <motion.svg
+    <m.svg
       width={64}
       height={72}
       viewBox="0 0 64 72"
@@ -209,7 +209,7 @@ function Flame({ status, reduce }: { status: Status; reduce: boolean }) {
           : undefined
       }
     >
-      <motion.path
+      <m.path
         d="M32 6 C 38 18, 50 24, 48 38 C 47 50, 38 60, 32 64 C 26 60, 17 50, 16 38 C 14 24, 26 18, 32 6 Z"
         fill={fill}
         opacity={0.9}
@@ -221,7 +221,7 @@ function Flame({ status, reduce }: { status: Status; reduce: boolean }) {
         }}
         style={{ transformOrigin: "32px 64px" }}
       />
-      <motion.path
+      <m.path
         d="M32 22 C 36 30, 42 34, 40 42 C 39 50, 35 56, 32 58 C 29 56, 25 50, 24 42 C 22 34, 28 30, 32 22 Z"
         fill="var(--k-bg)"
         opacity={status === "dormant" ? 0.7 : 0.55}
@@ -233,6 +233,6 @@ function Flame({ status, reduce }: { status: Status; reduce: boolean }) {
         transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
         style={{ transformOrigin: "32px 58px" }}
       />
-    </motion.svg>
+    </m.svg>
   );
 }

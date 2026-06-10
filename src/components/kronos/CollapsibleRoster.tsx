@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import {
   CheckInButton,
   NoShowButton,
@@ -79,7 +79,7 @@ export default function CollapsibleRoster({ roster }: { roster: ClassRoster }) {
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -138,7 +138,7 @@ export default function CollapsibleRoster({ roster }: { roster: ClassRoster }) {
                 </table>
               )}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

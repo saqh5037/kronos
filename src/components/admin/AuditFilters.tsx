@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   AUDIT_CATEGORIES,
   AUDIT_CATEGORY_LABELS,
@@ -56,7 +56,7 @@ export default function AuditFilters({
               }`}
             >
               {currentDays === f.value && (
-                <motion.div
+                <m.div
                   layoutId="audit-filter-pill"
                   className="absolute inset-0 bg-[var(--k-t2)] rounded-full"
                   transition={{
@@ -72,7 +72,7 @@ export default function AuditFilters({
         </div>
 
         {sensitiveCount > 0 && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="k-chip text-[var(--k-warning)] bg-[rgba(255, 90, 90, 0.1)] border-[rgba(255, 90, 90, 0.3)]"
@@ -82,7 +82,7 @@ export default function AuditFilters({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--k-warning)]" />
             </span>
             {sensitiveCount} sensible{sensitiveCount !== 1 ? "s" : ""}
-          </motion.div>
+          </m.div>
         )}
       </div>
 

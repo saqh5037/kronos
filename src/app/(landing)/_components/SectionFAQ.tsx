@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { m, AnimatePresence, useReducedMotion } from "framer-motion";
 import { FAQ_ITEMS } from "../_data/mock";
 import { track } from "../_lib/track";
 import {
@@ -41,18 +41,18 @@ function FAQItem({
         aria-controls={`faq-answer-${questionId}`}
       >
         <span>{question}</span>
-        <motion.span
+        <m.span
           animate={{ rotate: isOpen ? 45 : 0 }}
           transition={{ duration: 0.2 }}
           className="lp-faq-icon"
           aria-hidden="true"
         >
           +
-        </motion.span>
+        </m.span>
       </button>
       <AnimatePresence initial={false}>
         {isOpen && (
-          <motion.div
+          <m.div
             id={`faq-answer-${questionId}`}
             initial={reduce ? false : { height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -65,7 +65,7 @@ function FAQItem({
             style={{ overflow: "hidden" }}
           >
             <div className="lp-faq-answer">{answer}</div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
@@ -94,7 +94,7 @@ export default function SectionFAQ({
 
   return (
     <section className="lp-section" id="section-faq">
-      <motion.div
+      <m.div
         className="lp-faq-head"
         initial={reduce ? false : { y: 14 }}
         whileInView={{ y: 0 }}
@@ -106,7 +106,7 @@ export default function SectionFAQ({
           /05 · PREGUNTAS FRECUENTES
         </div>
         <h2>Lo que todo owner pregunta antes de cambiarse.</h2>
-      </motion.div>
+      </m.div>
 
       <div className="lp-faq-list">
         {items.map((item) => (

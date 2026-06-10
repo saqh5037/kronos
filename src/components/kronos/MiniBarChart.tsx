@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 interface BarItem {
   value: number; // 0-1
@@ -32,7 +32,7 @@ export default function MiniBarChart({
     <div className={className}>
       <div className="flex items-end" style={{ height, gap }}>
         {bars.map((bar, i) => (
-          <motion.div
+          <m.div
             key={i}
             className="flex flex-col items-center gap-1.5"
             style={{ width: computedBarWidth }}
@@ -44,7 +44,7 @@ export default function MiniBarChart({
               className="w-full relative flex items-end"
               style={{ height: height - 20 }}
             >
-              <motion.div
+              <m.div
                 className="w-full rounded-[3px]"
                 style={{
                   background: bar.isBest
@@ -81,7 +81,7 @@ export default function MiniBarChart({
                 {bar.sublabel}
               </span>
             )}
-          </motion.div>
+          </m.div>
         ))}
       </div>
     </div>

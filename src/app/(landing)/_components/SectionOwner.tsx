@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { OWNER_KPIS, OWNER_OCCUPANCY } from "../_data/mock";
 import { track } from "../_lib/track";
 import CountUp from "./CountUp";
@@ -71,7 +71,7 @@ export default function SectionOwner() {
           }}
         />
       </div>
-      <motion.div
+      <m.div
         className="lp-section-grid"
         initial="hidden"
         whileInView="show"
@@ -83,7 +83,7 @@ export default function SectionOwner() {
         }
         style={{ position: "relative", zIndex: 1 }}
       >
-        <motion.div className="lp-owner-frame lp-grain" variants={v}>
+        <m.div className="lp-owner-frame lp-grain" variants={v}>
           <div
             style={{
               display: "flex",
@@ -137,7 +137,7 @@ export default function SectionOwner() {
             </div>
             <div className="lp-chart-bars">
               {OWNER_OCCUPANCY.map((bar, i) => (
-                <motion.div
+                <m.div
                   key={i}
                   initial={reduce ? false : { scaleY: 0 }}
                   animate={{ scaleY: 1 }}
@@ -168,9 +168,9 @@ export default function SectionOwner() {
               ))}
             </div>
           </div>
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={v}>
+        <m.div variants={v}>
           <div className="lp-eyebrow">
             <span className="lp-dot" />
             /02 · PARA EL OWNER
@@ -230,8 +230,8 @@ export default function SectionOwner() {
           >
             Ver el admin completo en demo →
           </a>
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
     </section>
   );
 }

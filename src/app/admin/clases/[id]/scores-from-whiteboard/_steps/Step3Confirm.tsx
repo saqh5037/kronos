@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 type Props = {
   count: number;
@@ -85,13 +85,13 @@ export default function Step3Confirm({ count, prDetected }: Props) {
 
       {/* Animated checkmark */}
       <div className="relative flex justify-center">
-        <motion.div
+        <m.div
           className="w-20 h-20 rounded-full bg-[var(--k-accent-soft)] border border-[var(--k-accent-line)] flex items-center justify-center"
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 15 }}
         >
-          <motion.svg
+          <m.svg
             width="40"
             height="40"
             viewBox="0 0 40 40"
@@ -100,7 +100,7 @@ export default function Step3Confirm({ count, prDetected }: Props) {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <motion.path
+            <m.path
               d="M10 20L17 27L30 13"
               stroke="var(--k-accent)"
               strokeWidth="3"
@@ -110,12 +110,12 @@ export default function Step3Confirm({ count, prDetected }: Props) {
               animate={{ pathLength: 1 }}
               transition={{ delay: 0.4, duration: 0.5, ease: "easeOut" }}
             />
-          </motion.svg>
-        </motion.div>
+          </m.svg>
+        </m.div>
       </div>
 
       <div className="space-y-2">
-        <motion.h2
+        <m.h2
           className="text-2xl font-display font-bold text-text"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -123,8 +123,8 @@ export default function Step3Confirm({ count, prDetected }: Props) {
         >
           <span className="text-[var(--k-accent)]">{animatedCount}</span> score
           {count !== 1 ? "s" : ""} guardado{count !== 1 ? "s" : ""}
-        </motion.h2>
-        <motion.p
+        </m.h2>
+        <m.p
           className="text-text-2 text-sm"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -132,10 +132,10 @@ export default function Step3Confirm({ count, prDetected }: Props) {
         >
           Los atletas recibirán una notificación en la app. Los PRs fueron
           detectados y registrados automáticamente.
-        </motion.p>
+        </m.p>
 
         {prDetected && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.8, type: "spring" }}
@@ -143,38 +143,38 @@ export default function Step3Confirm({ count, prDetected }: Props) {
           >
             <span className="text-lg">🏆</span>
             PR detectado
-            <motion.span
+            <m.span
               className="inline-block w-2 h-2 rounded-full bg-[var(--k-accent)]"
               animate={{ opacity: [1, 0.4, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             />
-          </motion.div>
+          </m.div>
         )}
       </div>
 
-      <motion.div
+      <m.div
         className="flex flex-col gap-3"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.4 }}
       >
-        <motion.button
+        <m.button
           onClick={() => router.push(`/admin/asistencia`)}
           className="k-btn-grad py-3 text-sm font-semibold"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
           Ver asistencia
-        </motion.button>
-        <motion.button
+        </m.button>
+        <m.button
           onClick={() => router.push(`/admin/leaderboards`)}
           className="k-btn-ghost py-3 text-sm"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
           Ver leaderboard
-        </motion.button>
-      </motion.div>
+        </m.button>
+      </m.div>
     </div>
   );
 }

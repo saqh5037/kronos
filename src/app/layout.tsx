@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import GlobalEffects from "@/components/GlobalEffects";
 import { KronosToaster } from "@/components/kronos/KronosToaster";
 import { ConfirmProvider } from "@/lib/use-confirm";
+import { MotionProvider } from "@/components/providers/MotionProvider";
 
 // TODO: Fix canvas-confetti webpack bundling issue
 // const AchievementToastHost = dynamic(() =>
@@ -91,12 +92,14 @@ export default function RootLayout({
           forcedTheme="dark"
         >
           <GlobalEffects />
-          <ConfirmProvider>
-            {children}
-            <KronosToaster />
-            {/* TODO: Fix canvas-confetti webpack bundling issue */}
-            {/* <AchievementToastHost /> */}
-          </ConfirmProvider>
+          <MotionProvider>
+            <ConfirmProvider>
+              {children}
+              <KronosToaster />
+              {/* TODO: Fix canvas-confetti webpack bundling issue */}
+              {/* <AchievementToastHost /> */}
+            </ConfirmProvider>
+          </MotionProvider>
         </ThemeProvider>
       </body>
     </html>

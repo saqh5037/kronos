@@ -2,7 +2,7 @@
 
 import { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { uploadWhiteboardPhoto } from "@/server/actions/uploads";
 import { processWhiteboardUpload } from "@/server/actions/scores";
 
@@ -78,7 +78,7 @@ export default function Step1Upload({ classId }: Props) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <motion.div
+        <m.div
           className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors overflow-hidden ${
             dragOver
               ? "border-[var(--k-accent)] bg-[var(--k-accent-soft)]"
@@ -129,7 +129,7 @@ export default function Step1Upload({ classId }: Props) {
           {/* Ripple effects */}
           <AnimatePresence>
             {ripples.map((ripple) => (
-              <motion.span
+              <m.span
                 key={ripple.id}
                 initial={{ width: 0, height: 0, opacity: 0.5 }}
                 animate={{ width: 300, height: 300, opacity: 0 }}
@@ -146,7 +146,7 @@ export default function Step1Upload({ classId }: Props) {
 
           <AnimatePresence mode="wait">
             {preview ? (
-              <motion.div
+              <m.div
                 key="preview"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -159,24 +159,24 @@ export default function Step1Upload({ classId }: Props) {
                   alt="Preview pizarra"
                   className="max-h-64 mx-auto rounded-lg object-contain"
                 />
-                <motion.p
+                <m.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
                   className="text-text-3 text-xs mt-3"
                 >
                   Toca para cambiar la imagen
-                </motion.p>
-              </motion.div>
+                </m.p>
+              </m.div>
             ) : (
-              <motion.div
+              <m.div
                 key="empty"
                 className="space-y-3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <motion.div
+                <m.div
                   className="text-5xl"
                   animate={{ y: [0, -4, 0] }}
                   transition={{
@@ -186,7 +186,7 @@ export default function Step1Upload({ classId }: Props) {
                   }}
                 >
                   📸
-                </motion.div>
+                </m.div>
                 <div>
                   <p className="text-text-2 text-sm font-medium">
                     {dragOver
@@ -208,10 +208,10 @@ export default function Step1Upload({ classId }: Props) {
                   </svg>
                   También puedes arrastrar y soltar
                 </div>
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
-        </motion.div>
+        </m.div>
 
         <input
           ref={fileRef}
@@ -224,7 +224,7 @@ export default function Step1Upload({ classId }: Props) {
 
         <AnimatePresence>
           {error && (
-            <motion.p
+            <m.p
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -247,13 +247,13 @@ export default function Step1Upload({ classId }: Props) {
                 <circle cx="8" cy="11" r="0.75" fill="currentColor" />
               </svg>
               {error}
-            </motion.p>
+            </m.p>
           )}
         </AnimatePresence>
 
         <AnimatePresence>
           {preview && (
-            <motion.button
+            <m.button
               key="submit"
               type="submit"
               disabled={loading}
@@ -272,7 +272,7 @@ export default function Step1Upload({ classId }: Props) {
               ) : (
                 "Procesar pizarra"
               )}
-            </motion.button>
+            </m.button>
           )}
         </AnimatePresence>
       </form>

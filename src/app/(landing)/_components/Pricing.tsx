@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { PRICING } from "../_data/mock";
 import { track } from "../_lib/track";
 
@@ -45,7 +45,7 @@ export default function Pricing() {
           <span className="lp-dot" />
           /04 · PRECIOS EN PESOS
         </div>
-        <motion.h2
+        <m.h2
           initial={reduce ? false : { y: 12 }}
           whileInView={{ y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
@@ -53,8 +53,8 @@ export default function Pricing() {
           style={{ marginTop: 24 }}
         >
           Tres planes. En pesos. Sin sorpresas.
-        </motion.h2>
-        <motion.p
+        </m.h2>
+        <m.p
           initial={reduce ? false : { y: 10 }}
           whileInView={{ y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
@@ -64,10 +64,10 @@ export default function Pricing() {
           Fee fijo mensual en MXN. Sin contratos anuales. Sin setup fee. Sin
           cargo extra por aceptar tarjeta. Tu Box crece o decrece, te avisamos
           antes de cambiar de tier — nunca te cobramos algo que no autorizaste.
-        </motion.p>
+        </m.p>
       </div>
 
-      <motion.div
+      <m.div
         className="lp-pricing"
         initial="hidden"
         whileInView="show"
@@ -79,7 +79,7 @@ export default function Pricing() {
         }
       >
         {PRICING.map((tier) => (
-          <motion.div
+          <m.div
             key={tier.name}
             className={`lp-price-card${tier.featured ? " featured" : ""}`}
             variants={v}
@@ -122,9 +122,9 @@ export default function Pricing() {
             >
               {tier.cta}
             </a>
-          </motion.div>
+          </m.div>
         ))}
-      </motion.div>
+      </m.div>
 
       <p
         className="lp-mono"

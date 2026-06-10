@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { hashStringToColor, getInitials } from "@/lib/hash-color";
 import type { FeedEvent, FeedSeverity } from "@/server/actions/owner-feed";
 import type { AuditAction } from "@prisma/client";
@@ -131,7 +131,7 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
             {/* Events */}
             <div className="space-y-3">
               {dayEvents.map((event, idx) => (
-                <motion.div
+                <m.div
                   key={event.id}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -240,7 +240,7 @@ export default function AuditTimeline({ events }: { events: FeedEvent[] }) {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </m.div>
               ))}
             </div>
           </div>

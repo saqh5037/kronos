@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { useEffect, useRef } from "react";
 
 type Props = {
@@ -57,7 +57,7 @@ export function KModal({
   return (
     <AnimatePresence>
       {open ? (
-        <motion.div
+        <m.div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -78,7 +78,7 @@ export function KModal({
               border: 0,
             }}
           />
-          <motion.div
+          <m.div
             ref={ref}
             className={`relative w-full ${MAX_W[size]} rounded-2xl p-5 sm:p-6 max-h-[90vh] overflow-y-auto`}
             style={{
@@ -125,8 +125,8 @@ export function KModal({
               </button>
             </div>
             {children}
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       ) : null}
     </AnimatePresence>
   );

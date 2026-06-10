@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { DUAL_QUOTES } from "../_data/copy";
 
 const fadeUp = {
@@ -15,7 +15,7 @@ function QuoteCard({ q, delay }: { q: Quote; delay: number }) {
   const variants = reduce ? undefined : fadeUp;
 
   return (
-    <motion.figure
+    <m.figure
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, margin: "-60px" }}
@@ -65,7 +65,7 @@ function QuoteCard({ q, delay }: { q: Quote; delay: number }) {
       >
         — <cite style={{ fontStyle: "normal" }}>{q.attribution}</cite>
       </figcaption>
-    </motion.figure>
+    </m.figure>
   );
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import {
   listMyNotifications,
   markAllRead,
@@ -129,7 +129,7 @@ export default function NotificationBell() {
   return (
     <div className="relative" ref={popoverRef}>
       {/* Bell button */}
-      <motion.button
+      <m.button
         onClick={handleOpen}
         aria-label="Notificaciones"
         className="relative p-2 rounded-full text-[var(--k-t2)] hover:text-[var(--text)] hover:bg-[var(--track)] transition-colors"
@@ -153,7 +153,7 @@ export default function NotificationBell() {
 
         <AnimatePresence>
           {unread > 0 && (
-            <motion.span
+            <m.span
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
@@ -163,15 +163,15 @@ export default function NotificationBell() {
                 {unread > 9 ? "9+" : unread}
                 <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--k-warning)] opacity-75 animate-ping" />
               </span>
-            </motion.span>
+            </m.span>
           )}
         </AnimatePresence>
-      </motion.button>
+      </m.button>
 
       {/* Popover */}
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: -8, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
@@ -218,13 +218,9 @@ export default function NotificationBell() {
                   </p>
                 </div>
               ) : (
-                <motion.div
-                  variants={container}
-                  initial="hidden"
-                  animate="show"
-                >
+                <m.div variants={container} initial="hidden" animate="show">
                   {notifications.map((n) => (
-                    <motion.div
+                    <m.div
                       key={n.id}
                       variants={itemAnim}
                       onClick={() => !n.readAt && handleRead(n.id)}
@@ -260,12 +256,12 @@ export default function NotificationBell() {
                       {!n.readAt && (
                         <span className="w-2 h-2 rounded-full bg-[var(--k-warning)] mt-1.5 flex-shrink-0" />
                       )}
-                    </motion.div>
+                    </m.div>
                   ))}
-                </motion.div>
+                </m.div>
               )}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import {
   detectPwaPlatform,
   buildSafariDeepLink,
@@ -106,7 +106,7 @@ export default function InstallPwaBanner() {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: -20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -12, scale: 0.95, height: 0 }}
@@ -196,24 +196,24 @@ export default function InstallPwaBanner() {
 
           <div className="flex gap-1.5 shrink-0">
             {mode === "android-prompt" && (
-              <motion.button
+              <m.button
                 onClick={handleInstall}
                 className="k-btn-grad text-[11px] px-3 py-1.5 rounded-lg font-semibold"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 Instalar
-              </motion.button>
+              </m.button>
             )}
             {mode === "ios-other" && (
-              <motion.button
+              <m.button
                 onClick={handleOpenInSafari}
                 className="k-btn-grad text-[11px] px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 Abrir en Safari
-              </motion.button>
+              </m.button>
             )}
             <button
               onClick={dismiss}
@@ -230,7 +230,7 @@ export default function InstallPwaBanner() {
               </svg>
             </button>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

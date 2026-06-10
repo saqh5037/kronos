@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { updatePermission } from "@/server/actions/permissions";
 import type { PermissionAction, Role } from "@prisma/client";
 
@@ -161,7 +161,7 @@ export default function PermissionMatrix({
               const state = getState(action);
 
               return (
-                <motion.tr
+                <m.tr
                   key={action}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -195,7 +195,7 @@ export default function PermissionMatrix({
                             }`}
                           >
                             {checked && (
-                              <motion.svg
+                              <m.svg
                                 width="12"
                                 height="12"
                                 viewBox="0 0 12 12"
@@ -214,7 +214,7 @@ export default function PermissionMatrix({
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
                                 />
-                              </motion.svg>
+                              </m.svg>
                             )}
                           </div>
                         </button>
@@ -236,7 +236,7 @@ export default function PermissionMatrix({
                         }`}
                       >
                         {state.requiresOwnerApproval && (
-                          <motion.svg
+                          <m.svg
                             width="12"
                             height="12"
                             viewBox="0 0 12 12"
@@ -255,7 +255,7 @@ export default function PermissionMatrix({
                               strokeLinecap="round"
                               strokeLinejoin="round"
                             />
-                          </motion.svg>
+                          </m.svg>
                         )}
                       </div>
                     </button>
@@ -284,7 +284,7 @@ export default function PermissionMatrix({
                       OWNER
                     </span>
                   </td>
-                </motion.tr>
+                </m.tr>
               );
             })}
           </tbody>

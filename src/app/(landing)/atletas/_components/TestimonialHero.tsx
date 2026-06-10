@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { TESTIMONIAL_HERO } from "../_data/copy";
 
 const quoteVariants = {
@@ -88,7 +88,7 @@ export default function TestimonialHero() {
           {TESTIMONIAL_HERO.eyebrow}
         </div>
 
-        <motion.blockquote
+        <m.blockquote
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
@@ -111,9 +111,9 @@ export default function TestimonialHero() {
           <span aria-hidden="true" style={{ color: "var(--k-accent)" }}>
             ”
           </span>
-        </motion.blockquote>
+        </m.blockquote>
 
-        <motion.figcaption
+        <m.figcaption
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
@@ -130,7 +130,7 @@ export default function TestimonialHero() {
           <cite style={{ fontStyle: "normal" }}>
             {TESTIMONIAL_HERO.attribution}
           </cite>
-        </motion.figcaption>
+        </m.figcaption>
       </figure>
     </section>
   );

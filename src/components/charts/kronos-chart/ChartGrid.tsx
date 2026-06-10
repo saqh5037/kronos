@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import type { ChartScale } from "./useChartScale";
 
 interface ChartGridProps {
@@ -43,7 +43,7 @@ export function ChartGrid({
       {yTicks.map((tick, i) => {
         const y = yScale(tick);
         return (
-          <motion.line
+          <m.line
             key={`grid-${i}`}
             x1={x1}
             x2={x2}
@@ -75,7 +75,7 @@ export function ChartGrid({
       })}
       {cinematic &&
         verticalLines.map(({ x, i }) => (
-          <motion.line
+          <m.line
             key={`vgrid-${i}`}
             x1={x}
             x2={x}

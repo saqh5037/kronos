@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 
 type Movement = {
   src: string;
@@ -101,7 +101,7 @@ export default function MovementStrip() {
           progresiones para cada movimiento según tu nivel real.
         </p>
 
-        <motion.div
+        <m.div
           className="atletas-movement-grid"
           initial="hidden"
           whileInView="show"
@@ -114,7 +114,7 @@ export default function MovementStrip() {
           }}
         >
           {MOVEMENTS.map((mov) => (
-            <motion.figure
+            <m.figure
               key={mov.label}
               variants={cardVariants}
               style={{
@@ -183,9 +183,9 @@ export default function MovementStrip() {
                   {mov.category}
                 </span>
               </figcaption>
-            </motion.figure>
+            </m.figure>
           ))}
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

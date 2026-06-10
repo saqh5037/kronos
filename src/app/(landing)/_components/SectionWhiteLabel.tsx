@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { WHITE_LABEL_PALETTES } from "../_data/mock";
 
 const fadeUp = {
@@ -47,7 +47,7 @@ export default function SectionWhiteLabel() {
           }}
         />
       </div>
-      <motion.div
+      <m.div
         className="lp-wl-head"
         style={{ position: "relative", zIndex: 1 }}
         initial="hidden"
@@ -59,22 +59,22 @@ export default function SectionWhiteLabel() {
             : { show: { transition: { staggerChildren: 0.08 } } }
         }
       >
-        <motion.div className="lp-eyebrow" variants={v}>
+        <m.div className="lp-eyebrow" variants={v}>
           <span className="lp-dot" />
           /03 · WHITE-LABEL REAL
-        </motion.div>
-        <motion.h2 variants={v}>La marca del Box, al frente.</motion.h2>
-        <motion.p variants={v}>
+        </m.div>
+        <m.h2 variants={v}>La marca del Box, al frente.</m.h2>
+        <m.p variants={v}>
           Tu logo, tu color y tu nombre dominan la experiencia del atleta en
           todos los tiers. Hierro y Acero corren sobre{" "}
           <code>tubox.kronos.app</code> con un footer discreto &ldquo;Powered by
           Kronos&rdquo;. Titanio elimina toda marca Kronos: dominio propio,
           emails propios y apps publicadas con tu nombre en App Store y Play
           Store.
-        </motion.p>
-      </motion.div>
+        </m.p>
+      </m.div>
 
-      <motion.div
+      <m.div
         className="lp-wl-pillars"
         initial="hidden"
         whileInView="show"
@@ -113,7 +113,7 @@ export default function SectionWhiteLabel() {
             body: "App nativa con tu nombre y tu ícono publicada en stores. Apple Developer Account a tu nombre, gestión del review process incluida. En Acero las apps son cobranded (tu logo, sub-marca Kronos).",
           },
         ].map((p) => (
-          <motion.div key={p.title} className="lp-wl-pillar" variants={v}>
+          <m.div key={p.title} className="lp-wl-pillar" variants={v}>
             <span
               className="lp-eyebrow"
               style={{
@@ -126,11 +126,11 @@ export default function SectionWhiteLabel() {
             </span>
             <h3>{p.title}</h3>
             <p>{p.body}</p>
-          </motion.div>
+          </m.div>
         ))}
-      </motion.div>
+      </m.div>
 
-      <motion.div
+      <m.div
         className="lp-palette-row"
         initial="hidden"
         whileInView="show"
@@ -149,7 +149,7 @@ export default function SectionWhiteLabel() {
         }}
       >
         {WHITE_LABEL_PALETTES.map((p) => (
-          <motion.div key={p.name} className="lp-palette-card" variants={v}>
+          <m.div key={p.name} className="lp-palette-card" variants={v}>
             <div
               className="swatch"
               style={{
@@ -162,11 +162,11 @@ export default function SectionWhiteLabel() {
               <div className="hex">{p.hex}</div>
             </div>
             <div className="who">{p.caption}</div>
-          </motion.div>
+          </m.div>
         ))}
-      </motion.div>
+      </m.div>
 
-      <motion.div
+      <m.div
         className="lp-wl-note"
         initial={reduce ? false : { y: 12 }}
         whileInView={{ y: 0 }}
@@ -181,7 +181,7 @@ export default function SectionWhiteLabel() {
           Cualquier hex válido en sRGB funciona. Si no pasa los thresholds WCAG
           AA, el sistema sugiere el más cercano que sí los pasa.
         </div>
-      </motion.div>
+      </m.div>
     </section>
   );
 }

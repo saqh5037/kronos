@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Transition } from "framer-motion";
+import { m, type Transition } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 interface ChartLineProps {
@@ -92,7 +92,7 @@ export function ChartLine({
   };
 
   return (
-    <motion.path
+    <m.path
       ref={ref}
       d={d}
       fill="none"

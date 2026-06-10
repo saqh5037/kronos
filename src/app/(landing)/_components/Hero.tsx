@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import HeroVideo from "./HeroVideo";
 import DuotoneImage from "./DuotoneImage";
 import { HERO_META } from "../_data/mock";
@@ -48,20 +48,20 @@ export default function Hero({
       />
       <div className="lp-hero-bg" aria-hidden="true" />
       <div className="lp-hero-grid">
-        <motion.div initial="hidden" animate="show" variants={variants}>
-          <motion.div className="lp-eyebrow" variants={child}>
+        <m.div initial="hidden" animate="show" variants={variants}>
+          <m.div className="lp-eyebrow" variants={child}>
             <span className="lp-dot" />
             {branding.heroEyebrow}
-          </motion.div>
-          <motion.h1 variants={child}>
+          </m.div>
+          <m.h1 variants={child}>
             {branding.heroTitleLine1}
             <br />
             {branding.heroTitleLine2}
-          </motion.h1>
-          <motion.p className="lp-lead" variants={child}>
+          </m.h1>
+          <m.p className="lp-lead" variants={child}>
             {branding.heroSubtitle}
-          </motion.p>
-          <motion.div className="lp-hero-actions" variants={child}>
+          </m.p>
+          <m.div className="lp-hero-actions" variants={child}>
             {boxHref ? (
               <a
                 href={boxHref}
@@ -136,11 +136,11 @@ export default function Hero({
                 ¿Ver cómo funciona primero?
               </a>
             )}
-          </motion.div>
-          <motion.div className="lp-hero-meta" variants={child}>
+          </m.div>
+          <m.div className="lp-hero-meta" variants={child}>
             {HERO_META.strip}
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
 
         <HeroVideo />
       </div>

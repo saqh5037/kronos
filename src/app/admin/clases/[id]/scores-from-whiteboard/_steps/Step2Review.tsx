@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { confirmWhiteboardScores } from "@/server/actions/scores";
 import ConfidenceBadge from "@/components/kronos/ConfidenceBadge";
 import AthleteCombobox from "@/components/kronos/AthleteCombobox";
@@ -219,7 +219,7 @@ export default function Step2Review({
       </div>
 
       {/* ─── DESKTOP TABLE (lg+) ─── */}
-      <motion.div
+      <m.div
         className="hidden lg:block overflow-x-auto rounded-xl border border-[var(--k-line)] bg-[var(--k-surface)]"
         variants={containerVariants}
         initial="hidden"
@@ -259,7 +259,7 @@ export default function Step2Review({
                 !validateScore(row.editedScore, wodScoreType);
 
               return (
-                <motion.tr
+                <m.tr
                   key={idx}
                   variants={rowVariants}
                   className={`border-b border-[var(--k-line)] transition-colors hover:bg-[var(--k-elevated)] ${
@@ -283,7 +283,7 @@ export default function Step2Review({
                       />
                       <div className="w-5 h-5 rounded border-2 border-white/20 peer-checked:bg-[var(--k-accent)] peer-checked:border-[var(--k-accent)] flex items-center justify-center transition-colors">
                         {row.include && (
-                          <motion.svg
+                          <m.svg
                             width="12"
                             height="12"
                             viewBox="0 0 12 12"
@@ -299,7 +299,7 @@ export default function Step2Review({
                               strokeLinecap="round"
                               strokeLinejoin="round"
                             />
-                          </motion.svg>
+                          </m.svg>
                         )}
                       </div>
                     </label>
@@ -322,7 +322,7 @@ export default function Step2Review({
                     <AnimatePresence>
                       {row.editedAthleteId !== row.matchedAthleteId &&
                         row.rawName && (
-                          <motion.div
+                          <m.div
                             initial={{ opacity: 0, height: 0, y: -4 }}
                             animate={{ opacity: 1, height: "auto", y: 0 }}
                             exit={{ opacity: 0, height: 0, y: -4 }}
@@ -365,7 +365,7 @@ export default function Step2Review({
                                 Guardar &quot;{row.rawName}&quot; como apodo
                               </span>
                             </label>
-                          </motion.div>
+                          </m.div>
                         )}
                     </AnimatePresence>
                   </td>
@@ -386,13 +386,13 @@ export default function Step2Review({
                         }`}
                       />
                       {scoreInvalid && (
-                        <motion.span
+                        <m.span
                           initial={{ opacity: 0, scale: 0.5 }}
                           animate={{ opacity: 1, scale: 1 }}
                           className="absolute -right-1 -top-1 text-[var(--k-warning)] text-xs"
                         >
                           ⚠
-                        </motion.span>
+                        </m.span>
                       )}
                     </div>
                   </td>
@@ -440,15 +440,15 @@ export default function Step2Review({
                       delay={idx * 0.04}
                     />
                   </td>
-                </motion.tr>
+                </m.tr>
               );
             })}
           </tbody>
         </table>
-      </motion.div>
+      </m.div>
 
       {/* ─── MOBILE CARDS (<lg) ─── */}
-      <motion.div
+      <m.div
         className="lg:hidden space-y-3"
         variants={containerVariants}
         initial="hidden"
@@ -463,7 +463,7 @@ export default function Step2Review({
             !validateScore(row.editedScore, wodScoreType);
 
           return (
-            <motion.div
+            <m.div
               key={idx}
               variants={cardVariants}
               className={`rounded-xl border bg-[var(--k-surface)] p-4 space-y-3 ${
@@ -501,7 +501,7 @@ export default function Step2Review({
                     />
                     <div className="w-5 h-5 rounded border-2 border-white/20 peer-checked:bg-[var(--k-accent)] peer-checked:border-[var(--k-accent)] flex items-center justify-center transition-colors">
                       {row.include && (
-                        <motion.svg
+                        <m.svg
                           width="12"
                           height="12"
                           viewBox="0 0 12 12"
@@ -517,7 +517,7 @@ export default function Step2Review({
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
-                        </motion.svg>
+                        </m.svg>
                       )}
                     </div>
                   </label>
@@ -538,7 +538,7 @@ export default function Step2Review({
                 <AnimatePresence>
                   {row.editedAthleteId !== row.matchedAthleteId &&
                     row.rawName && (
-                      <motion.div
+                      <m.div
                         initial={{ opacity: 0, height: 0, y: -4 }}
                         animate={{ opacity: 1, height: "auto", y: 0 }}
                         exit={{ opacity: 0, height: 0, y: -4 }}
@@ -578,7 +578,7 @@ export default function Step2Review({
                             Guardar &quot;{row.rawName}&quot; como apodo
                           </span>
                         </label>
-                      </motion.div>
+                      </m.div>
                     )}
                 </AnimatePresence>
               </div>
@@ -603,13 +603,13 @@ export default function Step2Review({
                       }`}
                     />
                     {scoreInvalid && (
-                      <motion.span
+                      <m.span
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="absolute -right-1 -top-1 text-[var(--k-warning)] text-xs"
                       >
                         ⚠
-                      </motion.span>
+                      </m.span>
                     )}
                   </div>
                 </div>
@@ -651,14 +651,14 @@ export default function Step2Review({
                   </select>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           );
         })}
-      </motion.div>
+      </m.div>
 
       <AnimatePresence>
         {error && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
@@ -681,7 +681,7 @@ export default function Step2Review({
               <circle cx="8" cy="11" r="0.75" fill="currentColor" />
             </svg>
             {error}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -695,7 +695,7 @@ export default function Step2Review({
         >
           Volver
         </button>
-        <motion.button
+        <m.button
           type="button"
           onClick={handleConfirm}
           disabled={loading || includedCount === 0}
@@ -711,7 +711,7 @@ export default function Step2Review({
           ) : (
             `Confirmar ${includedCount} score${includedCount !== 1 ? "s" : ""}`
           )}
-        </motion.button>
+        </m.button>
       </div>
     </div>
   );

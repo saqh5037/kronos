@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import type { TourDefinition } from "./types";
 import { useTargetBox } from "./useTargetBox";
 import { useTour } from "./TourProvider";
@@ -57,7 +57,7 @@ export function TourOverlay({
     >
       {/* Four backdrop slabs around the spotlight. Each slab carries the blur. */}
       {/* TOP */}
-      <motion.div
+      <m.div
         initial={false}
         animate={{
           height: measured ? spotTop : "100vh",
@@ -78,7 +78,7 @@ export function TourOverlay({
         }}
       />
       {/* BOTTOM */}
-      <motion.div
+      <m.div
         initial={false}
         animate={{
           top: measured ? spotTop + spotH : 0,
@@ -98,7 +98,7 @@ export function TourOverlay({
         }}
       />
       {/* LEFT */}
-      <motion.div
+      <m.div
         initial={false}
         animate={{
           top: measured ? spotTop : 0,
@@ -118,7 +118,7 @@ export function TourOverlay({
         }}
       />
       {/* RIGHT */}
-      <motion.div
+      <m.div
         initial={false}
         animate={{
           top: measured ? spotTop : 0,
@@ -141,7 +141,7 @@ export function TourOverlay({
       {/* Lime neon ring around the spotlight. Sits ABOVE the slabs but
           intercepts no clicks — the target underneath stays interactive. */}
       {measured ? (
-        <motion.div
+        <m.div
           initial={false}
           animate={{
             top: spotTop,

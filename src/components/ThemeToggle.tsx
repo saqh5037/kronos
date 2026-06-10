@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "@/components/ThemeProvider";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 const BUTTON_CLASS =
   "inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors";
@@ -56,7 +56,7 @@ export default function ThemeToggle({
       aria-label={isDark ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
       title={isDark ? "Tema claro" : "Tema oscuro"}
     >
-      <motion.div
+      <m.div
         key={isDark ? "sun" : "moon"}
         initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
         animate={{ rotate: 0, opacity: 1, scale: 1 }}
@@ -64,7 +64,7 @@ export default function ThemeToggle({
         transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
       >
         {isDark ? <SunIcon /> : <MoonIcon />}
-      </motion.div>
+      </m.div>
       {!iconOnly && (
         <span className="hidden sm:inline">{isDark ? "Claro" : "Oscuro"}</span>
       )}

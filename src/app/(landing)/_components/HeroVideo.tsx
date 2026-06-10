@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { useRef, useState } from "react";
 
 export default function HeroVideo() {
@@ -30,7 +30,7 @@ export default function HeroVideo() {
   return (
     <div className="lp-phone-wrap">
       <div className="lp-phone-glow" aria-hidden="true" />
-      <motion.div
+      <m.div
         className="lp-phone"
         initial={reduceMotion ? false : { y: 18 }}
         animate={{ y: 0 }}
@@ -121,7 +121,7 @@ export default function HeroVideo() {
             </>
           )}
         </button>
-      </motion.div>
+      </m.div>
 
       <div
         className="lp-phone-anno"

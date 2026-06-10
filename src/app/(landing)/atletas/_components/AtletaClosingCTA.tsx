@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
 import { FINAL_CTA, CTA_LABEL } from "../_data/copy";
 
@@ -15,7 +15,7 @@ export default function AtletaClosingCTA({
 
   return (
     <section className="lp-cta-tail-shell">
-      <motion.div
+      <m.div
         className="lp-cta-tail lp-grain"
         initial={reduce ? false : { y: 14 }}
         whileInView={{ y: 0 }}
@@ -121,7 +121,7 @@ export default function AtletaClosingCTA({
             {FINAL_CTA.footnote}
           </span>
         </div>
-      </motion.div>
+      </m.div>
     </section>
   );
 }

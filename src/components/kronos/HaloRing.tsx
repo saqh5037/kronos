@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { CHART_COLORS } from "@/components/charts/tokens";
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -45,7 +45,7 @@ export default function HaloRing({
       style={{ width: size, height: size }}
     >
       {/* Glow backdrop */}
-      <motion.div
+      <m.div
         className="absolute rounded-full"
         style={{
           inset: -8,
@@ -76,7 +76,7 @@ export default function HaloRing({
           strokeWidth={strokeWidth}
         />
         {/* Progress */}
-        <motion.circle
+        <m.circle
           cx={size / 2}
           cy={size / 2}
           r={r}
@@ -106,7 +106,7 @@ export default function HaloRing({
       {(displayValue || label) && (
         <div className="absolute inset-0 flex flex-col items-center justify-center z-[2]">
           {displayValue && (
-            <motion.span
+            <m.span
               className="font-display font-bold"
               style={{
                 fontSize: size > 110 ? 24 : 18,
@@ -117,10 +117,10 @@ export default function HaloRing({
               transition={animate ? { delay: 0.4, duration: 0.4 } : undefined}
             >
               {displayValue}
-            </motion.span>
+            </m.span>
           )}
           {label && (
-            <motion.span
+            <m.span
               className="font-mono"
               style={{
                 fontSize: 8,
@@ -133,7 +133,7 @@ export default function HaloRing({
               transition={animate ? { delay: 0.6, duration: 0.3 } : undefined}
             >
               {label}
-            </motion.span>
+            </m.span>
           )}
         </div>
       )}
