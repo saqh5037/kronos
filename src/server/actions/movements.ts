@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { authOptions } from "../auth";
 import { withTenant, db as rawDb } from "../db";
+import { invalidateMovementCatalog } from "@/server/cache";
 import {
   movementSchema,
   cuesSchema,
@@ -193,6 +194,7 @@ export async function updateMovement(
     // Cast: dynamic shape; validated by Zod above.
     data: updateData as never,
   });
+  invalidateMovementCatalog(session.user.tenantId);
   revalidatePath("/admin/movimientos");
   revalidatePath(`/admin/movimientos/${id}`);
   revalidatePath("/atleta/movimientos");
@@ -236,6 +238,7 @@ export async function updateMovementVideoUrl(
     where: { id },
     data: { videoUrl },
   });
+  invalidateMovementCatalog(session.user.tenantId);
   revalidatePath("/admin/movimientos");
   revalidatePath("/atleta/movimientos");
   return { ok: true };
@@ -259,6 +262,7 @@ export async function restoreStandardMovement(
     where: { id },
     data: { videoUrl: standard.videoUrl },
   });
+  invalidateMovementCatalog(session.user.tenantId);
   revalidatePath("/admin/movimientos");
   revalidatePath("/atleta/movimientos");
   return { ok: true };
@@ -284,6 +288,7 @@ export async function createMovement(data: unknown) {
     },
   });
 
+  invalidateMovementCatalog(session.user.tenantId);
   revalidatePath("/admin/wods");
   return movement;
 }

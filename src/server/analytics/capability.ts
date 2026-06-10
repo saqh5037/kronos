@@ -9,6 +9,7 @@ import {
   type Capability,
 } from "@/lib/analytics/capability";
 import { computePercentile } from "@/lib/analytics/percentile";
+import { getCachedBoxMovementStats } from "@/server/cache";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -35,20 +36,18 @@ export type CapabilityProfile = {
 /**
  * Capability profile (radar chart) for an athlete.
  *
- * For each of 5 categories (STRENGTH/OLYMPIC/CARDIO/GYMNASTIC/CORE) we
- * compute a 0-100 score by normalizing the athlete's PR per movement vs
- * the box max for that movement, then averaging within the category.
- *
- * `overallRank` is the athlete's position in the box on the sum of their
- * 5 category scores.
+ * Performance: O(PRs del atleta) + lectura de cache del box.
+ * El cache `getCachedBoxMovementStats` (TTL 15 min) provee boxMaxByMovement
+ * y overallScores sin releer todos los PRs del box en cada render.
  */
 export async function getAthleteCapabilityProfile(
   athleteId: string,
 ): Promise<CapabilityProfile> {
   const session = await requireSession();
-  const db = withTenant(session.user.tenantId);
+  const tenantId = session.user.tenantId;
+  const db = withTenant(tenantId);
 
-  const [myPRs, allPRs] = await Promise.all([
+  const [myPRs, boxStats] = await Promise.all([
     db.pR.findMany({
       where: { athleteId },
       select: {
@@ -57,23 +56,12 @@ export async function getAthleteCapabilityProfile(
         movement: { select: { name: true } },
       },
     }),
-    db.pR.findMany({
-      select: {
-        athleteId: true,
-        movementId: true,
-        value: true,
-        movement: { select: { name: true } },
-      },
-    }),
+    getCachedBoxMovementStats(tenantId),
   ]);
 
-  // Box max per movement (used to normalize contributions).
-  const boxMaxByMovement = new Map<string, number>();
-  for (const pr of allPRs) {
-    const v = Number(pr.value);
-    const cur = boxMaxByMovement.get(pr.movementId);
-    if (cur === undefined || v > cur) boxMaxByMovement.set(pr.movementId, v);
-  }
+  const boxMaxByMovement = new Map<string, number>(
+    Object.entries(boxStats.byMovement).map(([id, e]) => [id, e.max]),
+  );
 
   const myBuckets = buildCapabilityBuckets({
     myPRs: myPRs.map((p) => ({
@@ -84,33 +72,8 @@ export async function getAthleteCapabilityProfile(
     boxMaxByMovement,
   });
 
-  // Compute every athlete's overall score (sum of 5 category scores) so
-  // we can rank the target athlete.
-  const allByAthlete = new Map<
-    string,
-    { movementId: string; movementName: string; value: number }[]
-  >();
-  for (const pr of allPRs) {
-    const arr = allByAthlete.get(pr.athleteId) ?? [];
-    arr.push({
-      movementId: pr.movementId,
-      movementName: pr.movement.name,
-      value: Number(pr.value),
-    });
-    allByAthlete.set(pr.athleteId, arr);
-  }
-
-  const overallScores: number[] = [];
-  let myOverall = 0;
-  for (const [aid, prs] of allByAthlete) {
-    const buckets = buildCapabilityBuckets({
-      myPRs: prs,
-      boxMaxByMovement,
-    });
-    const total = buckets.reduce((s, b) => s + b.score, 0);
-    overallScores.push(total);
-    if (aid === athleteId) myOverall = total;
-  }
+  const overallScores = boxStats.overallScores;
+  const myOverall = boxStats.overallByAthlete[athleteId] ?? 0;
 
   // If athlete has no PRs at all, they're not in the ranking pool.
   const totalAthletes = overallScores.length;

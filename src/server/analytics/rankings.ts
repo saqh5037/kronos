@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
 import { withTenant } from "../db";
 import { computePercentile } from "@/lib/analytics/percentile";
+import { getCachedBoxMovementStats } from "@/server/cache";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -27,6 +28,10 @@ export type MovementRanking = {
  * on, compute their percentile and rank among all athletes with a PR for
  * that movement in the box.
  *
+ * Performance: O(PRs del atleta) + lectura de cache del box.
+ * El cache `getCachedBoxMovementStats` (TTL 15 min) provee los values por
+ * movimiento sin releer todos los PRs del box en cada render.
+ *
  * Returns sorted by percentile desc (their best showings first).
  */
 export async function getAthleteMovementRankings(
@@ -34,36 +39,28 @@ export async function getAthleteMovementRankings(
   limit = 8,
 ): Promise<MovementRanking[]> {
   const session = await requireSession();
-  const db = withTenant(session.user.tenantId);
+  const tenantId = session.user.tenantId;
+  const db = withTenant(tenantId);
 
-  const myPRs = await db.pR.findMany({
-    where: { athleteId },
-    select: {
-      movementId: true,
-      value: true,
-      unit: true,
-      achievedAt: true,
-      movement: { select: { name: true } },
-    },
-  });
+  const [myPRs, boxStats] = await Promise.all([
+    db.pR.findMany({
+      where: { athleteId },
+      select: {
+        movementId: true,
+        value: true,
+        unit: true,
+        achievedAt: true,
+        movement: { select: { name: true } },
+      },
+    }),
+    getCachedBoxMovementStats(tenantId),
+  ]);
 
   if (myPRs.length === 0) return [];
 
-  const movementIds = myPRs.map((p) => p.movementId);
-  const allPRs = await db.pR.findMany({
-    where: { movementId: { in: movementIds } },
-    select: { movementId: true, value: true },
-  });
-
-  const byMovement = new Map<string, number[]>();
-  for (const p of allPRs) {
-    const arr = byMovement.get(p.movementId) ?? [];
-    arr.push(Number(p.value));
-    byMovement.set(p.movementId, arr);
-  }
-
   const rankings: MovementRanking[] = myPRs.map((p) => {
-    const peers = byMovement.get(p.movementId) ?? [];
+    const entry = boxStats.byMovement[p.movementId];
+    const peers = entry?.values ?? [];
     const myValue = Number(p.value);
     const r = computePercentile(peers, myValue, false);
     return {
@@ -104,6 +101,9 @@ export type WODPercentileForMe = {
 /**
  * Returns the percentile of the current athlete in a WOD without re-running
  * the full leaderboard. Designed to enrich `getWODLeaderboard` callers.
+ *
+ * Uses groupBy to get best-per-athlete at DB level (O(1 row/atleta) vs
+ * O(all scores)) — see getMyWODPercentile in scores.ts for the same pattern.
  *
  * Caller is responsible for the cohort: this only considers RX/RXPLUS
  * scores (matches the leaderboard convention).

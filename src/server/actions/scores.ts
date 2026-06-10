@@ -8,6 +8,7 @@ import { detectPR, formatScore } from "@/lib/scores";
 import type { ScoreType } from "@/lib/validations/wod";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
+import { invalidatePRStats, getCachedTodayWod } from "@/server/cache";
 import { maybeAchievePRGoals } from "./goals";
 import {
   runAchievementEvaluation,
@@ -145,51 +146,14 @@ export type TodayWOD = {
 
 export async function getTodayWOD(): Promise<TodayWOD> {
   const session = await requireSession();
-  const db = withTenant(session.user.tenantId);
-
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-
-  const klass = await db.class.findFirst({
-    where: {
-      startsAt: { gte: start, lt: end },
-      isActive: true,
-      wodId: { not: null },
-    },
-    orderBy: { startsAt: "asc" },
-    include: {
-      wod: {
-        include: {
-          movements: {
-            orderBy: { order: "asc" },
-            include: { movement: { select: { name: true } } },
-          },
-        },
-      },
-    },
-  });
-
-  if (!klass || !klass.wod) return null;
-
+  const tenantId = session.user.tenantId;
+  // dateKey in UTC ("YYYY-MM-DD") — server-side so no hydration risk.
+  const dateKey = new Date().toISOString().slice(0, 10);
+  const cached = await getCachedTodayWod(tenantId, dateKey);
+  if (!cached) return null;
   return {
-    classId: klass.id,
-    startsAt: klass.startsAt,
-    wodId: klass.wod.id,
-    wodName: klass.wod.name,
-    wodType: klass.wod.type,
-    scoreType: klass.wod.scoreType as ScoreType,
-    description: klass.wod.description,
-    timeCap: klass.wod.timeCap,
-    movements: klass.wod.movements.map((m) => ({
-      movementId: m.movementId,
-      name: m.movement.name,
-      reps: m.reps,
-      weight: m.weight ? Number(m.weight) : null,
-      notes: m.notes,
-      order: m.order,
-    })),
+    ...cached,
+    scoreType: cached.scoreType as ScoreType,
   };
 }
 
@@ -222,25 +186,35 @@ export async function getMyWODPercentile(
   });
   if (!wod) return null;
 
-  const allScores = await db.score.findMany({
-    where: { wodId },
-    select: { athleteId: true, value: true },
-  });
-  if (allScores.length === 0) return null;
-
-  // Best per athlete
-  const bestByAthlete = new Map<string, number>();
+  // groupBy: 1 row per athlete with their best score at DB level.
+  // TIME → _min (lower is better); all others → _max (higher is better).
   const lowerIsBetter = wod.scoreType === "TIME";
-  for (const s of allScores) {
-    const v = Number(s.value);
-    const existing = bestByAthlete.get(s.athleteId);
-    if (
-      existing === undefined ||
-      (lowerIsBetter ? v < existing : v > existing)
-    ) {
-      bestByAthlete.set(s.athleteId, v);
+
+  const bestByAthlete = new Map<string, number>();
+
+  if (lowerIsBetter) {
+    const grouped = await db.score.groupBy({
+      by: ["athleteId"],
+      where: { wodId },
+      _min: { value: true },
+    });
+    if (grouped.length === 0) return null;
+    for (const row of grouped) {
+      bestByAthlete.set(row.athleteId, Number(row._min.value ?? 0));
+    }
+  } else {
+    const grouped = await db.score.groupBy({
+      by: ["athleteId"],
+      where: { wodId },
+      _max: { value: true },
+    });
+    if (grouped.length === 0) return null;
+    for (const row of grouped) {
+      bestByAthlete.set(row.athleteId, Number(row._max.value ?? 0));
     }
   }
+
+  if (bestByAthlete.size === 0) return null;
 
   const myBest = bestByAthlete.get(me.id) ?? null;
   if (myBest === null) return null;
@@ -473,6 +447,8 @@ export async function submitScore(data: unknown) {
     console.error("[submitScore] achievement eval failed:", err);
   }
 
+  // Invalidate PR stats cache so capability/ranking pages reflect the new PR.
+  invalidatePRStats(tenantId);
   revalidatePath("/atleta/wod");
   revalidatePath("/atleta");
   revalidatePath("/admin/prs");

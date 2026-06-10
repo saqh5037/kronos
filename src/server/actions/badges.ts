@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import type { BadgeTier } from "@prisma/client";
 import { authOptions } from "../auth";
 import { withTenant, db as rawDb } from "../db";
+import { getCachedBadgeCatalog } from "@/server/cache";
 import {
   isCriterion,
   xpForBadgeCode,
@@ -222,7 +223,7 @@ export async function listBadgesWithProgress(): Promise<BadgeDetail[]> {
   const athleteTier = levelToTier(prefs.level);
 
   const [badges, achievements] = await Promise.all([
-    db.badge.findMany({ where: { tenantId }, orderBy: { code: "asc" } }),
+    getCachedBadgeCatalog(tenantId),
     db.achievement.findMany({ where: { athleteId: athlete.id, tenantId } }),
   ]);
 

@@ -11,6 +11,7 @@ import {
 } from "@/lib/validations/class";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
+import { invalidateTodayWod } from "@/server/cache";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -106,6 +107,11 @@ export async function createClass(data: unknown) {
   }));
 
   const result = await rawDb.class.createMany({ data: rows });
+  // If any class has a WOD assigned today, invalidate the WOD-of-day cache.
+  if (parsed.wodId) {
+    const todayKey = new Date().toISOString().slice(0, 10);
+    invalidateTodayWod(tenantId, todayKey);
+  }
   revalidatePath("/admin/programacion");
   return { created: result.count };
 }
@@ -152,6 +158,12 @@ export async function updateClass(id: string, data: unknown) {
       wodId: parsed.wodId ?? null,
     },
   });
+  // If the class date is today, invalidate the WOD-of-day cache.
+  const classDateKey = parsed.startsAt.toISOString().slice(0, 10);
+  const todayKey = new Date().toISOString().slice(0, 10);
+  if (classDateKey === todayKey) {
+    invalidateTodayWod(session.user.tenantId, todayKey);
+  }
   revalidatePath("/admin/programacion");
   return { ok: true };
 }
