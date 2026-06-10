@@ -255,7 +255,32 @@ pm2 reload kronos
 
 Si la migración es destructiva (drop column, etc.), restaurar backup de Postgres antes.
 
-## 9 · Pendientes post primer deploy
+## 9 · Drift de schema — migraciones aplicadas fuera de Prisma
+
+Estos cambios se aplicaron en producción con `db push` directo y no están registrados en `_prisma_migrations`.
+La migración `20260610000000_baseline_trial_notified_and_pilot_beta_signed` los formaliza, pero **NO debe ejecutarse** — solo marcarse como aplicada.
+
+### Cambios en drift
+
+| Campo / Valor         | Modelo        | Descripción                                               |
+| --------------------- | ------------- | --------------------------------------------------------- |
+| `trialLastNotifiedAt` | `Box`         | DateTime opcional para throttle de emails de fin de trial |
+| `PILOT_BETA_SIGNED`   | `AuditAction` | Valor de enum para auditoría de firma del acuerdo beta    |
+
+### Cómo registrar la migración en prod (sin ejecutar el SQL)
+
+Conectarse al servidor y correr:
+
+```bash
+cd /home/ubuntu/kronos
+pnpm prisma migrate resolve --applied 20260610000000_baseline_trial_notified_and_pilot_beta_signed
+```
+
+> **Importante**: este comando solo inserta la fila en `_prisma_migrations`. No toca la BD.
+> Ejecutar con confirmación de Samuel antes de cualquier `prisma migrate deploy` subsiguiente —
+> de lo contrario Prisma intentaría correr el SQL sobre columnas/valores que ya existen.
+
+## 10 · Pendientes post primer deploy
 
 - [ ] Sprint B — subdominios `<slug>.kronos-fit.com` (ver `docs/SUBDOMAIN-PLAN.md` cuando se cree)
 - [ ] CI/CD con GitHub Actions (auto-deploy en push a `main`)
