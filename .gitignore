@@ -121,3 +121,4 @@ Thumbs.db
 
 # Proyecto paralelo de scratch — NO trackear
 kronos-atleta-self-serve/
+!/scripts/backfill-movement-progressions.ts
