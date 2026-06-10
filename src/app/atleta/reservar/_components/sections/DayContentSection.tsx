@@ -5,6 +5,8 @@
  * Fetches listAvailableClasses once; used by only ONE section, so no cache needed.
  */
 
+import Link from "next/link";
+import type { Route } from "next";
 import { type AvailableClass } from "@/server/actions/bookings";
 import { getBoxTimezone } from "@/server/cache";
 import { getCachedSession } from "@/server/session";
@@ -18,6 +20,15 @@ function sameDay(a: Date, b: Date) {
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate()
   );
+}
+
+function nextDayDateKey(selected: Date): string {
+  const next = new Date(selected);
+  next.setDate(next.getDate() + 1);
+  const y = next.getFullYear();
+  const m = String(next.getMonth() + 1).padStart(2, "0");
+  const d = String(next.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 export async function DayContentSection({
@@ -98,7 +109,7 @@ export async function DayContentSection({
             >
               <Icon.CalX width={28} height={28} />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <span
                 style={{
                   fontFamily: "var(--k-font-body)",
@@ -121,6 +132,29 @@ export async function DayContentSection({
               >
                 ELIGE OTRO DÍA EN LA SEMANA
               </span>
+              <Link
+                href={`/atleta/reservar?date=${nextDayDateKey(selected)}` as Route}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  padding: "10px 20px",
+                  borderRadius: 10,
+                  background: "var(--k-elevated)",
+                  border: "1px solid var(--k-line)",
+                  color: "var(--k-t2)",
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  textDecoration: "none",
+                  minHeight: 40,
+                }}
+              >
+                Ver mañana →
+              </Link>
             </div>
           </div>
         ) : (

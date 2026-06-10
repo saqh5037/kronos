@@ -16,6 +16,7 @@ import { GoalCard } from "./GoalCard";
 import { GoalForm } from "./GoalForm";
 import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
 import { saludTour } from "@/components/tour/tours/salud";
+import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 
 type Props = {
   history: BodyMetricHistoryPoint[];
@@ -53,6 +54,9 @@ export function SaludShell({ history, latest, goals }: Props) {
         }}
       >
         <div>
+          <div style={{ marginBottom: 4 }}>
+            <AthleteBackLink href="/atleta" label="Inicio" />
+          </div>
           <div
             style={{
               fontFamily: "var(--k-font-display)",

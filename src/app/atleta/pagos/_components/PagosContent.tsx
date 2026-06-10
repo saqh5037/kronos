@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { listAthleteMemberships } from "@/server/actions/payments";
 import PayMembershipButton from "@/components/atleta/PayMembershipButton";
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
@@ -86,6 +87,10 @@ export async function PagosContent() {
             border: "1px dashed var(--k-line)",
             borderRadius: 16,
             textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            alignItems: "center",
           }}
         >
           <p
@@ -99,6 +104,28 @@ export async function PagosContent() {
             No tienes membresías asignadas. Pídele a tu coach que te asigne un
             plan.
           </p>
+          <Link
+            href="/atleta"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "10px 20px",
+              borderRadius: 10,
+              background: "var(--k-elevated)",
+              border: "1px solid var(--k-line)",
+              color: "var(--k-t2)",
+              fontFamily: "var(--k-font-display)",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              minHeight: 40,
+            }}
+          >
+            Volver al inicio →
+          </Link>
         </div>
       </div>
     );

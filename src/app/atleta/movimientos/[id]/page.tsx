@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
+import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 import { getMyMovementProfile } from "@/server/analytics/movement";
 import {
   getMyPRProgression,
@@ -64,6 +65,9 @@ export default async function MovementDetailPage({
           gap: 8,
         }}
       >
+        <div style={{ marginBottom: 4 }}>
+          <AthleteBackLink href="/atleta/movimientos" label="Movimientos" />
+        </div>
         <span
           style={{
             fontFamily: "var(--k-font-display)",
@@ -708,7 +712,7 @@ export default async function MovementDetailPage({
           }}
         >
           <Link
-            href={`/atleta` as Route}
+            href={`/atleta/wod` as Route}
             style={{
               display: "flex",
               alignItems: "center",
@@ -749,7 +753,7 @@ export default async function MovementDetailPage({
       {isInTodayWod && (
         <AnimatedSection className="px-3.5 mt-4 hidden lg:block">
           <AnimatedItem>
-            <Link href={`/atleta` as Route} style={{ textDecoration: "none" }}>
+            <Link href={`/atleta/wod` as Route} style={{ textDecoration: "none" }}>
               <div
                 style={{
                   padding: 16,

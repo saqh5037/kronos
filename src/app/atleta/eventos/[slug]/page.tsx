@@ -30,6 +30,70 @@ export default async function EventoDetailPage({ params }: PageProps) {
   if (!data) notFound();
   const { event, entry } = data;
 
+  // Compared server-side so the markup never depends on the client clock.
+  const isEventPast = event.startDate ? event.startDate < new Date() : false;
+
+  // Past event — closed state (with or without entry), no QR / registration CTA.
+  // Must run before the not-registered branch so past events never show QR copy.
+  if (isEventPast) {
+    return (
+      <>
+        <div style={{ padding: "48px 16px 0" }}>
+          <AthleteBackLink href="/atleta/eventos" label="Eventos" />
+        </div>
+        <main className="px-4 pb-24 pt-4 max-w-2xl mx-auto">
+          <header className="mb-5">
+            {event.partnerName ? (
+              <p className="k-eyebrow mb-1" style={{ color: "var(--k-accent)" }}>
+                {event.partnerName}
+              </p>
+            ) : null}
+            <h1
+              className="font-display text-3xl mt-1"
+              style={{ color: "var(--k-t1)" }}
+            >
+              {event.name}
+            </h1>
+            {event.startDate ? (
+              <p className="text-sm mt-2" style={{ color: "var(--k-t2)" }}>
+                {formatDate(event.startDate)}
+              </p>
+            ) : null}
+          </header>
+
+          <div className="k-card p-5 mb-5">
+            <p className="k-eyebrow mb-2" style={{ color: "var(--k-t3)" }}>
+              Evento finalizado
+            </p>
+            {entry?.submittedAt ? (
+              <div>
+                <p className="text-sm mb-3" style={{ color: "var(--k-t2)" }}>
+                  Tu resultado registrado:
+                </p>
+                <div className="flex items-baseline gap-3">
+                  <span
+                    className="font-display text-3xl"
+                    style={{ color: "var(--k-t1)" }}
+                  >
+                    {entry.scoreText}
+                  </span>
+                  {entry.division ? (
+                    <span className="k-chip">{entry.division}</span>
+                  ) : null}
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm" style={{ color: "var(--k-t2)" }}>
+                Este evento ya concluyó. El período de registro de resultados
+                está cerrado.
+              </p>
+            )}
+          </div>
+        </main>
+      </>
+    );
+  }
+
   // Si el atleta no está inscrito todavía, mostramos info + cómo inscribirse.
   if (!entry) {
     return (

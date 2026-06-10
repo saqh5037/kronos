@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Route } from "next";
+import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 
 export const metadata = { title: "Kronos — Centro de Ayuda" };
 
@@ -76,6 +77,9 @@ export default function AyudaPage() {
   return (
     <div className="min-h-full pb-32 px-4 pt-6 max-w-lg mx-auto">
       <div className="mb-8">
+        <div style={{ marginBottom: 8 }}>
+          <AthleteBackLink href="/atleta" label="Inicio" />
+        </div>
         <h1
           className="text-2xl font-bold tracking-tight"
           style={{
@@ -183,17 +187,29 @@ export default function AyudaPage() {
         ))}
       </div>
 
-      <div
-        className="mt-8 p-4 rounded-xl text-center"
+      <Link
+        href="/atleta/ajustes"
+        className="mt-8 p-4 rounded-xl text-center block"
         style={{
           background: "rgba(200,255,45,0.06)",
           border: "1px solid rgba(200,255,45,0.12)",
+          textDecoration: "none",
         }}
       >
         <p className="text-sm" style={{ color: "var(--k-t3)" }}>
-          ¿Necesitas ayuda con algo más? Contacta a tu coach.
+          ¿Necesitas más ayuda? Pregunta a tu coach en el box.
         </p>
-      </div>
+        <p
+          className="text-xs mt-1 font-semibold"
+          style={{
+            fontFamily: "var(--k-font-display)",
+            color: "var(--k-accent)",
+            letterSpacing: "0.12em",
+          }}
+        >
+          VER MIS AJUSTES →
+        </p>
+      </Link>
     </div>
   );
 }

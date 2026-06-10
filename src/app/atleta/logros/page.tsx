@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 import {
   LogrosContent,
   LogrosContentSkeleton,
@@ -16,6 +17,9 @@ export default function TrophyRoomPage() {
     >
       {/* HEADER — paints immediately */}
       <header className="px-4 pt-5 pb-4">
+        <div style={{ marginBottom: 4 }}>
+          <AthleteBackLink href="/atleta" label="Inicio" />
+        </div>
         <div className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
           Trophy Room · Atleta
         </div>

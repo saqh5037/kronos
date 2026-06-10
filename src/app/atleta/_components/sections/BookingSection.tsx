@@ -95,10 +95,11 @@ export async function BookingSection() {
         <Link href="/atleta/reservar" className="block">
           <KCard variant="ghost">
             <p
-              className="text-sm text-center py-3"
+              className="text-sm text-center py-3 flex items-center justify-center gap-1.5"
               style={{ color: "var(--k-t2)" }}
             >
-              Sin reservas activas. Toca para reservar.
+              Ver clases disponibles
+              <span aria-hidden style={{ color: "var(--k-t3)" }}>→</span>
             </p>
           </KCard>
         </Link>

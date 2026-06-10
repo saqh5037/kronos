@@ -15,6 +15,7 @@ import {
 } from "@/server/actions/skills";
 import { AIPlanSection, AIPlanSkeleton } from "./_components/AIPlanSection";
 
+import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 import type {
   ActiveSkillData,
   CatalogSkill,
@@ -61,6 +62,9 @@ export default async function SkillsPage() {
   return (
     <div className="pb-28 relative">
       <header style={{ padding: "56px 20px 0" }}>
+        <div style={{ marginBottom: 4 }}>
+          <AthleteBackLink href="/atleta" label="Inicio" />
+        </div>
         <div className="flex items-center gap-2 mb-3">
           <span
             style={{

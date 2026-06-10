@@ -21,6 +21,7 @@ import MovementCatalogCached from "@/components/atleta/MovementCatalogCached";
 import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
 import { movimientosTour } from "@/components/tour/tours/movimientos";
 import { getCachedSession } from "@/server/session";
+import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 
 export async function MovimientosContentSection() {
   let movements: RankedMovement[] = [];
@@ -52,6 +53,9 @@ export async function MovimientosContentSection() {
           position: "relative",
         }}
       >
+        <div style={{ marginBottom: 4 }}>
+          <AthleteBackLink href="/atleta" label="Inicio" />
+        </div>
         <div style={{ position: "absolute", top: 56, right: 20 }}>
           <TourTriggerButton tourId={movimientosTour.id} />
         </div>
