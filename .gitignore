@@ -63,6 +63,7 @@ Thumbs.db
 /scripts/*
 !/scripts/generate-pilot-beta-link.ts
 !/scripts/seed-demo-dominus.ts
+!/scripts/seed-grizzlys.ts
 !/scripts/smoke.sh
 !/scripts/deploy.sh
 /.playwright-mcp/

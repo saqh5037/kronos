@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:grizzlys": "tsx scripts/seed-grizzlys.ts",
     "db:seed:ops": "tsx prisma/seed-operations.ts",
     "db:seed:story": "tsx prisma/seed-athlete-story.ts",
     "db:studio": "prisma studio",
