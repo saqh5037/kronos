@@ -8,7 +8,12 @@ import { detectPR, formatScore } from "@/lib/scores";
 import type { ScoreType } from "@/lib/validations/wod";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
-import { invalidatePRStats, getCachedTodayWod } from "@/server/cache";
+import {
+  invalidatePRStats,
+  getCachedTodayWod,
+  getBoxTimezone,
+} from "@/server/cache";
+import { todayKeyInTz, clampDateKey } from "@/lib/wod-date";
 import { maybeAchievePRGoals } from "./goals";
 import {
   runAchievementEvaluation,
@@ -144,17 +149,32 @@ export type TodayWOD = {
   }[];
 } | null;
 
-export async function getTodayWOD(): Promise<TodayWOD> {
+/**
+ * Returns the WOD for a given date (in box timezone).
+ * If dateKey is omitted, resolves to today in the box's local timezone.
+ * dateKey is clamped to ±7 days from today.
+ */
+export async function getWodForDate(dateKey?: string): Promise<TodayWOD> {
   const session = await requireSession();
   const tenantId = session.user.tenantId;
-  // dateKey in UTC ("YYYY-MM-DD") — server-side so no hydration risk.
-  const dateKey = new Date().toISOString().slice(0, 10);
-  const cached = await getCachedTodayWod(tenantId, dateKey);
+  const timezone = await getBoxTimezone(tenantId);
+  const resolvedKey = dateKey
+    ? clampDateKey(dateKey, timezone)
+    : todayKeyInTz(new Date(), timezone);
+  const cached = await getCachedTodayWod(tenantId, resolvedKey, timezone);
   if (!cached) return null;
   return {
     ...cached,
     scoreType: cached.scoreType as ScoreType,
   };
+}
+
+/**
+ * Returns the WOD for today in the box's local timezone.
+ * Kept for backward compatibility — callers that don't need date navigation.
+ */
+export async function getTodayWOD(): Promise<TodayWOD> {
+  return getWodForDate();
 }
 
 export type MyWODPercentile = {

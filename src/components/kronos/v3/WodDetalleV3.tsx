@@ -23,6 +23,8 @@ export type WodDetalleV3Props = {
   wodType: string;
   scoreType: string;
   timeCap?: number | null;
+  /** WOD description (multi-line plaintext, rendered with whitespace-pre-line). */
+  description?: string;
   movements: MovementRowData[];
   /** total rounds e.g. "3 RFT" o "AMRAP 12" */
   roundsLabel: string;
@@ -53,6 +55,10 @@ export type WodDetalleV3Props = {
   primaryCtaLabel?: string;
   leaderboardHref?: LinkHref;
   backHref?: LinkHref;
+  /** Header label override (e.g. "WOD · MIÉ 10 JUN" vs "WOD · HOY") */
+  headerLabel?: string;
+  /** Day navigation bar slot (server component renders chips) */
+  dayNavSlot?: React.ReactNode;
   /** El form real de score (server interaction) */
   scoreFormSlot?: React.ReactNode;
 };
@@ -125,7 +131,7 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
               color: "var(--k-t2)",
             }}
           >
-            WOD · HOY
+            {props.headerLabel ?? "WOD · HOY"}
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <TourTriggerButton tourId={wodTour.id} />
@@ -149,6 +155,9 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
             </button>
           </div>
         </div>
+
+        {/* Day navigation */}
+        {props.dayNavSlot}
 
         {/* Hero */}
         <div
@@ -286,6 +295,32 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
             </span>
           </div>
         </div>
+
+        {/* Description */}
+        {props.description && (
+          <div
+            style={{
+              margin: "0 20px",
+              padding: "16px 18px",
+              background: "var(--k-surface)",
+              border: "1px solid var(--k-line)",
+              borderRadius: 16,
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "var(--k-font-body)",
+                fontSize: 13,
+                color: "var(--k-t2)",
+                lineHeight: 1.6,
+                whiteSpace: "pre-line",
+              }}
+            >
+              {props.description}
+            </p>
+          </div>
+        )}
 
         {/* Movements */}
         {props.movements.length > 0 && (

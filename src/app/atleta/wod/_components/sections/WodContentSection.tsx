@@ -1,12 +1,12 @@
 /**
  * WodContentSection — streams the WOD detail + score history.
  *
- * getTodayWOD and listMyScores are called only here (one section each),
+ * getWodForDate and listMyScores are called only here (one section each),
  * so no request-cache dedup needed — direct action calls are fine.
  */
 
 import {
-  getTodayWOD,
+  getWodForDate,
   listMyScores,
   type TodayWOD,
   type MyScoreRow,
@@ -19,6 +19,15 @@ import WodDetalleV3, {
   type WodDetalleV3Props,
   type MovementRowData,
 } from "@/components/kronos/v3/WodDetalleV3";
+import {
+  buildWodDayNav,
+  todayKeyInTz,
+  clampDateKey,
+  type WodDayNav,
+} from "@/lib/wod-date";
+import { getBoxTimezone } from "@/server/cache";
+import { requireCachedSession } from "@/server/session";
+import WodDayNavBar from "../WodDayNavBar";
 
 function detectIcon(name: string): MovementRowData["iconKind"] {
   const n = name.toLowerCase();
@@ -59,12 +68,29 @@ function roundsLabelFor(wod: NonNullable<TodayWOD>): {
   return { label: t || wod.scoreType, sub: wod.scoreType };
 }
 
-export async function WodContentSection() {
+export async function WodContentSection({ dateParam }: { dateParam?: string }) {
+  // Resolve box timezone and dateKey server-side — never Date.now() in client component render.
+  let timezone = "UTC";
+  try {
+    const session = await requireCachedSession();
+    timezone = await getBoxTimezone(session.user.tenantId);
+  } catch {
+    // unauthenticated — fallback
+  }
+
+  const todayKey = todayKeyInTz(new Date(), timezone);
+  const resolvedKey = dateParam ? clampDateKey(dateParam, timezone) : todayKey;
+
+  const dayNav: WodDayNav = buildWodDayNav(resolvedKey, todayKey);
+
   let wod: TodayWOD = null;
   let myScores: MyScoreRow[] = [];
 
   try {
-    [wod, myScores] = await Promise.all([getTodayWOD(), listMyScores(20)]);
+    [wod, myScores] = await Promise.all([
+      getWodForDate(resolvedKey),
+      listMyScores(20),
+    ]);
   } catch {
     // no session
   }
@@ -83,6 +109,7 @@ export async function WodContentSection() {
           gap: 12,
         }}
       >
+        <WodDayNavBar dayNav={dayNav} />
         <span
           style={{
             fontFamily: "var(--k-font-display)",
@@ -92,7 +119,7 @@ export async function WodContentSection() {
             fontWeight: 600,
           }}
         >
-          WOD · HOY
+          {dayNav.headerLabel}
         </span>
         <h1
           style={{
@@ -107,7 +134,8 @@ export async function WodContentSection() {
           Sin WOD
         </h1>
         <p style={{ color: "var(--k-t2)", fontSize: 13 }}>
-          No hay WOD programado para hoy todavía.
+          No hay WOD programado para {dayNav.isToday ? "hoy" : "este día"}{" "}
+          todavía.
         </p>
       </div>
     );
@@ -157,6 +185,7 @@ export async function WodContentSection() {
     wodType: wod.wodType,
     scoreType: wod.scoreType,
     timeCap: wod.timeCap,
+    description: wod.description ?? undefined,
     movements,
     roundsLabel: rounds.label,
     roundsSub: rounds.sub,
@@ -171,6 +200,8 @@ export async function WodContentSection() {
     } as unknown as WodDetalleV3Props["leaderboardHref"],
     backHref: "/atleta",
     hidePrimaryCta: true,
+    headerLabel: dayNav.headerLabel,
+    dayNavSlot: <WodDayNavBar dayNav={dayNav} />,
     scoreFormSlot: (
       <ScoreForm
         wodId={wod.wodId}

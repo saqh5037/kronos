@@ -26,6 +26,7 @@
 import { unstable_cache, revalidateTag } from "next/cache";
 import { db } from "@/server/db";
 import { buildCapabilityBuckets } from "@/lib/analytics/capability";
+import { localDayWindow } from "@/lib/wod-date";
 
 const FIVE_MINUTES = 5 * 60;
 const TEN_MINUTES = 10 * 60;
@@ -298,18 +299,29 @@ export function invalidateBadgeCatalog(tenantId: string): void {
 
 /**
  * WOD asignado a la primera clase activa del día. Cacheado 10 min.
- * dateKey = "YYYY-MM-DD" en UTC — el caller lo genera y lo pasa como argumento
+ * dateKey = "YYYY-MM-DD" en la timezone del box — el caller lo genera y pasa como argumento
  * (nunca leer Date dentro del callback; el callback se ejecuta en cache context).
+ *
+ * timezone: IANA tz del box (e.g. "America/Mexico_City"). Default "UTC" para
+ * compatibilidad con callers existentes que no lo pasan.
  *
  * IMPORTANTE: cachea SOLO la parte del box. El score del atleta NO se incluye
  * aquí — el caller debe recuperarlo por separado si lo necesita.
  *
  * Invalidar tras: createClass, updateClass (cuando cambia el wodId del día).
  */
-export function getCachedTodayWod(tenantId: string, dateKey: string) {
-  // dateKey format: "YYYY-MM-DD" (caller passes UTC date string)
-  const startOfDay = new Date(`${dateKey}T00:00:00.000Z`);
-  const endOfDay = new Date(`${dateKey}T23:59:59.999Z`);
+export function getCachedTodayWod(
+  tenantId: string,
+  dateKey: string,
+  timezone = "UTC",
+) {
+  // dateKey format: "YYYY-MM-DD" in box-local timezone.
+  // Window is computed using box timezone so evening classes (e.g. 20:30 CDMX = 02:30Z next day)
+  // fall within the correct local calendar day window.
+  const { start: startOfDay, end: endOfDay } = localDayWindow(
+    dateKey,
+    timezone,
+  );
 
   return unstable_cache(
     async () => {
@@ -364,6 +376,19 @@ export function getCachedTodayWod(tenantId: string, dateKey: string) {
 
 export function invalidateTodayWod(tenantId: string, dateKey: string): void {
   revalidateTag(cacheTags.todayWod(tenantId, dateKey));
+}
+
+/**
+ * Returns the IANA timezone for a box (tenantId = boxId).
+ * Lightweight — one findUnique on Box.timezone. Not cached (callers are server actions
+ * that run infrequently). Falls back to "UTC" if box not found.
+ */
+export async function getBoxTimezone(tenantId: string): Promise<string> {
+  const box = await db.box.findUnique({
+    where: { id: tenantId },
+    select: { timezone: true },
+  });
+  return box?.timezone ?? "UTC";
 }
 
 // ─── Sweep helpers (después de mutaciones grandes) ───────────────────────────

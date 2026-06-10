@@ -11,7 +11,8 @@ import {
 } from "@/lib/validations/class";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
-import { invalidateTodayWod } from "@/server/cache";
+import { invalidateTodayWod, getBoxTimezone } from "@/server/cache";
+import { todayKeyInTz } from "@/lib/wod-date";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -109,7 +110,8 @@ export async function createClass(data: unknown) {
   const result = await rawDb.class.createMany({ data: rows });
   // If any class has a WOD assigned today, invalidate the WOD-of-day cache.
   if (parsed.wodId) {
-    const todayKey = new Date().toISOString().slice(0, 10);
+    const timezone = await getBoxTimezone(tenantId);
+    const todayKey = todayKeyInTz(new Date(), timezone);
     invalidateTodayWod(tenantId, todayKey);
   }
   revalidatePath("/admin/programacion");
@@ -158,11 +160,13 @@ export async function updateClass(id: string, data: unknown) {
       wodId: parsed.wodId ?? null,
     },
   });
-  // If the class date is today, invalidate the WOD-of-day cache.
-  const classDateKey = parsed.startsAt.toISOString().slice(0, 10);
-  const todayKey = new Date().toISOString().slice(0, 10);
+  // If the class date is today (in box tz), invalidate the WOD-of-day cache.
+  const tenantId = session.user.tenantId;
+  const timezone = await getBoxTimezone(tenantId);
+  const todayKey = todayKeyInTz(new Date(), timezone);
+  const classDateKey = todayKeyInTz(parsed.startsAt, timezone);
   if (classDateKey === todayKey) {
-    invalidateTodayWod(session.user.tenantId, todayKey);
+    invalidateTodayWod(tenantId, todayKey);
   }
   revalidatePath("/admin/programacion");
   return { ok: true };

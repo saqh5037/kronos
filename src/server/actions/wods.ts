@@ -6,7 +6,8 @@ import { authOptions } from "../auth";
 import { withTenant, db as rawDb } from "../db";
 import { wodSchema } from "@/lib/validations/wod";
 import type { WODType, ScoreType } from "@/lib/validations/wod";
-import { invalidateTodayWod } from "@/server/cache";
+import { invalidateTodayWod, getBoxTimezone } from "@/server/cache";
+import { todayKeyInTz } from "@/lib/wod-date";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -109,7 +110,8 @@ export async function createWOD(data: unknown) {
   });
 
   // Invalidate today's WOD cache — the new WOD might be scheduled for today.
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const timezone = await getBoxTimezone(tenantId);
+  const todayKey = todayKeyInTz(new Date(), timezone);
   invalidateTodayWod(tenantId, todayKey);
   revalidatePath("/admin/wods");
   return wod;
