@@ -473,10 +473,10 @@ async function requireCoachSession() {
  * marks status=PROCESSED. Returns the aiResult to hydrate the review UI.
  */
 export async function processWhiteboardUpload(uploadId: string) {
-  await requireCoachSession();
+  const session = await requireCoachSession();
 
   const upload = await rawDb.whiteboardUpload.findUnique({
-    where: { id: uploadId },
+    where: { id: uploadId, tenantId: session.user.tenantId },
     include: { class: { include: { wod: true } } },
   });
   if (!upload) throw new Error("Upload no encontrado");
@@ -747,6 +747,7 @@ export async function confirmWhiteboardScores(
     },
   });
 
+  invalidatePRStats(tenantId);
   revalidatePath(`/admin/clases`);
   revalidatePath(`/admin/asistencia`);
   revalidatePath(`/admin/leaderboards`);
