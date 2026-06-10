@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import KCard from "@/components/kronos/KCard";
@@ -11,9 +12,8 @@ import { skillsTour } from "@/components/tour/tours/skills";
 import {
   getActiveSkillForAthlete,
   getSkillCatalogForAthlete,
-  getSkillContextualPRPredictions,
 } from "@/server/actions/skills";
-import type { getTop3PRPredictions } from "@/server/actions/ai";
+import { AIPlanSection, AIPlanSkeleton } from "./_components/AIPlanSection";
 
 import type {
   ActiveSkillData,
@@ -55,13 +55,6 @@ export default async function SkillsPage() {
       catalog: [] as CatalogSkill[],
     })),
   ]);
-
-  const prPredictions: Awaited<ReturnType<typeof getTop3PRPredictions>> =
-    activeSkill
-      ? await getSkillContextualPRPredictions(activeSkill.skill.id).catch(
-          () => [],
-        )
-      : [];
 
   const tierCfg = TIER_LABEL[catalogResult.athleteTier];
 
@@ -109,7 +102,7 @@ export default async function SkillsPage() {
           catalog={catalogResult.catalog.filter(
             (c) => c.id !== activeSkill.skill.id,
           )}
-          prPredictions={prPredictions}
+          skillId={activeSkill.skill.id}
         />
       ) : (
         <EmptySkillView catalog={catalogResult.catalog} />
@@ -122,12 +115,12 @@ function ActiveSkillView({
   data,
   tier,
   catalog,
-  prPredictions,
+  skillId,
 }: {
   data: ActiveSkillData;
   tier: SkillTier;
   catalog: CatalogSkill[];
-  prPredictions: Awaited<ReturnType<typeof getTop3PRPredictions>>;
+  skillId: string;
 }) {
   const tierVerb = TIER_VERB[tier];
   const skill = data.skill;
@@ -415,76 +408,10 @@ function ActiveSkillView({
         </KCard>
       </RevealOnScroll>
 
-      {prPredictions && prPredictions.length > 0 && (
-        <RevealOnScroll
-          data-tour="skills.ai-plan"
-          variant="fade-up"
-          className="px-3.5 mb-4"
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              justifyContent: "space-between",
-              marginBottom: 8,
-              padding: "0 4px",
-            }}
-          >
-            <span className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
-              TU PLAN · KRONOS AI
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--k-font-display)",
-                fontSize: 9,
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                color: "var(--k-t3)",
-              }}
-            >
-              REGRESIÓN + IA
-            </span>
-          </div>
-          <div style={{ display: "grid", gap: 8 }}>
-            {prPredictions.slice(0, 2).map((card) => (
-              <KCard key={card.movementId}>
-                <div
-                  style={{
-                    padding: "12px 14px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                  }}
-                >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontFamily: "var(--k-font-display)",
-                        fontSize: 13,
-                        fontWeight: 700,
-                        color: "var(--k-t1)",
-                      }}
-                    >
-                      {card.movementName}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "var(--k-font-body)",
-                        fontSize: 11,
-                        color: "var(--k-t2)",
-                        marginTop: 2,
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {card.narrative}
-                    </div>
-                  </div>
-                </div>
-              </KCard>
-            ))}
-          </div>
-        </RevealOnScroll>
-      )}
+      {/* AI PLAN — isolated in Suspense so Gemini latency doesn't block the rest */}
+      <Suspense fallback={<AIPlanSkeleton />}>
+        <AIPlanSection skillId={skillId} />
+      </Suspense>
 
       {catalog.length > 0 && (
         <RevealOnScroll variant="fade-up" className="px-3.5 mb-4">
