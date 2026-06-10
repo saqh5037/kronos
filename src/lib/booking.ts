@@ -145,3 +145,27 @@ export function cancelDeadline(
     klass.startsAt.getTime() - window.cancelCloseMinBefore * 60 * 1000,
   );
 }
+
+/**
+ * Decide whether a caller is authorized to cancel a specific booking.
+ *
+ * Role rules:
+ *   - OWNER / COACH / STAFF → can cancel any booking in their tenant.
+ *   - ATHLETE → may only cancel their own; callerAthleteId must match bookingAthleteId.
+ *     If callerAthleteId is null (no athlete profile), authorization is denied.
+ */
+export function canCancelBooking({
+  role,
+  callerAthleteId,
+  bookingAthleteId,
+}: {
+  role: string;
+  callerAthleteId: string | null;
+  bookingAthleteId: string;
+}): boolean {
+  if (role === "OWNER" || role === "COACH" || role === "STAFF") return true;
+  if (role === "ATHLETE") {
+    return callerAthleteId !== null && callerAthleteId === bookingAthleteId;
+  }
+  return false;
+}

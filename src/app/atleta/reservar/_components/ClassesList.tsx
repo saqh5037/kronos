@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import type { AvailableClass } from "@/server/actions/bookings";
+import { classToWodDateKey } from "@/lib/wod-date";
 import { BookButton } from "@/components/BookingActions";
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
 import { EmptyState } from "@/components/kronos/EmptyState";
@@ -52,9 +54,11 @@ const selectStyle: React.CSSProperties = {
 export function ClassesList({
   classes,
   usualHours = [],
+  boxTimezone = "UTC",
 }: {
   classes: AvailableClass[];
   usualHours?: number[];
+  boxTimezone?: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -322,6 +326,7 @@ export function ClassesList({
                     key={c.id}
                     c={c}
                     now={now}
+                    boxTimezone={boxTimezone}
                     isUsual={usualHours.includes(
                       new Date(c.startsAt).getHours(),
                     )}
@@ -342,12 +347,14 @@ function ClassRow({
   c,
   isUsual = false,
   now,
+  boxTimezone = "UTC",
   isTourCardAnchor = false,
   isTourBookAnchor = false,
 }: {
   c: AvailableClass;
   isUsual?: boolean;
   now: number | null;
+  boxTimezone?: string;
   isTourCardAnchor?: boolean;
   isTourBookAnchor?: boolean;
 }) {
@@ -491,9 +498,24 @@ function ClassRow({
                 letterSpacing: "-0.01em",
               }}
             >
-              {isOpenBox
-                ? "Open Box · Acceso libre"
-                : (c.wod?.name ?? "WOD por definir")}
+              {isOpenBox ? (
+                "Open Box · Acceso libre"
+              ) : c.wod?.name ? (
+                <Link
+                  href={`/atleta/wod?date=${classToWodDateKey(c.startsAt, boxTimezone)}`}
+                  style={{
+                    color: "inherit",
+                    textDecoration: "underline",
+                    textDecorationColor: "var(--k-accent-line)",
+                    textUnderlineOffset: 3,
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {c.wod.name}
+                </Link>
+              ) : (
+                "WOD por definir"
+              )}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div
@@ -574,42 +596,13 @@ function ClassRow({
               : {})}
             style={{ flexShrink: 0 }}
           >
-            {isBooked ? (
-              <div
-                style={{
-                  display: "flex",
-                  width: 40,
-                  height: 40,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: 999,
-                  background: "var(--k-accent-soft)",
-                  border: "1px solid var(--k-accent-line)",
-                }}
-                aria-label="Reservada"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="var(--k-accent)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              </div>
-            ) : (
-              <BookButton
-                classId={c.id}
-                bookedCount={c.bookedCount}
-                capacity={c.capacity}
-                myStatus={c.myBookingStatus}
-                myBookingId={c.myBookingId}
-              />
-            )}
+            <BookButton
+              classId={c.id}
+              bookedCount={c.bookedCount}
+              capacity={c.capacity}
+              myStatus={c.myBookingStatus}
+              myBookingId={c.myBookingId}
+            />
           </div>
         </div>
       </div>

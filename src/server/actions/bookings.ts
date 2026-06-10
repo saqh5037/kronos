@@ -7,6 +7,7 @@ import {
   decideBooking,
   decideCancel,
   nextWaitlistPromotion,
+  canCancelBooking,
   type BookingSnapshot,
   type BookingWindow,
 } from "@/lib/booking";
@@ -278,7 +279,15 @@ export async function bookClass(classId: string) {
 export async function cancelBooking(bookingId: string) {
   const session = await requireSession();
   const tenantId = session.user.tenantId;
+  const role = session.user.role as string;
   const window = await getBoxBookingWindow(tenantId);
+
+  // For ATHLETE callers, resolve their athlete profile to check ownership.
+  let callerAthleteId: string | null = null;
+  if (role === "ATHLETE") {
+    const myAthlete = await getMyAthlete(session.user.id, tenantId);
+    callerAthleteId = myAthlete?.id ?? null;
+  }
 
   await rawDb.$transaction(
     async (tx) => {
@@ -296,8 +305,20 @@ export async function cancelBooking(bookingId: string) {
             },
           },
         },
+        // Include athleteId for ownership check
       });
       if (!booking) throw new Error("Reserva no encontrada");
+
+      // Ownership check — ATHLETE can only cancel their own bookings
+      if (
+        !canCancelBooking({
+          role,
+          callerAthleteId,
+          bookingAthleteId: booking.athleteId,
+        })
+      ) {
+        throw new Error("No autorizado");
+      }
 
       const cancelDecision = decideCancel(
         { startsAt: booking.class.startsAt },

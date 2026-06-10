@@ -153,9 +153,10 @@ export function BookButton({
           style={{
             background: "none",
             border: "none",
-            padding: "2px 4px",
+            minHeight: 40,
+            padding: "10px 12px",
             fontFamily: "var(--k-font-display)",
-            fontSize: 9,
+            fontSize: 10,
             fontWeight: 600,
             letterSpacing: "0.12em",
             color: "var(--k-t3)",

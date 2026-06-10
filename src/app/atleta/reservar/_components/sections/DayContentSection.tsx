@@ -6,6 +6,8 @@
  */
 
 import { type AvailableClass } from "@/server/actions/bookings";
+import { getBoxTimezone } from "@/server/cache";
+import { getCachedSession } from "@/server/session";
 import { listWeekClassesCached } from "../request-cache";
 import { ClassesList } from "../ClassesList";
 import { Icon } from "@/components/kronos/v3/icons";
@@ -28,7 +30,12 @@ export async function DayContentSection({
   const selected = new Date(selectedIso);
 
   let dayClasses: AvailableClass[] = [];
+  let boxTimezone = "UTC";
   try {
+    const session = await getCachedSession();
+    if (session?.user?.tenantId) {
+      boxTimezone = await getBoxTimezone(session.user.tenantId);
+    }
     const all = await listWeekClassesCached(todayIso);
     dayClasses = all.filter((c) => sameDay(c.startsAt, selected));
   } catch {
@@ -117,7 +124,11 @@ export async function DayContentSection({
             </div>
           </div>
         ) : (
-          <ClassesList classes={dayClasses} usualHours={[]} />
+          <ClassesList
+            classes={dayClasses}
+            usualHours={[]}
+            boxTimezone={boxTimezone}
+          />
         )}
       </div>
     </>
