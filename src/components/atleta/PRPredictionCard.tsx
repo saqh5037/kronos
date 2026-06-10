@@ -7,25 +7,26 @@ type StatusStyle = {
   label: string;
 };
 
+// V3 — lima neon monochrome; intensity via opacity only
 const STATUS_STYLES: Record<PRPredictionCardData["status"], StatusStyle> = {
   improving: {
-    accent: "var(--brand-blue)",
-    glow: "rgba(0, 68, 255, 0.22)",
+    accent: "var(--k-accent)",
+    glow: "rgba(200, 255, 45, 0.22)",
     label: "EN ALZA",
   },
   plateau: {
-    accent: "var(--brand-violet)",
-    glow: "rgba(124, 58, 237, 0.20)",
+    accent: "var(--k-accent)",
+    glow: "rgba(200, 255, 45, 0.16)",
     label: "PLATEAU",
   },
   declining: {
     accent: "var(--k-accent)",
-    glow: "rgba(230, 0, 38, 0.22)",
+    glow: "rgba(200, 255, 45, 0.20)",
     label: "BAJANDO",
   },
   insufficient: {
     accent: "var(--k-t3)",
-    glow: "rgba(100, 116, 139, 0.14)",
+    glow: "rgba(200, 255, 45, 0.08)",
     label: "POCOS DATOS",
   },
 };

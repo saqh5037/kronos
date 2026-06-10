@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ComponentProps } from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId } from "react";
 import { Icon } from "./icons";
 
 type LinkHref = ComponentProps<typeof Link>["href"];
@@ -85,6 +85,7 @@ function Sparkline({
   strokeW?: number;
   fill?: boolean;
 }) {
+  const gradientId = useId();
   if (data.length < 2) return null;
   const min = Math.min(...data);
   const max = Math.max(...data);
@@ -95,7 +96,7 @@ function Sparkline({
   );
   const path = "M" + pts.join(" L");
   const area = path + ` L${w},${h} L0,${h} Z`;
-  const id = `spark-grad-${Math.random().toString(36).slice(2, 8)}`;
+  const id = `spark-grad-${gradientId}`;
   return (
     <svg width={w} height={h} style={{ display: "block" }}>
       {fill && (

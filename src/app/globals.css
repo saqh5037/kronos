@@ -1217,8 +1217,8 @@
   }
   .k-card-brand:hover {
     transform: translateY(-4px);
-    border-color: var(--blue-line);
-    box-shadow: 0 20px 56px rgba(0, 68, 255, 0.1);
+    border-color: var(--k-accent-line);
+    box-shadow: 0 20px 56px rgba(200, 255, 45, 0.1);
   }
 
   /* ── Corner decorations (thin colored corners) ── */
@@ -1914,6 +1914,16 @@ body {
 }
 .k-nav-item:not([data-active="1"]):hover svg {
   color: #8a8a94 !important;
+}
+
+/* ── Focus-visible V3 ── */
+.k-btn-grad:focus-visible,
+.k-btn-ghost:focus-visible,
+.k-chip:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--k-accent);
+  outline-offset: 2px;
 }
 
 /* button hover enhancements */

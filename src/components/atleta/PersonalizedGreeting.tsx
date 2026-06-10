@@ -7,31 +7,31 @@ type ToneStyle = {
   label: string;
 };
 
-// Paleta brand v1 (manual de marca)
+// V3 — lima neon monochrome; intensity via opacity only
 const TONE_STYLES: Record<DailyGreeting["tone"], ToneStyle> = {
   push: {
     accent: "var(--k-accent)",
-    glow: "rgba(230, 0, 38, 0.32)",
+    glow: "rgba(200, 255, 45, 0.32)",
     label: "PUSH",
   },
   maintain: {
-    accent: "var(--brand-blue)",
-    glow: "rgba(0, 68, 255, 0.28)",
+    accent: "var(--k-accent)",
+    glow: "rgba(200, 255, 45, 0.22)",
     label: "MANTÉN",
   },
   recover: {
-    accent: "var(--brand-cyan)",
-    glow: "rgba(0, 191, 255, 0.28)",
+    accent: "var(--k-accent)",
+    glow: "rgba(200, 255, 45, 0.18)",
     label: "RECOVERY",
   },
   comeback: {
-    accent: "var(--brand-violet)",
-    glow: "rgba(124, 58, 237, 0.30)",
+    accent: "var(--k-accent)",
+    glow: "rgba(200, 255, 45, 0.20)",
     label: "VUELVE",
   },
   celebrate: {
-    accent: "var(--brand-pink)",
-    glow: "rgba(255, 77, 138, 0.32)",
+    accent: "var(--k-accent)",
+    glow: "rgba(200, 255, 45, 0.30)",
     label: "PR",
   },
 };

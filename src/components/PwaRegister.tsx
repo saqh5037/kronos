@@ -15,6 +15,17 @@ export default function PwaRegister() {
     if (typeof window === "undefined" || !("serviceWorker" in navigator))
       return;
 
+    // Dev chunks are not content-hashed, so the SW's cache-first strategy for
+    // /_next/static serves stale JS after every edit. Register in prod only,
+    // and tear down any SW left over from a previous prod-mode visit.
+    if (process.env.NODE_ENV !== "production") {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((regs) => regs.forEach((reg) => reg.unregister()))
+        .catch(() => {});
+      return;
+    }
+
     navigator.serviceWorker
       .register("/sw.js", { scope: "/" })
       .then((reg) => {

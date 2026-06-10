@@ -47,7 +47,7 @@ export function AnimatedStats({
           ve apenas en los bordes y entre cards. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -mx-3 sm:-mx-4 rounded-2xl overflow-hidden"
+        className="pointer-events-none absolute inset-0 rounded-2xl overflow-hidden"
         style={{
           backgroundImage: "url(/images/app/home-stats-backdrop.webp)",
           backgroundSize: "cover",

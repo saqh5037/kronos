@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setPassword, clearPassword } from "@/server/actions/password";
 import { PASSWORD_MIN_LENGTH } from "@/lib/validations/password";
+import { useConfirm } from "@/lib/use-confirm";
 
 export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
   const router = useRouter();
@@ -13,6 +14,7 @@ export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState<string | null>(null);
+  const confirmDialog = useConfirm();
 
   function handleSet(e: React.FormEvent) {
     e.preventDefault();
@@ -39,13 +41,12 @@ export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
     });
   }
 
-  function handleClear() {
-    if (
-      !confirm &&
-      !window.confirm("¿Seguro? Volverás a depender solo del magic link.")
-    ) {
-      return;
-    }
+  async function handleClear() {
+    const ok = await confirmDialog({
+      title: "¿Eliminar contraseña?",
+      message: "Volverás a depender solo del magic link para iniciar sesión.",
+    });
+    if (!ok) return;
     setError(null);
     setSuccess(null);
     startTransition(async () => {
