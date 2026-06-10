@@ -8,7 +8,7 @@
  * Usage:
  *   tsx scripts/seed-grizzlys.ts
  *   Env overrides: GRIZZLYS_OWNER_EMAIL (default samuelquirozh@gmail.com),
- *                  GRIZZLYS_ATHLETE_EMAIL (default sah5037@gmail.com)
+ *                  GRIZZLYS_ATHLETE_EMAIL (default saqh5037@gmail.com)
  */
 
 import { PrismaClient } from "@prisma/client";
@@ -332,7 +332,7 @@ async function main() {
 
   // ─── Athlete (Samuel as athlete) ───────────────────────────────────────────
   const athleteEmail =
-    process.env.GRIZZLYS_ATHLETE_EMAIL ?? "sah5037@gmail.com";
+    process.env.GRIZZLYS_ATHLETE_EMAIL ?? "saqh5037@gmail.com";
   const athleteUser = await ensureBoxUser(
     athleteEmail,
     "Samuel Quiroz",
