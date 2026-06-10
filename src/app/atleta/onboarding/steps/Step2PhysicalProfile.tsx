@@ -147,6 +147,11 @@ export function Step2PhysicalProfile({
       </div>
 
       <div className="flex flex-col gap-2 pt-2">
+        {!biologicalSex && (
+          <p className="text-xs text-center" style={{ color: "var(--k-t2)" }}>
+            Selecciona tu sexo biológico para continuar
+          </p>
+        )}
         <button
           type="button"
           onClick={onNext}

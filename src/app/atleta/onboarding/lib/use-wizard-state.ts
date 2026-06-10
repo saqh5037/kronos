@@ -9,6 +9,7 @@ import type {
   RoutinePreference,
   TrainingLocation,
 } from "@prisma/client";
+import { deriveTrainingLocation } from "./derive-training-location";
 
 export type WizardState = {
   step: number;
@@ -42,6 +43,7 @@ type WizardAction =
   | { type: "SET_ROUTINE_PREFERENCE"; payload: RoutinePreference }
   | { type: "SET_EXCLUDED_MUSCLES"; payload: string[] }
   | { type: "SET_TRAINING_LOCATION"; payload: TrainingLocation }
+  | { type: "CLEAR_TRAINING_LOCATION" }
   | { type: "SET_TRAINS_OWN_TOO"; payload: boolean }
   | { type: "SET_PUSH_NOTIFICATIONS"; payload: boolean };
 
@@ -73,6 +75,8 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
       return { ...state, excludedMuscles: action.payload };
     case "SET_TRAINING_LOCATION":
       return { ...state, trainingLocation: action.payload };
+    case "CLEAR_TRAINING_LOCATION":
+      return { ...state, trainingLocation: null };
     case "SET_TRAINS_OWN_TOO":
       return { ...state, trainsOnOwnToo: action.payload };
     case "SET_PUSH_NOTIFICATIONS":
@@ -104,7 +108,7 @@ const INITIAL_STATE: WizardState = {
   pushNotificationsEnabled: false,
 };
 
-export function useWizardState() {
+export function useWizardState(isB2B = false) {
   const [state, dispatch] = useReducer(wizardReducer, INITIAL_STATE);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
@@ -178,26 +182,41 @@ export function useWizardState() {
             type: "SET_EXCLUDED_MUSCLES",
             payload: parsed.excludedMuscles,
           });
-        if (parsed.trainingLocation)
-          dispatch({
-            type: "SET_TRAINING_LOCATION",
-            payload: parsed.trainingLocation,
-          });
+        // Restore trainsOnOwnToo first so we can normalize trainingLocation
+        const restoredTrainsOnOwnToo = parsed.trainsOnOwnToo ?? false;
         if (parsed.trainsOnOwnToo)
           dispatch({
             type: "SET_TRAINS_OWN_TOO",
             payload: parsed.trainsOnOwnToo,
+          });
+        // Normalize trainingLocation for B2B restore: if trainsOnOwnToo=false
+        // and location is null (was never set or came from an old session),
+        // auto-set to BOX_B2B so finish() validation doesn't dead-end.
+        const normalizedLocation = deriveTrainingLocation({
+          isB2B,
+          trainsOnOwnToo: restoredTrainsOnOwnToo,
+          currentLocation: parsed.trainingLocation ?? null,
+        });
+        if (normalizedLocation !== null)
+          dispatch({
+            type: "SET_TRAINING_LOCATION",
+            payload: normalizedLocation,
           });
         if (parsed.pushNotificationsEnabled)
           dispatch({
             type: "SET_PUSH_NOTIFICATIONS",
             payload: parsed.pushNotificationsEnabled,
           });
+      } else if (isB2B) {
+        // No saved state + B2B: auto-set BOX_B2B so the validation never trips
+        // on the fresh path where the user simply goes step 1 → 9 without
+        // touching the "También entreno solo" checkbox.
+        dispatch({ type: "SET_TRAINING_LOCATION", payload: "BOX_B2B" });
       }
     } catch (err) {
       console.warn("Failed to load wizard state:", err);
     }
-  }, []);
+  }, [isB2B]);
 
   const setStep = useCallback((step: number) => {
     dispatch({ type: "SET_STEP", payload: step });
@@ -251,9 +270,24 @@ export function useWizardState() {
     dispatch({ type: "SET_TRAINING_LOCATION", payload: location });
   }, []);
 
-  const setTrainsOwnToo = useCallback((trainsOwn: boolean) => {
-    dispatch({ type: "SET_TRAINS_OWN_TOO", payload: trainsOwn });
-  }, []);
+  const setTrainsOwnToo = useCallback(
+    (trainsOwn: boolean) => {
+      dispatch({ type: "SET_TRAINS_OWN_TOO", payload: trainsOwn });
+      // When the B2B toggle changes, re-derive the location immediately so
+      // the state is always consistent (no manual location needed for plain B2B).
+      const derived = deriveTrainingLocation({
+        isB2B,
+        trainsOnOwnToo: trainsOwn,
+        currentLocation: state.trainingLocation,
+      });
+      if (derived !== null) {
+        dispatch({ type: "SET_TRAINING_LOCATION", payload: derived });
+      } else {
+        dispatch({ type: "CLEAR_TRAINING_LOCATION" });
+      }
+    },
+    [isB2B, state.trainingLocation],
+  );
 
   const setPushNotifications = useCallback((enabled: boolean) => {
     dispatch({ type: "SET_PUSH_NOTIFICATIONS", payload: enabled });

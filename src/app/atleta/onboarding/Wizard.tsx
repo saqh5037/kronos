@@ -12,6 +12,7 @@ import {
 import { markOnboarded } from "@/lib/pwa-visits";
 import { ProgressBar } from "@/components/kronos/forms";
 import { useWizardState } from "./lib/use-wizard-state";
+import { validateWizard } from "./lib/validate-wizard";
 import { PlanCreatingScreen } from "./steps/PlanCreatingScreen";
 import {
   Step1Reason,
@@ -54,7 +55,7 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
     setExcludedMuscles,
     setTrainingLocation,
     setTrainsOwnToo,
-  } = useWizardState();
+  } = useWizardState(isB2B);
 
   function next() {
     if (state.step < TOTAL_STEPS) {
@@ -76,20 +77,10 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
   }
 
   function finish() {
-    // Validate all required fields
-    if (
-      !state.fitnessReason ||
-      !state.biologicalSex ||
-      !state.weightKg ||
-      !state.heightCm ||
-      !state.ageYears ||
-      !state.fitnessExperience ||
-      !state.fitnessGoal ||
-      !state.weeklyFrequency ||
-      !state.routinePreference ||
-      !state.trainingLocation
-    ) {
-      kToast.error("Completa todos los campos para continuar");
+    const validationError = validateWizard(state);
+    if (validationError) {
+      setStep(validationError.step);
+      kToast.error(validationError.message);
       return;
     }
 

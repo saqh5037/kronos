@@ -101,7 +101,7 @@ export function Step8Location({
           <button
             type="button"
             onClick={onNext}
-            disabled={pending}
+            disabled={pending || (trainsOnOwnToo && !trainingLocation)}
             className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50"
           >
             Siguiente
