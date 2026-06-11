@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mini — Box</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 4.25in; height: 5.5in;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden; position: relative;
+  background: #0a0a0f;
+}
+.photo-bg {
+  position: absolute; inset: 0;
+  background: url('/Users/samuelquiroz/Documents/proyectos/kronos/public/images/landing/box-hero-coach-tablet.webp') center/cover no-repeat;
+}
+.photo-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,10,15,0.2) 0%, rgba(10,10,15,0.55) 25%, rgba(0,26,153,0.92) 100%);
+}
+.safe {
+  position: absolute;
+  inset: 0.12in;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: space-between;
+  color: white; text-align: center;
+  z-index: 2;
+}
+.logo-wrap {
+  width: 0.85in; height: 0.85in;
+  background: #C8FF2D; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+}
+.logo-wrap span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700; font-size: 0.5in;
+  color: #08080A; line-height: 1;
+}
+.badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500; font-size: 8pt;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #00bfff;
+  background: rgba(0,0,0,0.4);
+  padding: 4px 14px; border-radius: 16px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(0,191,255,0.25);
+}
+h1 {
+  font-weight: 900; font-size: 28pt;
+  line-height: 1.08; letter-spacing: -0.02em;
+  text-shadow: 0 3px 16px rgba(0,0,0,0.55);
+}
+h1 span { color: #00bfff; }
+.sub {
+  font-weight: 400; font-size: 11pt;
+  line-height: 1.45; opacity: 0.92;
+  max-width: 3.4in;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.45);
+}
+.features {
+  display: flex; gap: 0.1in;
+  flex-wrap: wrap; justify-content: center;
+}
+.feature {
+  background: rgba(0,68,255,0.15);
+  border: 1px solid rgba(0,191,255,0.25);
+  border-radius: 10px;
+  padding: 0.1in 0.14in;
+}
+.feature-label {
+  font-size: 8.5pt; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: #00bfff;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.qr-wrap {
+  background: white; border-radius: 18px;
+  padding: 0.14in;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.4);
+}
+.qr-wrap img { width: 1.45in; height: 1.45in; display: block; }
+.cta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700; font-size: 11.5pt;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: #00bfff;
+}
+.url {
+  font-size: 9pt; opacity: 0.6;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.footer p {
+  font-size: 8pt; opacity: 0.5;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.05em;
+}
+</style>
+</head>
+<body>
+<div class="photo-bg"></div>
+<div class="safe">
+  <div class="logo-wrap"><span>K</span></div>
+  <div class="badge">Para Dueños de Box</div>
+  <h1>TU BOX.<br><span>SIN CAOS.</span></h1>
+  <p class="sub">Reservas, pagos, WODs, asistencia y reportes. Todo en una app, en español, con <strong>tu logo y tu color</strong>.</p>
+  <div class="features">
+    <div class="feature"><span class="feature-label">Reservas</span></div>
+    <div class="feature"><span class="feature-label">Pagos</span></div>
+    <div class="feature"><span class="feature-label">WODs</span></div>
+    <div class="feature"><span class="feature-label">Reportes</span></div>
+  </div>
+  <div class="qr-wrap"><img src="qr-code-box.svg" alt="QR"></div>
+  <div class="cta">Prueba 14 días gratis</div>
+  <div class="url">kronos-fit.com/signup</div>
+  <div class="footer"><p>Evento Especial · Sábado · Sin compromiso</p></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mini — Neón</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 4.25in; height: 5.5in;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden; position: relative;
+  background: linear-gradient(180deg, #0a0a0f 0%, #0f0f1a 50%, #121228 100%);
+}
+.grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(200,255,45,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,255,45,0.05) 1px, transparent 1px);
+  background-size: 0.4in 0.4in;
+}
+.glow {
+  position: absolute; top: -0.4in; right: -0.4in;
+  width: 2.5in; height: 2.5in;
+  background: radial-gradient(circle, rgba(200,255,45,0.18) 0%, transparent 50%);
+  pointer-events: none;
+}
+.safe {
+  position: absolute;
+  inset: 0.12in;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: space-between;
+  color: white; text-align: center;
+}
+.logo-wrap {
+  width: 0.85in; height: 0.85in;
+  background: #C8FF2D; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 35px rgba(200,255,45,0.4);
+}
+.logo-wrap span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700; font-size: 0.5in;
+  color: #08080A; line-height: 1;
+}
+.badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500; font-size: 8pt;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: #C8FF2D;
+}
+h1 {
+  font-weight: 900; font-size: 28pt;
+  line-height: 1.05; letter-spacing: -0.02em;
+}
+h1 span { color: #C8FF2D; }
+.sub {
+  font-weight: 400; font-size: 11.5pt;
+  line-height: 1.4; opacity: 0.85;
+  max-width: 3.5in;
+}
+.stats {
+  display: flex; gap: 0.16in;
+}
+.stat {
+  border: 1.5px solid rgba(200,255,45,0.3);
+  border-radius: 12px; padding: 0.16in 0.2in;
+  min-width: 1.05in;
+}
+.stat-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700; font-size: 22pt;
+  color: #C8FF2D; display: block;
+}
+.stat-label {
+  font-size: 8.5pt; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  opacity: 0.75;
+}
+.qr-wrap {
+  background: white; border-radius: 18px;
+  padding: 0.14in;
+  box-shadow: 0 0 30px rgba(200,255,45,0.25);
+}
+.qr-wrap img { width: 1.5in; height: 1.5in; display: block; }
+.cta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700; font-size: 11.5pt;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: #C8FF2D;
+}
+.url {
+  font-size: 9pt; opacity: 0.6;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.bar {
+  width: 0.7in; height: 2.5px;
+  background: #C8FF2D; border-radius: 1.5px;
+  box-shadow: 0 0 10px rgba(200,255,45,0.5);
+}
+.footer p {
+  font-size: 8pt; opacity: 0.45;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.05em;
+}
+</style>
+</head>
+<body>
+<div class="grid"></div>
+<div class="glow"></div>
+<div class="safe">
+  <div class="logo-wrap"><span>K</span></div>
+  <div class="badge">El Sistema Operativo de tu Box</div>
+  <h1>TU ENTRENAMIENTO.<br><span>TU HISTORIA.</span></h1>
+  <p class="sub">Lleva tu progreso en el bolsillo. Reserva clases, registra tus PRs y construye tu racha.</p>
+  <div class="stats">
+    <div class="stat"><span class="stat-num">∞</span><span class="stat-label">PRs</span></div>
+    <div class="stat"><span class="stat-num">365</span><span class="stat-label">Días</span></div>
+    <div class="stat"><span class="stat-num">1</span><span class="stat-label">App</span></div>
+  </div>
+  <div class="qr-wrap"><img src="qr-code.svg" alt="QR"></div>
+  <div class="cta">Escanea y únete</div>
+  <div class="url">kronos-fit.com/atleta-signup</div>
+  <div class="bar"></div>
+  <div class="footer"><p>Evento Especial · Sábado · Registro Gratuito</p></div>
+</div>
+</body>
+</html>

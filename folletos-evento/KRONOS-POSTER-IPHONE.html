@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>KRONOS Poster</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  width: 2550px;
+  height: 3900px;
+  font-family: 'Inter', sans-serif;
+  background: #08080A;
+  color: #fff;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Background ──────────────────────────────────────── */
+.bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 80%, rgba(200,255,45,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 20% 30%, rgba(0,68,255,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 30% at 80% 20%, rgba(200,255,45,0.02) 0%, transparent 50%),
+    #08080A;
+}
+
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(200,255,45,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,255,45,0.012) 1px, transparent 1px);
+  background-size: 100px 100px;
+  pointer-events: none;
+}
+
+/* ── Frame ───────────────────────────────────────────── */
+.poster-frame {
+  position: absolute;
+  top: 50px; left: 50px; right: 50px; bottom: 50px;
+  border: 2px solid rgba(200,255,45,0.1);
+  border-radius: 28px;
+  pointer-events: none;
+  z-index: 5;
+}
+.poster-frame::before {
+  content: '';
+  position: absolute;
+  top: 10px; left: 10px; right: 10px; bottom: 10px;
+  border: 1px solid rgba(200,255,45,0.04);
+  border-radius: 18px;
+}
+.corner {
+  position: absolute;
+  width: 80px; height: 80px;
+  z-index: 6;
+  pointer-events: none;
+}
+.corner-tl { top: 38px; left: 38px; border-top: 4px solid #C8FF2D; border-left: 4px solid #C8FF2D; border-radius: 12px 0 0 0; }
+.corner-tr { top: 38px; right: 38px; border-top: 4px solid #C8FF2D; border-right: 4px solid #C8FF2D; border-radius: 0 12px 0 0; }
+.corner-bl { bottom: 38px; left: 38px; border-bottom: 4px solid #C8FF2D; border-left: 4px solid #C8FF2D; border-radius: 0 0 0 12px; }
+.corner-br { bottom: 38px; right: 38px; border-bottom: 4px solid #C8FF2D; border-right: 4px solid #C8FF2D; border-radius: 0 0 12px 0; }
+
+/* ── Main Content (INVERTED vertical layout) ─────────── */
+.content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 120px 40px 120px;
+}
+
+/* ── Top: Text Section ───────────────────────────────── */
+.text-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 1800px;
+}
+
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 50px;
+}
+.logo-k {
+  width: 90px; height: 90px;
+  background: #C8FF2D;
+  border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900;
+  font-size: 44px;
+  color: #08080A;
+}
+.logo-text {
+  font-size: 64px;
+  font-weight: 900;
+  letter-spacing: 16px;
+  color: #fff;
+}
+
+.headline {
+  font-size: 160px;
+  font-weight: 900;
+  line-height: 1.06;
+  letter-spacing: -5px;
+  margin-bottom: 35px;
+}
+.headline .lime { color: #C8FF2D; }
+
+.subhead {
+  font-size: 44px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.5;
+  margin-bottom: 55px;
+}
+
+.features {
+  display: flex;
+  justify-content: center;
+  gap: 70px;
+  margin-bottom: 50px;
+  width: 100%;
+}
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.feature-dot {
+  width: 16px; height: 16px;
+  background: #C8FF2D;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(200,255,45,0.35);
+}
+.feature-text {
+  font-size: 34px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.qr-section {
+  display: flex;
+  align-items: center;
+  gap: 45px;
+  margin-bottom: 35px;
+}
+.qr-wrap {
+  width: 260px; height: 260px;
+  background: #fff;
+  border-radius: 24px;
+  padding: 16px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+.qr-wrap img { width: 100%; height: 100%; }
+.qr-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+.qr-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+.qr-url {
+  font-size: 34px;
+  font-weight: 700;
+  color: #C8FF2D;
+  letter-spacing: -0.5px;
+}
+
+.section-divider {
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,255,45,0.25), transparent);
+  margin: 20px 0;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  margin-bottom: 20px;
+}
+.footer-logo {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: #fff;
+}
+.footer-divider {
+  width: 1px; height: 30px;
+  background: rgba(255,255,255,0.2);
+}
+.footer-detail {
+  font-size: 24px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.4);
+}
+.footer-detail strong {
+  color: #C8FF2D;
+  font-weight: 700;
+}
+
+/* ── Middle: Feature Cards ───────────────────────────── */
+.cards-section {
+  width: 100%;
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(200,255,45,0.06);
+}
+.cards-title {
+  text-align: center;
+  font-size: 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  letter-spacing: 6px;
+  margin-bottom: 25px;
+}
+.cards-row {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+}
+.card {
+  flex: 1;
+  max-width: 520px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 24px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+.card-icon {
+  width: 56px; height: 56px;
+  background: rgba(200,255,45,0.1);
+  border: 1px solid rgba(200,255,45,0.2);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+.card-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+.card-desc {
+  font-size: 22px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.5;
+}
+
+/* ── Bottom: Phone (large, centered) ─────────────────── */
+.phone-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-top: 50px;
+  flex: 1;
+  justify-content: flex-end;
+}
+.phone-wrap {
+  position: relative;
+  width: 1300px;
+}
+.phone-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 80px 160px rgba(0,0,0,0.95)) drop-shadow(0 0 60px rgba(200,255,45,0.08));
+}
+.phone-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 85%; height: 92%;
+  background: radial-gradient(ellipse 45% 45% at 50% 40%, rgba(200,255,45,0.08) 0%, transparent 70%);
+  filter: blur(80px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── Watermark ───────────────────────────────────────── */
+.watermark {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 200px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.012);
+  letter-spacing: 30px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* Shapes */
+.shape {
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+}
+.shape-1 {
+  width: 400px; height: 400px;
+  border: 1px solid rgba(200,255,45,0.04);
+  border-radius: 50%;
+  top: 200px; left: 100px;
+}
+.shape-2 {
+  width: 250px; height: 250px;
+  border: 1px solid rgba(200,255,45,0.03);
+  border-radius: 50%;
+  top: 300px; right: 150px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="bg-grid"></div>
+
+<div class="poster-frame"></div>
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<div class="watermark">KRONOS</div>
+<div class="shape shape-1"></div>
+<div class="shape shape-2"></div>
+
+<div class="content">
+
+  <!-- Top: All text content -->
+  <div class="text-section">
+
+    <div class="logo-row">
+      <div class="logo-k">K</div>
+      <div class="logo-text">KRONOS</div>
+    </div>
+
+    <h1 class="headline">
+      TU BOX.
+      <span class="lime">EN TU BOLSILLO.</span>
+    </h1>
+
+    <p class="subhead">
+      La plataforma todo-en-uno que tu box necesita. Reservas, skills, WODs, pagos y comunidad.
+    </p>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-dot"></div>
+        <span class="feature-text">Reservá tu clase en 3 toques</span>
+      </div>
+      <div class="feature">
+        <div class="feature-dot"></div>
+        <span class="feature-text">Seguí tu progreso con Skills</span>
+      </div>
+      <div class="feature">
+        <div class="feature-dot"></div>
+        <span class="feature-text">Pagos, racha y comunidad en una app</span>
+      </div>
+    </div>
+
+    <div class="qr-section">
+      <div class="qr-wrap">
+        <img src="assets/qr-code.png" alt="QR">
+      </div>
+      <div class="qr-text">
+        <span class="qr-label">Escaneá y probá la app</span>
+        <span class="qr-url">app.kronos.fit</span>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="footer">
+      <span class="footer-logo">KRONOS</span>
+      <div class="footer-divider"></div>
+      <span class="footer-detail">Evento CrossFit · <strong>Sábado 24 de Mayo</strong></span>
+    </div>
+
+  </div>
+
+  <!-- Middle: Feature Cards -->
+  <div class="cards-section">
+    <div class="cards-title">Todo lo que necesitás</div>
+    <div class="cards-row">
+      <div class="card">
+        <div class="card-icon">📅</div>
+        <div class="card-title">Reservas</div>
+        <div class="card-desc">Agendá tu clase en segundos. Sin llamadas, sin grupos de WhatsApp.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⭐</div>
+        <div class="card-title">Skills</div>
+        <div class="card-desc">Seguí tu progreso en cada movimiento. De principiante a RX.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">💳</div>
+        <div class="card-title">Pagos</div>
+        <div class="card-desc">Pagá tu membresía desde la app. Automático y sin complicaciones.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔥</div>
+        <div class="card-title">Racha</div>
+        <div class="card-desc">Mantené tu constancia. Competí con vos mismo y con tu comunidad.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom: Phone -->
+  <div class="phone-section">
+    <div class="phone-wrap">
+      <div class="phone-glow"></div>
+      <img class="phone-img" src="assets/iphone-real-upscaled.png" alt="Kronos App">
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Kronos Folleto — Fuego</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+@page { size: 5.75in 8.75in; margin: 0; }
+body {
+  width: 5.75in; height: 8.75in;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+.bleed {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(160deg, #e60026 0%, #b3001b 30%, #0044ff 70%, #001a99 100%);
+}
+.bleed::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.safe {
+  position: absolute;
+  top: 0.375in; left: 0.375in; right: 0.375in; bottom: 0.375in;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: white; text-align: center;
+}
+.logo-wrap {
+  width: 0.9in; height: 0.9in;
+  background: #C8FF2D; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 0.25in;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.logo-wrap span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700; font-size: 0.55in;
+  color: #08080A; line-height: 1;
+}
+.badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500; font-size: 9pt;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  opacity: 0.85; margin-bottom: 0.12in;
+}
+h1 {
+  font-weight: 900; font-size: 32pt;
+  line-height: 1.05; letter-spacing: -0.02em;
+  margin-bottom: 0.12in;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+.sub {
+  font-weight: 400; font-size: 13pt;
+  line-height: 1.5; opacity: 0.92;
+  max-width: 4.2in; margin-bottom: 0.25in;
+}
+.features {
+  display: flex; gap: 0.25in; margin-bottom: 0.25in;
+}
+.feature {
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  padding: 0.18in 0.22in;
+  text-align: center; min-width: 1.3in;
+}
+.feature-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700; font-size: 18pt;
+  color: #C8FF2D; display: block; margin-bottom: 4px;
+}
+.feature-label {
+  font-size: 8pt; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  opacity: 0.9;
+}
+.qr-wrap {
+  background: white; border-radius: 20px;
+  padding: 0.18in; margin-bottom: 0.12in;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+}
+.qr-wrap img { width: 1.6in; height: 1.6in; display: block; }
+.cta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700; font-size: 11pt;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: #C8FF2D;
+  margin-bottom: 6px;
+}
+.url {
+  font-size: 9pt; opacity: 0.75;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.footer {
+.footer {
+  margin-top: 0.15in;
+  text-align: center;
+}
+}
+.footer p {
+  font-size: 7.5pt; opacity: 0.6;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.05em;
+}
+.swoosh {
+  position: absolute; bottom: -0.5in; right: -0.5in;
+  width: 4in; height: 4in;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div class="bleed">
+  <div class="swoosh"></div>
+  <div class="safe">
+    <div class="logo-wrap"><span>K</span></div>
+    <div class="badge">Sistema Operativo de tu Box</div>
+    <h1>DOMINA TU<br>RENDIMIENTO</h1>
+    <p class="sub">Tu box ya usa <strong>Kronos</strong>. Ahora es tu turno: registra tus PRs, sigue tu racha y lleva tu progreso al siguiente nivel. Todo en una app, en español.</p>
+    <div class="features">
+      <div class="feature"><span class="feature-num">PRs</span><span class="feature-label">Personales</span></div>
+      <div class="feature"><span class="feature-num">WODs</span><span class="feature-label">Diarios</span></div>
+      <div class="feature"><span class="feature-num">Racha</span><span class="feature-label">Semanal</span></div>
+    </div>
+    <div class="qr-wrap">
+      <img src="qr-code.svg" alt="QR">
+    </div>
+    <div class="cta">Escanea y empieza hoy</div>
+    <div class="url">kronos-fit.com/atleta-signup</div>
+  </div>
+</div>
+</body>
+</html>

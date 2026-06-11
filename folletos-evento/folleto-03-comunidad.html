@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Kronos Folleto — Comunidad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+@page { size: 5.75in 8.75in; margin: 0; }
+body {
+  width: 5.75in; height: 8.75in;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden; position: relative;
+  background: #0a0a0f;
+}
+.photo-bg {
+  position: absolute; inset: 0;
+  background: url('/Users/samuelquiroz/Documents/proyectos/kronos/public/images/landing/box-community-celebration.webp') center/cover no-repeat;
+}
+.photo-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,10,15,0.25) 0%, rgba(10,10,15,0.75) 45%, rgba(10,10,15,0.95) 100%);
+}
+.safe {
+  position: absolute;
+  top: 0.375in; left: 0.375in; right: 0.375in; bottom: 0.375in;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: white; text-align: center;
+  z-index: 2;
+}
+.logo-wrap {
+  width: 0.85in; height: 0.85in;
+  background: #C8FF2D; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 0.3in;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.logo-wrap span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700; font-size: 0.52in;
+  color: #08080A; line-height: 1;
+}
+.badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500; font-size: 8.5pt;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: #C8FF2D; margin-bottom: 0.22in;
+  background: rgba(0,0,0,0.35);
+  padding: 4px 14px; border-radius: 20px;
+  backdrop-filter: blur(6px);
+}
+h1 {
+  font-weight: 900; font-size: 31pt;
+  line-height: 1.08; letter-spacing: -0.02em;
+  margin-bottom: 0.12in;
+  text-shadow: 0 3px 16px rgba(0,0,0,0.5);
+}
+.sub {
+  font-weight: 400; font-size: 12.5pt;
+  line-height: 1.55; opacity: 0.88;
+  max-width: 4.2in; margin-bottom: 0.3in;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+.highlight {
+  background: rgba(200,255,45,0.15);
+  border-left: 3px solid #C8FF2D;
+  border-radius: 0 12px 12px 0;
+  padding: 0.18in 0.22in;
+  margin-bottom: 0.3in;
+  text-align: left;
+  max-width: 4.3in;
+}
+.highlight p {
+  font-size: 11pt; line-height: 1.5; opacity: 0.9;
+}
+.highlight strong { color: #C8FF2D; }
+.qr-wrap {
+  background: white; border-radius: 18px;
+  padding: 0.15in; margin-bottom: 0.12in;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+.qr-wrap img { width: 1.5in; height: 1.5in; display: block; }
+.cta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700; font-size: 11pt;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: #C8FF2D; margin-bottom: 6px;
+}
+.url {
+  font-size: 9pt; opacity: 0.6;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.footer {
+  margin-top: 0.15in;
+  text-align: center;
+}
+.footer p {
+  font-size: 7.5pt; opacity: 0.5;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.06em;
+}
+</style>
+</head>
+<body>
+<div class="photo-bg"></div>
+<div class="safe">
+  <div class="logo-wrap"><span>K</span></div>
+  <div class="badge">Tu Comunidad Te Espera</div>
+  <h1>LA COMUNIDAD<br>CRECE CONTIGO</h1>
+  <p class="sub">Miles de atletas ya registran sus PRs, siguen sus WODs y compiten sanamente con Kronos. Este sábado, tu box te invita a ser parte.</p>
+  <div class="highlight">
+    <p><strong>Reserva</strong> tu clase · <strong>Registra</strong> tus PRs · <strong>Sigue</strong> tu racha · Todo en <strong>una app</strong></p>
+  </div>
+  <div class="qr-wrap">
+    <img src="qr-code.svg" alt="QR">
+  </div>
+  <div class="cta">Escanea y empieza hoy</div>
+  <div class="url">kronos-fit.com/atleta-signup</div>
+  <div class="footer">
+    <p>Evento Especial · Sábado · Registro Gratuito</p>
+  </div>
+</div>
+</body>
+</html>
