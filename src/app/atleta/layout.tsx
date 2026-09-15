@@ -60,7 +60,7 @@ export default async function AtletaLayout({
     );
   }
 
-  // Box mode se resuelve UNA vez acá (getBoxMode está memoizado por request)
+  // Box mode se resuelve UNA vez aquí (getBoxMode está memoizado por request)
   // y baja al TabBar, que esconde las tabs de box (Reservar) cuando el atleta
   // está en Box Personal. Las páginas personal-only NO redirigen: renderizan
   // su propio estado explicativo, porque un `redirect()` a nivel page se
