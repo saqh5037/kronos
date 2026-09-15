@@ -1,19 +1,37 @@
 /**
  * WodContentSection — streams the WOD detail + score history.
  *
+ * Audit 2026-09-15 (P1, /atleta/wod) fixed here:
+ *  - The chip read "FORTIME" and the meta line printed the raw `TIME` enum →
+ *    both go through `wodTypeLabel` / `scoreTypeLabel`.
+ *  - The movement card subtitle said "ROUNDS FOR TIME" on a For Time WOD →
+ *    the subtitle now describes the SCORE type, which is what it measures.
+ *  - The free-text description contradicted the structured movement list
+ *    ("1 mile run …" vs "3200 Run") → the description renders only when there
+ *    is no structured list, so the athlete sees ONE version of the workout.
+ *  - "Mejor marca" used `wodScores[0]`, the most RECENT score, not the best →
+ *    best is now resolved by metric direction, and the most recent one feeds
+ *    the "Tu último <WOD>" autofill on the form.
+ *  - `ScoreForm` is replaced by the type-aware `AthleteScoreForm`.
+ *
  * getWodForDate and listMyScores are called only here (one section each),
  * so no request-cache dedup needed — direct action calls are fine.
  */
 
 import {
   getWodForDate,
+  getMyLastScoreForWOD,
   listMyScores,
   type TodayWOD,
   type MyScoreRow,
+  type MyLastScoreForWOD,
 } from "@/server/actions/scores";
-import ScoreForm from "@/components/ScoreForm";
+import AthleteScoreForm from "../AthleteScoreForm";
 import { formatScore } from "@/lib/scores";
+import { sortByMetric } from "@/lib/scores/direction";
 import { formatDayMonth } from "@/lib/week";
+import { wodTypeLabel, scoreTypeLabel } from "@/lib/labels";
+import type { WODType } from "@prisma/client";
 import type { ScoreType } from "@/lib/validations/wod";
 import WodDetalleV3, {
   type WodDetalleV3Props,
@@ -42,30 +60,34 @@ function detectIcon(name: string): MovementRowData["iconKind"] {
   return "default";
 }
 
+/**
+ * The big label on the movement card and the line under it.
+ *
+ * The label is the WOD FORMAT ("For Time", "AMRAP 20"); the subtitle is what
+ * the score MEASURES. The old code printed "ROUNDS FOR TIME" under every
+ * For Time WOD, including Murph, which is a single round.
+ */
 function roundsLabelFor(wod: NonNullable<TodayWOD>): {
   label: string;
   sub: string;
 } {
-  const t = wod.wodType?.toUpperCase?.() ?? "";
-  if (t.includes("AMRAP")) {
+  const type = wod.wodType as WODType;
+  const typeName = wodTypeLabel[type] ?? wod.wodType;
+  const scoreName = scoreTypeLabel[wod.scoreType as ScoreType];
+
+  if (type === "AMRAP") {
     return {
       label: wod.timeCap ? `AMRAP ${wod.timeCap}` : "AMRAP",
-      sub: "AS MANY ROUNDS AS POSSIBLE",
+      sub: scoreName,
     };
   }
-  if (t.includes("EMOM")) {
+  if (type === "EMOM") {
     return {
       label: wod.timeCap ? `EMOM ${wod.timeCap}` : "EMOM",
-      sub: "EVERY MIN ON THE MIN",
+      sub: scoreName,
     };
   }
-  if (t.includes("RFT") || t.includes("FOR_TIME") || t.includes("FORTIME")) {
-    return {
-      label: t.includes("RFT") ? t : "FOR TIME",
-      sub: "ROUNDS FOR TIME",
-    };
-  }
-  return { label: t || wod.scoreType, sub: wod.scoreType };
+  return { label: typeName, sub: scoreName };
 }
 
 export async function WodContentSection({ dateParam }: { dateParam?: string }) {
@@ -141,18 +163,33 @@ export async function WodContentSection({ dateParam }: { dateParam?: string }) {
     );
   }
 
-  const wodScores = myScores.filter((s) => s.wodId === wod.wodId);
-  const best = wodScores[0];
+  const resolvedWod = wod;
+  const scoreType = resolvedWod.scoreType as ScoreType;
+
+  let lastScore: MyLastScoreForWOD = null;
+  try {
+    lastScore = await getMyLastScoreForWOD(resolvedWod.wodId);
+  } catch {
+    lastScore = null;
+  }
+
+  // `listMyScores` is ordered by date, so [0] is the most recent attempt.
+  // The BEST attempt needs the metric direction.
+  const wodScores = myScores.filter((s) => s.wodId === resolvedWod.wodId);
+  const byMetric = sortByMetric(wodScores, (s) => Number(s.value), scoreType);
+  const best = byMetric[0];
+  const firstAttempt = wodScores[wodScores.length - 1];
+
   const sparkValues = wodScores
     .slice(0, 5)
     .reverse()
     .map((s) => Number(s.value));
-  const firstAttempt = wodScores[wodScores.length - 1];
+
   const delta =
     best && firstAttempt && wodScores.length >= 2
-      ? best.scoreType === "TIME"
-        ? `↓ desde ${formatScore(Number(firstAttempt.value), firstAttempt.scoreType as ScoreType)}`
-        : `↑ desde ${formatScore(Number(firstAttempt.value), firstAttempt.scoreType as ScoreType)}`
+      ? scoreType === "TIME"
+        ? `desde ${formatScore(Number(firstAttempt.value), scoreType)}`
+        : `desde ${formatScore(Number(firstAttempt.value), scoreType)}`
       : undefined;
 
   const bestDateLabel = best
@@ -164,7 +201,7 @@ export async function WodContentSection({ dateParam }: { dateParam?: string }) {
       )} DÍAS`
     : undefined;
 
-  const movements: MovementRowData[] = wod.movements.map((m) => {
+  const movements: MovementRowData[] = resolvedWod.movements.map((m) => {
     const reps = m.reps != null ? String(m.reps) : "—";
     const weightSub = m.weight ? `${m.weight} kg` : "";
     const noteSub = m.notes ? m.notes : "";
@@ -178,20 +215,25 @@ export async function WodContentSection({ dateParam }: { dateParam?: string }) {
     };
   });
 
-  const rounds = roundsLabelFor(wod);
+  const rounds = roundsLabelFor(resolvedWod);
 
   const props: WodDetalleV3Props = {
-    wodName: wod.wodName,
-    wodType: wod.wodType,
-    scoreType: wod.scoreType,
-    timeCap: wod.timeCap,
-    description: wod.description ?? undefined,
+    wodName: resolvedWod.wodName,
+    // Pre-labelled: WodDetalleV3 renders `wodType`/`scoreType` verbatim, so the
+    // enum has to be translated at this boundary ("FORTIME" → "For Time").
+    wodType: wodTypeLabel[resolvedWod.wodType as WODType] ?? resolvedWod.wodType,
+    scoreType: scoreTypeLabel[scoreType],
+    timeCap: resolvedWod.timeCap,
+    // ONE source of truth for the workout: the free-text block is a fallback
+    // for WODs that have no structured movements, never a second version.
+    description:
+      movements.length > 0
+        ? undefined
+        : (resolvedWod.description ?? undefined),
     movements,
     roundsLabel: rounds.label,
     roundsSub: rounds.sub,
-    bestScore: best
-      ? formatScore(Number(best.value), best.scoreType as ScoreType)
-      : undefined,
+    bestScore: best ? formatScore(Number(best.value), scoreType) : undefined,
     bestScoreDateLabel: bestDateLabel,
     bestScoreSpark: sparkValues.length >= 2 ? sparkValues : undefined,
     bestScoreDelta: delta,
@@ -203,10 +245,13 @@ export async function WodContentSection({ dateParam }: { dateParam?: string }) {
     headerLabel: dayNav.headerLabel,
     dayNavSlot: <WodDayNavBar dayNav={dayNav} />,
     scoreFormSlot: (
-      <ScoreForm
-        wodId={wod.wodId}
-        scoreType={wod.scoreType}
-        classId={wod.classId}
+      <AthleteScoreForm
+        wodId={resolvedWod.wodId}
+        wodName={resolvedWod.wodName}
+        scoreType={scoreType}
+        classId={resolvedWod.classId}
+        timeCap={resolvedWod.timeCap}
+        lastScore={lastScore}
       />
     ),
   };

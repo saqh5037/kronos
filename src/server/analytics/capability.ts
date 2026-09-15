@@ -9,7 +9,27 @@ import {
   type Capability,
 } from "@/lib/analytics/capability";
 import { computePercentile } from "@/lib/analytics/percentile";
+import {
+  capabilityCategoriesView,
+  capabilityCategoryName,
+} from "@/lib/scores/capability-view";
 import { getCachedBoxMovementStats } from "@/server/cache";
+
+/**
+ * `pickWeakestStrongest` returns the pure classifier's own label, which is
+ * still "Olympic". Map it back through the Spanish table by matching on label.
+ */
+const LABEL_TO_CATEGORY: Record<string, string> = {
+  Fuerza: "STRENGTH",
+  Olympic: "OLYMPIC",
+  Cardio: "CARDIO",
+  "Gimnástico": "GYMNASTIC",
+  Core: "CORE",
+};
+
+function capabilityLabelES(label: string): string {
+  return capabilityCategoryName(LABEL_TO_CATEGORY[label] ?? label, label);
+}
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -19,18 +39,34 @@ async function requireSession() {
 
 export type CapabilityCategoryResult = {
   category: Capability;
+  /** Neutral Mexican Spanish label ("Olímpico", not "Olympic"). */
   name: string;
-  score: number;
+  /**
+   * `null` when the athlete has no movements in this category.
+   *
+   * Audit 2026-09-15 (P1, /atleta/perfil): the radar showed "Cardio 0" and
+   * "Core 0" with Helen, Karen and Fran on file, because
+   * `buildCapabilityBuckets` short-circuits an empty bucket to `score: 0` —
+   * indistinguishable from a genuinely bad category. Absent data is null here
+   * and renders as "sin datos".
+   */
+  score: number | null;
+  /** Ready-to-render: the rounded score, or "sin datos". */
+  display: string;
+  hasData: boolean;
   rawValue: number;
   movementCount: number;
 };
 
 export type CapabilityProfile = {
   categories: CapabilityCategoryResult[];
-  overallRank: number;
+  /** `null` when the athlete is not in the ranking pool (no PRs, empty box). */
+  overallRank: number | null;
   totalAthletes: number;
   weakestCategory: string | null;
   strongestCategory: string | null;
+  /** True when at least one category has data — the UI hides the radar otherwise. */
+  hasAnyData: boolean;
 };
 
 /**
@@ -83,19 +119,23 @@ export async function getAthleteCapabilityProfile(
       : computePercentile(overallScores, myOverall, false);
 
   const { weakest, strongest } = pickWeakestStrongest(myBuckets);
+  const view = capabilityCategoriesView(myBuckets);
 
   return {
-    categories: myBuckets.map((b) => ({
+    categories: myBuckets.map((b, i) => ({
       category: b.category,
-      name: b.label,
-      score: b.score,
+      name: view[i].name,
+      score: view[i].score,
+      display: view[i].display,
+      hasData: view[i].hasData,
       rawValue: b.rawValue,
       movementCount: b.movementCount,
     })),
-    overallRank: rankInfo.rank,
+    overallRank: rankInfo.total > 0 && rankInfo.rank > 0 ? rankInfo.rank : null,
     totalAthletes: rankInfo.total,
-    weakestCategory: weakest,
-    strongestCategory: strongest,
+    weakestCategory: weakest ? capabilityLabelES(weakest) : null,
+    strongestCategory: strongest ? capabilityLabelES(strongest) : null,
+    hasAnyData: view.some((c) => c.hasData),
   };
 }
 
@@ -106,21 +146,26 @@ export async function getMyCapabilityProfile(): Promise<CapabilityProfile> {
     where: { userId: session.user.id },
   });
   if (!me) {
+    const empty = buildCapabilityBuckets({
+      myPRs: [],
+      boxMaxByMovement: new Map(),
+    });
+    const view = capabilityCategoriesView(empty);
     return {
-      categories: buildCapabilityBuckets({
-        myPRs: [],
-        boxMaxByMovement: new Map(),
-      }).map((b) => ({
+      categories: empty.map((b, i) => ({
         category: b.category,
-        name: b.label,
-        score: 0,
+        name: view[i].name,
+        score: null,
+        display: view[i].display,
+        hasData: false,
         rawValue: 0,
         movementCount: 0,
       })),
-      overallRank: 0,
+      overallRank: null,
       totalAthletes: 0,
       weakestCategory: null,
       strongestCategory: null,
+      hasAnyData: false,
     };
   }
   return getAthleteCapabilityProfile(me.id);

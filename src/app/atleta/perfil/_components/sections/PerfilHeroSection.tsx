@@ -70,7 +70,7 @@ export async function PerfilHeroSection() {
       <header
         className="relative px-4 pb-4"
         style={{
-          paddingTop: "max(calc(env(safe-area-inset-top) + 12px), 48px)",
+          paddingTop: "max(calc(env(safe-area-inset-top) + 24px), 60px)",
         }}
       >
         <AnimatedSection className="relative">

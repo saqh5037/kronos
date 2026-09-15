@@ -1,5 +1,10 @@
 /**
  * PRsSection — personal records grid.
+ *
+ * Audit 2026-09-15 (P1 colour, S2): the top record glowed in
+ * `rgba(25,240,139,0.3)` — the retired #19f08b teal, an explicit anti-pattern
+ * in CLAUDE.md. Lime, on the highlighted record only.
+ *
  * Uses listMyPRs() directly (only consumer in this page).
  */
 
@@ -50,9 +55,8 @@ export async function PRsSection() {
                     className="font-display font-bold text-2xl"
                     style={{
                       letterSpacing: "-0.02em",
-                      color: i === 0 ? "var(--k-t2)" : "var(--text)",
-                      textShadow:
-                        i === 0 ? "0 0 10px rgba(25,240,139,0.3)" : "none",
+                      color: i === 0 ? "var(--k-accent)" : "var(--k-t1)",
+                      textShadow: i === 0 ? "var(--k-accent-glow)" : "none",
                     }}
                   >
                     {pr.value}

@@ -42,14 +42,20 @@ describe("normalizeGoalId", () => {
 });
 
 describe("formatDeadline", () => {
-  it("includes the year in the formatted string", () => {
-    const date = new Date("2026-09-01T12:00:00.000Z");
-    expect(formatDeadline(date)).toContain("2026");
+  // Audit 2026-09-15 (P2 copy, /atleta/plan): the deadline used to render as
+  // "3 DE OCTUBRE DE 2026" — a full uppercase line the athlete had to do date
+  // arithmetic on. It now leads with the countdown and keeps a short date, so
+  // the old "must contain the year" expectation is deliberately gone.
+  it("leads with the countdown, not the long date", () => {
+    const now = new Date(2026, 8, 15);
+    expect(formatDeadline(new Date(2026, 9, 3), now)).toBe(
+      "faltan 18 días · 3 oct",
+    );
   });
 
   it("includes a recognizable month reference (es-MX)", () => {
-    const date = new Date("2026-09-01T12:00:00.000Z");
-    const formatted = formatDeadline(date).toLowerCase();
+    const now = new Date(2026, 7, 20);
+    const formatted = formatDeadline(new Date(2026, 8, 1), now).toLowerCase();
     // es-MX can render "septiembre" or abbreviated "sep"
     expect(formatted).toMatch(/sep/);
   });

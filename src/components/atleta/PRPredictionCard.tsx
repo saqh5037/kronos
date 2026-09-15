@@ -1,5 +1,6 @@
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
 import type { PRPredictionCard as PRPredictionCardData } from "@/server/actions/ai";
+import { confidenceLabel, normalizeNarrative } from "@/lib/scores/copy";
 
 type StatusStyle = {
   accent: string;
@@ -31,6 +32,13 @@ const STATUS_STYLES: Record<PRPredictionCardData["status"], StatusStyle> = {
   },
 };
 
+/**
+ * Audit 2026-09-15 (P1 copy, /atleta/perfil): "99 % CONFIANZA" on a six-week
+ * 1RM forecast is an overclaim that will be wrong in public, and the narrative
+ * still leaked English ("Necesitamos al menos 3 attempts"). Confidence is now a
+ * band ("confianza alta/media/baja") and the narrative passes through the
+ * boundary guard in `@/lib/scores/copy`.
+ */
 export default function PRPredictionCard({
   card,
 }: {
@@ -47,9 +55,7 @@ export default function PRPredictionCard({
       <div
         className="k-card-brand relative"
         style={{
-          boxShadow: isAI
-            ? `0 0 0 1px var(--blue-line), 0 12px 36px ${status.glow}`
-            : `0 0 0 1px ${status.glow}, 0 6px 22px ${status.glow}`,
+          boxShadow: `0 0 0 1px ${status.glow}, 0 8px 28px ${status.glow}`,
         }}
       >
         <span className="k-corner-tl" aria-hidden />
@@ -77,7 +83,7 @@ export default function PRPredictionCard({
               <span
                 className="font-display font-extrabold text-[36px] leading-none tracking-[-0.02em] k-h-italic"
                 style={{
-                  color: isAI ? "transparent" : "var(--text)",
+                  color: isAI ? "transparent" : "var(--k-t1)",
                   background: isAI ? "var(--k-accent)" : "transparent",
                   WebkitBackgroundClip: isAI ? "text" : "border-box",
                   backgroundClip: isAI ? "text" : "border-box",
@@ -119,20 +125,27 @@ export default function PRPredictionCard({
             className="text-[13px] leading-[1.5] mt-2.5"
             style={{ color: "var(--k-t2)" }}
           >
-            {card.narrative}
+            {normalizeNarrative(card.narrative)}
           </p>
 
           {showPrediction && card.confidence > 0 && (
             <div className="flex items-center gap-2.5 mt-3.5">
               <div
                 className="h-1 flex-1 rounded-full overflow-hidden"
-                style={{ background: "var(--track)" }}
+                style={{ background: "var(--k-line)" }}
               >
+                {/*
+                  `width` is a layout property; animating it reflows the card on
+                  every frame. Same bar, composited.
+                */}
                 <div
-                  className="h-full rounded-full transition-all"
+                  className="h-full rounded-full"
                   style={{
-                    width: `${confidencePct}%`,
-                    background: isAI ? "var(--k-accent)" : status.accent,
+                    width: "100%",
+                    transformOrigin: "left center",
+                    transform: `scaleX(${Math.min(1, Math.max(0, confidencePct / 100))})`,
+                    transition: "transform 400ms ease",
+                    background: "var(--k-accent)",
                   }}
                 />
               </div>
@@ -140,7 +153,7 @@ export default function PRPredictionCard({
                 className="font-mono text-[9px] tracking-[0.14em] font-bold uppercase"
                 style={{ color: "var(--k-t3)" }}
               >
-                {confidencePct}% confianza
+                {confidenceLabel(card.confidence)}
               </span>
             </div>
           )}

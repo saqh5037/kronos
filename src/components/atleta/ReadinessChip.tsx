@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, m } from "framer-motion";
+import { X } from "lucide-react";
 import QuickSurvey from "./QuickSurvey";
 import type { SurveyRow } from "@/server/actions/surveys";
 
@@ -71,7 +72,7 @@ export default function ReadinessChip({ survey }: Props) {
             marginLeft: 4,
           }}
         >
-          CHECK-IN →
+          CHECK-IN
         </span>
       </button>
 
@@ -166,7 +167,7 @@ export default function ReadinessChip({ survey }: Props) {
                     cursor: "pointer",
                   }}
                 >
-                  ✕
+                  <X width={12} height={12} aria-hidden />
                 </button>
               </div>
               <div style={{ padding: "8px 0 16px" }}>

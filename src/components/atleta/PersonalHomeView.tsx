@@ -104,7 +104,7 @@ export default async function PersonalHomeView() {
               textDecoration: "none",
             }}
           >
-            Crear WOD del día →
+            Crear WOD del día
           </Link>
         </div>
       </div>
@@ -203,7 +203,7 @@ export default async function PersonalHomeView() {
             letterSpacing: "0.01em",
           }}
         >
-          Registra tu WOD de hoy →
+          Registra tu WOD de hoy
         </Link>
         <div style={{ display: "flex", gap: 10 }}>
           <Link
@@ -222,7 +222,7 @@ export default async function PersonalHomeView() {
               letterSpacing: "0.04em",
             }}
           >
-            🗓️ Tu programa
+            Tu programa
           </Link>
           <Link
             href="/atleta/wod/foto"
@@ -240,7 +240,7 @@ export default async function PersonalHomeView() {
               letterSpacing: "0.04em",
             }}
           >
-            📷 Foto whiteboard
+            Foto whiteboard
           </Link>
         </div>
       </div>
@@ -276,7 +276,7 @@ export default async function PersonalHomeView() {
                 textDecoration: "none",
               }}
             >
-              Ver todos →
+              Ver todos
             </Link>
           </div>
           <KCard animate={false}>

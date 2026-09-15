@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ArrowDown, ArrowUp, Minus, X } from "lucide-react";
 import {
   createBodyMetric,
   deleteBodyMetric,
@@ -408,7 +409,8 @@ function MetricRow({
     group.current.value,
     group.previous?.value ?? null,
   );
-  const trendArrow = trend === "up" ? "↑" : trend === "down" ? "↓" : "→";
+  const TrendIcon =
+    trend === "up" ? ArrowUp : trend === "down" ? ArrowDown : Minus;
   const trendColor =
     trend === "flat"
       ? "var(--k-t3)"
@@ -491,7 +493,7 @@ function MetricRow({
                 marginLeft: 6,
               }}
             >
-              {trendArrow} {delta}
+              <TrendIcon width={12} height={12} aria-hidden /> {delta}
             </span>
           )}
         </div>
@@ -525,7 +527,7 @@ function MetricRow({
           letterSpacing: "0.12em",
         }}
       >
-        ✕
+        <X width={12} height={12} aria-hidden />
       </button>
     </div>
   );

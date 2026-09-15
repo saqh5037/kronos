@@ -7,22 +7,28 @@
  */
 
 import {
+  HomeHeaderSkeleton,
+  TodaySkeleton,
   HeroSkeleton,
   GreetingSkeleton,
   BookingSkeleton,
   WeekStripSkeleton,
   LeaderboardSkeleton,
+  BadgesSkeleton,
   RecentActivitySkeleton,
 } from "./_components/skeletons";
 
 export default function AtletaLoading() {
   return (
     <div className="pb-28">
+      <HomeHeaderSkeleton />
+      <TodaySkeleton />
       <HeroSkeleton />
       <GreetingSkeleton />
       <BookingSkeleton />
       <WeekStripSkeleton />
       <LeaderboardSkeleton />
+      <BadgesSkeleton />
       <RecentActivitySkeleton />
     </div>
   );

@@ -79,7 +79,7 @@ export function OneTapBookButton({
     state === "pending"
       ? "Reservando..."
       : state === "booked"
-        ? "Reservado ✓"
+        ? "Reservado"
         : state === "waitlist"
           ? "En lista de espera"
           : state === "error"

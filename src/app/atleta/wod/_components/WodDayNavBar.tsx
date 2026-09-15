@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { WodDayNav } from "@/lib/wod-date";
 
 /**
@@ -30,6 +31,9 @@ export default function WodDayNavBar({ dayNav }: { dayNav: WodDayNav }) {
   };
 
   const chipGhost: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 4,
     ...chipBase,
     background: "transparent",
     border: "1px solid var(--k-line)",
@@ -37,6 +41,9 @@ export default function WodDayNavBar({ dayNav }: { dayNav: WodDayNav }) {
   };
 
   const chipDisabled: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 4,
     ...chipBase,
     background: "transparent",
     border: "1px solid var(--k-line)",
@@ -65,7 +72,8 @@ export default function WodDayNavBar({ dayNav }: { dayNav: WodDayNav }) {
           aria-label="Día anterior"
           data-testid="wod-nav-prev"
         >
-          ← PREV
+          <ChevronLeft width={13} height={13} aria-hidden />
+          Anterior
         </Link>
       ) : (
         <span
@@ -73,7 +81,8 @@ export default function WodDayNavBar({ dayNav }: { dayNav: WodDayNav }) {
           aria-disabled="true"
           data-testid="wod-nav-prev-disabled"
         >
-          ← PREV
+          <ChevronLeft width={13} height={13} aria-hidden />
+          Anterior
         </span>
       )}
 
@@ -97,7 +106,8 @@ export default function WodDayNavBar({ dayNav }: { dayNav: WodDayNav }) {
           aria-label="Día siguiente"
           data-testid="wod-nav-next"
         >
-          NEXT →
+          Siguiente
+          <ChevronRight width={13} height={13} aria-hidden />
         </Link>
       ) : (
         <span
@@ -105,7 +115,8 @@ export default function WodDayNavBar({ dayNav }: { dayNav: WodDayNav }) {
           aria-disabled="true"
           data-testid="wod-nav-next-disabled"
         >
-          NEXT →
+          Siguiente
+          <ChevronRight width={13} height={13} aria-hidden />
         </span>
       )}
     </div>
