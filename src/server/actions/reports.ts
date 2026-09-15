@@ -6,6 +6,11 @@ import { withTenant } from "../db";
 import type { PlanType } from "@/lib/validations/membership";
 import { startOfMonth, subMonths, endOfMonth } from "date-fns";
 import { monthKey } from "@/lib/dates";
+import {
+  getBoxPeriodTimezone,
+  getPeriodSummary,
+  type PeriodInput,
+} from "../period-summary";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -15,7 +20,13 @@ async function requireSession() {
 
 export type Reports = {
   generatedAt: Date;
-  // Headline KPIs (current month)
+  /**
+   * The window every number below belongs to. RENDER `period.label` next to
+   * the headline: the audit found "Ingresos del mes $214,000" beside a
+   * filter that said "Últimos 30 días" while Pagos said $138,750.
+   */
+  period: { from: Date; to: Date; label: string };
+  // Headline KPIs (the selected period; defaults to this month)
   monthRevenue: number;
   prevMonthRevenue: number;
   revenueDelta: number; // (current - prev) / prev (or 0 if prev=0)
@@ -33,6 +44,12 @@ export type Reports = {
   pausedAthletes: number;
   newAthletesMonth: number;
   churnedMembershipsMonth: number;
+  /** Same rule and same number as /admin/atletas and the dashboard. */
+  athletesAtRisk: number;
+  atRiskRule: string;
+  /** Morosos; the same number /admin/pagos shows. */
+  overdueCount: number;
+  overdueTotal: number;
 
   // Activity
   monthScores: number;
@@ -46,25 +63,34 @@ export type Reports = {
   planDistribution: { type: PlanType; count: number; revenue: number }[];
 };
 
-export async function getReports(): Promise<Reports> {
+/**
+ * Reportes KPIs for one explicit period.
+ *
+ * Defaults to "este mes" so the existing headline copy stays true, but the
+ * page MUST pass the same `{ from, to }` its filter shows — that is what
+ * makes Reportes and Pagos print the same revenue for the same window.
+ * Revenue, athletes, attendance and at-risk all come from the shared
+ * `getPeriodSummary`, so there is nothing left to drift.
+ */
+export async function getReports(opts?: PeriodInput): Promise<Reports> {
   const session = await requireSession();
-  const db = withTenant(session.user.tenantId);
+  const tenantId = session.user.tenantId;
+  const db = withTenant(tenantId);
 
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const prevMonthEnd = monthStart;
+  const tz = opts?.tz ?? (await getBoxPeriodTimezone(tenantId));
+  const summary = await getPeriodSummary(tenantId, {
+    preset: opts?.preset ?? "thisMonth",
+    from: opts?.from,
+    to: opts?.to,
+    tz,
+  });
+  const periodStart = summary.period.from;
+  const periodEnd = summary.period.to;
 
   const [
-    paidThisMonth,
-    paidLastMonth,
     activeMemberships,
-    classesHeld,
-    bookingsThisMonth,
-    activeAthletesCount,
     pausedAthletesCount,
-    newAthletes,
     churnedMemberships,
     scoresThisMonth,
     prsThisMonth,
@@ -72,38 +98,11 @@ export async function getReports(): Promise<Reports> {
     topAttendeesRaw,
     planGrouping,
   ] = await Promise.all([
-    db.payment.findMany({
-      where: { status: "PAID", paidAt: { gte: monthStart, lt: monthEnd } },
-      select: { amount: true },
-    }),
-    db.payment.findMany({
-      where: {
-        status: "PAID",
-        paidAt: { gte: prevMonthStart, lt: prevMonthEnd },
-      },
-      select: { amount: true },
-    }),
     db.membership.findMany({
       where: { status: "ACTIVE" },
       include: { plan: true },
     }),
-    db.class.count({
-      where: {
-        startsAt: { gte: monthStart, lt: monthEnd },
-        isActive: true,
-      },
-    }),
-    db.booking.findMany({
-      where: {
-        class: { startsAt: { gte: monthStart, lt: monthEnd } },
-      },
-      select: { status: true },
-    }),
-    db.athlete.count({ where: { status: "ACTIVE" } }),
     db.athlete.count({ where: { status: "PAUSED" } }),
-    db.athlete.count({
-      where: { createdAt: { gte: monthStart, lt: monthEnd } },
-    }),
     db.membership.count({
       where: {
         status: "CANCELLED",
@@ -112,14 +111,14 @@ export async function getReports(): Promise<Reports> {
       },
     }),
     db.score.count({
-      where: { createdAt: { gte: monthStart, lt: monthEnd } },
+      where: { createdAt: { gte: periodStart, lte: periodEnd } },
     }),
     db.pR.count({
-      where: { achievedAt: { gte: monthStart, lt: monthEnd } },
+      where: { achievedAt: { gte: periodStart, lte: periodEnd } },
     }),
     db.score.groupBy({
       by: ["wodId"],
-      where: { createdAt: { gte: monthStart, lt: monthEnd } },
+      where: { createdAt: { gte: periodStart, lte: periodEnd } },
       _count: { _all: true },
       orderBy: { _count: { wodId: "desc" } },
       take: 5,
@@ -128,7 +127,7 @@ export async function getReports(): Promise<Reports> {
       by: ["athleteId"],
       where: {
         status: "ATTENDED",
-        class: { startsAt: { gte: monthStart, lt: monthEnd } },
+        class: { startsAt: { gte: periodStart, lte: periodEnd } },
       },
       _count: { _all: true },
       orderBy: { _count: { athleteId: "desc" } },
@@ -140,18 +139,17 @@ export async function getReports(): Promise<Reports> {
     }),
   ]);
 
-  const monthRevenue = paidThisMonth.reduce(
-    (acc, p) => acc + Number(p.amount),
+  const classesHeld = summary.attendance.byDay.reduce(
+    (s, d) => s + d.classes,
     0,
   );
-  const prevMonthRevenue = paidLastMonth.reduce(
-    (acc, p) => acc + Number(p.amount),
-    0,
-  );
-  const revenueDelta =
-    prevMonthRevenue === 0
-      ? 0
-      : (monthRevenue - prevMonthRevenue) / prevMonthRevenue;
+  const activeAthletesCount = summary.athletes.active;
+  const newAthletes = summary.athletes.newInPeriod;
+
+  // The one revenue number. Pagos reads the same field of the same summary.
+  const monthRevenue = summary.revenue.total;
+  const prevMonthRevenue = summary.revenue.previousTotal;
+  const revenueDelta = summary.revenue.deltaPct;
 
   // MRR: monthly-equivalent of all active memberships
   const mrr = activeMemberships.reduce((acc, m) => {
@@ -175,15 +173,10 @@ export async function getReports(): Promise<Reports> {
     }
   }, 0);
 
-  const monthBookings = bookingsThisMonth.length;
-  const monthAttended = bookingsThisMonth.filter(
-    (b) => b.status === "ATTENDED",
-  ).length;
-  const monthNoShow = bookingsThisMonth.filter(
-    (b) => b.status === "NOSHOW",
-  ).length;
-  const denom = monthAttended + monthNoShow;
-  const attendanceRate = denom === 0 ? 0 : monthAttended / denom;
+  const monthBookings = summary.attendance.bookings;
+  const monthAttended = summary.attendance.checkins;
+  const monthNoShow = summary.attendance.noShows;
+  const attendanceRate = 1 - summary.attendance.noShowRate;
 
   // Resolve WOD names for top WODs
   const topWODIds = topWODsRaw.map((w) => w.wodId);
@@ -234,6 +227,11 @@ export async function getReports(): Promise<Reports> {
 
   return {
     generatedAt: now,
+    period: {
+      from: summary.period.from,
+      to: summary.period.to,
+      label: summary.period.label,
+    },
     monthRevenue,
     prevMonthRevenue,
     revenueDelta,
@@ -247,6 +245,10 @@ export async function getReports(): Promise<Reports> {
     pausedAthletes: pausedAthletesCount,
     newAthletesMonth: newAthletes,
     churnedMembershipsMonth: churnedMemberships,
+    athletesAtRisk: summary.athletes.atRisk,
+    atRiskRule: summary.athletes.atRiskRule,
+    overdueCount: summary.memberships.overdueCount,
+    overdueTotal: summary.memberships.overdueTotal,
     monthScores: scoresThisMonth,
     monthPRs: prsThisMonth,
     topWODs,

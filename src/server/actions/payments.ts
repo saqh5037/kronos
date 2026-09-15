@@ -18,7 +18,15 @@ import {
   resolveMpBackUrlBase,
 } from "@/lib/payments/mp-client";
 import { type ListOpts, type ListResult, normalizePagination } from "./types";
-import { eachDayInRange, dayKey } from "@/lib/dates";
+import {
+  buildPaymentsWhere,
+  getBoxPeriodTimezone,
+  getPeriodSummary,
+  type OverdueMembershipRow,
+  type PaymentDayPoint,
+  type PaymentsFilter,
+  type PeriodInput,
+} from "../period-summary";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -90,11 +98,45 @@ export async function listPayments(opts?: {
   }));
 }
 
+/**
+ * Period-scoped payment KPIs. Every field comes from `getPeriodSummary`,
+ * so the KPI row and the table below it cannot disagree (audit P0 #6:
+ * "Pagos rango 27" beside "33 pagos en el rango" under the same filter).
+ *
+ * `monthRevenue` / `monthCount` keep their old names so `/admin/pagos`
+ * compiles unchanged, but they now hold PERIOD values, not month-to-date.
+ * New code should read `revenue` / `count`.
+ */
 export type PaymentStats = {
+  /** @deprecated now holds PERIOD revenue; read `revenue` instead. */
   monthRevenue: number;
+  /** @deprecated now holds the PERIOD payment count; read `count`. */
   monthCount: number;
+  /** @deprecated now scoped to the period, not all-time. */
   pendingRevenue: number;
   pendingCount: number;
+};
+
+/**
+ * What `getPaymentStats` actually returns. Structurally a superset of the
+ * legacy `PaymentStats`, so pages that still declare the old type keep
+ * compiling while new code reads the explicit, period-aware fields.
+ */
+export type PeriodPaymentStats = PaymentStats & {
+  period: { from: Date; to: Date; label: string };
+  /** PAID revenue recognised in the period. Same number Reportes shows. */
+  revenue: number;
+  revenuePrevious: number;
+  revenueDelta: number;
+  /** Payments created in the period, any status — equals the table total. */
+  count: number;
+  paidCount: number;
+  paidTotal: number;
+  failedCount: number;
+  failedTotal: number;
+  /** Morosos per the shared overdue rule. Never truncated by a limit. */
+  overdueCount: number;
+  overdueTotal: number;
 };
 
 export type PaymentSort = "createdAt" | "paidAt" | "amount";
@@ -108,35 +150,17 @@ export async function listPaymentsPaged(
   const db = withTenant(session.user.tenantId);
   const { page, pageSize, skip, take } = normalizePagination(opts);
 
-  const search = opts?.search?.trim();
-  const where = {
-    ...(opts?.status ? { status: opts.status as PaymentStatus } : {}),
-    ...(opts?.gateway ? { gateway: opts.gateway } : {}),
-    ...(opts?.dateFrom || opts?.dateTo
-      ? {
-          createdAt: {
-            ...(opts.dateFrom ? { gte: opts.dateFrom } : {}),
-            ...(opts.dateTo ? { lte: opts.dateTo } : {}),
-          },
-        }
-      : {}),
-    ...(search
-      ? {
-          membership: {
-            athlete: {
-              OR: [
-                {
-                  firstName: { contains: search, mode: "insensitive" as const },
-                },
-                {
-                  lastName: { contains: search, mode: "insensitive" as const },
-                },
-              ],
-            },
-          },
-        }
-      : {}),
-  };
+  // ONE `where` for the table AND for the KPI above it. Before this, the
+  // KPI counted PAID rows by `paidAt` while the table counted every row by
+  // `createdAt`, which is how one filter produced both 27 and 33.
+  const where = buildPaymentsWhere({
+    period: { from: opts?.dateFrom, to: opts?.dateTo },
+    filter: {
+      status: (opts?.status as PaymentStatus | undefined) ?? undefined,
+      gateway: opts?.gateway,
+      search: opts?.search ?? undefined,
+    },
+  });
 
   const sortBy = opts?.sortBy ?? "createdAt";
   const sortDir = opts?.sortDir ?? "desc";
@@ -178,129 +202,99 @@ export async function listPaymentsPaged(
   return { rows, total, page, pageSize };
 }
 
-export type RevenueByDayPoint = { day: string; revenue: number; count: number };
+/** Alias so existing imports keep type-checking. */
+export type RevenueByDayPoint = PaymentDayPoint;
 
+/**
+ * PAID revenue per civil day of the BOX timezone, covering exactly
+ * `dateFrom..dateTo`.
+ *
+ * Delegates to `getPeriodSummary`, whose series is generated from the
+ * period instead of from the rows the query happened to return — the old
+ * behaviour is why the dashboard drew an April x-axis under an "últimos
+ * 30 días" label.
+ */
 export async function getRevenueByDay(opts: {
   dateFrom: Date;
   dateTo: Date;
+  tz?: string;
 }): Promise<RevenueByDayPoint[]> {
   const session = await requireSession();
-
-  const results = await rawDb.$queryRaw<
-    Array<{ day: Date; revenue: number; count: bigint }>
-  >`
-    SELECT DATE("paidAt") as day, SUM(amount) as revenue, COUNT(*) as count
-    FROM "Payment"
-    WHERE "tenantId" = ${session.user.tenantId}
-      AND status = 'PAID'
-      AND "paidAt" >= ${opts.dateFrom}
-      AND "paidAt" <= ${opts.dateTo}
-    GROUP BY DATE("paidAt")
-    ORDER BY day ASC
-  `;
-
-  const byDay = new Map<string, { revenue: number; count: number }>();
-  for (const r of results) {
-    const k = dayKey(r.day);
-    byDay.set(k, { revenue: Number(r.revenue), count: Number(r.count) });
-  }
-
-  return eachDayInRange({ from: opts.dateFrom, to: opts.dateTo }).map((d) => {
-    const k = dayKey(d);
-    const v = byDay.get(k) ?? { revenue: 0, count: 0 };
-    return { day: k, revenue: v.revenue, count: v.count };
+  const tenantId = session.user.tenantId;
+  const tz = opts.tz ?? (await getBoxPeriodTimezone(tenantId));
+  const summary = await getPeriodSummary(tenantId, {
+    from: opts.dateFrom,
+    to: opts.dateTo,
+    tz,
   });
+  return summary.payments.byDay;
 }
 
-export type OverdueMembership = {
-  membershipId: string;
-  athleteId: string;
-  athleteName: string;
-  planName: string;
-  endDate: Date;
-  daysOverdue: number;
-  pendingAmount: number;
-  currency: string;
-};
+/** Alias so existing imports keep type-checking. */
+export type OverdueMembership = OverdueMembershipRow;
 
-export async function listOverdueMemberships(opts?: {
-  graceDays?: number;
-  limit?: number;
-}): Promise<OverdueMembership[]> {
+/**
+ * Morosos, per the single `OVERDUE_RULE` in `server/period-summary/rules`.
+ *
+ * The authoritative COUNT lives in `getPaymentStats().overdueCount`: this
+ * function is the row list and is still capped by `limit`, so a KPI must
+ * never be derived from `.length`.
+ */
+export async function listOverdueMemberships(
+  opts?: PeriodInput & { graceDays?: number; limit?: number },
+): Promise<OverdueMembership[]> {
   const session = await requireSession();
-  const db = withTenant(session.user.tenantId);
-  const graceDays = opts?.graceDays ?? 0;
-  const limit = opts?.limit ?? 50;
-  const now = new Date();
-  const cutoff = new Date(now.getTime() - graceDays * 86400000);
-
-  const memberships = await db.membership.findMany({
-    where: {
-      status: { in: ["ACTIVE", "PENDING", "EXPIRED"] },
-      endDate: { lt: cutoff },
-    },
-    orderBy: { endDate: "asc" },
-    take: limit,
-    include: {
-      athlete: { select: { id: true, firstName: true, lastName: true } },
-      plan: { select: { name: true, price: true, currency: true } },
-      payments: { where: { status: "PENDING" }, select: { amount: true } },
-    },
+  const tenantId = session.user.tenantId;
+  const tz = opts?.tz ?? (await getBoxPeriodTimezone(tenantId));
+  const summary = await getPeriodSummary(tenantId, {
+    preset: opts?.preset,
+    from: opts?.from,
+    to: opts?.to,
+    tz,
+    graceDays: opts?.graceDays,
   });
-
-  return memberships
-    .filter((m) => m.endDate !== null)
-    .map((m) => {
-      const endDate = m.endDate!;
-      const daysOverdue = Math.floor(
-        (now.getTime() - endDate.getTime()) / 86400000,
-      );
-      const pendingAmount = m.payments.reduce(
-        (acc, p) => acc + Number(p.amount),
-        0,
-      );
-      return {
-        membershipId: m.id,
-        athleteId: m.athlete.id,
-        athleteName: `${m.athlete.firstName} ${m.athlete.lastName}`,
-        planName: m.plan.name,
-        endDate,
-        daysOverdue,
-        pendingAmount: pendingAmount || Number(m.plan.price),
-        currency: m.plan.currency,
-      };
-    });
+  return summary.memberships.overdueRows.slice(0, opts?.limit ?? 50);
 }
 
-export async function getPaymentStats(): Promise<PaymentStats> {
+/**
+ * KPIs for `/admin/pagos`. Pass the SAME range and filters the table uses
+ * and the numbers are identical by construction — they are two reads of one
+ * request-scoped summary.
+ */
+export async function getPaymentStats(
+  opts?: PeriodInput & { filter?: PaymentsFilter },
+): Promise<PeriodPaymentStats> {
   const session = await requireSession();
-
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  monthStart.setHours(0, 0, 0, 0);
-
-  const [paidThisMonth, pending] = await Promise.all([
-    rawDb.payment.aggregate({
-      where: {
-        tenantId: session.user.tenantId,
-        status: "PAID",
-        paidAt: { gte: monthStart },
-      },
-      _sum: { amount: true },
-      _count: { id: true },
-    }),
-    rawDb.payment.aggregate({
-      where: { tenantId: session.user.tenantId, status: "PENDING" },
-      _sum: { amount: true },
-      _count: { id: true },
-    }),
-  ]);
+  const tenantId = session.user.tenantId;
+  const tz = opts?.tz ?? (await getBoxPeriodTimezone(tenantId));
+  const summary = await getPeriodSummary(tenantId, {
+    preset: opts?.preset,
+    from: opts?.from,
+    to: opts?.to,
+    tz,
+    paymentFilter: opts?.filter,
+  });
 
   return {
-    monthRevenue: Number(paidThisMonth._sum.amount ?? 0),
-    monthCount: paidThisMonth._count.id,
-    pendingRevenue: Number(pending._sum.amount ?? 0),
-    pendingCount: pending._count.id,
+    period: {
+      from: summary.period.from,
+      to: summary.period.to,
+      label: summary.period.label,
+    },
+    monthRevenue: summary.revenue.total,
+    monthCount: summary.payments.count,
+    revenue: summary.revenue.total,
+    revenuePrevious: summary.revenue.previousTotal,
+    revenueDelta: summary.revenue.deltaPct,
+    count: summary.payments.count,
+    paidCount: summary.payments.paidCount,
+    paidTotal: summary.payments.paidTotal,
+    pendingRevenue: summary.payments.pendingTotal,
+    pendingCount: summary.payments.pendingCount,
+    failedCount: summary.payments.failedCount,
+    failedTotal: summary.payments.failedTotal,
+    overdueCount: summary.memberships.overdueCount,
+    overdueTotal: summary.memberships.overdueTotal,
   };
 }
 
