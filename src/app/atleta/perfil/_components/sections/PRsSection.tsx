@@ -2,7 +2,7 @@
  * PRsSection — personal records grid.
  *
  * Audit 2026-09-15 (P1 colour, S2): the top record glowed in
- * `rgba(25,240,139,0.3)` — the retired #19f08b teal, an explicit anti-pattern
+ * `rgba(25,240,139,0.3)` — the retired teal (pre-V3 palette), an explicit anti-pattern
  * in CLAUDE.md. Lime, on the highlighted record only.
  *
  * Uses listMyPRs() directly (only consumer in this page).
