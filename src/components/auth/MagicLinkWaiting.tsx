@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { kToast } from "@/lib/toast";
+import { Icon } from "@/components/kronos/Icon";
 import OtpInput from "./OtpInput";
 
 /**
@@ -104,12 +105,11 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
         className="inline-flex items-center justify-center w-12 h-12 rounded-full"
         style={{ background: "var(--k-accent-soft)" }}
       >
-        <span
-          className="font-display font-bold text-xl"
+        <Icon
+          name="mail"
+          size={24}
           style={{ color: "var(--k-accent)" }}
-        >
-          ✓
-        </span>
+        />
       </div>
       <h2 className="font-display font-bold text-xl">
         {title ?? "Revisa tu correo"}
@@ -148,7 +148,7 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
           {error ? (
             <p
               className="text-xs"
-              style={{ color: "var(--k-danger, #ff5a5a)" }}
+              style={{ color: "var(--k-danger)" }}
             >
               {error}
             </p>
@@ -208,10 +208,11 @@ export default function MagicLinkWaiting({ email, title, subtitle }: Props) {
                 setMode("otp");
                 setError(null);
               }}
-              className="text-sm underline"
+              className="inline-flex min-h-11 items-center gap-1 text-sm underline"
               style={{ color: "var(--k-accent)" }}
             >
-              ← Volver al código
+              <Icon name="arrowLeft" size={16} />
+              Volver al código
             </button>
             <button
               type="button"

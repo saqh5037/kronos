@@ -13,10 +13,18 @@ export type ConfirmOptions = {
   tone?: ConfirmTone;
 };
 
+/** Warning and danger mean warning and danger; everything else is brand. */
 const TONE_COLOR: Record<ConfirmTone, string> = {
   danger: "var(--k-danger)",
-  warning: "var(--k-t2)",
-  info: "var(--k-warning)",
+  warning: "var(--k-warning)",
+  info: "var(--k-accent)",
+};
+
+/** A `var()` cannot take an alpha suffix, so the translucent pair is explicit. */
+const TONE_LINE: Record<ConfirmTone, string> = {
+  danger: "rgba(255, 90, 90, 0.35)",
+  warning: "rgba(255, 176, 32, 0.35)",
+  info: "var(--k-accent-line)",
 };
 
 export function ConfirmDialog({
@@ -67,9 +75,9 @@ export function ConfirmDialog({
           <m.div
             className="relative w-full max-w-sm rounded-2xl p-6"
             style={{
-              background: "var(--card)",
-              border: `1px solid ${accent}40`,
-              boxShadow: `0 12px 40px ${accent}20, 0 0 0 1px var(--line)`,
+              background: "var(--k-surface)",
+              border: `1px solid ${TONE_LINE[tone]}`,
+              boxShadow: "0 12px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--k-line)",
             }}
             initial={{ scale: 0.95, opacity: 0, y: 8 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -85,7 +93,7 @@ export function ConfirmDialog({
             <h2
               id="confirm-title"
               className="font-display font-extrabold text-xl leading-tight"
-              style={{ color: "var(--text)" }}
+              style={{ color: "var(--k-t1)" }}
             >
               {options.title}
             </h2>
@@ -105,7 +113,7 @@ export function ConfirmDialog({
                 style={{
                   background: "var(--k-elevated)",
                   color: "var(--k-t2)",
-                  border: "1px solid var(--line)",
+                  border: "1px solid var(--k-line)",
                 }}
                 autoFocus
               >
@@ -117,7 +125,7 @@ export function ConfirmDialog({
                 className="px-4 py-2 rounded-lg text-sm font-bold transition-all"
                 style={{
                   background: accent,
-                  color: "#0a0a0c",
+                  color: "var(--k-accent-on)",
                 }}
               >
                 {options.confirmLabel ?? "Confirmar"}

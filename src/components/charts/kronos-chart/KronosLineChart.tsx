@@ -66,12 +66,23 @@ export interface KronosLineChartProps<T> {
   className?: string;
   ariaLabel?: string;
   /**
-   * Visual variant. `cinematic` = bars + line + intense glow + lima palette
-   * over deep black panel (V3 Cuarto Oscuro look).
+   * Visual variant. `cinematic` renders the chart on a deep black panel.
+   * It no longer implies glow or bars — those are explicit props now.
    */
   variant?: KronosChartVariant;
-  /** When true (default in cinematic), render bars beneath the line. */
+  /**
+   * Render bars beneath the line. Default false: bars + line over the SAME
+   * series is double encoding (audit 2026-09-15). Only turn this on when the
+   * bars carry a second series.
+   */
   bars?: boolean;
+  /** Opt-in glow/drop-shadow stack. Default false. */
+  glow?: boolean;
+  /**
+   * Floor the y domain at 0 for counts and money (default). Pass false only for
+   * a series that lives away from zero (body weight, a 1RM in kg).
+   */
+  zeroFloor?: boolean;
 }
 
 interface NormalizedSeries<T> {
@@ -115,11 +126,12 @@ export function KronosLineChart<T>({
   ariaLabel,
   variant = "default",
   bars,
+  glow = false,
+  zeroFloor = true,
 }: KronosLineChartProps<T>) {
   const isCinematic = variant === "cinematic";
-  const resolvedColor =
-    color ?? (isCinematic ? CHART_COLORS.primary : CHART_COLORS.fire);
-  const showBars = bars ?? isCinematic;
+  const resolvedColor = color ?? CHART_COLORS.primary;
+  const showBars = bars ?? false;
   const reduce = useReducedMotion() ?? false;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -170,7 +182,8 @@ export function KronosLineChart<T>({
     [normalized],
   );
 
-  const scale = useChartScale(allPoints, width, height);
+  const scaleOptions = useMemo(() => ({ zeroFloor }), [zeroFloor]);
+  const scale = useChartScale(allPoints, width, height, scaleOptions);
 
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
@@ -267,8 +280,9 @@ export function KronosLineChart<T>({
                 "radial-gradient(ellipse at 50% 60%, #14141a 0%, #0f1014 65%, #08080a 100%)",
               borderRadius: 12,
               overflow: "hidden",
-              boxShadow:
-                "inset 0 0 40px rgba(200, 255, 45, 0.08), 0 0 0 1px rgba(200, 255, 45, 0.12)",
+              boxShadow: glow
+                ? "inset 0 0 40px rgba(200, 255, 45, 0.08), 0 0 0 1px rgba(200, 255, 45, 0.12)"
+                : "0 0 0 1px var(--k-line)",
             }
           : null),
       }}
@@ -296,12 +310,12 @@ export function KronosLineChart<T>({
               scale={scale}
               animate={showAnim}
               reduceMotion={reduce}
-              cinematic={isCinematic}
+              cinematic={glow}
               cinematicColor={CHART_COLORS.primary}
             />
           )}
 
-          {isCinematic && showBars && builtSeries[0] && (
+          {showBars && builtSeries[0] && (
             <ChartBars
               bars={barsForFirst}
               color={builtSeries[0].color}
@@ -371,7 +385,8 @@ export function KronosLineChart<T>({
               animate={showAnim}
               reduceMotion={reduce}
               delay={0.1 + i * 0.08}
-              intense={isCinematic}
+              glow={glow}
+              intense={glow}
               strokeWidth={isCinematic ? 2.8 : 2.5}
             />
           ))}
@@ -390,7 +405,8 @@ export function KronosLineChart<T>({
                   animate={showAnim}
                   reduceMotion={reduce}
                   delay={1.2 + i * 0.08}
-                  intense={isCinematic}
+                  glow={glow}
+                  intense={glow}
                 />
               );
             })}
@@ -482,7 +498,7 @@ function DefaultTooltipContent<T>({
               />
               <span
                 className="font-display font-bold text-sm"
-                style={{ color: "var(--text)" }}
+                style={{ color: "var(--k-t1)" }}
               >
                 {formatY ? formatY(value) : value}
               </span>

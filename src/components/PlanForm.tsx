@@ -49,7 +49,7 @@ export default function PlanForm() {
         required
         maxLength={80}
         className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       />
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1 text-xs">
@@ -58,7 +58,7 @@ export default function PlanForm() {
             name="type"
             defaultValue="MONTHLY"
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)", background: "var(--card)" }}
+            style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
           >
             {planTypes.map((t) => (
               <option key={t} value={t}>
@@ -77,7 +77,7 @@ export default function PlanForm() {
             min="0"
             required
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)" }}
+            style={{ borderColor: "var(--k-line)" }}
           />
         </label>
       </div>
@@ -91,7 +91,7 @@ export default function PlanForm() {
             min="0"
             placeholder="0 = sin cap"
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)" }}
+            style={{ borderColor: "var(--k-line)" }}
           />
         </label>
         <label className="flex flex-col gap-1 text-xs">
@@ -103,7 +103,7 @@ export default function PlanForm() {
             min="0"
             placeholder="auto si vacío"
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)" }}
+            style={{ borderColor: "var(--k-line)" }}
           />
         </label>
       </div>

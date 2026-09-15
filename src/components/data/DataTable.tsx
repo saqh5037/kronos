@@ -10,6 +10,7 @@ import {
   type SortingState,
   type RowSelectionState,
 } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Props<T> = {
@@ -43,25 +44,31 @@ export function DataTable<T>({
     if (!selectable) return columns;
     const checkbox: ColumnDef<T, unknown> = {
       id: "_select",
-      size: 32,
+      size: 44,
       header: ({ table }) => (
-        <input
-          type="checkbox"
-          checked={table.getIsAllPageRowsSelected()}
-          onChange={table.getToggleAllPageRowsSelectedHandler()}
-          aria-label="Seleccionar todo"
-          className="accent-[var(--k-accent)]"
-        />
+        <label className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center">
+          <input
+            type="checkbox"
+            checked={table.getIsAllPageRowsSelected()}
+            onChange={table.getToggleAllPageRowsSelectedHandler()}
+            aria-label="Seleccionar todo"
+            className="h-4 w-4 accent-[var(--k-accent)]"
+          />
+        </label>
       ),
       cell: ({ row }) => (
-        <input
-          type="checkbox"
-          checked={row.getIsSelected()}
-          onChange={row.getToggleSelectedHandler()}
+        <label
+          className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center"
           onClick={(e) => e.stopPropagation()}
-          aria-label="Seleccionar fila"
-          className="accent-[var(--k-accent)]"
-        />
+        >
+          <input
+            type="checkbox"
+            checked={row.getIsSelected()}
+            onChange={row.getToggleSelectedHandler()}
+            aria-label="Seleccionar fila"
+            className="h-4 w-4 accent-[var(--k-accent)]"
+          />
+        </label>
       ),
     };
     return [checkbox, ...columns];
@@ -96,9 +103,25 @@ export function DataTable<T>({
               {hg.headers.map((header) => {
                 const canSort = header.column.getCanSort();
                 const dir = header.column.getIsSorted();
+                const SortIcon =
+                  dir === "asc"
+                    ? ArrowUp
+                    : dir === "desc"
+                      ? ArrowDown
+                      : ChevronsUpDown;
                 return (
                   <th
                     key={header.id}
+                    scope="col"
+                    aria-sort={
+                      !canSort
+                        ? undefined
+                        : dir === "asc"
+                          ? "ascending"
+                          : dir === "desc"
+                            ? "descending"
+                            : "none"
+                    }
                     style={{
                       width: header.getSize()
                         ? `${header.getSize()}px`
@@ -109,18 +132,32 @@ export function DataTable<T>({
                       <button
                         type="button"
                         onClick={header.column.getToggleSortingHandler()}
-                        className="inline-flex min-h-8 items-center gap-1 py-1 hover:text-[var(--text)] transition-colors"
+                        aria-label={
+                          dir === "asc"
+                            ? "Ordenado de menor a mayor. Cambiar orden"
+                            : dir === "desc"
+                              ? "Ordenado de mayor a menor. Cambiar orden"
+                              : "Sin ordenar. Ordenar por esta columna"
+                        }
+                        className={cn(
+                          "inline-flex min-h-11 items-center gap-1 py-1 transition-colors hover:text-[var(--k-t1)]",
+                          dir && "text-[var(--k-accent)]",
+                        )}
                       >
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
-                        <span
+                        <SortIcon
+                          width={14}
+                          height={14}
+                          strokeWidth={2}
                           aria-hidden
-                          className="text-[var(--k-t3)] text-xs"
-                        >
-                          {dir === "asc" ? "↑" : dir === "desc" ? "↓" : "↕"}
-                        </span>
+                          focusable={false}
+                          style={{
+                            color: dir ? "var(--k-accent)" : "var(--k-t2)",
+                          }}
+                        />
                       </button>
                     ) : (
                       flexRender(
@@ -141,7 +178,7 @@ export function DataTable<T>({
               onClick={onRowClick ? () => onRowClick(row.original) : undefined}
               className={cn(
                 onRowClick && "cursor-pointer",
-                row.getIsSelected() && "bg-[var(--blue-soft)]",
+                row.getIsSelected() && "bg-[var(--k-accent-soft)]",
               )}
             >
               {row.getVisibleCells().map((cell) => (

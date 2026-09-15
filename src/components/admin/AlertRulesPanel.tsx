@@ -8,6 +8,7 @@ import {
   deleteAlertRule,
 } from "@/server/actions/alerts";
 import { hashStringToColor, getInitials } from "@/lib/hash-color";
+import { Icon, type IconName } from "@/components/kronos/Icon";
 import type { AlertRuleRow } from "@/server/actions/alerts";
 import type { AuditAction, AlertChannel } from "@prisma/client";
 
@@ -21,16 +22,16 @@ type Props = {
 
 const CHANNEL_CONFIG: Record<
   AlertChannel,
-  { icon: string; label: string; chipClass: string }
+  { icon: IconName; label: string; chipClass: string }
 > = {
-  EMAIL: { icon: "📧", label: "Email", chipClass: "k-chip-steel" },
-  PUSH: { icon: "📱", label: "Push", chipClass: "k-chip-moss" },
-  IN_APP: { icon: "🔔", label: "In-App", chipClass: "k-chip-ghost" },
+  EMAIL: { icon: "mail", label: "Email", chipClass: "k-chip-ghost" },
+  PUSH: { icon: "phone", label: "Push", chipClass: "k-chip-ghost" },
+  IN_APP: { icon: "bell", label: "In-App", chipClass: "k-chip-ghost" },
   BOTH: {
-    icon: "🌟",
+    icon: "send",
     label: "Email + Push",
     chipClass:
-      "bg-gradient-to-r from-[var(--k-accent)] to-[var(--k-warning)] text-text border-transparent",
+      "bg-[var(--k-accent-soft)] text-[var(--k-accent)] border-[var(--k-accent-line)]",
   },
 };
 
@@ -47,7 +48,7 @@ function AvatarStack({ ids, owners }: { ids: string[]; owners: Owner[] }) {
       {display.map((o, i) => (
         <div
           key={o.id}
-          className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-text border-2 border-[var(--card)]"
+          className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-[var(--k-t1)] border-2 border-[var(--k-surface)]"
           style={{
             backgroundColor: hashStringToColor(o.id),
             marginLeft: i > 0 ? -8 : 0,
@@ -60,7 +61,7 @@ function AvatarStack({ ids, owners }: { ids: string[]; owners: Owner[] }) {
       ))}
       {extra > 0 && (
         <div
-          className="w-6 h-6 rounded-full bg-[var(--k-elevated)] border-2 border-[var(--card)] flex items-center justify-center text-[9px] font-medium text-text-2"
+          className="w-6 h-6 rounded-full bg-[var(--k-elevated)] border-2 border-[var(--k-surface)] flex items-center justify-center text-[9px] font-medium text-[var(--k-t2)]"
           style={{ marginLeft: -8, zIndex: 0 }}
         >
           +{extra}
@@ -164,10 +165,10 @@ export default function AlertRulesPanel({
                     name="channel"
                     className="w-full bg-[var(--k-elevated)] text-text text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)]"
                   >
-                    <option value="EMAIL">📧 Email</option>
-                    <option value="BOTH">🌟 Email + Push</option>
-                    <option value="PUSH">📱 Push</option>
-                    <option value="IN_APP">🔔 In-App</option>
+                    <option value="EMAIL">Email</option>
+                    <option value="BOTH">Email + Push</option>
+                    <option value="PUSH">Push</option>
+                    <option value="IN_APP">In-App</option>
                   </select>
                 </div>
 
@@ -263,7 +264,8 @@ export default function AlertRulesPanel({
                       <span
                         className={`k-chip text-[9px] py-0.5 px-1.5 ${channel.chipClass}`}
                       >
-                        {channel.icon} {channel.label}
+                        <Icon name={channel.icon} size={16} />{" "}
+                        {channel.label}
                       </span>
                     </div>
 
@@ -294,7 +296,7 @@ export default function AlertRulesPanel({
                       }}
                     >
                       <m.div
-                        className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md"
+                        className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-[var(--k-t1)] shadow-md"
                         animate={{ x: rule.enabled ? 20 : 0 }}
                         transition={{
                           type: "spring",
@@ -307,21 +309,10 @@ export default function AlertRulesPanel({
                     {/* Delete */}
                     <button
                       onClick={() => handleDelete(rule.id)}
-                      className="text-text-3 hover:text-[var(--k-warning)] transition-colors p-1"
+                      aria-label="Eliminar regla de alerta"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center text-[var(--k-t2)] hover:text-[var(--k-danger)] transition-colors"
                     >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 14 14"
-                        fill="none"
-                      >
-                        <path
-                          d="M2 4H12M4.5 4V2.5C4.5 2.22386 4.72386 2 5 2H9C9.27614 2 9.5 2.22386 9.5 2.5V4M6 7V10M8 7V10"
-                          stroke="currentColor"
-                          strokeWidth="1.2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
+                      <Icon name="trash" size={16} />
                     </button>
                   </div>
                 </div>
@@ -333,9 +324,11 @@ export default function AlertRulesPanel({
 
       {rules.length === 0 && !showForm && (
         <div className="k-card p-10 text-center">
-          <p className="text-4xl mb-3">🔔</p>
-          <p className="font-medium text-text">Sin reglas de alerta</p>
-          <p className="text-sm text-text-3 mt-1">
+          <div className="mb-3 flex justify-center text-[var(--k-t2)]">
+            <Icon name="bell" size={24} />
+          </div>
+          <p className="font-medium text-[var(--k-t1)]">Sin reglas de alerta</p>
+          <p className="text-sm text-[var(--k-t2)] mt-1">
             Crea una regla para empezar a recibir notificaciones sobre eventos
             críticos.
           </p>

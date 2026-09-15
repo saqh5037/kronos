@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icon } from "@/components/kronos/Icon";
 
 type Step = { label: string; done: boolean };
 
@@ -56,14 +57,18 @@ export default function OnboardingBanner({
           {steps.map((s) => (
             <span
               key={s.label}
-              className="text-[11px] px-2 py-1 rounded-full font-mono"
+              className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full font-mono"
               style={{
                 background: s.done ? "var(--k-accent)" : "var(--k-elevated)",
-                color: s.done ? "var(--k-accent-on)" : "var(--k-t3)",
+                color: s.done ? "var(--k-accent-on)" : "var(--k-t2)",
                 border: s.done ? "none" : "1px solid var(--k-line-2)",
               }}
             >
-              {s.done ? "✓" : "○"} {s.label}
+              <Icon name={s.done ? "check" : "circle"} size={16} />
+              {s.label}
+              <span className="sr-only">
+                {s.done ? " listo" : " pendiente"}
+              </span>
             </span>
           ))}
         </div>
@@ -71,9 +76,10 @@ export default function OnboardingBanner({
       <div className="flex flex-col gap-2 shrink-0">
         <Link
           href="/admin/onboarding"
-          className="k-btn-grad px-4 py-2 rounded-full font-bold text-xs whitespace-nowrap text-center"
+          className="k-btn-grad inline-flex min-h-11 items-center justify-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs whitespace-nowrap text-center"
         >
-          Continuar setup →
+          Continuar setup
+          <Icon name="arrowRight" size={16} />
         </Link>
         {!hasPassword && (
           <Link

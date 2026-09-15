@@ -62,20 +62,20 @@ export default function MovementForm() {
         required
         maxLength={80}
         className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       />
       <input
         name="videoUrl"
         type="url"
         placeholder="URL del video (opcional)"
         className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       />
       <input
         name="equipment"
         placeholder="Equipo (separado por comas: Barbell, Plates)"
         className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       />
       <textarea
         name="standardDescription"
@@ -83,7 +83,7 @@ export default function MovementForm() {
         rows={2}
         maxLength={1000}
         className="px-3 py-2 rounded-lg text-sm border bg-transparent resize-none"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       />
       {error && (
         <p className="text-xs" style={{ color: "var(--k-danger)" }}>

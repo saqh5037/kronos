@@ -52,8 +52,8 @@ function lerpColor(
 
 export default function ParticleMesh({
   density = 35,
-  colorPrimary = "#e60026",
-  colorSecondary = "#00bfff",
+  colorPrimary = "#c8ff2d",
+  colorSecondary = "#a8d726",
   connectionDistance = 120,
   mobileBehavior = "static-gradient",
   className = "",

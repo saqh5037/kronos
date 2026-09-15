@@ -9,7 +9,7 @@ import { kToast } from "@/lib/toast";
 import { fireAchievementToast } from "@/components/atleta/AchievementToast";
 import { JargonTip } from "@/components/kronos/JargonTip";
 
-const ERROR_RED = "#ff5e5e";
+const ERROR_RED = "var(--k-danger)";
 
 const labelStyle: React.CSSProperties = {
   fontFamily: "var(--k-font-display)",
@@ -97,7 +97,7 @@ export default function ScoreForm({
             res.prAchieved ? "NUEVO PR REGISTRADO" : "SCORE GUARDADO",
           );
         } else if (res.prAchieved) {
-          kToast.success("🏆 ¡Nuevo PR registrado!", {
+          kToast.success("¡Nuevo PR registrado!", {
             description: "Tu mejor marca personal ha sido actualizada.",
             duration: 5000,
           });

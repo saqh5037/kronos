@@ -67,7 +67,7 @@ export default function CashPaymentForm({
           name="membershipId"
           required
           className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
+          style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
         >
           <option value="">— Seleccionar —</option>
           {memberships.map((m) => (
@@ -88,7 +88,7 @@ export default function CashPaymentForm({
             min="0.01"
             required
             className="px-3 py-2 rounded-lg text-sm border bg-transparent font-mono"
-            style={{ borderColor: "var(--line)" }}
+            style={{ borderColor: "var(--k-line)" }}
           />
         </label>
         <label className="flex flex-col gap-1 text-xs">
@@ -98,7 +98,7 @@ export default function CashPaymentForm({
             type="date"
             defaultValue={today}
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)" }}
+            style={{ borderColor: "var(--k-line)" }}
           />
         </label>
       </div>
@@ -108,7 +108,7 @@ export default function CashPaymentForm({
         rows={2}
         maxLength={300}
         className="px-3 py-2 rounded-lg text-sm border bg-transparent resize-none"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       />
       {error && (
         <p className="text-xs" style={{ color: "var(--k-danger)" }}>

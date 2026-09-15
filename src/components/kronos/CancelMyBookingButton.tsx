@@ -38,8 +38,8 @@ export default function CancelMyBookingButton({
       disabled={isPending}
       className="text-[11px] font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50"
       style={{
-        background: "var(--btn-ghost-bg)",
-        border: "1px solid var(--line)",
+        background: "var(--k-elevated)",
+        border: "1px solid var(--k-line)",
         color: "var(--k-t2)",
       }}
       whileHover={{ scale: 1.05 }}

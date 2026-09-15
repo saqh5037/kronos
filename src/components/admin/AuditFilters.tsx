@@ -44,7 +44,7 @@ export default function AuditFilters({
   return (
     <div className="space-y-3 mb-6">
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex items-center bg-[var(--k-elevated)] rounded-full p-1 border border-[var(--line)]">
+        <div className="relative flex items-center bg-[var(--k-elevated)] rounded-full p-1 border border-[var(--k-line)]">
           {DAYS_FILTERS.map((f) => (
             <button
               key={f.value}
@@ -75,10 +75,9 @@ export default function AuditFilters({
           <m.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="k-chip text-[var(--k-warning)] bg-[rgba(255, 90, 90, 0.1)] border-[rgba(255, 90, 90, 0.3)]"
+            className="k-chip text-[var(--k-warning)] bg-[var(--k-elevated)] border-[var(--k-line-2)]"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--k-warning)] opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--k-warning)]" />
             </span>
             {sensitiveCount} sensible{sensitiveCount !== 1 ? "s" : ""}
@@ -95,8 +94,8 @@ export default function AuditFilters({
             background: !currentCategory
               ? "var(--k-accent)"
               : "var(--k-elevated)",
-            color: !currentCategory ? "#0a0a0c" : "var(--k-t2)",
-            border: !currentCategory ? "none" : "1px solid var(--line)",
+            color: !currentCategory ? "var(--k-accent-on)" : "var(--k-t2)",
+            border: !currentCategory ? "none" : "1px solid var(--k-line)",
           }}
         >
           Todo
@@ -112,9 +111,9 @@ export default function AuditFilters({
                 currentCategory === cat
                   ? "var(--k-accent)"
                   : "var(--k-elevated)",
-              color: currentCategory === cat ? "#0a0a0c" : "var(--k-t2)",
+              color: currentCategory === cat ? "var(--k-accent-on)" : "var(--k-t2)",
               border:
-                currentCategory === cat ? "none" : "1px solid var(--line)",
+                currentCategory === cat ? "none" : "1px solid var(--k-line)",
             }}
           >
             {AUDIT_CATEGORY_LABELS[cat]}

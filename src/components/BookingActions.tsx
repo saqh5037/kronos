@@ -79,7 +79,7 @@ export function BookButton({
     transition: "background 120ms ease, box-shadow 120ms ease",
   };
 
-  // Optimistic "Reservado ✓" — shown right after booking while page revalidates
+  // Optimistic "Reservado" state — shown right after booking while the page revalidates
   if (myStatus === "BOOKED" || justBooked) {
     if (justCancelled) {
       // Show brief "Cancelado" feedback before server revalidation

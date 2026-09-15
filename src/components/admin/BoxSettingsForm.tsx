@@ -22,7 +22,7 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
   const [defaultClassCapacity, setDefaultClassCapacity] = useState(
     String(box.defaultClassCapacity),
   );
-  const [brandColor, setBrandColor] = useState(box.brandColor ?? "#4a7c59");
+  const [brandColor, setBrandColor] = useState(box.brandColor ?? "#c8ff2d");
   const [logoUrl, setLogoUrl] = useState(box.logoUrl ?? "");
 
   const [error, setError] = useState<string | null>(null);
@@ -87,15 +87,15 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
                 disabled={!canEdit}
                 className="w-12 h-10 rounded-lg border cursor-pointer disabled:cursor-not-allowed"
                 style={{
-                  borderColor: "var(--line)",
-                  background: "var(--card)",
+                  borderColor: "var(--k-line)",
+                  background: "var(--k-surface)",
                 }}
               />
               <input
                 type="text"
                 value={brandColor}
                 onChange={(e) => setBrandColor(e.target.value)}
-                placeholder="#4a7c59"
+                placeholder="#c8ff2d"
                 disabled={!canEdit}
                 pattern="^#[0-9a-fA-F]{6}$"
                 className={`${inputClass} font-mono uppercase`}

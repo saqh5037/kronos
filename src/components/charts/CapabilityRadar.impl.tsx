@@ -65,12 +65,12 @@ export function CapabilityRadar({
           <PolarGrid stroke={CHART_COLORS.grid} radialLines={true} />
           <PolarAngleAxis
             dataKey="name"
-            tick={{ fontSize: 10, fill: CHART_COLORS.text2, fontWeight: 600 }}
+            tick={{ fontSize: 11, fill: CHART_COLORS.text2, fontWeight: 600 }}
           />
           <PolarRadiusAxis
             angle={90}
             domain={[0, 100]}
-            tick={{ fontSize: 9, fill: CHART_COLORS.text3 }}
+            tick={{ fontSize: 11, fill: CHART_COLORS.text2 }}
             tickCount={5}
             stroke={CHART_COLORS.grid}
           />
@@ -113,7 +113,7 @@ export function CapabilityRadar({
             </div>
             <div
               className="text-[10px] font-bold tracking-wide"
-              style={{ color: "var(--k-t3)" }}
+              style={{ color: "var(--k-t2)" }}
             >
               MÁS FUERTE
             </div>
@@ -123,13 +123,13 @@ export function CapabilityRadar({
           <div className="text-center">
             <div
               className="font-display text-lg font-bold"
-              style={{ color: "var(--k-warning)" }}
+              style={{ color: "var(--k-accent)", opacity: 0.55 }}
             >
               {weakestCategory}
             </div>
             <div
               className="text-[10px] font-bold tracking-wide"
-              style={{ color: "var(--k-t3)" }}
+              style={{ color: "var(--k-t2)" }}
             >
               A MEJORAR
             </div>
@@ -162,7 +162,7 @@ export function CapabilityRadar({
             </div>
             <div
               className="w-8 text-right text-[11px] font-bold font-mono"
-              style={{ color: "var(--text)" }}
+              style={{ color: "var(--k-t1)" }}
             >
               {Math.round(c.score)}
             </div>

@@ -46,7 +46,7 @@ export function TooltipBubble({
           <div
             className="rounded-lg px-3 py-2 text-xs"
             style={{
-              background: "var(--card-elevated, var(--card))",
+              background: "var(--k-elevated)",
               border: "1px solid var(--line-strong, rgba(127,127,127,0.25))",
               boxShadow: "0 6px 20px rgba(0,0,0,0.18)",
               minWidth: 92,
@@ -108,7 +108,7 @@ export function TooltipCrosshair({
             fill={color}
             style={{ filter: `drop-shadow(0 0 6px ${color})` }}
           />
-          <circle cx={x} cy={y} r={1.4} fill="#ffffff" />
+          <circle cx={x} cy={y} r={1.4} fill="var(--k-t1)" />
         </m.g>
       )}
     </AnimatePresence>

@@ -1,5 +1,7 @@
 "use client";
 
+import { Icon } from "../Icon";
+
 type RadioCardProps = {
   selected: boolean;
   onChange: (selected: boolean) => void;
@@ -37,9 +39,9 @@ export function RadioCard({
           {selected && (
             <div
               className="w-full h-full flex items-center justify-center"
-              style={{ color: "var(--k-bg)" }}
+              style={{ color: "var(--k-accent-on)" }}
             >
-              ✓
+              <Icon name="check" size={16} />
             </div>
           )}
         </div>

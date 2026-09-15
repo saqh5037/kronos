@@ -46,7 +46,7 @@ export function DateRangePicker({ className }: { className?: string }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 py-1.5 text-sm text-[var(--text)] hover:border-[var(--k-line-2)]"
+        className="inline-flex items-center gap-2 rounded-xl border border-[var(--k-line)] bg-[var(--k-surface)] px-3 py-1.5 text-sm text-[var(--k-t1)] hover:border-[var(--k-line-2)]"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
           <rect
@@ -71,7 +71,7 @@ export function DateRangePicker({ className }: { className?: string }) {
       {open ? (
         <div
           role="dialog"
-          className="absolute right-0 z-20 mt-2 w-72 rounded-xl border border-[var(--line)] bg-[var(--card)] p-3 shadow-lg"
+          className="absolute right-0 z-20 mt-2 w-72 rounded-xl border border-[var(--k-line)] bg-[var(--k-surface)] p-3 shadow-lg"
           style={{ boxShadow: "var(--card-glow-hover)" }}
         >
           <div className="mb-2 grid grid-cols-2 gap-2">
@@ -84,9 +84,9 @@ export function DateRangePicker({ className }: { className?: string }) {
                   setOpen(false);
                 }}
                 className={cn(
-                  "rounded-lg px-2 py-1.5 text-left text-xs",
+                  "min-h-11 rounded-lg px-2 py-1.5 text-left text-xs",
                   range.preset === p
-                    ? "bg-[var(--strain-soft)] text-[var(--k-warning)]"
+                    ? "bg-[var(--k-accent-soft)] text-[var(--k-accent)]"
                     : "hover:bg-[var(--k-elevated)] text-[var(--k-t2)]",
                 )}
               >
@@ -94,7 +94,7 @@ export function DateRangePicker({ className }: { className?: string }) {
               </button>
             ))}
           </div>
-          <div className="border-t border-[var(--line)] pt-3">
+          <div className="border-t border-[var(--k-line)] pt-3">
             <div className="k-eyebrow mb-2">Rango personalizado</div>
             <div className="flex items-center gap-2">
               <input
@@ -106,7 +106,7 @@ export function DateRangePicker({ className }: { className?: string }) {
                     setRange({ from, to: range.to });
                   }
                 }}
-                className="flex-1 rounded-lg border border-[var(--line)] bg-[var(--k-surface)] px-2 py-1 text-xs text-[var(--text)]"
+                className="flex-1 rounded-lg border border-[var(--k-line)] bg-[var(--k-surface)] px-2 py-1 text-xs text-[var(--k-t1)]"
               />
               <span className="text-[var(--k-t3)]">–</span>
               <input
@@ -118,7 +118,7 @@ export function DateRangePicker({ className }: { className?: string }) {
                     setRange({ from: range.from, to });
                   }
                 }}
-                className="flex-1 rounded-lg border border-[var(--line)] bg-[var(--k-surface)] px-2 py-1 text-xs text-[var(--text)]"
+                className="flex-1 rounded-lg border border-[var(--k-line)] bg-[var(--k-surface)] px-2 py-1 text-xs text-[var(--k-t1)]"
               />
             </div>
           </div>

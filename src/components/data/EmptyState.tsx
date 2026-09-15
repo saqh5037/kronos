@@ -19,13 +19,13 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[var(--line)] bg-[var(--card)] py-10 text-center",
+        "flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[var(--k-line)] bg-[var(--k-surface)] py-10 text-center",
         className,
       )}
     >
-      {icon ? <div className="text-[var(--k-t3)]">{icon}</div> : null}
+      {icon ? <div className="text-[var(--k-t2)]">{icon}</div> : null}
       <div className="space-y-1">
-        <p className="text-sm font-semibold text-[var(--text)]">{title}</p>
+        <p className="text-sm font-semibold text-[var(--k-t1)]">{title}</p>
         {description ? (
           <p className="text-xs text-[var(--k-t2)]">{description}</p>
         ) : null}
