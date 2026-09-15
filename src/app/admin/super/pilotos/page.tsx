@@ -4,6 +4,7 @@ import {
   listPilotBoxes,
   type PilotBoxRow,
 } from "@/server/actions/super-pilotos";
+import { formatDateShort } from "@/lib/format";
 import CopyMagicLinkButton from "./CopyMagicLinkButton";
 
 export const metadata: Metadata = {
@@ -20,18 +21,11 @@ export default async function PilotosDashboardPage() {
       style={{
         maxWidth: 1200,
         margin: "0 auto",
-        padding: "48px 24px",
+        padding: "32px 24px 48px",
         color: "var(--k-t1)",
       }}
     >
       <header style={{ marginBottom: 32 }}>
-        <p
-          className="lp-eyebrow"
-          style={{ color: "var(--k-accent)", letterSpacing: "0.22em" }}
-        >
-          <span className="lp-dot" />
-          SUPER-ADMIN · PILOTOS ACTIVOS
-        </p>
         <div
           style={{
             display: "flex",
@@ -39,7 +33,7 @@ export default async function PilotosDashboardPage() {
             justifyContent: "space-between",
             gap: 16,
             flexWrap: "wrap",
-            margin: "12px 0 8px",
+            marginBottom: 8,
           }}
         >
           <h1
@@ -55,6 +49,7 @@ export default async function PilotosDashboardPage() {
           >
             Pilotos {pilots.length > 0 ? `· ${pilots.length}` : ""}
           </h1>
+          {/* One call to action on the page — there used to be two, 200 px apart */}
           <Link
             href="/admin/super/pilotos/nuevo"
             className="k-btn-grad"
@@ -65,7 +60,7 @@ export default async function PilotosDashboardPage() {
               fontWeight: 700,
             }}
           >
-            + Crear Box piloto
+            Crear box piloto
           </Link>
         </div>
         <p
@@ -77,8 +72,7 @@ export default async function PilotosDashboardPage() {
             margin: 0,
           }}
         >
-          Boxes creados via wizard con exclusividad geográfica activa. Métricas
-          actualizadas al recargar.
+          Boxes que dimos de alta a mano, con exclusividad geográfica vigente.
         </p>
       </header>
 
@@ -88,7 +82,8 @@ export default async function PilotosDashboardPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fill, minmax(min(100%, 340px), 1fr))",
             gap: 16,
           }}
         >
@@ -121,24 +116,11 @@ function EmptyState() {
           marginBottom: 8,
         }}
       >
-        Aún no hay Boxes piloto
+        Todavía no hay boxes piloto
       </p>
-      <p style={{ fontSize: 13, color: "var(--k-t2)", marginBottom: 20 }}>
-        Crea el primero con el wizard de onboarding manual.
+      <p style={{ fontSize: 13, color: "var(--k-t2)", margin: 0 }}>
+        Da de alta el primero con «Crear box piloto», aquí arriba.
       </p>
-      <Link
-        href="/admin/super/pilotos/nuevo"
-        className="k-btn-grad"
-        style={{
-          padding: "10px 20px",
-          fontSize: 13,
-          borderRadius: 12,
-          fontWeight: 700,
-          display: "inline-block",
-        }}
-      >
-        Crear primer Box piloto
-      </Link>
     </div>
   );
 }
@@ -172,7 +154,7 @@ function PilotCard({ pilot }: { pilot: PilotBoxRow }) {
           }}
         >
           <span
-            className="text-[10px] font-mono uppercase tracking-wider"
+            className="font-display text-[10px] tracking-wider uppercase"
             style={{ color: "var(--k-accent)" }}
           >
             {pilot.disciplineName ?? "Sin disciplina"}
@@ -214,12 +196,12 @@ function PilotCard({ pilot }: { pilot: PilotBoxRow }) {
         }}
       >
         <Metric
-          label="Trial"
+          label="Prueba"
           value={
             pilot.trialDaysLeft !== null
-              ? `${pilot.trialDaysLeft}d`
+              ? `${pilot.trialDaysLeft} días`
               : trialExpired
-                ? "vencido"
+                ? "Vencida"
                 : "—"
           }
           tone={
@@ -232,27 +214,22 @@ function PilotCard({ pilot }: { pilot: PilotBoxRow }) {
           label="Exclusividad"
           value={
             pilot.exclusivityDaysLeft !== null
-              ? `${pilot.exclusivityDaysLeft}d`
+              ? `${pilot.exclusivityDaysLeft} días`
               : exclusivityExpired
-                ? "vencida"
+                ? "Vencida"
                 : "—"
           }
         />
         <Metric label="Atletas" value={pilot.athleteCount.toString()} />
         <Metric label="WODs" value={pilot.wodCount.toString()} />
         <Metric
-          label="Push subs"
+          label="Avisos push"
           value={pilot.pushSubscriptionCount.toString()}
         />
         <Metric
-          label="Firma"
+          label="Convenio"
           value={
-            signed
-              ? pilot.pilotBetaSignedAt!.toLocaleDateString("es-MX", {
-                  day: "numeric",
-                  month: "short",
-                })
-              : "Pendiente"
+            signed ? formatDateShort(pilot.pilotBetaSignedAt!) : "Pendiente"
           }
           tone={signed ? "ok" : "warn"}
         />
@@ -301,7 +278,7 @@ function StatusBadge({
       }
     : trialExpired
       ? {
-          label: "Trial vencido",
+          label: "Prueba vencida",
           color: "var(--k-danger)",
           bg: "rgba(255,90,90,0.1)",
         }
@@ -313,7 +290,7 @@ function StatusBadge({
 
   return (
     <span
-      className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full"
+      className="font-display rounded-full px-2 py-0.5 text-[10px] tracking-wider uppercase"
       style={{ color: config.color, background: config.bg }}
     >
       {config.label}

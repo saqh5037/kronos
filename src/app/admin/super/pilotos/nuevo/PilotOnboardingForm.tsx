@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Check, X } from "lucide-react";
 import {
   createPilotBox,
   type PilotOnboardingResult,
@@ -9,6 +10,7 @@ import {
   PILOT_DISCIPLINE_SLUGS,
   type PilotDisciplineSlug,
 } from "@/lib/validations/pilot-onboarding";
+import { formatDateLong } from "@/lib/format";
 
 type DisciplineOption = { slug: string; name: string };
 
@@ -90,6 +92,15 @@ const SECTION_TITLE_STYLE: React.CSSProperties = {
   textTransform: "uppercase",
 };
 
+/** Marks a field the form will not submit without. */
+function Required() {
+  return (
+    <span aria-hidden style={{ color: "var(--k-accent)" }}>
+      {" *"}
+    </span>
+  );
+}
+
 export function PilotOnboardingForm({
   disciplines,
 }: {
@@ -98,14 +109,20 @@ export function PilotOnboardingForm({
   const [form, setForm] = useState<FormState>(INITIAL);
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<PilotOnboardingResult | null>(null);
+  /** Creating a tenant and emailing its owner deserves a confirmation step. */
+  const [reviewing, setReviewing] = useState(false);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleReview(e: React.FormEvent) {
     e.preventDefault();
     setResult(null);
+    setReviewing(true);
+  }
+
+  function handleCreate() {
     startTransition(async () => {
       const res = await createPilotBox({
         ...form,
@@ -113,6 +130,7 @@ export function PilotOnboardingForm({
         exclusivityDays: Number(form.exclusivityDays),
       });
       setResult(res);
+      setReviewing(false);
       if (res.ok) {
         setForm(INITIAL);
       }
@@ -120,9 +138,108 @@ export function PilotOnboardingForm({
   }
 
   const fieldErrors = result && !result.ok ? (result.fieldErrors ?? {}) : {};
+  const disciplineName =
+    disciplines.find((d) => d.slug === form.disciplineSlug)?.name ??
+    form.disciplineSlug;
+
+  if (reviewing) {
+    return (
+      <div className="k-card" style={{ padding: "24px" }}>
+        <h2
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 18,
+            fontWeight: 700,
+            margin: "0 0 4px",
+          }}
+        >
+          Revisa antes de crear
+        </h2>
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--k-t2)",
+            margin: "0 0 18px",
+            lineHeight: 1.5,
+          }}
+        >
+          Al confirmar se crea el box y le llega al dueño un enlace de acceso a
+          su correo. Esto no se deshace solo.
+        </p>
+
+        <dl
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: 10,
+            margin: "0 0 22px",
+            fontSize: 14,
+          }}
+        >
+          <SummaryRow label="Box" value={form.boxName} />
+          <SummaryRow label="Dirección pública" value={`/${form.slug}`} />
+          <SummaryRow label="Disciplina" value={disciplineName} />
+          <SummaryRow
+            label="Ubicación"
+            value={[form.city, form.region, form.country]
+              .filter(Boolean)
+              .join(", ")}
+          />
+          <SummaryRow label="Dueño" value={form.ownerName} />
+          <SummaryRow label="Correo del dueño" value={form.email} />
+          <SummaryRow label="Prueba" value={`${form.trialDurationDays} días`} />
+          <SummaryRow
+            label="Exclusividad"
+            value={
+              form.exclusivityDays > 0
+                ? `${form.exclusivityDays} días`
+                : "Sin exclusividad"
+            }
+          />
+          <SummaryRow
+            label="Funciones encendidas"
+            value={
+              [
+                form.enableHyroxUI ? "Formato Hyrox" : null,
+                form.enableMmAthlete ? "Varias membresías por atleta" : null,
+              ]
+                .filter(Boolean)
+                .join(" · ") || "Ninguna extra"
+            }
+          />
+        </dl>
+
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+          <button
+            type="button"
+            onClick={handleCreate}
+            disabled={pending}
+            className="k-btn-grad"
+            style={{
+              padding: "12px 22px",
+              fontSize: 14,
+              borderRadius: 10,
+              fontWeight: 700,
+            }}
+          >
+            {pending ? "Creando…" : "Confirmar y crear box"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setReviewing(false)}
+            disabled={pending}
+            className="k-btn-ghost"
+            style={{ padding: "12px 22px", fontSize: 14, borderRadius: 10 }}
+          >
+            Seguir editando
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <form onSubmit={handleSubmit} aria-labelledby="form-title">
+    <form onSubmit={handleReview} aria-labelledby="form-title">
       {/* Honeypot — oculto visualmente, accesible para bots */}
       <div
         aria-hidden="true"
@@ -146,12 +263,18 @@ export function PilotOnboardingForm({
         />
       </div>
 
+      <p style={{ fontSize: 12, color: "var(--k-t3)", margin: "0 0 16px" }}>
+        Los campos marcados con{" "}
+        <span style={{ color: "var(--k-accent)" }}>*</span> son obligatorios.
+      </p>
+
       {/* Owner */}
       <section style={SECTION_STYLE}>
-        <h2 style={SECTION_TITLE_STYLE}>Owner del Box</h2>
+        <h2 style={SECTION_TITLE_STYLE}>Dueño del box</h2>
         <div style={FIELD_BLOCK}>
           <label htmlFor="email" style={LABEL_STYLE}>
-            Email
+            Correo
+            <Required />
           </label>
           <input
             id="email"
@@ -160,7 +283,7 @@ export function PilotOnboardingForm({
             value={form.email}
             onChange={(e) => update("email", e.target.value)}
             style={INPUT_STYLE}
-            placeholder="owner@boxhyrox.mx"
+            placeholder="correo@ejemplo.com"
           />
           {fieldErrors.email && (
             <p style={{ color: "var(--k-danger)", fontSize: 13, marginTop: 6 }}>
@@ -171,6 +294,7 @@ export function PilotOnboardingForm({
         <div style={FIELD_BLOCK}>
           <label htmlFor="ownerName" style={LABEL_STYLE}>
             Nombre completo
+            <Required />
           </label>
           <input
             id="ownerName"
@@ -179,7 +303,7 @@ export function PilotOnboardingForm({
             value={form.ownerName}
             onChange={(e) => update("ownerName", e.target.value)}
             style={INPUT_STYLE}
-            placeholder="María Pérez"
+            placeholder="Nombre y apellido"
           />
         </div>
       </section>
@@ -189,7 +313,8 @@ export function PilotOnboardingForm({
         <h2 style={SECTION_TITLE_STYLE}>Box</h2>
         <div style={FIELD_BLOCK}>
           <label htmlFor="boxName" style={LABEL_STYLE}>
-            Nombre del Box
+            Nombre del box
+            <Required />
           </label>
           <input
             id="boxName"
@@ -198,12 +323,13 @@ export function PilotOnboardingForm({
             value={form.boxName}
             onChange={(e) => update("boxName", e.target.value)}
             style={INPUT_STYLE}
-            placeholder="Hyrox Studio Polanco"
+            placeholder="Nombre del box"
           />
         </div>
         <div style={FIELD_BLOCK}>
           <label htmlFor="slug" style={LABEL_STYLE}>
-            Slug (URL — solo minúsculas, números, guiones)
+            Dirección pública
+            <Required />
           </label>
           <input
             id="slug"
@@ -213,8 +339,11 @@ export function PilotOnboardingForm({
             value={form.slug}
             onChange={(e) => update("slug", e.target.value)}
             style={INPUT_STYLE}
-            placeholder="hyrox-polanco"
+            placeholder="nombre-del-box"
           />
+          <p style={{ fontSize: 12, color: "var(--k-t3)", marginTop: 6 }}>
+            Así se verá en la URL. Solo minúsculas, números y guiones.
+          </p>
           {fieldErrors.slug && (
             <p style={{ color: "var(--k-danger)", fontSize: 13, marginTop: 6 }}>
               {fieldErrors.slug}
@@ -225,10 +354,11 @@ export function PilotOnboardingForm({
 
       {/* Disciplina + Geo */}
       <section style={SECTION_STYLE}>
-        <h2 style={SECTION_TITLE_STYLE}>Disciplina + Geo</h2>
+        <h2 style={SECTION_TITLE_STYLE}>Disciplina y ubicación</h2>
         <div style={FIELD_BLOCK}>
           <label htmlFor="disciplineSlug" style={LABEL_STYLE}>
             Disciplina
+            <Required />
           </label>
           <select
             id="disciplineSlug"
@@ -242,7 +372,7 @@ export function PilotOnboardingForm({
           >
             {disciplines.map((d) => (
               <option key={d.slug} value={d.slug}>
-                {d.name} ({d.slug})
+                {d.name}
               </option>
             ))}
           </select>
@@ -258,6 +388,7 @@ export function PilotOnboardingForm({
           <div>
             <label htmlFor="city" style={LABEL_STYLE}>
               Ciudad
+              <Required />
             </label>
             <input
               id="city"
@@ -266,12 +397,13 @@ export function PilotOnboardingForm({
               value={form.city}
               onChange={(e) => update("city", e.target.value)}
               style={INPUT_STYLE}
-              placeholder="Ciudad de México"
+              placeholder="Ciudad"
             />
           </div>
           <div>
             <label htmlFor="country" style={LABEL_STYLE}>
-              País (ISO)
+              País
+              <Required />
             </label>
             <input
               id="country"
@@ -281,13 +413,15 @@ export function PilotOnboardingForm({
               value={form.country}
               onChange={(e) => update("country", e.target.value.toUpperCase())}
               style={INPUT_STYLE}
-              placeholder="MX"
             />
+            <p style={{ fontSize: 12, color: "var(--k-t3)", marginTop: 6 }}>
+              Dos letras
+            </p>
           </div>
         </div>
         <div style={FIELD_BLOCK}>
           <label htmlFor="region" style={LABEL_STYLE}>
-            Región / Estado (opcional)
+            Estado o región (opcional)
           </label>
           <input
             id="region"
@@ -295,14 +429,14 @@ export function PilotOnboardingForm({
             value={form.region}
             onChange={(e) => update("region", e.target.value)}
             style={INPUT_STYLE}
-            placeholder="CDMX"
+            placeholder="Estado o región"
           />
         </div>
       </section>
 
       {/* Configuración piloto */}
       <section style={SECTION_STYLE}>
-        <h2 style={SECTION_TITLE_STYLE}>Configuración piloto</h2>
+        <h2 style={SECTION_TITLE_STYLE}>Condiciones del piloto</h2>
         <div
           style={{
             display: "grid",
@@ -313,7 +447,8 @@ export function PilotOnboardingForm({
         >
           <div>
             <label htmlFor="trialDurationDays" style={LABEL_STYLE}>
-              Trial (días)
+              Prueba (días)
+              <Required />
             </label>
             <input
               id="trialDurationDays"
@@ -330,7 +465,8 @@ export function PilotOnboardingForm({
           </div>
           <div>
             <label htmlFor="exclusivityDays" style={LABEL_STYLE}>
-              Exclusividad geográfica (días)
+              Exclusividad (días)
+              <Required />
             </label>
             <input
               id="exclusivityDays"
@@ -344,6 +480,10 @@ export function PilotOnboardingForm({
               }
               style={INPUT_STYLE}
             />
+            <p style={{ fontSize: 12, color: "var(--k-t3)", marginTop: 6 }}>
+              Días sin otro box de la misma disciplina en su ciudad. 0 = sin
+              exclusividad.
+            </p>
           </div>
         </div>
         <fieldset
@@ -365,12 +505,12 @@ export function PilotOnboardingForm({
               textTransform: "uppercase",
             }}
           >
-            Feature flags
+            Funciones opcionales
           </legend>
           <label
             style={{
               display: "flex",
-              alignItems: "center",
+              alignItems: "flex-start",
               gap: 10,
               padding: "6px 0",
               cursor: "pointer",
@@ -383,16 +523,17 @@ export function PilotOnboardingForm({
               type="checkbox"
               checked={form.enableHyroxUI}
               onChange={(e) => update("enableHyroxUI", e.target.checked)}
+              style={{ marginTop: 3 }}
             />
             <span>
-              <strong>hyrox</strong> — UI de stations + race format (auto-on si
-              disciplina=hyrox)
+              <strong>Formato Hyrox</strong> — pantallas por estación y modo
+              carrera. Se enciende solo cuando la disciplina es Hyrox.
             </span>
           </label>
           <label
             style={{
               display: "flex",
-              alignItems: "center",
+              alignItems: "flex-start",
               gap: 10,
               padding: "6px 0",
               cursor: "pointer",
@@ -405,10 +546,11 @@ export function PilotOnboardingForm({
               type="checkbox"
               checked={form.enableMmAthlete}
               onChange={(e) => update("enableMmAthlete", e.target.checked)}
+              style={{ marginTop: 3 }}
             />
             <span>
-              <strong>mm_athlete</strong> — atletas pueden tener múltiples
-              memberships (F2)
+              <strong>Varias membresías por atleta</strong> — permite que un
+              atleta tenga más de una membresía activa a la vez.
             </span>
           </label>
         </fieldset>
@@ -416,23 +558,16 @@ export function PilotOnboardingForm({
 
       <button
         type="submit"
-        disabled={pending}
+        className="k-btn-grad"
         style={{
           width: "100%",
           padding: "14px 24px",
-          fontFamily: "var(--k-font-display)",
           fontSize: 15,
-          fontWeight: 700,
-          letterSpacing: "0.04em",
-          background: pending ? "var(--k-line-2)" : "var(--k-accent)",
-          color: "var(--k-accent-on)",
-          border: "none",
           borderRadius: 10,
-          cursor: pending ? "wait" : "pointer",
           marginTop: 8,
         }}
       >
-        {pending ? "Creando piloto…" : "Crear Box piloto"}
+        Revisar y crear
       </button>
 
       {/* Result */}
@@ -458,9 +593,13 @@ export function PilotOnboardingForm({
                   fontWeight: 700,
                   margin: "0 0 12px",
                   color: "var(--k-accent)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
                 }}
               >
-                ✓ Box piloto creado
+                <Check size={18} strokeWidth={2.6} aria-hidden />
+                Box piloto creado
               </h3>
               <dl
                 style={{
@@ -472,7 +611,7 @@ export function PilotOnboardingForm({
               >
                 <div>
                   <dt style={{ display: "inline", color: "var(--k-t2)" }}>
-                    Slug:
+                    Dirección pública:
                   </dt>{" "}
                   <dd
                     style={{
@@ -481,7 +620,7 @@ export function PilotOnboardingForm({
                       fontFamily: "var(--k-font-display)",
                     }}
                   >
-                    {result.slug}
+                    /{result.slug}
                   </dd>
                 </div>
                 <div>
@@ -494,32 +633,25 @@ export function PilotOnboardingForm({
                 </div>
                 <div>
                   <dt style={{ display: "inline", color: "var(--k-t2)" }}>
-                    Trial termina:
+                    La prueba termina:
                   </dt>{" "}
                   <dd style={{ display: "inline", margin: 0 }}>
-                    {result.trialEndsAt.toLocaleDateString("es-MX", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
+                    {formatDateLong(result.trialEndsAt)}
                   </dd>
                 </div>
                 {result.pilotExclusivityExpiresAt && (
                   <div>
                     <dt style={{ display: "inline", color: "var(--k-t2)" }}>
-                      Exclusividad expira:
+                      Exclusividad hasta:
                     </dt>{" "}
                     <dd style={{ display: "inline", margin: 0 }}>
-                      {result.pilotExclusivityExpiresAt.toLocaleDateString(
-                        "es-MX",
-                        { day: "numeric", month: "long", year: "numeric" },
-                      )}
+                      {formatDateLong(result.pilotExclusivityExpiresAt)}
                     </dd>
                   </div>
                 )}
                 <div>
                   <dt style={{ display: "inline", color: "var(--k-t2)" }}>
-                    Owner email:
+                    Correo del dueño:
                   </dt>{" "}
                   <dd style={{ display: "inline", margin: 0 }}>
                     {result.ownerEmail}
@@ -534,7 +666,7 @@ export function PilotOnboardingForm({
                   lineHeight: 1.5,
                 }}
               >
-                Próximo paso: enviar magic link al owner desde{" "}
+                Siguiente paso: mándale el enlace de acceso desde{" "}
                 <code
                   style={{
                     fontFamily: "var(--k-font-display)",
@@ -546,7 +678,7 @@ export function PilotOnboardingForm({
                 >
                   /login
                 </code>{" "}
-                con su email, o crear AthleteInvitation masiva para sus atletas.
+                con su correo, o invita en bloque a sus atletas.
               </p>
             </>
           ) : (
@@ -558,9 +690,13 @@ export function PilotOnboardingForm({
                   fontWeight: 700,
                   margin: "0 0 8px",
                   color: "var(--k-danger)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
                 }}
               >
-                ✘ {result.error}
+                <X size={17} strokeWidth={2.6} aria-hidden />
+                {result.error}
               </h3>
               <p style={{ margin: 0, fontSize: 14, color: "var(--k-t1)" }}>
                 {result.message}
@@ -570,5 +706,31 @@ export function PilotOnboardingForm({
         </div>
       )}
     </form>
+  );
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        gap: 16,
+        borderBottom: "1px solid var(--k-line)",
+        paddingBottom: 8,
+      }}
+    >
+      <dt style={{ color: "var(--k-t3)", fontSize: 13 }}>{label}</dt>
+      <dd
+        style={{
+          margin: 0,
+          textAlign: "right",
+          color: "var(--k-t1)",
+          fontWeight: 600,
+        }}
+      >
+        {value || "—"}
+      </dd>
+    </div>
   );
 }

@@ -28,7 +28,7 @@ import {
 import { PLAN_TYPES, STAFF_ROLES } from "@/lib/validations/onboarding";
 import { kToast } from "@/lib/toast";
 import KCard from "@/components/kronos/KCard";
-import Eyebrow from "@/components/kronos/Eyebrow";
+import { ArrowLeft, ArrowRight, Check, RotateCcw, X } from "lucide-react";
 import { LogoUpload } from "@/components/admin/LogoUpload";
 
 type Props = {
@@ -38,13 +38,14 @@ type Props = {
   wodPresets: BenchmarkWodOption[];
 };
 
+// `short` keeps the step names readable at 360, where they used to vanish
 const STEPS = [
-  { n: 1, label: "Box" },
-  { n: 2, label: "Horarios" },
-  { n: 3, label: "WODs" },
-  { n: 4, label: "Plan" },
-  { n: 5, label: "Equipo" },
-  { n: 6, label: "Listo" },
+  { n: 1, label: "Box", short: "Box" },
+  { n: 2, label: "Horarios", short: "Hrs" },
+  { n: 3, label: "WODs", short: "WOD" },
+  { n: 4, label: "Plan", short: "Plan" },
+  { n: 5, label: "Equipo", short: "Eq" },
+  { n: 6, label: "Listo", short: "Fin" },
 ] as const;
 
 const TOTAL_STEPS = STEPS.length;
@@ -289,9 +290,9 @@ export default function OnboardingWizard({
   return (
     <div>
       <div className="mb-8">
-        <Eyebrow color="blue">
-          Onboarding · Paso {step} de {TOTAL_STEPS}
-        </Eyebrow>
+        <span className="k-eyebrow-bar">
+          Configuración inicial · Paso {step} de {TOTAL_STEPS}
+        </span>
         <h1 className="mt-3 font-display font-extrabold text-[36px] md:text-[44px] leading-[1.05] tracking-[-0.02em]">
           Configura tu box en {TOTAL_STEPS} pasos
         </h1>
@@ -401,15 +402,16 @@ function Stepper({ current }: { current: number }) {
                   color: active || done ? "var(--k-accent-on)" : "var(--k-t3)",
                 }}
               >
-                {done ? "✓" : s.n}
+                {done ? <Check size={14} strokeWidth={3} aria-hidden /> : s.n}
               </div>
               <span
-                className="text-[10px] font-mono uppercase tracking-wider hidden md:inline"
+                className="font-display text-[10px] uppercase tracking-wider"
                 style={{
                   color: active ? "var(--k-t1)" : "var(--k-t3)",
                 }}
               >
-                {s.label}
+                <span className="md:hidden">{s.short}</span>
+                <span className="hidden md:inline">{s.label}</span>
               </span>
             </div>
             {i < STEPS.length - 1 ? (
@@ -684,13 +686,14 @@ function Step2(p: Step2Props) {
         <button
           type="button"
           onClick={p.onResetPreset}
-          className="text-xs underline"
+          className="inline-flex items-center gap-1.5 text-xs underline"
           style={{ color: "var(--k-t3)" }}
         >
-          ↺ Volver al preset CrossFit
+          <RotateCcw size={12} strokeWidth={2.2} aria-hidden />
+          Volver al horario sugerido de CrossFit
         </button>
         <p className="text-[11px]" style={{ color: "var(--k-t3)" }}>
-          Puedes afinarlo después en Ajustes → Horarios.
+          Puedes afinarlo después en Ajustes › Horarios.
         </p>
       </div>
 
@@ -698,10 +701,10 @@ function Step2(p: Step2Props) {
         left={
           <button
             onClick={p.onBack}
-            className="text-sm underline"
-            style={{ color: "var(--k-t3)" }}
+            className="k-btn-ghost inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold"
           >
-            ← Atrás
+            <ArrowLeft size={14} strokeWidth={2.2} aria-hidden />
+            Atrás
           </button>
         }
         right={
@@ -832,10 +835,10 @@ function StepWods(p: StepWodsProps) {
         left={
           <button
             onClick={p.onBack}
-            className="text-sm underline"
-            style={{ color: "var(--k-t3)" }}
+            className="k-btn-ghost inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold"
           >
-            ← Atrás
+            <ArrowLeft size={14} strokeWidth={2.2} aria-hidden />
+            Atrás
           </button>
         }
         right={
@@ -922,10 +925,10 @@ function Step3(p: Step3Props) {
         left={
           <button
             onClick={p.onBack}
-            className="text-sm underline"
-            style={{ color: "var(--k-t3)" }}
+            className="k-btn-ghost inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold"
           >
-            ← Atrás
+            <ArrowLeft size={14} strokeWidth={2.2} aria-hidden />
+            Atrás
           </button>
         }
         right={
@@ -1011,7 +1014,7 @@ function Step4(p: Step4Props) {
               }}
               aria-label="Eliminar fila"
             >
-              ✕
+              <X size={14} strokeWidth={2.4} aria-hidden />
             </button>
           </div>
         ))}
@@ -1027,10 +1030,10 @@ function Step4(p: Step4Props) {
         left={
           <button
             onClick={p.onBack}
-            className="text-sm underline"
-            style={{ color: "var(--k-t3)" }}
+            className="k-btn-ghost inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold"
           >
-            ← Atrás
+            <ArrowLeft size={14} strokeWidth={2.2} aria-hidden />
+            Atrás
           </button>
         }
         right={
@@ -1074,10 +1077,10 @@ function Step5(p: Step5Props) {
         style={{ background: "var(--k-accent-soft)" }}
       >
         <span
-          className="font-display font-bold text-2xl"
+          className="font-display text-2xl font-bold"
           style={{ color: "var(--k-accent)" }}
         >
-          ✓
+          <Check size={26} strokeWidth={3} aria-hidden />
         </span>
       </div>
       <h2 className="font-display font-bold text-2xl">
@@ -1091,10 +1094,10 @@ function Step5(p: Step5Props) {
         left={
           <button
             onClick={p.onBack}
-            className="text-sm underline"
-            style={{ color: "var(--k-t3)" }}
+            className="k-btn-ghost inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold"
           >
-            ← Atrás
+            <ArrowLeft size={14} strokeWidth={2.2} aria-hidden />
+            Atrás
           </button>
         }
         right={
@@ -1103,7 +1106,14 @@ function Step5(p: Step5Props) {
             disabled={p.pending}
             className="k-btn-grad px-6 py-3 rounded-full font-bold text-sm disabled:opacity-50"
           >
-            {p.pending ? "Cerrando…" : "Ir al dashboard →"}
+            {p.pending ? (
+              "Cerrando…"
+            ) : (
+              <span className="inline-flex items-center gap-1.5">
+                Ir al panel
+                <ArrowRight size={14} strokeWidth={2.4} aria-hidden />
+              </span>
+            )}
           </button>
         }
       />

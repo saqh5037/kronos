@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import type { Route } from "next";
+import { Mail, Tv } from "lucide-react";
 import {
   getPlatformStats,
   type PlatformBoxRow,
 } from "@/server/actions/super-platform";
+import { formatDateLong } from "@/lib/format";
+import { label } from "@/lib/labels";
 
 export const metadata: Metadata = {
-  title: "Platform · Kronos super-admin",
+  title: "Plataforma · Kronos super-admin",
   robots: { index: false, follow: false },
 };
 
@@ -18,18 +23,11 @@ export default async function PlatformDashboardPage() {
       style={{
         maxWidth: 1200,
         margin: "0 auto",
-        padding: "48px 24px",
+        padding: "32px 24px 48px",
         color: "var(--k-t1)",
       }}
     >
       <header style={{ marginBottom: 32 }}>
-        <p
-          className="lp-eyebrow"
-          style={{ color: "var(--k-accent)", letterSpacing: "0.22em" }}
-        >
-          <span className="lp-dot" />
-          SUPER-ADMIN · PLATAFORMA
-        </p>
         <h1
           style={{
             fontFamily: "var(--k-font-display)",
@@ -37,7 +35,7 @@ export default async function PlatformDashboardPage() {
             fontWeight: 700,
             letterSpacing: "-0.03em",
             color: "var(--k-t1)",
-            margin: "12px 0 8px",
+            margin: "0 0 8px",
             lineHeight: 1.1,
           }}
         >
@@ -52,7 +50,7 @@ export default async function PlatformDashboardPage() {
             margin: 0,
           }}
         >
-          Métricas globales de la plataforma. Datos actualizados al recargar.
+          Todos los boxes de Kronos y cómo van.
         </p>
       </header>
 
@@ -88,7 +86,7 @@ export default async function PlatformDashboardPage() {
               marginBottom: 12,
             }}
           >
-            Todos los Boxes ({stats.totalBoxes})
+            Todos los boxes ({stats.totalBoxes})
           </p>
           <div
             style={{
@@ -108,7 +106,7 @@ export default async function PlatformDashboardPage() {
   );
 }
 
-function KpiCard({ label, value }: { label: string; value: number }) {
+function KpiCard({ label: text, value }: { label: string; value: number }) {
   return (
     <div
       className="k-card"
@@ -128,7 +126,7 @@ function KpiCard({ label, value }: { label: string; value: number }) {
           letterSpacing: "0.1em",
         }}
       >
-        {label}
+        {text}
       </span>
       <span
         style={{
@@ -145,23 +143,23 @@ function KpiCard({ label, value }: { label: string; value: number }) {
   );
 }
 
+function statusColor(status: string): string {
+  switch (status) {
+    case "ACTIVE":
+      return "var(--k-accent)";
+    case "TRIAL":
+      return "var(--k-t2)";
+    case "PAST_DUE":
+    case "CANCELLED":
+    case "EXPIRED":
+      return "var(--k-danger)";
+    default:
+      return "var(--k-t2)";
+  }
+}
+
 function StatusChipsCard({ byStatus }: { byStatus: Record<string, number> }) {
   const entries = Object.entries(byStatus);
-
-  const statusColor = (status: string): string => {
-    switch (status) {
-      case "ACTIVE":
-        return "var(--k-accent)";
-      case "TRIAL":
-        return "var(--k-warning)";
-      case "PAST_DUE":
-      case "CANCELLED":
-      case "EXPIRED":
-        return "var(--k-danger)";
-      default:
-        return "var(--k-t2)";
-    }
-  };
 
   return (
     <div
@@ -199,14 +197,12 @@ function StatusChipsCard({ byStatus }: { byStatus: Record<string, number> }) {
             >
               <span
                 style={{
-                  fontFamily: "var(--k-font-display)",
-                  fontSize: 11,
+                  fontFamily: "var(--k-font-body)",
+                  fontSize: 12,
                   color: statusColor(status),
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
                 }}
               >
-                {status}
+                {label("subscriptionStatus", status)}
               </span>
               <span
                 style={{
@@ -227,18 +223,12 @@ function StatusChipsCard({ byStatus }: { byStatus: Record<string, number> }) {
 }
 
 function BoxCard({ box }: { box: PlatformBoxRow }) {
-  const statusColor =
-    box.subscriptionStatus === "ACTIVE"
-      ? "var(--k-accent)"
-      : box.subscriptionStatus === "TRIAL"
-        ? "var(--k-warning)"
-        : "var(--k-danger)";
-
-  const statusBg =
+  const color = statusColor(box.subscriptionStatus);
+  const bg =
     box.subscriptionStatus === "ACTIVE"
       ? "var(--k-accent-soft)"
       : box.subscriptionStatus === "TRIAL"
-        ? "rgba(255,176,32,0.1)"
+        ? "var(--k-elevated)"
         : "rgba(255,90,90,0.1)";
 
   return (
@@ -279,14 +269,14 @@ function BoxCard({ box }: { box: PlatformBoxRow }) {
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: "0.08em",
-              color: statusColor,
-              background: statusBg,
+              color,
+              background: bg,
               padding: "2px 8px",
               borderRadius: 999,
               whiteSpace: "nowrap",
             }}
           >
-            {box.subscriptionStatus}
+            {label("subscriptionStatus", box.subscriptionStatus)}
           </span>
         </div>
         <p
@@ -313,21 +303,56 @@ function BoxCard({ box }: { box: PlatformBoxRow }) {
       >
         <Metric label="Atletas" value={box.athleteCount.toString()} />
         <Metric label="Usuarios" value={box.userCount.toString()} />
-        <Metric
-          label="Creado"
-          value={box.createdAt.toLocaleDateString("es-MX", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })}
-        />
-        {box.ownerEmail && <Metric label="Owner" value={box.ownerEmail} />}
+        <Metric label="Creado" value={formatDateLong(box.createdAt)} />
+        {/* Always rendered: a missing owner is information, not a reason to hide the row */}
+        <Metric label="Dueño" value={box.ownerEmail ?? "Sin dueño asignado"} />
       </dl>
+
+      <footer
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+          paddingTop: 10,
+          borderTop: "1px solid var(--k-line)",
+        }}
+      >
+        <Link
+          href={`/tv/${box.slug}` as Route}
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--k-accent)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <Tv size={13} strokeWidth={2.2} aria-hidden />
+          Ver pantalla del box
+        </Link>
+        {box.ownerEmail ? (
+          <a
+            href={`mailto:${box.ownerEmail}`}
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: "var(--k-t2)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <Mail size={13} strokeWidth={2.2} aria-hidden />
+            Escribir al dueño
+          </a>
+        ) : null}
+      </footer>
     </article>
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function Metric({ label: text, value }: { label: string; value: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
       <dt
@@ -339,7 +364,7 @@ function Metric({ label, value }: { label: string; value: string }) {
           fontFamily: "var(--k-font-display)",
         }}
       >
-        {label}
+        {text}
       </dt>
       <dd
         style={{
@@ -352,6 +377,7 @@ function Metric({ label, value }: { label: string; value: string }) {
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
         }}
+        title={value}
       >
         {value}
       </dd>
@@ -379,10 +405,10 @@ function EmptyState() {
           marginBottom: 8,
         }}
       >
-        No hay Boxes registrados
+        No hay boxes registrados
       </p>
       <p style={{ fontSize: 13, color: "var(--k-t2)" }}>
-        La plataforma aún no tiene ningún Box registrado.
+        La plataforma todavía no tiene ningún box.
       </p>
     </div>
   );

@@ -32,10 +32,11 @@ export function NewChurnBarChart({ data }: { data: AthletesByMonthPoint[] }) {
       xKey="month"
       bars={[
         { key: "newAthletes", label: "Nuevos", color: CHART_COLORS.moss },
+        /* "Bajas" is a second category, not a warning — orange said "alarm" */
         {
           key: "churnedMemberships",
           label: "Bajas",
-          color: CHART_COLORS.ember,
+          color: CHART_COLORS.neutral,
         },
       ]}
       stacked={false}

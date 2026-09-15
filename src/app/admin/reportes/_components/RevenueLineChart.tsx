@@ -1,6 +1,7 @@
 "use client";
 
 import { KronosLineChart } from "@/components/charts/kronos-chart";
+import { formatMXN } from "@/lib/format";
 import type { RevenueByMonthPoint } from "@/server/actions/reports";
 
 const MONTHS_ES = [
@@ -25,7 +26,8 @@ const fmtMonth = (k: unknown) => {
   return MONTHS_ES[idx] ?? k;
 };
 
-const fmtCurrency = (v: number) => `$${(v / 1000).toFixed(1)}k`;
+/** Same money format as every other screen: "$400,000", not "$400.0k". */
+const fmtCurrency = (v: number) => formatMXN(v, { suffix: false });
 
 export function RevenueLineChart({ data }: { data: RevenueByMonthPoint[] }) {
   return (
