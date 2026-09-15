@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft, Lightbulb } from "lucide-react";
 import { NumberStepper } from "@/components/kronos/forms";
 import type { FitnessExperience } from "@prisma/client";
 
@@ -44,8 +45,8 @@ export function Step5Frequency({
         <div
           className="px-3 py-2 rounded-lg text-xs"
           style={{
-            background: "var(--k-accent-soft)",
-            borderLeft: "3px solid var(--k-accent)",
+            background: "var(--k-surface)",
+            borderLeft: "3px solid var(--k-line)",
             color: "var(--k-t1)",
           }}
         >
@@ -63,7 +64,10 @@ export function Step5Frequency({
       />
 
       <div className="space-y-1 text-xs" style={{ color: "var(--k-t2)" }}>
-        <p>💡 Ajusta según tu disponibilidad actual. Puedes cambiar después.</p>
+        <p className="flex items-start gap-1.5">
+          <Lightbulb size={13} aria-hidden className="mt-0.5 shrink-0" />
+          Ajusta según tu disponibilidad actual. Puedes cambiar después.
+        </p>
       </div>
 
       <div className="flex flex-col gap-2 pt-2">
@@ -87,7 +91,10 @@ export function Step5Frequency({
           className="text-xs underline disabled:opacity-50"
           style={{ color: "var(--k-t3)" }}
         >
-          ← Atrás
+          <span className="inline-flex items-center justify-center gap-1">
+            <ChevronLeft size={12} aria-hidden />
+            Atrás
+          </span>
         </button>
       </div>
     </div>

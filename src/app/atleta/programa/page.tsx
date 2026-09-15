@@ -1,16 +1,46 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { Camera, ChevronRight, CalendarRange } from "lucide-react";
 import { getBoxMode } from "@/server/actions/box-mode";
 import { listMyScheduledProgramWods } from "@/server/actions/athlete-program";
+import { EmptyStateCTA } from "@/components/kronos/EmptyStateCTA";
 import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 import ProgramWeekForm from "./_components/ProgramWeekForm";
 
 export const metadata = { title: "Kronos — Programa personal" };
 export const dynamic = "force-dynamic";
 
+/**
+ * Programa personal — solo para atletas en Box Personal.
+ *
+ * El atleta de box NO se redirige: se le explica en su lugar. Un `redirect()`
+ * a nivel page se resolvía en el cliente después de que `atleta/layout.tsx`
+ * ya había streameado su shell → "Rendered more hooks than during the previous
+ * render" (audit 2026-09-15, sección C). Cubierto por
+ * e2e/no-page-errors.spec.ts.
+ */
 export default async function ProgramaPage() {
   const { isPersonal } = await getBoxMode();
-  if (!isPersonal) redirect("/atleta");
+
+  if (!isPersonal) {
+    return (
+      <div className="pb-28">
+        <div style={{ padding: "48px 16px 0" }}>
+          <AthleteBackLink href="/atleta" label="Inicio" />
+        </div>
+        <div style={{ padding: "24px 20px" }}>
+          <EmptyStateCTA
+            icon={<CalendarRange size={24} aria-hidden />}
+            title="Esto es para atletas independientes"
+            description="Tu box programa tu semana, así que no necesitas cargarla a mano. Revisa las clases disponibles y aparta tu lugar."
+            ctaLabel="Ver clases"
+            ctaHref="/atleta/reservar"
+            secondaryLabel="Ir al inicio"
+            secondaryHref="/atleta"
+          />
+        </div>
+      </div>
+    );
+  }
 
   const upcoming = await listMyScheduledProgramWods().catch(() => []);
 
@@ -87,13 +117,10 @@ export default async function ProgramaPage() {
               display: "grid",
               placeItems: "center",
               color: "var(--k-t2)",
-              fontFamily: "var(--k-font-display)",
-              fontSize: 18,
-              fontWeight: 700,
               flexShrink: 0,
             }}
           >
-            📷
+            <Camera size={18} />
           </span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
@@ -118,7 +145,11 @@ export default async function ProgramaPage() {
               OCR Gemini · 1 WOD por foto
             </div>
           </div>
-          <span style={{ color: "var(--k-t3)", fontSize: 18 }}>›</span>
+          <ChevronRight
+            size={18}
+            aria-hidden
+            style={{ color: "var(--k-t3)", flexShrink: 0 }}
+          />
         </Link>
       </section>
 

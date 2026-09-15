@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { Check, ChevronLeft, ChevronRight, X } from "lucide-react";
 import {
   createProgramDays,
   deleteProgramWod,
@@ -259,9 +260,13 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
                     padding: "6px 10px",
                     borderRadius: 8,
                     cursor: isPending ? "wait" : "pointer",
+                    minWidth: 44,
+                    minHeight: 44,
+                    display: "grid",
+                    placeItems: "center",
                   }}
                 >
-                  ✕
+                  <X size={16} aria-hidden />
                 </button>
               </div>
             ))}
@@ -313,8 +318,9 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
               onClick={() => shiftWeek(-7)}
               className="k-tap"
               style={navBtn}
+              aria-label="Semana anterior"
             >
-              ‹
+              <ChevronLeft size={18} aria-hidden />
             </button>
             <div style={{ textAlign: "center" }}>
               <div
@@ -345,8 +351,9 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
               onClick={() => shiftWeek(7)}
               className="k-tap"
               style={navBtn}
+              aria-label="Semana siguiente"
             >
-              ›
+              <ChevronRight size={18} aria-hidden />
             </button>
           </div>
 
@@ -455,9 +462,13 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
                 fontWeight: 700,
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
               }}
             >
-              ✓ {success}
+              <Check size={14} aria-hidden />
+              {success}
             </div>
           )}
 
@@ -510,14 +521,13 @@ const inputStyle: React.CSSProperties = {
 };
 
 const navBtn: React.CSSProperties = {
-  width: 36,
-  height: 36,
+  width: 44,
+  height: 44,
   borderRadius: 10,
   background: "var(--k-elevated)",
   border: "1px solid var(--k-line)",
   color: "var(--k-t1)",
-  fontFamily: "var(--k-font-display)",
-  fontSize: 18,
-  fontWeight: 700,
+  display: "grid",
+  placeItems: "center",
   cursor: "pointer",
 };
