@@ -123,7 +123,7 @@ export default function OpenGraphImage() {
         <span>·</span>
         <span>ATLETAS · BOXES</span>
         <span>·</span>
-        <span>LATAM</span>
+        <span>MÉXICO</span>
       </div>
     </div>,
     { ...size },

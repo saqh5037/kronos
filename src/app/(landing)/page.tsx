@@ -8,14 +8,14 @@ import RouterSplit from "./_components/router/RouterSplit";
 export const metadata: Metadata = {
   title: "Kronos — Tu CrossFit en una app. Gratis para atletas.",
   description:
-    "App gratuita de CrossFit para atletas + sistema operativo para Boxes. Tus PRs, tu racha, reservas, WODs y pagos en una sola app, en español, hecha en LATAM.",
+    "App gratuita de CrossFit para atletas + sistema operativo para Boxes. Tus PRs, tu racha, reservas, WODs y pagos en una sola app, en español, hecha en México.",
   alternates: {
     canonical: "https://www.kronos-fit.com",
   },
   openGraph: {
     title: "Kronos — Tu CrossFit en una app",
     description:
-      "Gratis para atletas. Premium para Boxes. App nativa, white-label real, pagos LATAM nativos.",
+      "Gratis para atletas. Premium para Boxes. App instalable desde el navegador, white-label real, cobranza con Mercado Pago y efectivo.",
     url: "https://www.kronos-fit.com",
     type: "website",
     locale: "es_MX",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Kronos — Tu CrossFit en una app",
     description:
-      "App de CrossFit gratis para atletas. Sistema operativo white-label para Boxes. Hecha en LATAM.",
+      "App de CrossFit gratis para atletas. Sistema operativo white-label para Boxes. Hecha en México.",
   },
 };
 

@@ -6,7 +6,7 @@ import { track } from "../../_lib/track";
 import { CTA_LABEL } from "../_data/copy";
 
 const NAV_LINKS = [
-  { label: "Skills", href: "#skills" },
+  { label: "Habilidades", href: "#skills" },
   { label: "WOD", href: "#wod" },
   { label: "Por qué", href: "#por-que" },
 ];
@@ -52,10 +52,10 @@ export default function NavAtletas({ boxHref }: { boxHref: string | null }) {
           </a>
         ) : (
           <Link
-            href="/login"
+            href="/atleta-signup"
             className="lp-btn-lime"
             onClick={() =>
-              track("cta_clicked", { location: "atletas_nav_login" })
+              track("cta_clicked", { location: "atletas_nav_signup" })
             }
           >
             {CTA_LABEL}

@@ -1,17 +1,11 @@
-"use client";
-
-import { m, useReducedMotion } from "framer-motion";
 import { WHY } from "../_data/copy";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
-
+/**
+ * Entrada (audit 2026-09-15): la comparación SÍ/NO vivía detrás de
+ * initial="hidden" + whileInView, así que sin scroll solo se veía el
+ * encabezado. Reposo visible + entrada CSS (.lp-rise).
+ */
 export default function AtletaSiNo() {
-  const reduce = useReducedMotion();
-  const variants = reduce ? undefined : fadeUp;
-
   return (
     <section className="lp-section" id="por-que">
       <div style={{ textAlign: "center", marginBottom: 48 }}>
@@ -36,12 +30,8 @@ export default function AtletaSiNo() {
           gap: 24,
         }}
       >
-        <m.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-60px" }}
-          variants={variants}
-          className="lp-card-frame"
+        <div
+          className="lp-card-frame lp-rise"
           style={{ minHeight: 0, padding: 36 }}
         >
           <div
@@ -108,14 +98,10 @@ export default function AtletaSiNo() {
               </li>
             ))}
           </ul>
-        </m.div>
+        </div>
 
-        <m.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-60px" }}
-          variants={variants}
-          className="lp-card-frame"
+        <div
+          className="lp-card-frame lp-rise lp-rise-1"
           style={{
             minHeight: 0,
             padding: 36,
@@ -195,7 +181,7 @@ export default function AtletaSiNo() {
               </li>
             ))}
           </ul>
-        </m.div>
+        </div>
       </div>
     </section>
   );

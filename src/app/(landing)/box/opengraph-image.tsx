@@ -102,8 +102,8 @@ export default function OpenGraphImage() {
             maxWidth: 900,
           }}
         >
-          Software para CrossFit Boxes en LATAM. White-label visual real. Pagos
-          Stripe + Mercado Pago + OXXO.
+          Software para CrossFit Boxes en México. White-label visual real. Cobranza
+          con Mercado Pago y efectivo.
         </div>
       </div>
 

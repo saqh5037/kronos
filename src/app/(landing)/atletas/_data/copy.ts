@@ -2,9 +2,14 @@
  * Copy centralizado de la landing /atletas.
  * Español mexicano neutro — sin voseo argentino.
  *
- * Las placas de testimonios llevan `· EJEMPLO ILUSTRATIVO` hasta que
- * Samuel reemplace con consentimiento firmado de atletas reales.
+ * Regla de verdad (audit 2026-09-15): NO hay testimonios en esta página. Las
+ * placas "RESEÑAS · EJEMPLO ILUSTRATIVO" se eliminaron: una reseña inventada,
+ * aunque esté rotulada como ejemplo, cuesta más confianza que una sección
+ * vacía. Cuando haya citas de atletas con consentimiento firmado, se agregan
+ * aquí como `TESTIMONIALS` y se vuelve a montar la sección.
  */
+
+import { CONTACT_EMAIL } from "../../_data/cta";
 
 export const CTA_LABEL = "Empezar gratis" as const;
 
@@ -12,23 +17,21 @@ export const HERO = {
   eyebrow: "GRATIS PARA SIEMPRE · NO NECESITAS QUE TU BOX USE KRONOS",
   claimLineA: "Tu progreso",
   claimLineB: "es el producto.",
-  sub: "Tu racha, tus PRs, tu WOD del día. Crea tu cuenta gratis en 30 segundos. Sin tarjeta, sin spam, sin gamificación cringe.",
+  sub: "Tu racha, tus PRs, tu WOD del día. Crea tu cuenta gratis en 30 segundos. Sin tarjeta, sin spam y sin frases motivacionales de relleno.",
   ctaTertiary: "Aunque tu Box todavía no use Kronos, tú ya puedes empezar.",
 } as const;
 
 export const BENEFIT_SKILLS = {
-  eyebrow: "/01 · SKILLS",
+  eyebrow: "/01 · HABILIDADES",
   h2: "Aprende. Perfecciona. Domina.",
-  body: "Eliges el skill — snatch, muscle-up, pistol, handstand walk. Kronos calcula las progresiones que te tocan hoy según tu nivel, no según un PDF genérico. Las que ya dominaste se marcan; las bloqueadas te dicen exactamente por qué.",
+  body: "Eliges la habilidad — snatch, muscle-up, pistol, handstand walk. Kronos calcula las progresiones que te tocan hoy según tu nivel, no según un PDF genérico. Las que ya dominaste se marcan; las bloqueadas te dicen exactamente por qué.",
   detail: {
     label: "PROGRESIÓN",
-    value: "27%",
-    /** CountUp config opcional — si está, anima 0→to al entrar al viewport. */
-    numeric: { to: 27, suffix: "%" },
+    value: "27 %",
   },
   phoneSrc: "/manual/atleta/skills.png",
   phoneAlt:
-    "Pantalla de Skills mostrando el catálogo de movimientos con coach virtual y progresiones desbloqueables",
+    "Pantalla de Habilidades mostrando el catálogo de movimientos con coach virtual y progresiones desbloqueables",
 } as const;
 
 export const BENEFIT_WOD = {
@@ -38,14 +41,7 @@ export const BENEFIT_WOD = {
   detail: { label: "ÚLTIMO HELEN", value: "−0:34" },
   phoneSrc: "/tutorials/wod-del-dia/screenshots/01-wod.png",
   phoneAlt:
-    "Pantalla del WOD del día con movimientos, time cap y CTA de registrar score",
-} as const;
-
-export const TESTIMONIAL_HERO = {
-  eyebrow: "RESEÑAS · EJEMPLO ILUSTRATIVO",
-  quote:
-    "Después de 3 años usando Excel, ver mi heatmap de 90 días me rompió. No me había dado cuenta de cuánto había entrenado.",
-  attribution: "DANIEL R. · 6:00 AM · IRON HANDS CROSSFIT, CDMX",
+    "Pantalla del WOD del día con movimientos, time cap y botón para registrar tu score",
 } as const;
 
 export const WHY = {
@@ -59,7 +55,7 @@ export const WHY = {
     "Trackear tus PRs y ver tu progresión real",
     "Reservar clase en tu box (si tu box usa Kronos)",
     "Foto del pizarrón → score automático",
-    "Skills con coach IA y progresiones desbloqueables",
+    "Habilidades con coach de IA y progresiones desbloqueables",
     "Comparar tu rendimiento contra el promedio del box",
     "Leer tu propio histórico sin vender tus datos",
   ],
@@ -73,27 +69,34 @@ export const WHY = {
   ],
 } as const;
 
+/**
+ * @deprecated No hay testimonios. Se conservan vacíos SOLO porque
+ * `src/app/atletas.json/route.ts` y `src/app/atletas.md/route.ts` los importan;
+ * esos dos endpoints deben dejar de emitir la sección de reseñas (quedan fuera
+ * del alcance de este cambio). No vuelvas a llenarlos con citas inventadas: si
+ * hay citas reales con consentimiento firmado, se crea `TESTIMONIALS` y se
+ * remonta la sección en la página.
+ */
+export const TESTIMONIAL_HERO = {
+  eyebrow: "",
+  quote: "",
+  attribution: "",
+} as const;
+
+/** @deprecated Ver `TESTIMONIAL_HERO`. */
 export const DUAL_QUOTES = {
-  eyebrow: "MÁS RESEÑAS · EJEMPLO ILUSTRATIVO",
-  a: {
-    quote: "Mi racha sobrevivió a 2 mudanzas y un cambio de box.",
-    attribution: "MARIANA V. · 5 AM · CDMX",
-  },
-  b: {
-    quote:
-      "El día que el sistema me gritó «nuevo PR en back squat» en media clase, lloré. Neta.",
-    attribution: "RICARDO H. · ACAPULCO",
-  },
+  eyebrow: "",
+  a: { quote: "", attribution: "" },
+  b: { quote: "", attribution: "" },
 } as const;
 
 export const FINAL_CTA = {
   eyebrow: "EMPIEZA HOY · GRATIS · SIN TARJETA · SIN LETRA CHICA",
   h2Line1: "Crea tu cuenta",
   h2Line2: "gratis hoy.",
-  sub: "30 segundos. Sin tarjeta. Sin permiso de tu Box. Si tu Box ya usa Kronos, todo se cablea solo. Si no, tú empiezas a llevar tu progreso desde ya.",
-  ctaSecondaryLabel: "Que mi box la pida",
-  ctaSecondaryHref:
-    "mailto:hola@kronos-fit.com?subject=Quiero%20Kronos%20en%20mi%20box",
+  sub: "30 segundos. Sin tarjeta. Sin pedirle permiso a tu Box. Si tu Box ya usa Kronos, todo se cablea solo. Si no, tú empiezas a llevar tu progreso desde ya.",
+  ctaSecondaryLabel: "Quiero Kronos en mi box",
+  ctaSecondaryHref: `mailto:${CONTACT_EMAIL}?subject=Quiero%20Kronos%20en%20mi%20box`,
   footnote: "TU DATA ES TUYA · SIN ANUNCIANTES · GRATIS PARA SIEMPRE",
 } as const;
 

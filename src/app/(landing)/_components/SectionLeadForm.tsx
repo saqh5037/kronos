@@ -11,6 +11,13 @@ import {
   SOFTWARE_OPTIONS,
   PLAN_OPTIONS,
 } from "../_data/mock";
+import {
+  CONTACT_EMAIL,
+  CTA_TRIAL_HREF,
+  CTA_TRIAL_LABEL,
+  CTA_WHATSAPP_LABEL,
+  TRIAL_DAYS,
+} from "../_data/cta";
 import { track } from "../_lib/track";
 
 const leadSchema = z.object({
@@ -88,7 +95,7 @@ function LeadForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
 
       <div className="lp-form-field">
-        <label htmlFor="ownerName">Nombre del owner *</label>
+        <label htmlFor="ownerName">Tu nombre (dueño o coach) *</label>
         <input
           id="ownerName"
           type="text"
@@ -106,7 +113,7 @@ function LeadForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
 
       <div className="lp-form-field">
-        <label htmlFor="email">Email *</label>
+        <label htmlFor="email">Correo *</label>
         <input
           id="email"
           type="email"
@@ -244,7 +251,7 @@ function LeadForm({ onSuccess }: { onSuccess: () => void }) {
         <div className="lp-form-error" role="alert">
           {serverError}
           <br />
-          <span style={{ fontSize: 13 }}>Escríbenos a hola@kronos-fit.com</span>
+          <span style={{ fontSize: 13 }}>Escríbenos a {CONTACT_EMAIL}</span>
         </div>
       )}
 
@@ -254,7 +261,7 @@ function LeadForm({ onSuccess }: { onSuccess: () => void }) {
         style={{ width: "100%", justifyContent: "center", marginTop: 8 }}
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Enviando..." : "RESERVAR MI LUGAR →"}
+        {isSubmitting ? "Enviando..." : CTA_WHATSAPP_LABEL.toUpperCase()}
       </button>
     </form>
   );
@@ -356,13 +363,18 @@ export default function SectionLeadForm() {
       >
         <div className="lp-eyebrow">
           <span className="lp-dot" />
-          /06 · RESERVAR MI LUGAR
+          /06 · {CTA_WHATSAPP_LABEL.toUpperCase()}
         </div>
-        <h2>Prueba Kronos en tu Box.</h2>
+        <h2>¿Prefieres que te acompañemos?</h2>
         <p>
-          30 días sin cargo. Sin tarjeta. Sin contrato anual. Te llamamos en
-          menos de 24 horas hábiles para entender tu Box y armar el setup. Si no
-          funciona, exportamos tu data en CSV y cancelas cuando quieras.
+          La prueba de {TRIAL_DAYS} días la arrancas tú mismo en{" "}
+          <a href={CTA_TRIAL_HREF} className="lp-link-lime">
+            {CTA_TRIAL_LABEL.toLowerCase()}
+          </a>
+          , sin tarjeta y sin hablar con nadie. Si prefieres que te ayudemos a
+          migrar tu data y a armar la configuración, déjanos tu WhatsApp y te
+          escribimos en menos de 24 horas hábiles. Si no funciona, exportamos tu
+          data en CSV y cancelas cuando quieras.
         </p>
       </m.div>
 
@@ -376,7 +388,7 @@ export default function SectionLeadForm() {
           <>
             <div className="lp-eyebrow" style={{ marginBottom: 24 }}>
               <span className="lp-dot" />
-              DÉJANOS TUS DATOS · TE CONTACTAMOS HOY
+              DÉJANOS TU WHATSAPP · TE ESCRIBIMOS HOY
             </div>
             <LeadForm onSuccess={() => setSubmitted(true)} />
             <p
@@ -390,7 +402,8 @@ export default function SectionLeadForm() {
             >
               Te respondemos en menos de 24 horas hábiles.
               <br />
-              Sin spam. Sin scripts de venta agresivos. Sin promesas vacías.
+              Sin spam. Sin guiones de venta agresivos. Solo lo que Kronos ya
+              hace hoy.
             </p>
           </>
         )}

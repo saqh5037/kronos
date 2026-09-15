@@ -1,39 +1,48 @@
-// Datos de la landing pública. Donde aparezca @mock es porque es ilustrativo
-// (preview del producto), no claim de tracción.
+// Datos de la landing pública.
+//
+// Regla de verdad (audit 2026-09-15): cada viñeta de plan mapea a algo que el
+// producto YA hace hoy. Los términos de servicio §3 dicen que los precios están
+// publicados en la landing, así que estas viñetas son contractuales. Lo que está
+// planeado vive SOLO en ROADMAP, en un bloque rotulado "En el roadmap".
+//
+// Pagos reales hoy: Mercado Pago (tarjeta) y efectivo registrado en el admin.
+// Nada de Stripe, OXXO, SPEI, CFDI, nómina, apps en stores, API pública ni SSO.
+
+import { CTA_TRIAL_HREF, CTA_TRIAL_LABEL, CTA_WHATSAPP_LABEL } from "./cta";
 
 // HERO_META — strip verificable bajo el hero. Sin números inventados.
 export const HERO_META = {
   strip:
-    "White-label real · Multi-tenant cross-Box · Stripe + Mercado Pago + OXXO · Hecho en LATAM",
+    "White-label real · Multi-tenant cross-Box · Mercado Pago (tarjeta) y efectivo · Hecho en México",
 };
 
 // SOCIAL_PROOF_BOXES — vacío hasta firmar pilotos con consentimiento.
 // Si hay piloto firmado, agregar { name, city }.
 export const SOCIAL_PROOF_BOXES: Array<{ name: string; city: string }> = [];
 
-// Paletas demo del white-label. Sin atribuir a Boxes específicos hasta tener
-// pilotos reales. "Lima Neon" es el default del sistema.
+// Paletas demo del white-label. Los captions son ejemplos neutros: no hay Boxes
+// reales atribuidos hasta tener consentimiento firmado de un piloto.
 export const WHITE_LABEL_PALETTES = [
   {
     name: "Lima Neon",
     hex: "#C8FF2D",
-    caption: "Califa CrossFit · CO",
+    caption: "Tu box · ejemplo",
     glow: true,
   },
   {
     name: "Naranja Brasa",
     hex: "#FF5A1F",
-    caption: "Iron Hands · MX",
+    caption: "Tu box · ejemplo",
   },
   {
     name: "Cobalto",
     hex: "#6B89FF",
-    caption: "Alpha Box · PE",
+    caption: "Tu box · ejemplo",
   },
   {
     name: "Sangre",
     hex: "#E84545",
-    caption: "Húsares · MX",
+    caption: "Tu box · ejemplo",
   },
 ];
 
@@ -48,7 +57,7 @@ export type PriceTier = {
   featured?: boolean;
 };
 
-// Pricing flat tiered en MXN. Nombres metálicos (CrossFit = barbell = metal).
+// Precios planos por plan en MXN. Nombres metálicos (CrossFit = barra = metal).
 export const PRICING: PriceTier[] = [
   {
     name: "Hierro",
@@ -56,21 +65,21 @@ export const PRICING: PriceTier[] = [
     unit: "MXN · al mes",
     desc: "Para Boxes independientes hasta 80 atletas activos. El motor base para operar como profesional desde el día uno.",
     features: [
-      "App atleta GRATIS para todos tus miembros — sin costo por usuario",
+      "App del atleta GRATIS para todos tus miembros — sin costo por usuario",
       "App del atleta con tu logo, color y nombre del Box",
       "Subdominio tubox.kronos.app",
-      "Reservas con waitlist FIFO",
-      "WOD del día + biblioteca con video",
+      "Reservas con lista de espera FIFO",
+      "WOD del día + biblioteca de movimientos con video",
       "Control de asistencia (QR + manual)",
-      "Hero racha + PRs por movimiento",
-      "Stripe + Mercado Pago",
-      "Cobranza automatizada",
+      "Membresías y cobranza con Mercado Pago (tarjeta) y efectivo",
+      "PRs por movimiento y rachas",
+      "Exportación de toda tu data en CSV",
       "Hasta 2 coaches en el admin",
-      "Soporte email · 48 hrs hábiles",
-      "Onboarding self-service",
+      "Soporte por correo · 48 hrs hábiles",
+      "Alta por tu cuenta, sin llamadas",
     ],
-    cta: "Empezar con Hierro →",
-    ctaHref: "#section-form",
+    cta: CTA_TRIAL_LABEL,
+    ctaHref: CTA_TRIAL_HREF,
   },
   {
     name: "Acero",
@@ -78,22 +87,20 @@ export const PRICING: PriceTier[] = [
     unit: "MXN · al mes",
     desc: "Para Boxes consolidados hasta 200 atletas. La operación profesional para los que ya escalaron y necesitan dejar de perder atletas.",
     features: [
-      "App atleta GRATIS para todos tus miembros — sin costo por usuario",
+      "App del atleta GRATIS para todos tus miembros — sin costo por usuario",
       "Todo lo de Hierro, más:",
-      "Admin completo con MRR, churn y ocupación",
-      "Programación de bloques (12 semanas)",
-      "WODs builder con RX y scaled",
-      "Leaderboards del Box",
-      "Multi-coach + nómina automática",
-      "Push notifications + announcements",
-      "Apps móviles cobranded (tu logo, sub-marca Kronos)",
-      "Facturación electrónica MX (CFDI 4.0)",
-      "OXXO + SPEI nativos",
-      "Reportes financieros",
-      "Soporte WhatsApp · 4 hrs hábiles",
+      "Panel con ingresos del mes, bajas y ocupación por hora",
+      "Constructor de WODs con RX y escalado",
+      "Rankings del Box por WOD y por asistencia",
+      "Pantalla para la TV del Box (pizarrón en vivo)",
+      "Avisos y notificaciones push a tus atletas",
+      "Reportes de operación e ingresos",
+      "Coaches ilimitados en el admin",
+      "Soporte por WhatsApp · 4 hrs hábiles",
+      "Acompañamiento de alta si lo quieres (opcional)",
     ],
-    cta: "Probar Acero 30 días →",
-    ctaHref: "#section-form",
+    cta: CTA_TRIAL_LABEL,
+    ctaHref: CTA_TRIAL_HREF,
     featured: true,
   },
   {
@@ -102,68 +109,65 @@ export const PRICING: PriceTier[] = [
     unit: "MXN · al mes",
     desc: "Para multi-sede, franquicias y redes de Boxes. Atletas activos sin límite, white-label total y multi-tenant cross-Box. Un atleta, varias ciudades, una sola racha.",
     features: [
-      "App atleta GRATIS para todos tus miembros — sin costo por usuario",
+      "App del atleta GRATIS para todos tus miembros — sin costo por usuario",
       "Todo lo de Acero, más:",
       "White-label completo · dominio propio (app.tubox.mx)",
-      "Cero marca Kronos en pantalla, footer ni emails",
-      "Apps con tu nombre en App Store y Play Store",
+      "Cero marca Kronos en pantalla, footer ni correos",
       "Multi-tenant cross-Box (racha unificada)",
-      "BI consolidado de todas las sedes",
-      "Switcher de sede para owners",
-      "API pública + webhooks",
-      "SSO (Google Workspace, Microsoft Entra)",
-      "Onboarding asistido + migración",
-      "SLA 99.9% · soporte 24/7",
-      "Brand kit por sede",
+      "Consolidado de todas las sedes en un solo panel",
+      "Cambio de sede desde el admin",
+      "Acompañamiento de alta y migración de tu data",
+      "Paleta y logo por sede",
     ],
-    cta: "Hablar con ventas →",
-    ctaHref: "#section-form",
+    cta: CTA_WHATSAPP_LABEL,
+    // Resuelto en el componente: WhatsApp si hay número, si no el formulario.
+    ctaHref: "",
   },
+];
+
+/**
+ * ROADMAP — lo único que puede nombrar features no lanzadas, y solo aquí.
+ * NUNCA moverlas a `PRICING.features`: esas viñetas son contractuales.
+ */
+export const ROADMAP: string[] = [
+  "Facturación electrónica MX (CFDI)",
+  "Pagos en efectivo por convenio y transferencia con referencia",
+  "Programación de bloques de varias semanas",
+  "Apps publicadas en tiendas con el nombre del Box",
+  "Integraciones con terceros",
 ];
 
 export type OwnerKpi = {
   label: string;
-  /** Display fallback string (no-JS / reduce-motion render). */
+  /** Valor estático de demo. No se anima: un "$0K" en la captura es peor que no tener número. */
   value: string;
-  /** Number to count to when entering viewport. */
-  displayTo: number;
-  prefix?: string;
-  suffix?: string;
-  decimals?: number;
-  /** Static percent suffix shown next to the counter (e.g. " %" for Churn). */
-  pct?: string;
   delta: string;
   up?: boolean;
 };
 
-// @mock — KPIs ilustrativos del admin dashboard preview en /02. NO son tracción real de Kronos.
+// Datos de ejemplo del panel admin que se muestra en /02. NO es tracción de
+// Kronos ni de ningún Box real: son cifras plausibles de un Box de ~400 atletas.
 export const OWNER_KPIS: OwnerKpi[] = [
   {
-    label: "MRR",
-    value: "$184K",
-    displayTo: 184,
-    prefix: "$",
-    suffix: "K",
-    delta: "↑12% MoM",
+    label: "Ingresos del mes",
+    value: "$184,000",
+    delta: "+12 % vs mes pasado",
     up: true,
   },
   {
-    label: "Atletas",
+    label: "Atletas activos",
     value: "412",
-    displayTo: 412,
-    delta: "↑28 neto",
+    delta: "+28 netos",
+    up: true,
   },
   {
-    label: "Churn",
-    value: "3.1",
-    displayTo: 3.1,
-    decimals: 1,
-    pct: "%",
-    delta: "↓0.4% MoM",
+    label: "Bajas del mes",
+    value: "3.1 %",
+    delta: "−0.4 pts vs mes pasado",
   },
 ];
 
-// @mock — bars 14 days, valor 0-100. Lima si activo, gris si fin de semana.
+// Datos de ejemplo — 14 días, valor 0-100. Lima si activo, gris si fin de semana.
 export const OWNER_OCCUPANCY: Array<{ value: number; weekend?: boolean }> = [
   { value: 65 },
   { value: 78 },
@@ -184,16 +188,16 @@ export const OWNER_OCCUPANCY: Array<{ value: number; weekend?: boolean }> = [
 export const FOOTER_LINKS = {
   producto: [
     { label: "App del atleta", href: "#section-atleta" },
-    { label: "Admin del owner", href: "#section-owner" },
+    { label: "Panel del dueño", href: "#section-owner" },
     { label: "White-label", href: "#section-whitelabel" },
     { label: "Multi-tenant cross-Box", href: "#section-atleta" },
     { label: "Pagos", href: "#section-owner" },
-    { label: "Pricing", href: "#section-pricing" },
+    { label: "Precios", href: "#section-pricing" },
   ],
   recursos: [
-    { label: "Documentación", href: "#", comingSoon: true },
-    { label: "Estado del sistema", href: "#", comingSoon: true },
-    { label: "Changelog", href: "#", comingSoon: true },
+    { label: "Manual del atleta", href: "/atletas/manual" },
+    { label: "Kronos para atletas", href: "/atletas" },
+    { label: "Pantalla para la TV del Box", href: "/tv" },
   ],
   kronos: [
     { label: "Contacto", href: "mailto:hola@kronos-fit.com" },
@@ -206,15 +210,15 @@ export const FOOTER_LINKS = {
 export const FAQ_ITEMS = [
   {
     id: 1,
-    question: "¿Cuánto tarda el onboarding?",
+    question: "¿Cuánto tarda darse de alta?",
     answer:
-      "72 horas hábiles para Hierro y Acero. Migras reservas, atletas activos, mandatos de pago y programación sin perder un día de operación. Titanio incluye onboarding presencial; el plazo depende del tamaño de la red.",
+      "Creas tu Box en minutos desde la página de registro: nombre, correo y dirección de tu box. Migrar atletas, reservas y programación toma unas horas más y lo puedes hacer tú con el template CSV, o nosotros te acompañamos si lo prefieres.",
   },
   {
     id: 2,
     question: "¿Migran mi data desde Wodify, PushPress, SugarWOD o Boxmagic?",
     answer:
-      "Sí. En Acero y Titanio la migración está incluida. En Hierro te damos el template CSV y un instructivo paso a paso para que la subas tú. Si te atoras, soporte te ayuda.",
+      "Sí. En Titanio la migración va acompañada. En Hierro y Acero te damos el template CSV y un instructivo paso a paso para que la subas tú. Si te atoras, soporte te ayuda.",
   },
   {
     id: 3,
@@ -224,21 +228,21 @@ export const FAQ_ITEMS = [
   },
   {
     id: 4,
-    question: "¿Cobran comisión sobre los pagos de mis atletas?",
+    question: "¿Cómo cobro las mensualidades y cobran comisión?",
     answer:
-      "No cobramos comisión sobre tus ingresos. Las únicas tarifas son las de Stripe y Mercado Pago, que son directas con ellos y tú puedes ver y auditar. Nosotros no metemos mano ahí.",
+      "Hoy cobras con Mercado Pago (tarjeta) desde la app del atleta, y registras el efectivo en el admin para que ningún pago se pierda. Kronos no cobra comisión sobre tus ingresos: las únicas tarifas son las de Mercado Pago, directas con ellos y auditables por ti.",
   },
   {
     id: 5,
     question: "¿Qué tan blanco es el white-label?",
     answer:
-      "Hierro y Acero: tu logo, color y nombre dominan la app, en un subdominio tubox.kronos.app con un footer discreto 'Powered by Kronos'. Los emails llegan desde no-reply@kronos-fit.com firmados por el Box. En Acero, además, apps móviles cobranded (tu logo + sub-marca Kronos). Titanio: dominio propio (app.tubox.mx), emails desde tu dominio, apps publicadas con tu nombre en App Store y Play Store, sin Kronos en ninguna pantalla. El atleta de Titanio nunca lee Kronos.",
+      "Hierro y Acero: tu logo, color y nombre dominan la app, en un subdominio tubox.kronos.app con un footer discreto 'Powered by Kronos'. Los correos llegan desde no-reply@kronos-fit.com firmados por el Box. Titanio: dominio propio (app.tubox.mx), correos desde tu dominio, y cero marca Kronos en pantalla. El atleta de Titanio nunca lee Kronos.",
   },
   {
     id: 6,
     question: "¿Mis datos están seguros?",
     answer:
-      "Base de datos en Postgres con encryption at rest. Cada Box es un tenant aislado: nadie de otro Box puede ver tu información, ni siquiera por error de sistema. Backups diarios, retención de 30 días. No usamos tu data para entrenar modelos de IA ni la vendemos a terceros.",
+      "Base de datos en Postgres con cifrado en reposo. Cada Box es un tenant aislado: nadie de otro Box puede ver tu información, ni siquiera por error de sistema. Respaldos diarios, retención de 30 días. No usamos tu data para entrenar modelos de IA ni la vendemos a terceros.",
   },
 ];
 

@@ -63,8 +63,8 @@ export const SCREENS: Screen[] = [
     actions: [
       "Ver el WOD del día con peso por movimiento",
       "Anotar score manual (tiempo · reps · peso)",
-      "Subir foto del pizarrón → OCR detecta tu marca",
-      "Ver tu mejor histórico + sparkline de últimos 5 intentos",
+      "Subir foto del pizarrón → la IA detecta tu marca",
+      "Ver tu mejor histórico y una mini gráfica de tus últimos 5 intentos",
       "Comparar contra el leaderboard completo del box",
     ],
     deepLink: "/atleta/wod",
@@ -91,7 +91,7 @@ export const SCREENS: Screen[] = [
     id: "programa",
     label: "Programa",
     title: "Programa semanal · tu propio WOD.",
-    lead: "Carga manual de WODs día por día. Subes foto del pizarrón del box, del gym o de tu garage; OCR Gemini lo lee; tú editas y guardas. Cargado una vez, queda en tu historial para siempre.",
+    lead: "Carga manual de WODs día por día. Subes foto del pizarrón del box, del gimnasio o de tu garage; la lectura de pizarra con IA lo interpreta; tú editas y guardas. Cargado una vez, queda en tu historial para siempre.",
     audience: "BOX PERSONAL",
     imageSrc: "/manual/atleta/programa.png",
     imageAlt:
@@ -99,22 +99,22 @@ export const SCREENS: Screen[] = [
     actions: [
       "Ver tu programa de los próximos 7 días",
       "Subir foto del pizarrón (1 WOD por foto)",
-      "Editar el WOD detectado por OCR antes de guardar",
+      "Editar lo que la IA detectó antes de guardar",
       "Registrar resultado directamente desde el programa",
     ],
     deepLink: "/atleta/programa",
   },
   {
     id: "skills",
-    label: "Skills",
-    title: "Skills · coach virtual con IA.",
-    lead: "Eliges skill (snatch, muscle-up, pistol, handstand walk). Kronos calcula tus progresiones según tu nivel real, no según un PDF genérico. Las completadas se marcan, las bloqueadas te dicen por qué.",
+    label: "Habilidades",
+    title: "Habilidades · coach virtual con IA.",
+    lead: "Eliges la habilidad (snatch, muscle-up, pistol, handstand walk). Kronos calcula tus progresiones según tu nivel real, no según un PDF genérico. Las completadas se marcan, las bloqueadas te dicen por qué.",
     audience: "AMBOS",
     imageSrc: "/manual/atleta/skills.png",
     imageAlt:
-      "Pantalla de skills con catálogo de movimientos y progresiones del coach virtual",
+      "Pantalla de habilidades con catálogo de movimientos y progresiones del coach virtual",
     actions: [
-      "Activar el skill que quieres mejorar",
+      "Activar la habilidad que quieres mejorar",
       "Ver progresiones desbloqueables (logradas · actual · bloqueadas)",
       "Leer cards del coach IA personalizadas a tu progreso",
       "Tap a un movimiento → técnica completa + PR + historia",
@@ -159,7 +159,7 @@ export const SCREENS: Screen[] = [
   {
     id: "logros",
     label: "Logros",
-    title: "Logros · skill tree real.",
+    title: "Logros · un árbol de logros de verdad.",
     lead: "Trofeos con condiciones reales: «Primer muscle-up estricto», «Doble peso corporal en back squat», «Guerrero RX». Nivel atleta global con XP. Lo que desbloqueas te costó.",
     audience: "AMBOS",
     imageSrc: "/manual/atleta/logros.png",

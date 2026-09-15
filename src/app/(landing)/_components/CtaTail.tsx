@@ -2,6 +2,13 @@
 
 import { m, useReducedMotion } from "framer-motion";
 import DuotoneImage from "./DuotoneImage";
+import {
+  CTA_TRIAL_HREF,
+  CTA_TRIAL_LABEL,
+  CTA_WHATSAPP_HREF,
+  CTA_WHATSAPP_LABEL,
+  TRIAL_DAYS,
+} from "../_data/cta";
 import { track } from "../_lib/track";
 
 export default function CtaTail() {
@@ -24,22 +31,21 @@ export default function CtaTail() {
           sizes="(max-width: 1100px) 100vw, 1200px"
           style={{ borderRadius: "inherit" }}
         />
-        <div
-          style={{ flex: 1, minWidth: 320, position: "relative", zIndex: 1 }}
-        >
+        <div style={{ flex: 1, minWidth: 0, position: "relative", zIndex: 1 }}>
           <div className="lp-eyebrow">
             <span className="lp-dot" />
-            30 DÍAS · SIN TARJETA · SIN CLÁUSULAS
+            {TRIAL_DAYS} DÍAS · SIN TARJETA · SIN CLÁUSULAS
           </div>
           <h2>
             Prueba Kronos <br />
             en <span className="lp-tag-lime">tu Box</span>.
           </h2>
           <p>
-            30 días sin cargo para que tu staff y tus atletas lo usen. Si no
-            funciona para tu Box, te exportamos todos los datos (atletas,
-            asistencias, PRs, pagos, programación) en CSV y cancelamos sin
-            cláusulas.
+            {TRIAL_DAYS} días sin cargo para que tu staff y tus atletas lo usen.
+            Te das de alta tú mismo en minutos; si quieres que te acompañemos con
+            la migración, escríbenos y lo hacemos contigo. Si no funciona para tu
+            Box, te exportamos todos los datos (atletas, asistencias, PRs, pagos,
+            programación) en CSV y cancelas sin cláusulas.
           </p>
         </div>
         <div
@@ -47,22 +53,22 @@ export default function CtaTail() {
           style={{ position: "relative", zIndex: 1 }}
         >
           <a
-            href="mailto:demo@kronos-fit.com?subject=Demo%20Kronos"
+            href={CTA_TRIAL_HREF}
             className="lp-btn-lime lp-btn-lg"
             style={{ justifyContent: "center" }}
-            onClick={() => track("landing_demo_booked", { source: "cta_tail" })}
+            onClick={() => track("cta_clicked", { location: "cta_tail" })}
           >
-            Reservar demo →
+            {CTA_TRIAL_LABEL}
           </a>
           <a
-            href="mailto:ventas@kronos-fit.com"
+            href={CTA_WHATSAPP_HREF}
             className="lp-btn-ghost lp-btn-lg"
             style={{ justifyContent: "center" }}
             onClick={() =>
-              track("landing_demo_booked", { source: "cta_tail_sales" })
+              track("cta_clicked", { location: "cta_tail_whatsapp" })
             }
           >
-            Hablar con ventas
+            {CTA_WHATSAPP_LABEL}
           </a>
           <span
             className="lp-caption"

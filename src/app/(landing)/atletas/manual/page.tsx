@@ -13,7 +13,7 @@ import { SCREENS } from "../_data/screens";
 export const metadata: Metadata = {
   title: "Manual Kronos Atletas — Guía completa pantalla por pantalla",
   description:
-    "Cómo usar Kronos Atletas: home, WOD, reservas, skills, perfil, logros. 9 pantallas documentadas con capturas reales y acciones por pantalla.",
+    "Cómo usar Kronos Atletas: inicio, WOD, reservas, habilidades, perfil y logros. Nueve pantallas documentadas con lo que puedes hacer en cada una.",
   alternates: { canonical: "/atletas/manual" },
   robots: { index: true, follow: true },
 };
