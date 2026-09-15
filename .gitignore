@@ -2,6 +2,7 @@
 .DS_Store
 .AppleDouble
 .LSOverride
+Thumbs.db
 
 # Editors
 .idea/
@@ -42,84 +43,62 @@ pnpm-debug.log*
 # Prisma
 prisma/migrations/dev/
 
-# Testing
+# Testing / QA output
 playwright-report/
 test-results/
 .playwright/
+/.playwright-mcp/
+/screenshots/
+.impeccable/
+lighthouse-report*/
 
 # Tooling
 .turbo/
 .cache/
 .eslintcache
 .stylelintcache
-
-# OS
-Thumbs.db
-/screenshots/
-# DB dumps locales — nunca commitear (pesados + sensibles)
-/backups/
-# /scripts/ ignorado por default (efímeros locales). Excepciones explícitas
-# para scripts de operación permanente:
-/scripts/*
-!/scripts/generate-pilot-beta-link.ts
-!/scripts/seed-demo-dominus.ts
-!/scripts/seed-grizzlys.ts
-!/scripts/smoke.sh
-!/scripts/deploy.sh
-/.playwright-mcp/
-/tour-*.png
-/tour2-*.png
-
-# Material visual local (capturas de review, smoke checks, mockups locales)
-/demo-*.png
-/forge-*.png
-/forge-v2-*.png
-/kimi-step*.png
-/kimi-review/
-/fix-*.png
-/ops-*.png
-/story-*.png
-/sweep-*.png
-/v-*.png
-/vi-*.png
-/[0-9].[0-9]-*.png
-/.claude-context.md
+/.atl/
 /.claude/
-/audit-*.png
+/.claude-context.md
 
-# Inspiración / source assets pesados — quedan local
-/Imspiracion/
-/_design-source/logo/
-/kronos-*.png
-
-# Screenshots de sesión Kimi/Claude (untracked)
-/landing-*.png
-/landing-*.jpg
-/final-*.png
-/final-*.jpg
-/nav-*.png
-/nav-*.jpg
-/signup-*.png
-/.tmp-*.png
-/.tmp-*.jpg
-/verify-*.png
-/verify-*.jpg
-
-# Capturas de auditorías/E2E/post-deploy/post-fix (efímeras locales)
-/e2e-*.png
-/post-deploy-*.png
-/post-fix-*.png
-/guia-*.png
-/guia-v2-*.png
+# ---------------------------------------------------------------------------
+# Imágenes sueltas en la RAÍZ del repo son siempre artefactos de QA/sesión.
+# Nunca son assets de producto: esos viven en `public/`, `docs/` o
+# `_design-source/`, y ninguno de estos patrones ancla-raíz los alcanza.
+# (Reemplaza ~30 reglas por prefijo; se purgaron 50 archivos el 2026-09-15.)
+# ---------------------------------------------------------------------------
+/*.png
+/*.jpg
+/*.jpeg
+/*.gif
+/*.webp
+/*.mp4
 
 # Material de comunicación temporal (mails a testers, guías HTML)
 /email-testers-*.html
 /guia-testers-*.html
 
-# Cache local del agent layer
-/.atl/
+# Assets fuente pesados y scratch de review — quedan local
+/Imspiracion/
+/kimi-review/
+/_design-source/logo/
+
+# DB dumps locales — nunca commitear (pesados + sensibles)
+/backups/
 
 # Proyecto paralelo de scratch — NO trackear
 kronos-atleta-self-serve/
+
+# ---------------------------------------------------------------------------
+# `scripts/` está ignorado por default (one-offs efímeros locales).
+# El tooling permanente se opta-in explícitamente.
+# ---------------------------------------------------------------------------
+/scripts/*
+!/scripts/deploy.sh
+!/scripts/smoke.sh
+!/scripts/generate-pilot-beta-link.ts
+!/scripts/seed-demo-dominus.ts
+!/scripts/seed-grizzlys.ts
 !/scripts/backfill-movement-progressions.ts
-.DS_Store
+!/scripts/archive/
+!/scripts/guards/

@@ -2,304 +2,336 @@
 
 Proyecto: `/Users/samuelquiroz/Documents/proyectos/kronos`
 
-SaaS multi-tenant para boxes de CrossFit. Next.js 15 + Prisma + NextAuth.
+SaaS multi-tenant para boxes de CrossFit (México). Next.js 15 App Router +
+Prisma 6 + NextAuth 4 + PostgreSQL. Dos productos en un repo: el panel del Box
+(`/admin`) y la app del atleta (`/atleta`, PWA), más landing pública, modo TV y
+super-admin de plataforma.
 
-## Estado actual
+Fuente de verdad de este documento: `docs/audit/2026-09-15-kronos-producto/`
+(inventario de código, auditoría de 264 pantallas, benchmark y roadmap).
 
-**V3 Sweep Total cerrado** (2026-05-07, último commit `4da235b`): 16 commits desde `e64495b`. Brand consistency end-to-end — producto + charts + skeletons + toasts + emails todos en lima neon `#C8FF2D` monocromático.
+## Estado actual — 2026-09-15
 
-**Fase 1 al 100%** (2026-05-04): 7 vertical slices end-to-end con TDD + cierre.
+| Rama                        | Qué es                                                                                        |
+| --------------------------- | --------------------------------------------------------------------------------------------- |
+| `main`                      | `808fbac` (2026-06-10). Producto en pausa desde junio; salud de build verde.                  |
+| `audit/2026-09-15-producto` | Evidencia de la auditoría. **PR #48 → `main`, abierto.**                                      |
+| `rebuild/base`              | `d8be40f`. Base común de la fase 0: `lucide-react`, `src/lib/labels.ts`, `src/lib/format.ts`. |
+| `rebuild/w0-*`              | Nueve worktrees paralelos del rediseño (ver "Modelo de trabajo").                             |
 
-Módulos admin con datos reales:
+Salud verificada en `rebuild/base` + este worktree:
 
-- Dashboard — KPIs día (clases/asistencia/ingreso), próximas clases, alertas, quick links
-- Atletas (Fase 0)
-- Programación — CRUD clases con recurrencia + grid semanal
-- WODs — biblioteca + builder + biblioteca de movimientos
-- Reservas — roster con waitlist + check-in + no-show
-- Asistencia — vista del día con stats + check-in inline
-- PRs — agrupados por movimiento, top 1 highlighted
-- Leaderboards — ranking por WOD + asistencia semanal
-- Pagos · Comunicaciones · Reportes (Fase 1 hardening)
-- Ajustes — config del Box (name, brandColor, logoUrl, locale, currency, timezone, capacity)
+- `pnpm typecheck` ✅ · `pnpm lint` ✅ (3 warnings preexistentes de `<img>` en
+  `atleta/ayuda` y `atleta/wod/foto`) · `pnpm test` ✅
+- **117 archivos vitest / 1402 tests.** Los 4 de `tests/integration/` quedan
+  fuera del run default (necesitan Postgres real → `pnpm test:integration`).
+- 26 specs Playwright en `e2e/` — **no corren en CI**, son manuales.
+- `src/` ≈ 765 archivos TS/TSX · 53 modelos Prisma · `globals.css` 2,074 líneas
+  - `landing.css` 1,982.
 
-App atleta:
+El diagnóstico de la auditoría: **la ingeniería está verde, el problema es
+producto y diseño.** El plan por fases vive en
+`docs/audit/2026-09-15-kronos-producto/07-roadmap.md` y es el único backlog
+vigente.
 
-- Home — hero stats (HaloRing semana/racha/PRs), próxima clase, último score, accesos rápidos
-- WOD del día — vista del WOD + ScoreForm con auto-detect PR
-- Reservar — calendario 7 días + estado mis reservas
-- Perfil — PRs + historial scores
+## Modelo de trabajo: worktrees con ownership (reemplaza "Lane discipline")
 
-Auth:
+La vieja tabla de lanes ("backend = Claude, UI = Kimi") ya no describe nada:
+`src/app/**` y `src/server/**` se co-editan en el mismo cambio. El modelo nuevo
+es aislamiento por **worktree + ownership de rutas**.
 
-- Magic link email (NextAuth EmailProvider)
-- Google OAuth (opcional, gateado por env)
-- **Dev login** — CredentialsProvider solo en NODE_ENV=development. UI bajo `NEXT_PUBLIC_DEV_LOGIN=1`.
-  Seed crea `owner@iron-hands.demo`, `coach@iron-hands.demo`, `atleta@iron-hands.demo` (password "dev").
-- **Role guard middleware**: ATHLETE solo /atleta/_, OWNER/COACH/STAFF solo /admin/_. Cross-access redirige al surface correcto.
+```bash
+git worktree add ../kronos-<feature> -b <rama>
+```
 
-Operativa (Fase 2 hardening):
+Reglas duras:
 
-- **Email**: Resend cuando `RESEND_API_KEY` está cableada, fallback a console.log mock para dev local.
-- **Cron** `/api/cron/dispatch-announcements` (GET, Bearer `CRON_SECRET`): dispara anuncios SCHEDULED con `scheduledAt <= now`.
-  Vercel Cron friendly — agendar `*/5 * * * *` en `vercel.json`.
-- **Sidebar admin responsive**: drawer + hamburger en `<lg`, fijo en `lg+`.
-
-Lógica de dominio (pure helpers + tests):
-
-- `decideBooking` — capacity check, waitlist, idempotencia
-- `nextWaitlistPromotion` — promoción FIFO
-- `computeAttendanceStreak` — UTC, 1-day grace
-- `detectPR / isBetterScore / formatScore` — TIME asc, demás desc
-- `expandRecurrence / recurrenceToRRule` — RRULE simple
-
-Stats:
-
-- Branch: `main`
-- Dev server: `:3000` (local) o `:3007 HOSTNAME=0.0.0.0` (acceso externo via port forwarding "hitazo" del router)
-- BD: PostgreSQL en `:5434` (docker compose)
-- Tests unit: 669/669 (`pnpm test`) — 54 archivos
-- Tests E2E: 11 fallos preexistentes con strict-mode violations (`getByText` ambiguo entre toast + `<p>`) — NO son regresión del sweep V3, queda como deuda separada
-- Build: `pnpm build` ✅
-- Typecheck + Lint: ✅
-- Commits sweep V3: `4908109`..`4da235b` (16 commits del sistema visual completo)
+1. **Cada agente edita solo sus rutas.** Si necesitas un cambio fuera de tu
+   ownership, lo **describes en el reporte final**; no lo tocas.
+2. **Un solo escritor por archivo.** Nada de dos agentes sobre el mismo `.tsx`.
+   Lectores read-only sí van en paralelo.
+3. `package.json`, `pnpm-lock.yaml` y `prisma/schema.prisma` son de la rama base
+   (`rebuild/base`). Ningún worktree de fase los toca — por eso `lucide-react`
+   se instaló ahí antes de abrir los nueve.
+4. **Foreground siempre para escritores.** Nunca `run_in_background` en un
+   agente que escribe: el padre no puede razonar sobre un árbol que cambia
+   debajo. Background solo para lectura/exploración.
+5. Al cerrar: `pnpm typecheck && pnpm lint && pnpm test` verde antes de push.
 
 ## Comandos
 
 ```bash
-pnpm dev              # Dev server
-pnpm build            # Build producción
-pnpm typecheck        # TypeScript check
-pnpm lint             # ESLint
-pnpm test             # Vitest unit tests
-pnpm test:e2e         # Playwright E2E (requiere pnpm db:seed previo)
-pnpm db:push          # Push schema (dev — sin migraciones)
-pnpm db:seed          # Seed: 2 boxes, 5 atletas, WODs, clases, badges
-pnpm db:studio        # Prisma Studio GUI
+pnpm dev                 # Dev server :3000
+pnpm build               # Build producción
+pnpm typecheck           # tsc --noEmit
+pnpm lint                # ESLint (next/core-web-vitals + next/typescript)
+pnpm test                # Vitest unit (117 archivos)
+pnpm test:integration    # Vitest integration — requiere Postgres real
+pnpm test:e2e            # Playwright (requiere pnpm db:seed previo)
 
-docker compose up -d db     # Levantar Postgres :5434
+pnpm db:push             # Push schema (dev — sin migraciones)
+pnpm db:seed             # Box "Iron Hands", atletas, WODs, clases, badges
+pnpm db:seed:ops         # Capa operativa (pagos, membresías, anuncios)
+pnpm db:seed:story       # Historia de un atleta (scores, PRs, racha)
+pnpm db:studio           # Prisma Studio
+
+docker compose up -d db  # Postgres :5434  (NO :5432)
+
+pnpm exec tsx scripts/guards/update-baseline.ts   # ratchet de los guards
 ```
 
 ## Stack
 
-- **Next.js 15** App Router + TypeScript strict
-- **Prisma 6** + PostgreSQL `:5434` (NO :5432)
-- **NextAuth.js 4** — magic link email + Google OAuth
-- **Tailwind CSS 3** + tokens custom en `globals.css`
-- **Framer Motion 11** (disponible, usar en Fase 1)
-- **Zod** — validación en `src/lib/validations/`
-- **Vitest** unit / **Playwright** e2e
-- **Sentry + PostHog** — cableados, sin eventos activos aún
+Next.js 15 (App Router, `typedRoutes`) · TypeScript strict · Prisma 6 +
+PostgreSQL `:5434` · NextAuth 4 (JWT, sesión 90 días) · Tailwind 3 + tokens
+`--k-*` en `globals.css` · framer-motion 11 vía `LazyMotion` (74 archivos, todos
+importan `m`, ninguno `motion`) · Recharts 3 detrás de `next/dynamic` ·
+`lucide-react` (sistema de iconos oficial) · Zod en `src/lib/validations/` ·
+Vitest + Playwright · **Sentry y PostHog activos** (no "cableados sin eventos":
+`src/lib/analytics.ts` emite 12 eventos tipados y `reportError` corre en
+webhooks y actions).
 
-## Lane discipline (IMPORTANTE)
+Sin shadcn/ui: `src/components/ui/` tiene un solo archivo (`ConfirmDialog.tsx`).
+No hay capa de primitivos — es deuda conocida, no una decisión.
 
-| Lane                 | Scope                                                            | Quién       |
-| -------------------- | ---------------------------------------------------------------- | ----------- |
-| Backend / data       | `src/server/**`, `prisma/**`, `src/lib/**`, tests, CI            | Claude Code |
-| UI / diseño          | `src/app/**`, `src/components/**`, `*.css`, `tailwind.config.ts` | Kimi        |
-| Pages con datos + UI | `src/app/.../page.tsx` mixtos                                    | Coordinar   |
+## Dominio: qué está construido de verdad
 
-Kimi porta los mockups de `_design-source/` al código real.
-Claude Code nunca toca CSS decorativo ni composición visual sin coordinación.
+| Área                                  | Estado           | Nota que importa                                                                                                                                                         |
+| ------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Auth & onboarding                     | BUILT            | Magic link, **OTP de 6 dígitos**, Google (env-gated), password, dev-login. Gate de onboarding del atleta en **DB**, no en el JWT.                                        |
+| Multi-tenancy + RBAC                  | BUILT            | `withTenant()` en 203 llamadas. `PermissionGrantRequest` se escribe pero **no tiene UI de aprobación** (STUB).                                                           |
+| **SaaS billing** (el Box paga)        | BUILT, parcial   | Solo Mercado Pago; `confirmCheckoutMock` es el camino en uso. El cargo recurrente real (preapproval) **no está cableado**. **Stripe no existe** — solo el valor de enum. |
+| Pagos de atletas                      | BUILT            | **Mercado Pago + efectivo, nada más.** Sin OXXO, SPEI ni CFDI.                                                                                                           |
+| Clases, reservas, waitlist, check-in  | BUILT            | `decideBooking`, promoción FIFO de waitlist, no-show, bulk check-in.                                                                                                     |
+| WODs, movimientos, whiteboard         | BUILT            | OCR de pizarra con Gemini Vision + cruce con roster. **Editor Hyrox = STUB** declarado.                                                                                  |
+| Scores, PRs, leaderboards, BodyMetric | BUILT            | `detectPR`, percentiles, tonelaje, radar de capacidades.                                                                                                                 |
+| Gamificación + skills                 | BUILT            | Badges, XPLedger, rachas, skill tree, plan IA por objetivo. `DailyMission` es **schema sin código**; `AchievementToast` está **comentado** en el layout.                 |
+| **Wearables (Whoop)**                 | BACKEND / sin UI | OAuth, vault de tokens cifrados, webhook HMAC, cron, 6 archivos de test — **cero consumidores en UI**. El hueco "backend construido, producto invisible" más grande.     |
+| IA (Gemini)                           | BUILT            | 7 flujos: OCR pizarra, foto-WOD, saludo del día, predicción de PR, plan de entrenamiento, análisis de forma, CoachCards. Todos con fallback determinista.                |
+| Comunicaciones + PWA push             | BUILT            | Anuncios con cron, notificaciones in-app, web-push (VAPID), encuestas, 7 templates de email, digest semanal del owner.                                                   |
+| Eventos / competencias                | PARTIAL          | Lectura e inscripción sí; **no existe create/update de `SportEvent` en el código** — se insertan a mano en BD.                                                           |
+| TV mode, reportes, auditoría, alertas | BUILT            | `/tv/[slug]`, churn risk, timeline de auditoría, reglas de alerta.                                                                                                       |
+| Landing / legal                       | BUILT, con deuda | **Truth gap P0**: `/box` y Términos §5 prometen Stripe, OXXO, SPEI, CFDI 4.0, apps nativas, API, SSO y SLA que el código no implementa.                                  |
+| i18n                                  | MISSING          | Todo el copy es español hardcodeado. `Box.locale`/`currency` solo alimentan `Intl`.                                                                                      |
+| Personal-box / atleta independiente   | BUILT            | `/atleta-signup` crea un box personal (slug `me-*`) y cambia el modo de la UI. Línea de producto B2C completa.                                                           |
+| Super-admin de plataforma             | BUILT            | Allowlist `SUPER_ADMIN_EMAILS` + gate de render y de RPC. Provisión de pilotos.                                                                                          |
 
-## Regla cardinal: Multi-tenancy
+## Regla cardinal: multi-tenancy
 
-**SIEMPRE** usar `withTenant(tenantId)` para queries. NUNCA `db.athlete.findMany()` directo.
+**SIEMPRE** `withTenant(tenantId)`. NUNCA `db.athlete.findMany()` directo.
 
 ```typescript
-// Patron correcto
 const db = withTenant(session.user.tenantId);
 const athletes = await db.athlete.findMany();
 
-// Unica excepcion — lookup de Box durante auth
+// Única excepción — lookup de Box durante auth
 const box = await db.box.findUnique({ where: { slug } });
 ```
 
-El tenant context viene de `session.user.tenantId` (JWT guardado en auth callback).
+El tenant viene de `session.user.tenantId` (JWT, callback de auth). El
+`AsyncLocalStorage` de `src/server/tenant.ts` es vestigial: los call sites pasan
+el `tenantId` explícito.
 
-## Arquitectura de archivos clave
+Invariante que no se negocia: `public/sw.js` fuerza network-only en
+`/api/*`, `/admin*` y `/atleta*` desde el fix de fuga de caché cross-tenant del
+2026-05-17. No lo relajes.
+
+## Archivos clave
 
 ```
 src/server/
-  tenant.ts       — AsyncLocalStorage para tenant context
-  db.ts           — prismaBase + withTenant() extension
-  auth.ts         — NextAuth config (JWT strategy)
-  actions/
-    athletes.ts   — listAthletes(), createAthlete()
-
+  db.ts              — prismaBase + extensión withTenant()
+  auth.ts            — NextAuth (JWT); auth-dev.ts, auth-password.ts, otp.ts
+  permissions.ts     — can(action, session)
+  actions/           — server actions por dominio
+  ocr/               — whiteboard.ts, photo-wod.ts (Gemini Vision)
+  analytics/         — rankings, tonnage, churn, coach-insights
 src/lib/
-  utils.ts        — cn() (clsx + tailwind-merge)
-  validations/
-    athlete.ts    — Zod schema AthleteInput
-
-src/middleware.ts — Protege /admin/* y /atleta/*
-src/types/next-auth.d.ts — Session con id, role, tenantId
-
-prisma/
-  schema.prisma   — Schema completo multi-tenant
-  seed.ts         — 2 boxes, 5 atletas, WODs, clases, badges
+  labels.ts          — enum Prisma → etiqueta es-MX  (frontera de presentación)
+  format.ts          — formatMXN, deltas con signo, fechas/horas es-MX 24h
+  ai/gemini-client.ts— cliente único de IA con cache + retries
+  features.ts        — feature flags por Box
+src/middleware.ts    — role routing + redirect de trial/expirado + rate limit
+prisma/schema.prisma — 53 modelos
 ```
 
-## Tokens visuales (V3 "Cuarto Oscuro")
+## Design system — la verdad, no el ideal
 
-Sistema actual — paleta lima neon monocromática, dark-only forzado. Variables canónicas en `src/app/globals.css:1612-1675`:
+Paleta lima neon monocromática, dark-only forzado (`forcedTheme="dark"`).
+Tokens canónicos en `src/app/globals.css`:
 
-**Backgrounds & text:**
+- `--k-bg #08080a` · `--k-surface #0f1014` · `--k-elevated #14141a`
+- `--k-line #1c1c24` · `--k-line-2 #26262e`
+- `--k-t1 #f5f5f7` · `--k-t2 #8a8a94` · **`--k-t3 #7a7a84`** (subió desde
+  `#54545c`, que medía 2.67:1 contra el fondo y reprobaba WCAG AA en las 534
+  etiquetas que lo usan)
+- `--k-accent #c8ff2d` (único color de marca) · `--k-accent-press #a8d726` ·
+  `--k-accent-on #08080a` · `--k-accent-soft` · `--k-accent-line` · `--k-accent-glow`
+- `--k-warning #ffb020` y `--k-danger #ff5a5a` — **solo semánticos reales**
+- `--k-font-display` IBM Plex Mono · `--k-font-body` Inter
 
-- `--k-bg #08080a`, `--k-surface #0f1014`, `--k-elevated #14141a`
-- `--k-line #1c1c24`, `--k-line-2 #26262e`
-- `--k-t1 #f5f5f7` (primary), `--k-t2 #8a8a94`, `--k-t3 #54545c`
+Clases utilitarias: `k-card`(`-featured`/`-ghost`/`-flat`), `k-btn-grad`,
+`k-btn-ghost`, `k-chip*`, `k-eyebrow`, `k-mono`, `k-tap`, `k-skeleton`.
 
-**Acento (lima neon):**
+Cuatro reglas de casa:
 
-- `--k-accent #c8ff2d` (lima — color brand único)
-- `--k-accent-press #a8d726` (estado pressed)
-- `--k-accent-on #08080a` (texto sobre acento)
-- `--k-accent-soft rgba(200, 255, 45, 0.1)`
-- `--k-accent-line rgba(200, 255, 45, 0.3)`
-- `--k-accent-glow 0 0 16px rgba(200, 255, 45, 0.18)`
+1. **Iconos: `lucide-react`.** Nunca emoji, nunca flechas unicode como
+   affordance, nunca códigos de dos letras como glifo. La auditoría encontró
+   emoji-como-icono en 71 archivos (S7).
+2. **Enums nunca crudos en la UI.** Todo chip, celda u opción que muestre un
+   valor de enum pasa por `label(...)` o un mapa tipado de `src/lib/labels.ts`.
+   `tests/unit/labels-format.test.ts` verifica que cada enum de Prisma tenga
+   etiqueta, así que un valor nuevo rompe el build hasta que lo etiquetes.
+3. **Dinero, fechas y horas por `src/lib/format.ts`.** Un solo estilo de moneda,
+   `es-MX`, 24h en todo el admin.
+4. **Color = cosa distinta; opacidad = intensidad.** Para low/mid/high usa
+   opacidad del acento, no naranja/rojo — con datos reales medio dataset cae en
+   rango "warning" y el monocromático se rompe:
 
-**Semánticos:**
+   ```tsx
+   style={{ background: "var(--k-accent)", opacity: score >= 70 ? 1 : score >= 40 ? 0.7 : 0.4 }}
+   ```
 
-- `--k-warning #ffb020` (naranja, solo para warnings reales)
-- `--k-danger #ff5a5a` (rojo, solo para errores)
+   Naranja y rojo se reservan para warning y error de verdad.
 
-**Tipografía:**
+Deuda viva del sistema: capa de compat al final de `globals.css` que mantiene
+nombres legacy (`--text`, `--card`, `--line`, `--bg`) para **59 archivos**;
+2,676 objetos `style={{}}` inline conviviendo con Tailwind; tres shells de admin
+y tres navegaciones de atleta duplicadas; `ThemeToggle` sigue montado bajo tema
+forzado. Todo eso es el trabajo de los worktrees, no el estado deseado.
 
-- `--k-font-display` IBM Plex Mono (headings, números, monospace)
-- `--k-font-body` Inter (body copy)
+## Dialecto (regla dura)
 
-**Compat layer** (`globals.css:1740+`): tokens legacy `--moss/--fire/--blue/--cyan/--strain/--red/--grad/--text-2/etc` están aliased a tokens V3 como red de seguridad. Pero el sweep V3 dejó cero referencias legacy en `src/{app,components}` — el compat solo cubre código futuro accidental.
+**Español mexicano neutro.** Cero voseo rioplatense: nada de `tenés`, `querés`,
+`podés`, `mantené`, `recibís`, `Subí`, `cancelás`, `pedile`, `acá`, `dale`,
+`fijate`, `acordate`.
 
-**Clases utilitarias:**
+Reemplazos: `tenés → tienes` · `podés → puedes` · `acá → aquí` ·
+`mantené → mantén` · `Subí → Sube` · `pedile → pídele` · `dale → va / sale`.
 
-- Cards: `k-card`, `k-card-featured`, `k-card-ghost`, `k-card-flat`
-- Botones: `k-btn-grad` (lima sólido), `k-btn-ghost`
-- Chips: `k-chip`, `k-chip-recovery`, `k-chip-strain`, `k-chip-pr`, `k-chip-ghost`
-- Eyebrow: `k-eyebrow`, `k-eyebrow-bar`
-- Headings: `k-h-italic`, `k-mono`, `k-body`
-- Animation: `k-tap`, `k-pulse-glow`, `k-grain`, `k-skeleton`
+Aplica también a comentarios de código y **a los prompts de IA**: un prompt
+escrito en voseo le enseña al modelo a contestarle al atleta en voseo (fue el
+caso de `src/server/ai/coach-cards-prompt.ts`).
 
-## Diseño source
+Y nunca notas de desarrollo en rutas de producto: "proveedor mockeado en Fase 1"
+o "configura la variable MERCADOPAGO_ACCESS_TOKEN" no se le muestran a un owner.
+Si el estado es demo, es un banner dev-only, no copy.
 
-`_design-source/` — mockups JSX de referencia, NO se compilan. Ver `_design-source/README.md` para mapa de qué está portado dónde.
+## Guards (ratchets) — `pnpm test`
 
-## Engram topic keys
+Dos tests de vitest defienden las reglas de arriba de forma determinista, y
+corren en CI porque son archivos vitest normales:
 
-- `proj.kronos.dev_port` — 3000 (local) / 3007 (acceso externo)
-- `proj.kronos.db_port` — 5434
-- `proj.kronos.phase` — Fase 1 cerrada, V3 sweep total cerrado
-- `proj.kronos.stack` — Next.js 15 + Prisma 6 + NextAuth 4 + Tailwind 3
-- `decision.kronos.v3_sweep_total` — sweep V3 cerrado completo (16 commits)
-- `bug.kronos.charts_navy_residual` — culprit del azul-marino en charts (cinematic bg + skeleton)
-- `bug.kronos.sprint_role_aware_regression` — Sprint role-aware perdido en sweeps visuales
-- `pattern.kronos.opacity_for_intensity` — opacidad variable para mantener monocromático
-- `pattern.kronos.perl_bulk_sweep` — perl bulk para sweeps masivos de tokens
+| Archivo                            | Reglas                                                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `tests/unit/dialect-guard.test.ts` | `voseo` — todo `src/**`                                                                                |
+| `tests/unit/ui-guards.test.ts`     | `emoji-in-jsx`, `legacy-tokens`, `banned-hex`, `raw-enum-jsx` sobre `src/app/**` y `src/components/**` |
 
-## Anti-patterns
+Ambos leen `tests/fixtures/guard-baseline.json`
+(`{ "<regla>": { "<archivo>": <conteo> } }`) y **fallan solo si un archivo sube
+su conteo o si aparece un archivo nuevo con violaciones**. Bajar siempre está
+permitido: por eso se pueden encender con la deuda todavía adentro.
 
-- NO queries sin `withTenant()` excepto Box lookup
-- NO `prisma db migrate` en dev — usar `pnpm db:push`
-- NO tocar `_design-source/` — es solo referencia
-- NO `npm run dev` — usar `pnpm dev`
-- NO mezclar lanes sin coordinación (Claude toca CSS decorativo = problema)
-- NO instalar shadcn sin correr el CLI correcto: `pnpm dlx shadcn@latest add <component>`
-- NO `window.confirm()` ni `window.alert()` — usar `useConfirm()` de `@/lib/use-confirm` (modal real, brand consistente, accesible). Si falta el provider en el árbol, agregar `<ConfirmProvider>` al layout correspondiente.
-- NO usar `var(--moss/--fire/--blue/--cyan/--strain/--red/--grad/--text-2/--card-2/--bg-soft/--line-strong)` legacy — usar `--k-*` directamente. El compat layer es solo red de seguridad.
-- NO usar hex hardcoded `#19f08b` (verde teal), `#3aa3ff` (cyan), `#1a3457/#0d1b2e/#07101e` (navy) — son colores legacy. Solo OK los V3: `#c8ff2d` (lima), `#a8d726` (lima press), `#ff5a5a` (danger), `#ffb020` (warning).
-- NO escribir branches role-aware sin e2e que los proteja — el branch puede perderse en sweeps visuales (lección Sprint 3.12 commit `b116a0f`).
-- NO usar `font-script` class — eliminada en sweep V3, usar `font-display` (Plex Mono).
+Baseline del punto de arranque: `voseo` 36 en 28 archivos · `emoji-in-jsx` 128
+en 71 · `legacy-tokens` 213 en 59 · `banned-hex` 0 · `raw-enum-jsx` 0.
+
+Para apretar el ratchet después de mergear los worktrees:
+
+```bash
+pnpm exec tsx scripts/guards/update-baseline.ts   # --check para solo reportar
+```
+
+El destino es `{}` en cada regla; ahí los guards se vuelven gates de tolerancia
+cero y el fixture deja de moverse. El script avisa con WARNING por cada entrada
+que **empeoró** — esa advertencia es la señal de review, no la ignores. Nunca lo
+corras para silenciar algo que acabas de escribir. Definiciones y scanner:
+`scripts/guards/rules.ts`.
 
 ## Hydration patterns (regla dura)
 
-Aprendido del bug de mobile 2026-05-06: `Hydration failed because the server rendered HTML didn't match the client.`
+Del bug de mobile del 2026-05-06: `Hydration failed because the server rendered
+HTML didn't match the client.`
 
-### Causa raíz típica
+Causas típicas en un client component (`"use client"`):
 
-Cualquier valor que difiera entre el render del server y el primer render del cliente rompe la rehidratación. Los más comunes:
+1. `new Date()`, `Date.now()`, `Math.random()` en el render
+2. `toLocaleString()` / `toLocaleDateString()` sin `locale` explícito
+3. `window.matchMedia`, `localStorage`, `sessionStorage`, `navigator.*` leídos en render
+4. Branches `typeof window !== "undefined"` que producen markup distinto
 
-1. **`new Date()`, `Date.now()`, `Math.random()`** en el render de un client component (`"use client"`)
-2. **`toLocaleString()` / `toLocaleDateString()`** sin pasar `locale` explícito (puede diferir entre runtime del server y del browser)
-3. **`window.matchMedia`, `localStorage`, `sessionStorage`, `navigator.*`** leídos en render
-4. **Branches `typeof window !== 'undefined'`** que producen markup distinto
-
-### Patrón correcto
-
-Si el componente es client-only (`"use client"`) y necesita "ahora", `localStorage`, etc:
+Patrón correcto:
 
 ```tsx
 "use client";
 import { useState, useEffect } from "react";
 
 export function MyComponent({ items }: Props) {
-  // ❌ NO HAGAS ESTO en render: const now = Date.now();
+  // ❌ NO en render: const now = Date.now();
   const [now, setNow] = useState<number | null>(null);
-  useEffect(() => {
-    setNow(Date.now());
-  }, []);
+  useEffect(() => setNow(Date.now()), []);
 
-  // En render: tratar `now === null` como "antes de hidratar"
-  const past = now !== null && itemDate.getTime() < now;
-  // ...
+  const past = now !== null && itemDate.getTime() < now; // null = "antes de hidratar"
 }
 ```
 
-Misma idea con preferencias de tema (`localStorage`), media queries, etc. Server renderiza una versión "neutra", `useEffect` enriquece después del mount.
+Si el dato viene del server, pásalo como prop inmutable y **no lo recalcules en
+el cliente** sobre el mismo concepto.
 
-### Si el dato viene del server (server component)
+Cómo detectar regresiones: probar desde otro device/timezone/locale; buscar
+`new Date()` o `Date.now()` en `src/components/**` y `src/app/**/_components/**`;
+leer el overlay de error de Next en dev.
 
-Pasarlo como prop inmutable. Server calcula `new Date()` una vez, lo serializa, el cliente lo recibe como `Date` reconstruido. **No volver a calcular `new Date()` en el cliente** sobre el mismo concepto.
+## Anti-patterns
 
-### Cómo detectar regresiones
+- **NO** queries sin `withTenant()` (excepto el lookup de Box en auth).
+- **NO** renderizar enums crudos (`PAID`, `ATTENDED`, `ROUNDS_REPS`) en JSX —
+  van por `src/lib/labels.ts`.
+- **NO** voseo, en ninguna parte: copy, comentarios o prompts de IA.
+- **NO** notas de dev, nombres de proveedor ("Gemini Vision", "OCR Gemini") ni
+  etiquetas "(DEMO)" en rutas de owner o atleta.
+- **NO** emoji como iconografía — `lucide-react`.
+- **NO** `var(--text|--card|--line|--bg|--accent|--moss|--fire|--grad|--text-2)`:
+  son legacy que solo vive por la capa de compat. Usa `--k-*`.
+- **NO** hex hardcoded `#19f08b`, `#3aa3ff`, `#1a3457`, `#0d1b2e`, `#07101e`.
+- **NO** color semántico (naranja/rojo) para intensidad de una misma cosa.
+- **NO** `run_in_background` en un agente que escribe archivos.
+- **NO** editar fuera del ownership de tu worktree — se reporta, no se toca.
+- **NO** `window.confirm()` ni `window.alert()` — `useConfirm()` de
+  `@/lib/use-confirm`. Si falta el provider, agrega `<ConfirmProvider>` al layout.
+- **NO** `prisma migrate` en dev — `pnpm db:push`.
+- **NO** `npm run dev` — `pnpm dev`.
+- **NO** tocar `_design-source/` — es referencia, no se compila.
+- **NO** instalar shadcn a mano: `pnpm dlx shadcn@latest add <component>`.
+- **NO** escribir branches role-aware sin e2e que los proteja: se pierden en
+  sweeps visuales (lección del commit `b116a0f`).
+- **NO** dejar rutas `/dev/*` accesibles en producción — `src/app/dev/layout.tsx`
+  las cierra con `notFound()` cuando `NODE_ENV === "production"`.
+- **NO** commitear imágenes en la raíz del repo: `.gitignore` las ignora por
+  ancla-raíz; los assets van en `public/`, `docs/` o `_design-source/`.
 
-- Test manual desde otro device (mobile, otra timezone, otro locale)
-- Buscar `new Date()` o `Date.now()` en `src/components/**` y `src/app/**/_components/**` (client components) — cualquier resultado es candidato a bug
-- Console error en navegador: `Hydration failed because...` → leer el stack para encontrar el componente
-- En dev mode Next muestra el error overlay con el componente exacto
+## Sweeps masivos de tokens
 
-## Sweeps masivos — patrones aprendidos
+Para cambiar muchos tokens CSS en muchos archivos, `perl -i -pe` en bloque sobre
+una lista de archivos gana por mucho a editar uno por uno. Dos reglas: los
+patrones **específicos van antes que los generales** (`--grad-soft` antes de
+`--grad`) y los hex hardcoded necesitan su propio regex (no los captura
+`var\(--…\)`). Después de cada bulk: `pnpm typecheck && pnpm test`, y los
+guards te dicen si algo subió de conteo.
 
-### Perl bulk para tokens CSS
+## Engram topic keys
 
-Cuando hay que cambiar muchos tokens CSS en muchos archivos (típico de sweeps visuales tipo V3), usar `perl -i -pe` con regex en bloque sobre lista de archivos. Mucho más rápido que Edit individual.
-
-```bash
-FILES=(src/path/a.tsx src/path/b.tsx ...)
-for f in "${FILES[@]}"; do
-  perl -i -pe '
-    s/var\(--grad-soft\)/var(--k-accent-soft)/g;  # ESPECÍFICO antes que general
-    s/var\(--grad\)/var(--k-accent)/g;            # general DESPUÉS
-    s/var\(--moss\)/var(--k-accent)/g;
-    s/var\(--text-2\)/var(--k-t2)/g;
-    s/#1c1917/var(--k-accent-on)/g;
-    # ...
-  ' "$f"
-done
-```
-
-**Reglas:**
-
-- **Orden importa**: específicos antes que generales (`--grad-soft` antes que `--grad`).
-- **Tokens hardcoded NO captura**: agregar regex separados para `rgba\(58.*163.*255` (cyan), `#3aa3ff` (cyan), `#19f08b` (verde teal), `#1a3457|#0d1b2e|#07101e` (navy).
-- **Verificación post-sweep**: `grep -rE "<patterns_legacy>" src/` debe dar 0 residuos.
-- **Tests obligatorios**: `pnpm typecheck && pnpm test` después de cada bulk.
-- **Excluir** `_design-source/`, `src/app/dev/**` (demos), y `src/server/email-templates/**` (emails Resend usan hex literales no CSS vars — sweep separado).
-
-### Opacidad variable para data viz monocromática
-
-Cuando una visualización necesita "intensidad" (low/mid/high) en V3 monocromático, usar opacidad del color base en vez de cambiar de color:
-
-```tsx
-style={{
-  background: "var(--k-accent)",
-  opacity: score >= 70 ? 1 : score >= 40 ? 0.7 : 0.4,
-}}
-```
-
-**No hacer**: `score >= 70 ? lima : warning` — rompe monocromático cuando datasets reales tienen muchos valores en rango "warning".
-
-**Sí hacer** semántica con color cuando es **distinta cosa** (success vs error) — no para intensidades de la misma cosa.
+- `proj.kronos.dev_port` — 3000 · `proj.kronos.db_port` — 5434
+- `proj.kronos.phase` — auditoría 2026-09-15 cerrada; rebuild fase 0 en curso
+- `proj.kronos.stack` — Next.js 15 + Prisma 6 + NextAuth 4 + Tailwind 3
+- `decision.kronos.rebuild_worktree_model` — ownership por worktree
+- `decision.kronos.guard_ratchets` — baseline como ratchet, no gate
+- `pattern.kronos.opacity_for_intensity` · `pattern.kronos.perl_bulk_sweep`
+- `bug.kronos.sw_cross_tenant_cache` — fuga de caché del service worker
 
 ## Para retomar
 
-"Retomo kronos, [fase/feature/bug]" — leer este CLAUDE.md y el estado de git. Los topic keys de Engram (`decision.kronos.v3_sweep_total`, `bug.kronos.*`, `pattern.kronos.*`) tienen contexto detallado de las decisiones del sweep.
+"Retomo kronos, [fase/feature/bug]" — lee este archivo, el estado de git y
+`docs/audit/2026-09-15-kronos-producto/07-roadmap.md`. Para el detalle de una
+pantalla, `02-screen-audit.md`; para lo que existe en código,
+`01-code-inventory.md`; para el inventario de ramas y qué hacer con cada una,
+`docs/branches-2026-09-15.md`.

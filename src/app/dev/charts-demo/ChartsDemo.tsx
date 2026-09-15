@@ -84,9 +84,9 @@ export function ChartsDemo() {
   return (
     <div
       style={{
-        background: "var(--bg)",
+        background: "var(--k-bg)",
         minHeight: "100vh",
-        color: "var(--text)",
+        color: "var(--k-t1)",
       }}
       className="p-4 md:p-8"
     >
@@ -98,7 +98,7 @@ export function ChartsDemo() {
             </h1>
             <p
               className="text-xs md:text-sm font-mono mt-1"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               dev only · /dev/charts-demo · path-draw + glow + head orb + grid
               stagger
@@ -121,7 +121,7 @@ export function ChartsDemo() {
                 {currentBest.toFixed(1)}{" "}
                 <span
                   className="text-sm font-mono"
-                  style={{ color: "var(--text-3)" }}
+                  style={{ color: "var(--k-t3)" }}
                 >
                   kg
                 </span>
@@ -208,7 +208,7 @@ export function ChartsDemo() {
             <h2 className="k-eyebrow">Variant CINEMATIC — stock chart style</h2>
             <p
               className="text-xs font-mono mt-1"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               bars + line + halo intenso + paleta azul · fondo deep navy con
               grid azul

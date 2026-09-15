@@ -2,11 +2,12 @@ import {
   KronosSkeleton,
   KronosSkeletonLines,
 } from "@/components/kronos/KronosSkeleton";
+import { notFound } from "next/navigation";
 
 export default function SkeletonsDemo() {
-  if (process.env.NODE_ENV !== "development") return null;
+  if (process.env.NODE_ENV === "production") notFound();
   return (
-    <div className="min-h-screen p-8" style={{ background: "var(--bg)" }}>
+    <div className="min-h-screen p-8" style={{ background: "var(--k-bg)" }}>
       <div className="mx-auto max-w-3xl space-y-8">
         <header>
           <h1 className="font-display text-2xl font-bold">
@@ -14,7 +15,7 @@ export default function SkeletonsDemo() {
           </h1>
           <p
             className="text-xs font-mono mt-1"
-            style={{ color: "var(--text-3)" }}
+            style={{ color: "var(--k-t3)" }}
           >
             dev only · /dev/skeletons-demo
           </p>
@@ -26,7 +27,7 @@ export default function SkeletonsDemo() {
             <div>
               <p
                 className="text-[10px] font-mono mb-1"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 line
               </p>
@@ -35,7 +36,7 @@ export default function SkeletonsDemo() {
             <div>
               <p
                 className="text-[10px] font-mono mb-1"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 line · width 60%, height 24
               </p>
@@ -44,7 +45,7 @@ export default function SkeletonsDemo() {
             <div>
               <p
                 className="text-[10px] font-mono mb-1"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 circle 48
               </p>
@@ -53,7 +54,7 @@ export default function SkeletonsDemo() {
             <div>
               <p
                 className="text-[10px] font-mono mb-1"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 block
               </p>
@@ -62,7 +63,7 @@ export default function SkeletonsDemo() {
             <div>
               <p
                 className="text-[10px] font-mono mb-1"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 chart
               </p>
@@ -71,7 +72,7 @@ export default function SkeletonsDemo() {
             <div>
               <p
                 className="text-[10px] font-mono mb-1"
-                style={{ color: "var(--text-3)" }}
+                style={{ color: "var(--k-t3)" }}
               >
                 lines (stagger)
               </p>
