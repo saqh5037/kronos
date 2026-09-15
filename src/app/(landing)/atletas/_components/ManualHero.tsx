@@ -45,9 +45,9 @@ export default function ManualHero() {
           <span className="lp-tag-lime">qué hace</span>, cómo se usa.
         </h1>
         <p className="lp-lead" style={{ marginTop: 24 }}>
-          Las 9 pantallas del atleta documentadas paso a paso. Quien la lea,
-          entiende toda la app. Linkeable por sección — copia la URL y
-          compártela.
+          Las 9 pantallas del atleta documentadas paso a paso. Quien lo lea,
+          entiende toda la app. Cada sección tiene su propio enlace: copia la
+          dirección de la barra y compártela.
         </p>
       </div>
     </section>

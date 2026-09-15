@@ -77,10 +77,10 @@ export default function TerminosPage() {
 
           <Section title="2. Objeto del servicio">
             <p>
-              Kronos proporciona una plataforma white-label de gestión para
-              Boxes de CrossFit, incluyendo: reservas de clases, control de
-              asistencia, programación de WODs, procesamiento de pagos, registro
-              de PRs, comunicaciones y panel administrativo.
+              Kronos proporciona una plataforma de gestión para Boxes de
+              CrossFit que opera bajo la marca del Box, incluyendo: reservas de
+              clases, control de asistencia, programación de WODs, procesamiento
+              de pagos, registro de PRs, comunicaciones y panel administrativo.
             </p>
           </Section>
 
@@ -99,7 +99,7 @@ export default function TerminosPage() {
             </p>
           </Section>
 
-          <Section title="4. Marca propia del Box">
+          <Section title="4. Marca del Box">
             <p>
               En todos los planes, el Box puede personalizar la aplicación del
               atleta con su logo, su nombre y su paleta de colores. En el plan

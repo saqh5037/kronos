@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Kronos Atletas — La app que entrena contigo",
     description:
-      "Tu progreso es el producto. WODs, PRs, skills, reservas. Anti-cringe, anti-spam, datos duros.",
+      "Tu progreso es el producto. WODs, PRs, habilidades, reservas. Sin motivación de relleno, sin spam, datos duros.",
     type: "website",
     locale: "es_MX",
     siteName: "Kronos",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Kronos Atletas — La app que entrena contigo",
     description:
-      "Tu progreso es el producto. WODs, PRs, skills, reservas. Anti-cringe, anti-spam, datos duros.",
+      "Tu progreso es el producto. WODs, PRs, habilidades, reservas. Sin motivación de relleno, sin spam, datos duros.",
   },
   alternates: { canonical: "/atletas" },
   robots: { index: true, follow: true },

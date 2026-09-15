@@ -244,12 +244,9 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
               : "Continuar →"}
         </button>
 
-        <p className="text-center text-xs leading-relaxed">
-          <span style={{ color: "var(--k-t3)" }}>¿Primera vez?</span>{" "}
-          <span style={{ color: "var(--k-accent)", fontWeight: 600 }}>
-            Te lleva 10 segundos →
-          </span>
-        </p>
+        {/* La misma frase estaba arriba de la card y adentro, y el "Te lleva 10
+            segundos →" parecía un enlace que competía con el botón sin ir a
+            ningún lado (audit 2026-09-15). */}
       </form>
     );
   }

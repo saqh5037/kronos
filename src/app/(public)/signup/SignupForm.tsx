@@ -100,7 +100,7 @@ export default function SignupForm({
           className="text-xs px-3 py-2 rounded-lg"
           style={{ background: "var(--k-elevated)", color: "var(--k-t3)" }}
         >
-          Slug: <strong>{success.slug}</strong> · Trial hasta{" "}
+          Tu box: <strong>{success.slug}</strong> · Prueba gratis hasta{" "}
           {success.trialEndsAt.toLocaleDateString("es-MX", {
             day: "numeric",
             month: "long",

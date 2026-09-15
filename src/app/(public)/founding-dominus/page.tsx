@@ -144,7 +144,7 @@ export default async function FoundingDominusPage() {
                 />
                 <BenefitCard
                   eyebrow="Founding"
-                  title="Onboarding 1-a-1"
+                  title="Alta acompañada 1 a 1"
                   desc="Sesión privada para configurar tu Box: horarios, atletas, plan de membresías. Soporte directo."
                 />
               </section>
