@@ -15,6 +15,7 @@ import {
   humanizeAuditTargetLabel,
   type AuditCategory,
 } from "@/lib/audit-humanize";
+import { readAuditSubject } from "@/components/admin/audit-subject";
 
 export const metadata = { title: "Kronos — Auditoría" };
 export const dynamic = "force-dynamic";
@@ -95,15 +96,28 @@ export default async function AuditoriaPage({
    * data it receives is ours.
    */
   const events: FeedEvent[] = page.map((e) => {
+    // `logAudit` stamps the athlete and plan names onto payment metadata at
+    // write time, so the headline can name WHOSE payment it was:
+    // "Cobro en efectivo · Mía Moreno · Mensual Ilimitado · $2,500 MXN".
+    const subject = readAuditSubject(e.metadata);
     const humanized = humanizeAuditEvent({
       action: e.action,
       metadata: e.metadata,
       targetType: e.target.type,
+      subject: {
+        athleteName: subject.athleteName,
+        planName: subject.planName,
+      },
     });
-    // money already lives inside the label, formatted once
+    // Everything the composed label already says is dropped here, so the
+    // timeline cannot print the same name and amount a second time.
     const restMetadata = Object.fromEntries(
       Object.entries(e.metadata).filter(
-        ([key]) => key !== "amount" && key !== "currency",
+        ([key]) =>
+          key !== "amount" &&
+          key !== "currency" &&
+          key !== "athleteName" &&
+          key !== "planName",
       ),
     );
     return {

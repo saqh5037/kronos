@@ -10,11 +10,35 @@ type MembershipOption = {
   amountPaid: number;
 };
 
+export type CashPaymentFormProps = {
+  memberships: MembershipOption[];
+  /**
+   * How prominent the collapsed trigger is.
+   *
+   * `"primary"` on `/admin/pagos`, where registering a cash payment is the
+   * owner's most frequent action and lives in the first viewport. `"ghost"`
+   * (the default) everywhere it is a secondary escape hatch.
+   *
+   * This exists because the page used to promote the trigger from outside with
+   * a wrapper of `[&>button]:!…` overrides — styling a component through its
+   * parent, which breaks the moment the component's markup changes.
+   */
+  variant?: "primary" | "ghost";
+};
+
+const TRIGGER_CLASS: Record<
+  NonNullable<CashPaymentFormProps["variant"]>,
+  string
+> = {
+  primary:
+    "rounded-full bg-[var(--k-accent)] px-5 py-3 text-sm font-bold uppercase text-[var(--k-accent-on)] transition-colors hover:bg-[var(--k-accent-press)]",
+  ghost: "k-btn-ghost rounded-md px-3 py-1.5 text-xs",
+};
+
 export default function CashPaymentForm({
   memberships,
-}: {
-  memberships: MembershipOption[];
-}) {
+  variant = "ghost",
+}: CashPaymentFormProps) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -45,10 +69,11 @@ export default function CashPaymentForm({
   if (!open) {
     return (
       <button
+        type="button"
         onClick={() => setOpen(true)}
-        className="k-btn-ghost px-3 py-1.5 rounded-md text-xs"
+        className={TRIGGER_CLASS[variant]}
       >
-        + Registrar cobro en efectivo
+        Registrar cobro en efectivo
       </button>
     );
   }
@@ -62,12 +87,15 @@ export default function CashPaymentForm({
     >
       <p className="k-eyebrow">Cobro en efectivo</p>
       <label className="flex flex-col gap-1 text-xs">
-        <span style={{ color: "var(--k-t2)" }}>Membership</span>
+        <span style={{ color: "var(--k-t2)" }}>Membresía</span>
         <select
           name="membershipId"
           required
           className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-          style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
+          style={{
+            borderColor: "var(--k-line)",
+            background: "var(--k-surface)",
+          }}
         >
           <option value="">— Seleccionar —</option>
           {memberships.map((m) => (

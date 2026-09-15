@@ -5,10 +5,11 @@ import { formatDateShort } from "@/lib/format";
 /**
  * WOD card for the admin library (audit 2026-09-15, /admin/wods P1).
  *
- * Monochrome on purpose: the shared `WODHeroCard` coloured the title by type
- * (STRENGTH orange, EMOM red), so "Death by Burpees" was red because of its
- * format, not because anything was wrong. Type is a chip, rendered once, and
- * the score type is named in Spanish instead of leaking HEAVIEST / ROUNDS_REPS.
+ * Monochrome on purpose: the `WODHeroCard` this replaced coloured the title by
+ * type (STRENGTH orange, EMOM red), so "Death by Burpees" was red because of
+ * its format, not because anything was wrong. That component is gone — it had
+ * no importers left. Type is a chip, rendered once, and the score type is
+ * named in Spanish instead of leaking HEAVIEST / ROUNDS_REPS.
  */
 export function WodCard({ w }: { w: WODSummary }) {
   return (
