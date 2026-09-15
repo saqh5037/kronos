@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import KronosLogo from "@/components/brand/KronosLogo";
+import { CTA_TRIAL_HREF, CTA_TRIAL_LABEL } from "../_data/cta";
 import { track } from "../_lib/track";
 
 const NAV_LINKS = [
@@ -49,11 +50,11 @@ export default function Nav({ boxHref }: { boxHref: string | null }) {
               Entrar
             </Link>
             <a
-              href="#section-form"
+              href={CTA_TRIAL_HREF}
               className="lp-btn-lime"
               onClick={() => track("cta_clicked", { location: "nav" })}
             >
-              Reservar lugar
+              {CTA_TRIAL_LABEL}
               <svg
                 width="14"
                 height="14"

@@ -1,35 +1,12 @@
 "use client";
 
-import { m, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
 import PhoneFrame from "./PhoneFrame";
-import CountUp from "../../_components/CountUp";
 import { CTA_LABEL } from "../_data/copy";
-
-const textVariants = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
-};
-
-const phoneVariants = {
-  hidden: { opacity: 0, scale: 0.96 },
-  show: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.65, ease: "easeOut", delay: 0.15 },
-  },
-};
 
 type Detail = {
   label: string;
   value: string;
-  /** Opcional: si está, el value se renderiza con CountUp al entrar al viewport. */
-  numeric?: {
-    to: number;
-    prefix?: string;
-    suffix?: string;
-    decimals?: number;
-  };
 };
 
 export type BenefitSectionProps = {
@@ -61,29 +38,20 @@ export default function BenefitSection({
   trackLocation,
   ctaHref,
 }: BenefitSectionProps) {
-  const reduce = useReducedMotion();
-  const text = reduce ? undefined : textVariants;
-  const phone = reduce ? undefined : phoneVariants;
-
+  // Entrada (audit 2026-09-15): estas secciones vivían detrás de
+  // `initial="hidden"` + `whileInView`, así que sin scroll o sin JS la página
+  // era 7,000 px de nada. Ahora el reposo es visible y la entrada es CSS pura.
   const Phone = (
-    <m.div
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-80px" }}
-      variants={phone}
+    <div
+      className="lp-rise lp-rise-1"
       style={{ display: "flex", justifyContent: "center" }}
     >
       <PhoneFrame src={phoneSrc} alt={phoneAlt} size="lg" glow width={300} />
-    </m.div>
+    </div>
   );
 
   const Text = (
-    <m.div
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-80px" }}
-      variants={text}
-    >
+    <div className="lp-rise">
       <div
         className="lp-eyebrow"
         style={{
@@ -145,16 +113,7 @@ export default function BenefitSection({
             color: "var(--k-accent)",
           }}
         >
-          {detail.numeric ? (
-            <CountUp
-              to={detail.numeric.to}
-              prefix={detail.numeric.prefix}
-              suffix={detail.numeric.suffix}
-              decimals={detail.numeric.decimals}
-            />
-          ) : (
-            detail.value
-          )}
+          {detail.value}
         </span>
       </div>
 
@@ -176,7 +135,7 @@ export default function BenefitSection({
           <path d="M5 12h14M13 6l6 6-6 6" />
         </svg>
       </a>
-    </m.div>
+    </div>
   );
 
   return (

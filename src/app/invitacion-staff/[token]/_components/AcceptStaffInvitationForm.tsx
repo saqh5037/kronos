@@ -43,7 +43,7 @@ export function AcceptStaffInvitationForm({
           </p>
         </div>
         <p className="text-sm text-[var(--k-t2)]">
-          Iniciá sesión con tu email para entrar al admin del Box:
+          Inicia sesión con tu correo para entrar al panel del Box:
         </p>
         <Link
           href={`/login?email=${encodeURIComponent(email)}`}

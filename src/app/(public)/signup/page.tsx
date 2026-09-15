@@ -5,8 +5,9 @@ import { authOptions } from "@/server/auth";
 import KCard from "@/components/kronos/KCard";
 import KronosLogo from "@/components/brand/KronosLogo";
 import SignupForm from "./SignupForm";
+import { TRIAL_DAYS } from "@/app/(landing)/_data/cta";
 
-export const metadata = { title: "Kronos — Empieza tu trial" };
+export const metadata = { title: "Kronos — Empieza tu prueba gratis" };
 
 type SignupPageProps = {
   searchParams: Promise<{ email?: string; reason?: string }>;
@@ -33,10 +34,11 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
             <KronosLogo variant="mark" size={56} />
           </div>
           <h1 className="font-display font-bold text-3xl tracking-[-0.01em]">
-            Empieza tu trial
+            Empieza tu prueba
           </h1>
           <p className="mt-2 text-sm" style={{ color: "var(--k-t2)" }}>
-            14 días gratis. Sin tarjeta. Tu box operando hoy mismo.
+            {TRIAL_DAYS} días gratis con acceso completo, sin tarjeta. Al
+            terminar eliges plan o te sales; no se cobra nada solo.
           </p>
         </div>
 

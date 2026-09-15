@@ -105,7 +105,7 @@ export default function SectionFAQ({
           <span className="lp-dot" />
           /05 · PREGUNTAS FRECUENTES
         </div>
-        <h2>Lo que todo owner pregunta antes de cambiarse.</h2>
+        <h2>Lo que todo dueño de box pregunta antes de cambiarse.</h2>
       </m.div>
 
       <div className="lp-faq-list">

@@ -113,7 +113,7 @@ export default function FoundingForm({
           className="text-xs px-3 py-2 rounded-lg"
           style={{ background: "var(--k-elevated)", color: "var(--k-t3)" }}
         >
-          Box: <strong>{success.slug}</strong> · Trial hasta{" "}
+          Tu box: <strong>{success.slug}</strong> · Prueba gratis hasta{" "}
           {success.trialEndsAt.toLocaleDateString("es-MX", {
             day: "numeric",
             month: "long",
@@ -129,11 +129,11 @@ export default function FoundingForm({
         <p className="text-xs" style={{ color: "var(--k-t3)" }}>
           ¿No te llegaron los correos en 5 min? Revisa spam o escríbenos a{" "}
           <a
-            href="mailto:contacto@kronos-fit.com"
+            href="mailto:hola@kronos-fit.com"
             className="underline"
             style={{ color: "var(--k-accent)" }}
           >
-            contacto@kronos-fit.com
+            hola@kronos-fit.com
           </a>
         </p>
       </div>
@@ -227,7 +227,7 @@ export default function FoundingForm({
       </div>
 
       <Field
-        label="Email del owner"
+        label="Correo del dueño"
         name="email"
         type="email"
         value={email}
@@ -263,7 +263,7 @@ export default function FoundingForm({
           className="text-xs font-mono uppercase tracking-wider"
           style={{ color: "var(--k-t3)" }}
         >
-          Slug (URL única)
+          Dirección de tu box
         </label>
         <input
           type="text"
@@ -288,7 +288,7 @@ export default function FoundingForm({
           }}
         >
           {errors.slug ??
-            "kronos-fit.com/[slug]. Solo minúsculas, números y guiones."}
+            "Así se verá tu box: kronos-fit.com/iron-hands. Solo minúsculas, números y guiones."}
         </p>
       </div>
       <Field

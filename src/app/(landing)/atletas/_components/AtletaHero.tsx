@@ -1,25 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { m, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
 import PhoneFrame from "./PhoneFrame";
 import { HERO, CTA_LABEL } from "../_data/copy";
 
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-};
-const item = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
-
+/**
+ * Entrada (audit 2026-09-15): reposo visible en el servidor; la entrada es CSS
+ * pura (.lp-rise). El teléfono va DESPUÉS del titular en el markup para que a
+ * 360 el atleta lea la promesa antes de ver la captura (el orden visual en
+ * desktop lo restablece la grid en landing.css).
+ */
 export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
-  const reduce = useReducedMotion();
-  const variants = reduce ? undefined : stagger;
-  const child = reduce ? undefined : item;
-
   const ctaHref = boxHref ?? "/atleta-signup";
 
   return (
@@ -51,20 +43,18 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
       />
       <div className="lp-hero-bg" aria-hidden="true" />
       <div className="lp-hero-grid">
-        <m.div initial="hidden" animate="show" variants={variants}>
-          <m.div className="lp-eyebrow" variants={child}>
+        <div>
+          <div className="lp-eyebrow lp-rise">
             <span className="lp-dot" />
             {HERO.eyebrow}
-          </m.div>
-          <m.h1 variants={child}>
+          </div>
+          <h1 className="lp-rise lp-rise-1">
             {HERO.claimLineA}
             <br />
             <span className="lp-tag-lime">{HERO.claimLineB}</span>
-          </m.h1>
-          <m.p className="lp-lead" variants={child}>
-            {HERO.sub}
-          </m.p>
-          <m.div className="lp-hero-actions" variants={child}>
+          </h1>
+          <p className="lp-lead lp-rise lp-rise-2">{HERO.sub}</p>
+          <div className="lp-hero-actions lp-rise lp-rise-3">
             <a
               href={ctaHref}
               className="lp-btn-lime lp-btn-lg"
@@ -88,10 +78,10 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             </a>
-          </m.div>
+          </div>
           {!boxHref && (
-            <m.p
-              variants={child}
+            <p
+              className="lp-rise lp-rise-4"
               style={{
                 marginTop: 16,
                 fontFamily: "var(--k-font-body)",
@@ -100,15 +90,12 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
               }}
             >
               {HERO.ctaTertiary}
-            </m.p>
+            </p>
           )}
-        </m.div>
+        </div>
 
-        <m.div
-          className="lp-phone-wrap"
-          initial={reduce ? false : { opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
+        <div
+          className="lp-phone-wrap lp-rise lp-rise-2"
           style={{ display: "flex", justifyContent: "center" }}
         >
           <PhoneFrame
@@ -118,7 +105,7 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
             glow
             width={320}
           />
-        </m.div>
+        </div>
       </div>
     </section>
   );

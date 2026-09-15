@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Política de Privacidad — Kronos",
+  title: "Aviso de Privacidad — Kronos",
   description:
-    "Cómo Kronos recopila, usa y protege la información personal de Boxes y atletas.",
+    "Quién es el responsable de tus datos, para qué los usamos y cómo ejercer tus derechos ARCO.",
   robots: { index: true, follow: true },
 };
 
@@ -40,7 +40,7 @@ export default function PrivacidadPage() {
             lineHeight: 1.05,
           }}
         >
-          Política de Privacidad
+          Aviso de Privacidad
         </h1>
         <p
           style={{
@@ -62,119 +62,159 @@ export default function PrivacidadPage() {
             gap: 40,
           }}
         >
-          <Section title="1. Información que recopilamos">
+          <Section title="1. Responsable de tus datos">
             <p>
-              <strong>Del Box (owner):</strong> nombre, email, teléfono, nombre
-              del Box, cantidad de atletas, software actual y preferencias de
-              plan. Estos datos se recopilan a través del formulario de contacto
-              en la landing page.
-            </p>
-            <p>
-              <strong>De los atletas:</strong> nombre, email, teléfono, fecha de
-              nacimiento, historial de asistencia, scores de WODs, PRs por
-              movimiento, pagos y membresías. Estos datos los ingresa el Box al
-              dar de alta a sus atletas en la plataforma.
-            </p>
-          </Section>
-
-          <Section title="2. Cómo usamos la información">
-            <ul
-              style={{
-                paddingLeft: 20,
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-              }}
-            >
-              <li>Operar y mantener la plataforma de gestión del Box.</li>
-              <li>Procesar pagos y facturación.</li>
-              <li>
-                Enviar notificaciones relevantes (reservas, WODs, pagos
-                vencidos).
-              </li>
-              <li>
-                Contactar al Box para onboarding, soporte y follow-up comercial.
-              </li>
-              <li>
-                Mejorar el producto a través de análisis de uso agregado y
-                anónimo.
-              </li>
-            </ul>
-          </Section>
-
-          <Section title="3. No vendemos tu data">
-            <p>
-              Nunca vendemos, alquilamos ni compartimos información personal con
-              terceros para fines de marketing. Los únicos terceros con acceso
-              limitado son nuestros proveedores de infraestructura (hosting
-              cloud, pasarelas de pago) bajo acuerdos de confidencialidad.
-            </p>
-          </Section>
-
-          <Section title="4. Seguridad">
-            <ul
-              style={{
-                paddingLeft: 20,
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-              }}
-            >
-              <li>Encryption at rest en la base de datos PostgreSQL.</li>
-              <li>TLS 1.3 en todas las comunicaciones.</li>
-              <li>
-                Aislamiento por tenant: cada Box tiene su propio espacio de
-                datos.
-              </li>
-              <li>Backups diarios automáticos con retención de 30 días.</li>
-              <li>
-                Acceso basado en roles con autenticación de dos factores
-                disponible.
-              </li>
-            </ul>
-          </Section>
-
-          <Section title="5. Tus derechos">
-            <p>
-              Como Box o atleta, tienes derecho a: acceder a tu información,
-              corregir datos inexactos, solicitar la eliminación de tu cuenta, y
-              exportar tu data en formato CSV. Para ejercer estos derechos,
-              escríbenos a{" "}
+              El responsable del tratamiento de tus datos personales es Kronos,
+              con domicilio en México y correo de contacto{" "}
               <a href="mailto:hola@kronos-fit.com" className="lp-link-lime">
                 hola@kronos-fit.com
               </a>
-              .
+              . Cuando usas la aplicación a través de un Box, ese Box es
+              responsable de los datos de sus atletas y Kronos actúa como
+              encargado del tratamiento por cuenta del Box.
             </p>
           </Section>
 
-          <Section title="6. Cookies y tracking">
+          <Section title="2. Datos que recopilamos">
+            <p>
+              <strong>Del dueño o coach del Box:</strong> nombre, correo,
+              teléfono, nombre del Box, cantidad de atletas, software actual y
+              preferencias de plan. Los recopilamos cuando creas tu Box o cuando
+              nos dejas tus datos en el formulario de contacto.
+            </p>
+            <p>
+              <strong>Del atleta:</strong> nombre, correo, teléfono, fecha de
+              nacimiento, historial de asistencia, scores de WODs, PRs por
+              movimiento, pagos y membresías. El atleta puede darse de alta por
+              su cuenta con una cuenta gratuita, o el Box puede darlo de alta e
+              invitarlo. En ambos casos, el atleta puede corregir o completar
+              sus datos desde su perfil.
+            </p>
+          </Section>
+
+          <Section title="3. Finalidades del tratamiento">
+            <ul
+              style={{
+                paddingLeft: 20,
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
+            >
+              <li>
+                Finalidades necesarias: operar la plataforma de gestión del Box,
+                dar de alta y autenticar tu cuenta, gestionar reservas,
+                asistencia, WODs y PRs, y procesar el cobro de membresías.
+              </li>
+              <li>
+                Finalidades necesarias: enviarte avisos de servicio (tu reserva,
+                el WOD del día, un pago vencido).
+              </li>
+              <li>
+                Finalidades no necesarias: contactar al dueño del Box para
+                acompañarlo en el alta, darle soporte y ofrecerle mejoras del
+                servicio.
+              </li>
+              <li>
+                Finalidades no necesarias: mejorar el producto con análisis de
+                uso agregado y anónimo.
+              </li>
+            </ul>
+            <p>
+              Puedes negarte a las finalidades no necesarias sin perder el
+              servicio: escríbenos al correo de contacto y dejamos de usar tus
+              datos para eso.
+            </p>
+          </Section>
+
+          <Section title="4. No vendemos tus datos">
+            <p>
+              Nunca vendemos, alquilamos ni compartimos información personal con
+              terceros para fines de mercadotecnia. Los únicos terceros con
+              acceso limitado son nuestros proveedores de infraestructura
+              (alojamiento en la nube, pasarela de pagos) bajo acuerdos de
+              confidencialidad.
+            </p>
+          </Section>
+
+          <Section title="5. Seguridad">
+            <ul
+              style={{
+                paddingLeft: 20,
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
+            >
+              <li>Cifrado en reposo en la base de datos PostgreSQL.</li>
+              <li>TLS 1.3 en todas las comunicaciones.</li>
+              <li>
+                Aislamiento por Box: cada Box tiene su propio espacio de datos y
+                nadie de otro Box puede verlo.
+              </li>
+              <li>Respaldos diarios automáticos con retención de 30 días.</li>
+              <li>Acceso basado en roles: cada persona ve solo lo suyo.</li>
+              <li>
+                El acceso a la cuenta es por código de un solo uso enviado a tu
+                correo, así que no hay contraseña que se pueda filtrar.
+              </li>
+            </ul>
+          </Section>
+
+          <Section title="6. Tus derechos ARCO">
+            <p>
+              Tienes derecho a <strong>acceder</strong> a tus datos personales,{" "}
+              <strong>rectificar</strong> los que estén incorrectos,{" "}
+              <strong>cancelar</strong> tu cuenta para que dejemos de tratarlos
+              y <strong>oponerte</strong> a que los usemos para una finalidad no
+              necesaria. También puedes revocar tu consentimiento y solicitar
+              que limitemos el uso o la divulgación de tus datos.
+            </p>
+            <p>
+              <strong>Cómo ejercerlos:</strong> escríbenos a{" "}
+              <a href="mailto:hola@kronos-fit.com" className="lp-link-lime">
+                hola@kronos-fit.com
+              </a>{" "}
+              desde el correo de tu cuenta, diciendo qué derecho quieres ejercer
+              y sobre qué datos. Te respondemos por el mismo medio. Si eres
+              atleta de un Box, avísanos también a tu Box: la información de tu
+              membresía y tus pagos es suya y puede necesitar autorizarlo.
+            </p>
+            <p>
+              Además, en cualquier momento puedes exportar toda tu información
+              en formato CSV desde la propia aplicación, sin pedírnoslo.
+            </p>
+          </Section>
+
+          <Section title="7. Cookies y analítica">
             <p>
               Usamos cookies esenciales para la operación de la plataforma
-              (sesión, preferencias). Usamos PostHog para analytics de producto
+              (sesión, preferencias). Usamos PostHog para analítica de producto
               de forma anónima. No usamos cookies de terceros para publicidad.
-              Puedes desactivar analytics desde la configuración de tu
+              Puedes desactivar la analítica desde la configuración de tu
               navegador.
             </p>
           </Section>
 
-          <Section title="7. Retención">
+          <Section title="8. Retención">
             <p>
               Mantenemos la información del Box mientras la cuenta esté activa.
-              Si cancelás, te damos 30 días para exportar tu data antes de
-              eliminarla permanentemente de nuestros servidores. Los backups se
-              purgan automáticamente después de 30 días.
+              Si cancelas, te damos 30 días para exportar tu información antes
+              de eliminarla permanentemente de nuestros servidores. Los
+              respaldos se purgan automáticamente después de 30 días.
             </p>
           </Section>
 
-          <Section title="8. Cambios a esta política">
+          <Section title="9. Cambios a este aviso">
             <p>
-              Podemos actualizar esta política ocasionalmente. Los cambios
-              materiales se notificarán por email. El uso continuado del
-              servicio después de la actualización constituye aceptación.
+              Podemos actualizar este aviso ocasionalmente. Los cambios
+              importantes se notifican por correo y se reflejan en la fecha de
+              última actualización de arriba. El uso continuado del servicio
+              después de la actualización constituye aceptación.
             </p>
           </Section>
 
-          <Section title="9. Contacto">
+          <Section title="10. Contacto">
             <p>
               Para preguntas sobre privacidad, escríbenos a{" "}
               <a href="mailto:hola@kronos-fit.com" className="lp-link-lime">

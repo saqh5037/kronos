@@ -2,7 +2,8 @@
 
 import { useRef, useEffect } from "react";
 import { m, useReducedMotion } from "framer-motion";
-import { PRICING } from "../_data/mock";
+import { PRICING, ROADMAP } from "../_data/mock";
+import { CTA_WHATSAPP_HREF, CTA_WHATSAPP_LABEL, TRIAL_DAYS } from "../_data/cta";
 import { track } from "../_lib/track";
 
 const fadeUp = {
@@ -61,9 +62,10 @@ export default function Pricing() {
           transition={{ duration: 0.5, delay: 0.1 }}
           style={{ marginTop: 24, textAlign: "center" }}
         >
-          Fee fijo mensual en MXN. Sin contratos anuales. Sin setup fee. Sin
-          cargo extra por aceptar tarjeta. Tu Box crece o decrece, te avisamos
-          antes de cambiar de tier — nunca te cobramos algo que no autorizaste.
+          Pago fijo mensual en MXN. Sin contratos anuales. Sin costo de
+          instalación. Sin cargo extra por aceptar tarjeta. Tu Box crece o
+          decrece, te avisamos antes de cambiar de plan — nunca te cobramos algo
+          que no autorizaste.
         </m.p>
       </div>
 
@@ -107,11 +109,11 @@ export default function Pricing() {
             <div className="desc">{tier.desc}</div>
             <ul>
               {tier.features.map((f) => (
-                <li key={f}>+ {f}</li>
+                <li key={f}>{f}</li>
               ))}
             </ul>
             <a
-              href={tier.ctaHref}
+              href={tier.ctaHref || CTA_WHATSAPP_HREF}
               className={tier.featured ? "lp-btn-lime" : "lp-btn-ghost"}
               style={{ marginTop: "auto", justifyContent: "center" }}
               onClick={() =>
@@ -139,14 +141,35 @@ export default function Pricing() {
           marginRight: "auto",
         }}
       >
-        Precios en MXN, sin IVA. Sin contratos anuales. Sin setup fee. Sin cargo
-        por integración con Stripe o Mercado Pago. Si tu Box crece y supera el
-        cap de atletas, te avisamos antes de pasar al tier siguiente. Si
-        decrece, también — pagas lo que corresponde al volumen real del mes.
+        Precios en MXN más IVA (16 %); te facturamos tu suscripción. Sin
+        contratos anuales, sin costo de instalación y sin cargo extra por aceptar
+        tarjeta. Si tu Box crece y supera el límite de atletas, te avisamos antes
+        de pasar al plan siguiente. Si decrece, también — pagas lo que
+        corresponde al volumen real del mes.
         <br />
         <br />
-        Para 5+ sedes o casos enterprise, escríbenos.
+        Cualquier plan arranca con {TRIAL_DAYS} días de prueba, sin tarjeta. Si
+        tienes 5 o más sedes, {CTA_WHATSAPP_LABEL.toLowerCase()} y lo armamos
+        contigo.
       </p>
+
+      <div className="lp-roadmap">
+        <div className="lp-eyebrow" style={{ color: "var(--k-t3)" }}>
+          <span className="lp-dot" style={{ background: "var(--k-t3)" }} />
+          EN EL ROADMAP · TODAVÍA NO ESTÁ LISTO
+        </div>
+        <p>
+          Esto <strong>no</strong> está incluido en ningún plan de arriba todavía.
+          Lo listamos para que sepas para dónde va Kronos, no para venderte algo
+          que no existe. Si algo de aquí es indispensable para tu Box, dínoslo y
+          te avisamos cuando salga.
+        </p>
+        <ul>
+          {ROADMAP.map((r) => (
+            <li key={r}>{r}</li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }

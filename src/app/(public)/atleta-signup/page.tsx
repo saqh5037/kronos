@@ -42,8 +42,7 @@ export default async function AtletaSignupPage({
             Atleta Kronos
           </h1>
           <p className="mt-2 text-sm" style={{ color: "var(--k-t2)" }}>
-            Tus PRs, tus movimientos, tu progreso. Si ya tienes cuenta entras
-            con tu email — si no, te ayudamos a crearla.
+            Tus PRs, tus movimientos, tu progreso. Gratis para siempre.
           </p>
         </div>
 

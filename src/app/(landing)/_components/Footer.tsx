@@ -32,26 +32,7 @@ export default function Footer() {
           <ul>
             {FOOTER_LINKS.recursos.map((l) => (
               <li key={l.label}>
-                {l.comingSoon ? (
-                  <span style={{ color: "var(--k-t3)", cursor: "default" }}>
-                    {l.label}
-                    <span
-                      style={{
-                        fontSize: 9,
-                        letterSpacing: "0.1em",
-                        textTransform: "uppercase",
-                        marginLeft: 8,
-                        color: "var(--k-accent)",
-                        fontFamily: "var(--k-font-display), monospace",
-                        fontWeight: 700,
-                      }}
-                    >
-                      PRÓX.
-                    </span>
-                  </span>
-                ) : (
-                  <a href={l.href}>{l.label}</a>
-                )}
+                <a href={l.href}>{l.label}</a>
               </li>
             ))}
           </ul>
@@ -145,7 +126,7 @@ export default function Footer() {
           <a href="/legal/terminos">TÉRMINOS</a> ·{" "}
           <a href="/legal/privacidad">PRIVACIDAD</a>
         </span>
-        <span>HECHO EN LATAM, PARA BOXES EN LATAM</span>
+        <span>HECHO EN MÉXICO, PARA BOXES EN MÉXICO</span>
       </div>
     </>
   );

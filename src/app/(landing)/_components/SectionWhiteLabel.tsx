@@ -36,7 +36,7 @@ export default function SectionWhiteLabel() {
       >
         <Image
           src="/images/landing/box-community-celebration.webp"
-          alt=""
+          alt="Atletas de un Box celebrando juntos al terminar el WOD"
           fill
           sizes="100vw"
           style={{
@@ -66,11 +66,10 @@ export default function SectionWhiteLabel() {
         <m.h2 variants={v}>La marca del Box, al frente.</m.h2>
         <m.p variants={v}>
           Tu logo, tu color y tu nombre dominan la experiencia del atleta en
-          todos los tiers. Hierro y Acero corren sobre{" "}
+          todos los planes. Hierro y Acero corren sobre{" "}
           <code>tubox.kronos.app</code> con un footer discreto &ldquo;Powered by
-          Kronos&rdquo;. Titanio elimina toda marca Kronos: dominio propio,
-          emails propios y apps publicadas con tu nombre en App Store y Play
-          Store.
+          Kronos&rdquo;. Titanio elimina toda marca Kronos: dominio propio y
+          correos desde tu dominio.
         </m.p>
       </m.div>
 
@@ -105,12 +104,12 @@ export default function SectionWhiteLabel() {
           {
             tier: "TITANIO",
             title: "Tus comunicaciones, tu nombre",
-            body: "Emails desde no-reply@tubox.mx, no desde Kronos. Push notifications firmadas como el Box. SMS desde tu sender ID si lo configuras. En Hierro y Acero los emails llegan desde no-reply@kronos-fit.com firmados por el Box.",
+            body: "Correos desde no-reply@tubox.mx, no desde Kronos. Notificaciones push firmadas como el Box. En Hierro y Acero los correos llegan desde no-reply@kronos-fit.com firmados por el Box.",
           },
           {
-            tier: "TITANIO",
-            title: "Tu marca en App Store y Play Store",
-            body: "App nativa con tu nombre y tu ícono publicada en stores. Apple Developer Account a tu nombre, gestión del review process incluida. En Acero las apps son cobranded (tu logo, sub-marca Kronos).",
+            tier: "TODOS",
+            title: "Se instala desde el navegador",
+            body: "La app del atleta es una app web instalable: tus atletas la agregan a la pantalla de inicio desde el navegador, con tu logo y tu ícono, sin pasar por ninguna tienda de apps.",
           },
         ].map((p) => (
           <m.div key={p.title} className="lp-wl-pillar" variants={v}>
@@ -122,7 +121,7 @@ export default function SectionWhiteLabel() {
                 marginBottom: 12,
               }}
             >
-              {p.tier === "TITANIO" ? "★ TITANIO" : "TODOS LOS TIERS"}
+              {p.tier === "TITANIO" ? "★ TITANIO" : "TODOS LOS PLANES"}
             </span>
             <h3>{p.title}</h3>
             <p>{p.body}</p>

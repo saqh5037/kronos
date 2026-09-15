@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { createBoxAndOwner } from "@/server/actions/signup";
 import { slugify } from "@/lib/slug";
+import { CTA_TRIAL_LABEL } from "@/app/(landing)/_data/cta";
 import { kToast } from "@/lib/toast";
 
 type FieldErrors = Partial<
@@ -99,7 +100,7 @@ export default function SignupForm({
           className="text-xs px-3 py-2 rounded-lg"
           style={{ background: "var(--k-elevated)", color: "var(--k-t3)" }}
         >
-          Slug: <strong>{success.slug}</strong> · Trial hasta{" "}
+          Tu box: <strong>{success.slug}</strong> · Prueba gratis hasta{" "}
           {success.trialEndsAt.toLocaleDateString("es-MX", {
             day: "numeric",
             month: "long",
@@ -145,7 +146,7 @@ export default function SignupForm({
         </div>
       ) : null}
       <Field
-        label="Email del owner"
+        label="Tu correo"
         name="email"
         type="email"
         value={email}
@@ -172,7 +173,7 @@ export default function SignupForm({
         type="text"
         value={boxName}
         onChange={onBoxNameChange}
-        placeholder="Iron Hands CrossFit"
+        placeholder="Ej. Iron Hands CrossFit"
         error={errors.boxName}
         required
       />
@@ -181,14 +182,14 @@ export default function SignupForm({
           className="text-xs font-mono uppercase tracking-wider"
           style={{ color: "var(--k-t3)" }}
         >
-          Slug (URL única)
+          Dirección de tu box
         </label>
         <div className="flex items-center gap-2">
           <input
             type="text"
             value={slug}
             onChange={(e) => onSlugChange(e.target.value)}
-            placeholder="iron-hands"
+            placeholder="Ej. iron-hands"
             required
             className="flex-1 px-4 py-3 rounded-xl text-sm border focus:outline-none transition-colors"
             style={{
@@ -204,7 +205,8 @@ export default function SignupForm({
             color: errors.slug ? "var(--k-danger)" : "var(--k-t3)",
           }}
         >
-          {errors.slug ?? "Solo minúsculas, números y guiones. Editable."}
+          {errors.slug ??
+            "Así se verá tu box: kronos-fit.com/iron-hands. Solo minúsculas, números y guiones. Puedes cambiarlo."}
         </p>
       </div>
 
@@ -213,7 +215,7 @@ export default function SignupForm({
         disabled={pending}
         className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 mt-2"
       >
-        {pending ? "Creando tu box…" : "Empezar prueba de 14 días"}
+        {pending ? "Creando tu box…" : CTA_TRIAL_LABEL}
       </button>
 
       <p

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/server/auth";
@@ -11,6 +12,7 @@ import {
   PROMO_EVENT_URL,
 } from "@/lib/dominus-promo";
 import FoundingForm from "./FoundingForm";
+import skipStyles from "./skip-link.module.css";
 
 export const metadata: Metadata = {
   title: "Founding Box Dominus · Kronos",
@@ -47,7 +49,9 @@ export default async function FoundingDominusPage() {
 
   return (
     <>
-      <a href="#main" className="lp-skip">
+      {/* `.lp-skip` vive en landing.css y este grupo de rutas no lo carga, así
+          que el enlace quedaba visible siempre (audit 2026-09-15). */}
+      <a href="#main" className={skipStyles.skip}>
         Saltar al contenido
       </a>
       <main
@@ -57,7 +61,9 @@ export default async function FoundingDominusPage() {
       >
         <div className="max-w-3xl mx-auto px-4 py-12 md:py-16">
           <header className="text-center mb-10">
-            <div className="inline-flex mb-4">
+            {/* El logo va en su propia línea: como `inline-flex` compartía
+                renglón con el chip y se encimaban a 1280. */}
+            <div className="flex justify-center mb-4">
               <KronosLogo variant="mark" size={56} />
             </div>
             {active ? (
@@ -111,11 +117,11 @@ export default async function FoundingDominusPage() {
                   Mantenemos la lista de interesados para próximas promos —
                   escríbenos a{" "}
                   <a
-                    href="mailto:contacto@kronos-fit.com"
+                    href="mailto:hola@kronos-fit.com"
                     className="underline"
                     style={{ color: "var(--k-accent)" }}
                   >
-                    contacto@kronos-fit.com
+                    hola@kronos-fit.com
                   </a>
                   .
                 </>
@@ -138,7 +144,7 @@ export default async function FoundingDominusPage() {
                 />
                 <BenefitCard
                   eyebrow="Founding"
-                  title="Onboarding 1-a-1"
+                  title="Alta acompañada 1 a 1"
                   desc="Sesión privada para configurar tu Box: horarios, atletas, plan de membresías. Soporte directo."
                 />
               </section>
@@ -181,6 +187,17 @@ export default async function FoundingDominusPage() {
               </section>
             </>
           ) : null}
+
+          {/* Salida: esta página no tenía ninguna (audit 2026-09-15). */}
+          <p className="mt-12 text-center">
+            <Link
+              href="/"
+              className="text-sm underline"
+              style={{ color: "var(--k-t2)" }}
+            >
+              Ir al inicio de Kronos
+            </Link>
+          </p>
         </div>
       </main>
     </>

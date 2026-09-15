@@ -1,0 +1,35 @@
+/*
+ * Skip link con alcance propio (audit 2026-09-15).
+ *
+ * `.lp-skip` vive en `(landing)/landing.css`, que este grupo de rutas no carga:
+ * el enlace quedaba visible en la esquina superior izquierda a 360 y a 1280.
+ * Este módulo lo esconde fuera de la vista hasta que recibe foco de teclado.
+ */
+.skip {
+  position: absolute;
+  top: -48px;
+  left: 12px;
+  z-index: 100;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--k-accent);
+  color: var(--k-accent-on, #08080a);
+  font-family: var(--k-font-display), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: top 0.18s ease;
+}
+
+.skip:focus,
+.skip:focus-visible {
+  top: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip {
+    transition: none;
+  }
+}

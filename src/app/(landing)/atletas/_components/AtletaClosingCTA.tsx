@@ -33,7 +33,7 @@ export default function AtletaClosingCTA({
         >
           <Image
             src="/images/landing/atletas-closing-hero-deadlift.webp"
-            alt=""
+            alt="Atleta levantando una barra en peso muerto durante un WOD"
             fill
             loading="lazy"
             sizes="(max-width: 768px) 100vw, 1320px"

@@ -31,7 +31,7 @@ export default function LoginForm({ initialEmail = "" }: LoginFormProps) {
       // significa que el email no tiene cuenta en Kronos. UX: mandar a
       // /atleta-signup precargando el email (la mayoría de los visitors
       // sin cuenta van a ser atletas, y desde ahí pueden saltar a /signup
-      // si son box owner).
+      // si tienen un box).
       const url = res?.url ?? "";
       if (url.includes("reason=no_account")) {
         window.location.href = `/atleta-signup?email=${encodeURIComponent(email)}`;
@@ -89,7 +89,7 @@ export default function LoginForm({ initialEmail = "" }: LoginFormProps) {
             aria-label="Correo electrónico"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="correo@tubox.com"
+            placeholder="tu@correo.com"
             required
             autoComplete="email"
             className="w-full px-4 py-3 rounded-xl border focus:outline-none transition-colors"
@@ -126,7 +126,7 @@ export default function LoginForm({ initialEmail = "" }: LoginFormProps) {
             aria-label="Correo electrónico"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="correo@tubox.com"
+            placeholder="tu@correo.com"
             required
             autoComplete="email"
             className="w-full px-4 py-3 rounded-xl border focus:outline-none transition-colors"

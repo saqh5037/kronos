@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { KeyRound } from "lucide-react";
 import KCard from "@/components/kronos/KCard";
 
 type Props = {
@@ -101,12 +102,10 @@ export default function OtpRedirectClient({ code, email }: Props) {
               K
             </span>
           </div>
-          <h1
-            className="font-display font-bold text-2xl"
-            style={{ color: "var(--k-t1)" }}
-          >
+          <h1 className="font-display font-bold text-2xl tracking-[0.02em] uppercase">
             Kronos
           </h1>
+          <p className="k-eyebrow mt-1">El tiempo es tu rival</p>
         </div>
 
         <KCard>
@@ -192,25 +191,27 @@ export default function OtpRedirectClient({ code, email }: Props) {
 
             {status === "missing-params" ? (
               <>
+                {/* Falta un parámetro, no es una advertencia: icono neutro, no
+                    naranja (audit 2026-09-15). */}
                 <div
                   className="inline-flex items-center justify-center w-12 h-12 rounded-full"
                   style={{
-                    background: "rgba(255, 176, 32, 0.1)",
-                    border: "1px solid rgba(255, 176, 32, 0.3)",
+                    background: "var(--k-elevated)",
+                    border: "1px solid var(--k-line-2)",
                   }}
                 >
-                  <span
-                    className="font-display font-bold text-xl"
-                    style={{ color: "var(--k-warning, #ffb020)" }}
-                  >
-                    ?
-                  </span>
+                  <KeyRound
+                    size={20}
+                    strokeWidth={1.75}
+                    style={{ color: "var(--k-t2)" }}
+                    aria-hidden="true"
+                  />
                 </div>
                 <h2
                   className="font-display font-bold text-xl"
                   style={{ color: "var(--k-t1)" }}
                 >
-                  Falta info
+                  Falta el código
                 </h2>
                 <p className="text-sm" style={{ color: "var(--k-t2)" }}>
                   Este link no trae código. Ve al login para pedir uno nuevo.

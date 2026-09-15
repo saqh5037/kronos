@@ -1,7 +1,4 @@
-"use client";
-
 import Image from "next/image";
-import { m, useReducedMotion } from "framer-motion";
 
 type Movement = {
   src: string;
@@ -49,21 +46,12 @@ const MOVEMENTS: Movement[] = [
   },
 ];
 
-const card = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
-
-const grid = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.06 } },
-};
-
+/**
+ * Entrada (audit 2026-09-15): la tira vivía detrás de opacity 0 + whileInView,
+ * así que sin scroll "Lo que entrenas con Kronos" era solo un encabezado.
+ * Reposo visible y entrada CSS (.lp-rise).
+ */
 export default function MovementStrip() {
-  const reduce = useReducedMotion();
-  const cardVariants = reduce ? undefined : card;
-  const gridVariants = reduce ? undefined : grid;
-
   return (
     <section
       className="lp-section"
@@ -82,7 +70,7 @@ export default function MovementStrip() {
           style={{ color: "var(--k-accent)", letterSpacing: "0.22em" }}
         >
           <span className="lp-dot" />
-          Skills + WOD
+          Habilidades + WOD
         </div>
         <h2 style={{ marginTop: 20, marginBottom: 20, textAlign: "left" }}>
           Lo que entrenas con Kronos
@@ -101,22 +89,18 @@ export default function MovementStrip() {
           progresiones para cada movimiento según tu nivel real.
         </p>
 
-        <m.div
+        <div
           className="atletas-movement-grid"
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={gridVariants}
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
             gap: 16,
           }}
         >
-          {MOVEMENTS.map((mov) => (
-            <m.figure
+          {MOVEMENTS.map((mov, i) => (
+            <figure
               key={mov.label}
-              variants={cardVariants}
+              className={`lp-rise lp-rise-${Math.min(i + 1, 5)}`}
               style={{
                 position: "relative",
                 margin: 0,
@@ -183,9 +167,9 @@ export default function MovementStrip() {
                   {mov.category}
                 </span>
               </figcaption>
-            </m.figure>
+            </figure>
           ))}
-        </m.div>
+        </div>
       </div>
     </section>
   );
