@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
+import { ArrowLeft, Receipt } from "lucide-react";
 import { authOptions } from "@/server/auth";
 import { listSaasInvoices, listSaasPlans } from "@/server/actions/saas-billing";
-import { formatPriceMxn } from "@/lib/saas-billing";
 import { summarizeInvoices } from "@/lib/saas-invoices-csv";
+import { formatDateLong, formatDateShort, formatMXN } from "@/lib/format";
+import { saasInvoiceStatusLabel } from "@/lib/labels";
 import { EmptyState } from "@/components/kronos/EmptyState";
 import { ExportInvoicesButton } from "./_components/ExportInvoicesButton";
 import { HistorialFilters } from "./_components/HistorialFilters";
@@ -12,12 +14,9 @@ import { HistorialFilters } from "./_components/HistorialFilters";
 export const metadata = { title: "Kronos — Historial de cobros" };
 export const dynamic = "force-dynamic";
 
-function formatDate(d: Date): string {
-  return d.toLocaleDateString("es-MX", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+/** "$999 MXN" / "Gratis" — cents in, one money format out. */
+function money(cents: number): string {
+  return cents === 0 ? "Gratis" : formatMXN(cents / 100);
 }
 
 function parseDate(input?: string): Date | undefined {
@@ -64,17 +63,22 @@ export default async function InvoiceHistoryPage({
   ]);
   const summary = summarizeInvoices(invoices);
 
+  /* Filtering an empty table is busywork — the controls only appear when
+     there is something to filter, or when a filter is what emptied it. */
+  const showFilters = invoices.length > 0 || hasFilters;
+
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
+    <div className="mx-auto max-w-5xl p-6 md:p-8">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <Link
             href="/admin/billing"
-            className="text-sm text-[var(--k-t3)] hover:text-[var(--k-t1)] mb-2 inline-block"
+            className="mb-2 inline-flex items-center gap-1.5 text-sm text-[var(--k-t3)] hover:text-[var(--k-t1)]"
           >
-            ← Suscripción
+            <ArrowLeft size={14} strokeWidth={2.2} aria-hidden />
+            Suscripción
           </Link>
-          <h1 className="font-display font-extrabold text-[28px] md:text-[36px] leading-[1.1] tracking-[-0.02em]">
+          <h1 className="font-display text-[28px] leading-[1.1] font-extrabold tracking-[-0.02em] md:text-[36px]">
             Historial de cobros
           </h1>
         </div>
@@ -83,96 +87,97 @@ export default async function InvoiceHistoryPage({
         )}
       </div>
 
-      <HistorialFilters
-        plans={plans.map((p) => ({ slug: p.slug, name: p.name }))}
-      />
+      {showFilters ? (
+        <HistorialFilters
+          plans={plans.map((p) => ({ slug: p.slug, name: p.name }))}
+        />
+      ) : null}
 
       {invoices.length === 0 ? (
         <EmptyState
+          icon={<Receipt size={20} strokeWidth={1.8} aria-hidden />}
           title={hasFilters ? "Sin resultados" : "Aún no hay cobros"}
           description={
             hasFilters
-              ? "Ningún cobro coincide con los filtros aplicados. Prueba ampliar el rango o cambiar el plan."
-              : "Cuando se confirme el primer cobro de tu suscripción aparecerá acá con el detalle del período y monto."
+              ? "Ningún cobro coincide con los filtros. Prueba a ampliar el rango o cambiar el plan."
+              : "Cuando se confirme el primer cobro de tu suscripción aparecerá aquí con el detalle del período y el monto."
           }
           tone="neutral"
         />
       ) : (
-        <>
-          <div className="k-card overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[var(--k-line)]">
-                  <th className="text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--k-t3)]">
-                    Fecha
-                  </th>
-                  <th className="text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--k-t3)]">
-                    Plan
-                  </th>
-                  <th className="text-right p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--k-t3)]">
-                    Monto
-                  </th>
-                  <th className="hidden md:table-cell text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--k-t3)]">
-                    Período
-                  </th>
-                  <th className="text-left p-3 md:p-4 font-mono text-xs uppercase tracking-wider text-[var(--k-t3)]">
-                    Estado
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map((inv) => (
-                  <tr
-                    key={inv.id}
-                    className="border-b border-[var(--k-line)] last:border-b-0 hover:bg-[var(--k-elevated)]/40 transition-colors"
-                  >
-                    <td className="p-3 md:p-4 whitespace-nowrap">
-                      {formatDate(inv.paidAt)}
-                    </td>
-                    <td className="p-3 md:p-4">{inv.planName}</td>
-                    <td className="p-3 md:p-4 text-right whitespace-nowrap font-bold">
-                      {formatPriceMxn(inv.amountMxnCents)}
-                    </td>
-                    <td className="hidden md:table-cell p-3 md:p-4 whitespace-nowrap text-[var(--k-t2)] text-xs">
-                      {formatDate(inv.periodStart)} →{" "}
-                      {formatDate(inv.periodEnd)}
-                    </td>
-                    <td className="p-3 md:p-4">
-                      {inv.status === "PAID" ? (
-                        <span className="k-chip k-chip-recovery">Pagado</span>
-                      ) : (
-                        <span className="k-chip k-chip-strain">
-                          Reembolsado
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t-2 border-[var(--k-line)] bg-[var(--k-elevated)]/30">
-                  <td colSpan={2} className="p-3 md:p-4 font-bold text-sm">
-                    Total
-                    <span className="text-xs text-[var(--k-t3)] font-normal ml-2">
-                      ({summary.count} cobro{summary.count === 1 ? "" : "s"}
-                      {summary.refundedCount > 0
-                        ? ` · ${summary.refundedCount} reembolsado${summary.refundedCount === 1 ? "" : "s"}`
-                        : ""}
-                      )
+        <div className="k-card overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[var(--k-line)]">
+                <th className="p-3 text-left font-mono text-xs tracking-wider text-[var(--k-t3)] uppercase md:p-4">
+                  Fecha
+                </th>
+                <th className="p-3 text-left font-mono text-xs tracking-wider text-[var(--k-t3)] uppercase md:p-4">
+                  Plan
+                </th>
+                <th className="p-3 text-right font-mono text-xs tracking-wider text-[var(--k-t3)] uppercase md:p-4">
+                  Monto
+                </th>
+                <th className="hidden p-3 text-left font-mono text-xs tracking-wider text-[var(--k-t3)] uppercase md:table-cell md:p-4">
+                  Período
+                </th>
+                <th className="p-3 text-left font-mono text-xs tracking-wider text-[var(--k-t3)] uppercase md:p-4">
+                  Estado
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoices.map((inv) => (
+                <tr
+                  key={inv.id}
+                  className="border-b border-[var(--k-line)] transition-colors last:border-b-0 hover:bg-[var(--k-elevated)]/40"
+                >
+                  <td className="p-3 whitespace-nowrap md:p-4">
+                    {formatDateLong(inv.paidAt)}
+                  </td>
+                  <td className="p-3 md:p-4">{inv.planName}</td>
+                  <td className="font-display p-3 text-right font-bold whitespace-nowrap md:p-4">
+                    {money(inv.amountMxnCents)}
+                  </td>
+                  <td className="hidden p-3 text-xs whitespace-nowrap text-[var(--k-t2)] md:table-cell md:p-4">
+                    {formatDateShort(inv.periodStart)} –{" "}
+                    {formatDateShort(inv.periodEnd)}
+                  </td>
+                  <td className="p-3 md:p-4">
+                    <span
+                      className={`k-chip ${
+                        inv.status === "PAID" ? "k-chip-moss" : "k-chip-ghost"
+                      }`}
+                    >
+                      {saasInvoiceStatusLabel[inv.status]}
                     </span>
                   </td>
-                  <td
-                    className="p-3 md:p-4 text-right font-bold text-base whitespace-nowrap"
-                    style={{ color: "var(--k-accent)" }}
-                  >
-                    {formatPriceMxn(summary.totalCents)}
-                  </td>
-                  <td colSpan={2}></td>
                 </tr>
-              </tfoot>
-            </table>
-          </div>
-        </>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-[var(--k-line)] bg-[var(--k-elevated)]/30">
+                <td colSpan={2} className="p-3 text-sm font-bold md:p-4">
+                  Total
+                  <span className="ml-2 text-xs font-normal text-[var(--k-t3)]">
+                    ({summary.count} cobro{summary.count === 1 ? "" : "s"}
+                    {summary.refundedCount > 0
+                      ? ` · ${summary.refundedCount} reembolsado${summary.refundedCount === 1 ? "" : "s"}`
+                      : ""}
+                    )
+                  </span>
+                </td>
+                <td
+                  className="font-display p-3 text-right text-base font-bold whitespace-nowrap md:p-4"
+                  style={{ color: "var(--k-accent)" }}
+                >
+                  {money(summary.totalCents)}
+                </td>
+                <td colSpan={2}></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       )}
     </div>
   );

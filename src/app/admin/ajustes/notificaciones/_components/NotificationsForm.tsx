@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AlertTriangle } from "lucide-react";
 import {
   updateBoxNotifications,
   type BoxNotificationSettings,
@@ -48,7 +49,7 @@ export function NotificationsForm({ initial }: Props) {
       <KCard animate={false} className="p-5 md:p-6">
         <SwitchRow
           label="Resumen semanal"
-          description="Cada lunes a las 9am recibís un email con revenue del mes, atletas activos, atletas en riesgo y próxima facturación."
+          description="Cada lunes a las 9:00 recibes un correo con los ingresos del mes, atletas activos, atletas en riesgo y tu próxima facturación."
           checked={weeklyDigest}
           onChange={setWeeklyDigest}
         />
@@ -57,7 +58,7 @@ export function NotificationsForm({ initial }: Props) {
       <KCard animate={false} className="p-5 md:p-6">
         <SwitchRow
           label="Avisos críticos de cobro"
-          description="Notificaciones cuando un cobro falla, tu trial está por terminar, o tu suscripción expira. Recomendamos mantenerlo activo."
+          description="Te avisamos cuando un cobro falla, cuando tu prueba está por terminar o cuando tu suscripción expira. Te recomendamos dejarlo activo."
           checked={transactional}
           onChange={setTransactional}
           warning={!transactional}
@@ -82,7 +83,7 @@ export function NotificationsForm({ initial }: Props) {
           type="button"
           onClick={handleSave}
           disabled={!dirty || pending}
-          className="k-btn-grad px-5 py-2.5 rounded-full text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          className="k-btn-grad rounded-full px-5 py-2.5 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? "Guardando…" : "Guardar"}
         </button>
@@ -106,12 +107,13 @@ function SwitchRow({
 }) {
   return (
     <div className="flex items-start justify-between gap-4">
-      <div className="flex-1 min-w-0">
-        <p className="font-bold text-base">{label}</p>
-        <p className="text-sm text-[var(--k-t2)] mt-1">{description}</p>
+      <div className="min-w-0 flex-1">
+        <p className="text-base font-bold">{label}</p>
+        <p className="mt-1 text-sm text-[var(--k-t2)]">{description}</p>
         {warning && (
-          <p className="text-xs text-[var(--k-warning)] mt-2">
-            ⚠ Si lo desactivas, no recibirás avisos cuando un cobro falle.
+          <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-[var(--k-warning)]">
+            <AlertTriangle size={13} strokeWidth={2.2} aria-hidden />
+            Si lo desactivas, no te avisaremos cuando un cobro falle.
           </p>
         )}
       </div>
@@ -121,7 +123,7 @@ function SwitchRow({
         aria-checked={checked}
         aria-label={label}
         onClick={() => onChange(!checked)}
-        className="relative shrink-0 inline-flex h-7 w-12 items-center rounded-full transition-colors"
+        className="relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors"
         style={{
           background: checked ? "var(--k-accent)" : "var(--k-elevated)",
           border: "1px solid var(--k-line-2)",
