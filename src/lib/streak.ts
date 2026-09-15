@@ -77,3 +77,34 @@ export function isStreakCurrent(
   if (!lastEventAt) return false;
   return diffDaysUTC(startOfDayUTC(now), startOfDayUTC(lastEventAt)) <= 1;
 }
+
+export type AttendanceBookingRow = {
+  checkedInAt: Date | null;
+  class?: { startsAt: Date } | null;
+};
+
+/**
+ * The day an ATTENDED booking counts for.
+ *
+ * `checkedInAt` is the truth when a coach checked the athlete in, but a large
+ * share of rows (seed, retroactive marking) only carry the class start — the
+ * gap behind the audit's "heatmap lights 4 cells against 17 clases".
+ */
+export function attendanceDayOf(booking: AttendanceBookingRow): Date | null {
+  return booking.checkedInAt ?? booking.class?.startsAt ?? null;
+}
+
+/**
+ * Streak length computed from raw booking rows instead of the cached
+ * `Streak.count` (audit 2026-09-15: a 30-day badge showed 0 % on day 7 because
+ * the cache is only written on check-in).
+ */
+export function streakFromBookings(
+  rows: readonly AttendanceBookingRow[],
+  now: Date = new Date(),
+): number {
+  const days = rows
+    .map(attendanceDayOf)
+    .filter((d): d is Date => d instanceof Date);
+  return computeAttendanceStreak(days, now);
+}

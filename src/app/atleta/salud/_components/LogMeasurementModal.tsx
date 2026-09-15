@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
+import { X } from "lucide-react";
 import {
   bodyMetricTypes,
   BODY_METRIC_LABEL,
@@ -189,14 +190,16 @@ export function LogMeasurementModal({
               background: "transparent",
               border: "1px solid var(--k-line)",
               color: "var(--k-t2)",
-              width: 32,
-              height: 32,
+              width: 44,
+              height: 44,
               borderRadius: 10,
               cursor: "pointer",
-              fontSize: 14,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            ✕
+            <X size={16} aria-hidden />
           </button>
         </div>
 

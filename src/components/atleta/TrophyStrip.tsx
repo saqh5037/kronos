@@ -3,6 +3,8 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { m } from "framer-motion";
+import { badgeIconName } from "@/lib/badges/progress";
+import { BadgeGlyph } from "@/app/atleta/logros/_components/BadgeGlyph";
 
 export type TrophyItem = {
   id: string;
@@ -68,13 +70,6 @@ export function TrophyStrip({ items, emptyHint }: TrophyStripProps) {
 
 function TrophyCard({ item, index }: { item: TrophyItem; index: number }) {
   const locked = !item.unlocked;
-  const initial =
-    item.code
-      .split("-")
-      .map((s) => s[0]?.toUpperCase() ?? "")
-      .join("")
-      .slice(0, 2) || "★";
-
   const href = `/atleta/logros/${item.code}` as Route;
   const aria = locked
     ? `Logro bloqueado: ${item.name}. Toca para ver el criterio y progreso.`
@@ -109,25 +104,11 @@ function TrophyCard({ item, index }: { item: TrophyItem; index: number }) {
         data-testid="trophy-card"
         data-locked={locked}
       >
-        <div
-          aria-hidden="true"
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
-            background: locked ? "var(--k-line-2)" : "var(--k-accent-soft)",
-            border: `1px solid ${locked ? "var(--k-line)" : "var(--k-accent-line)"}`,
-            display: "grid",
-            placeItems: "center",
-            color: locked ? "var(--k-t3)" : "var(--k-accent)",
-            fontFamily: "var(--k-font-display)",
-            fontSize: 18,
-            fontWeight: 600,
-            marginBottom: 8,
-            boxShadow: locked ? undefined : "var(--k-accent-glow)",
-          }}
-        >
-          {locked ? <LockIcon /> : initial}
+        <div style={{ marginBottom: 8 }}>
+          <BadgeGlyph
+            icon={badgeIconName(item.code)}
+            unlocked={item.unlocked}
+          />
         </div>
         <div
           className="k-mono"
@@ -174,33 +155,21 @@ function TrophyCard({ item, index }: { item: TrophyItem; index: number }) {
               overflow: "hidden",
             }}
           >
+            {/* transform, not width — animating a layout property reflows the
+                whole horizontal strip on every home render. */}
             <div
               style={{
                 height: "100%",
-                width: `${Math.min(100, Math.max(0, item.progress * 100))}%`,
+                width: "100%",
+                transformOrigin: "left center",
+                transform: `scaleX(${Math.min(1, Math.max(0, item.progress))})`,
                 background: "var(--k-accent)",
-                transition: "width 400ms ease",
+                transition: "transform 400ms ease",
               }}
             />
           </div>
         )}
       </m.div>
     </Link>
-  );
-}
-
-function LockIcon() {
-  return (
-    <svg
-      width={18}
-      height={18}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-    >
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-    </svg>
   );
 }

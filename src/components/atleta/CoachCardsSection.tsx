@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import type { Route } from "next";
+import { ArrowRight } from "lucide-react";
 import { dismissCoachCard } from "@/server/actions/coach-cards";
 import type { CoachCardType } from "@prisma/client";
 
@@ -139,6 +140,7 @@ export default function CoachCardsSection({ cards }: Props) {
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
+                    gap: 6,
                     marginTop: 8,
                     marginLeft: -10,
                     minHeight: 44,
@@ -152,7 +154,8 @@ export default function CoachCardsSection({ cards }: Props) {
                     textDecoration: "none",
                   }}
                 >
-                  {card.ctaLabel} →
+                  {card.ctaLabel}
+                  <ArrowRight size={13} aria-hidden />
                 </Link>
               )}
             </div>

@@ -1,40 +1,49 @@
+/**
+ * Athlete memberships and payment history.
+ *
+ * Audit 2026-09-15: "Plan types leak enums: 'UNLIMITED', 'MONTHLY'"; "no next
+ * charge date or amount, no payment method"; "history collapsed behind an ASCII
+ * '▸ HISTORIAL (4)'"; "'Mensual Ilimitado · 18 MAY 2026 → 5 OCT 2026' is 4.5
+ * months for a 'mensual' plan".
+ *
+ * Every enum goes through `@/lib/labels`, money and dates through
+ * `@/lib/format`, the period is described by the plan instead of guessed from
+ * the word "mensual", and the history is expanded by default.
+ */
+
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { listAthleteMemberships } from "@/server/actions/payments";
 import PayMembershipButton from "@/components/atleta/PayMembershipButton";
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
+import {
+  membershipStatusLabel,
+  paymentGatewayLabel,
+  paymentStatusLabel,
+  planTypeLabel,
+} from "@/lib/labels";
+import { formatDateLong, formatMXN } from "@/lib/format";
 
-type StatusVisual = {
-  label: string;
-  variant: "active" | "pending" | "muted";
+type Membership = Awaited<ReturnType<typeof listAthleteMemberships>>[number];
+
+type StatusVariant = "active" | "pending" | "muted";
+
+const STATUS_VARIANT: Record<string, StatusVariant> = {
+  PENDING: "pending",
+  ACTIVE: "active",
+  PAUSED: "muted",
+  EXPIRED: "muted",
+  CANCELLED: "muted",
 };
 
-const STATUS_LABEL: Record<string, StatusVisual> = {
-  PENDING: { label: "Pendiente de pago", variant: "pending" },
-  ACTIVE: { label: "Activa", variant: "active" },
-  PAUSED: { label: "Pausada", variant: "muted" },
-  EXPIRED: { label: "Vencida", variant: "muted" },
-  CANCELLED: { label: "Cancelada", variant: "muted" },
-};
-
-const PAYMENT_STATUS_LABEL: Record<string, string> = {
-  PENDING: "Pendiente",
-  PAID: "Pagado",
-  FAILED: "Rechazado",
-  REFUNDED: "Reembolsado",
-};
-
-function fmtDate(d: Date | null) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("es-MX", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+function money(amount: number, currency: string): string {
+  // The shared MXN formatter covers the only currency the product bills in;
+  // anything else prints the raw code rather than a wrong symbol.
+  if (currency.toUpperCase() === "MXN") return formatMXN(amount);
+  return `${amount.toLocaleString("es-MX")} ${currency}`;
 }
 
-function statusChipStyle(
-  variant: StatusVisual["variant"],
-): React.CSSProperties {
+function statusChipStyle(variant: StatusVariant): React.CSSProperties {
   const base: React.CSSProperties = {
     display: "inline-block",
     padding: "3px 9px",
@@ -44,6 +53,7 @@ function statusChipStyle(
     fontWeight: 700,
     letterSpacing: "0.16em",
     textTransform: "uppercase",
+    whiteSpace: "nowrap",
   };
   if (variant === "active") {
     return {
@@ -54,6 +64,8 @@ function statusChipStyle(
     };
   }
   if (variant === "pending") {
+    // A membership waiting for payment is a real pending state, so warning is
+    // the honest token here.
     return {
       ...base,
       color: "var(--k-warning)",
@@ -70,7 +82,7 @@ function statusChipStyle(
 }
 
 export async function PagosContent() {
-  let memberships: Awaited<ReturnType<typeof listAthleteMemberships>> = [];
+  let memberships: Membership[] = [];
   try {
     memberships = await listAthleteMemberships();
   } catch {
@@ -121,10 +133,11 @@ export async function PagosContent() {
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               textDecoration: "none",
-              minHeight: 40,
+              minHeight: 44,
             }}
           >
-            Volver al inicio →
+            Volver al inicio
+            <ArrowRight size={13} aria-hidden />
           </Link>
         </div>
       </div>
@@ -140,186 +153,238 @@ export async function PagosContent() {
         gap: 12,
       }}
     >
-      {memberships.map((m, idx) => {
-        const statusInfo = STATUS_LABEL[m.status] ?? STATUS_LABEL.PENDING;
-        return (
-          <AnimatedItem key={m.id}>
-            <div
-              {...(idx === 0 ? { "data-tour": "pagos.membresia-card" } : {})}
-              style={{
-                padding: 16,
-                background: "var(--k-surface)",
-                border: "1px solid var(--k-line)",
-                borderRadius: 16,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  marginBottom: 14,
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 600,
-                      marginBottom: 4,
-                      color: "var(--k-t1)",
-                      fontFamily: "var(--k-font-body)",
-                    }}
-                  >
-                    {m.planName}
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "var(--k-font-display)",
-                      fontSize: 10,
-                      fontWeight: 600,
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                      color: "var(--k-t2)",
-                    }}
-                  >
-                    {m.planType} · {fmtDate(m.startDate)}
-                    {m.endDate ? ` → ${fmtDate(m.endDate)}` : ""}
-                  </div>
-                </div>
-                <span style={statusChipStyle(statusInfo.variant)}>
-                  {statusInfo.label}
-                </span>
-              </div>
+      {memberships.map((m, idx) => (
+        <AnimatedItem key={m.id}>
+          <MembershipCard membership={m} isFirst={idx === 0} />
+        </AnimatedItem>
+      ))}
+    </div>
+  );
+}
 
+function MembershipCard({
+  membership: m,
+  isFirst,
+}: {
+  membership: Membership;
+  isFirst: boolean;
+}) {
+  const variant = STATUS_VARIANT[m.status] ?? "muted";
+  const lastPaid = m.payments.find((p) => p.status === "PAID") ?? null;
+  const method = lastPaid ? paymentGatewayLabel[lastPaid.gateway] : null;
+
+  return (
+    <div
+      {...(isFirst ? { "data-tour": "pagos.membresia-card" } : {})}
+      style={{
+        padding: 16,
+        background: "var(--k-surface)",
+        border: "1px solid var(--k-line)",
+        borderRadius: 16,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: 12,
+          marginBottom: 14,
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 600,
+              marginBottom: 4,
+              color: "var(--k-t1)",
+              fontFamily: "var(--k-font-body)",
+            }}
+          >
+            {m.planName}
+          </div>
+          {/* The plan type comes from the label map, and the period is stated
+              as a range instead of implying a monthly cycle the dates do not
+              support. */}
+          <div
+            style={{
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "var(--k-t2)",
+            }}
+          >
+            Plan {planTypeLabel[m.planType]}
+          </div>
+          <div
+            style={{
+              fontFamily: "var(--k-font-body)",
+              fontSize: 11,
+              color: "var(--k-t3)",
+              marginTop: 3,
+            }}
+          >
+            {m.endDate
+              ? `Vigencia: ${formatDateLong(new Date(m.startDate))} al ${formatDateLong(new Date(m.endDate))}`
+              : `Desde ${formatDateLong(new Date(m.startDate))}`}
+          </div>
+        </div>
+        <span style={statusChipStyle(variant)}>
+          {membershipStatusLabel[m.status]}
+        </span>
+      </div>
+
+      <DataRow
+        label="Monto"
+        value={money(m.planPrice, m.planCurrency)}
+        strong
+      />
+      {m.endDate && (
+        <DataRow
+          label={m.autoRenew ? "Próximo cobro" : "Vence"}
+          value={formatDateLong(new Date(m.endDate))}
+        />
+      )}
+      {method && <DataRow label="Método" value={method} />}
+
+      {m.status === "PENDING" && m.pendingPaymentId && (
+        <div data-tour="pagos.cta-pagar" style={{ marginTop: 14 }}>
+          <PayMembershipButton
+            paymentId={m.pendingPaymentId}
+            amount={m.planPrice}
+            currency={m.planCurrency}
+          />
+        </div>
+      )}
+
+      {m.payments.length > 0 && (
+        <div data-tour="pagos.historial" style={{ marginTop: 18 }}>
+          {/* Expanded by default: the history is the trust moment, not an
+              easter egg behind an ASCII triangle. */}
+          <div
+            className="k-mono"
+            style={{
+              fontSize: 9,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "var(--k-t3)",
+              marginBottom: 8,
+            }}
+          >
+            Historial ({m.payments.length})
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {m.payments.map((p) => (
               <div
+                key={p.id}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  marginBottom: 14,
+                  gap: 8,
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  background: "var(--k-elevated)",
+                  border: "1px solid var(--k-line)",
+                  fontSize: 12,
+                  fontFamily: "var(--k-font-body)",
                 }}
               >
-                <div
+                <span style={{ color: "var(--k-t2)", minWidth: 0 }}>
+                  {formatDateLong(new Date(p.paidAt ?? p.createdAt))} ·{" "}
+                  {paymentGatewayLabel[p.gateway]}
+                </span>
+                <span
                   style={{
-                    fontFamily: "var(--k-font-display)",
-                    fontSize: 11,
-                    fontWeight: 600,
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    color: "var(--k-t3)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    flexShrink: 0,
                   }}
                 >
-                  Monto
-                </div>
-                <div
-                  style={{
-                    fontFamily: "var(--k-font-display)",
-                    fontSize: 20,
-                    fontWeight: 700,
-                    color: "var(--k-t1)",
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  {m.planPrice.toLocaleString("es-MX")} {m.planCurrency}
-                </div>
-              </div>
-
-              {m.status === "PENDING" && m.pendingPaymentId && (
-                <div data-tour="pagos.cta-pagar">
-                  <PayMembershipButton
-                    paymentId={m.pendingPaymentId}
-                    amount={m.planPrice}
-                    currency={m.planCurrency}
-                  />
-                </div>
-              )}
-
-              {m.payments.length > 0 && (
-                <details data-tour="pagos.historial" style={{ marginTop: 16 }}>
-                  <summary
+                  <span
                     style={{
-                      cursor: "pointer",
+                      color:
+                        p.status === "PAID"
+                          ? "var(--k-accent)"
+                          : p.status === "FAILED"
+                            ? "var(--k-danger)"
+                            : "var(--k-t2)",
+                      fontWeight: p.status === "PAID" ? 700 : 500,
                       fontFamily: "var(--k-font-display)",
                       fontSize: 10,
-                      fontWeight: 700,
-                      letterSpacing: "0.16em",
+                      letterSpacing: "0.12em",
                       textTransform: "uppercase",
-                      color: "var(--k-t2)",
                     }}
                   >
-                    Historial ({m.payments.length})
-                  </summary>
-                  <div
+                    {paymentStatusLabel[p.status]}
+                  </span>
+                  <span
                     style={{
-                      marginTop: 10,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 6,
+                      fontFamily: "var(--k-font-display)",
+                      fontWeight: 700,
+                      color: "var(--k-t1)",
                     }}
                   >
-                    {m.payments.map((p) => (
-                      <div
-                        key={p.id}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          padding: "8px 12px",
-                          borderRadius: 10,
-                          background: "var(--k-elevated)",
-                          border: "1px solid var(--k-line)",
-                          fontSize: 12,
-                          fontFamily: "var(--k-font-body)",
-                        }}
-                      >
-                        <span style={{ color: "var(--k-t2)" }}>
-                          {fmtDate(p.paidAt ?? p.createdAt)} · {p.gateway}
-                        </span>
-                        <span
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 8,
-                          }}
-                        >
-                          <span
-                            style={{
-                              color:
-                                p.status === "PAID"
-                                  ? "var(--k-accent)"
-                                  : p.status === "FAILED"
-                                    ? "#ff5e5e"
-                                    : "var(--k-t2)",
-                              fontWeight: p.status === "PAID" ? 700 : 500,
-                              fontFamily: "var(--k-font-display)",
-                              fontSize: 10,
-                              letterSpacing: "0.12em",
-                              textTransform: "uppercase",
-                            }}
-                          >
-                            {PAYMENT_STATUS_LABEL[p.status] ?? p.status}
-                          </span>
-                          <span
-                            style={{
-                              fontFamily: "var(--k-font-display)",
-                              fontWeight: 700,
-                              color: "var(--k-t1)",
-                            }}
-                          >
-                            {p.amount.toLocaleString("es-MX")} {p.currency}
-                          </span>
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              )}
-            </div>
-          </AnimatedItem>
-        );
-      })}
+                    {money(p.amount, p.currency)}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DataRow({
+  label,
+  value,
+  strong,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "baseline",
+        justifyContent: "space-between",
+        gap: 12,
+        padding: "6px 0",
+        borderTop: "1px solid var(--k-line)",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 10,
+          fontWeight: 600,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "var(--k-t3)",
+        }}
+      >
+        {label}
+      </span>
+      <span
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: strong ? 20 : 13,
+          fontWeight: 700,
+          color: strong ? "var(--k-t1)" : "var(--k-t2)",
+          letterSpacing: strong ? "-0.02em" : "0",
+          textAlign: "right",
+        }}
+      >
+        {value}
+      </span>
     </div>
   );
 }
@@ -338,7 +403,7 @@ export function PagosContentSkeleton() {
         <div
           key={i}
           className="k-card k-skeleton"
-          style={{ height: 140, borderRadius: 16 }}
+          style={{ height: 180, borderRadius: 16 }}
         />
       ))}
     </div>
