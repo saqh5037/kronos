@@ -4,9 +4,17 @@ import { revalidatePath } from "next/cache";
 import { requireCachedSession } from "@/server/session";
 import { withTenant, db as rawDb } from "../db";
 import { computeAttendanceStreak } from "@/lib/streak";
-import { eachDayInRange, dayKey } from "@/lib/dates";
 import { subDays, startOfDay } from "date-fns";
-import { Prisma } from "@prisma/client";
+import {
+  buildAttendanceSeries,
+  getBoxPeriodTimezone,
+  getPeriodSummary,
+  queryAttendanceBuckets,
+  queryCapacityBuckets,
+  type AttendanceDayPoint,
+  type Period,
+  type PeriodInput,
+} from "../period-summary";
 
 async function requireSession() {
   return requireCachedSession();
@@ -150,95 +158,92 @@ export async function recomputeAttendanceStreak(athleteId: string) {
   return { count };
 }
 
-export type AttendanceByDayPoint = {
-  day: string;
-  attended: number;
-  noShow: number;
-  booked: number;
-  capacity: number;
-};
+/**
+ * Alias so existing imports keep type-checking. The shape is now a superset
+ * of the old one: `seats` (attended + noShow + booked) and `classes` were
+ * added; `booked` keeps meaning "still reserved", which is what
+ * /admin/asistencia renders as "Reservadas".
+ */
+export type AttendanceByDayPoint = AttendanceDayPoint;
 
+/**
+ * Attendance per civil day of the BOX timezone, covering exactly
+ * `dateFrom..dateTo`.
+ *
+ * Two fixes from the 2026-09-15 audit land here: the series is generated
+ * from the period (no more April data under a 30-day label) and the day
+ * bucket follows the box timezone, so a 20:30 CDMX class no longer counts
+ * toward the next day.
+ */
 export async function getAttendanceByDay(opts: {
   dateFrom: Date;
   dateTo: Date;
   coachId?: string;
+  tz?: string;
 }): Promise<AttendanceByDayPoint[]> {
   const session = await requireSession();
+  const tenantId = session.user.tenantId;
+  const tz = opts.tz ?? (await getBoxPeriodTimezone(tenantId));
 
-  const classWhere: Record<string, unknown> = {
-    tenantId: session.user.tenantId,
-    isActive: true,
-    startsAt: { gte: opts.dateFrom, lte: opts.dateTo },
-  };
-  if (opts.coachId) classWhere.coachId = opts.coachId;
-
-  const coachClause = opts.coachId
-    ? Prisma.sql`AND c."coachId" = ${opts.coachId}`
-    : Prisma.sql``;
-
-  const [classCapacities, bookingCounts] = await Promise.all([
-    rawDb.class.findMany({
-      where: classWhere,
-      select: { startsAt: true, capacity: true },
-    }),
-    rawDb.$queryRaw<
-      Array<{
-        day: Date;
-        attended: bigint;
-        noShow: bigint;
-        booked: bigint;
-      }>
-    >(Prisma.sql`
-      SELECT
-        DATE(c."startsAt") as day,
-        COUNT(*) FILTER (WHERE b.status = 'ATTENDED') as attended,
-        COUNT(*) FILTER (WHERE b.status = 'NOSHOW') as "noShow",
-        COUNT(*) FILTER (WHERE b.status = 'BOOKED') as booked
-      FROM "Booking" b
-      JOIN "Class" c ON b."classId" = c.id
-      WHERE b."tenantId" = ${session.user.tenantId}
-        AND c."isActive" = true
-        AND c."startsAt" >= ${opts.dateFrom}
-        AND c."startsAt" <= ${opts.dateTo}
-        ${coachClause}
-      GROUP BY DATE(c."startsAt")
-    `),
-  ]);
-
-  const capacityByDay = new Map<string, number>();
-  for (const c of classCapacities) {
-    const k = dayKey(c.startsAt);
-    capacityByDay.set(k, (capacityByDay.get(k) ?? 0) + c.capacity);
-  }
-
-  const bookingByDay = new Map<
-    string,
-    { attended: number; noShow: number; booked: number }
-  >();
-  for (const b of bookingCounts) {
-    const k = dayKey(b.day);
-    bookingByDay.set(k, {
-      attended: Number(b.attended),
-      noShow: Number(b.noShow),
-      booked: Number(b.booked),
+  if (!opts.coachId) {
+    const summary = await getPeriodSummary(tenantId, {
+      from: opts.dateFrom,
+      to: opts.dateTo,
+      tz,
     });
+    return summary.attendance.byDay;
   }
 
-  return eachDayInRange({ from: opts.dateFrom, to: opts.dateTo }).map((d) => {
-    const k = dayKey(d);
-    const counts = bookingByDay.get(k) ?? {
-      attended: 0,
-      noShow: 0,
-      booked: 0,
-    };
-    return {
-      day: k,
-      attended: counts.attended,
-      noShow: counts.noShow,
-      booked: counts.booked,
-      capacity: capacityByDay.get(k) ?? 0,
-    };
+  // Coach-scoped view: the box summary is box-wide, so run the same shared
+  // queries with a coach filter and pad with the same period-driven series.
+  const period: Period = { from: opts.dateFrom, to: opts.dateTo, tz };
+  const [buckets, capacity] = await Promise.all([
+    queryAttendanceBuckets(tenantId, period, opts.coachId),
+    queryCapacityBuckets(tenantId, period, opts.coachId),
+  ]);
+  return buildAttendanceSeries(period, buckets, capacity);
+}
+
+export type AttendanceStats = {
+  period: { from: Date; to: Date; label: string };
+  checkins: number;
+  /** Seats taken = attended + noShow + booked. */
+  bookings: number;
+  noShows: number;
+  noShowRate: number;
+  byDay: AttendanceByDayPoint[];
+};
+
+/**
+ * Period attendance KPIs for `/admin/asistencia`, read from the same
+ * request-scoped summary the rest of the admin uses. The subtitle must
+ * render `period.label`: the audit found "Últimos 7 días · 170 asistencias"
+ * under a filter that said "Últimos 30 días".
+ */
+export async function getAttendanceStats(
+  opts?: PeriodInput,
+): Promise<AttendanceStats> {
+  const session = await requireSession();
+  const tenantId = session.user.tenantId;
+  const tz = opts?.tz ?? (await getBoxPeriodTimezone(tenantId));
+  const summary = await getPeriodSummary(tenantId, {
+    preset: opts?.preset,
+    from: opts?.from,
+    to: opts?.to,
+    tz,
   });
+  return {
+    period: {
+      from: summary.period.from,
+      to: summary.period.to,
+      label: summary.period.label,
+    },
+    checkins: summary.attendance.checkins,
+    bookings: summary.attendance.bookings,
+    noShows: summary.attendance.noShows,
+    noShowRate: summary.attendance.noShowRate,
+    byDay: summary.attendance.byDay,
+  };
 }
 
 export type AttendanceHeatmapCell = {

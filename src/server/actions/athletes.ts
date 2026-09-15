@@ -13,8 +13,17 @@ import {
 import { revalidatePath } from "next/cache";
 import { type ListOpts, type ListResult, normalizePagination } from "./types";
 import type { AthleteStatus } from "@prisma/client";
-import { eachDayInRange, dayKey } from "@/lib/dates";
 import { subDays, startOfDay } from "date-fns";
+import {
+  dayKeyInTz,
+  eachDayKeyInPeriod,
+  getBoxPeriodTimezone,
+  getPeriodSummary,
+  AT_RISK_DEFAULT_INACTIVITY_DAYS,
+  type AtRiskReason,
+  type AtRiskSeverity,
+  type PeriodInput,
+} from "../period-summary";
 
 export async function listAthletes() {
   const session = await getServerSession(authOptions);
@@ -149,11 +158,14 @@ export type AthleteGrowthPoint = { day: string; total: number; new: number };
 export async function getAthleteGrowthByDay(opts: {
   dateFrom: Date;
   dateTo: Date;
+  tz?: string;
 }): Promise<AthleteGrowthPoint[]> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.tenantId) throw new Error("Unauthorized");
 
-  const db = withTenant(session.user.tenantId);
+  const tenantId = session.user.tenantId;
+  const db = withTenant(tenantId);
+  const tz = opts.tz ?? (await getBoxPeriodTimezone(tenantId));
 
   const [totalBefore, inRange] = await Promise.all([
     db.athlete.count({ where: { createdAt: { lt: opts.dateFrom } } }),
@@ -165,16 +177,21 @@ export async function getAthleteGrowthByDay(opts: {
 
   const newByDay = new Map<string, number>();
   for (const a of inRange) {
-    const k = dayKey(a.createdAt);
+    const k = dayKeyInTz(a.createdAt, tz);
     newByDay.set(k, (newByDay.get(k) ?? 0) + 1);
   }
 
+  // One point per civil day of the period, in the box timezone — same rule
+  // as every other series in the admin.
   let runningTotal = totalBefore;
-  return eachDayInRange({ from: opts.dateFrom, to: opts.dateTo }).map((d) => {
-    const k = dayKey(d);
-    const newCount = newByDay.get(k) ?? 0;
+  return eachDayKeyInPeriod({
+    from: opts.dateFrom,
+    to: opts.dateTo,
+    tz,
+  }).map((day) => {
+    const newCount = newByDay.get(day) ?? 0;
     runningTotal += newCount;
-    return { day: k, total: runningTotal, new: newCount };
+    return { day, total: runningTotal, new: newCount };
   });
 }
 
@@ -184,77 +201,92 @@ export type AtRiskAthlete = {
   lastName: string;
   daysSinceLastAttendance: number | null;
   hasOverdueMembership: boolean;
+  /** Why the athlete is flagged, per the shared rule. */
+  reasons: AtRiskReason[];
+  reasonLabels: string[];
+  severity: AtRiskSeverity;
 };
 
 /**
- * Atletas ACTIVE sin asistencia en N días o con membresía vencida.
+ * Atletas en riesgo, per the single `AT_RISK_RULE`.
+ *
+ * Before this, three screens ran three different detectors and reported 0,
+ * 0 and 3 for the same box on the same day (audit P0 #6). The list is still
+ * capped by `limit`; the authoritative COUNT is `getAthleteCounts().atRisk`.
  */
-export async function getAtRiskAthletes(opts?: {
-  inactivityDays?: number;
-  limit?: number;
-}): Promise<AtRiskAthlete[]> {
+export async function getAtRiskAthletes(
+  opts?: PeriodInput & { inactivityDays?: number; limit?: number },
+): Promise<AtRiskAthlete[]> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.tenantId) throw new Error("Unauthorized");
-  const db = withTenant(session.user.tenantId);
+  const tenantId = session.user.tenantId;
+  const tz = opts?.tz ?? (await getBoxPeriodTimezone(tenantId));
 
-  const inactivityDays = opts?.inactivityDays ?? 14;
-  const limit = opts?.limit ?? 50;
-  const cutoff = startOfDay(subDays(new Date(), inactivityDays));
-  const now = new Date();
+  const summary = await getPeriodSummary(tenantId, {
+    preset: opts?.preset,
+    from: opts?.from,
+    to: opts?.to,
+    tz,
+    inactivityDays: opts?.inactivityDays ?? AT_RISK_DEFAULT_INACTIVITY_DAYS,
+  });
 
-  const athletes = await db.athlete.findMany({
-    where: { status: "ACTIVE" },
-    include: {
-      bookings: {
-        where: { status: "ATTENDED" },
-        orderBy: { checkedInAt: "desc" },
-        take: 1,
-        select: { checkedInAt: true },
-      },
-      memberships: {
-        where: { status: "ACTIVE" },
-        orderBy: { createdAt: "desc" },
-        take: 1,
-        select: { endDate: true },
-      },
+  return summary.athletes.atRiskRows.slice(0, opts?.limit ?? 50).map((row) => ({
+    id: row.athleteId,
+    firstName: row.firstName,
+    lastName: row.lastName,
+    daysSinceLastAttendance: row.daysSinceLastAttendance,
+    hasOverdueMembership: row.hasOverdueMembership,
+    reasons: row.reasons,
+    reasonLabels: row.reasonLabels,
+    severity: row.severity,
+  }));
+}
+
+export type AthleteCounts = {
+  period: { from: Date; to: Date; label: string };
+  /** `Athlete.status = ACTIVE` — the roster size every screen must show. */
+  active: number;
+  newInPeriod: number;
+  /** Authoritative at-risk count (never truncated by a list limit). */
+  atRisk: number;
+  atRiskRule: string;
+  /** Morosos; a subset of `atRisk` for athletes that are still ACTIVE. */
+  overdueCount: number;
+};
+
+/**
+ * The athlete KPIs for the dashboard, Atletas and Reportes. One call, one
+ * definition: the dashboard used to print "seats booked today" (27) as
+ * "atletas activos" while Atletas printed 42.
+ */
+export async function getAthleteCounts(
+  opts?: PeriodInput & { inactivityDays?: number },
+): Promise<AthleteCounts> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error("Unauthorized");
+  const tenantId = session.user.tenantId;
+  const tz = opts?.tz ?? (await getBoxPeriodTimezone(tenantId));
+
+  const summary = await getPeriodSummary(tenantId, {
+    preset: opts?.preset,
+    from: opts?.from,
+    to: opts?.to,
+    tz,
+    inactivityDays: opts?.inactivityDays ?? AT_RISK_DEFAULT_INACTIVITY_DAYS,
+  });
+
+  return {
+    period: {
+      from: summary.period.from,
+      to: summary.period.to,
+      label: summary.period.label,
     },
-    take: limit * 4,
-  });
-
-  const out: AtRiskAthlete[] = [];
-  for (const a of athletes) {
-    const last = a.bookings[0]?.checkedInAt ?? null;
-    const daysSince = last
-      ? Math.floor((now.getTime() - last.getTime()) / 86400000)
-      : null;
-    const overdue = a.memberships[0]?.endDate
-      ? a.memberships[0].endDate.getTime() < now.getTime()
-      : false;
-
-    const isAtRisk =
-      (last === null && a.createdAt.getTime() < cutoff.getTime()) ||
-      (last !== null && last.getTime() < cutoff.getTime()) ||
-      overdue;
-
-    if (isAtRisk) {
-      out.push({
-        id: a.id,
-        firstName: a.firstName,
-        lastName: a.lastName,
-        daysSinceLastAttendance: daysSince,
-        hasOverdueMembership: overdue,
-      });
-    }
-    if (out.length >= limit) break;
-  }
-
-  out.sort((x, y) => {
-    const xd = x.daysSinceLastAttendance ?? 9999;
-    const yd = y.daysSinceLastAttendance ?? 9999;
-    return yd - xd;
-  });
-
-  return out;
+    active: summary.athletes.active,
+    newInPeriod: summary.athletes.newInPeriod,
+    atRisk: summary.athletes.atRisk,
+    atRiskRule: summary.athletes.atRiskRule,
+    overdueCount: summary.memberships.overdueCount,
+  };
 }
 
 export type AthleteDetail = {
