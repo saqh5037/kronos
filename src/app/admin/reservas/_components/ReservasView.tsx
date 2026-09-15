@@ -11,6 +11,10 @@ import {
   CancelBookingButton,
 } from "@/components/BookingActions";
 import { EmptyState } from "@/components/kronos/EmptyState";
+import {
+  ResponsiveList,
+  type ColumnSpec,
+} from "@/components/data/ResponsiveList";
 import { bookingStatusLabel, classKindLabel } from "@/lib/labels";
 import { formatDateShort, formatDateWeekday, formatTime24 } from "@/lib/format";
 
@@ -76,6 +80,80 @@ const STATUS_COLOR: Record<BookingStatusValue, string> = {
 function ymd(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
+
+type RosterBooking = RosterDTO["bookings"][number];
+
+/**
+ * The roster's four columns, shared by the table and the phone cards.
+ *
+ * Module scope, not a `useMemo` inside the component: nothing here closes over
+ * props or state, so there is one array for the lifetime of the module.
+ */
+const rosterColumns: ColumnSpec<RosterBooking>[] = [
+  {
+    key: "athlete",
+    label: "Atleta",
+    // The name leads: a roster without names cannot be used.
+    primary: true,
+    render: (b) => (
+      <span className="text-sm font-semibold md:truncate">
+        {b.firstName} {b.lastName}
+      </span>
+    ),
+  },
+  {
+    key: "status",
+    label: "Estado",
+    render: (b) => (
+      <span
+        className="inline-block w-fit rounded-full px-2 py-1 font-mono text-[10px] font-bold tracking-wider uppercase"
+        style={{
+          background: "var(--k-surface)",
+          color: STATUS_COLOR[b.status],
+          border: `1px solid ${STATUS_COLOR[b.status]}40`,
+        }}
+      >
+        {bookingStatusLabel[b.status]}
+      </span>
+    ),
+  },
+  {
+    key: "bookedAt",
+    label: "Reservó",
+    render: (b) => (
+      <span className="font-mono text-[10px]" style={{ color: "var(--k-t2)" }}>
+        {formatDateShort(new Date(b.bookedAt))} ·{" "}
+        {formatTime24(new Date(b.bookedAt))}
+      </span>
+    ),
+  },
+  {
+    key: "actions",
+    label: "Acciones",
+    render: (b) => (
+      <span className="flex flex-wrap gap-1.5">
+        {b.status === "BOOKED" || b.status === "WAITLIST" ? (
+          <>
+            <CheckInButton bookingId={b.bookingId} />
+            <NoShowButton bookingId={b.bookingId} />
+            <CancelBookingButton bookingId={b.bookingId} />
+          </>
+        ) : b.status === "ATTENDED" ? (
+          <NoShowButton bookingId={b.bookingId} />
+        ) : b.status === "NOSHOW" ? (
+          <CheckInButton bookingId={b.bookingId} />
+        ) : (
+          <span
+            className="font-mono text-[10px]"
+            style={{ color: "var(--k-t2)" }}
+          >
+            Sin acciones
+          </span>
+        )}
+      </span>
+    ),
+  },
+];
 
 export function ReservasView({
   classes,
@@ -372,67 +450,18 @@ export function ReservasView({
                 />
               </div>
             ) : (
-              <div className="flex flex-col gap-1">
-                {/* Header only exists where the columns do (md+). */}
-                <div
-                  className="hidden md:grid md:grid-cols-[minmax(0,1fr)_120px_120px_auto] gap-3 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-wider"
-                  style={{ color: "var(--k-t2)" }}
-                >
-                  <span>Atleta</span>
-                  <span>Estado</span>
-                  <span>Reservó</span>
-                  <span>Acciones</span>
-                </div>
-                {filteredBookings.map((b) => (
-                  <div
-                    key={b.bookingId}
-                    className="flex flex-col gap-2 rounded-lg px-3 py-3 md:grid md:grid-cols-[minmax(0,1fr)_120px_120px_auto] md:items-center md:gap-3 md:py-2.5"
-                    style={{ background: "var(--k-elevated)" }}
-                  >
-                    {/* The name leads: a roster without names cannot be used. */}
-                    <span className="text-sm font-semibold md:truncate">
-                      {b.firstName} {b.lastName}
-                    </span>
-                    <span
-                      className="font-mono text-[10px] font-bold uppercase tracking-wider rounded-full px-2 py-1 inline-block w-fit"
-                      style={{
-                        background: "var(--k-surface)",
-                        color: STATUS_COLOR[b.status],
-                        border: `1px solid ${STATUS_COLOR[b.status]}40`,
-                      }}
-                    >
-                      {bookingStatusLabel[b.status]}
-                    </span>
-                    <span
-                      className="font-mono text-[10px]"
-                      style={{ color: "var(--k-t2)" }}
-                    >
-                      {formatDateShort(new Date(b.bookedAt))} ·{" "}
-                      {formatTime24(new Date(b.bookedAt))}
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {b.status === "BOOKED" || b.status === "WAITLIST" ? (
-                        <>
-                          <CheckInButton bookingId={b.bookingId} />
-                          <NoShowButton bookingId={b.bookingId} />
-                          <CancelBookingButton bookingId={b.bookingId} />
-                        </>
-                      ) : b.status === "ATTENDED" ? (
-                        <NoShowButton bookingId={b.bookingId} />
-                      ) : b.status === "NOSHOW" ? (
-                        <CheckInButton bookingId={b.bookingId} />
-                      ) : (
-                        <span
-                          className="font-mono text-[10px]"
-                          style={{ color: "var(--k-t2)" }}
-                        >
-                          Sin acciones
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              /*
+                One column spec, two renderings. The hand-rolled grid this
+                replaced dropped its column headers below `md`, so on a phone
+                the status chip and the timestamp sat there unlabelled — the
+                coach had to know what each line meant (audit 2026-09-15, P0 #4).
+              */
+              <ResponsiveList
+                rows={filteredBookings}
+                columns={rosterColumns}
+                rowKey={(b) => b.bookingId}
+                caption="Roster de la clase seleccionada"
+              />
             )}
           </div>
         )}

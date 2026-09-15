@@ -23,7 +23,13 @@ export type TVLeader = {
 };
 
 export type TVData = {
-  box: { name: string; brandColor: string | null };
+  /**
+   * `logoUrl` is the Box's own mark. The TV screen hangs on the wall of a box
+   * that pays for white-label, so the wall should carry its logo and not just
+   * its name in a brand colour (audit 2026-09-15). `null` when the Box has
+   * never uploaded one — the header then falls back to the name.
+   */
+  box: { name: string; brandColor: string | null; logoUrl: string | null };
   currentClass: TVClass | null;
   upcomingClasses: TVClass[];
   todaysWOD: TVWOD | null;
@@ -56,7 +62,7 @@ export type TVWOD = {
 export async function getTVDisplay(slug: string): Promise<TVDisplay> {
   const box = await rawDb.box.findUnique({
     where: { slug },
-    select: { id: true, name: true, brandColor: true },
+    select: { id: true, name: true, brandColor: true, logoUrl: true },
   });
   if (!box) return null;
 
@@ -169,7 +175,11 @@ export async function getTVDisplay(slug: string): Promise<TVDisplay> {
     .map((l) => ({ athleteName: l.name, attendedCount: l.count }));
 
   return {
-    box: { name: box.name, brandColor: box.brandColor },
+    box: {
+      name: box.name,
+      brandColor: box.brandColor,
+      logoUrl: box.logoUrl,
+    },
     currentClass: current ? mapClass(current) : null,
     upcomingClasses: upcoming.map(mapClass),
     todaysWOD,

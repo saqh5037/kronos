@@ -38,6 +38,13 @@ export function RevenueLineChart({ data }: { data: RevenueByMonthPoint[] }) {
       variant="cinematic"
       height={260}
       gradient
+      /*
+       * Money floors at zero, stated at the call site rather than left to the
+       * default: the audit's "Crecimiento" finding was a 40-to-52 truncated axis
+       * that made a 30 % rise look like a tenfold one. `zeroFloor` routes
+       * through `computeYDomain` in `src/components/charts/domain.ts`.
+       */
+      zeroFloor
       formatY={fmtCurrency}
       formatX={fmtMonth}
       ariaLabel="Ingresos por mes"

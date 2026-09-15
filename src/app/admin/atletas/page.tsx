@@ -1,10 +1,11 @@
 import Link from "next/link";
-import type { Route } from "next";
 import { Flame } from "lucide-react";
 import {
   listAthletesPaged,
+  getAthleteCounts,
   getAthleteGrowthByDay,
   getAtRiskAthletes,
+  type AthleteCounts,
   type AthleteRow,
   type AthleteGrowthPoint,
   type AtRiskAthlete,
@@ -19,6 +20,7 @@ import { periodLabel } from "../_lib/period";
 import { AtletasFilters } from "./_components/AtletasFilters";
 import { GrowthChart } from "./_components/GrowthChart";
 import { AtletasTable } from "./_components/AtletasTable";
+import { AtRiskTable } from "./_components/AtRiskTable";
 
 export const metadata = { title: "Kronos — Atletas" };
 
@@ -83,45 +85,59 @@ export default async function AtletasPage({
   };
   let growth: AthleteGrowthPoint[] = [];
   let atRisk: AtRiskAthlete[] = [];
+  let counts: AthleteCounts | null = null;
   let newInRange = 0;
   let newPrev = 0;
   let pendingInvitationsCount = 0;
 
   try {
-    const [tableRes, growthData, atRiskData, newInRangeData, newPrevData] =
-      await Promise.all([
-        listAthletesPaged({
-          dateFrom: range?.from,
-          dateTo: range?.to,
-          search,
-          status,
-          page,
-          pageSize: PAGE_SIZE,
-        }),
-        range
-          ? getAthleteGrowthByDay({ dateFrom: range.from, dateTo: range.to })
-          : Promise.resolve([]),
-        getAtRiskAthletes({ inactivityDays: 14, limit: 20 }),
-        range
-          ? listAthletesPaged({
-              dateFrom: range.from,
-              dateTo: range.to,
-              page: 1,
-              pageSize: 1,
-            })
-          : Promise.resolve(null),
-        prev
-          ? listAthletesPaged({
-              dateFrom: prev.from,
-              dateTo: prev.to,
-              page: 1,
-              pageSize: 1,
-            })
-          : Promise.resolve(null),
-      ]);
+    const [
+      tableRes,
+      growthData,
+      atRiskData,
+      countsData,
+      newInRangeData,
+      newPrevData,
+    ] = await Promise.all([
+      listAthletesPaged({
+        dateFrom: range?.from,
+        dateTo: range?.to,
+        search,
+        status,
+        page,
+        pageSize: PAGE_SIZE,
+      }),
+      range
+        ? getAthleteGrowthByDay({ dateFrom: range.from, dateTo: range.to })
+        : Promise.resolve([]),
+      getAtRiskAthletes({ inactivityDays: 14, limit: 20 }),
+      // "Activos" and "(N) en riesgo" come from the shared summary, so this
+      // page, the dashboard and Reportes print the same two numbers. The
+      // at-risk LIST below is capped at 20; its `.length` is not the count.
+      getAthleteCounts(
+        range ? { from: range.from, to: range.to } : { preset: "last30" },
+      ),
+      range
+        ? listAthletesPaged({
+            dateFrom: range.from,
+            dateTo: range.to,
+            page: 1,
+            pageSize: 1,
+          })
+        : Promise.resolve(null),
+      prev
+        ? listAthletesPaged({
+            dateFrom: prev.from,
+            dateTo: prev.to,
+            page: 1,
+            pageSize: 1,
+          })
+        : Promise.resolve(null),
+    ]);
     rows = tableRes;
     growth = growthData;
     atRisk = atRiskData;
+    counts = countsData;
     newInRange = newInRangeData?.total ?? 0;
     newPrev = newPrevData?.total ?? 0;
     try {
@@ -142,6 +158,8 @@ export default async function AtletasPage({
   const scopeLabel = statusLabel
     ? `${rows.total} ${statusLabel.toLowerCase()}${rows.total === 1 ? "" : "s"}`
     : `${rows.total} atleta${rows.total === 1 ? "" : "s"}`;
+  const activeCount = counts?.active ?? 0;
+  const atRiskCount = counts?.atRisk ?? 0;
   const subtitle = [
     range ? periodLabel(range) : "Todos los registros",
     scopeLabel,
@@ -197,7 +215,14 @@ export default async function AtletasPage({
           label={statusLabel ? `${statusLabel}s en la lista` : "En la lista"}
           value={String(rows.total)}
           tone="moss"
-          subtitle="El mismo número que la tabla de abajo"
+          subtitle={
+            // The list count IS the table's count. When a filter narrows it,
+            // the roster size from the shared summary is named next to it so
+            // the two can be read together instead of contradicting.
+            rows.total === activeCount
+              ? "El mismo número que la tabla de abajo"
+              : `${activeCount} activos en el box`
+          }
         />
         <KpiCard
           label={range ? "Nuevos en el rango" : "Nuevos"}
@@ -209,7 +234,6 @@ export default async function AtletasPage({
                 current={newInRange}
                 previous={newPrev}
                 goodWhen="higher"
-                formatter={(v) => v.toFixed(0)}
               />
             ) : undefined
           }
@@ -221,11 +245,11 @@ export default async function AtletasPage({
         />
         <KpiCard
           label="En riesgo"
-          value={String(atRisk.length)}
-          tone={atRisk.length > 0 ? "ember" : undefined}
+          value={String(atRiskCount)}
+          tone={atRiskCount > 0 ? "ember" : undefined}
           subtitle={
-            atRisk.length > 0
-              ? "Sin asistencia 14d+ o vencidos"
+            atRiskCount > 0
+              ? `Sin check-in 14+ días o con adeudo · ${counts?.overdueCount ?? 0} morosos`
               : "Todos al día"
           }
         />
@@ -253,55 +277,9 @@ export default async function AtletasPage({
             style={{ color: "var(--k-warning)" }}
           >
             <Flame size={14} aria-hidden />
-            Atletas en riesgo ({atRisk.length})
+            Atletas en riesgo ({atRiskCount})
           </p>
-          <div className="k-card overflow-hidden">
-            <table className="k-table text-sm">
-              <thead>
-                <tr>
-                  <th>Atleta</th>
-                  <th>Días sin asistir</th>
-                  <th>Membresía</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {atRisk.map((a) => (
-                  <tr key={a.id}>
-                    <td className="font-medium">
-                      <Link
-                        href={`/admin/atletas/${a.id}` as Route}
-                        className="hover:text-[var(--k-accent)] transition-colors"
-                      >
-                        {a.firstName} {a.lastName}
-                      </Link>
-                    </td>
-                    <td>
-                      <span className="k-chip k-chip-pr text-[10px]">
-                        {a.daysSinceLastAttendance ?? "Nunca"}
-                        {a.daysSinceLastAttendance !== null ? "d" : ""}
-                      </span>
-                    </td>
-                    <td className="text-xs">
-                      {a.hasOverdueMembership ? (
-                        <span className="text-[var(--k-danger)]">Vencida</span>
-                      ) : (
-                        <span className="text-[var(--k-t2)]">Vigente</span>
-                      )}
-                    </td>
-                    <td>
-                      <Link
-                        href={`/admin/atletas/${a.id}` as Route}
-                        className="k-btn-ghost inline-flex min-h-11 items-center rounded-full px-3 text-xs font-semibold"
-                      >
-                        Ver atleta
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AtRiskTable rows={atRisk} totalCount={atRiskCount} />
         </section>
       )}
 

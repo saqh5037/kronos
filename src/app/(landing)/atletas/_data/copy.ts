@@ -69,26 +69,14 @@ export const WHY = {
   ],
 } as const;
 
-/**
- * @deprecated No hay testimonios. Se conservan vacíos SOLO porque
- * `src/app/atletas.json/route.ts` y `src/app/atletas.md/route.ts` los importan;
- * esos dos endpoints deben dejar de emitir la sección de reseñas (quedan fuera
- * del alcance de este cambio). No vuelvas a llenarlos con citas inventadas: si
- * hay citas reales con consentimiento firmado, se crea `TESTIMONIALS` y se
- * remonta la sección en la página.
+/*
+ * `TESTIMONIAL_HERO` y `DUAL_QUOTES` ya no existen. Eran citas inventadas; se
+ * vaciaron cuando la página dejó de renderizarlas y se borraron cuando
+ * `atletas.json` y `atletas.md` dejaron de emitir la sección de reseñas.
+ *
+ * No vuelvas a crearlas con citas escritas por nosotros: si hay citas reales
+ * con consentimiento firmado, se crea `TESTIMONIALS` y se remonta la sección.
  */
-export const TESTIMONIAL_HERO = {
-  eyebrow: "",
-  quote: "",
-  attribution: "",
-} as const;
-
-/** @deprecated Ver `TESTIMONIAL_HERO`. */
-export const DUAL_QUOTES = {
-  eyebrow: "",
-  a: { quote: "", attribution: "" },
-  b: { quote: "", attribution: "" },
-} as const;
 
 export const FINAL_CTA = {
   eyebrow: "EMPIEZA HOY · GRATIS · SIN TARJETA · SIN LETRA CHICA",

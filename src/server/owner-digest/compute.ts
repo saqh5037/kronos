@@ -1,12 +1,6 @@
 import { db as prismaBase } from "../db";
-import {
-  detectChurnRisk,
-  type ChurnDetection,
-  type Severity,
-} from "@/lib/insights/detectors";
-
-const RISK_WINDOW_DAYS = 30;
-const PR_LOOKBACK_DAYS = 180;
+import type { Severity } from "@/lib/insights/detectors";
+import { getBoxPeriodTimezone, getPeriodSummary } from "../period-summary";
 
 export type AthleteAtRiskRow = {
   athleteId: string;
@@ -87,108 +81,42 @@ export async function computeBookingsLastWeek(
   });
 }
 
+/**
+ * At-risk athletes for the digest and the owner/coach dashboards, from the
+ * shared `AT_RISK_RULE` in `server/period-summary/rules`.
+ *
+ * This used to run `detectChurnRisk` — a multi-signal detector that weighed
+ * attendance decline, PR staleness and cancellation ratio. It disagreed with
+ * both of the other two at-risk numbers in the product: the audit found the
+ * dashboard and Reportes printing 0 while /admin/atletas printed 3 and Pagos
+ * printed 4 morosos (P0 #6, systemic issue S4). There is now exactly one rule,
+ * and the digest reads it too, so an owner's Monday email and their dashboard
+ * cannot open with two different numbers.
+ *
+ * `reasons` are the rule's own Spanish reason labels, which is what the email
+ * template renders per athlete.
+ *
+ * The count is NOT this array's length: `limit` truncates it. Callers that
+ * need the number read `getPeriodSummary(...).athletes.atRisk`.
+ */
 export async function computeAthletesAtRisk(
   tenantId: string,
   limit: number = 5,
   now: Date = new Date(),
 ): Promise<AthleteAtRiskRow[]> {
-  const windowStart = new Date(now);
-  windowStart.setDate(windowStart.getDate() - RISK_WINDOW_DAYS);
-  const prevWindowStart = new Date(windowStart);
-  prevWindowStart.setDate(prevWindowStart.getDate() - RISK_WINDOW_DAYS);
-  const prLookback = new Date(now);
-  prLookback.setDate(prLookback.getDate() - PR_LOOKBACK_DAYS);
-
-  const athletes = await prismaBase.athlete.findMany({
-    where: { tenantId, status: "ACTIVE" },
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      bookings: {
-        where: { class: { startsAt: { gte: prevWindowStart } } },
-        select: {
-          status: true,
-          checkedInAt: true,
-          class: { select: { startsAt: true } },
-        },
-      },
-      prs: {
-        orderBy: { achievedAt: "desc" },
-        take: 1,
-        select: { achievedAt: true },
-      },
-    },
+  const tz = await getBoxPeriodTimezone(tenantId);
+  const summary = await getPeriodSummary(tenantId, {
+    preset: "last30",
+    tz,
+    now,
   });
 
-  const atRisk: AthleteAtRiskRow[] = [];
-
-  for (const a of athletes) {
-    let currentAttended = 0;
-    let currentTotal = 0;
-    let prevAttended = 0;
-    let prevTotal = 0;
-    let lastAttendedAt: Date | null = null;
-    let recentCancellations = 0;
-    let recentBookings = 0;
-
-    for (const b of a.bookings) {
-      const t = b.class.startsAt;
-      const inCurrent = t >= windowStart;
-      const counted = b.status !== "CANCELLED";
-      const attended = b.status === "ATTENDED";
-      if (inCurrent) {
-        if (counted) currentTotal += 1;
-        if (attended) currentAttended += 1;
-        recentBookings += 1;
-        if (b.status === "CANCELLED") recentCancellations += 1;
-        if (attended && b.checkedInAt) {
-          if (!lastAttendedAt || b.checkedInAt > lastAttendedAt) {
-            lastAttendedAt = b.checkedInAt;
-          }
-        }
-      } else {
-        if (counted) prevTotal += 1;
-        if (attended) prevAttended += 1;
-      }
-    }
-
-    const currentRate = currentTotal === 0 ? 0 : currentAttended / currentTotal;
-    const previousRate = prevTotal === 0 ? 0 : prevAttended / prevTotal;
-    const attendanceDeltaPct = currentRate - previousRate;
-
-    const daysSinceLastAttended = lastAttendedAt
-      ? Math.floor((now.getTime() - lastAttendedAt.getTime()) / 86400000)
-      : null;
-
-    const lastPRAt = a.prs[0]?.achievedAt ?? null;
-    const daysSinceLastPR = lastPRAt
-      ? Math.floor((now.getTime() - lastPRAt.getTime()) / 86400000)
-      : null;
-
-    const cancelRatio =
-      recentBookings > 0 ? recentCancellations / recentBookings : 0;
-
-    const detection: ChurnDetection = detectChurnRisk({
-      daysSinceLastAttended,
-      attendanceDeltaPct,
-      daysSinceLastPR,
-      recentCancellationsRatio: cancelRatio,
-    });
-
-    if (detection.atRisk) {
-      atRisk.push({
-        athleteId: a.id,
-        name: `${a.firstName} ${a.lastName}`,
-        severity: detection.severity,
-        reasons: detection.reasons,
-      });
-    }
-  }
-
-  const severityRank: Record<Severity, number> = { high: 3, med: 2, low: 1 };
-  atRisk.sort((a, b) => severityRank[b.severity] - severityRank[a.severity]);
-  return atRisk.slice(0, limit);
+  return summary.athletes.atRiskRows.slice(0, limit).map((row) => ({
+    athleteId: row.athleteId,
+    name: row.name,
+    severity: row.severity as Severity,
+    reasons: row.reasonLabels,
+  }));
 }
 
 export async function getNextBillingDate(
