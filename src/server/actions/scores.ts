@@ -5,6 +5,15 @@ import { requireCachedSession } from "@/server/session";
 import { withTenant, db as rawDb } from "../db";
 import { scoreSchema } from "@/lib/validations/score";
 import { detectPR, formatScore } from "@/lib/scores";
+import { scoreDirection } from "@/lib/scores/direction";
+import {
+  buildRanking,
+  toBoard,
+  HOME_BOARD_ROWS,
+  type Board,
+  type BoardRow,
+  type RankingCandidate,
+} from "@/lib/scores/leaderboard";
 import type { ScoreType } from "@/lib/validations/wod";
 import { logAudit } from "../audit";
 import { trackEvent } from "@/lib/analytics";
@@ -274,21 +283,104 @@ export async function listScoresForWOD(wodId: string) {
 }
 
 /**
- * Today's WOD plus its scoreboard, in a single action. The two queries still
- * run sequentially internally (scores need the wodId the first query resolves),
- * but folding them into one action lets the athlete home await it inside its
- * `Promise.all` batch instead of running the scores query serially AFTER the
- * whole batch resolves — removing that tail round-trip from the cold-start
- * render path the PWA hits on every launch.
+ * My most recent score on a WOD — the "Tu último <WOD>: <score> (<scaling>)"
+ * autofill line on the score form (audit 2026-09-15, P1: "no 'tu último Murph'
+ * autofill"). Most recent, not best: the athlete wants to know what they did
+ * last time, and `bestScore` on the WOD card already covers the best.
  */
-export async function getTodayWODWithScores(): Promise<{
+export type MyLastScoreForWOD = {
+  value: number;
+  unit: string;
+  scaling: Scaling;
+  createdAt: Date;
+} | null;
+
+export async function getMyLastScoreForWOD(
+  wodId: string,
+): Promise<MyLastScoreForWOD> {
+  const session = await requireSession();
+  const tenantId = session.user.tenantId;
+  const me = await getMyAthlete(session.user.id, tenantId);
+  if (!me) return null;
+
+  const db = withTenant(tenantId);
+  const last = await db.score.findFirst({
+    where: { wodId, athleteId: me.id },
+    orderBy: { createdAt: "desc" },
+    select: { value: true, unit: true, scaling: true, createdAt: true },
+  });
+  if (!last) return null;
+
+  return {
+    value: Number(last.value),
+    unit: last.unit,
+    scaling: last.scaling,
+    createdAt: last.createdAt,
+  };
+}
+
+/**
+ * Today's WOD plus its RANKED scoreboard, in a single action.
+ *
+ * Audit 2026-09-15 (S10): the home board showed "MURPH HOY" as 11:48, 9:04,
+ * 4:04, 9:00 because it rendered the first four rows of `listScoresForWOD`,
+ * which orders by `createdAt desc`. The ranking is now built here, once,
+ * through the shared metric-direction helpers, and carries the athlete's own
+ * pinned row so the card answers "where am I" even outside the visible head.
+ *
+ * The two queries still run sequentially internally (scores need the wodId the
+ * first query resolves), but folding them into one action lets the athlete home
+ * await it inside its `Promise.all` batch instead of running the scores query
+ * serially AFTER the whole batch resolves — removing that tail round-trip from
+ * the cold-start render path the PWA hits on every launch.
+ */
+export type TodayWODBoard = {
   wod: TodayWOD;
-  scores: Awaited<ReturnType<typeof listScoresForWOD>>;
-}> {
+  board: Board;
+  /** My own row on today's board, when I already logged a score. */
+  myScore: BoardRow | null;
+};
+
+export async function getTodayWODWithScores(): Promise<TodayWODBoard> {
+  const emptyBoard: Board = {
+    entries: [],
+    myEntry: null,
+    myRank: null,
+    totalAthletes: 0,
+  };
+
   const wod = await getTodayWOD();
-  if (!wod) return { wod: null, scores: [] };
-  const scores = await listScoresForWOD(wod.wodId);
-  return { wod, scores };
+  if (!wod) return { wod: null, board: emptyBoard, myScore: null };
+
+  const session = await requireSession();
+  const tenantId = session.user.tenantId;
+  const [rows, me] = await Promise.all([
+    listScoresForWOD(wod.wodId),
+    getMyAthlete(session.user.id, tenantId),
+  ]);
+
+  const candidates: RankingCandidate[] = rows.map((s) => ({
+    athleteId: s.athleteId,
+    athleteName: `${s.athlete.firstName} ${s.athlete.lastName ?? ""}`.trim(),
+    value: Number(s.value),
+    unit: s.unit,
+    scaling: s.scaling,
+    achievedAt: s.createdAt,
+    source: "score" as const,
+  }));
+
+  const board = toBoard(
+    buildRanking({
+      scores: candidates,
+      direction: scoreDirection(wod.scoreType),
+    }),
+    me?.id ?? null,
+    HOME_BOARD_ROWS,
+  );
+
+  const myScore = board.entries.find((r) => r.isMe) ?? board.myEntry ?? null;
+
+  return { wod, board, myScore };
 }
 
 /**
