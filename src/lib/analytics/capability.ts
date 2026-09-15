@@ -70,8 +70,15 @@ export type MovementContribution = {
 export type CapabilityBucket = {
   category: Capability;
   label: string;
-  /** 0-100 score: average of normalized contributions × 100. */
-  score: number;
+  /**
+   * 0-100 score: average of normalized contributions × 100.
+   *
+   * `null` when `movementCount === 0`. Audit 2026-09-15 (P1, /atleta/perfil):
+   * this used to short-circuit an empty bucket to `0`, which the radar plotted
+   * as "Cardio 0" / "Core 0" — indistinguishable from a category the athlete
+   * trains badly. A 0 is a measurement; absence is not.
+   */
+  score: number | null;
   /** Sum of raw normalized contributions before division (signal strength). */
   rawValue: number;
   movementCount: number;
@@ -112,7 +119,7 @@ export function buildCapabilityBuckets(input: {
     const rawValue = items.reduce((s, i) => s + i.normalizedScore, 0);
     const score =
       movementCount === 0
-        ? 0
+        ? null
         : Math.round((rawValue / movementCount) * 1000) / 10;
     buckets.push({
       category: cap,
@@ -129,7 +136,10 @@ export function pickWeakestStrongest(buckets: CapabilityBucket[]): {
   weakest: string | null;
   strongest: string | null;
 } {
-  const populated = buckets.filter((b) => b.movementCount > 0);
+  const populated = buckets.filter(
+    (b): b is CapabilityBucket & { score: number } =>
+      b.movementCount > 0 && b.score !== null,
+  );
   if (populated.length === 0) return { weakest: null, strongest: null };
   const sorted = [...populated].sort((a, b) => a.score - b.score);
   return {

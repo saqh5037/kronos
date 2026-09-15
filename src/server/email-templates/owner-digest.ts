@@ -132,7 +132,7 @@ export function renderOwnerDigestEmail(args: {
     ${nextBillingHtml}
 
     <p style="font-size: 11px; color: #777; text-align: center; margin-top: 24px;">
-      Este resumen llega cada lunes. ¿Querés frenar estos emails? Respondé este mensaje.
+      Este resumen llega cada lunes. ¿Quieres dejar de recibirlo? Responde este mensaje.
     </p>
   </div>
 </body></html>

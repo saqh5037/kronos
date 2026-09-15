@@ -25,7 +25,7 @@ export const leaderboardTour: TourDefinition = {
     {
       anchor: "leaderboard.ranking",
       title: "Tu posición",
-      body: "Aquí ves el orden completo. Búscate, márcate la meta y subí lugares entrenamiento tras entrenamiento.",
+      body: "Aquí ves el orden completo. Búscate, fija tu meta y sube lugares entrenamiento tras entrenamiento.",
       placement: "top",
     },
   ],

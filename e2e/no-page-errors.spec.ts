@@ -16,6 +16,11 @@ import { loginAs } from "./fixtures/auth";
  *     across the transition. Fixed by resolving box mode once in the layout
  *     and rendering an in-place state instead of redirecting.
  *
+ *     `/atleta/wod` and `/atleta/pagos` are the same bug in the OTHER
+ *     direction: they redirected the PERSONAL-box athlete away. Both now
+ *     render an in-place explanation too, so no `/atleta/**` page redirects on
+ *     box mode any more.
+ *
  *  2. `Hydration failed because the server rendered HTML didn't match the
  *     client` on `/atleta/perfil`, caused by `PushSubscribeButton` seeding
  *     `useState` from `Notification.permission` / `serviceWorker`.
@@ -28,8 +33,10 @@ const ROUTES = [
   "/atleta",
   "/atleta/perfil",
   "/atleta/programa",
+  "/atleta/wod",
   "/atleta/wod/nuevo",
   "/atleta/wod/foto",
+  "/atleta/pagos",
   "/atleta/onboarding",
 ] as const;
 
@@ -104,6 +111,20 @@ test.describe("athlete surface runtime errors", () => {
       await expect(
         page.getByText(/atletas independientes/i).first(),
       ).toBeVisible({ timeout: 15_000 });
+    }
+  });
+
+  test("box-only routes keep the athlete on the URL they tapped", async ({
+    page,
+  }) => {
+    // The mirror of the test above: `/atleta/wod` and `/atleta/pagos` used to
+    // `redirect()` the PERSONAL-box athlete. A box athlete must simply get the
+    // real page, on the same URL, with no bounce.
+    await loginAs(page, "atleta");
+
+    for (const route of ["/atleta/wod", "/atleta/pagos"]) {
+      await page.goto(route, { waitUntil: "load", timeout: 60_000 });
+      expect(new URL(page.url()).pathname, `${route} redirected`).toBe(route);
     }
   });
 

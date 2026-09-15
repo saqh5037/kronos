@@ -1,14 +1,43 @@
 import { Heatmap } from "@/components/charts/Heatmap";
-import { subDays, startOfDay } from "date-fns";
-import type { MyAttendanceDay } from "@/server/actions/athlete-home";
+import {
+  dayKeyToUtcNoon,
+  type HeatmapDayBucket,
+} from "@/lib/analytics/attendance-heatmap";
 
 /**
- * Server component — computes from/to once on the server so the same
- * value gets serialized to the client and avoids hydration mismatch.
+ * Server component — the calendar days are already decided.
+ *
+ * Audit 2026-09-15: this used to take raw attendance instants plus a local
+ * `new Date()` for the range, and let the CLIENT `Heatmap` bucket them with
+ * local-time `format()`. A 20:00 CDMX check-in is the next calendar day in UTC,
+ * so cells jumped depending on the viewer's device. Bucketing now happens
+ * server-side in the box timezone (`@/lib/analytics/attendance-heatmap`) and
+ * only day keys cross the boundary; `dayKeyToUtcNoon` re-anchors them so the
+ * chart's own local formatting lands back on the intended day.
  */
-export function MyHeatmap90d({ days }: { days: MyAttendanceDay[] }) {
-  const to = new Date();
-  const from = startOfDay(subDays(to, 89));
-  const data = days.map((d) => ({ date: d.date, value: 1 }));
-  return <Heatmap data={data} from={from} to={to} cellSize={11} cellGap={2} />;
+export function MyHeatmap90d({
+  buckets,
+  fromKey,
+  toKey,
+}: {
+  buckets: HeatmapDayBucket[];
+  /** First day of the window, "YYYY-MM-DD" in the box timezone. */
+  fromKey: string;
+  /** Last day of the window ("today" in the box timezone). */
+  toKey: string;
+}) {
+  const data = buckets.map((b) => ({
+    date: dayKeyToUtcNoon(b.dateKey),
+    value: b.value,
+  }));
+
+  return (
+    <Heatmap
+      data={data}
+      from={dayKeyToUtcNoon(fromKey)}
+      to={dayKeyToUtcNoon(toKey)}
+      cellSize={11}
+      cellGap={2}
+    />
+  );
 }

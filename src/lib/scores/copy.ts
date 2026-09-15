@@ -42,11 +42,7 @@ const MS_PER_DAY = 86_400_000;
 /** Whole days between two dates, counted from local midnight to local midnight. */
 export function daysUntil(target: Date, now: Date): number {
   const a = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-  const b = Date.UTC(
-    target.getFullYear(),
-    target.getMonth(),
-    target.getDate(),
-  );
+  const b = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
   return Math.round((b - a) / MS_PER_DAY);
 }
 
@@ -109,10 +105,10 @@ export function capabilityScoreLabel(score: number | null | undefined): string {
 /**
  * Boundary guard for AI narrative text that still leaks English tokens.
  *
- * The generator lives in `src/lib/ai/pr-prediction.ts` (outside this wave's
- * ownership) and emits "Necesitamos al menos 3 attempts para predecir". Until
- * that copy is fixed at the source, the presentation layer normalises the known
- * leaks so a Spanish screen never shows an English word.
+ * The deterministic fallbacks in `src/lib/ai/pr-prediction.ts` are Spanish now
+ * ("Necesitamos al menos 3 intentos para predecir"), but this guard stays: the
+ * narrative can also come straight from Gemini, and a model answering in
+ * English is not something the generator can prevent.
  */
 const NARRATIVE_REPLACEMENTS: Array<[RegExp, string]> = [
   [/\battempts\b/gi, "intentos"],

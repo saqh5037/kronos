@@ -29,8 +29,10 @@ export type MovementProfile = {
   daysSinceLastAttempt: number | null;
   isStale: boolean;
   progression: PRProgressionPoint[];
-  percentileInBox: number;
-  rankInBox: number;
+  /** `null` when the athlete has no mark on this movement, or the box has no cohort. */
+  percentileInBox: number | null;
+  /** 1 is best. `null` when there is no position to hold (see above). */
+  rankInBox: number | null;
   totalAthletesInBox: number;
   currentBest: number | null;
 };
@@ -52,11 +54,14 @@ export function buildMovementProfile(
   const days = lastPR ? daysSinceLastAttempt(lastPR.achievedAt) : null;
   const stale = isStale(lastPR?.achievedAt ?? null, threshold);
 
+  // An athlete with no mark on this movement is not ranked last, they are not
+  // ranked at all — the cohort size stays real so the UI can still say how many
+  // athletes have logged it (audit 2026-09-15: the card read "#0 DE 0").
   const peers =
     currentBest === null
       ? {
-          percentile: 0,
-          rank: 0,
+          percentile: null,
+          rank: null,
           total: input.boxCurrentBests.length,
           betterThan: 0,
         }

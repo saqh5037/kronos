@@ -47,14 +47,18 @@ describe("inferCapability", () => {
 });
 
 describe("buildCapabilityBuckets", () => {
-  it("returns 5 buckets with zero score on empty input", () => {
+  // An empty bucket used to score 0 — the same value a genuinely terrible
+  // category earns — which the radar plotted as "Cardio 0" / "Core 0" (audit
+  // 2026-09-15, P1). Absence is `null`; see
+  // tests/unit/atleta-leftovers-capability-nulls.test.ts.
+  it("returns 5 buckets with NO score on empty input", () => {
     const buckets = buildCapabilityBuckets({
       myPRs: [],
       boxMaxByMovement: new Map(),
     });
     expect(buckets).toHaveLength(5);
     for (const b of buckets) {
-      expect(b.score).toBe(0);
+      expect(b.score).toBeNull();
       expect(b.movementCount).toBe(0);
     }
   });

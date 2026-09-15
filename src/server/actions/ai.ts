@@ -9,6 +9,7 @@ import {
   buildFallbackText,
   buildGeminiPrompt,
   computeGreeting,
+  sanitizeGreeting,
   type GreetingContext,
   type GreetingTone,
 } from "@/lib/ai/personalized-greeting";
@@ -138,7 +139,14 @@ export async function getDailyGreeting(): Promise<DailyGreeting | null> {
       const raw = await generateText(prompt);
       const cleaned = sanitizeGeminiText(raw);
       if (!cleaned) return fallback;
-      return { text: cleaned, tone: computed.tone, source: "ai" };
+      // Guard BEFORE caching: the result lives 12h, so an unsafe greeting
+      // stored here outlives any render-time check. `sanitizeGreeting` rejects
+      // output that personifies the WOD ("es hora de que Helen sienta tu nuevo
+      // PR" — Helen is a benchmark workout, not a person; audit 2026-09-15)
+      // and falls back to the deterministic text.
+      const safe = sanitizeGreeting(cleaned, ctx);
+      if (safe !== cleaned) return fallback;
+      return { text: safe, tone: computed.tone, source: "ai" };
     } catch (err) {
       console.error("[ai.greeting] Gemini failed, using fallback:", err);
       return fallback;

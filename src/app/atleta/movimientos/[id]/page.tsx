@@ -77,8 +77,9 @@ export default async function MovementDetailPage({
       label: profile.frequency90d === 1 ? "ENTRENO 90D" : "ENTRENOS 90D",
     });
   }
-  // A rank of #0, or a rank inside a box of one, tells the athlete nothing.
-  if (profile.rankInBox > 0 && profile.totalAthletesInBox > 1) {
+  // No rank at all (no mark on this movement), or a rank inside a box of one,
+  // tells the athlete nothing.
+  if (profile.rankInBox !== null && profile.totalAthletesInBox > 1) {
     statTiles.push({
       value: `#${profile.rankInBox}`,
       label: `DE ${profile.totalAthletesInBox} EN EL BOX`,
