@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Trophy } from "lucide-react";
 import {
   getTVDisplay,
   type TVDisplay,
@@ -7,9 +8,23 @@ import {
   type TVLeader,
   type TVPRRow,
 } from "@/server/actions/tv";
-import { formatTime, formatDayMonth } from "@/lib/week";
+import { formatTime } from "@/lib/week";
+import { formatDateWeekday } from "@/lib/format";
+import { formatMinutesUntil } from "../_lib/format-countdown";
 
 export const metadata = { title: "Kronos — Pantalla del box" };
+
+/**
+ * Intensidad monocromática: el rank 1 va a full y los siguientes bajan opacidad
+ * en vez de cambiar de color. Naranja y rojo quedan solo para advertencias y
+ * errores reales (audit 2026-09-15).
+ */
+function rankOpacity(index: number): number {
+  if (index === 0) return 1;
+  if (index === 1) return 0.78;
+  if (index === 2) return 0.6;
+  return 0.42;
+}
 
 // Refresh data every 30 seconds when the TV is left running
 export const revalidate = 30;
@@ -28,7 +43,7 @@ export default async function TVDisplayPage({
       className="min-h-screen p-8 flex flex-col gap-6"
       style={{ background: "var(--bg)" }}
     >
-      <Header boxName={data.box.name} />
+      <Header boxName={data.box.name} brandColor={data.box.brandColor} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
         <div className="lg:col-span-2 flex flex-col gap-6">
@@ -45,48 +60,63 @@ export default async function TVDisplayPage({
           <RecentPRs prs={data.recentPRs} />
         </div>
       </div>
+
+      {/* Marca discreta: la pantalla la ve el atleta del Box, no un prospecto
+          de Kronos (audit 2026-09-15). */}
+      <footer
+        className="k-eyebrow text-right"
+        style={{ color: "var(--k-t3)", fontSize: 10 }}
+      >
+        Kronos
+      </footer>
     </main>
   );
 }
 
-function Header({ boxName }: { boxName: string }) {
+/**
+ * La pantalla es del Box, no de Kronos (audit 2026-09-15). El nombre del Box es
+ * el título y toma su color de marca; "Kronos" queda como marca discreta al pie.
+ * Los tamaños usan clamp() para que nada se desborde a 360.
+ */
+function Header({
+  boxName,
+  brandColor,
+}: {
+  boxName: string;
+  brandColor: string | null;
+}) {
   const now = new Date();
   return (
     <header
-      className="flex items-end justify-between border-b pb-4"
+      className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b pb-4"
       style={{ borderColor: "var(--line)" }}
     >
-      <div>
-        <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
-          {boxName}
-        </p>
+      <div className="min-w-0">
         <h1
-          className="font-display font-bold text-5xl tracking-tight mt-1"
+          className="font-display font-bold tracking-tight"
           style={{
-            background: "var(--k-accent)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            color: brandColor ?? "var(--k-accent)",
+            fontSize: "clamp(28px, 6vw, 64px)",
+            lineHeight: 1.02,
+            overflowWrap: "anywhere",
           }}
         >
-          KRONOS
+          {boxName}
         </h1>
       </div>
-      <div className="text-right">
+      <div className="text-right min-w-0">
         <p
-          className="font-mono font-bold text-7xl"
-          style={{ color: "var(--text)" }}
+          className="font-mono font-bold"
+          style={{
+            color: "var(--text)",
+            fontSize: "clamp(40px, 11vw, 88px)",
+            lineHeight: 1,
+          }}
         >
           {formatTime(now)}
         </p>
-        <p
-          className="k-eyebrow mt-1 capitalize"
-          style={{ color: "var(--k-t3)" }}
-        >
-          {now.toLocaleDateString("es-MX", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-          })}
+        <p className="k-eyebrow mt-1" style={{ color: "var(--k-t3)" }}>
+          {formatDateWeekday(now)}
         </p>
       </div>
     </header>
@@ -176,7 +206,8 @@ function NowPlaying({
         }}
       >
         <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
-          PRÓXIMA · en {minutesUntil}min · {formatTime(next.startsAt)}
+          PRÓXIMA · {formatMinutesUntil(minutesUntil)} ·{" "}
+          {formatTime(next.startsAt)}
         </p>
         <h2 className="font-display font-bold text-5xl mt-2 tracking-tight">
           {next.wodName ?? "Por definir"}
@@ -204,9 +235,11 @@ function NowPlaying({
 
 function TodaysWOD({ wod }: { wod: TVWOD | null }) {
   if (!wod) return null;
+  // Sin `flex-1`: la card se estiraba a 750 px con una sola línea adentro y
+  // ~550 px de vacío (audit 2026-09-15). Ahora crece con su contenido.
   return (
     <section
-      className="p-6 rounded-2xl border flex-1"
+      className="p-6 rounded-2xl border"
       style={{ borderColor: "var(--line)", background: "var(--card)" }}
     >
       <div className="flex items-center justify-between">
@@ -325,7 +358,7 @@ function WeekLeaders({ leaders }: { leaders: TVLeader[] }) {
       style={{ borderColor: "var(--line)", background: "var(--card)" }}
     >
       <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
-        Top de la semana
+        Top de la semana · asistencias
       </p>
       {leaders.length === 0 ? (
         <p className="text-sm" style={{ color: "var(--k-t3)" }}>
@@ -342,12 +375,8 @@ function WeekLeaders({ leaders }: { leaders: TVLeader[] }) {
                 <span
                   className="font-mono font-bold text-lg w-6"
                   style={{
-                    color:
-                      idx === 0
-                        ? "var(--k-accent)"
-                        : idx < 3
-                          ? "var(--k-warning)"
-                          : "var(--k-t3)",
+                    color: "var(--k-accent)",
+                    opacity: rankOpacity(idx),
                   }}
                 >
                   {idx + 1}
@@ -357,7 +386,8 @@ function WeekLeaders({ leaders }: { leaders: TVLeader[] }) {
               <span
                 className="font-mono font-bold"
                 style={{
-                  color: idx === 0 ? "var(--k-accent)" : "var(--text)",
+                  color: "var(--k-accent)",
+                  opacity: rankOpacity(idx),
                 }}
               >
                 {l.attendedCount}
@@ -376,8 +406,12 @@ function RecentPRs({ prs }: { prs: TVPRRow[] }) {
       className="p-5 rounded-2xl border"
       style={{ borderColor: "var(--line)", background: "var(--card)" }}
     >
-      <p className="k-eyebrow mb-3" style={{ color: "var(--k-warning)" }}>
-        🏆 PRs recientes
+      <p
+        className="k-eyebrow mb-3 flex items-center gap-2"
+        style={{ color: "var(--k-accent)" }}
+      >
+        <Trophy size={14} strokeWidth={2} aria-hidden="true" />
+        PRs recientes
       </p>
       {prs.length === 0 ? (
         <p className="text-sm" style={{ color: "var(--k-t3)" }}>
@@ -393,14 +427,14 @@ function RecentPRs({ prs }: { prs: TVPRRow[] }) {
                 </span>
                 <span
                   className="font-mono font-bold text-sm"
-                  style={{ color: "var(--k-warning)" }}
+                  style={{ color: "var(--k-accent)" }}
                 >
                   {p.value}
                   {p.unit}
                 </span>
               </div>
               <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-                {p.movementName} · {formatDayMonth(p.achievedAt)}
+                {p.movementName} · {formatDateWeekday(p.achievedAt)}
               </p>
             </li>
           ))}

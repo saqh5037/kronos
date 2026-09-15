@@ -25,7 +25,7 @@ export default function CtaTail() {
       >
         <DuotoneImage
           src="/images/landing/box-closing-hero-class.webp"
-          alt=""
+          alt="Clase completa de CrossFit entrenando al mismo tiempo en un Box"
           intensity="strong"
           position="center 45%"
           sizes="(max-width: 1100px) 100vw, 1200px"

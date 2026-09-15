@@ -81,7 +81,7 @@ export default function PilotBetaSignForm({
         </p>
         <p className="text-[12px]" style={{ color: "var(--k-t3)" }}>
           Te llegará un correo con el detalle. Si tarda más de 5 min, revisa
-          spam o escribe a contacto@kronos-fit.com.
+          spam o escribe a hola@kronos-fit.com.
         </p>
       </div>
     );

@@ -79,8 +79,8 @@ export default function PrivacidadPage() {
             <p>
               <strong>Del dueño o coach del Box:</strong> nombre, correo,
               teléfono, nombre del Box, cantidad de atletas, software actual y
-              preferencias de plan. Los recopilamos cuando creas tu Box o
-              cuando nos dejas tus datos en el formulario de contacto.
+              preferencias de plan. Los recopilamos cuando creas tu Box o cuando
+              nos dejas tus datos en el formulario de contacto.
             </p>
             <p>
               <strong>Del atleta:</strong> nombre, correo, teléfono, fecha de

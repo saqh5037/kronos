@@ -89,7 +89,7 @@ export default function LoginForm({ initialEmail = "" }: LoginFormProps) {
             aria-label="Correo electrónico"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="correo@tubox.com"
+            placeholder="tu@correo.com"
             required
             autoComplete="email"
             className="w-full px-4 py-3 rounded-xl border focus:outline-none transition-colors"
@@ -126,7 +126,7 @@ export default function LoginForm({ initialEmail = "" }: LoginFormProps) {
             aria-label="Correo electrónico"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="correo@tubox.com"
+            placeholder="tu@correo.com"
             required
             autoComplete="email"
             className="w-full px-4 py-3 rounded-xl border focus:outline-none transition-colors"

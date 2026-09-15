@@ -342,7 +342,7 @@ export default function SectionLeadForm() {
       >
         <Image
           src="/images/landing/box-testimonial-bg.webp"
-          alt=""
+          alt="Interior de un Box de CrossFit con racks y barras olímpicas"
           fill
           sizes="100vw"
           style={{

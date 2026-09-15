@@ -36,7 +36,7 @@ export default function SectionWhiteLabel() {
       >
         <Image
           src="/images/landing/box-community-celebration.webp"
-          alt=""
+          alt="Atletas de un Box celebrando juntos al terminar el WOD"
           fill
           sizes="100vw"
           style={{

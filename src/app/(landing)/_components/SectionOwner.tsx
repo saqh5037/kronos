@@ -60,7 +60,7 @@ export default function SectionOwner() {
       >
         <Image
           src="/images/landing/box-coach-correcting-form.webp"
-          alt=""
+          alt="Coach corrigiendo la forma de una atleta durante una clase en un Box de CrossFit"
           fill
           sizes="100vw"
           style={{

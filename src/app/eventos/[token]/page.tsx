@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import { getEventByAccessToken } from "@/server/actions/events";
 import RegisterButton from "./_components/RegisterButton";
+import { divisionLabel } from "./_lib/division-label";
 
 export const metadata = { title: "Kronos — Eventos" };
 export const dynamic = "force-dynamic";
@@ -71,7 +72,7 @@ export default async function EventoLandingPage({ params }: PageProps) {
                   className="k-eyebrow mb-1"
                   style={{ color: "var(--k-accent)" }}
                 >
-                  Partner · {event.partnerName}
+                  Organiza · {event.partnerName}
                 </p>
               ) : null}
               <h1
@@ -100,7 +101,7 @@ export default async function EventoLandingPage({ params }: PageProps) {
               <div className="mb-5 flex flex-wrap gap-2">
                 {event.divisions.map((d) => (
                   <span key={d} className="k-chip">
-                    {d}
+                    {divisionLabel(d)}
                   </span>
                 ))}
               </div>
@@ -124,7 +125,7 @@ export default async function EventoLandingPage({ params }: PageProps) {
             ) : !session?.user ? (
               <Link
                 href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
-                className="k-btn-grad w-full text-center inline-block"
+                className="k-btn-grad w-full text-center block px-5 py-3 leading-snug"
               >
                 Iniciar sesión para inscribirme
               </Link>
