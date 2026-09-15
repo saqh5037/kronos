@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { m } from "framer-motion";
+import { Check } from "lucide-react";
 
 const TESTIMONIALS = [
   {
@@ -190,9 +191,10 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
             <m.div
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 0.6 }}
-              className="text-6xl mb-4 inline-block"
+              className="mb-4 inline-flex items-center justify-center"
+              style={{ color: "var(--k-accent)" }}
             >
-              ✓
+              <Check size={56} strokeWidth={2.5} aria-hidden />
             </m.div>
             <h2 className="font-display font-bold text-2xl tracking-[-0.01em]">
               ¡Listo!

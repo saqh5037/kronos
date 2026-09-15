@@ -1,6 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import {
+  CalendarCheck,
+  ChevronLeft,
+  Dumbbell,
+  Flame,
+  type LucideIcon,
+} from "lucide-react";
 import PushSubscribeButton from "@/components/atleta/PushSubscribeButton";
 
 type Step9NotificationsProps = {
@@ -16,21 +23,25 @@ export function Step9Notifications({
 }: Step9NotificationsProps) {
   const [showedPreviews, setShowedPreviews] = useState(false);
 
-  const sampleNotifications = [
+  const sampleNotifications: {
+    title: string;
+    description: string;
+    Icon: LucideIcon;
+  }[] = [
     {
       title: "Tu WOD está listo",
       description: "Entrena hoy: Cindy — 20 min AMRAP",
-      icon: "💪",
+      Icon: Dumbbell,
     },
     {
       title: "Reserva confirmada",
       description: "Mañana a las 18:30 — CrossFit 101",
-      icon: "✅",
+      Icon: CalendarCheck,
     },
     {
       title: "Nuevo PR detectado",
       description: "¡Levantaste 10 kg más en Squat!",
-      icon: "🔥",
+      Icon: Flame,
     },
   ];
 
@@ -55,10 +66,15 @@ export function Step9Notifications({
             className="flex gap-3 p-3 rounded-lg"
             style={{
               background: "var(--k-surface)",
-              borderLeft: "3px solid var(--k-accent)",
+              borderLeft: "3px solid var(--k-line)",
             }}
           >
-            <span className="text-lg flex-shrink-0">{notif.icon}</span>
+            <span
+              className="flex-shrink-0 mt-0.5"
+              style={{ color: "var(--k-t2)" }}
+            >
+              <notif.Icon size={16} aria-hidden />
+            </span>
             <div className="flex-1 min-w-0">
               <p
                 className="text-xs font-semibold"
@@ -113,7 +129,10 @@ export function Step9Notifications({
           className="text-xs underline disabled:opacity-50"
           style={{ color: "var(--k-t3)" }}
         >
-          ← Atrás
+          <span className="inline-flex items-center justify-center gap-1">
+            <ChevronLeft size={12} aria-hidden />
+            Atrás
+          </span>
         </button>
       </div>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Apple, ChevronLeft } from "lucide-react";
 import { NumberStepper, CheckboxCard } from "@/components/kronos/forms";
 import type { BiologicalSex } from "@prisma/client";
 
@@ -59,7 +60,7 @@ export function Step2PhysicalProfile({
             color: "var(--k-t2)",
           }}
         >
-          <span className="text-lg">🍎</span>
+          <Apple size={18} aria-hidden className="shrink-0" />
           <div className="text-left flex-1">
             <div
               className="text-sm font-semibold"
@@ -167,7 +168,10 @@ export function Step2PhysicalProfile({
           className="text-xs underline disabled:opacity-50"
           style={{ color: "var(--k-t3)" }}
         >
-          ← Atrás
+          <span className="inline-flex items-center justify-center gap-1">
+            <ChevronLeft size={12} aria-hidden />
+            Atrás
+          </span>
         </button>
       </div>
     </div>
