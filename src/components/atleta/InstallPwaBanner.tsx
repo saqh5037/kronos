@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { m, AnimatePresence } from "framer-motion";
+import { EllipsisVertical, Smartphone, X } from "lucide-react";
 import {
   detectPwaPlatform,
   buildSafariDeepLink,
@@ -89,11 +90,11 @@ export default function InstallPwaBanner() {
   if (dismissed || isStandalone) return null;
 
   // 4 modos según plataforma:
-  // - ios-safari: instrucciones "Compartir → Agregar a inicio" (puede instalar)
+  // - ios-safari: instrucciones "Compartir" y "Agregar a inicio" (puede instalar)
   // - ios-other: Chrome/Firefox/Edge iOS o in-app browser → botón "Abrir en
   //   Safari" porque Apple SOLO deja a Safari instalar PWAs como standalone
   // - android-prompt: tiene beforeinstallprompt → botón nativo "Instalar"
-  // - android-manual: Android sin prompt → instrucciones menú ⋮
+  // - android-manual: Android sin prompt → instrucciones del menú del navegador
   const mode =
     platform === "ios-safari"
       ? "ios-safari"
@@ -111,11 +112,14 @@ export default function InstallPwaBanner() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -12, scale: 0.95, height: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="mx-3.5 mt-3 mb-1 rounded-2xl p-3.5 flex items-start gap-3 overflow-hidden"
+          className="mx-3.5 mb-1 rounded-2xl p-3.5 flex items-start gap-3 overflow-hidden"
           style={{
+            // Notch + la campana de notificaciones (fixed, 44px, top 12) viven
+            // arriba del banner: 64px lo dejan pasar sin taparse.
+            marginTop: "calc(env(safe-area-inset-top, 0px) + 64px)",
             background:
-              "linear-gradient(135deg, var(--card) 0%, var(--k-elevated) 100%)",
-            border: "1px solid var(--line)",
+              "linear-gradient(135deg, var(--k-surface) 0%, var(--k-elevated) 100%)",
+            border: "1px solid var(--k-line)",
           }}
         >
           {/* Device icon */}
@@ -123,36 +127,25 @@ export default function InstallPwaBanner() {
             className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{
               background: "var(--k-accent-soft)",
-              border: "1px solid var(--fire-line)",
+              border: "1px solid var(--k-accent-line)",
+              color: "var(--k-accent)",
             }}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--k-accent)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-              <line x1="12" y1="18" x2="12.01" y2="18" />
-            </svg>
+            <Smartphone size={18} aria-hidden />
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="text-[13px] font-semibold text-[var(--text)] mb-0.5">
+            <div className="text-[13px] font-semibold text-[var(--k-t1)] mb-0.5">
               Instalar Kronos
             </div>
             {mode === "ios-safari" && (
               <div className="text-[11px] leading-relaxed text-[var(--k-t3)]">
                 Toca{" "}
-                <span className="font-bold text-[var(--k-warning)]">
+                <span className="font-bold text-[var(--k-accent)]">
                   Compartir
                 </span>{" "}
-                (icono cuadrado con flecha) y luego{" "}
-                <span className="font-bold text-[var(--k-warning)]">
+                (el cuadro con la flecha) y luego{" "}
+                <span className="font-bold text-[var(--k-accent)]">
                   Agregar a inicio
                 </span>
                 .
@@ -161,12 +154,15 @@ export default function InstallPwaBanner() {
             {mode === "ios-other" && (
               <div className="text-[11px] leading-relaxed text-[var(--k-t3)]">
                 Apple solo deja a{" "}
-                <span className="font-bold text-[var(--k-warning)]">
-                  Safari
+                <span className="font-bold text-[var(--k-accent)]">Safari</span>{" "}
+                instalar apps. Toca el botón para abrir Kronos en Safari y ahí
+                elige{" "}
+                <span className="font-bold text-[var(--k-accent)]">
+                  Compartir
                 </span>{" "}
-                instalar apps. Toca el botón para abrir Kronos en Safari y luego{" "}
-                <span className="font-bold text-[var(--k-warning)]">
-                  Compartir → Agregar a inicio
+                y luego{" "}
+                <span className="font-bold text-[var(--k-accent)]">
+                  Agregar a inicio
                 </span>
                 .
               </div>
@@ -180,13 +176,17 @@ export default function InstallPwaBanner() {
             {mode === "android-manual" && (
               <div className="text-[11px] leading-relaxed text-[var(--k-t3)]">
                 Abre el menú{" "}
-                <span className="font-bold text-[var(--k-warning)]">⋮</span> del
-                navegador y toca{" "}
-                <span className="font-bold text-[var(--k-warning)]">
+                <EllipsisVertical
+                  size={12}
+                  aria-hidden
+                  className="inline align-text-bottom text-[var(--k-accent)]"
+                />{" "}
+                del navegador y toca{" "}
+                <span className="font-bold text-[var(--k-accent)]">
                   Instalar app
                 </span>{" "}
                 o{" "}
-                <span className="font-bold text-[var(--k-warning)]">
+                <span className="font-bold text-[var(--k-accent)]">
                   Agregar a inicio
                 </span>
                 .
@@ -198,7 +198,8 @@ export default function InstallPwaBanner() {
             {mode === "android-prompt" && (
               <m.button
                 onClick={handleInstall}
-                className="k-btn-grad text-[11px] px-3 py-1.5 rounded-lg font-semibold"
+                className="k-btn-grad text-[11px] px-3 rounded-lg font-semibold"
+                style={{ minHeight: 44 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -208,7 +209,8 @@ export default function InstallPwaBanner() {
             {mode === "ios-other" && (
               <m.button
                 onClick={handleOpenInSafari}
-                className="k-btn-grad text-[11px] px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap"
+                className="k-btn-grad text-[11px] px-3 rounded-lg font-semibold whitespace-nowrap"
+                style={{ minHeight: 44 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -217,17 +219,11 @@ export default function InstallPwaBanner() {
             )}
             <button
               onClick={dismiss}
-              className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--k-t3)] hover:text-[var(--k-t2)] hover:bg-[var(--k-elevated)] transition-colors"
+              className="rounded-full flex items-center justify-center text-[var(--k-t3)] hover:text-[var(--k-t2)] hover:bg-[var(--k-elevated)] transition-colors"
+              style={{ width: 44, height: 44 }}
               aria-label="Cerrar"
             >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path
-                  d="M2 2L12 12M12 2L2 12"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <X size={16} aria-hidden />
             </button>
           </div>
         </m.div>
