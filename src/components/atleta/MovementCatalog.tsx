@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { m, AnimatePresence } from "framer-motion";
+import { Search } from "lucide-react";
 import { extractYouTubeId, getYouTubeThumbnail } from "@/lib/youtube";
 import type { MovementRow } from "@/server/actions/movements";
 
@@ -92,36 +93,14 @@ const CATEGORIES: { key: Category; label: string }[] = [
   { key: "ACCESSORY", label: "Accesorio" },
 ];
 
-function categoryChipClass(cat: string): string {
-  switch (cat) {
-    case "STRENGTH":
-      return "k-chip-steel";
-    case "GYMNASTICS":
-      return "k-chip-moss";
-    case "OLYMPIC":
-      return "bg-gradient-to-r from-[var(--k-accent)] to-[var(--k-warning)] text-white border-transparent";
-    case "MONOSTRUCTURAL":
-      return "k-chip-amber";
-    case "ACCESSORY":
-      return "k-chip-ghost";
-    default:
-      return "k-chip-ghost";
-  }
-}
-
-function categoryGlow(cat: string): string {
-  switch (cat) {
-    case "STRENGTH":
-      return "rgba(100,116,139,0.25)";
-    case "GYMNASTICS":
-      return "rgba(74,124,89,0.25)";
-    case "OLYMPIC":
-      return "rgba(220,75,23,0.25)";
-    case "MONOSTRUCTURAL":
-      return "rgba(217,119,6,0.25)";
-    default:
-      return "rgba(255,255,255,0.06)";
-  }
+/**
+ * Audit 2026-09-15 (P1 colour, S2): the card glow encoded the category in four
+ * off-palette colours (slate, green, burnt orange, amber) — decorative colour
+ * on a taxonomy, and orange means "warning" everywhere else. One lime glow; the
+ * chip label carries the category.
+ */
+function categoryGlow(): string {
+  return "rgba(200, 255, 45, 0.12)";
 }
 
 function categoryLabel(cat: string): string {
@@ -285,7 +264,7 @@ export default function MovementCatalog({
                     className="rounded-xl border border-[var(--line)] bg-[var(--card)] overflow-hidden"
                     whileHover={{
                       scale: 1.03,
-                      boxShadow: `0 8px 32px ${categoryGlow(mv.category)}`,
+                      boxShadow: `0 8px 32px ${categoryGlow()}`,
                     }}
                     transition={{
                       type: "spring",
@@ -348,7 +327,7 @@ export default function MovementCatalog({
                       </h3>
                       <div className="flex items-center gap-2 mt-1.5">
                         <span
-                          className={`k-chip text-[9px] py-0.5 px-1.5 ${categoryChipClass(mv.category)}`}
+                          className="k-chip k-chip-ghost text-[9px] py-0.5 px-1.5"
                         >
                           {categoryLabel(mv.category)}
                         </span>
@@ -374,7 +353,12 @@ export default function MovementCatalog({
           animate={{ opacity: 1, y: 0 }}
           className="k-card p-8 text-center"
         >
-          <p className="text-3xl mb-2">🔍</p>
+          <Search
+            width={28}
+            height={28}
+            aria-hidden
+            className="mx-auto mb-2 text-[var(--k-t3)]"
+          />
           <p className="text-sm text-[var(--k-t2)]">
             No encontramos movimientos con &quot;{search}&quot;
           </p>

@@ -11,7 +11,7 @@ export default function HistorialPage() {
   return (
     <>
       {/* BACK LINK — paints immediately */}
-      <div style={{ padding: "48px 16px 0" }}>
+      <div style={{ padding: "56px 16px 0" }}>
         <AthleteBackLink href="/atleta" label="Inicio" />
       </div>
 

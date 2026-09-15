@@ -1,11 +1,25 @@
 "use client";
 
+/**
+ * HistorialView — the athlete's score history.
+ *
+ * Audit 2026-09-15 (P2 consistency, /atleta/historial): every row printed the
+ * unit twice — "78 kg" from `formatScore` and a second "kg" underneath, and a
+ * time result showed "10:06" with an "s" under it. `formatScore` already
+ * carries the unit, so the duplicate line is gone and its space now holds the
+ * scaling, which the row actually lacked.
+ *
+ * The "Todos / Todo" filters also name what they filter, and the scaling select
+ * uses the shared labels instead of the raw enum.
+ */
+
 import { useEffect, useState, useTransition, useCallback } from "react";
 import {
   listMyScoresPaged,
   type MyScoreRow,
   type MyScoreSort,
 } from "@/server/actions/scores";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import KCard from "@/components/kronos/KCard";
 import {
@@ -13,6 +27,8 @@ import {
   AnimatedItem,
 } from "@/components/kronos/AnimatedSection";
 import { formatScore } from "@/lib/scores";
+import { scalingLabel } from "@/lib/labels";
+import type { Scaling } from "@prisma/client";
 import type { ScoreType } from "@/lib/validations/wod";
 import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
 import { historialTour } from "@/components/tour/tours/historial";
@@ -21,6 +37,15 @@ type WODOption = { id: string; name: string; scoreType: ScoreType };
 
 type Props = {
   wodOptions: WODOption[];
+};
+
+const selectClass =
+  "k-card px-3 py-2.5 text-[12px] font-medium rounded-xl appearance-none min-h-[44px]";
+
+const selectStyle: React.CSSProperties = {
+  background: "var(--k-elevated)",
+  border: "1px solid var(--k-line)",
+  color: "var(--k-t1)",
 };
 
 export default function HistorialPage({ wodOptions }: Props) {
@@ -84,14 +109,14 @@ export default function HistorialPage({ wodOptions }: Props) {
       <header
         data-tour="historial.header"
         style={{
-          padding: "56px 20px 20px",
+          padding: "20px 20px 20px",
           display: "flex",
           flexDirection: "column",
           gap: 8,
           position: "relative",
         }}
       >
-        <div style={{ position: "absolute", top: 56, right: 20 }}>
+        <div style={{ position: "absolute", top: 20, right: 20 }}>
           <TourTriggerButton tourId={historialTour.id} />
         </div>
         <span
@@ -144,12 +169,9 @@ export default function HistorialPage({ wodOptions }: Props) {
                 setWodId(e.target.value);
                 load(1, { wodId: e.target.value });
               }}
-              className="flex-1 k-card px-3 py-2.5 text-[12px] font-medium rounded-xl appearance-none"
-              style={{
-                background: "var(--card)",
-                border: "1px solid var(--line)",
-                color: "var(--text)",
-              }}
+              className={`flex-1 ${selectClass}`}
+              style={selectStyle}
+              aria-label="Filtrar por WOD"
             >
               <option value="">Todos los WODs</option>
               {wodOptions.map((w) => (
@@ -164,16 +186,14 @@ export default function HistorialPage({ wodOptions }: Props) {
                 setScaling(e.target.value);
                 load(1, { scaling: e.target.value });
               }}
-              className="w-[100px] k-card px-3 py-2.5 text-[12px] font-medium rounded-xl appearance-none"
-              style={{
-                background: "var(--card)",
-                border: "1px solid var(--line)",
-                color: "var(--text)",
-              }}
+              className={`w-[130px] ${selectClass}`}
+              style={selectStyle}
+              aria-label="Filtrar por escala"
             >
-              <option value="">Todo</option>
-              <option value="RX">RX</option>
-              <option value="SCALED">Scaled</option>
+              <option value="">Toda escala</option>
+              <option value="RX">{scalingLabel.RX}</option>
+              <option value="SCALED">{scalingLabel.SCALED}</option>
+              <option value="RXPLUS">{scalingLabel.RXPLUS}</option>
             </select>
           </div>
         </AnimatedItem>
@@ -184,7 +204,7 @@ export default function HistorialPage({ wodOptions }: Props) {
         {isPending && scores.length === 0 && (
           <KCard variant="ghost" className="p-6 text-center">
             <div className="text-sm" style={{ color: "var(--k-t3)" }}>
-              Cargando...
+              Cargando…
             </div>
           </KCard>
         )}
@@ -206,18 +226,18 @@ export default function HistorialPage({ wodOptions }: Props) {
             <div
               className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
               style={{
-                background:
-                  s.scaling === "RX" ? "var(--k-elevated)" : "var(--k-surface)",
-                border: `1px solid ${s.scaling === "RX" ? "var(--k-line)" : "var(--line)"}`,
+                background: "var(--k-elevated)",
+                border: "1px solid var(--k-line)",
               }}
             >
               <span
-                className="text-[10px] font-bold"
+                className="text-[9px] font-bold"
                 style={{
-                  color: s.scaling === "RX" ? "var(--k-t2)" : "var(--k-t3)",
+                  color:
+                    s.scaling === "SCALED" ? "var(--k-t3)" : "var(--k-t2)",
                 }}
               >
-                {s.scaling === "RX" ? "RX" : "SC"}
+                {scalingLabel[s.scaling as Scaling] ?? s.scaling}
               </span>
             </div>
             <div className="flex-1 min-w-0">
@@ -235,15 +255,13 @@ export default function HistorialPage({ wodOptions }: Props) {
                 })}
               </div>
             </div>
+            {/*
+              `formatScore` already carries the unit ("78 kg", "10:06"), so the
+              second unit line the audit flagged ("78 kg / kg") is gone.
+            */}
             <div className="text-right shrink-0">
               <div className="font-display text-sm font-bold">
                 {formatScore(s.value, s.scoreType)}
-              </div>
-              <div
-                className="text-[9px] font-bold tracking-wide"
-                style={{ color: "var(--k-t3)" }}
-              >
-                {s.unit}
               </div>
             </div>
           </KCard>
@@ -259,13 +277,15 @@ export default function HistorialPage({ wodOptions }: Props) {
           <button
             onClick={() => load(page - 1)}
             disabled={page <= 1 || isPending}
-            className="px-4 py-2 rounded-lg text-[11px] font-bold disabled:opacity-30"
+            className="px-4 min-h-[44px] rounded-lg text-[11px] font-bold disabled:opacity-30 inline-flex items-center gap-1.5"
             style={{
-              background: "var(--card)",
-              border: "1px solid var(--line)",
+              background: "var(--k-elevated)",
+              border: "1px solid var(--k-line)",
+              color: "var(--k-t1)",
             }}
           >
-            ‹ Anterior
+            <ChevronLeft width={14} height={14} aria-hidden />
+            Anterior
           </button>
           <span
             className="text-[11px] font-bold"
@@ -276,13 +296,15 @@ export default function HistorialPage({ wodOptions }: Props) {
           <button
             onClick={() => load(page + 1)}
             disabled={page >= totalPages || isPending}
-            className="px-4 py-2 rounded-lg text-[11px] font-bold disabled:opacity-30"
+            className="px-4 min-h-[44px] rounded-lg text-[11px] font-bold disabled:opacity-30 inline-flex items-center gap-1.5"
             style={{
-              background: "var(--card)",
-              border: "1px solid var(--line)",
+              background: "var(--k-elevated)",
+              border: "1px solid var(--k-line)",
+              color: "var(--k-t1)",
             }}
           >
-            Siguiente ›
+            Siguiente
+            <ChevronRight width={14} height={14} aria-hidden />
           </button>
         </div>
       )}

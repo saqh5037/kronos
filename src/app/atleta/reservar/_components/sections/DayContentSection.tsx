@@ -1,18 +1,26 @@
 /**
- * DayContentSection — streams the eyebrow + class list for the selected day.
+ * DayContentSection — streams the booked summary, eyebrow and class list.
+ *
+ * Audit 2026-09-15 (P2, /atleta/reservar):
+ *  - "MARTES 15 · 6 CLASES", then "6 CLASES", then "15-SEP" stated the same
+ *    fact three times in 120 px → one eyebrow line.
+ *  - "No 'tienes clase mañana 06:00' summary; the lime dot on MIÉ 16 is the
+ *    only booked indicator" → a booked summary line sits above the list.
  *
  * Receives selected/today as ISO strings (serializable over RSC boundary).
- * Fetches listAvailableClasses once; used by only ONE section, so no cache needed.
+ * Fetches listWeekClasses once; used by only ONE section, so no cache needed.
  */
 
 import Link from "next/link";
 import type { Route } from "next";
+import { CalendarCheck } from "lucide-react";
 import { type AvailableClass } from "@/server/actions/bookings";
 import { getBoxTimezone } from "@/server/cache";
 import { getCachedSession } from "@/server/session";
 import { listWeekClassesCached } from "../request-cache";
 import { ClassesList } from "../ClassesList";
 import { Icon } from "@/components/kronos/v3/icons";
+import { formatTime24, formatDateWeekday } from "@/lib/format";
 
 function sameDay(a: Date, b: Date) {
   return (
@@ -31,6 +39,15 @@ function nextDayDateKey(selected: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/** "Hoy" / "Mañana" / "mar 16 sep" — the athlete's frame of reference. */
+function whenLabel(date: Date, today: Date): string {
+  if (sameDay(date, today)) return "Hoy";
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (sameDay(date, tomorrow)) return "Mañana";
+  return formatDateWeekday(date);
+}
+
 export async function DayContentSection({
   selectedIso,
   todayIso,
@@ -39,28 +56,85 @@ export async function DayContentSection({
   todayIso: string;
 }) {
   const selected = new Date(selectedIso);
+  const today = new Date(todayIso);
 
   let dayClasses: AvailableClass[] = [];
+  let allClasses: AvailableClass[] = [];
   let boxTimezone = "UTC";
   try {
     const session = await getCachedSession();
     if (session?.user?.tenantId) {
       boxTimezone = await getBoxTimezone(session.user.tenantId);
     }
-    const all = await listWeekClassesCached(todayIso);
-    dayClasses = all.filter((c) => sameDay(c.startsAt, selected));
+    allClasses = await listWeekClassesCached(todayIso);
+    dayClasses = allClasses.filter((c) => sameDay(c.startsAt, selected));
   } catch {
     // no session
   }
 
+  // The athlete's next booked class this week, whichever day it falls on.
+  const nextBooked = allClasses
+    .filter(
+      (c) =>
+        c.myBookingStatus === "BOOKED" &&
+        c.startsAt.getTime() >= today.getTime(),
+    )
+    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())[0];
+
   const dayLabel = new Intl.DateTimeFormat("es-MX", {
     weekday: "long",
     day: "numeric",
+    month: "short",
   }).format(selected);
 
   return (
     <>
-      {/* Eyebrow del día */}
+      {/* Resumen de tu próxima reserva — la respuesta a "¿ya reservé?" */}
+      {nextBooked && (
+        <div style={{ padding: "0 20px", marginTop: 14 }}>
+          <Link
+            href={`/atleta/reservar?date=${nextBooked.startsAt.getFullYear()}-${String(
+              nextBooked.startsAt.getMonth() + 1,
+            ).padStart(2, "0")}-${String(nextBooked.startsAt.getDate()).padStart(2, "0")}` as Route}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "12px 14px",
+              borderRadius: 12,
+              background: "var(--k-accent-soft)",
+              border: "1px solid var(--k-accent-line)",
+              color: "var(--k-t1)",
+              textDecoration: "none",
+              minHeight: 48,
+            }}
+          >
+            <CalendarCheck
+              width={16}
+              height={16}
+              aria-hidden
+              style={{ color: "var(--k-accent)", flexShrink: 0 }}
+            />
+            <span
+              style={{
+                fontFamily: "var(--k-font-body)",
+                fontSize: 13,
+                fontWeight: 500,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {whenLabel(nextBooked.startsAt, today)}{" "}
+              {formatTime24(nextBooked.startsAt)}
+              {nextBooked.coach?.name ? ` · ${nextBooked.coach.name}` : ""} ·{" "}
+              {nextBooked.bookedCount}/{nextBooked.capacity}
+            </span>
+          </Link>
+        </div>
+      )}
+
+      {/* Eyebrow del día — una sola línea con el día y el conteo */}
       <div style={{ padding: "0 20px", marginTop: 16 }}>
         <span
           style={{
@@ -153,7 +227,7 @@ export async function DayContentSection({
                   minHeight: 40,
                 }}
               >
-                Ver mañana →
+                Ver mañana
               </Link>
             </div>
           </div>
