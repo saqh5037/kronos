@@ -1,4 +1,4 @@
-import { Layout, StaffInvitationActions } from "./page";
+import { Layout, StaffInvitationActions } from "./_components/InvitationShell";
 
 /**
  * Estado 404 de una invitación al equipo (audit 2026-09-15). A un coach lo

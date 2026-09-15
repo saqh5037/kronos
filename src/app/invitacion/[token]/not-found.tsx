@@ -1,4 +1,4 @@
-import { InvitationActions, Layout } from "./page";
+import { InvitationActions, Layout } from "./_components/InvitationShell";
 
 /**
  * Estado 404 de una invitación de atleta (audit 2026-09-15).

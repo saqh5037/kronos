@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import KronosLogo from "@/components/brand/KronosLogo";
 import { getStaffInvitationByToken } from "@/server/actions/staff-invitations";
 import { isInvitationActionable } from "@/lib/staff-invitation";
 import { AcceptStaffInvitationForm } from "./_components/AcceptStaffInvitationForm";
+import { Layout, StaffInvitationActions } from "./_components/InvitationShell";
 
 export const metadata = { title: "Kronos — Invitación al equipo" };
 export const dynamic = "force-dynamic";
@@ -88,48 +88,3 @@ export default async function StaffInvitationPage({
  * salida primaria sigue siendo una cuenta gratis: con ella entra hoy y el dueño
  * la conecta al equipo después.
  */
-export function StaffInvitationActions() {
-  return (
-    <div className="flex flex-col gap-3">
-      <Link href="/atleta-signup" className="k-btn-grad w-full text-center">
-        Crear cuenta gratis
-      </Link>
-      <Link href="/login" className="k-btn-ghost w-full text-center">
-        Ya tengo cuenta
-      </Link>
-    </div>
-  );
-}
-
-export function Layout({
-  children,
-  boxName,
-  brandColor,
-}: {
-  children: React.ReactNode;
-  boxName?: string;
-  brandColor?: string | null;
-}) {
-  return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--k-bg)]">
-      <div className="w-full max-w-md">
-        <div className="flex flex-col items-center gap-3 mb-6">
-          <KronosLogo variant="lockup-h" size={34} />
-          <p className="text-xs text-center text-[var(--k-t3)] max-w-[22rem]">
-            Kronos es el sistema con el que un box lleva clases, reservas, WODs,
-            asistencia y cobros en un solo lugar.
-          </p>
-          {boxName && (
-            <p
-              className="k-eyebrow text-center"
-              style={{ color: brandColor ?? "var(--k-t3)" }}
-            >
-              {boxName}
-            </p>
-          )}
-        </div>
-        <div className="k-card p-6">{children}</div>
-      </div>
-    </div>
-  );
-}
