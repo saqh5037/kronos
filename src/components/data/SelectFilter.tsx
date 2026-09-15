@@ -33,7 +33,7 @@ export function SelectFilter({
       <select
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="rounded-lg border border-[var(--line)] bg-[var(--card)] px-3 py-1.5 text-sm text-[var(--text)] focus:border-[var(--strain-line)] focus:outline-none"
+        className="min-h-11 rounded-lg border border-[var(--k-line)] bg-[var(--k-surface)] px-3 py-1.5 text-sm text-[var(--k-t1)] focus:border-[var(--k-accent-line)] focus:outline-none"
       >
         <option value="">{allLabel}</option>
         {options.map((opt) => (

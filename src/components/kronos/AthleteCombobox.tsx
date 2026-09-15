@@ -72,10 +72,10 @@ export default function AthleteCombobox({
           setOpen(!open);
           if (!open) setQuery("");
         }}
-        className="w-full text-left bg-[var(--k-elevated)] text-[var(--text)] text-sm rounded-lg px-3 py-2 border border-[var(--line)] min-w-[160px] flex items-center justify-between gap-2 hover:border-[var(--k-line-2)] transition-colors"
+        className="w-full text-left bg-[var(--k-elevated)] text-[var(--k-t1)] text-sm rounded-lg px-3 py-2 border border-[var(--k-line)] min-w-[160px] flex items-center justify-between gap-2 hover:border-[var(--k-line-2)] transition-colors"
       >
         <span
-          className={selected ? "text-[var(--text)]" : "text-[var(--k-t3)]"}
+          className={selected ? "text-[var(--k-t1)]" : "text-[var(--k-t3)]"}
         >
           {selected
             ? `${selected.firstName} ${selected.lastName}`
@@ -105,9 +105,9 @@ export default function AthleteCombobox({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute z-50 mt-1 w-full min-w-[200px] bg-[var(--card)] border border-[var(--line)] rounded-lg shadow-xl overflow-hidden"
+            className="absolute z-50 mt-1 w-full min-w-[200px] bg-[var(--k-surface)] border border-[var(--k-line)] rounded-lg shadow-xl overflow-hidden"
           >
-            <div className="p-2 border-b border-[var(--line)]">
+            <div className="p-2 border-b border-[var(--k-line)]">
               <div className="relative">
                 <svg
                   className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--k-t3)]"
@@ -136,7 +136,7 @@ export default function AthleteCombobox({
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={placeholder}
-                  className="w-full bg-[var(--k-elevated)] text-[var(--text)] text-sm rounded-md pl-8 pr-3 py-1.5 border border-[var(--line)] placeholder:text-[var(--k-t3)] focus:outline-none focus:border-[var(--k-t2)] transition-colors"
+                  className="w-full bg-[var(--k-elevated)] text-[var(--k-t1)] text-sm rounded-md pl-8 pr-3 py-1.5 border border-[var(--k-line)] placeholder:text-[var(--k-t3)] focus:outline-none focus:border-[var(--k-t2)] transition-colors"
                 />
               </div>
             </div>
@@ -145,7 +145,7 @@ export default function AthleteCombobox({
               <button
                 type="button"
                 onClick={() => handleSelect(null)}
-                className="w-full text-left px-3 py-2 text-sm text-[var(--k-t3)] hover:bg-[var(--k-elevated)] transition-colors border-b border-[var(--line)]"
+                className="w-full text-left px-3 py-2 text-sm text-[var(--k-t3)] hover:bg-[var(--k-elevated)] transition-colors border-b border-[var(--k-line)]"
               >
                 -- Sin match --
               </button>

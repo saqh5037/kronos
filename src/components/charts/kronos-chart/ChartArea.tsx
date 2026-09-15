@@ -38,12 +38,15 @@ export function ChartArea({
           <stop offset="100%" stopColor={color} stopOpacity={0} />
         </linearGradient>
         <clipPath id={clipId}>
+          {/* Reveal with scaleX rather than animating the rect width. */}
           <m.rect
             x={0}
             y={0}
+            width={width}
             height={height}
-            initial={skipMotion ? { width } : { width: 0 }}
-            animate={{ width }}
+            style={{ transformOrigin: "left center", transformBox: "fill-box" }}
+            initial={skipMotion ? { scaleX: 1 } : { scaleX: 0 }}
+            animate={{ scaleX: 1 }}
             transition={
               skipMotion
                 ? { duration: 0 }

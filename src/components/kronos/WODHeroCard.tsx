@@ -1,13 +1,10 @@
 import type { WODSummary } from "@/server/actions/wods";
 
-const TYPE_COLOR: Record<string, string> = {
-  STRENGTH: "var(--k-warning)",
-  AMRAP: "var(--k-warning)",
-  EMOM: "var(--k-danger)",
-  TABATA: "#f5a623",
-  FORTIME: "var(--k-accent)",
-  METCON: "var(--k-accent)",
-};
+/**
+ * WOD type is a category, not a severity: colouring TABATA orange and EMOM red
+ * told the athlete something was wrong (audit 2026-09-15, S2). The type now
+ * reads as a chip with a word; the accent stays lime everywhere.
+ */
 
 const TYPE_LABEL: Record<string, string> = {
   STRENGTH: "Strength",
@@ -25,8 +22,13 @@ const SCORE_TYPE_LABEL: Record<string, string> = {
   WEIGHT: "Heaviest",
 };
 
+/** Lime as raw channels, so alpha can be applied without string-concatenating
+ *  onto a `var()` (which is not valid CSS). */
+const LIME = "200, 255, 45";
+const lime = (alpha: number) => `rgba(${LIME}, ${alpha})`;
+
 export function WODHeroCard({ w }: { w: WODSummary }) {
-  const accent = TYPE_COLOR[w.type] ?? "var(--text)";
+  const accent = "var(--k-accent)";
   const typeLabel = TYPE_LABEL[w.type] ?? w.type;
   const scoreLabel = SCORE_TYPE_LABEL[w.scoreType] ?? w.scoreType;
 
@@ -34,9 +36,9 @@ export function WODHeroCard({ w }: { w: WODSummary }) {
     <article
       className="rounded-2xl p-5 relative overflow-hidden transition-all hover:scale-[1.005]"
       style={{
-        background: "var(--card)",
-        border: `1px solid ${accent}30`,
-        boxShadow: `0 0 0 1px ${accent}10, 0 4px 20px ${accent}08, inset 0 0 60px ${accent}06`,
+        background: "var(--k-surface)",
+        border: `1px solid ${lime(0.18)}`,
+        boxShadow: `0 4px 20px ${lime(0.05)}`,
       }}
     >
       {/* Top accent bar */}
@@ -51,7 +53,7 @@ export function WODHeroCard({ w }: { w: WODSummary }) {
         aria-hidden
         className="absolute -inset-px pointer-events-none rounded-2xl"
         style={{
-          background: `radial-gradient(circle at 0% 0%, ${accent}10, transparent 50%)`,
+          background: `radial-gradient(circle at 0% 0%, ${lime(0.06)}, transparent 50%)`,
         }}
       />
 
@@ -71,9 +73,9 @@ export function WODHeroCard({ w }: { w: WODSummary }) {
             <span
               className="rounded-full px-2.5 py-0.5 font-mono text-[10px] font-bold tracking-wider uppercase inline-flex items-center gap-1"
               style={{
-                background: `${accent}18`,
+                background: "var(--k-accent-soft)",
                 color: accent,
-                border: `1px solid ${accent}35`,
+                border: "1px solid var(--k-accent-line)",
               }}
             >
               {typeLabel}
@@ -85,7 +87,7 @@ export function WODHeroCard({ w }: { w: WODSummary }) {
               style={{
                 background: "var(--k-elevated)",
                 color: "var(--k-t2)",
-                border: "1px solid var(--line)",
+                border: "1px solid var(--k-line)",
               }}
             >
               {w.timeCap} min cap
@@ -111,7 +113,7 @@ export function WODHeroCard({ w }: { w: WODSummary }) {
         {w.description && (
           <pre
             className="text-[12.5px] leading-[1.55] font-sans whitespace-pre-wrap mb-4"
-            style={{ color: "var(--text)" }}
+            style={{ color: "var(--k-t1)" }}
           >
             {w.description}
           </pre>
@@ -121,7 +123,7 @@ export function WODHeroCard({ w }: { w: WODSummary }) {
         <div
           className="flex items-center gap-3 pt-3 border-t font-mono text-[10px] font-bold uppercase tracking-wider"
           style={{
-            borderColor: "var(--line)",
+            borderColor: "var(--k-line)",
             color: "var(--k-t3)",
           }}
         >

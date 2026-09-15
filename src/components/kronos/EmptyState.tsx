@@ -11,11 +11,30 @@ export type EmptyStateProps = {
   className?: string;
 };
 
+/** Warning and danger mean warning and danger; everything else is brand. */
 const TONE_COLOR: Record<EmptyStateTone, string> = {
-  neutral: "var(--k-t3)",
-  info: "var(--k-warning)",
-  warning: "var(--k-t2)",
+  neutral: "var(--k-t2)",
+  info: "var(--k-accent)",
+  warning: "var(--k-warning)",
   danger: "var(--k-danger)",
+};
+
+/**
+ * Soft/line companions. They are spelled out because a `var()` cannot carry an
+ * alpha suffix — `var(--k-accent)15` is not a colour, it is nothing.
+ */
+const TONE_SOFT: Record<EmptyStateTone, string> = {
+  neutral: "rgba(138, 138, 148, 0.10)",
+  info: "var(--k-accent-soft)",
+  warning: "rgba(255, 176, 32, 0.10)",
+  danger: "rgba(255, 90, 90, 0.10)",
+};
+
+const TONE_LINE: Record<EmptyStateTone, string> = {
+  neutral: "var(--k-line-2)",
+  info: "var(--k-accent-line)",
+  warning: "rgba(255, 176, 32, 0.30)",
+  danger: "rgba(255, 90, 90, 0.30)",
 };
 
 export function EmptyState({
@@ -34,8 +53,8 @@ export function EmptyState({
       <div
         className="w-12 h-12 rounded-full flex items-center justify-center"
         style={{
-          background: `${accent}15`,
-          border: `1px solid ${accent}30`,
+          background: TONE_SOFT[tone],
+          border: `1px solid ${TONE_LINE[tone]}`,
           color: accent,
         }}
       >
@@ -43,7 +62,7 @@ export function EmptyState({
       </div>
       <h3
         className="font-display font-bold text-base leading-tight"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--k-t1)" }}
       >
         {title}
       </h3>

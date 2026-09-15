@@ -11,6 +11,7 @@ import {
   Legend,
 } from "recharts";
 import { CHART_COLORS, CHART_PALETTE } from "./tokens";
+import { ZERO_FLOOR_DOMAIN } from "./domain";
 
 export type BarSeries = {
   key: string;
@@ -27,6 +28,11 @@ type Props<T extends Record<string, unknown>> = {
   xFormatter?: (value: string) => string;
   stacked?: boolean;
   showLegend?: boolean;
+  /**
+   * Floor the y axis at 0 (default). Bars are read by height, so a truncated
+   * axis lies about the ratio between them (audit 2026-09-15).
+   */
+  zeroFloor?: boolean;
 };
 
 export function BarChart<T extends Record<string, unknown>>({
@@ -38,6 +44,7 @@ export function BarChart<T extends Record<string, unknown>>({
   xFormatter,
   stacked = false,
   showLegend = false,
+  zeroFloor = true,
 }: Props<T>) {
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -49,19 +56,20 @@ export function BarChart<T extends Record<string, unknown>>({
         />
         <XAxis
           dataKey={xKey as string}
-          stroke={CHART_COLORS.text3}
-          tick={{ fontSize: 11 }}
+          stroke={CHART_COLORS.text2}
+          tick={{ fontSize: 11, fill: CHART_COLORS.text2 }}
           tickFormatter={xFormatter}
           tickLine={false}
           axisLine={false}
         />
         <YAxis
-          stroke={CHART_COLORS.text3}
-          tick={{ fontSize: 11 }}
+          stroke={CHART_COLORS.text2}
+          tick={{ fontSize: 11, fill: CHART_COLORS.text2 }}
           tickFormatter={yFormatter}
           tickLine={false}
           axisLine={false}
           width={48}
+          domain={zeroFloor ? ZERO_FLOOR_DOMAIN : undefined}
         />
         <Tooltip
           cursor={{ fill: "var(--k-elevated)" }}

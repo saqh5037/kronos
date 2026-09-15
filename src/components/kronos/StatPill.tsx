@@ -22,8 +22,8 @@ export default function StatPill({
     <m.div
       className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${className}`}
       style={{
-        background: "var(--card)",
-        borderColor: "var(--line)",
+        background: "var(--k-surface)",
+        borderColor: "var(--k-line)",
         boxShadow: "var(--card-glow)",
       }}
       whileHover={{ scale: 1.03 }}

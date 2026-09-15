@@ -17,6 +17,8 @@ interface ChartBarsProps {
   animate: boolean;
   reduceMotion: boolean;
   baseDelay?: number;
+  /** Opt-in drop-shadow. Off by default (audit 2026-09-15, chart kit rules). */
+  glow?: boolean;
 }
 
 export function ChartBars({
@@ -27,6 +29,7 @@ export function ChartBars({
   animate,
   reduceMotion,
   baseDelay = 0.2,
+  glow = false,
 }: ChartBarsProps) {
   const skipMotion = !animate || reduceMotion;
 
@@ -67,7 +70,7 @@ export function ChartBars({
             style={{
               transformOrigin: `${b.x + b.width / 2}px ${baselineY}px`,
               transformBox: "fill-box",
-              filter: `drop-shadow(0 0 4px ${color}55)`,
+              filter: glow ? `drop-shadow(0 0 4px ${color})` : undefined,
             }}
             {...initialProps}
           />

@@ -18,19 +18,21 @@ export default function CollapsibleRoster({ roster }: { roster: ClassRoster }) {
   );
   const waitlist = roster.bookings.filter((b) => b.status === "WAITLIST");
   const fillRatio = booked.length / roster.capacity;
+  // Occupancy is intensity of one thing: a full class is the best outcome, not
+  // a warning (audit 2026-09-15, S2). Lime when full, neutral below.
   const chip =
     fillRatio >= 1
-      ? "k-chip-ember"
+      ? "k-chip-moss"
       : fillRatio >= 0.7
         ? "k-chip-steel"
-        : "k-chip-moss";
+        : "k-chip-ghost";
 
   return (
     <div className="k-card overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full px-4 py-3 flex items-center justify-between gap-4 text-left"
-        style={{ borderBottom: open ? "1px solid var(--line)" : "none" }}
+        style={{ borderBottom: open ? "1px solid var(--k-line)" : "none" }}
       >
         <div className="flex items-center gap-3 min-w-0">
           <div
@@ -153,9 +155,11 @@ function chipForStatus(status: string): string {
       return "k-chip-moss";
     case "WAITLIST":
       return "k-chip-ghost";
+    // A no-show is the one status a coach has to act on; a cancellation is not.
     case "NOSHOW":
-    case "CANCELLED":
       return "k-chip-ember";
+    case "CANCELLED":
+      return "k-chip-ghost";
     default:
       return "k-chip-ghost";
   }

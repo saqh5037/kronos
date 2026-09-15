@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ComponentProps } from "react";
 import { Icon } from "./icons";
+import { Icon as KIcon } from "@/components/kronos/Icon";
 import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
 import { wodTour } from "@/components/tour/tours/wod";
 
@@ -407,16 +408,16 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
                     >
                       {m.name}
                       {m.movementId && (
-                        <span
-                          aria-hidden="true"
+                        <KIcon
+                          name="arrowUpRight"
+                          size={16}
                           style={{
                             color: "var(--k-accent)",
                             marginLeft: 6,
-                            fontSize: 11,
+                            display: "inline",
+                            verticalAlign: "middle",
                           }}
-                        >
-                          ↗
-                        </span>
+                        />
                       )}
                     </span>
                     {m.sub && (

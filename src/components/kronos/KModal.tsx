@@ -1,6 +1,7 @@
 "use client";
 
 import { m, AnimatePresence } from "framer-motion";
+import { Icon } from "./Icon";
 import { useEffect, useRef } from "react";
 
 type Props = {
@@ -113,7 +114,7 @@ export function KModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base"
+                className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center"
                 style={{
                   background: "var(--k-elevated)",
                   border: "1px solid var(--k-line-2)",
@@ -121,7 +122,7 @@ export function KModal({
                 }}
                 aria-label="Cerrar"
               >
-                ✕
+                <Icon name="close" size={16} />
               </button>
             </div>
             {children}

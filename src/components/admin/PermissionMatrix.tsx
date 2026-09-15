@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { m } from "framer-motion";
 import { updatePermission } from "@/server/actions/permissions";
+import { Icon, type IconName } from "@/components/kronos/Icon";
 import type { PermissionAction, Role } from "@prisma/client";
 
 const ALL_ACTIONS: PermissionAction[] = [
@@ -29,16 +30,16 @@ const ACTION_LABELS: Record<PermissionAction, string> = {
   MANAGE_ATHLETE_METRICS: "Registrar mediciones de atletas",
 };
 
-const ACTION_ICONS: Partial<Record<PermissionAction, string>> = {
-  REGISTER_CASH_PAYMENT: "💵",
-  APPLY_DISCOUNT: "✂️",
-  REFUND_PAYMENT: "↩️",
-  EDIT_PLAN_PRICING: "🏷️",
-  DELETE_ATHLETE: "🗑️",
-  MARK_OVERDUE: "⚠️",
-  VIEW_FINANCIAL_REPORTS: "📊",
-  EDIT_OTHERS_SCORES: "✏️",
-  MANAGE_ATHLETE_METRICS: "⚖️",
+const ACTION_ICONS: Partial<Record<PermissionAction, IconName>> = {
+  REGISTER_CASH_PAYMENT: "cash",
+  APPLY_DISCOUNT: "discount",
+  REFUND_PAYMENT: "refund",
+  EDIT_PLAN_PRICING: "tag",
+  DELETE_ATHLETE: "trash",
+  MARK_OVERDUE: "alert",
+  VIEW_FINANCIAL_REPORTS: "chart",
+  EDIT_OTHERS_SCORES: "edit",
+  MANAGE_ATHLETE_METRICS: "metrics",
 };
 
 const ROLES: Role[] = ["COACH", "STAFF"];
@@ -129,34 +130,34 @@ export default function PermissionMatrix({
   }
 
   return (
-    <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] overflow-hidden">
+    <div className="rounded-xl border border-[var(--k-line)] bg-[var(--k-surface)] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[var(--line)]">
-              <th className="text-left p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider">
+            <tr className="border-b border-[var(--k-line)]">
+              <th className="text-left p-4 text-[var(--k-t2)] font-mono text-[10px] uppercase tracking-wider">
                 Acción
               </th>
               {ROLES.map((role) => (
                 <th
                   key={role}
-                  className="text-center p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider w-28"
+                  className="text-center p-4 text-[var(--k-t2)] font-mono text-[10px] uppercase tracking-wider w-28"
                 >
                   {ROLE_LABELS[role]}
                 </th>
               ))}
-              <th className="text-center p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider w-32">
+              <th className="text-center p-4 text-[var(--k-t2)] font-mono text-[10px] uppercase tracking-wider w-32">
                 <span className="inline-flex items-center gap-1">
-                  <span>🛡️</span> Aprobación
+                  <Icon name="shield" size={16} /> Aprobación
                 </span>
               </th>
-              <th className="text-center p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider w-36">
+              <th className="text-center p-4 text-[var(--k-t2)] font-mono text-[10px] uppercase tracking-wider w-36">
                 Umbral (MXN)
               </th>
               <th className="w-20 p-4"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--line)]">
+          <tbody className="divide-y divide-[var(--k-line)]">
             {ALL_ACTIONS.map((action, idx) => {
               const state = getState(action);
 
@@ -170,10 +171,12 @@ export default function PermissionMatrix({
                 >
                   <td className="p-4">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-lg">
-                        {ACTION_ICONS[action] ?? "⚙️"}
-                      </span>
-                      <span className="font-medium text-text text-[13px]">
+                      <Icon
+                        name={ACTION_ICONS[action] ?? "settings"}
+                        size={20}
+                        style={{ color: "var(--k-t2)" }}
+                      />
+                      <span className="font-medium text-[var(--k-t1)] text-[13px]">
                         {ACTION_LABELS[action]}
                       </span>
                     </div>
@@ -185,7 +188,9 @@ export default function PermissionMatrix({
                       <td key={role} className="p-4 text-center">
                         <button
                           onClick={() => toggleRole(action, role)}
-                          className="relative inline-flex items-center justify-center cursor-pointer"
+                          aria-pressed={checked}
+                          aria-label={`${ACTION_LABELS[action]} · ${ROLE_LABELS[role]}`}
+                          className="relative inline-flex min-h-11 min-w-11 items-center justify-center cursor-pointer"
                         >
                           <div
                             className={`w-5 h-5 rounded border-2 transition-colors flex items-center justify-center ${
@@ -209,7 +214,7 @@ export default function PermissionMatrix({
                               >
                                 <path
                                   d="M2.5 6.5L5 9L9.5 3.5"
-                                  stroke="white"
+                                  stroke="var(--k-accent-on)"
                                   strokeWidth="1.5"
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
@@ -226,12 +231,14 @@ export default function PermissionMatrix({
                   <td className="p-4 text-center">
                     <button
                       onClick={() => toggleApproval(action)}
-                      className="relative inline-flex items-center justify-center cursor-pointer"
+                      aria-pressed={state.requiresOwnerApproval}
+                      aria-label={`${ACTION_LABELS[action]} · requiere aprobación del dueño`}
+                      className="relative inline-flex min-h-11 min-w-11 items-center justify-center cursor-pointer"
                     >
                       <div
                         className={`w-5 h-5 rounded border-2 transition-colors flex items-center justify-center ${
                           state.requiresOwnerApproval
-                            ? "bg-[var(--k-warning)] border-[var(--k-warning)]"
+                            ? "bg-[var(--k-accent)] border-[var(--k-accent)]"
                             : "border-white/20 bg-transparent hover:border-white/40"
                         }`}
                       >
@@ -250,7 +257,7 @@ export default function PermissionMatrix({
                           >
                             <path
                               d="M2.5 6.5L5 9L9.5 3.5"
-                              stroke="white"
+                              stroke="var(--k-accent-on)"
                               strokeWidth="1.5"
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -264,7 +271,7 @@ export default function PermissionMatrix({
                   {/* Threshold */}
                   <td className="p-4 text-center">
                     <div className="relative inline-block">
-                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-3 text-xs">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--k-t2)] text-xs">
                         $
                       </span>
                       <input
@@ -273,14 +280,14 @@ export default function PermissionMatrix({
                         defaultValue={state.threshold ?? ""}
                         onBlur={(e) => updateThreshold(action, e.target.value)}
                         placeholder="—"
-                        className="w-24 bg-[var(--k-elevated)] text-text text-sm rounded-lg pl-6 pr-2 py-1.5 border border-white/10 text-center focus:outline-none focus:border-[var(--k-t2)] transition-colors"
+                        className="w-24 bg-[var(--k-elevated)] text-[var(--k-t1)] text-sm rounded-lg pl-6 pr-2 py-1.5 border border-white/10 text-center focus:outline-none focus:border-[var(--k-t2)] transition-colors"
                         min={0}
                       />
                     </div>
                   </td>
 
                   <td className="p-4 text-right">
-                    <span className="text-[10px] text-text-3 font-mono">
+                    <span className="text-[10px] text-[var(--k-t2)] font-mono">
                       OWNER
                     </span>
                   </td>

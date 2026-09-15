@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { removeAlias } from "@/server/actions/aliases";
+import { Icon } from "@/components/kronos/Icon";
 
 type Alias = {
   id: string;
@@ -132,7 +133,7 @@ export default function AliasCardList({
                       <span className="text-[11px] text-text-3">¿Seguro?</span>
                       <button
                         onClick={() => handleDelete(a.id)}
-                        className="text-[11px] text-[var(--k-warning)] font-medium hover:underline"
+                        className="text-[11px] text-[var(--k-accent)] font-medium hover:underline"
                       >
                         Sí, borrar
                       </button>
@@ -146,7 +147,7 @@ export default function AliasCardList({
                   ) : (
                     <button
                       onClick={() => setConfirmingId(a.id)}
-                      className="text-[11px] text-text-3 hover:text-[var(--k-warning)] transition-colors"
+                      className="text-[11px] text-[var(--k-t2)] hover:text-[var(--k-danger)] transition-colors"
                     >
                       <svg
                         width="14"
@@ -176,7 +177,9 @@ export default function AliasCardList({
           animate={{ opacity: 1 }}
           className="k-card p-8 text-center"
         >
-          <p className="text-3xl mb-2">🔍</p>
+          <div className="mb-2 flex justify-center text-[var(--k-t2)]">
+            <Icon name="search" size={24} />
+          </div>
           <p className="text-sm text-text-2">
             No encontramos apodos con &quot;{search}&quot;
           </p>

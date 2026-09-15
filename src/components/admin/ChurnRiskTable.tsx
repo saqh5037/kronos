@@ -2,10 +2,15 @@ import Link from "next/link";
 import type { Route } from "next";
 import type { ChurnRiskRow } from "@/server/analytics/churn";
 
-const SEVERITY_COLOR: Record<ChurnRiskRow["severity"], string> = {
-  high: "var(--k-accent)",
-  med: "var(--brand-violet)",
-  low: "var(--brand-blue)",
+/**
+ * Churn severity is intensity of one thing, so it is one hue at three opacities
+ * (audit 2026-09-15, S2) — and no `var()` carries an alpha suffix, which is not
+ * valid CSS.
+ */
+const SEVERITY_OPACITY: Record<ChurnRiskRow["severity"], number> = {
+  high: 1,
+  med: 0.7,
+  low: 0.45,
 };
 
 const SEVERITY_LABEL: Record<ChurnRiskRow["severity"], string> = {
@@ -27,7 +32,7 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
 
   return (
     <div className="k-card overflow-hidden">
-      <div className="grid grid-cols-12 gap-3 border-b border-[var(--line)] px-4 py-2.5 text-[10px] font-mono font-bold tracking-[0.12em] uppercase text-[var(--k-t3)]">
+      <div className="grid grid-cols-12 gap-3 border-b border-[var(--k-line)] px-4 py-2.5 text-[10px] font-mono font-bold tracking-[0.12em] uppercase text-[var(--k-t3)]">
         <div className="col-span-3">Atleta</div>
         <div className="col-span-2">Severidad</div>
         <div className="col-span-5">Señales</div>
@@ -36,7 +41,7 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
       {rows.map((row) => (
         <div
           key={row.athleteId}
-          className="grid grid-cols-12 gap-3 border-b border-[var(--line)] px-4 py-3 last:border-b-0 items-center"
+          className="grid grid-cols-12 gap-3 border-b border-[var(--k-line)] px-4 py-3 last:border-b-0 items-center"
         >
           <div className="col-span-3 min-w-0">
             <p className="font-display text-sm font-bold truncate">
@@ -54,9 +59,10 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
             <span
               className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase px-2 py-0.5 rounded-md inline-block"
               style={{
-                color: SEVERITY_COLOR[row.severity],
+                color: "var(--k-accent)",
+                opacity: SEVERITY_OPACITY[row.severity],
                 background: "var(--k-surface)",
-                border: `1px solid ${SEVERITY_COLOR[row.severity]}55`,
+                border: "1px solid var(--k-accent-line)",
               }}
             >
               {SEVERITY_LABEL[row.severity]} · {row.signalCount}/4
@@ -69,7 +75,10 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
                   <span
                     aria-hidden
                     className="mt-1 h-1 w-1 rounded-full flex-shrink-0"
-                    style={{ background: SEVERITY_COLOR[row.severity] }}
+                    style={{
+                      background: "var(--k-accent)",
+                      opacity: SEVERITY_OPACITY[row.severity],
+                    }}
                   />
                   <span>{reason}</span>
                 </li>

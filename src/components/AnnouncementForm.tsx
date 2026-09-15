@@ -79,7 +79,7 @@ export default function AnnouncementForm() {
         required
         maxLength={120}
         className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       />
       <textarea
         name="body"
@@ -88,7 +88,7 @@ export default function AnnouncementForm() {
         rows={6}
         maxLength={5000}
         className="px-3 py-2 rounded-lg text-sm border bg-transparent resize-none"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       />
       <div className="grid grid-cols-3 gap-2">
         <label className="flex flex-col gap-1 text-xs">
@@ -97,7 +97,7 @@ export default function AnnouncementForm() {
             name="audience"
             defaultValue="ALL"
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)", background: "var(--card)" }}
+            style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
           >
             {announcementAudiences.map((a) => (
               <option key={a} value={a}>
@@ -112,7 +112,7 @@ export default function AnnouncementForm() {
             name="channel"
             defaultValue="IN_APP"
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)", background: "var(--card)" }}
+            style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
           >
             {announcementChannels.map((c) => (
               <option key={c} value={c}>
@@ -127,7 +127,7 @@ export default function AnnouncementForm() {
             name="scheduledAt"
             type="datetime-local"
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)" }}
+            style={{ borderColor: "var(--k-line)" }}
           />
         </label>
       </div>

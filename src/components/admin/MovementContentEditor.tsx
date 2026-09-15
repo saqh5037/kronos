@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Icon } from "@/components/kronos/Icon";
 import {
   applyManualOverride,
   regenerateMovementContent,
@@ -190,7 +191,7 @@ export default function MovementContentEditor({
             }}
             aria-label="Cerrar"
           >
-            ×
+            <Icon name="close" size={20} />
           </button>
         </div>
         <p

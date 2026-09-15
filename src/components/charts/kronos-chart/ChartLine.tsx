@@ -7,8 +7,9 @@ interface ChartLineProps {
   d: string;
   color: string;
   strokeWidth?: number;
+  /** Opt-in drop-shadow. Off by default — glow costs contrast and paint time. */
   glow?: boolean;
-  /** Stronger glow stack for cinematic variant */
+  /** Stronger glow stack; only meaningful when `glow` is on. */
   intense?: boolean;
   animate: boolean;
   reduceMotion: boolean;
@@ -20,7 +21,7 @@ export function ChartLine({
   d,
   color,
   strokeWidth = 2.5,
-  glow = true,
+  glow = false,
   intense = false,
   animate,
   reduceMotion,
@@ -49,10 +50,11 @@ export function ChartLine({
     return () => cancelAnimationFrame(id);
   }, [d, skipMotion]);
 
+  // `color` may be an rgba() string, so no alpha suffix may be appended to it.
   const filter = glow
     ? intense
-      ? `drop-shadow(0 0 10px ${color}) drop-shadow(0 0 4px ${color}aa)`
-      : `drop-shadow(0 0 6px ${color}66)`
+      ? `drop-shadow(0 0 10px ${color}) drop-shadow(0 0 4px ${color})`
+      : `drop-shadow(0 0 6px ${color})`
     : undefined;
 
   if (skipMotion) {

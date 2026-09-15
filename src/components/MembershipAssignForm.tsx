@@ -65,7 +65,7 @@ export default function MembershipAssignForm({
           name="athleteId"
           required
           className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
+          style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
         >
           <option value="">— Seleccionar —</option>
           {athletes.map((a) => (
@@ -81,7 +81,7 @@ export default function MembershipAssignForm({
           name="planId"
           required
           className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
+          style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
         >
           <option value="">— Seleccionar —</option>
           {plans.map((p) => (
@@ -99,7 +99,7 @@ export default function MembershipAssignForm({
           defaultValue={today}
           required
           className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-          style={{ borderColor: "var(--line)" }}
+          style={{ borderColor: "var(--k-line)" }}
         />
       </label>
       <label className="flex items-center gap-2 text-xs">
@@ -115,7 +115,7 @@ export default function MembershipAssignForm({
         <input
           name="pendingPayment"
           type="checkbox"
-          style={{ accentColor: "var(--k-warning)" }}
+          style={{ accentColor: "var(--k-accent)" }}
         />
         <span style={{ color: "var(--k-t2)" }}>
           Crear pendiente de pago (atleta paga por MercadoPago)

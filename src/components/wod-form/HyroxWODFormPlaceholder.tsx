@@ -11,6 +11,8 @@
  * Por ahora ofrece copy + acción manual de "Pide la beta del editor
  * Hyrox" — Samuel recibe el ping y lo agenda.
  */
+import { Icon } from "@/components/kronos/Icon";
+
 export default function HyroxWODFormPlaceholder() {
   return (
     <div
@@ -40,10 +42,11 @@ export default function HyroxWODFormPlaceholder() {
       </p>
       <a
         href="mailto:contacto@kronos-fit.com?subject=Beta%20editor%20Hyrox"
-        className="inline-flex items-center text-[11px] font-medium underline"
+        className="inline-flex min-h-11 items-center gap-1 text-[11px] font-medium underline"
         style={{ color: "var(--k-accent)" }}
       >
-        Pedir acceso a la beta →
+        Pedir acceso a la beta
+        <Icon name="arrowRight" size={16} />
       </a>
     </div>
   );

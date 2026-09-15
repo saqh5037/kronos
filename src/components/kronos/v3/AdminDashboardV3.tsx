@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import type { ComponentProps } from "react";
-import { useState, useEffect, useId } from "react";
+import { useState, useEffect, useId, useMemo } from "react";
+import { formatTime24 } from "@/lib/format";
+import { roleLabel } from "@/lib/labels";
+import type { Role } from "@prisma/client";
+import { TrendDelta } from "@/components/kronos/TrendDelta";
+import {
+  parseTrendValue,
+  type TrendKind,
+} from "@/components/kronos/trend-delta";
 import { Icon } from "./icons";
 
 type LinkHref = ComponentProps<typeof Link>["href"];
@@ -15,7 +23,14 @@ export type NavBadge = string | number | undefined;
 export type AlertSeverity = "warning" | "danger";
 
 export type ClassRowData = {
+  /** Pre-formatted fallback. `startsAt` wins when present. */
   hora: string;
+  /**
+   * Class start. When present the list sorts by it, hides finished classes and
+   * renders a 24-hour time (audit 2026-09-15: "Próximas clases · hoy" listed
+   * 17:00, 18:00, 19:00, 06:00, 07:00 at 12:52, in 12-hour format).
+   */
+  startsAt?: Date | string;
   clase: string;
   coach: string;
   taken: number;
@@ -38,14 +53,19 @@ export type AdminDashboardV3Props = {
   ownerName: string;
   ownerFirstName?: string;
   ownerInitial?: string;
+  /** Free-text role line. `role` is preferred: it goes through `roleLabel`. */
   ownerRole?: string;
+  role?: Role;
   rangeLabel: string;
+  /** Unread notifications. A bare dot does not say how many (audit S7). */
+  notificationCount?: number;
   greeting: string;
   dateLabel: string;
-  // KPI hero
+  // KPI hero — deltas accept a signed number (preferred) or a legacy label
+  // string; `<TrendDelta/>` derives arrow and colour from the sign either way.
   mrr: string;
-  mrrDelta?: string;
-  mrrDeltaAbs?: string;
+  mrrDelta?: number | string;
+  mrrDeltaAbs?: number | string;
   mrrSpark: number[];
   activeAthletes: string;
   arpu: string;
@@ -55,20 +75,61 @@ export type AdminDashboardV3Props = {
   classesProgrammed: number;
   classesWithWaitlist: number;
   newAthletes30d: number;
-  newAthletesDelta?: string;
+  newAthletesDelta?: number | string;
   newAthletesBreakdown?: string;
   atRiskCount: number;
   atRiskTotal: number;
   atRiskNote?: string;
-  // Charts
-  revenueChart: { data: number[]; total: string; delta?: string };
-  attendanceChart: { data: number[]; total: string; delta?: string };
+  // Charts — `labels` must come from the requested period; without it the chart
+  // draws no x axis rather than inventing dates (audit: April under "30 días").
+  revenueChart: {
+    data: number[];
+    total: string;
+    delta?: number | string;
+    labels?: string[];
+  };
+  attendanceChart: {
+    data: number[];
+    total: string;
+    delta?: number | string;
+    labels?: string[];
+  };
   // Tables
   nextClasses: ClassRowData[];
   alerts: AlertRowData[];
   // Counts
   classesTodayLabel: string;
 };
+
+/**
+ * Every delta on this dashboard goes through here, so a fall can never render
+ * lime with an up-caret again (audit 2026-09-15, S2).
+ */
+function DeltaPill({
+  raw,
+  kind,
+  invert,
+  size = 14,
+  context,
+}: {
+  raw?: number | string;
+  kind: TrendKind;
+  invert?: boolean;
+  size?: 12 | 14 | 16;
+  context?: string;
+}) {
+  const value = parseTrendValue(raw);
+  if (value === null) return null;
+  return (
+    <TrendDelta
+      value={value}
+      kind={kind}
+      invert={invert}
+      context={context}
+      size={size}
+    />
+  );
+}
 
 function Sparkline({
   data,
@@ -374,7 +435,7 @@ function NavGroup({
             fontSize: 9,
             fontWeight: 600,
             letterSpacing: "0.18em",
-            color: "var(--k-t4)",
+            color: "var(--k-t2)",
           }}
         >
           {title}
@@ -390,7 +451,17 @@ function NavGroup({
   );
 }
 
-function BoxCard({ collapsed }: { collapsed: boolean }) {
+function BoxCard({
+  collapsed,
+  boxName,
+  roleName,
+  boxInitials,
+}: {
+  collapsed: boolean;
+  boxName: string;
+  roleName: string;
+  boxInitials?: string;
+}) {
   return (
     <div
       className="k-tap"
@@ -438,7 +509,7 @@ function BoxCard({ collapsed }: { collapsed: boolean }) {
           flexShrink: 0,
         }}
       >
-        B
+        {boxInitials ?? boxName.slice(0, 2).toUpperCase()}
       </div>
       {!collapsed && (
         <>
@@ -463,21 +534,21 @@ function BoxCard({ collapsed }: { collapsed: boolean }) {
                 textOverflow: "ellipsis",
               }}
             >
-              TU BOX
+              {boxName.toUpperCase()}
             </span>
             <span
               style={{
                 fontFamily: "var(--k-font-display)",
                 fontSize: 8.5,
                 fontWeight: 500,
-                color: "var(--k-t3)",
+                color: "var(--k-t2)",
                 letterSpacing: "0.12em",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
               }}
             >
-              OWNER
+              {roleName.toUpperCase()}
             </span>
           </div>
           <Icon.Down
@@ -514,7 +585,7 @@ function LiveStrip({ collapsed }: { collapsed: boolean }) {
       style={{
         padding: collapsed ? "10px 8px" : "10px 14px",
         borderTop: "1px solid var(--k-line)",
-        background: "#0a0a0c",
+        background: "var(--k-bg)",
         display: "flex",
         alignItems: "center",
         gap: 8,
@@ -569,10 +640,16 @@ function Sidebar({
   collapsed = false,
   athletesBadge,
   reservasBadge,
+  boxName,
+  roleName,
+  boxInitials,
 }: {
   collapsed?: boolean;
   athletesBadge?: NavBadge;
   reservasBadge?: NavBadge;
+  boxName: string;
+  roleName: string;
+  boxInitials?: string;
 }) {
   return (
     <div
@@ -588,7 +665,12 @@ function Sidebar({
       }}
     >
       <KronosMark collapsed={collapsed} />
-      <BoxCard collapsed={collapsed} />
+      <BoxCard
+        collapsed={collapsed}
+        boxName={boxName}
+        roleName={roleName}
+        boxInitials={boxInitials}
+      />
       <div
         className="k-scroll"
         style={{
@@ -725,11 +807,13 @@ function AdminHeader({
   boxLocation,
   boxInitials,
   ownerInitial,
+  notificationCount = 0,
 }: {
   boxName: string;
   boxLocation?: string;
   boxInitials?: string;
   ownerInitial?: string;
+  notificationCount?: number;
 }) {
   return (
     <div
@@ -853,33 +937,29 @@ function AdminHeader({
           }}
         >
           <Icon.Bell width={16} height={16} style={{ color: "var(--k-t2)" }} />
-          <span
-            style={{
-              position: "absolute",
-              top: 8,
-              right: 9,
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: ACC,
-              boxShadow: `0 0 8px ${ACC}`,
-            }}
-          />
-        </div>
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            background: "var(--k-surface)",
-            border: "1px solid var(--k-line)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-          }}
-        >
-          <Icon.Theme width={15} height={15} style={{ color: "var(--k-t2)" }} />
+          {notificationCount > 0 && (
+            <span
+              aria-label={`${notificationCount} sin leer`}
+              style={{
+                position: "absolute",
+                top: 2,
+                right: 2,
+                minWidth: 16,
+                height: 16,
+                padding: "0 4px",
+                borderRadius: 8,
+                background: ACC,
+                color: "var(--k-accent-on)",
+                fontFamily: "var(--k-font-display)",
+                fontSize: 10,
+                fontWeight: 700,
+                lineHeight: "16px",
+                textAlign: "center",
+              }}
+            >
+              {notificationCount > 99 ? "99+" : notificationCount}
+            </span>
+          )}
         </div>
         <div
           style={{
@@ -1004,11 +1084,16 @@ function Headline({
             justifyContent: "center",
             cursor: "pointer",
           }}
+          role="button"
+          tabIndex={0}
+          aria-label="Descargar el reporte del período"
+          title="Descargar el reporte del período"
         >
           <Icon.Download
             width={15}
             height={15}
             style={{ color: "var(--k-t2)" }}
+            aria-hidden="true"
           />
         </div>
       </div>
@@ -1093,34 +1178,16 @@ function KpiHero(props: AdminDashboardV3Props) {
               flexWrap: "wrap",
             }}
           >
-            {props.mrrDelta && (
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 4,
-                  fontFamily: "var(--k-font-display)",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: ACC,
-                }}
-              >
-                <Icon.Up width={13} height={13} />
-                {props.mrrDelta}
-              </span>
-            )}
-            {props.mrrDeltaAbs && (
-              <span
-                style={{
-                  fontFamily: "var(--k-font-display)",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  color: "var(--k-t2)",
-                }}
-              >
-                · {props.mrrDeltaAbs}
-              </span>
-            )}
+            <DeltaPill
+              raw={props.mrrDelta}
+              kind="percent"
+              context="vs período anterior"
+            />
+            <DeltaPill
+              raw={props.mrrDeltaAbs}
+              kind="money"
+              context="vs período anterior"
+            />
           </div>
         )}
         {props.mrrSpark.length >= 2 && (
@@ -1304,22 +1371,12 @@ function KpiHero(props: AdminDashboardV3Props) {
               {props.newAthletes30d > 0 ? "+" : ""}
               {props.newAthletes30d}
             </span>
-            {props.newAthletesDelta && (
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 3,
-                  fontFamily: "var(--k-font-display)",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: ACC,
-                }}
-              >
-                <Icon.Up width={11} height={11} />
-                {props.newAthletesDelta}
-              </span>
-            )}
+            <DeltaPill
+              raw={props.newAthletesDelta}
+              kind="percent"
+              size={12}
+              context="vs período anterior"
+            />
           </div>
           {props.newAthletesBreakdown && (
             <div
@@ -1385,30 +1442,43 @@ function KpiHero(props: AdminDashboardV3Props) {
               Ver lista <Icon.Right width={11} height={11} />
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-            <span
+          {props.atRiskTotal > 0 ? (
+            <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+              <span
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 32,
+                  fontWeight: 700,
+                  letterSpacing: "-0.03em",
+                  color: ACC,
+                  lineHeight: 1,
+                }}
+              >
+                {props.atRiskCount}
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  color: "var(--k-t2)",
+                }}
+              >
+                de {props.atRiskTotal} totales
+              </span>
+            </div>
+          ) : (
+            /* "0 de 0" reads as a failed query, so say so (audit S4). */
+            <div
               style={{
-                fontFamily: "var(--k-font-display)",
-                fontSize: 32,
-                fontWeight: 700,
-                letterSpacing: "-0.03em",
-                color: ACC,
-                lineHeight: 1,
-              }}
-            >
-              {props.atRiskCount}
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--k-font-display)",
-                fontSize: 11,
-                fontWeight: 500,
+                fontFamily: "var(--k-font-body)",
+                fontSize: 13,
                 color: "var(--k-t2)",
               }}
             >
-              de {props.atRiskTotal} totales
-            </span>
-          </div>
+              Sin datos de riesgo todavía
+            </div>
+          )}
           {props.atRiskNote && (
             <div
               style={{
@@ -1437,6 +1507,16 @@ function KpiHero(props: AdminDashboardV3Props) {
   );
 }
 
+/** Up to `max` evenly spaced labels, first and last always included. */
+function pickTicks(labels: string[], max: number): string[] {
+  if (labels.length <= max) return labels;
+  const step = (labels.length - 1) / (max - 1);
+  return Array.from(
+    { length: max },
+    (_, i) => labels[Math.round(i * step)] ?? "",
+  );
+}
+
 function ChartCard({
   title,
   eyebrow,
@@ -1444,13 +1524,16 @@ function ChartCard({
   delta,
   data,
   yLabels,
+  xLabels,
 }: {
   title: string;
   eyebrow: string;
   value: string;
-  delta?: string;
+  delta?: number | string;
   data: number[];
   yLabels: string[];
+  /** Tick labels for the requested period. Omitted = no x axis, never fake dates. */
+  xLabels?: string[];
 }) {
   const w = 540;
   const h = 160;
@@ -1470,7 +1553,8 @@ function ChartCard({
     path +
     ` L${pad.l + innerW},${pad.t + innerH} L${pad.l},${pad.t + innerH} Z`;
   const id = title.replace(/\s/g, "-").toLowerCase();
-  const xLabels = ["1 abr", "8", "15", "22", "29", "7 may"];
+  // Up to six evenly spaced labels taken from the period the header asked for.
+  const ticks = pickTicks(xLabels ?? [], 6);
   const idx = Math.floor(data.length * 0.62);
   const tipX = pad.l + (idx / (data.length - 1 || 1)) * innerW;
   const tipY = pad.t + innerH - ((data[idx] - min) / (max - min || 1)) * innerH;
@@ -1543,57 +1627,11 @@ function ChartCard({
             >
               {value}
             </span>
-            {delta && (
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 3,
-                  fontFamily: "var(--k-font-display)",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: ACC,
-                }}
-              >
-                <Icon.Up width={10} height={10} />
-                {delta}
-              </span>
-            )}
+            <DeltaPill raw={delta} kind="percent" size={12} />
           </div>
         </div>
-        <div
-          style={{
-            display: "flex",
-            gap: 2,
-            padding: 2,
-            background: "var(--k-elevated)",
-            borderRadius: 8,
-          }}
-        >
-          {[
-            { l: "1S", a: false },
-            { l: "1M", a: true },
-            { l: "3M", a: false },
-            { l: "1A", a: false },
-          ].map((t) => (
-            <span
-              key={t.l}
-              style={{
-                fontFamily: "var(--k-font-display)",
-                fontSize: 10,
-                fontWeight: 600,
-                letterSpacing: "0.1em",
-                color: t.a ? "var(--k-t1)" : "var(--k-t3)",
-                background: t.a ? "var(--k-line)" : "transparent",
-                padding: "5px 10px",
-                borderRadius: 6,
-                cursor: "pointer",
-              }}
-            >
-              {t.l}
-            </span>
-          ))}
-        </div>
+        {/* The header range control is the only period switch; a second per-chart
+            one gave the owner two competing controls (audit S4). */}
       </div>
 
       <svg
@@ -1618,7 +1656,7 @@ function ChartCard({
                 y1={y}
                 x2={pad.l + innerW}
                 y2={y}
-                stroke="#14141A"
+                stroke="var(--k-line)"
                 strokeWidth="1"
                 strokeDasharray={i === 0 ? "0" : "2 3"}
               />
@@ -1626,8 +1664,8 @@ function ChartCard({
                 x={pad.l - 8}
                 y={y + 3}
                 fontFamily="var(--k-font-display)"
-                fontSize="9"
-                fill="#54545C"
+                fontSize="11"
+                fill="var(--k-t2)"
                 textAnchor="end"
                 letterSpacing="0.06em"
               >
@@ -1636,17 +1674,19 @@ function ChartCard({
             </g>
           );
         })}
-        {xLabels.map((lbl, i) => {
-          const x = pad.l + (i / (xLabels.length - 1)) * innerW;
+        {ticks.map((lbl, i) => {
+          const x = pad.l + (i / Math.max(1, ticks.length - 1)) * innerW;
           return (
             <text
               key={i}
               x={x}
               y={h - 6}
               fontFamily="var(--k-font-display)"
-              fontSize="9"
-              fill="#54545C"
-              textAnchor="middle"
+              fontSize="11"
+              fill="var(--k-t2)"
+              textAnchor={
+                i === 0 ? "start" : i === ticks.length - 1 ? "end" : "middle"
+              }
               letterSpacing="0.06em"
             >
               {lbl}
@@ -1686,6 +1726,12 @@ function ChartCard({
   );
 }
 
+function toDate(value: Date | string | undefined): Date | null {
+  if (!value) return null;
+  const d = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 function ClassesTable({
   classes,
   classesTodayLabel,
@@ -1693,6 +1739,33 @@ function ClassesTable({
   classes: ClassRowData[];
   classesTodayLabel: string;
 }) {
+  // "Now" only exists after mount: reading the clock during render would break
+  // hydration (project rule). Before that, show the whole sorted day.
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(t);
+  }, []);
+
+  const visible = useMemo(() => {
+    const withTime = classes.map((c) => ({ c, at: toDate(c.startsAt) }));
+    const sorted = withTime.sort((a, b) => {
+      if (a.at && b.at) return a.at.getTime() - b.at.getTime();
+      if (a.at) return -1;
+      if (b.at) return 1;
+      return a.c.hora.localeCompare(b.c.hora);
+    });
+    const upcoming =
+      now === null
+        ? sorted
+        : sorted.filter(({ at }) => at === null || at.getTime() >= now);
+    return upcoming.map(({ c, at }) => ({
+      ...c,
+      hora: at ? formatTime24(at) : c.hora,
+    }));
+  }, [classes, now]);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <div
@@ -1773,7 +1846,7 @@ function ClassesTable({
                   fontSize: 9,
                   fontWeight: 600,
                   letterSpacing: "0.18em",
-                  color: "var(--k-t4)",
+                  color: "var(--k-t2)",
                   textAlign: i === 5 ? "right" : "left",
                 }}
               >
@@ -1782,7 +1855,7 @@ function ClassesTable({
             ),
           )}
         </div>
-        {classes.length === 0 ? (
+        {visible.length === 0 ? (
           <div
             style={{
               padding: "32px",
@@ -1792,10 +1865,12 @@ function ClassesTable({
               color: "var(--k-t3)",
             }}
           >
-            Sin clases programadas para hoy.
+            {classes.length === 0
+              ? "Sin clases programadas para hoy."
+              : "No quedan clases por empezar hoy."}
           </div>
         ) : (
-          classes.map((c, i) => {
+          visible.map((c, i) => {
             const pct = (c.taken / c.capacity) * 100;
             const full = c.taken === c.capacity;
             return (
@@ -1881,7 +1956,7 @@ function ClassesTable({
                     fontFamily: "var(--k-font-display)",
                     fontSize: 11,
                     fontWeight: 600,
-                    color: c.waitlist > 0 ? WARN : "var(--k-t4)",
+                    color: c.waitlist > 0 ? WARN : "var(--k-t2)",
                     letterSpacing: "0.04em",
                   }}
                 >
@@ -2100,6 +2175,13 @@ export default function AdminDashboardV3(props: AdminDashboardV3Props) {
       <Sidebar
         athletesBadge={props.activeAthletes}
         reservasBadge={props.attendanceToday.taken}
+        boxName={props.boxName}
+        boxInitials={props.boxInitials}
+        roleName={
+          props.role
+            ? roleLabel[props.role]
+            : (props.ownerRole ?? roleLabel.OWNER)
+        }
       />
       <div
         style={{
@@ -2114,6 +2196,7 @@ export default function AdminDashboardV3(props: AdminDashboardV3Props) {
           boxLocation={props.boxLocation}
           boxInitials={props.boxInitials}
           ownerInitial={props.ownerInitial}
+          notificationCount={props.notificationCount}
         />
         <div style={{ flex: 1, overflowY: "auto", padding: "32px 32px 64px" }}>
           <div
@@ -2141,20 +2224,22 @@ export default function AdminDashboardV3(props: AdminDashboardV3Props) {
               className="k-charts-row"
             >
               <ChartCard
-                title="Revenue diario"
-                eyebrow="INGRESO · ÚLTIMOS 30 DÍAS"
+                title="Ingresos diarios"
+                eyebrow={`INGRESO · ${props.rangeLabel}`}
                 value={props.revenueChart.total}
                 delta={props.revenueChart.delta}
                 data={props.revenueChart.data}
                 yLabels={["$0", "$1.2K", "$2.4K"]}
+                xLabels={props.revenueChart.labels}
               />
               <ChartCard
                 title="Asistencia diaria"
-                eyebrow="CHECK-INS · ÚLTIMOS 30 DÍAS"
+                eyebrow={`CHECK-INS · ${props.rangeLabel}`}
                 value={props.attendanceChart.total}
                 delta={props.attendanceChart.delta}
                 data={props.attendanceChart.data}
                 yLabels={["0", "50", "100"]}
+                xLabels={props.attendanceChart.labels}
               />
             </div>
             <ClassesTable
