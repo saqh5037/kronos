@@ -1,5 +1,7 @@
-import { redirect } from "next/navigation";
+import { PencilLine } from "lucide-react";
 import { getBoxMode } from "@/server/actions/box-mode";
+import { EmptyStateCTA } from "@/components/kronos/EmptyStateCTA";
+import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 import QuickWodForm from "./QuickWodForm";
 
 export const metadata = { title: "Kronos — Nuevo WOD" };
@@ -7,10 +9,42 @@ export const metadata = { title: "Kronos — Nuevo WOD" };
 /**
  * Mini editor de WOD para atletas en Box Personal. Box real usa el flow
  * tradicional (coach programa, atleta solo loggea score en /atleta/wod).
+ *
+ * El atleta de box NO se redirige: se le explica en su lugar. Un `redirect()`
+ * a nivel page se resolvía en el cliente después de que `atleta/layout.tsx`
+ * ya había streameado su shell, y React veía distinto conteo de hooks entre
+ * renders → "Rendered more hooks than during the previous render"
+ * (audit 2026-09-15, sección C). Cubierto por e2e/no-page-errors.spec.ts.
  */
 export default async function NuevoWodPage() {
   const { isPersonal } = await getBoxMode();
-  if (!isPersonal) redirect("/atleta/wod");
+
+  if (!isPersonal) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "var(--k-bg)",
+          color: "var(--k-t1)",
+          fontFamily: "var(--k-font-body)",
+          paddingBottom: 96,
+        }}
+      >
+        <div style={{ padding: "48px 16px 0" }}>
+          <AthleteBackLink href="/atleta/wod" label="WOD del día" />
+        </div>
+        <div style={{ padding: "24px 20px" }}>
+          <EmptyStateCTA
+            icon={<PencilLine size={24} aria-hidden />}
+            title="Esto es para atletas independientes"
+            description="Tu box programa tus WODs, así que no necesitas crearlos. Abre el WOD del día y registra tu resultado."
+            ctaLabel="Ver el WOD de hoy"
+            ctaHref="/atleta/wod"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
