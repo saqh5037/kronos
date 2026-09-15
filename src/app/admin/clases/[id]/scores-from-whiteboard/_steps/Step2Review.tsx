@@ -3,11 +3,27 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { m, AnimatePresence } from "framer-motion";
+import { AlertTriangle } from "lucide-react";
 import { confirmWhiteboardScores } from "@/server/actions/scores";
 import ConfidenceBadge from "@/components/kronos/ConfidenceBadge";
 import AthleteCombobox from "@/components/kronos/AthleteCombobox";
+import { scalingLabel, scoreTypeLabel } from "@/lib/labels";
 import type { WhiteboardRow } from "@/server/ocr/whiteboard";
 import type { ScoreType, Scaling } from "@prisma/client";
+
+/**
+ * Native selects get the house chevron: the browser default is a white arrow
+ * on a dark control (audit 2026-09-15, S1 "browser-default controls").
+ */
+const SELECT_CLASS =
+  "appearance-none bg-[var(--k-elevated)] text-[var(--k-t1)] text-xs rounded-lg pl-2 pr-7 py-2 border border-[var(--k-line-2)] focus:outline-none focus:border-[var(--k-t2)] transition-colors bg-no-repeat";
+
+const SELECT_STYLE = {
+  backgroundImage:
+    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a94' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>\")",
+  backgroundPosition: "right 0.5rem center",
+  backgroundSize: "12px",
+} as const;
 
 type RosterEntry = {
   athleteId: string;
@@ -204,11 +220,11 @@ export default function Step2Review({
   return (
     <div className="space-y-4">
       <div>
-        <p className="k-eyebrow mb-1">Paso 2 de 3</p>
-        <h2 className="text-xl font-display font-bold text-text">
+        <p className="k-eyebrow mb-1">Paso 2 de 3 · Revisar</p>
+        <h2 className="text-xl font-display font-bold text-[var(--k-t1)]">
           Revisar scores detectados
         </h2>
-        <p className="text-sm text-text-2 mt-1">
+        <p className="text-sm text-[var(--k-t2)] mt-1">
           {rows.length} filas detectadas{" "}
           {needsReview > 0 && (
             <span className="text-[var(--k-warning)] font-medium">
@@ -227,7 +243,7 @@ export default function Step2Review({
       >
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-text-3 border-b border-[var(--k-line)]">
+            <tr className="text-left text-[var(--k-t2)] border-b border-[var(--k-line)]">
               <th className="pb-3 pt-3 pr-3 pl-4 w-10"></th>
               <th className="pb-3 pt-3 pr-3 font-mono text-[10px] uppercase tracking-wider">
                 Nombre en pizarra
@@ -307,7 +323,9 @@ export default function Step2Review({
 
                   {/* Raw name */}
                   <td className="py-3 pr-3">
-                    <span className="font-mono text-text-2">{row.rawName}</span>
+                    <span className="font-mono text-[var(--k-t2)]">
+                      {row.rawName}
+                    </span>
                   </td>
 
                   {/* Athlete combobox */}
@@ -379,19 +397,20 @@ export default function Step2Review({
                         onChange={(e) =>
                           updateRow(idx, { editedScore: e.target.value })
                         }
-                        className={`bg-[var(--k-elevated)] text-text text-sm rounded-lg px-3 py-2 border w-24 font-mono transition-colors focus:outline-none ${
+                        className={`bg-[var(--k-elevated)] text-[var(--k-t1)] text-sm rounded-lg px-3 py-2 border w-24 font-mono transition-colors focus:outline-none ${
                           scoreInvalid
                             ? "border-[var(--k-warning)] focus:border-[var(--k-warning)] shadow-[0_0_8px_rgba(196,69,54,0.3)]"
-                            : "border-white/10 focus:border-[var(--k-t2)]"
+                            : "border-[var(--k-line-2)] focus:border-[var(--k-t2)]"
                         }`}
                       />
                       {scoreInvalid && (
                         <m.span
                           initial={{ opacity: 0, scale: 0.5 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="absolute -right-1 -top-1 text-[var(--k-warning)] text-xs"
+                          className="absolute -right-1 -top-1 text-[var(--k-warning)]"
+                          aria-label="Score no válido"
                         >
-                          ⚠
+                          <AlertTriangle size={12} aria-hidden />
                         </m.span>
                       )}
                     </div>
@@ -406,12 +425,15 @@ export default function Step2Review({
                           scoreType: e.target.value as ScoreType,
                         })
                       }
-                      className="bg-[var(--k-elevated)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)] transition-colors"
+                      className={SELECT_CLASS}
+                      style={SELECT_STYLE}
                     >
-                      <option value="TIME">TIME</option>
-                      <option value="REPS">REPS</option>
-                      <option value="WEIGHT">WEIGHT</option>
-                      <option value="ROUNDS_REPS">ROUNDS</option>
+                      <option value="TIME">{scoreTypeLabel.TIME}</option>
+                      <option value="REPS">{scoreTypeLabel.REPS}</option>
+                      <option value="WEIGHT">{scoreTypeLabel.WEIGHT}</option>
+                      <option value="ROUNDS_REPS">
+                        {scoreTypeLabel.ROUNDS_REPS}
+                      </option>
                     </select>
                   </td>
 
@@ -424,11 +446,12 @@ export default function Step2Review({
                           scaling: e.target.value as Scaling,
                         })
                       }
-                      className="bg-[var(--k-elevated)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)] transition-colors"
+                      className={SELECT_CLASS}
+                      style={SELECT_STYLE}
                     >
-                      <option value="RX">RX</option>
-                      <option value="SCALED">SCALED</option>
-                      <option value="RXPLUS">RX+</option>
+                      <option value="RX">{scalingLabel.RX}</option>
+                      <option value="SCALED">{scalingLabel.SCALED}</option>
+                      <option value="RXPLUS">{scalingLabel.RXPLUS}</option>
                     </select>
                   </td>
 
@@ -477,10 +500,10 @@ export default function Step2Review({
               {/* Header: raw name + confidence + include toggle */}
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="font-mono text-text-2 text-sm truncate">
+                  <p className="font-mono text-[var(--k-t2)] text-sm truncate">
                     {row.rawName}
                   </p>
-                  <p className="text-[10px] text-text-3 mt-0.5 font-mono uppercase tracking-wider">
+                  <p className="text-[10px] text-[var(--k-t2)] mt-0.5 font-mono uppercase tracking-wider">
                     Nombre en pizarra
                   </p>
                 </div>
@@ -526,7 +549,7 @@ export default function Step2Review({
 
               {/* Athlete */}
               <div>
-                <p className="text-[10px] text-text-3 mb-1.5 font-mono uppercase tracking-wider">
+                <p className="text-[10px] text-[var(--k-t2)] mb-1.5 font-mono uppercase tracking-wider">
                   Atleta
                 </p>
                 <AthleteCombobox
@@ -586,7 +609,7 @@ export default function Step2Review({
               {/* Score + Type + Scaling row */}
               <div className="flex items-end gap-2">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-text-3 mb-1.5 font-mono uppercase tracking-wider">
+                  <p className="text-[10px] text-[var(--k-t2)] mb-1.5 font-mono uppercase tracking-wider">
                     Score
                   </p>
                   <div className="relative">
@@ -596,25 +619,26 @@ export default function Step2Review({
                       onChange={(e) =>
                         updateRow(idx, { editedScore: e.target.value })
                       }
-                      className={`w-full bg-[var(--k-elevated)] text-text text-sm rounded-lg px-3 py-2 border font-mono transition-colors focus:outline-none ${
+                      className={`w-full bg-[var(--k-elevated)] text-[var(--k-t1)] text-sm rounded-lg px-3 py-2 border font-mono transition-colors focus:outline-none ${
                         scoreInvalid
                           ? "border-[var(--k-warning)] focus:border-[var(--k-warning)] shadow-[0_0_8px_rgba(196,69,54,0.3)]"
-                          : "border-white/10 focus:border-[var(--k-t2)]"
+                          : "border-[var(--k-line-2)] focus:border-[var(--k-t2)]"
                       }`}
                     />
                     {scoreInvalid && (
                       <m.span
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="absolute -right-1 -top-1 text-[var(--k-warning)] text-xs"
+                        className="absolute -right-1 -top-1 text-[var(--k-warning)]"
+                        aria-label="Score no válido"
                       >
-                        ⚠
+                        <AlertTriangle size={12} aria-hidden />
                       </m.span>
                     )}
                   </div>
                 </div>
                 <div>
-                  <p className="text-[10px] text-text-3 mb-1.5 font-mono uppercase tracking-wider">
+                  <p className="text-[10px] text-[var(--k-t2)] mb-1.5 font-mono uppercase tracking-wider">
                     Tipo
                   </p>
                   <select
@@ -624,16 +648,19 @@ export default function Step2Review({
                         scoreType: e.target.value as ScoreType,
                       })
                     }
-                    className="bg-[var(--k-elevated)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)] transition-colors"
+                    className={SELECT_CLASS}
+                    style={SELECT_STYLE}
                   >
-                    <option value="TIME">TIME</option>
-                    <option value="REPS">REPS</option>
-                    <option value="WEIGHT">WEIGHT</option>
-                    <option value="ROUNDS_REPS">ROUNDS</option>
+                    <option value="TIME">{scoreTypeLabel.TIME}</option>
+                    <option value="REPS">{scoreTypeLabel.REPS}</option>
+                    <option value="WEIGHT">{scoreTypeLabel.WEIGHT}</option>
+                    <option value="ROUNDS_REPS">
+                      {scoreTypeLabel.ROUNDS_REPS}
+                    </option>
                   </select>
                 </div>
                 <div>
-                  <p className="text-[10px] text-text-3 mb-1.5 font-mono uppercase tracking-wider">
+                  <p className="text-[10px] text-[var(--k-t2)] mb-1.5 font-mono uppercase tracking-wider">
                     Scaling
                   </p>
                   <select
@@ -643,11 +670,12 @@ export default function Step2Review({
                         scaling: e.target.value as Scaling,
                       })
                     }
-                    className="bg-[var(--k-elevated)] text-text text-xs rounded-lg px-2 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)] transition-colors"
+                    className={SELECT_CLASS}
+                    style={SELECT_STYLE}
                   >
-                    <option value="RX">RX</option>
-                    <option value="SCALED">SCALED</option>
-                    <option value="RXPLUS">RX+</option>
+                    <option value="RX">{scalingLabel.RX}</option>
+                    <option value="SCALED">{scalingLabel.SCALED}</option>
+                    <option value="RXPLUS">{scalingLabel.RXPLUS}</option>
                   </select>
                 </div>
               </div>

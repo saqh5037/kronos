@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import KCard from "@/components/kronos/KCard";
 import { formatPriceMxn } from "@/lib/saas-billing";
+import { formatDateLong } from "@/lib/format";
 
 type Props = {
   nextBilling: {
@@ -9,14 +11,6 @@ type Props = {
     amountMxnCents: number;
   } | null;
 };
-
-function formatDate(d: Date): string {
-  return d.toLocaleDateString("es-MX", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
 
 function daysUntil(d: Date): number {
   const ms = d.getTime() - Date.now();
@@ -29,7 +23,7 @@ export function UpcomingBillingCard({ nextBilling }: Props) {
       <KCard animate={false} className="p-5 md:p-6">
         <h2 className="font-display text-xl font-bold mb-3">Suscripción</h2>
         <p className="text-sm text-[var(--k-t2)] mb-4">
-          Tu Box no tiene una suscripción activa. Activá un plan para mantener
+          Tu Box no tiene una suscripción activa. Activa un plan para mantener
           el servicio sin interrupciones.
         </p>
         <Link
@@ -48,7 +42,7 @@ export function UpcomingBillingCard({ nextBilling }: Props) {
     <KCard animate={false} className="p-5 md:p-6">
       <div className="flex items-baseline justify-between gap-3 mb-4">
         <h2 className="font-display text-xl font-bold">Próxima facturación</h2>
-        <span className="text-xs font-mono uppercase tracking-wider text-[var(--k-t3)]">
+        <span className="text-xs font-mono uppercase tracking-wider text-[var(--k-t2)]">
           {nextBilling.planName}
         </span>
       </div>
@@ -58,33 +52,29 @@ export function UpcomingBillingCard({ nextBilling }: Props) {
           <p className="text-2xl font-display font-extrabold">
             {formatPriceMxn(nextBilling.amountMxnCents)}
           </p>
-          <p className="text-xs text-[var(--k-t3)] mt-0.5">
-            {formatDate(nextBilling.date)}
+          <p className="text-xs text-[var(--k-t2)] mt-0.5">
+            {formatDateLong(nextBilling.date)}
           </p>
         </div>
         <div className="text-right">
-          <p
-            className="text-2xl font-display font-extrabold"
-            style={{ color: "var(--k-warning)" }}
-          >
-            {days}
-          </p>
-          <p className="text-xs text-[var(--k-t3)]">
+          <p className="text-2xl font-display font-extrabold">{days}</p>
+          <p className="text-xs text-[var(--k-t2)]">
             día{days === 1 ? "" : "s"}
           </p>
         </div>
       </div>
 
-      <div className="pt-3 border-t border-[var(--border)] flex flex-wrap gap-3 text-sm">
+      <div className="pt-3 border-t border-[var(--k-line)] flex flex-wrap gap-3 text-sm">
         <Link
           href="/admin/billing/historial"
-          className="text-[var(--k-warning)] hover:underline"
+          className="inline-flex items-center gap-1 text-[var(--k-t2)] hover:text-[var(--k-t1)]"
         >
-          Ver historial →
+          Ver historial
+          <ArrowRight size={14} aria-hidden />
         </Link>
         <Link
           href="/admin/billing"
-          className="text-[var(--k-t2)] hover:text-[var(--text)]"
+          className="text-[var(--k-t2)] hover:text-[var(--k-t1)]"
         >
           Gestionar suscripción
         </Link>

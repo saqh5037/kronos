@@ -16,22 +16,27 @@ import type { AthleteStatus } from "@prisma/client";
 import type { CSVColumn } from "@/lib/csv";
 import { useUrlPatch } from "@/lib/url-state";
 import { useRouter } from "next/navigation";
+import { athleteStatusLabel } from "@/lib/labels";
+import { formatDateShort } from "@/lib/format";
+import { formatPhoneMX } from "../../_lib/phone";
 import { AthleteDrawer } from "./AthleteDrawer";
 
-const fmtDate = (d: Date | null) =>
-  d
-    ? new Date(d).toLocaleDateString("es-MX", {
-        day: "2-digit",
-        month: "short",
-      })
-    : "—";
+const fmtDate = (d: Date | null) => (d ? formatDateShort(new Date(d)) : "—");
 
 const csvColumns: CSVColumn<AthleteRow>[] = [
   { key: "firstName", header: "Nombre", value: (r) => r.firstName },
   { key: "lastName", header: "Apellido", value: (r) => r.lastName },
-  { key: "phone", header: "Teléfono", value: (r) => r.phone ?? "" },
+  {
+    key: "phone",
+    header: "Teléfono",
+    value: (r) => formatPhoneMX(r.phone, ""),
+  },
   { key: "email", header: "Email", value: (r) => r.email ?? "" },
-  { key: "status", header: "Estado", value: (r) => r.status },
+  {
+    key: "status",
+    header: "Estado",
+    value: (r) => athleteStatusLabel[r.status],
+  },
   {
     key: "activePlanName",
     header: "Plan activo",
@@ -59,7 +64,7 @@ type Props = {
   };
 };
 
-function StatusChip({ status }: { status: string }) {
+function StatusChip({ status }: { status: AthleteStatus }) {
   const cls =
     status === "ACTIVE"
       ? "k-chip-moss"
@@ -68,7 +73,11 @@ function StatusChip({ status }: { status: string }) {
         : status === "CANCELLED"
           ? "k-chip-ember"
           : "k-chip-ghost";
-  return <span className={`k-chip ${cls} text-[10px]`}>{status}</span>;
+  return (
+    <span className={`k-chip ${cls} text-[10px]`}>
+      {athleteStatusLabel[status]}
+    </span>
+  );
 }
 
 export function AtletasTable({
@@ -109,7 +118,7 @@ export function AtletasTable({
         header: "Teléfono",
         cell: ({ row }) => (
           <span className="font-mono text-xs text-[var(--k-t2)]">
-            {row.original.phone ?? "—"}
+            {formatPhoneMX(row.original.phone)}
           </span>
         ),
       },
@@ -211,14 +220,19 @@ export function AtletasTable({
               onSelectionChange={setSelection}
               onRowClick={(r) => setDrawerId(r.id)}
             />
-            <div className="border-t border-[var(--k-line)] px-4 py-2">
-              <Pagination
-                page={page}
-                pageSize={pageSize}
-                total={total}
-                onPageChange={(n) => patch({ page: n > 1 ? String(n) : null })}
-              />
-            </div>
+            {/* A pager with a single page is noise, not navigation. */}
+            {total > pageSize ? (
+              <div className="border-t border-[var(--k-line)] px-4 py-2">
+                <Pagination
+                  page={page}
+                  pageSize={pageSize}
+                  total={total}
+                  onPageChange={(n) =>
+                    patch({ page: n > 1 ? String(n) : null })
+                  }
+                />
+              </div>
+            ) : null}
           </>
         )}
       </div>

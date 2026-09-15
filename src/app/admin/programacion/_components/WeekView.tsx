@@ -2,6 +2,7 @@ import { ClassCard } from "./ClassCard";
 import { addDays, formatWeekday } from "@/lib/week";
 import type { ClassRow } from "@/server/actions/classes";
 import { EmptyState } from "@/components/kronos/EmptyState";
+import { dayKeyLocal, sortClassesByStart } from "../../_lib/schedule";
 
 export function WeekView({
   weekStart,
@@ -12,22 +13,30 @@ export function WeekView({
   classes: ClassRow[];
   today: Date;
 }) {
-  const todayKey = today.toISOString().slice(0, 10);
+  // Local day keys, not the UTC slice of an ISO string: 18:00 in Mexico City
+  // is already the next day in UTC, which is what pushed evening classes into
+  // the following column (audit /admin/programacion P1).
+  const todayKey = dayKeyLocal(today);
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-7 gap-2">
         {days.map((d) => {
-          const key = d.toISOString().slice(0, 10);
-          const dayClasses = classes
-            .filter((c) => c.startsAt.toISOString().slice(0, 10) === key)
-            .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+          const key = dayKeyLocal(d);
+          const dayClasses = sortClassesByStart(
+            classes.filter((c) => dayKeyLocal(c.startsAt) === key),
+          );
           const isToday = key === todayKey;
           return (
             <div
               key={key}
-              className={`k-card flex flex-col overflow-hidden ${isToday ? "ring-1 ring-cyan/30" : ""}`}
+              className="k-card flex flex-col overflow-hidden"
+              style={
+                isToday
+                  ? { boxShadow: "inset 0 0 0 1px var(--k-accent-line)" }
+                  : undefined
+              }
             >
               <div
                 className="px-2.5 py-2 border-b flex items-center justify-between"
@@ -37,7 +46,7 @@ export function WeekView({
                   <p
                     className="font-mono text-[9px] font-bold tracking-[0.12em] uppercase"
                     style={{
-                      color: isToday ? "var(--k-warning)" : "var(--k-t3)",
+                      color: isToday ? "var(--k-accent)" : "var(--k-t2)",
                     }}
                   >
                     {formatWeekday(d)}
@@ -47,7 +56,7 @@ export function WeekView({
                   </p>
                 </div>
                 {isToday && (
-                  <span className="k-chip k-chip-cyan text-[8px] py-0.5 px-1.5">
+                  <span className="k-chip k-chip-moss text-[8px] py-0.5 px-1.5">
                     HOY
                   </span>
                 )}
@@ -57,7 +66,7 @@ export function WeekView({
                   <div className="flex-1 flex items-center justify-center py-4">
                     <p
                       className="text-[11px] font-medium"
-                      style={{ color: "var(--k-t3)" }}
+                      style={{ color: "var(--k-t2)" }}
                     >
                       Sin clases
                     </p>

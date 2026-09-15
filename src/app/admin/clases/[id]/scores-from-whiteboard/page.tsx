@@ -1,7 +1,12 @@
 import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 import { getServerSession } from "next-auth";
+import { ArrowLeft } from "lucide-react";
 import { authOptions } from "@/server/auth";
 import { db as rawDb, withTenant } from "@/server/db";
+import { formatDateWeekday, formatTime24 } from "@/lib/format";
+import { scoreTypeLabel } from "@/lib/labels";
 import Step1Upload from "./_steps/Step1Upload";
 import Step2Review from "./_steps/Step2Review";
 import Step3Confirm from "./_steps/Step3Confirm";
@@ -11,6 +16,68 @@ type Props = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ step?: string; uploadId?: string; count?: string }>;
 };
+
+/** The three steps, named — "PASO 1 DE 3" alone says nothing about 2 and 3. */
+const STEPS = ["Foto", "Revisar", "Guardar"] as const;
+
+function Stepper({ current }: { current: 1 | 2 | 3 }) {
+  return (
+    <ol className="mb-5 flex flex-wrap items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-wider">
+      {STEPS.map((name, i) => {
+        const step = (i + 1) as 1 | 2 | 3;
+        const active = step === current;
+        const done = step < current;
+        return (
+          <li key={name} className="flex items-center gap-2">
+            <span
+              className="rounded-full px-2.5 py-1"
+              style={{
+                background: active
+                  ? "var(--k-accent-soft)"
+                  : "var(--k-elevated)",
+                color: active
+                  ? "var(--k-accent)"
+                  : done
+                    ? "var(--k-t1)"
+                    : "var(--k-t2)",
+                border: `1px solid ${
+                  active ? "var(--k-accent-line)" : "var(--k-line-2)"
+                }`,
+              }}
+            >
+              {step}. {name}
+            </span>
+            {step < 3 ? (
+              <span aria-hidden style={{ color: "var(--k-t3)" }}>
+                ·
+              </span>
+            ) : null}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function BackBar({ classId }: { classId: string }) {
+  return (
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <Link
+        href={`/admin/asistencia#clase-${classId}` as Route}
+        className="inline-flex min-h-11 items-center gap-1.5 text-sm text-[var(--k-t2)] hover:text-[var(--k-t1)]"
+      >
+        <ArrowLeft size={16} aria-hidden />
+        Volver a asistencia
+      </Link>
+      <Link
+        href="/admin/asistencia"
+        className="k-btn-ghost inline-flex min-h-11 items-center rounded-full px-4 text-xs font-semibold"
+      >
+        Cancelar
+      </Link>
+    </div>
+  );
+}
 
 export default async function ScoresFromWhiteboardPage({
   params,
@@ -35,10 +102,16 @@ export default async function ScoresFromWhiteboardPage({
   });
   if (!klass) notFound();
 
+  const classLabel = `${formatDateWeekday(klass.startsAt)} · ${formatTime24(
+    klass.startsAt,
+  )}`;
+
   // Step 3: done
   if (step === "done") {
     return (
-      <main className="min-h-screen bg-bg p-4">
+      <main className="min-h-screen bg-[var(--k-bg)] p-4 max-w-4xl mx-auto">
+        <BackBar classId={classId} />
+        <Stepper current={3} />
         <Step3Confirm count={parseInt(count ?? "0")} />
       </main>
     );
@@ -73,20 +146,19 @@ export default async function ScoresFromWhiteboardPage({
     const wodScoreType = klass.wod?.scoreType ?? "TIME";
 
     return (
-      <main className="min-h-screen bg-bg p-4 max-w-4xl mx-auto">
+      <main className="min-h-screen bg-[var(--k-bg)] p-4 max-w-4xl mx-auto">
+        <BackBar classId={classId} />
+        <Stepper current={2} />
         <div className="mb-6">
-          <h1 className="text-2xl font-display font-bold text-text">
+          <h1 className="text-2xl font-display font-bold text-[var(--k-t1)]">
             Scores desde pizarra
           </h1>
-          <p className="text-text-2 text-sm mt-1">
-            Clase del{" "}
-            {klass.startsAt.toLocaleDateString("es-MX", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-            })}
+          <p className="text-[var(--k-t2)] text-sm mt-1">
+            Clase del {classLabel}
             {klass.wod
-              ? ` · WOD: ${klass.wod.name} · Tipo: ${wodScoreType}`
+              ? ` · ${klass.wod.name} · Se mide en ${scoreTypeLabel[
+                  wodScoreType
+                ].toLowerCase()}`
               : ""}
           </p>
         </div>
@@ -103,26 +175,19 @@ export default async function ScoresFromWhiteboardPage({
 
   // Step 1: upload (default)
   return (
-    <main className="min-h-screen bg-bg p-4 flex items-start justify-center pt-16">
-      <div className="w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-display font-bold text-text">
-            Cargar scores de pizarra
-          </h1>
-          <p className="text-text-2 text-sm mt-1">
-            Clase:{" "}
-            {klass.startsAt.toLocaleDateString("es-MX", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-            {klass.wod ? ` · ${klass.wod.name}` : ""}
-          </p>
-        </div>
-        <Step1Upload classId={classId} />
+    <main className="min-h-screen bg-[var(--k-bg)] p-4 max-w-4xl mx-auto">
+      <BackBar classId={classId} />
+      <Stepper current={1} />
+      <div className="mb-6">
+        <h1 className="text-2xl font-display font-bold text-[var(--k-t1)]">
+          Cargar scores de pizarra
+        </h1>
+        <p className="text-[var(--k-t2)] text-sm mt-1">
+          Clase del {classLabel}
+          {klass.wod ? ` · ${klass.wod.name}` : ""}
+        </p>
       </div>
+      <Step1Upload classId={classId} />
     </main>
   );
 }

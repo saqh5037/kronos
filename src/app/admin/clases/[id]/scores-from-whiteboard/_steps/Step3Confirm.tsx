@@ -3,11 +3,15 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { m } from "framer-motion";
+import { Trophy } from "lucide-react";
 
 type Props = {
   count: number;
   prDetected?: boolean;
 };
+
+/** Lime family only — the confetti used the retired moss/fire palette. */
+const CONFETTI_COLORS = ["#c8ff2d", "#a8d726", "#f5f5f7", "#8a8a94"];
 
 function useCountUp(target: number, duration = 1200) {
   const [value, setValue] = useState(0);
@@ -57,13 +61,13 @@ export default function Step3Confirm({ count, prDetected }: Props) {
         ...defaults,
         particleCount,
         origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-        colors: ["#4a7c59", "#dc4b17", "#e8893a", "#64748b"],
+        colors: CONFETTI_COLORS,
       });
       confetti({
         ...defaults,
         particleCount,
         origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-        colors: ["#4a7c59", "#dc4b17", "#e8893a", "#64748b"],
+        colors: CONFETTI_COLORS,
       });
     }, 400);
 
@@ -79,7 +83,7 @@ export default function Step3Confirm({ count, prDetected }: Props) {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 0%, rgba(74,124,89,0.08), transparent 60%)",
+            "radial-gradient(ellipse at 50% 0%, rgba(200,255,45,0.08), transparent 60%)",
         }}
       />
 
@@ -116,7 +120,7 @@ export default function Step3Confirm({ count, prDetected }: Props) {
 
       <div className="space-y-2">
         <m.h2
-          className="text-2xl font-display font-bold text-text"
+          className="text-2xl font-display font-bold text-[var(--k-t1)]"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.4 }}
@@ -125,7 +129,7 @@ export default function Step3Confirm({ count, prDetected }: Props) {
           {count !== 1 ? "s" : ""} guardado{count !== 1 ? "s" : ""}
         </m.h2>
         <m.p
-          className="text-text-2 text-sm"
+          className="text-[var(--k-t2)] text-sm"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.65, duration: 0.4 }}
@@ -139,9 +143,14 @@ export default function Step3Confirm({ count, prDetected }: Props) {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.8, type: "spring" }}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--fire-soft)] to-[var(--amber-soft)] text-[var(--k-accent)] border border-[var(--fire-line)] rounded-full px-4 py-1.5 text-sm font-bold mt-2"
+            className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-bold mt-2"
+            style={{
+              background: "var(--k-accent-soft)",
+              color: "var(--k-accent)",
+              borderColor: "var(--k-accent-line)",
+            }}
           >
-            <span className="text-lg">🏆</span>
+            <Trophy size={16} aria-hidden />
             PR detectado
             <m.span
               className="inline-block w-2 h-2 rounded-full bg-[var(--k-accent)]"

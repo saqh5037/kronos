@@ -2,12 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Check } from "lucide-react";
 import { parseBulkInvitations } from "@/lib/athlete-invitation";
 import { inviteAthletesFromText } from "@/server/actions/athlete-invitations";
 
-const PLACEHOLDER = `alice@example.com,Alice Liddell,5551234
-bob@example.com,Bob Marley
-charlie@example.com`;
+const PLACEHOLDER = `ana@correo.com,Ana Ramírez,5553165435
+beto@correo.com,Beto Salas
+carla@correo.com`;
 
 type SubmitState =
   | { kind: "idle" }
@@ -145,8 +146,9 @@ export function InviteForm() {
 
       {/* Result */}
       {state.kind === "ok" && (
-        <div className="rounded-lg border border-[var(--k-accent-line)] bg-[var(--k-accent-soft)] p-3 text-sm">
-          ✓ {state.created}{" "}
+        <div className="flex items-center gap-2 rounded-lg border border-[var(--k-accent-line)] bg-[var(--k-accent-soft)] p-3 text-sm">
+          <Check size={14} aria-hidden className="text-[var(--k-accent)]" />
+          {state.created}{" "}
           {state.created === 1 ? "invitación enviada" : "invitaciones enviadas"}
           .
           {state.skipped > 0 &&

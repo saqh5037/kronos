@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createBodyMetricForAthlete } from "@/server/actions/body-metrics";
 import { BODY_METRIC_LABEL } from "@/lib/validations/body-metric";
+import { formatDateShort } from "@/lib/format";
 import type { BodyMetricType } from "@/lib/validations/body-metric";
 import { LogMeasurementModal } from "@/app/atleta/salud/_components/LogMeasurementModal";
 
@@ -20,12 +21,7 @@ type Props = {
   entries: Entry[];
 };
 
-const fmtShortDate = (d: Date) =>
-  new Date(d).toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "short",
-    year: "2-digit",
-  });
+const fmtShortDate = (d: Date) => formatDateShort(new Date(d));
 
 export function AthleteBodyMetrics({ athleteId, entries }: Props) {
   const [open, setOpen] = useState(false);

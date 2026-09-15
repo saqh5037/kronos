@@ -1,9 +1,7 @@
 import Link from "next/link";
 import type { ClassRow } from "@/server/actions/classes";
-
-function ymd(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+import { classKindLabel } from "@/lib/labels";
+import { dayKeyLocal as ymd } from "../../_lib/schedule";
 
 export function MonthView({
   monthAnchor,
@@ -78,7 +76,7 @@ export function MonthView({
               style={{
                 background: inMonth ? "var(--k-elevated)" : "transparent",
                 border: isToday
-                  ? "1px solid var(--k-warning)"
+                  ? "1px solid var(--k-accent-line)"
                   : "1px solid var(--k-line)",
                 opacity: inMonth ? 1 : 0.4,
               }}
@@ -87,7 +85,7 @@ export function MonthView({
                 <p
                   className="font-display text-sm font-bold leading-none"
                   style={{
-                    color: isToday ? "var(--k-warning)" : "var(--k-t1)",
+                    color: isToday ? "var(--k-accent)" : "var(--k-t1)",
                   }}
                 >
                   {date.getDate()}
@@ -105,27 +103,23 @@ export function MonthView({
                 <div className="mt-2 flex flex-col gap-1">
                   <div
                     className="h-[3px] rounded-full overflow-hidden"
-                    style={{ background: "var(--btn-ghost-bg)" }}
+                    style={{ background: "var(--k-line-2)" }}
                   >
                     <div
                       className="h-full rounded-full"
                       style={{
                         width: `${Math.min(100, fillPct)}%`,
-                        background:
-                          fillPct >= 80
-                            ? "var(--k-accent)"
-                            : fillPct >= 50
-                              ? "var(--k-accent)"
-                              : "var(--k-t2)",
+                        background: "var(--k-accent)",
+                        opacity: fillPct >= 80 ? 1 : fillPct >= 50 ? 0.8 : 0.5,
                       }}
                     />
                   </div>
                   {hasOpenBox && (
                     <span
                       className="font-mono text-[7px] font-bold uppercase tracking-wider"
-                      style={{ color: "var(--k-warning)" }}
+                      style={{ color: "var(--k-t2)" }}
                     >
-                      Open Box
+                      {classKindLabel.OPEN_BOX}
                     </span>
                   )}
                 </div>

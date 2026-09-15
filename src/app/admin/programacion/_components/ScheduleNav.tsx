@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { formatDateShort, formatDateWeekday } from "@/lib/format";
 
 type View = "day" | "week" | "month";
 
@@ -31,30 +33,23 @@ export function ScheduleNav({
 
   const label =
     view === "day"
-      ? date.toLocaleDateString("es-MX", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        })
+      ? formatDateWeekday(date)
       : view === "month"
         ? date.toLocaleDateString("es-MX", {
             month: "long",
             year: "numeric",
           })
-        : `Semana ${date.toLocaleDateString("es-MX", {
-            day: "numeric",
-            month: "short",
-          })}`;
+        : `Semana del ${formatDateShort(date)}`;
 
   return (
     <div className="flex items-center gap-2">
       <Link
         href={{ pathname: basePath, query: { view, date: ymd(prev) } }}
-        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--k-elevated)]"
+        className="w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--k-elevated)]"
         style={{ border: "1px solid var(--k-line)" }}
         aria-label="Anterior"
       >
-        ←
+        <ChevronLeft size={16} aria-hidden />
       </Link>
       <button
         onClick={() => {
@@ -63,18 +58,18 @@ export function ScheduleNav({
           const url = `${basePath}?view=${view}&date=${ymd(t)}`;
           router.push(url as never);
         }}
-        className="px-3 py-1.5 rounded-full text-xs font-bold transition-colors hover:bg-[var(--k-elevated)]"
+        className="min-h-11 px-4 rounded-full text-xs font-bold transition-colors hover:bg-[var(--k-elevated)]"
         style={{ border: "1px solid var(--k-line)" }}
       >
         Hoy
       </button>
       <Link
         href={{ pathname: basePath, query: { view, date: ymd(next) } }}
-        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--k-elevated)]"
+        className="w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--k-elevated)]"
         style={{ border: "1px solid var(--k-line)" }}
         aria-label="Siguiente"
       >
-        →
+        <ChevronRight size={16} aria-hidden />
       </Link>
       <p
         className="text-sm font-bold capitalize ml-2"
