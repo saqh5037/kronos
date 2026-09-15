@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import KCard from "@/components/kronos/KCard";
 
 type Props = {
@@ -15,15 +16,16 @@ export function CoachAttendanceTodayCard({ totals }: Props) {
         <h2 className="font-display text-xl font-bold">Asistencia hoy</h2>
         <Link
           href="/admin/asistencia"
-          className="text-sm text-[var(--k-warning)] hover:underline"
+          className="inline-flex items-center gap-1 text-sm text-[var(--k-t2)] hover:text-[var(--k-t1)]"
         >
-          Detalle →
+          Detalle
+          <ArrowRight size={14} aria-hidden />
         </Link>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <p className="text-xs font-mono uppercase tracking-wider text-[var(--k-t3)] mb-1">
+          <p className="text-xs font-mono uppercase tracking-wider text-[var(--k-t2)] mb-1">
             Reservados
           </p>
           <p className="font-display text-3xl font-extrabold">
@@ -31,7 +33,7 @@ export function CoachAttendanceTodayCard({ totals }: Props) {
           </p>
         </div>
         <div>
-          <p className="text-xs font-mono uppercase tracking-wider text-[var(--k-t3)] mb-1">
+          <p className="text-xs font-mono uppercase tracking-wider text-[var(--k-t2)] mb-1">
             Asistidos
           </p>
           <p
@@ -41,7 +43,9 @@ export function CoachAttendanceTodayCard({ totals }: Props) {
             {totals.attended}
           </p>
           {totals.booked > 0 && (
-            <p className="text-xs text-[var(--k-t3)] mt-0.5">{pct}%</p>
+            <p className="text-xs text-[var(--k-t2)] mt-0.5">
+              {pct} % de los reservados
+            </p>
           )}
         </div>
       </div>

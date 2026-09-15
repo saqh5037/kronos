@@ -18,6 +18,9 @@ import { CoachClassesTodayCard } from "./_components/CoachClassesTodayCard";
 import { CoachAttendanceTodayCard } from "./_components/CoachAttendanceTodayCard";
 import { AtRiskCard } from "./_components/AtRiskCard";
 import AdminErrorState from "./_components/AdminErrorState";
+import { dashboardGreeting } from "./_lib/greeting";
+import { upcomingClasses } from "./_lib/schedule";
+import { formatDateShort, formatDateWeekday, formatTime24 } from "@/lib/format";
 import OnboardingBanner from "@/components/admin/OnboardingBanner";
 import { db as prismaBase } from "@/server/db";
 import {
@@ -170,17 +173,8 @@ export default async function AdminDashboardPage({
   }
 
   const money = fmtMoney(box);
-  const dateLabel = new Intl.DateTimeFormat(box.locale, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    timeZone: box.timezone,
-  }).format(new Date());
-  const timeFmt = new Intl.DateTimeFormat(box.locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: box.timezone,
-  });
+  const now = new Date();
+  const dateLabel = formatDateWeekday(now, box.timezone);
 
   // Range KPIs
   const rangeRevenue = revenuePoints.reduce((s, p) => s + p.revenue, 0);
@@ -203,11 +197,12 @@ export default async function AdminDashboardPage({
 
   const session_ = session;
 
-  // Owner info
-  const ownerName = session_.user?.name ?? "Owner";
-  const ownerInitial = ownerName.trim().charAt(0).toUpperCase() || "O";
-  const ownerFirstName = ownerName.split(" ")[0] || ownerName;
-  const greeting = `Buenos días, ${ownerFirstName}`;
+  // Owner info — the greeting names the PERSON and the time of day, never the
+  // box and never a hardcoded "Buenos días" (audit 2026-09-15, /admin P2).
+  const sessionName = session_.user?.name ?? null;
+  const ownerName = sessionName ?? "Tu cuenta";
+  const ownerInitial = ownerName.trim().charAt(0).toUpperCase() || "K";
+  const greeting = dashboardGreeting(sessionName, now, box.timezone);
 
   // Alerts
   const alerts: AlertRowData[] = [];
@@ -242,9 +237,15 @@ export default async function AdminDashboardPage({
     });
   }
 
-  // Next classes (table)
-  const nextClasses: ClassRowData[] = data.nextClasses.map((c) => ({
-    hora: timeFmt.format(c.startsAt),
+  // Next classes (table) — chronological, today only and without the classes
+  // that already finished: the panel is titled "Próximas clases · hoy", so it
+  // must read as a timeline of what is still ahead (audit top issue #8).
+  const todayLabelForCompare = formatDateShort(now, box.timezone);
+  const upcomingToday = upcomingClasses(data.nextClasses, now).filter(
+    (c) => formatDateShort(c.startsAt, box.timezone) === todayLabelForCompare,
+  );
+  const nextClasses: ClassRowData[] = upcomingToday.map((c) => ({
+    hora: formatTime24(c.startsAt, box.timezone),
     clase: c.wod?.name ?? "Open Box",
     coach: c.coach?.name ?? "—",
     taken: c.bookedCount,
@@ -340,9 +341,12 @@ export default async function AdminDashboardPage({
 
     nextClasses,
     alerts,
-    classesTodayLabel: `${data.todayStats.totalClasses} clase${
-      data.todayStats.totalClasses === 1 ? "" : "s"
-    } programadas`,
+    classesTodayLabel:
+      upcomingToday.length === 0
+        ? `${data.todayStats.totalClasses} clase${
+            data.todayStats.totalClasses === 1 ? "" : "s"
+          } hoy · ya terminaron`
+        : `${upcomingToday.length} por venir de ${data.todayStats.totalClasses} hoy`,
   };
 
   // Onboarding banner state — only for OWNER, only if not completed
@@ -414,13 +418,9 @@ export default async function AdminDashboardPage({
 
 async function CoachDashboard({ session }: { session: Session }) {
   const snapshot = await getCoachDashboardSnapshot();
-  const coachName = session.user?.name ?? "Coach";
-  const firstName = coachName.split(" ")[0] || coachName;
-  const dateLabel = new Intl.DateTimeFormat("es-MX", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  }).format(new Date());
+  const now = new Date();
+  const greeting = dashboardGreeting(session.user?.name ?? null, now);
+  const dateLabel = formatDateWeekday(now);
 
   return (
     <div
@@ -455,14 +455,13 @@ async function CoachDashboard({ session }: { session: Session }) {
             margin: "8px 0 4px",
           }}
         >
-          Hola, {firstName}
+          {greeting}
         </h1>
         <p
           style={{
             color: "var(--k-t2)",
             fontSize: 14,
             margin: 0,
-            textTransform: "capitalize",
           }}
         >
           {dateLabel}
@@ -477,7 +476,10 @@ async function CoachDashboard({ session }: { session: Session }) {
             marginTop: 32,
           }}
         >
-          <CoachClassesTodayCard classes={snapshot?.classesToday ?? []} />
+          <CoachClassesTodayCard
+            classes={snapshot?.classesToday ?? []}
+            now={now}
+          />
           <CoachAttendanceTodayCard
             totals={
               snapshot?.attendanceTodayTotal ?? { booked: 0, attended: 0 }

@@ -5,12 +5,8 @@ import {
   type ClassRow,
 } from "@/server/actions/classes";
 import ClassForm from "@/components/ClassForm";
-import {
-  startOfWeek,
-  addDays,
-  formatWeekday,
-  formatDayMonth,
-} from "@/lib/week";
+import { startOfWeek, addDays } from "@/lib/week";
+import { formatDateShort, formatDateWeekday } from "@/lib/format";
 import Eyebrow from "@/components/kronos/Eyebrow";
 import { ScheduleViewSwitch } from "./_components/ScheduleViewSwitch";
 import { ScheduleNav } from "./_components/ScheduleNav";
@@ -92,10 +88,10 @@ export default async function ProgramacionPage({
 
   const headerLabel =
     view === "day"
-      ? `${formatWeekday(date)} ${formatDayMonth(date)}`
+      ? formatDateWeekday(date)
       : view === "month"
         ? date.toLocaleDateString("es-MX", { month: "long", year: "numeric" })
-        : `Semana del ${formatDayMonth(from)} al ${formatDayMonth(addDays(from, 6))}`;
+        : `Semana del ${formatDateShort(from)} al ${formatDateShort(addDays(from, 6))}`;
 
   return (
     <div className="p-6 lg:p-8">

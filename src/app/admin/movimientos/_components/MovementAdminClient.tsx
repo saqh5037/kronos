@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { m, AnimatePresence } from "framer-motion";
+import { Dumbbell, Pencil, RotateCcw, Search, SearchX, X } from "lucide-react";
 import {
   updateMovementVideoUrl,
   restoreStandardMovement,
@@ -9,23 +10,16 @@ import {
 } from "@/server/actions/movements";
 import { extractYouTubeId, getYouTubeThumbnail } from "@/lib/youtube";
 import type { MovementRow, MovementDetail } from "@/server/actions/movements";
+import { label, movementCategoryLabel } from "@/lib/labels";
 import MovementContentEditor from "@/components/admin/MovementContentEditor";
-
-const CATEGORY_LABELS: Record<string, string> = {
-  OLYMPIC: "Olímpicos",
-  STRENGTH: "Fuerza",
-  GYMNASTICS: "Gimnasia",
-  MONOSTRUCTURAL: "Cardio",
-  ACCESSORY: "Accesorio",
-};
 
 const CATEGORIES = [
   { key: "ALL", label: "Todos" },
-  { key: "STRENGTH", label: "Fuerza" },
-  { key: "GYMNASTICS", label: "Gimnasia" },
-  { key: "OLYMPIC", label: "Olímpico" },
-  { key: "MONOSTRUCTURAL", label: "Cardio" },
-  { key: "ACCESSORY", label: "Accesorio" },
+  { key: "STRENGTH", label: movementCategoryLabel.STRENGTH },
+  { key: "GYMNASTICS", label: movementCategoryLabel.GYMNASTICS },
+  { key: "OLYMPIC", label: movementCategoryLabel.OLYMPIC },
+  { key: "MONOSTRUCTURAL", label: movementCategoryLabel.MONOSTRUCTURAL },
+  { key: "ACCESSORY", label: movementCategoryLabel.ACCESSORY },
 ];
 
 export default function MovementAdminClient({
@@ -37,6 +31,8 @@ export default function MovementAdminClient({
   const [editVideoUrl, setEditVideoUrl] = useState("");
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("ALL");
+  const [onlyWithoutVideo, setOnlyWithoutVideo] = useState(false);
+  const [brokenThumbs, setBrokenThumbs] = useState<Record<string, boolean>>({});
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [editorDetail, setEditorDetail] = useState<MovementDetail | null>(null);
@@ -61,8 +57,11 @@ export default function MovementAdminClient({
       m.slug.includes(search.toLowerCase());
     const matchesCategory =
       activeCategory === "ALL" || m.category === activeCategory;
-    return matchesSearch && matchesCategory;
+    const matchesVideo = !onlyWithoutVideo || !m.videoUrl;
+    return matchesSearch && matchesCategory && matchesVideo;
   });
+
+  const withoutVideoCount = movements.filter((m) => !m.videoUrl).length;
 
   function openEdit(m: MovementRow) {
     setSelectedId(m.id);
@@ -106,47 +105,26 @@ export default function MovementAdminClient({
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-md">
-          <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-3"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-          >
-            <circle
-              cx="7"
-              cy="7"
-              r="5"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            />
-            <path
-              d="M11 11L14 14"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          <Search
+            size={16}
+            aria-hidden
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--k-t2)]"
+          />
           <input
             type="text"
-            placeholder="Buscar movimiento..."
+            placeholder="Buscar movimiento…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-xl text-sm bg-[var(--card)] border border-[var(--line)] focus:outline-none focus:border-[var(--k-t2)] text-text placeholder:text-text-3"
+            className="w-full pl-10 pr-10 py-2 rounded-xl text-sm bg-[var(--k-surface)] border border-[var(--k-line-2)] focus:outline-none focus:border-[var(--k-t2)] text-[var(--k-t1)] placeholder:text-[var(--k-t2)]"
           />
           {search && (
             <button
+              type="button"
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-3 hover:text-text-2"
+              aria-label="Limpiar búsqueda"
+              className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[var(--k-t2)] hover:text-[var(--k-t1)]"
             >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path
-                  d="M2 2L12 12M12 2L2 12"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <X size={14} aria-hidden />
             </button>
           )}
         </div>
@@ -155,47 +133,69 @@ export default function MovementAdminClient({
           {CATEGORIES.map((cat) => (
             <button
               key={cat.key}
+              type="button"
               onClick={() => setActiveCategory(cat.key)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+              aria-pressed={activeCategory === cat.key}
+              className={`min-h-11 px-3 text-xs font-medium rounded-full transition-colors ${
                 activeCategory === cat.key
-                  ? "bg-[var(--k-elevated)] text-text border border-[var(--k-line-2)]"
-                  : "text-text-3 hover:text-text-2"
+                  ? "bg-[var(--k-elevated)] text-[var(--k-t1)] border border-[var(--k-line-2)]"
+                  : "text-[var(--k-t2)] hover:text-[var(--k-t1)]"
               }`}
             >
               {cat.label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => setOnlyWithoutVideo((v) => !v)}
+            aria-pressed={onlyWithoutVideo}
+            className="min-h-11 rounded-full px-3 text-xs font-medium transition-colors"
+            style={{
+              background: onlyWithoutVideo
+                ? "var(--k-accent-soft)"
+                : "transparent",
+              color: onlyWithoutVideo ? "var(--k-accent)" : "var(--k-t2)",
+              border: `1px solid ${
+                onlyWithoutVideo ? "var(--k-accent-line)" : "transparent"
+              }`,
+            }}
+          >
+            Sin video ({withoutVideoCount})
+          </button>
         </div>
       </div>
 
-      <p className="text-[11px] text-text-3 font-mono uppercase tracking-wider mb-3">
+      <p className="text-[11px] text-[var(--k-t2)] font-mono uppercase tracking-wider mb-3">
         {filtered.length} movimiento{filtered.length !== 1 ? "s" : ""}
       </p>
 
       {/* Table */}
-      <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] overflow-hidden">
+      <div className="rounded-xl border border-[var(--k-line)] bg-[var(--k-surface)] overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[var(--line)]">
-              <th className="text-left p-3 text-text-3 font-mono text-[10px] uppercase tracking-wider w-16">
+            <tr className="border-b border-[var(--k-line)]">
+              <th className="text-left p-3 text-[var(--k-t2)] font-mono text-[10px] uppercase tracking-wider w-16">
                 Miniatura
               </th>
-              <th className="text-left p-3 text-text-3 font-mono text-[10px] uppercase tracking-wider">
+              <th className="text-left p-3 text-[var(--k-t2)] font-mono text-[10px] uppercase tracking-wider">
                 Nombre
               </th>
-              <th className="text-left p-3 text-text-3 font-mono text-[10px] uppercase tracking-wider">
+              <th className="text-left p-3 text-[var(--k-t2)] font-mono text-[10px] uppercase tracking-wider">
                 Categoría
               </th>
-              <th className="text-left p-3 text-text-3 font-mono text-[10px] uppercase tracking-wider">
-                Estado
+              <th className="text-left p-3 text-[var(--k-t2)] font-mono text-[10px] uppercase tracking-wider">
+                Video
               </th>
               <th className="w-16 p-3"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--line)]">
+          <tbody className="divide-y divide-[var(--k-line)]">
             {filtered.map((m) => {
               const videoId = extractYouTubeId(m.videoUrl);
-              const thumbnail = videoId ? getYouTubeThumbnail(videoId) : null;
+              const thumbnail =
+                videoId && !brokenThumbs[m.id]
+                  ? getYouTubeThumbnail(videoId)
+                  : null;
               const isOverridden = !!m.videoUrl && !m.isStandard;
 
               return (
@@ -205,68 +205,66 @@ export default function MovementAdminClient({
                   onClick={() => openEdit(m)}
                 >
                   <td className="p-3">
-                    <div className="w-12 h-8 rounded-lg bg-[var(--k-surface)] overflow-hidden border border-[var(--line)]">
+                    <div className="w-12 h-8 rounded-lg bg-[var(--k-elevated)] overflow-hidden border border-[var(--k-line)]">
                       {thumbnail ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={thumbnail}
-                          alt={m.name}
+                          alt=""
                           className="w-full h-full object-cover"
                           loading="lazy"
+                          onError={() =>
+                            setBrokenThumbs((prev) => ({
+                              ...prev,
+                              [m.id]: true,
+                            }))
+                          }
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="var(--k-t3)"
-                            strokeWidth="1.5"
-                          >
-                            <polygon points="5 3 19 12 5 21 5 3" />
-                          </svg>
+                        // No thumbnail: a movement tile, not a grey "•••".
+                        <div className="w-full h-full flex items-center justify-center text-[var(--k-t2)]">
+                          <Dumbbell size={14} aria-hidden />
                         </div>
                       )}
                     </div>
                   </td>
                   <td className="p-3">
-                    <div className="text-sm font-medium text-text truncate">
+                    {/* The slug is developer information — it lives in the
+                        edit form, not in the coach's table. */}
+                    <div className="text-sm font-medium text-[var(--k-t1)] truncate">
                       {m.name}
-                    </div>
-                    <div className="text-[10px] text-text-3 truncate">
-                      {m.slug}
                     </div>
                   </td>
                   <td className="p-3">
-                    <span className="text-[11px] text-text-2">
-                      {CATEGORY_LABELS[m.category] ?? m.category}
+                    <span className="text-[11px] text-[var(--k-t2)]">
+                      {label("movementCategory", m.category)}
                     </span>
                   </td>
                   <td className="p-3">
                     {isOverridden ? (
-                      <span className="k-chip k-chip-strain text-[9px] py-0.5 px-1.5">
-                        Override
+                      <span className="k-chip k-chip-moss text-[9px] py-0.5 px-1.5">
+                        Video propio
                       </span>
+                    ) : m.videoUrl ? (
+                      <span className="text-[11px] text-[var(--k-t2)]">—</span>
                     ) : (
                       <span className="k-chip k-chip-ghost text-[9px] py-0.5 px-1.5">
-                        Estándar
+                        Sin video
                       </span>
                     )}
                   </td>
                   <td className="p-3">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      className="text-text-3 group-hover:text-text-2 transition-colors"
+                    <button
+                      type="button"
+                      aria-label={`Editar ${m.name}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEdit(m);
+                      }}
+                      className="flex h-11 w-11 items-center justify-center rounded-lg text-[var(--k-t2)] transition-colors hover:bg-[var(--k-elevated)] hover:text-[var(--k-t1)]"
                     >
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
+                      <Pencil size={16} aria-hidden />
+                    </button>
                   </td>
                 </tr>
               );
@@ -278,9 +276,13 @@ export default function MovementAdminClient({
       {/* Empty state */}
       {filtered.length === 0 && (
         <div className="k-card p-10 text-center mt-4">
-          <p className="text-3xl mb-2">🔍</p>
-          <p className="text-sm text-text-2">
-            No encontramos movimientos con &quot;{search}&quot;
+          <SearchX
+            size={28}
+            aria-hidden
+            className="mx-auto mb-2 text-[var(--k-t2)]"
+          />
+          <p className="text-sm text-[var(--k-t2)]">
+            No encontramos movimientos con esos filtros.
           </p>
         </div>
       )}
@@ -303,24 +305,26 @@ export default function MovementAdminClient({
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 40, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 bg-[var(--card)] border border-[var(--line)]"
+              className="w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 bg-[var(--k-surface)] border border-[var(--k-line-2)]"
             >
-              <h2 className="font-display text-lg font-bold text-text mb-1">
+              <h2 className="font-display text-lg font-bold text-[var(--k-t1)] mb-1">
                 {selected.name}
               </h2>
-              <p className="text-[11px] text-text-3 mb-4">
+              <p className="text-[11px] text-[var(--k-t2)] mb-4">
                 {selected.isStandard ? "Movimiento estándar" : "Personalizado"}
                 {" · "}
-                {CATEGORY_LABELS[selected.category]}
+                {label("movementCategory", selected.category)}
+                {" · "}
+                <span className="font-mono">{selected.slug}</span>
               </p>
 
               {/* Current video preview */}
               {selected.videoUrl && (
                 <div
-                  className="rounded-xl overflow-hidden mb-4 border border-[var(--line)]"
+                  className="rounded-xl overflow-hidden mb-4 border border-[var(--k-line)]"
                   style={{
                     aspectRatio: "16/9",
-                    background: "var(--k-surface)",
+                    background: "var(--k-elevated)",
                   }}
                 >
                   <iframe
@@ -332,7 +336,7 @@ export default function MovementAdminClient({
                 </div>
               )}
 
-              <label className="block text-[11px] font-mono font-bold tracking-wider text-text-3 uppercase mb-1.5">
+              <label className="block text-[11px] font-mono font-bold tracking-wider text-[var(--k-t2)] uppercase mb-1.5">
                 URL del video (YouTube embed)
               </label>
               <input
@@ -340,7 +344,7 @@ export default function MovementAdminClient({
                 value={editVideoUrl}
                 onChange={(e) => setEditVideoUrl(e.target.value)}
                 placeholder="https://www.youtube.com/embed/..."
-                className="w-full px-3 py-2.5 rounded-xl text-sm bg-[var(--k-elevated)] border border-[var(--line)] focus:outline-none focus:border-[var(--k-t2)] text-text placeholder:text-text-3 mb-4"
+                className="w-full px-3 py-2.5 rounded-xl text-sm bg-[var(--k-elevated)] border border-[var(--k-line-2)] focus:outline-none focus:border-[var(--k-t2)] text-[var(--k-t1)] placeholder:text-[var(--k-t2)] mb-4"
               />
 
               <AnimatePresence>
@@ -349,11 +353,12 @@ export default function MovementAdminClient({
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className={`text-[12px] mb-3 font-semibold ${
-                      message.includes("Error")
-                        ? "text-[var(--k-warning)]"
-                        : "text-[var(--k-accent)]"
-                    }`}
+                    className="text-[12px] mb-3 font-semibold"
+                    style={{
+                      color: message.includes("Error")
+                        ? "var(--k-danger)"
+                        : "var(--k-accent)",
+                    }}
                   >
                     {message}
                   </m.p>
@@ -364,47 +369,38 @@ export default function MovementAdminClient({
                 <m.button
                   onClick={handleSave}
                   disabled={isPending}
-                  className="k-btn-grad flex-1 py-2.5 text-sm font-semibold disabled:opacity-50"
+                  className="k-btn-grad flex-1 min-h-11 py-2.5 text-sm font-semibold disabled:opacity-50"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  {isPending ? "Guardando..." : "Guardar video"}
+                  {isPending ? "Guardando…" : "Guardar video"}
                 </m.button>
                 <m.button
                   type="button"
                   onClick={() => openContentEditor(selected.id)}
                   disabled={isPending || editorLoading}
-                  className="k-btn-ghost px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
+                  className="k-btn-ghost min-h-11 px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  {editorLoading ? "Cargando..." : "Editar contenido AI"}
+                  {editorLoading ? "Cargando…" : "Editar contenido"}
                 </m.button>
                 {selected.isStandard && (
                   <m.button
                     onClick={handleRestore}
                     disabled={isPending}
-                    className="k-btn-ghost px-4 py-2.5 text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50"
+                    className="k-btn-ghost min-h-11 px-4 py-2.5 text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M9 14L4 9l5-5" />
-                      <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
-                    </svg>
+                    <RotateCcw size={14} aria-hidden />
                     Restaurar
                   </m.button>
                 )}
                 <button
+                  type="button"
                   onClick={closeEdit}
-                  className="k-btn-ghost px-4 py-2.5 text-sm text-text-3 hover:text-text-2"
+                  className="k-btn-ghost min-h-11 px-4 py-2.5 text-sm text-[var(--k-t2)] hover:text-[var(--k-t1)]"
                 >
                   Cerrar
                 </button>

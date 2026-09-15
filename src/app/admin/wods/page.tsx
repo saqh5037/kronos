@@ -5,8 +5,8 @@ import type { WODSummary } from "@/server/actions/wods";
 import { listMovements } from "@/server/actions/movements";
 import SmartWODForm from "@/components/wod-form/SmartWODForm";
 import MovementForm from "@/components/MovementForm";
-import { WODHeroCard } from "@/components/kronos/WODHeroCard";
 import { getCachedBoxDiscipline } from "@/server/cache";
+import { WodLibrary } from "./_components/WodLibrary";
 
 export const metadata = { title: "Kronos — WODs" };
 
@@ -39,7 +39,7 @@ export default async function WODsPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-6 lg:p-8">
       <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
         <div>
           <span className="k-eyebrow-bar">Programación · Biblioteca</span>
@@ -67,10 +67,6 @@ export default async function WODsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* WOD library */}
         <div className="lg:col-span-2">
-          <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
-            {wods.length} WOD{wods.length === 1 ? "" : "s"} activo
-            {wods.length === 1 ? "" : "s"}
-          </p>
           {wods.length === 0 ? (
             <div className="k-card p-6 text-center">
               <p className="text-sm" style={{ color: "var(--k-t2)" }}>
@@ -78,11 +74,7 @@ export default async function WODsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {wods.map((w) => (
-                <WODHeroCard key={w.id} w={w} />
-              ))}
-            </div>
+            <WodLibrary wods={wods} />
           )}
         </div>
 
@@ -90,43 +82,52 @@ export default async function WODsPage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
-              Biblioteca de movimientos
+              Biblioteca de movimientos ({movements.length})
             </p>
             <MovementForm />
           </div>
-          <div className="k-card overflow-hidden max-h-[60vh] overflow-y-auto">
+          {/* The rail scrolls with a visible affordance instead of clipping
+              its 8th row against a fixed height (audit /admin/wods P2). */}
+          <div className="k-card overflow-hidden">
             {movements.length === 0 ? (
               <p
                 className="text-xs p-4 text-center"
-                style={{ color: "var(--k-t3)" }}
+                style={{ color: "var(--k-t2)" }}
               >
                 Sin movimientos. Crea el primero.
               </p>
             ) : (
-              <ul className="flex flex-col">
-                {movements.map((m) => (
-                  <li
-                    key={m.id}
-                    className="px-4 py-3 border-b last:border-b-0 flex items-center justify-between group hover:bg-[var(--k-elevated)] transition-colors"
-                    style={{ borderColor: "var(--k-line)" }}
-                  >
-                    <div>
+              <>
+                <ul className="flex max-h-[70vh] flex-col overflow-y-auto overscroll-contain">
+                  {movements.map((m) => (
+                    <li
+                      key={m.id}
+                      className="px-4 py-3 border-b last:border-b-0 hover:bg-[var(--k-elevated)] transition-colors"
+                      style={{ borderColor: "var(--k-line)" }}
+                    >
                       <p className="text-sm font-medium">{m.name}</p>
                       {m.equipment.length > 0 && (
                         <p
                           className="text-[10px] mt-0.5"
-                          style={{ color: "var(--k-t3)" }}
+                          style={{ color: "var(--k-t2)" }}
                         >
                           {m.equipment.join(" · ")}
                         </p>
                       )}
-                    </div>
-                    <span className="text-lg opacity-0 group-hover:opacity-40 transition-opacity">
-                      ›
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                    </li>
+                  ))}
+                </ul>
+                <p
+                  className="border-t px-4 py-2 text-[10px]"
+                  style={{
+                    borderColor: "var(--k-line)",
+                    color: "var(--k-t2)",
+                  }}
+                >
+                  Desliza para ver los {movements.length} movimientos · edítalos
+                  en Movimientos
+                </p>
+              </>
             )}
           </div>
         </div>

@@ -7,12 +7,9 @@ import {
   resendInvitation,
   type PendingInvitationRow,
 } from "@/server/actions/athlete-invitations";
+import { formatDateShort } from "@/lib/format";
 
-const fmtDate = (d: Date) =>
-  new Date(d).toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "short",
-  });
+const fmtDate = (d: Date) => formatDateShort(new Date(d));
 
 function daysUntil(date: Date, nowMs: number): number {
   return Math.ceil((new Date(date).getTime() - nowMs) / (1000 * 60 * 60 * 24));
@@ -48,7 +45,7 @@ export function PendingInvitationsList({
       <div className="k-card p-5">
         <p className="k-eyebrow mb-3">Pendientes</p>
         <p className="text-sm text-[var(--k-t3)]">
-          No hay invitaciones pendientes. Las que envíes aparecerán acá.
+          No hay invitaciones pendientes. Las que envíes aparecerán aquí.
         </p>
       </div>
     );

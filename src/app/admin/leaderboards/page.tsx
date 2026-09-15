@@ -8,7 +8,8 @@ import {
 import WODSelector from "@/components/WODSelector";
 import Podium from "@/components/kronos/Podium";
 import { formatScore } from "@/lib/scores";
-import { formatDayMonth } from "@/lib/week";
+import { formatDateShort } from "@/lib/format";
+import { scalingLabel, scoreTypeLabel } from "@/lib/labels";
 import type { ScoreType } from "@/lib/validations/wod";
 
 export const metadata = { title: "Kronos — Leaderboards" };
@@ -47,7 +48,7 @@ export default async function LeaderboardsPage({
     })) ?? [];
 
   return (
-    <div className="p-8">
+    <div className="p-6 lg:p-8">
       <div className="mb-8">
         <span className="k-eyebrow-bar">Performance</span>
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
@@ -80,7 +81,7 @@ export default async function LeaderboardsPage({
             <div className="k-card p-6 text-center">
               <p className="text-sm" style={{ color: "var(--k-t2)" }}>
                 {wodOptions.length === 0
-                  ? "Sin WODs todavía. Crea uno en /admin/wods."
+                  ? "Sin WODs todavía. Crea uno en Programación › WODs."
                   : "No hay scores RX para este WOD aún."}
               </p>
             </div>
@@ -93,66 +94,110 @@ export default async function LeaderboardsPage({
                 <h3 className="font-display font-bold text-base">
                   {board.wodName}
                 </h3>
-                <p className="text-xs mt-0.5" style={{ color: "var(--k-t3)" }}>
-                  Score: {board.scoreType} · {board.entries.length} atleta
-                  {board.entries.length === 1 ? "" : "s"}
-                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <span
+                    className="rounded-full px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider"
+                    style={{
+                      background: "var(--k-accent-soft)",
+                      color: "var(--k-accent)",
+                      border: "1px solid var(--k-accent-line)",
+                    }}
+                  >
+                    {scoreTypeLabel[board.scoreType as ScoreType]}
+                  </span>
+                  <span className="text-xs" style={{ color: "var(--k-t2)" }}>
+                    {board.entries.length} atleta
+                    {board.entries.length === 1 ? "" : "s"}
+                  </span>
+                </div>
               </div>
 
               <div className="p-4">
                 <Podium entries={podiumData} />
 
-                <table className="k-table text-sm">
-                  <thead>
-                    <tr
-                      style={{
-                        borderBottom: "1px solid var(--k-line)",
-                        color: "var(--k-t3)",
-                      }}
-                    >
-                      <th className="text-left px-4 py-2 k-eyebrow w-12">#</th>
-                      <th className="text-left px-4 py-2 k-eyebrow">Atleta</th>
-                      <th className="text-left px-4 py-2 k-eyebrow">
-                        Resultado
-                      </th>
-                      <th className="text-left px-4 py-2 k-eyebrow">Logrado</th>
-                    </tr>
-                  </thead>
-                  <tbody className="k-stagger">
-                    {board.entries.slice(3).map((e, idx) => (
-                      <tr key={e.athleteId} className="k-row">
-                        <td
-                          className="px-4 py-2 font-mono text-xs"
-                          style={{ color: "var(--k-t3)" }}
-                        >
-                          {idx + 4}
-                        </td>
-                        <td className="px-4 py-2 font-medium">
-                          {e.athleteName}
-                        </td>
-                        <td className="px-4 py-2">
-                          <span className="font-mono font-bold">
-                            {formatScore(e.value, board.scoreType)}
-                          </span>
-                          {e.scaling !== "RX" && (
-                            <span
-                              className="ml-2 text-[10px]"
-                              style={{ color: "var(--k-warning)" }}
-                            >
-                              {e.scaling}
-                            </span>
-                          )}
-                        </td>
-                        <td
-                          className="px-4 py-2 font-mono text-xs"
-                          style={{ color: "var(--k-t3)" }}
-                        >
-                          {formatDayMonth(e.achievedAt)}
-                        </td>
+                {/* The table starts at #1: the podium is an accent on the
+                    ranking, not a replacement for its first three rows. */}
+                <div className="overflow-x-auto">
+                  <table className="k-table text-sm">
+                    <thead>
+                      <tr
+                        style={{
+                          borderBottom: "1px solid var(--k-line)",
+                          color: "var(--k-t2)",
+                        }}
+                      >
+                        <th className="text-left px-4 py-2 k-eyebrow w-12">
+                          #
+                        </th>
+                        <th className="text-left px-4 py-2 k-eyebrow">
+                          Atleta
+                        </th>
+                        <th className="text-left px-4 py-2 k-eyebrow">
+                          Resultado
+                        </th>
+                        <th className="text-left px-4 py-2 k-eyebrow">
+                          Logrado
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="k-stagger">
+                      {board.entries.map((e, idx) => {
+                        const rank = idx + 1;
+                        const onPodium = rank <= 3;
+                        return (
+                          <tr key={e.athleteId} className="k-row">
+                            <td
+                              className="px-4 py-2 font-mono text-xs font-bold"
+                              style={{
+                                color: onPodium
+                                  ? "var(--k-accent)"
+                                  : "var(--k-t2)",
+                              }}
+                            >
+                              {rank}
+                            </td>
+                            <td className="px-4 py-2 font-medium">
+                              {e.athleteName}
+                            </td>
+                            <td className="px-4 py-2">
+                              <span
+                                className="font-mono font-bold"
+                                style={{
+                                  color: onPodium
+                                    ? "var(--k-accent)"
+                                    : "var(--k-t1)",
+                                }}
+                              >
+                                {formatScore(e.value, board.scoreType)}
+                              </span>
+                              {e.scaling !== "RX" && (
+                                <span
+                                  className="ml-2 text-[10px]"
+                                  style={{ color: "var(--k-t2)" }}
+                                >
+                                  {scalingLabel[
+                                    e.scaling as keyof typeof scalingLabel
+                                  ] ?? e.scaling}
+                                </span>
+                              )}
+                            </td>
+                            <td
+                              className="px-4 py-2 font-mono text-xs"
+                              style={{ color: "var(--k-t2)" }}
+                            >
+                              {formatDateShort(e.achievedAt)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <p className="mt-3 text-xs" style={{ color: "var(--k-t2)" }}>
+                  Se muestra el mejor score de cada atleta. A resultado igual,
+                  los scores RX van por encima de los escalados.
+                </p>
               </div>
             </div>
           )}
@@ -167,7 +212,7 @@ export default async function LeaderboardsPage({
             {attendanceLeaders.length === 0 ? (
               <p
                 className="text-xs p-4 text-center"
-                style={{ color: "var(--k-t3)" }}
+                style={{ color: "var(--k-t2)" }}
               >
                 Sin check-ins esta semana.
               </p>
@@ -180,15 +225,13 @@ export default async function LeaderboardsPage({
                     style={{ borderColor: "var(--k-line)" }}
                   >
                     <div className="flex items-center gap-3 min-w-0">
+                      {/* Rank is lime with intensity, never orange: a podium
+                          place is not a warning (audit /leaderboards P1). */}
                       <span
-                        className="font-mono text-xs w-6"
+                        className="font-mono text-xs font-bold w-6"
                         style={{
-                          color:
-                            idx === 0
-                              ? "var(--k-accent)"
-                              : idx < 3
-                                ? "var(--k-warning)"
-                                : "var(--k-t3)",
+                          color: "var(--k-accent)",
+                          opacity: idx === 0 ? 1 : idx < 3 ? 0.75 : 0.45,
                         }}
                       >
                         {idx + 1}
@@ -209,6 +252,16 @@ export default async function LeaderboardsPage({
                 ))}
               </ul>
             )}
+            <p
+              className="border-t px-4 py-2 text-[10px]"
+              style={{
+                borderColor: "var(--k-line)",
+                color: "var(--k-t2)",
+              }}
+            >
+              Con el mismo número de clases, el orden entre atletas no implica
+              ventaja.
+            </p>
           </div>
         </div>
       </div>

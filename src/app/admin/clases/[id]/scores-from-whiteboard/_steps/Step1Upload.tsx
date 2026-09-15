@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { m, AnimatePresence } from "framer-motion";
+import { AlertCircle, Camera, Plus } from "lucide-react";
 import { uploadWhiteboardPhoto } from "@/server/actions/uploads";
 import { processWhiteboardUpload } from "@/server/actions/scores";
 
@@ -68,23 +69,32 @@ export default function Step1Upload({ classId }: Props) {
   return (
     <div className="k-card p-6 max-w-lg mx-auto space-y-6 relative overflow-hidden">
       <div>
-        <p className="k-eyebrow mb-1">Paso 1 de 3</p>
-        <h2 className="text-xl font-display font-bold text-text">
+        <p className="k-eyebrow mb-1">Paso 1 de 3 · Foto</p>
+        <h2 className="text-xl font-display font-bold text-[var(--k-t1)]">
           Foto de la pizarra
         </h2>
-        <p className="text-sm text-text-2 mt-1">
+        <p className="text-sm text-[var(--k-t2)] mt-1">
           Toma una foto clara de la pizarra con los scores del WOD.
         </p>
       </div>
+
+      {/* Guidance: this is what decides whether the OCR is usable. */}
+      <ul className="space-y-1.5 text-xs text-[var(--k-t2)]">
+        <li>· Encuadra la pizarra completa, sin cortar filas.</li>
+        <li>· Evita reflejos y sombras sobre el texto.</li>
+        <li>· Una línea por atleta, con su nombre y su resultado.</li>
+        <li>
+          · Los nombres se cruzan con tu roster y los puedes editar en el paso
+          2, antes de guardar nada.
+        </li>
+      </ul>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <m.div
           className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors overflow-hidden ${
             dragOver
               ? "border-[var(--k-accent)] bg-[var(--k-accent-soft)]"
-              : preview
-                ? "border-white/20"
-                : "border-white/20 hover:border-white/40"
+              : "border-[var(--k-line-2)] hover:border-[var(--k-t3)]"
           }`}
           onClick={(e) => {
             addRipple(e);
@@ -113,9 +123,9 @@ export default function Step1Upload({ classId }: Props) {
             dragOver
               ? {
                   boxShadow: [
-                    "0 0 0px rgba(74,124,89,0)",
-                    "0 0 20px rgba(74,124,89,0.3)",
-                    "0 0 0px rgba(74,124,89,0)",
+                    "0 0 0px rgba(200,255,45,0)",
+                    "0 0 20px rgba(200,255,45,0.3)",
+                    "0 0 0px rgba(200,255,45,0)",
                   ],
                 }
               : {}
@@ -135,7 +145,7 @@ export default function Step1Upload({ classId }: Props) {
                 animate={{ width: 300, height: 300, opacity: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
-                className="absolute rounded-full bg-white/10 pointer-events-none"
+                className="absolute rounded-full bg-[var(--k-accent-soft)] pointer-events-none"
                 style={{
                   left: ripple.x - 150,
                   top: ripple.y - 150,
@@ -156,14 +166,14 @@ export default function Step1Upload({ classId }: Props) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={preview}
-                  alt="Preview pizarra"
+                  alt="Vista previa de la pizarra"
                   className="max-h-64 mx-auto rounded-lg object-contain"
                 />
                 <m.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="text-text-3 text-xs mt-3"
+                  className="text-[var(--k-t2)] text-xs mt-3"
                 >
                   Toca para cambiar la imagen
                 </m.p>
@@ -177,7 +187,7 @@ export default function Step1Upload({ classId }: Props) {
                 exit={{ opacity: 0 }}
               >
                 <m.div
-                  className="text-5xl"
+                  className="flex justify-center text-[var(--k-accent)]"
                   animate={{ y: [0, -4, 0] }}
                   transition={{
                     duration: 2,
@@ -185,27 +195,20 @@ export default function Step1Upload({ classId }: Props) {
                     ease: "easeInOut",
                   }}
                 >
-                  📸
+                  <Camera size={44} aria-hidden strokeWidth={1.5} />
                 </m.div>
                 <div>
-                  <p className="text-text-2 text-sm font-medium">
+                  <p className="text-[var(--k-t2)] text-sm font-medium">
                     {dragOver
                       ? "Suelta la imagen aquí"
                       : "Toca para seleccionar o tomar foto"}
                   </p>
-                  <p className="text-text-3 text-xs mt-1">
-                    Max 8 MB · JPG, PNG, HEIC
+                  <p className="text-[var(--k-t2)] text-xs mt-1">
+                    Máximo 8 MB · JPG, PNG, HEIC
                   </p>
                 </div>
-                <div className="flex items-center justify-center gap-2 text-text-3 text-xs mt-2">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path
-                      d="M7 1V13M1 7H13"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                <div className="flex items-center justify-center gap-2 text-[var(--k-t2)] text-xs mt-2">
+                  <Plus size={14} aria-hidden />
                   También puedes arrastrar y soltar
                 </div>
               </m.div>
@@ -228,24 +231,14 @@ export default function Step1Upload({ classId }: Props) {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="text-sm text-[var(--k-warning)] bg-[rgba(255, 90, 90, 0.1)] rounded-lg px-4 py-3 border border-[rgba(255, 90, 90, 0.3)] flex items-center gap-2"
+              className="text-sm rounded-lg px-4 py-3 flex items-center gap-2"
+              style={{
+                color: "var(--k-danger)",
+                background: "rgba(255, 90, 90, 0.1)",
+                border: "1px solid rgba(255, 90, 90, 0.3)",
+              }}
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle
-                  cx="8"
-                  cy="8"
-                  r="6"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M8 5V8.5"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-                <circle cx="8" cy="11" r="0.75" fill="currentColor" />
-              </svg>
+              <AlertCircle size={16} aria-hidden />
               {error}
             </m.p>
           )}
@@ -266,8 +259,8 @@ export default function Step1Upload({ classId }: Props) {
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Procesando con IA...
+                  <span className="inline-block w-4 h-4 border-2 border-[var(--k-line-2)] border-t-[var(--k-accent-on)] rounded-full animate-spin" />
+                  Analizando la foto…
                 </span>
               ) : (
                 "Procesar pizarra"

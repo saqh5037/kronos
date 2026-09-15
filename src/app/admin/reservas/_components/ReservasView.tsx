@@ -2,6 +2,8 @@
 
 import { useCallback, useMemo } from "react";
 import Link from "next/link";
+import type { Route } from "next";
+import { Camera } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   CheckInButton,
@@ -9,6 +11,8 @@ import {
   CancelBookingButton,
 } from "@/components/BookingActions";
 import { EmptyState } from "@/components/kronos/EmptyState";
+import { bookingStatusLabel, classKindLabel } from "@/lib/labels";
+import { formatDateShort, formatDateWeekday, formatTime24 } from "@/lib/format";
 
 type ClassChip = {
   id: string;
@@ -21,6 +25,13 @@ type ClassChip = {
   timeLabel: string;
 };
 
+type BookingStatusValue =
+  | "BOOKED"
+  | "WAITLIST"
+  | "ATTENDED"
+  | "NOSHOW"
+  | "CANCELLED";
+
 type RosterDTO = {
   classId: string;
   startsAt: string;
@@ -32,34 +43,33 @@ type RosterDTO = {
     athleteId: string;
     firstName: string;
     lastName: string;
-    status: "BOOKED" | "WAITLIST" | "ATTENDED" | "NOSHOW" | "CANCELLED";
+    status: BookingStatusValue;
     bookedAt: string;
     checkedInAt: string | null;
   }[];
 };
 
-type Status =
-  | "ALL"
-  | "BOOKED"
-  | "WAITLIST"
-  | "ATTENDED"
-  | "NOSHOW"
-  | "CANCELLED";
+type Status = "ALL" | BookingStatusValue;
 
+/**
+ * Tab labels: the roster is filtered by what the booking IS, so "BOOKED" is
+ * "Pendientes" (nobody has checked in yet) — "Reservadas" read as a
+ * contradiction next to "6/10" (audit /admin/reservas P2).
+ */
 const STATUS_LABEL: Record<Status, string> = {
   ALL: "Todas",
-  BOOKED: "Reservadas",
-  WAITLIST: "Lista espera",
+  BOOKED: "Pendientes",
+  WAITLIST: "Lista de espera",
   ATTENDED: "Asistieron",
-  NOSHOW: "No-show",
+  NOSHOW: "No vinieron",
   CANCELLED: "Canceladas",
 };
 
-const STATUS_COLOR: Record<string, string> = {
-  BOOKED: "var(--k-accent)",
+const STATUS_COLOR: Record<BookingStatusValue, string> = {
+  BOOKED: "var(--k-t2)",
   WAITLIST: "var(--k-t2)",
   ATTENDED: "var(--k-accent)",
-  NOSHOW: "var(--k-accent)",
+  NOSHOW: "var(--k-danger)",
   CANCELLED: "var(--k-t3)",
 };
 
@@ -141,7 +151,7 @@ export function ReservasView({
       <aside className="flex flex-col gap-2">
         <p
           className="font-mono text-[10px] font-bold uppercase tracking-wider px-1"
-          style={{ color: "var(--k-t3)" }}
+          style={{ color: "var(--k-t2)" }}
         >
           {view === "day" ? "Clases del día" : "Clases de la semana"}
         </p>
@@ -151,25 +161,15 @@ export function ReservasView({
               {view === "week" && (
                 <p
                   className="font-mono text-[10px] font-bold uppercase tracking-wider px-1 pt-1.5"
-                  style={{ color: "var(--k-t3)" }}
+                  style={{ color: "var(--k-t2)" }}
                 >
-                  {new Date(dayKey + "T12:00:00").toLocaleDateString("es-MX", {
-                    weekday: "short",
-                    day: "2-digit",
-                    month: "short",
-                  })}
+                  {formatDateWeekday(new Date(dayKey + "T12:00:00"))}
                 </p>
               )}
               {dayClasses.map((c) => {
-                const fillRatio = c.bookingCount / c.capacity;
+                const fillRatio = c.bookingCount / Math.max(1, c.capacity);
                 const accent =
-                  c.kind === "OPEN_BOX"
-                    ? "var(--k-warning)"
-                    : fillRatio >= 1
-                      ? "var(--k-accent)"
-                      : fillRatio >= 0.7
-                        ? "var(--k-t2)"
-                        : "var(--k-accent)";
+                  fillRatio >= 0.7 ? "var(--k-accent)" : "var(--k-t2)";
                 const isSelected = c.id === selectedId;
                 return (
                   <Link
@@ -186,12 +186,12 @@ export function ReservasView({
                     style={{
                       background: isSelected
                         ? "var(--k-elevated)"
-                        : "var(--card)",
+                        : "var(--k-surface)",
                       borderColor: isSelected
-                        ? "var(--k-line-2)"
-                        : "var(--line)",
+                        ? "var(--k-accent-line)"
+                        : "var(--k-line)",
                       boxShadow: isSelected
-                        ? `inset 3px 0 0 ${accent}`
+                        ? "inset 3px 0 0 var(--k-accent)"
                         : "none",
                     }}
                   >
@@ -202,7 +202,7 @@ export function ReservasView({
                       <span
                         className="font-mono text-[9px] font-bold rounded-full px-1.5 py-0.5"
                         style={{
-                          background: `${accent}22`,
+                          background: "var(--k-accent-soft)",
                           color: accent,
                         }}
                       >
@@ -211,16 +211,11 @@ export function ReservasView({
                     </div>
                     <p
                       className="text-[11px] mt-1 truncate font-semibold"
-                      style={{
-                        color:
-                          c.kind === "OPEN_BOX"
-                            ? "var(--k-warning)"
-                            : "var(--text)",
-                      }}
+                      style={{ color: "var(--k-t1)" }}
                     >
                       {c.kind === "OPEN_BOX"
-                        ? "Open Box"
-                        : (c.wodName ?? "WOD")}
+                        ? classKindLabel.OPEN_BOX
+                        : (c.wodName ?? classKindLabel.WOD)}
                     </p>
                   </Link>
                 );
@@ -235,8 +230,8 @@ export function ReservasView({
         {!roster ? (
           <EmptyState
             tone="info"
-            title="Seleccioná una clase"
-            description="Tocá una clase de la lista izquierda para ver su roster, hacer check-in o gestionar waitlist."
+            title="Selecciona una clase"
+            description="Toca una clase de la lista para ver su roster, hacer check-in o gestionar la lista de espera."
           />
         ) : (
           <div className="k-card p-4 lg:p-5">
@@ -244,19 +239,13 @@ export function ReservasView({
               <div>
                 <p
                   className="font-mono text-[10px] font-bold uppercase tracking-wider"
-                  style={{ color: "var(--k-t3)" }}
+                  style={{ color: "var(--k-t2)" }}
                 >
-                  ROSTER ·{" "}
-                  {new Date(roster.startsAt).toLocaleString("es-MX", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  Roster · {formatDateWeekday(new Date(roster.startsAt))} ·{" "}
+                  {formatTime24(new Date(roster.startsAt))}
                 </p>
                 <h2 className="font-display text-2xl font-bold mt-1">
-                  {roster.wodName ?? "Open Box"}
+                  {roster.wodName ?? classKindLabel.OPEN_BOX}
                 </h2>
                 {roster.coachName && (
                   <p
@@ -267,27 +256,38 @@ export function ReservasView({
                   </p>
                 )}
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Stat
-                  label="Reservadas"
-                  value={counts.booked}
-                  color="var(--k-accent)"
-                />
-                <Stat
-                  label="Lista"
-                  value={counts.waitlist}
-                  color="var(--k-t2)"
-                />
-                <Stat
-                  label="Asist."
-                  value={counts.attended}
-                  color="var(--k-accent)"
-                />
-                <Stat
-                  label="No-show"
-                  value={counts.noshow}
-                  color="var(--k-accent)"
-                />
+              <div className="flex flex-col items-end gap-2">
+                <Link
+                  href={
+                    `/admin/clases/${roster.classId}/scores-from-whiteboard` as Route
+                  }
+                  className="k-btn-ghost inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold"
+                >
+                  <Camera size={14} aria-hidden />
+                  Cargar pizarra
+                </Link>
+                <div className="flex flex-wrap gap-2">
+                  <Stat
+                    label={STATUS_LABEL.BOOKED}
+                    value={counts.booked}
+                    color="var(--k-t2)"
+                  />
+                  <Stat
+                    label="Lista"
+                    value={counts.waitlist}
+                    color="var(--k-t2)"
+                  />
+                  <Stat
+                    label="Asist."
+                    value={counts.attended}
+                    color="var(--k-accent)"
+                  />
+                  <Stat
+                    label="No-show"
+                    value={counts.noshow}
+                    color="var(--k-danger)"
+                  />
+                </div>
               </div>
             </div>
 
@@ -299,42 +299,48 @@ export function ReservasView({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="rounded-lg border bg-[var(--k-elevated)] px-3 py-1.5 text-sm flex-1 min-w-[180px]"
-                style={{ borderColor: "var(--line)" }}
+                style={{ borderColor: "var(--k-line-2)" }}
               />
-              <div
-                className="inline-flex rounded-full p-1 gap-0.5"
-                style={{
-                  background: "var(--k-elevated)",
-                  border: "1px solid var(--line)",
-                }}
-              >
-                {(
-                  [
-                    "ALL",
-                    "BOOKED",
-                    "WAITLIST",
-                    "ATTENDED",
-                    "NOSHOW",
-                  ] as Status[]
-                ).map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setStatusFilter(s)}
-                    className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all"
-                    style={{
-                      background:
-                        statusFilter === s ? "var(--card)" : "transparent",
-                      color: statusFilter === s ? "var(--text)" : "var(--k-t3)",
-                    }}
-                  >
-                    {STATUS_LABEL[s]}
-                  </button>
-                ))}
+              {/* Scrollable strip: at 360 the six tabs overflowed the viewport. */}
+              <div className="-mx-1 w-full overflow-x-auto px-1 sm:mx-0 sm:w-auto sm:px-0">
+                <div
+                  className="inline-flex w-max rounded-full p-1 gap-0.5"
+                  style={{
+                    background: "var(--k-elevated)",
+                    border: "1px solid var(--k-line-2)",
+                  }}
+                >
+                  {(
+                    [
+                      "ALL",
+                      "BOOKED",
+                      "WAITLIST",
+                      "ATTENDED",
+                      "NOSHOW",
+                    ] as Status[]
+                  ).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setStatusFilter(s)}
+                      className="whitespace-nowrap rounded-full px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-all"
+                      style={{
+                        background:
+                          statusFilter === s
+                            ? "var(--k-surface)"
+                            : "transparent",
+                        color:
+                          statusFilter === s ? "var(--k-t1)" : "var(--k-t2)",
+                      }}
+                    >
+                      {STATUS_LABEL[s]}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Bookings table */}
+            {/* Bookings list */}
             {filteredBookings.length === 0 ? (
               <div className="py-8">
                 <EmptyState
@@ -347,7 +353,7 @@ export function ReservasView({
                   description={
                     search || statusFilter !== "ALL"
                       ? "Prueba con otro nombre o cambia el estado."
-                      : "Cuando los atletas reserven, aparecerán acá para hacer check-in."
+                      : "Cuando los atletas reserven, aparecerán aquí para hacer check-in."
                   }
                   action={
                     search || statusFilter !== "ALL" ? (
@@ -367,9 +373,10 @@ export function ReservasView({
               </div>
             ) : (
               <div className="flex flex-col gap-1">
+                {/* Header only exists where the columns do (md+). */}
                 <div
-                  className="grid grid-cols-[1fr_120px_120px_140px] gap-3 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-wider"
-                  style={{ color: "var(--k-t3)" }}
+                  className="hidden md:grid md:grid-cols-[minmax(0,1fr)_120px_120px_auto] gap-3 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-wider"
+                  style={{ color: "var(--k-t2)" }}
                 >
                   <span>Atleta</span>
                   <span>Estado</span>
@@ -379,39 +386,48 @@ export function ReservasView({
                 {filteredBookings.map((b) => (
                   <div
                     key={b.bookingId}
-                    className="grid grid-cols-[1fr_120px_120px_140px] gap-3 items-center px-3 py-2.5 rounded-lg"
+                    className="flex flex-col gap-2 rounded-lg px-3 py-3 md:grid md:grid-cols-[minmax(0,1fr)_120px_120px_auto] md:items-center md:gap-3 md:py-2.5"
                     style={{ background: "var(--k-elevated)" }}
                   >
-                    <span className="font-medium text-sm truncate">
+                    {/* The name leads: a roster without names cannot be used. */}
+                    <span className="text-sm font-semibold md:truncate">
                       {b.firstName} {b.lastName}
                     </span>
                     <span
                       className="font-mono text-[10px] font-bold uppercase tracking-wider rounded-full px-2 py-1 inline-block w-fit"
                       style={{
-                        background: `${STATUS_COLOR[b.status]}22`,
+                        background: "var(--k-surface)",
                         color: STATUS_COLOR[b.status],
+                        border: `1px solid ${STATUS_COLOR[b.status]}40`,
                       }}
                     >
-                      {b.status}
+                      {bookingStatusLabel[b.status]}
                     </span>
                     <span
                       className="font-mono text-[10px]"
-                      style={{ color: "var(--k-t3)" }}
+                      style={{ color: "var(--k-t2)" }}
                     >
-                      {new Date(b.bookedAt).toLocaleString("es-MX", {
-                        day: "2-digit",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {formatDateShort(new Date(b.bookedAt))} ·{" "}
+                      {formatTime24(new Date(b.bookedAt))}
                     </span>
-                    <div className="flex gap-1.5 flex-wrap">
-                      {(b.status === "BOOKED" || b.status === "WAITLIST") && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {b.status === "BOOKED" || b.status === "WAITLIST" ? (
                         <>
                           <CheckInButton bookingId={b.bookingId} />
                           <NoShowButton bookingId={b.bookingId} />
                           <CancelBookingButton bookingId={b.bookingId} />
                         </>
+                      ) : b.status === "ATTENDED" ? (
+                        <NoShowButton bookingId={b.bookingId} />
+                      ) : b.status === "NOSHOW" ? (
+                        <CheckInButton bookingId={b.bookingId} />
+                      ) : (
+                        <span
+                          className="font-mono text-[10px]"
+                          style={{ color: "var(--k-t2)" }}
+                        >
+                          Sin acciones
+                        </span>
                       )}
                     </div>
                   </div>
