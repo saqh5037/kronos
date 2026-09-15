@@ -16,6 +16,19 @@ import type { OverdueMembership, PaymentRow } from "@/server/actions/payments";
 
 export type StatusBucket = { count: number; amount: number };
 
+/*
+ * `summarizePaymentPeriod` and `dailyRevenueSeries` below are no longer read by
+ * any screen.
+ *
+ * The handoff note above ("the proper home for this is one server-side
+ * period-summary action") has been taken up: `/admin/pagos` now reads
+ * `getPaymentStats` and `getRevenueByDay`, both backed by `getPeriodSummary`,
+ * instead of fetching every movement of the period in 200-row chunks and
+ * adding them up in the page. They are kept only because
+ * `tests/unit/admin-mgmt-period.test.ts` still pins their behaviour; delete
+ * both, and that file, in the same change.
+ */
+
 export type PaymentPeriodSummary = {
   /** Every movement in the period — matches the table's own count. */
   total: number;

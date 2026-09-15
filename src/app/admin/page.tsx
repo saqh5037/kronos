@@ -2,13 +2,16 @@ import { redirect } from "next/navigation";
 import { getServerSession, type Session } from "next-auth";
 import * as Sentry from "@sentry/nextjs";
 import { authOptions } from "@/server/auth";
-import { getDashboardData } from "@/server/actions/dashboard";
+import {
+  getDashboardData,
+  getDashboardSummary,
+} from "@/server/actions/dashboard";
 import { getBox } from "@/server/actions/box";
-import { getRevenueByDay } from "@/server/actions/payments";
 import { getAttendanceByDay } from "@/server/actions/attendance";
+import { countUnreadNotifications } from "@/server/actions/notifications";
 import { rangeFromParams, previousRange } from "@/lib/dates";
-import { getOwnerDashboardSnapshot } from "@/server/actions/owner-dashboard";
 import { getCoachDashboardSnapshot } from "@/server/actions/coach-dashboard";
+import { mapDashboardSummary } from "./_lib/dashboard-summary";
 import AdminDashboardV3, {
   type AdminDashboardV3Props,
   type ClassRowData,
@@ -21,6 +24,8 @@ import AdminErrorState from "./_components/AdminErrorState";
 import { dashboardGreeting } from "./_lib/greeting";
 import { upcomingClasses } from "./_lib/schedule";
 import { formatDateShort, formatDateWeekday, formatTime24 } from "@/lib/format";
+import { roleLabel } from "@/lib/labels";
+import type { Role } from "@prisma/client";
 import OnboardingBanner from "@/components/admin/OnboardingBanner";
 import { db as prismaBase } from "@/server/db";
 import {
@@ -37,18 +42,6 @@ type SearchParams = {
   to?: string;
 };
 
-const RANGE_LABELS: Record<string, string> = {
-  today: "HOY",
-  yesterday: "AYER",
-  last7: "ÚLTIMOS 7 DÍAS",
-  last30: "ÚLTIMOS 30 DÍAS",
-  last90: "ÚLTIMOS 90 DÍAS",
-  thisMonth: "ESTE MES",
-  lastMonth: "MES PASADO",
-  thisYear: "ESTE AÑO",
-  custom: "RANGO CUSTOM",
-};
-
 function fmtMoney(box: { locale: string; currency: string }) {
   return new Intl.NumberFormat(box.locale, {
     style: "currency",
@@ -62,14 +55,13 @@ function pct(part: number, whole: number): number {
   return Math.round((part / whole) * 100);
 }
 
-function deltaPctLabel(current: number, previous: number): string | undefined {
-  if (previous === 0) {
-    if (current === 0) return undefined;
-    return "+100%";
-  }
-  const diff = ((current - previous) / previous) * 100;
-  const sign = diff >= 0 ? "+" : "";
-  return `${sign}${diff.toFixed(1)}%`;
+/**
+ * `session.user.role` is typed `string` (see `src/types/next-auth.d.ts`), so
+ * it is narrowed against the label map rather than cast: an unknown role then
+ * falls back to the default line instead of rendering `undefined`.
+ */
+function asRole(value: string | undefined): Role | undefined {
+  return value && value in roleLabel ? (value as Role) : undefined;
 }
 
 export default async function AdminDashboardPage({
@@ -101,34 +93,35 @@ export default async function AdminDashboardPage({
   });
   const prev = previousRange(range);
 
+  // The window every number on this page belongs to. A preset is forwarded as
+  // a preset so `summary.period.label` reads "últimos 30 días" like the picker
+  // does, instead of a date pair that says the same thing less clearly.
+  const periodInput = range.preset
+    ? { preset: range.preset }
+    : { from: range.from, to: range.to };
+
   let data: Awaited<ReturnType<typeof getDashboardData>> | null = null;
   let box: Awaited<ReturnType<typeof getBox>> | null = null;
-  let revenuePoints: Awaited<ReturnType<typeof getRevenueByDay>> = [];
-  let attendancePoints: Awaited<ReturnType<typeof getAttendanceByDay>> = [];
-  let revenuePrev: Awaited<ReturnType<typeof getRevenueByDay>> = [];
+  let summary: Awaited<ReturnType<typeof getDashboardSummary>> | null = null;
   let attendancePrev: Awaited<ReturnType<typeof getAttendanceByDay>> = [];
-  let snapshot: Awaited<ReturnType<typeof getOwnerDashboardSnapshot>> = null;
+  let notificationCount = 0;
   let dashboardError: AdminDashboardErrorKind | null = null;
   let dashboardErrorDetail: string | null = null;
 
   try {
-    [
-      data,
-      box,
-      revenuePoints,
-      revenuePrev,
-      attendancePoints,
-      attendancePrev,
-      snapshot,
-    ] = await Promise.all([
-      getDashboardData(),
-      getBox(),
-      getRevenueByDay({ dateFrom: range.from, dateTo: range.to }),
-      getRevenueByDay({ dateFrom: prev.from, dateTo: prev.to }),
-      getAttendanceByDay({ dateFrom: range.from, dateTo: range.to }),
-      getAttendanceByDay({ dateFrom: prev.from, dateTo: prev.to }),
-      getOwnerDashboardSnapshot(),
-    ]);
+    // `getDashboardSummary` is the single source of every KPI and both chart
+    // series below (audit 2026-09-15, P0 #6). The only extra range query is
+    // the PREVIOUS window's attendance: the summary carries a previous total
+    // for revenue but not for check-ins.
+    [data, box, summary, attendancePrev, notificationCount] = await Promise.all(
+      [
+        getDashboardData(periodInput),
+        getBox(),
+        getDashboardSummary(periodInput),
+        getAttendanceByDay({ dateFrom: prev.from, dateTo: prev.to }),
+        countUnreadNotifications().catch(() => 0),
+      ],
+    );
   } catch (err) {
     if (isUnauthorizedError(err)) {
       dashboardError = "UNAUTHORIZED";
@@ -136,8 +129,8 @@ export default async function AdminDashboardPage({
       dashboardError = "BOX_NOT_FOUND";
     } else if (err instanceof Error && err.message === "Unauthorized") {
       // Fallback: otras server actions del Promise.all (getDashboardData,
-      // getRevenueByDay, getAttendanceByDay, getOwnerDashboardSnapshot) aún
-      // tiran Error genérico — clasificamos por mensaje hasta tiparlas.
+      // getDashboardSummary, getAttendanceByDay) aún tiran Error genérico —
+      // clasificamos por mensaje hasta tiparlas.
       dashboardError = "UNAUTHORIZED";
     } else if (err instanceof Error && err.message === "Box not found") {
       dashboardError = "BOX_NOT_FOUND";
@@ -158,7 +151,7 @@ export default async function AdminDashboardPage({
     });
   }
 
-  if (dashboardError || !data || !box) {
+  if (dashboardError || !data || !box || !summary) {
     const kind: AdminDashboardErrorKind = dashboardError ?? "DB_ERROR";
     return (
       <AdminErrorState
@@ -176,24 +169,10 @@ export default async function AdminDashboardPage({
   const now = new Date();
   const dateLabel = formatDateWeekday(now, box.timezone);
 
-  // Range KPIs
-  const rangeRevenue = revenuePoints.reduce((s, p) => s + p.revenue, 0);
-  const rangeRevenuePrev = revenuePrev.reduce((s, p) => s + p.revenue, 0);
-  const rangeAttended = attendancePoints.reduce((s, p) => s + p.attended, 0);
-  const rangeAttendedPrev = attendancePrev.reduce((s, p) => s + p.attended, 0);
-  const revenueDelta = deltaPctLabel(rangeRevenue, rangeRevenuePrev);
-  const attendanceDelta = deltaPctLabel(rangeAttended, rangeAttendedPrev);
-
-  // MRR — uso revenue de los últimos 30 días como proxy si no hay snapshot
-  const mrrCents =
-    (snapshot?.monthlyRevenueCents ?? 0) > 0
-      ? snapshot!.monthlyRevenueCents
-      : Math.round(rangeRevenue * 100);
-  const mrrPrev = Math.round(rangeRevenuePrev * 100);
-  const mrrDeltaAbs =
-    mrrCents > 0 && mrrPrev > 0
-      ? `${money.format((mrrCents - mrrPrev) / 100)} vs período anterior`
-      : undefined;
+  // Every KPI, both series and both x-axes, from the one summary.
+  const kpis = mapDashboardSummary(summary, {
+    previousCheckins: attendancePrev.reduce((s, p) => s + p.attended, 0),
+  });
 
   const session_ = session;
 
@@ -226,12 +205,12 @@ export default async function AdminDashboardPage({
       href: "/admin/reservas",
     });
   }
-  if (snapshot && snapshot.athletesAtRisk.length > 0) {
+  if (kpis.atRiskCount > 0) {
     alerts.push({
       severity: "warning",
-      text: `${snapshot.athletesAtRisk.length} atleta${
-        snapshot.athletesAtRisk.length === 1 ? "" : "s"
-      } sin asistir hace 14+ días`,
+      text: `${kpis.atRiskCount} atleta${
+        kpis.atRiskCount === 1 ? "" : "s"
+      } en riesgo · ${kpis.atRiskNote?.toLowerCase() ?? "revisa la lista"}`,
       cta: "Ver atletas",
       href: "/admin/atletas?at_risk=1",
     });
@@ -246,6 +225,9 @@ export default async function AdminDashboardPage({
   );
   const nextClasses: ClassRowData[] = upcomingToday.map((c) => ({
     hora: formatTime24(c.startsAt, box.timezone),
+    // The list sorts, hides finished classes and renders a 24-hour time from
+    // this instant; `hora` is only the fallback for a row without one.
+    startsAt: c.startsAt,
     clase: c.wod?.name ?? "Open Box",
     coach: c.coach?.name ?? "—",
     taken: c.bookedCount,
@@ -272,27 +254,23 @@ export default async function AdminDashboardPage({
     boxInitials,
     ownerName,
     ownerInitial,
-    ownerRole: `${session_.user?.role ?? "OWNER"} · ${box.name.toUpperCase()}`,
-    rangeLabel: RANGE_LABELS[range.preset ?? "last30"] ?? "RANGO CUSTOM",
+    // `role` goes through `roleLabel`; the old free-text line printed the raw
+    // enum ("OWNER · IRON HANDS") straight into the sidebar.
+    role: asRole(session_.user?.role),
+    notificationCount,
+    rangeLabel: kpis.rangeLabel,
     greeting,
     dateLabel,
 
-    mrr: money.format(mrrCents / 100),
-    mrrDelta: revenueDelta,
-    mrrDeltaAbs,
-    mrrSpark: revenuePoints.map((p) => p.revenue),
+    mrr: money.format(kpis.mrr),
+    mrrDelta: kpis.mrrDeltaPct,
+    mrrDeltaAbs: kpis.mrrDeltaAbs,
+    mrrSpark: kpis.revenueChart.data,
 
-    activeAthletes: String(
-      data.todayStats.totalBooked > 0
-        ? Math.max(data.todayStats.totalBooked, 1)
-        : 0,
-    ),
-    arpu:
-      mrrCents > 0 && data.todayStats.totalBooked > 0
-        ? money.format(
-            mrrCents / 100 / Math.max(1, data.todayStats.totalBooked),
-          )
-        : "—",
+    // The roster, not seats booked today: this tile said 27 while
+    // /admin/atletas said 42 for the same box (audit P0 #6).
+    activeAthletes: String(kpis.activeAthletes),
+    arpu: kpis.arpu === null ? "—" : money.format(kpis.arpu),
     churn30d: "—",
 
     attendanceToday: {
@@ -315,28 +293,27 @@ export default async function AdminDashboardPage({
     classesProgrammed: data.todayStats.totalClasses,
     classesWithWaitlist: data.waitlistedClassesToday,
 
-    newAthletes30d: 0,
+    newAthletes30d: kpis.newAthletes,
     newAthletesDelta: undefined,
-    newAthletesBreakdown: undefined,
+    newAthletesBreakdown: `alta en ${kpis.periodLabel}`,
 
-    atRiskCount: snapshot?.athletesAtRisk.length ?? 0,
-    atRiskTotal: snapshot?.athletesAtRisk.length
-      ? Math.max(snapshot.athletesAtRisk.length, data.todayStats.totalBooked)
-      : 0,
-    atRiskNote:
-      snapshot && snapshot.athletesAtRisk.length > 0
-        ? "Sin asistir hace 14+ días"
-        : undefined,
+    atRiskCount: kpis.atRiskCount,
+    atRiskTotal: kpis.atRiskTotal,
+    atRiskNote: kpis.atRiskNote,
 
+    // `labels` come from `byDay[].day` of the requested period, so the x-axis
+    // can no longer read "1 abr" under an "últimos 30 días" header.
     revenueChart: {
-      data: revenuePoints.map((p) => p.revenue),
-      total: money.format(rangeRevenue),
-      delta: revenueDelta,
+      data: kpis.revenueChart.data,
+      labels: kpis.revenueChart.labels,
+      total: money.format(kpis.revenueChart.total),
+      delta: kpis.revenueChart.deltaPct,
     },
     attendanceChart: {
-      data: attendancePoints.map((p) => p.attended),
-      total: String(rangeAttended),
-      delta: attendanceDelta,
+      data: kpis.attendanceChart.data,
+      labels: kpis.attendanceChart.labels,
+      total: String(kpis.attendanceChart.total),
+      delta: kpis.attendanceChart.deltaPct,
     },
 
     nextClasses,

@@ -11,10 +11,6 @@ import {
   getReadinessAverage,
   type ReadinessAverage,
 } from "@/server/actions/surveys";
-import {
-  listOverdueMemberships,
-  type OverdueMembership,
-} from "@/server/actions/payments";
 import { MetricDelta } from "@/components/charts/MetricDelta";
 import { RevenueLineChart } from "./_components/RevenueLineChart";
 import { NewChurnBarChart } from "./_components/NewChurnBarChart";
@@ -27,33 +23,59 @@ import { getChurnRiskList, type ChurnRiskRow } from "@/server/analytics/churn";
 import ChurnRiskTable from "@/components/admin/ChurnRiskTable";
 import { formatMXN } from "@/lib/format";
 import { planTypeLabel } from "@/lib/labels";
-import { dedupeOverdueMemberships } from "../pagos/_lib/period";
+import { rangeFromParams } from "@/lib/dates";
+import { DateRangePicker } from "@/components/data/DateRangePicker";
 import {
   hasEnoughReadinessData,
-  monthYearLabel,
   responseCountLabel,
   rollingMonthsLabel,
 } from "./_lib/period-label";
 
 export const metadata = { title: "Kronos — Reportes" };
 
+type SearchParams = {
+  preset?: string;
+  from?: string;
+  to?: string;
+};
+
 const fmtPct = (v: number) => `${Math.round(v * 100)} %`;
 
-export default async function ReportesPage() {
+export default async function ReportesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<SearchParams>;
+}) {
+  const sp = (await searchParams) ?? {};
+  // The picker is back and it drives the query. It was removed because
+  // `getReports()` ignored its range — a control that changes nothing is worse
+  // than none — and `getReports` now takes the period, so the fix is to wire
+  // the control rather than to hide it. Default: "este mes", the window the
+  // headline copy has always claimed.
+  const range = rangeFromParams({
+    preset: sp.preset ?? "thisMonth",
+    from: sp.from,
+    to: sp.to,
+  });
+  const periodInput = range.preset
+    ? { preset: range.preset }
+    : { from: range.from, to: range.to };
+
   let r: Reports | null = null;
   let revenue12m: RevenueByMonthPoint[] = [];
   let athletes12m: AthletesByMonthPoint[] = [];
   let readiness: ReadinessAverage | null = null;
   let churnRisk: ChurnRiskRow[] = [];
-  let overdue: OverdueMembership[] = [];
 
   try {
-    [r, revenue12m, athletes12m, churnRisk, overdue] = await Promise.all([
-      getReports(),
+    // Morosos come from `getReports().overdueCount` — the authoritative count
+    // of the same shared rule Pagos shows. The page used to fetch the row list
+    // and print `.length`, which a `limit: 50` could silently truncate.
+    [r, revenue12m, athletes12m, churnRisk] = await Promise.all([
+      getReports(periodInput),
       getRevenueByMonth(12),
       getAthletesByMonth(12),
       getChurnRiskList(),
-      listOverdueMemberships({ limit: 50 }),
     ]);
     readiness = await getReadinessAverage({ sinceDays: 7 });
   } catch {
@@ -81,13 +103,9 @@ export default async function ReportesPage() {
     );
   }
 
-  /*
-   * The header period is the period of the data. `getReports()` is scoped to
-   * the current month and takes no range, so the page says "mes en curso"
-   * instead of showing a range picker that changes nothing — see the branch
-   * report for the action-level fix.
-   */
-  const monthLabel = monthYearLabel(r.generatedAt);
+  // The label of the window the data actually covers, straight off the
+  // summary — never a literal, never `generatedAt`.
+  const periodLabel = r.period.label;
 
   const totalRevenue12m = revenue12m.reduce((s, p) => s + p.revenue, 0);
   const totalNew12m = athletes12m.reduce((s, p) => s + p.newAthletes, 0);
@@ -97,36 +115,36 @@ export default async function ReportesPage() {
   );
   const twelveMonthLabel = rollingMonthsLabel(12);
 
-  const overdueRows = dedupeOverdueMemberships(overdue);
-
   return (
     <div className="p-4 md:p-8">
-      <div className="mb-6">
-        <span className="k-eyebrow-bar">Análisis</span>
-        <h1
-          className="k-h-italic font-display mt-2 text-[32px] leading-[1] font-extrabold tracking-[-0.02em] md:text-[38px]"
-          style={{ color: "var(--k-t1)" }}
-        >
-          Re<em>portes</em>
-        </h1>
-        <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
-          Mes en curso · {monthLabel}
-        </p>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span className="k-eyebrow-bar">Análisis</span>
+          <h1
+            className="k-h-italic font-display mt-2 text-[32px] leading-[1] font-extrabold tracking-[-0.02em] md:text-[38px]"
+            style={{ color: "var(--k-t1)" }}
+          >
+            Re<em>portes</em>
+          </h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
+            {periodLabel} · lo que pasó en tu box
+          </p>
+        </div>
+        <DateRangePicker />
       </div>
 
       {/* Hero KPIs */}
-      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
         <KpiCard
-          label="Ingresos del mes"
+          label="Ingresos"
           value={formatMXN(r.monthRevenue)}
-          period={monthLabel}
+          period={periodLabel}
           tone="accent"
           delta={
             <MetricDelta
               current={r.monthRevenue}
               previous={r.prevMonthRevenue}
               goodWhen="higher"
-              formatter={(v) => formatMXN(v)}
             />
           }
         />
@@ -138,13 +156,24 @@ export default async function ReportesPage() {
         <KpiCard
           label="Atletas activos"
           value={String(r.activeAthletes)}
-          period={monthLabel}
+          period={periodLabel}
           subtitle={`+${r.newAthletesMonth} nuevos · ${r.pausedAthletes} pausados`}
+        />
+        <KpiCard
+          label="En riesgo"
+          value={String(r.athletesAtRisk)}
+          period={periodLabel}
+          tone={r.athletesAtRisk > 0 ? "warning" : undefined}
+          subtitle={
+            r.overdueCount > 0
+              ? `${r.overdueCount} con adeudo · ${formatMXN(r.overdueTotal)}`
+              : "Nadie con adeudo"
+          }
         />
         <KpiCard
           label="Tasa de asistencia"
           value={fmtPct(r.attendanceRate)}
-          period={monthLabel}
+          period={periodLabel}
           tone={r.attendanceRate >= 0.65 ? "accent" : "warning"}
           subtitle={`${r.monthAttended} de ${r.monthAttended + r.monthNoShow} reservas`}
         />
@@ -219,7 +248,7 @@ export default async function ReportesPage() {
         <p className="mb-3 text-xs" style={{ color: "var(--k-t3)" }}>
           Esta lista mira la asistencia: quién dejó de venir o canceló de más.
           No mira el dinero.{" "}
-          {overdueRows.length > 0 ? (
+          {r.overdueCount > 0 ? (
             <>
               Por adeudo hay{" "}
               <Link
@@ -227,8 +256,8 @@ export default async function ReportesPage() {
                 className="underline decoration-dotted"
                 style={{ color: "var(--k-accent)" }}
               >
-                {overdueRows.length} moroso
-                {overdueRows.length === 1 ? "" : "s"} en Pagos
+                {r.overdueCount} moroso
+                {r.overdueCount === 1 ? "" : "s"} en Pagos
               </Link>
               , que es otra pregunta.
             </>
@@ -244,18 +273,18 @@ export default async function ReportesPage() {
         <SimpleStat
           label="Clases impartidas"
           value={String(r.monthClassesHeld)}
-          period={monthLabel}
+          period={periodLabel}
         />
         <SimpleStat
           label="Scores registrados"
           value={String(r.monthScores)}
-          period={monthLabel}
+          period={periodLabel}
           subtitle={`${r.monthPRs} PRs nuevos`}
         />
         <SimpleStat
           label="Reservas"
           value={String(r.monthBookings)}
-          period={monthLabel}
+          period={periodLabel}
           subtitle={`${r.monthAttended} asistidas · ${r.monthNoShow} no-show`}
         />
       </div>
@@ -263,8 +292,8 @@ export default async function ReportesPage() {
       {/* Top tables + plan distribution */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <TopTable
-          title="Top WODs del mes"
-          subtitle="Por scores registrados"
+          title="Top WODs"
+          subtitle={`Por scores registrados · ${periodLabel}`}
           rows={r.topWODs.map((w, i) => ({
             rank: i + 1,
             label: w.name,
@@ -273,7 +302,7 @@ export default async function ReportesPage() {
         />
         <TopTable
           title="Top atletas por asistencia"
-          subtitle="Clases asistidas este mes"
+          subtitle={`Clases asistidas · ${periodLabel}`}
           rows={r.topAttendees.map((a, i) => ({
             rank: i + 1,
             label: a.athleteName,
@@ -375,7 +404,7 @@ function TopTable({
       </div>
       {rows.length === 0 ? (
         <p className="p-4 text-center text-xs" style={{ color: "var(--k-t3)" }}>
-          Sin datos este mes.
+          Sin datos en el período.
         </p>
       ) : (
         <ul className="flex flex-col">

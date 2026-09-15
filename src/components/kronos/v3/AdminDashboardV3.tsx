@@ -1144,7 +1144,14 @@ function KpiHero(props: AdminDashboardV3Props) {
               color: ACC,
             }}
           >
-            MRR · INGRESO MENSUAL
+            {/*
+              The hero number is PAID revenue for the selected range, so it is
+              labelled with that range. It used to read "MRR · INGRESO MENSUAL"
+              over whatever window the filter happened to hold — and over a
+              figure that was really the Box's own SaaS invoices (audit
+              2026-09-15, S4).
+            */}
+            INGRESO COBRADO · {props.rangeLabel}
           </span>
         </div>
         <div

@@ -7,34 +7,26 @@ import {
   type MembershipRow,
 } from "@/server/actions/memberships";
 import {
+  getPaymentStats,
+  getRevenueByDay,
   listPaymentsPaged,
   listOverdueMemberships,
   type PaymentRow,
   type OverdueMembership,
+  type PeriodPaymentStats,
+  type RevenueByDayPoint,
 } from "@/server/actions/payments";
 import { listAthletes } from "@/server/actions/athletes";
 import PlanForm from "@/components/PlanForm";
 import MembershipAssignForm from "@/components/MembershipAssignForm";
 import CashPaymentForm from "@/components/CashPaymentForm";
-import {
-  dayKey,
-  eachDayInRange,
-  formatRange,
-  previousRange,
-  rangeFromParams,
-  type DateRange,
-} from "@/lib/dates";
+import { rangeFromParams } from "@/lib/dates";
 import { formatMXN } from "@/lib/format";
 import { planTypeLabel } from "@/lib/labels";
 import type { PaymentGateway, PaymentStatus } from "@/lib/validations/payment";
 import type { MembershipStatus } from "@/lib/validations/membership";
 import { MetricDelta } from "@/components/charts/MetricDelta";
-import {
-  dailyRevenueSeries,
-  dedupeOverdueMemberships,
-  planCardLines,
-  summarizePaymentPeriod,
-} from "./_lib/period";
+import { dedupeOverdueMemberships, planCardLines } from "./_lib/period";
 import { PagosFilters } from "./_components/PagosFilters";
 import { RevenueChart } from "./_components/RevenueChart";
 import { PlanDonut } from "./_components/PlanDonut";
@@ -57,9 +49,6 @@ type SearchParams = {
 };
 
 const PAGE_SIZE = 25;
-/** `MAX_PAGE_SIZE` in src/server/actions/types.ts. */
-const FETCH_CHUNK = 200;
-const MAX_CHUNKS = 10;
 
 /** Anchor of the cash register in the header — every "register a payment" lands here. */
 const CASH_ANCHOR = "#registrar-cobro";
@@ -79,37 +68,6 @@ function parsePage(v?: string): number {
   return Number.isFinite(n) && n > 0 ? n : 1;
 }
 
-/**
- * Every movement of the period, from ONE action, so the KPI breakdown and the
- * table count cannot disagree (audit 2026-09-15, P0 #6). The right home for
- * this is a server-side period summary — see the branch report.
- */
-async function loadPeriodPayments(args: {
-  range: DateRange;
-  search?: string;
-}): Promise<{ rows: PaymentRow[]; total: number }> {
-  const first = await listPaymentsPaged({
-    dateFrom: args.range.from,
-    dateTo: args.range.to,
-    search: args.search,
-    page: 1,
-    pageSize: FETCH_CHUNK,
-  });
-  const rows = [...first.rows];
-  const pages = Math.min(MAX_CHUNKS, Math.ceil(first.total / FETCH_CHUNK));
-  for (let page = 2; page <= pages; page++) {
-    const next = await listPaymentsPaged({
-      dateFrom: args.range.from,
-      dateTo: args.range.to,
-      search: args.search,
-      page,
-      pageSize: FETCH_CHUNK,
-    });
-    rows.push(...next.rows);
-  }
-  return { rows, total: first.total };
-}
-
 export default async function PagosPage({
   searchParams,
 }: {
@@ -121,8 +79,6 @@ export default async function PagosPage({
     from: sp.from,
     to: sp.to,
   });
-  const prev = previousRange(range);
-  const periodLabel = formatRange(range);
   const search = (sp.q ?? "").trim() || undefined;
   const gateway = parseGateway(sp.gateway);
   const paymentStatus = parsePaymentStatus(sp.status);
@@ -143,52 +99,86 @@ export default async function PagosPage({
     page: pmem,
     pageSize: PAGE_SIZE,
   };
-  let period = { rows: [] as PaymentRow[], total: 0 };
-  let periodPrev = { rows: [] as PaymentRow[], total: 0 };
+  let stats: PeriodPaymentStats | null = null;
+  let periodStats: PeriodPaymentStats | null = null;
+  let revenue: RevenueByDayPoint[] = [];
   let overdue: OverdueMembership[] = [];
   let athletes: { id: string; firstName: string; lastName: string }[] = [];
 
+  // ONE filter object for the table AND for the KPI row above it. Passing the
+  // same `filter` to `getPaymentStats` is what makes "Movimientos" and the
+  // table's own total the same number by construction — the audit found a KPI
+  // reading 27 beside a table saying 33 under this very filter (P0 #6).
+  const paymentFilter = {
+    ...(paymentStatus ? { status: paymentStatus } : {}),
+    ...(gateway ? { gateway } : {}),
+    ...(search ? { search } : {}),
+  };
+
   try {
-    [plans, payments, memberships, period, periodPrev, overdue, athletes] =
-      await Promise.all([
-        listPlans(),
-        listPaymentsPaged({
-          dateFrom: range.from,
-          dateTo: range.to,
-          search,
-          gateway,
-          status: paymentStatus,
-          page: ppay,
-          pageSize: PAGE_SIZE,
-        }),
-        listMembershipsPaged({
-          search,
-          status: "ACTIVE" as MembershipStatus,
-          planId,
-          page: pmem,
-          pageSize: PAGE_SIZE,
-        }),
-        loadPeriodPayments({ range, search }),
-        loadPeriodPayments({ range: prev, search }),
-        listOverdueMemberships({ limit: 50 }),
-        listAthletes(),
-      ]);
+    [
+      plans,
+      payments,
+      memberships,
+      stats,
+      periodStats,
+      revenue,
+      overdue,
+      athletes,
+    ] = await Promise.all([
+      listPlans(),
+      listPaymentsPaged({
+        dateFrom: range.from,
+        dateTo: range.to,
+        search,
+        gateway,
+        status: paymentStatus,
+        page: ppay,
+        pageSize: PAGE_SIZE,
+      }),
+      listMembershipsPaged({
+        search,
+        status: "ACTIVE" as MembershipStatus,
+        planId,
+        page: pmem,
+        pageSize: PAGE_SIZE,
+      }),
+      // Replaces the page-level 200-row × 10-chunk scan that used to load
+      // every movement of the period just to add it up in JS: the counts,
+      // the totals and the morosos now come from the server-side summary.
+      getPaymentStats({
+        from: range.from,
+        to: range.to,
+        filter: paymentFilter,
+      }),
+      // The same period WITHOUT the method/status narrowing, so the table can
+      // still say "de N en el periodo". With no method/status filter set this
+      // resolves to the identical request-scoped summary as the call above —
+      // same memo key, one query.
+      getPaymentStats({
+        from: range.from,
+        to: range.to,
+        filter: search ? { search } : {},
+      }),
+      getRevenueByDay({ dateFrom: range.from, dateTo: range.to }),
+      listOverdueMemberships({ from: range.from, to: range.to, limit: 50 }),
+      listAthletes(),
+    ]);
   } catch {
     // BD/sesión ausente — render placeholder
   }
 
   const activePlans = plans.filter((p) => p.isActive);
 
-  // Every number below comes from `period.rows` — one dataset, one period.
-  const summary = summarizePaymentPeriod(period.rows);
-  const summaryPrev = summarizePaymentPeriod(periodPrev.rows);
-  const revenue = dailyRevenueSeries(
-    period.rows,
-    eachDayInRange(range).map(dayKey),
-  );
+  // `period.label` is the label every KPI renders, so a number and its window
+  // can never be read apart.
+  const periodLabel = stats?.period.label ?? "sin período";
 
   const overdueRows = dedupeOverdueMemberships(overdue);
-  const overdueAmount = overdueRows.reduce((s, m) => s + m.pendingAmount, 0);
+  // The authoritative count and total, never `overdueRows.length` — that list
+  // is capped at 50 and deduped per athlete + plan.
+  const overdueCount = stats?.overdueCount ?? 0;
+  const overdueAmount = stats?.overdueTotal ?? 0;
 
   const planDist = plans
     .map((p) => ({ name: p.name, value: p.activeMembershipCount }))
@@ -211,17 +201,14 @@ export default async function PagosPage({
         </div>
         {/*
           The cash register is the owner's most frequent action, so it lives in
-          the first viewport as the primary control. `CashPaymentForm` styles its
-          own collapsed trigger as a ghost button; promoting it from here keeps
-          the change inside this route — the component should take a `variant`
-          prop instead (see the branch report).
+          the first viewport as the primary control — declared through the
+          component's own `variant` prop rather than a wrapper full of
+          `[&>button]:!…` overrides.
         */}
-        <div
-          id="registrar-cobro"
-          className="scroll-mt-24 [&>button]:!rounded-full [&>button]:!border-none [&>button]:!bg-[var(--k-accent)] [&>button]:!px-5 [&>button]:!py-3 [&>button]:!text-sm [&>button]:!font-bold [&>button]:!text-[var(--k-accent-on)] [&>button]:!uppercase"
-        >
+        <div id="registrar-cobro" className="scroll-mt-24">
           {memberships.rows.length > 0 ? (
             <CashPaymentForm
+              variant="primary"
               memberships={memberships.rows.map((m) => ({
                 id: m.id,
                 athleteName: m.athleteName,
@@ -241,64 +228,55 @@ export default async function PagosPage({
       <div className="mb-3 grid grid-cols-2 gap-3 lg:grid-cols-5">
         <KpiCard
           label="Ingresos cobrados"
-          value={formatMXN(summary.paid.amount)}
+          value={formatMXN(stats?.revenue ?? 0)}
           period={periodLabel}
           tone="accent"
           delta={
             <MetricDelta
-              current={summary.paid.amount}
-              previous={summaryPrev.paid.amount}
+              current={stats?.revenue ?? 0}
+              previous={stats?.revenuePrevious ?? 0}
               goodWhen="higher"
-              formatter={(v) => formatMXN(v)}
             />
           }
         />
         <KpiCard
           label="Movimientos"
-          value={String(summary.total)}
+          value={String(stats?.count ?? 0)}
           period={periodLabel}
-          subtitle={`${summary.paid.count} cobrados`}
-          delta={
-            <MetricDelta
-              current={summary.total}
-              previous={summaryPrev.total}
-              goodWhen="higher"
-              formatter={(v) => v.toFixed(0)}
-            />
-          }
+          subtitle={`${stats?.paidCount ?? 0} cobrados`}
         />
         <KpiCard
           label="Por cobrar"
-          value={formatMXN(summary.pending.amount)}
+          value={formatMXN(stats?.pendingRevenue ?? 0)}
           period={periodLabel}
-          subtitle={`${summary.pending.count} pendiente${
-            summary.pending.count === 1 ? "" : "s"
+          subtitle={`${stats?.pendingCount ?? 0} pendiente${
+            (stats?.pendingCount ?? 0) === 1 ? "" : "s"
           }`}
-          tone={summary.pending.count > 0 ? "warning" : undefined}
+          tone={(stats?.pendingCount ?? 0) > 0 ? "warning" : undefined}
           href="/admin/pagos?status=PENDING#pagos"
         />
         <KpiCard
           label="Fallidos"
-          value={String(summary.failed.count)}
+          value={String(stats?.failedCount ?? 0)}
           period={periodLabel}
           subtitle={
-            summary.failed.count > 0
-              ? `${formatMXN(summary.failed.amount)} sin cobrar`
+            (stats?.failedCount ?? 0) > 0
+              ? `${formatMXN(stats?.failedTotal ?? 0)} sin cobrar`
               : "Ningún cobro rebotó"
           }
-          tone={summary.failed.count > 0 ? "danger" : undefined}
+          tone={(stats?.failedCount ?? 0) > 0 ? "danger" : undefined}
           href="/admin/pagos?status=FAILED#pagos"
         />
         <KpiCard
           label="Morosos"
-          value={String(overdueRows.length)}
-          period="al día de hoy"
+          value={String(overdueCount)}
+          period="al cierre del período"
           subtitle={
-            overdueRows.length > 0
+            overdueCount > 0
               ? `${formatMXN(overdueAmount)} adeudados`
               : "Nadie con adeudo"
           }
-          tone={overdueRows.length > 0 ? "warning" : undefined}
+          tone={overdueCount > 0 ? "warning" : undefined}
           href="/admin/pagos#morosos"
         />
       </div>
@@ -315,7 +293,7 @@ export default async function PagosPage({
       <div className="mb-6 grid grid-cols-1 gap-3 lg:grid-cols-3">
         <div className="k-card p-4 lg:col-span-2">
           <p className="k-eyebrow mb-2">Ingresos cobrados · {periodLabel}</p>
-          {summary.paid.amount > 0 ? (
+          {(stats?.revenue ?? 0) > 0 ? (
             <RevenueChart data={revenue} />
           ) : (
             <p className="py-10 text-center text-sm text-[var(--k-t3)]">
@@ -336,7 +314,7 @@ export default async function PagosPage({
       </div>
 
       {/* Morosos */}
-      {overdueRows.length > 0 && (
+      {overdueCount > 0 && (
         <section id="morosos" className="mb-6 scroll-mt-24">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p
@@ -344,13 +322,17 @@ export default async function PagosPage({
               style={{ color: "var(--k-warning)" }}
             >
               <AlertTriangle size={13} strokeWidth={2.4} aria-hidden />
-              Morosos ({overdueRows.length})
+              Morosos ({overdueCount})
             </p>
             <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-              {formatMXN(overdueAmount)} adeudados al día de hoy
+              {formatMXN(overdueAmount)} adeudados al cierre del período
             </p>
           </div>
-          <OverdueTable rows={overdueRows} cashHref={CASH_ANCHOR} />
+          <OverdueTable
+            rows={overdueRows}
+            cashHref={CASH_ANCHOR}
+            totalCount={overdueCount}
+          />
         </section>
       )}
 
@@ -365,7 +347,7 @@ export default async function PagosPage({
           page={payments.page}
           pageSize={payments.pageSize}
           periodLabel={periodLabel}
-          periodTotal={summary.total}
+          periodTotal={periodStats?.count ?? payments.total}
           cashHref={CASH_ANCHOR}
           filterValues={{
             dateFrom: range.from,

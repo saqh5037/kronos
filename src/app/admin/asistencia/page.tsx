@@ -4,16 +4,18 @@ import {
   getTodayStats,
   getAttendanceByDay,
   getAttendanceHeatmap,
+  getAttendanceStats,
   listFrequentNoShows,
   type AttendanceByDayPoint,
   type AttendanceHeatmapCell,
+  type AttendanceStats,
   type FrequentNoShow,
 } from "@/server/actions/attendance";
 import { getClassRoster, type ClassRoster } from "@/server/actions/bookings";
 import { rangeFromParams, previousRange } from "@/lib/dates";
 import { formatDateShort, formatDateWeekday } from "@/lib/format";
 import { MetricDelta } from "@/components/charts/MetricDelta";
-import { periodLabel, periodSubtitle } from "../_lib/period";
+import { periodLabel } from "../_lib/period";
 import { pickNextClass, sortClassesByStart } from "../_lib/schedule";
 import { AsistenciaFilters } from "./_components/AsistenciaFilters";
 import {
@@ -69,6 +71,9 @@ export default async function AsistenciaPage({
     to: sp.to,
   });
   const prev = previousRange(range);
+  const periodInput = range.preset
+    ? { preset: range.preset }
+    : { from: range.from, to: range.to };
 
   let classesToday: Awaited<ReturnType<typeof getTodayClasses>> = [];
   let statsToday = {
@@ -78,24 +83,27 @@ export default async function AsistenciaPage({
     totalNoShow: 0,
     attendanceRate: 0,
   };
-  let rangePoints: AttendanceByDayPoint[] = [];
+  let rangeStatsServer: AttendanceStats | null = null;
   let prevPoints: AttendanceByDayPoint[] = [];
   let heatmap: AttendanceHeatmapCell[] = [];
   let noShows: FrequentNoShow[] = [];
   let rosters: ClassRoster[] = [];
 
   try {
+    // `getAttendanceStats` carries the period label with its numbers, so the
+    // subtitle can never say "Últimos 7 días" over a 30-day filter again
+    // (audit 2026-09-15, S4). Its `byDay` is the series the charts draw.
     const [tcl, stt, rangeData, prevData, hm, ns] = await Promise.all([
       getTodayClasses(),
       getTodayStats(),
-      getAttendanceByDay({ dateFrom: range.from, dateTo: range.to }),
+      getAttendanceStats(periodInput),
       getAttendanceByDay({ dateFrom: prev.from, dateTo: prev.to }),
       getAttendanceHeatmap({ dateFrom: range.from, dateTo: range.to }),
       listFrequentNoShows({ windowDays: 30, threshold: 3 }),
     ]);
     classesToday = sortClassesByStart(tcl);
     statsToday = stt;
-    rangePoints = rangeData;
+    rangeStatsServer = rangeData;
     prevPoints = prevData;
     heatmap = hm;
     noShows = ns;
@@ -104,8 +112,11 @@ export default async function AsistenciaPage({
     // BD/sesión ausentes
   }
 
+  const rangePoints = rangeStatsServer?.byDay ?? [];
   const rangeStats = summarize(rangePoints);
   const prevStats = summarize(prevPoints);
+  // The label of the window the data covers, from the server that computed it.
+  const rangeLabel = rangeStatsServer?.period.label ?? periodLabel(range);
 
   const now = new Date();
   const todayLabel = formatDateWeekday(now);
@@ -128,12 +139,11 @@ export default async function AsistenciaPage({
           </h1>
         </div>
         <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
-          {periodSubtitle(
-            range,
-            rangeStats.attended,
-            "asistencia",
-            "asistencias",
-          )}
+          {`${rangeLabel} · ${rangeStatsServer?.checkins ?? 0} ${
+            (rangeStatsServer?.checkins ?? 0) === 1
+              ? "asistencia"
+              : "asistencias"
+          }`}
         </p>
       </div>
 
@@ -178,7 +188,6 @@ export default async function AsistenciaPage({
               current={rangeStats.attendanceRate}
               previous={prevStats.attendanceRate}
               goodWhen="higher"
-              formatter={(v) => `${(v * 100).toFixed(1)}%`}
             />
           }
         />
@@ -191,7 +200,6 @@ export default async function AsistenciaPage({
               current={rangeStats.noShowRate}
               previous={prevStats.noShowRate}
               goodWhen="lower"
-              formatter={(v) => `${(v * 100).toFixed(1)}%`}
             />
           }
         />
@@ -218,7 +226,7 @@ export default async function AsistenciaPage({
               className="font-mono text-[10px] font-bold"
               style={{ color: "var(--k-t2)" }}
             >
-              {periodLabel(range)}
+              {rangeLabel}
             </p>
           </div>
           {rangePoints.length > 0 &&
