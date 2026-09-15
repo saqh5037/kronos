@@ -1,126 +1,131 @@
 /**
- * Dialect guard — prevents voseo (Rioplatense) from leaking into user-facing
- * strings anywhere in the product.
+ * Dialect guard — keeps Rioplatense voseo and other non-Mexican regional
+ * markers out of the product.
  *
- * Originally only scanned `src/server/actions/` — that gap let voseo in
- * components and pages reach production. This version covers the full surface:
- *   - src/server/actions/  (original)
- *   - src/app/             (pages, layouts, route handlers)
- *   - src/components/      (shared UI)
- * and matches both `.ts` and `.tsx` files.
+ * ============================================================================
+ * SCOPE
+ * ============================================================================
+ * Scans ALL of `src/**` (`.ts` + `.tsx`). The previous version only covered
+ * `src/server/actions`, `src/app` and `src/components`, which let voseo survive
+ * in `src/lib`, `src/middleware.ts`, the email templates and — worst of all —
+ * `src/server/ai/coach-cards-prompt.ts`, where a voseo-written prompt teaches
+ * Gemini to answer the athlete in voseo. The product audit of 2026-09-15 found
+ * it in ≥8 user-facing files (screen audit, systemic issue S3) while this test
+ * was green.
  *
- * We only flag UNAMBIGUOUS voseo conjugations — forms that have no valid
- * Mexican-neutral reading. We deliberately skip tokens that collide with valid
- * MX preterites (yo elegí, yo seguí, yo pedí, yo subí) to avoid false
- * positives.
+ * ============================================================================
+ * RATCHET
+ * ============================================================================
+ * Shares `tests/fixtures/guard-baseline.json` and the machinery in
+ * `scripts/guards/rules.ts` with `tests/unit/ui-guards.test.ts`. Read that
+ * file's header for the full contract. In short: a file's count may go DOWN
+ * freely; it fails when a count rises or a new file shows up with violations.
  *
- * If this test ever fails, replace the voseo form with its MX-neutral
- * equivalent. Do NOT add an exception unless the match is a genuine false
- * positive.
+ * Baseline at branch point: 36 occurrences across 28 files.
+ * Ratchet it down with `pnpm exec tsx scripts/guards/update-baseline.ts`; the
+ * destination is `{}`, after which this test is a plain zero-tolerance gate.
+ *
+ * ============================================================================
+ * WORD BOUNDARIES — WHY NOT \b
+ * ============================================================================
+ * The rule uses Unicode letter lookarounds `(?<!\p{L}) … (?!\p{L})` rather than
+ * `\b`. JavaScript's `\b` is ASCII-only, so `/\bsubí\b/` does NOT match
+ * "Subí una foto": the trailing `\b` sits after `í`, which is not a `\w`
+ * character, so it demands a following word character. Accented endings are the
+ * rule in voseo (`tenés`, `mantené`, `recibís`, `acá`), so an ASCII `\b` would
+ * silently disable most of the pattern.
+ *
+ * ============================================================================
+ * WHEN IT FAILS
+ * ============================================================================
+ * Replace the form with its Mexican-neutral equivalent — never add an exception
+ * unless the match is a genuine false positive, and then say so in the commit:
+ *   tenés/querés/podés → tienes/quieres/puedes    acá → aquí
+ *   mantené → mantén        Subí → Sube           esperá → espera
+ *   pedile → pídele         cancelás → cancelas   dale → va / sale
+ *   recibís → recibes       fijate → fíjate       acordate → recuerda
+ *
+ * Forms deliberately NOT flagged (they collide with valid Mexican first-person
+ * preterites: yo elegí, yo seguí, yo pedí, yo registré, yo cargué, yo empecé)
+ * are listed in `scripts/guards/rules.ts`.
  */
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import {
+  BASELINE_PATH,
+  RULES,
+  ratchetFailures,
+  scanRule,
+  type Baseline,
+} from "../../scripts/guards/rules";
 
-import { describe, it, expect } from "vitest";
-import { readdirSync, readFileSync } from "fs";
-import path from "path";
+const repoRoot = process.cwd();
 
-const SCAN_DIRS = [
-  path.join(process.cwd(), "src", "server", "actions"),
-  path.join(process.cwd(), "src", "app"),
-  path.join(process.cwd(), "src", "components"),
-];
+const baseline: Baseline = JSON.parse(
+  readFileSync(path.join(repoRoot, BASELINE_PATH), "utf-8"),
+) as Baseline;
 
-// Unambiguous voseo forms: no valid Mexican-neutral reading.
-// Lowercased; the scanner lowercases each line before matching.
-// Trailing `s?` covers the conjugated variant (cargás). Bare imperatives
-// without `s` are separate entries (cargá). Bounded by non-letters via
-// Unicode-aware lookarounds so accents are handled correctly.
-//
-// EXCLUDED intentionally (collide with MX preterites of 1st-person singular):
-//   elegí, seguí, pedí, subí, registré, cargué, anuncié, empecé
-const VOSEO = [
-  // --- original list ---
-  "probás?",
-  "elegís?",
-  "ingresás?",
-  "tenés",
-  "podés",
-  "querés",
-  "sabés",
-  "hacés?",
-  "andás?",
-  "mirás?",
-  "dejás?",
-  "mandás?",
-  "contás?",
-  "agregás?",
-  "guardás?",
-  "cargás?",
-  "revisás?",
-  "fijate",
-  "acordate",
-  // --- extended forms ---
-  // Voseo present-tense conjugations (unambiguous -ás/-és/-ís)
-  "evolucionás?",
-  "registrás?",
-  "anunciás?",
-  "empezás?",
-  "preferís",
-  "seguís",
-  "llevás?",
-  "lográs?",
-  "alcanzás?",
-  "sumás?",
-  "entrenás?",
-  "reservás?",
-  "anotás?",
-  // Voseo imperatives (safe: MX preterite would have accent shift ué/qué/etc.)
-  "registrá",
-  "cargá",
-  "anunciá",
-  "empezá",
-  "volvé",
-  "anotá",
-  "reservá",
-  "sumá",
-  // Voseo reflexive imperative (safe: no MX preterite collision)
-  "llevate",
-];
+const voseoRule = RULES.find((rule) => rule.name === "voseo");
 
-const VOSEO_RE = new RegExp(
-  `(?<!\\p{L})(?:${VOSEO.join("|")})(?!\\p{L})`,
-  "gu",
-);
+describe("dialect guard — no voseo in src/**", () => {
+  it("is wired to a rule definition", () => {
+    expect(voseoRule).toBeDefined();
+  });
 
-function collectFiles(dir: string): string[] {
-  const out: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) out.push(...collectFiles(full));
-    else if (entry.isFile() && (full.endsWith(".ts") || full.endsWith(".tsx")))
-      out.push(full);
-  }
-  return out;
-}
-
-describe("dialect guard — no voseo in product copy", () => {
-  it("src/server/actions + src/app + src/components use Mexican-neutral Spanish (no voseo)", () => {
-    const files = SCAN_DIRS.flatMap((dir) => collectFiles(dir));
-    const hits: string[] = [];
-
-    for (const file of files) {
-      const lines = readFileSync(file, "utf-8").split("\n");
-      lines.forEach((line, i) => {
-        if (VOSEO_RE.test(line.toLowerCase())) {
-          const rel = path.relative(process.cwd(), file);
-          hits.push(`${rel}:${i + 1}  →  ${line.trim()}`);
-        }
-        VOSEO_RE.lastIndex = 0; // reset stateful global regex
-      });
-    }
+  it("src/** uses Mexican-neutral Spanish (ratchet vs baseline)", () => {
+    const rule = voseoRule!;
+    const current = scanRule(rule, repoRoot);
+    const failures = ratchetFailures(rule, current, baseline[rule.name] ?? {});
 
     expect(
-      hits,
-      `Voseo found (use MX-neutral Spanish):\n${hits.join("\n")}`,
+      failures,
+      [
+        `Voseo regressed in ${failures.length} file(s).`,
+        "",
+        rule.hint,
+        "",
+        failures.join("\n"),
+        "",
+        "This guard is a RATCHET: counts may only go down. Fix the copy.",
+        "Only regenerate the baseline when the numbers DECREASE:",
+        "  pnpm exec tsx scripts/guards/update-baseline.ts",
+      ].join("\n"),
     ).toEqual([]);
+  });
+
+  it("matches accented forms (regression test for the ASCII \\b bug)", () => {
+    const rule = voseoRule!;
+    const samples = [
+      "Subí una foto de la pizarra",
+      "Mantené el tono",
+      "Ya recibís los avisos",
+      "Pedile a tu Box que te invite",
+      "Si cancelás con menos de 2 horas",
+      "Nos vemos acá",
+      "Esperá un momento",
+    ];
+    for (const sample of samples) {
+      expect(rule.pattern().test(sample), `should flag: ${sample}`).toBe(true);
+    }
+  });
+
+  it("does not flag valid Mexican-neutral copy", () => {
+    const rule = voseoRule!;
+    const samples = [
+      "Mantén el tono de tu Box",
+      "Sube una foto de la pizarra",
+      "Recibes los avisos por correo",
+      "Pídele a tu coach que te invite",
+      "Si cancelas con menos de 2 horas",
+      "Nos vemos aquí",
+      "Yo elegí este plan y seguí el programa",
+      "Espera un momento",
+    ];
+    for (const sample of samples) {
+      expect(rule.pattern().test(sample), `should allow: ${sample}`).toBe(
+        false,
+      );
+    }
   });
 });

@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, rebuild/base]
   pull_request:
-    branches: [main]
+    branches: [main, rebuild/base]
 
 jobs:
   quality:
@@ -33,5 +33,15 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # Includes the hygiene guards (tests/unit/dialect-guard.test.ts and
+      # tests/unit/ui-guards.test.ts) — they are ordinary vitest files, so they
+      # need no extra step. They ratchet against tests/fixtures/guard-baseline.json:
+      # a file's violation count may only go down. See the header of
+      # tests/unit/ui-guards.test.ts.
       - name: Unit tests
         run: pnpm test
+
+      # tests/integration/** is excluded from `pnpm test` (needs a real Postgres)
+      # and e2e stays out of CI on purpose — 26 Playwright specs, run manually.
+      # Perf lives in its own workflow: .github/workflows/lighthouse.yml, which
+      # honours a `skip-perf` PR label.
