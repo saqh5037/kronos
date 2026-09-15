@@ -21,10 +21,9 @@ export default function FoundingPartners() {
             textAlign: "center",
           }}
         >
-          Estamos arrancando con un grupo cerrado de Boxes en México.
-          <br />
-          Si tu Box opera en MX, CO o PE y quieres sumarte al piloto, hay 20
-          cupos durante 2026.
+          Estamos arrancando con un grupo cerrado de Boxes en México. Todavía no
+          publicamos sus nombres: cuando tengamos su permiso por escrito, van
+          aquí.
         </div>
       </section>
     );
@@ -52,7 +51,7 @@ export default function FoundingPartners() {
           marginTop: 12,
         }}
       >
-        Cupo limitado a 20 Boxes en piloto durante 2026.
+        Boxes que están usando Kronos hoy, con su permiso para nombrarlos.
       </div>
     </section>
   );
