@@ -1,11 +1,13 @@
 "use client";
 
+import { notFound } from "next/navigation";
+
 import { kToast } from "@/lib/toast";
 
 export default function ToastDemoPage() {
-  if (process.env.NODE_ENV !== "development") return null;
+  if (process.env.NODE_ENV === "production") notFound();
   return (
-    <div className="min-h-screen p-8" style={{ background: "var(--bg)" }}>
+    <div className="min-h-screen p-8" style={{ background: "var(--k-bg)" }}>
       <div className="mx-auto max-w-2xl space-y-6">
         <header>
           <h1 className="font-display text-2xl font-bold">
@@ -13,7 +15,7 @@ export default function ToastDemoPage() {
           </h1>
           <p
             className="text-xs font-mono mt-1"
-            style={{ color: "var(--text-3)" }}
+            style={{ color: "var(--k-t3)" }}
           >
             dev only · /dev/toast-demo
           </p>
@@ -69,7 +71,7 @@ export default function ToastDemoPage() {
             type="button"
             className="k-btn-ghost"
             onClick={() =>
-              kToast.success("🏆 ¡Nuevo PR!", {
+              kToast.success("¡Nuevo PR!", {
                 description: "Back Squat — 102.5 kg (+4.2%)",
                 duration: 5000,
               })
