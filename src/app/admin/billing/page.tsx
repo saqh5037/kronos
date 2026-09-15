@@ -16,6 +16,7 @@ import { label, saasSubscriptionStatusLabel } from "@/lib/labels";
 import { CancelSubscriptionButton } from "./_components/CancelSubscriptionButton";
 import { SpendMetricsCard } from "./_components/SpendMetricsCard";
 import { isDominusPromoActive, promoDaysLeft } from "@/lib/dominus-promo";
+import { supportMailto } from "@/lib/contact";
 
 export const metadata = { title: "Kronos — Suscripción" };
 export const dynamic = "force-dynamic";
@@ -170,7 +171,7 @@ export default async function BillingPage() {
             </div>
           </div>
           <a
-            href="mailto:contacto@kronos-fit.com?subject=Quiero%20Founding%20Box%20Dominus"
+            href={supportMailto("Quiero Founding Box Dominus")}
             className="k-btn-grad inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap"
           >
             Activar Founding

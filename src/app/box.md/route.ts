@@ -4,9 +4,30 @@ import {
   FAQ_ITEMS,
   WHITE_LABEL_PALETTES,
 } from "@/app/(landing)/_data/mock";
+import {
+  CTA_TRIAL_HREF,
+  CTA_TRIAL_LABEL,
+  CTA_WHATSAPP_HREF,
+  CTA_WHATSAPP_LABEL,
+  TRIAL_DAYS,
+} from "@/app/(landing)/_data/cta";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
+
+const SITE = "https://www.kronos-fit.com";
+
+/**
+ * A markdown document has no page to anchor into, so a relative href or a bare
+ * `#section-form` fragment — which is what the WhatsApp CTA falls back to when
+ * the support number is not configured — is a link nothing can follow. Every
+ * link here resolves against the site origin.
+ */
+function absolute(href: string): string {
+  if (/^(https?:\/\/|mailto:)/.test(href)) return href;
+  return href.startsWith("#") ? `${SITE}/box${href}` : `${SITE}${href}`;
+}
 
 function renderMarkdown(): string {
   const lines: string[] = [];
@@ -54,14 +75,19 @@ function renderMarkdown(): string {
     lines.push(f.answer);
     lines.push("");
   }
-  lines.push("## Reservar demo");
+  // Same two actions the page offers, same labels, same trial length. The
+  // section used to be titled "Reservar demo" and pointed at a demo desk and a
+  // sales inbox that do not exist for a self-serve product; it also quoted 30
+  // trial days against the 14 the product grants (audit 2026-09-15).
+  lines.push("## Empezar");
   lines.push("");
   lines.push(
-    "30 días sin cargo. Sin tarjeta. Sin contrato anual. Te llamamos en menos de 24 horas hábiles para entender tu Box y armar el setup.",
+    `${TRIAL_DAYS} días sin cargo. Sin tarjeta. Sin contrato anual. Te das de alta tú mismo y el Box queda listo en minutos.`,
   );
   lines.push("");
-  lines.push("- Reservar demo: mailto:demo@kronos-fit.com");
-  lines.push("- Hablar con ventas: mailto:ventas@kronos-fit.com");
+  lines.push(`- ${CTA_TRIAL_LABEL}: ${absolute(CTA_TRIAL_HREF)}`);
+  lines.push(`- ${CTA_WHATSAPP_LABEL}: ${absolute(CTA_WHATSAPP_HREF)}`);
+  lines.push(`- Escríbenos: mailto:${SUPPORT_EMAIL}`);
   lines.push("");
   lines.push("*TU DATA ES TUYA POR CONTRATO*");
   lines.push("");

@@ -12,6 +12,7 @@
  * Hyrox" — Samuel recibe el ping y lo agenda.
  */
 import { Icon } from "@/components/kronos/Icon";
+import { supportMailto } from "@/lib/contact";
 
 export default function HyroxWODFormPlaceholder() {
   return (
@@ -41,7 +42,7 @@ export default function HyroxWODFormPlaceholder() {
         estándar.
       </p>
       <a
-        href="mailto:contacto@kronos-fit.com?subject=Beta%20editor%20Hyrox"
+        href={supportMailto("Beta editor Hyrox")}
         className="inline-flex min-h-11 items-center gap-1 text-[11px] font-medium underline"
         style={{ color: "var(--k-accent)" }}
       >

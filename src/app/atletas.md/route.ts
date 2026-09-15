@@ -2,9 +2,7 @@ import {
   HERO,
   BENEFIT_SKILLS,
   BENEFIT_WOD,
-  TESTIMONIAL_HERO,
   WHY,
-  DUAL_QUOTES,
   FINAL_CTA,
   FOOTER,
 } from "@/app/(landing)/atletas/_data/copy";
@@ -40,20 +38,11 @@ function renderMarkdown(): string {
   lines.push("");
   lines.push(`**${BENEFIT_WOD.detail.label}:** ${BENEFIT_WOD.detail.value}`);
   lines.push("");
-  lines.push("## Reseñas (ejemplos ilustrativos)");
-  lines.push("");
-  lines.push(`> "${TESTIMONIAL_HERO.quote}"`);
-  lines.push(">");
-  lines.push(`> — ${TESTIMONIAL_HERO.attribution}`);
-  lines.push("");
-  lines.push(`> "${DUAL_QUOTES.a.quote}"`);
-  lines.push(">");
-  lines.push(`> — ${DUAL_QUOTES.a.attribution}`);
-  lines.push("");
-  lines.push(`> "${DUAL_QUOTES.b.quote}"`);
-  lines.push(">");
-  lines.push(`> — ${DUAL_QUOTES.b.attribution}`);
-  lines.push("");
+  // No "Reseñas" section. There are no real athlete quotes with signed
+  // consent, and the invented ones were emptied out upstream — which left this
+  // endpoint publishing three empty blockquotes under an "ejemplos
+  // ilustrativos" heading (audit 2026-09-15, public-truth review). When real
+  // quotes exist, add `TESTIMONIALS` to the copy module and render it here.
   lines.push(`## ${WHY.h2Line1} ${WHY.h2Line2}`);
   lines.push("");
   lines.push(WHY.sub);

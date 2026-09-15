@@ -3,9 +3,7 @@ import {
   HERO,
   BENEFIT_SKILLS,
   BENEFIT_WOD,
-  TESTIMONIAL_HERO,
   WHY,
-  DUAL_QUOTES,
   FINAL_CTA,
   FOOTER,
 } from "@/app/(landing)/atletas/_data/copy";
@@ -45,23 +43,12 @@ export function GET() {
         detail: BENEFIT_WOD.detail,
       },
     ],
-    testimonials: [
-      {
-        quote: TESTIMONIAL_HERO.quote,
-        attribution: TESTIMONIAL_HERO.attribution,
-        note: "Ejemplo ilustrativo",
-      },
-      {
-        quote: DUAL_QUOTES.a.quote,
-        attribution: DUAL_QUOTES.a.attribution,
-        note: "Ejemplo ilustrativo",
-      },
-      {
-        quote: DUAL_QUOTES.b.quote,
-        attribution: DUAL_QUOTES.b.attribution,
-        note: "Ejemplo ilustrativo",
-      },
-    ],
+    // No `testimonials` key. There are no real athlete quotes with signed
+    // consent, and the invented ones were emptied out upstream — which left
+    // this endpoint publishing three blank quotes under an "ejemplo
+    // ilustrativo" note (audit 2026-09-15, public-truth review). An absent key
+    // is honest; an empty array of fake reviews is not. When real quotes exist,
+    // add `TESTIMONIALS` to the copy module and read it here.
     why: {
       title: `${WHY.h2Line1} ${WHY.h2Line2}`,
       sub: WHY.sub,
