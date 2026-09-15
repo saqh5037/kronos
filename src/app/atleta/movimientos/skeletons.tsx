@@ -1,12 +1,15 @@
 import { KronosSkeleton } from "@/components/kronos/KronosSkeleton";
 
+/**
+ * Matches the library-first layout: header, search, filter chips, card grid.
+ * The old skeleton drew a list of ranked rows, which is no longer what loads.
+ */
 export function MovimientosContentSkeleton() {
   return (
     <div className="pb-28">
-      {/* Header */}
       <div
         style={{
-          padding: "56px 20px 20px",
+          padding: "56px 20px 16px",
           display: "flex",
           flexDirection: "column",
           gap: 8,
@@ -14,54 +17,31 @@ export function MovimientosContentSkeleton() {
       >
         <KronosSkeleton variant="line" width={130} height={9} />
         <KronosSkeleton variant="line" width={240} height={28} delay={40} />
-        <KronosSkeleton variant="line" width={100} height={11} delay={80} />
+        <KronosSkeleton variant="line" width={180} height={11} delay={80} />
       </div>
 
-      {/* Movement rows */}
-      <div className="px-3.5 mt-2 space-y-2">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            style={{
-              background: "var(--k-surface)",
-              border: "1px solid var(--k-line)",
-              borderRadius: 14,
-              padding: "14px 12px",
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-            }}
-          >
+      <div className="px-3.5 space-y-4">
+        <KronosSkeleton variant="line" width="100%" height={44} delay={60} />
+        <div className="flex gap-1.5 flex-wrap">
+          {Array.from({ length: 6 }).map((_, i) => (
             <KronosSkeleton
+              key={i}
               variant="line"
-              width={16}
-              height={14}
-              delay={i * 40}
+              width={78}
+              height={34}
+              delay={80 + i * 20}
             />
-            <div className="flex-1 space-y-1.5">
-              <KronosSkeleton
-                variant="line"
-                width="50%"
-                height={11}
-                delay={i * 40 + 20}
-              />
-              <KronosSkeleton
-                variant="line"
-                width="35%"
-                height={8}
-                delay={i * 40 + 50}
-              />
-            </div>
-            <div className="text-right space-y-1">
-              <KronosSkeleton
-                variant="line"
-                width={56}
-                height={14}
-                delay={i * 40 + 70}
-              />
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="k-card k-skeleton"
+              style={{ height: 176, borderRadius: 12 }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

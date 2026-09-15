@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import type {
   BodyMetricHistoryPoint,
   LatestByType,
@@ -43,48 +44,47 @@ export function SaludShell({ history, latest, goals }: Props) {
 
   return (
     <div style={{ paddingTop: 12 }}>
-      <header
-        style={{
-          margin: "0 16px 6px",
-          paddingTop: 36,
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          gap: 12,
-        }}
-      >
-        <div>
-          <div style={{ marginBottom: 4 }}>
-            <AthleteBackLink href="/atleta" label="Inicio" />
-          </div>
-          <div
-            style={{
-              fontFamily: "var(--k-font-display)",
-              fontSize: 9,
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              color: "var(--k-t2)",
-              textTransform: "uppercase",
-            }}
-          >
-            Salud
-          </div>
-          <h1
-            style={{
-              fontFamily: "var(--k-font-display)",
-              fontSize: 26,
-              fontWeight: 700,
-              color: "var(--k-t1)",
-              letterSpacing: "-0.02em",
-              marginTop: 2,
-              lineHeight: 1.1,
-            }}
-          >
-            Tu cuerpo en el tiempo
-          </h1>
+      {/* Audit 2026-09-15: at 360 the title was squeezed into three lines
+          against the "?" and "+ REGISTRAR" controls. The title now owns a full
+          row and the actions sit in their own row beneath it. */}
+      <header style={{ margin: "0 16px 6px", paddingTop: 36 }}>
+        <div className="pl-12 lg:pl-0" style={{ marginBottom: 4 }}>
+          <AthleteBackLink href="/atleta" label="Inicio" />
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <TourTriggerButton tourId={saludTour.id} />
+        <div
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: "0.18em",
+            color: "var(--k-t2)",
+            textTransform: "uppercase",
+          }}
+        >
+          Salud
+        </div>
+        <h1
+          style={{
+            fontFamily: "var(--k-font-display)",
+            fontSize: 26,
+            fontWeight: 700,
+            color: "var(--k-t1)",
+            letterSpacing: "-0.02em",
+            margin: "2px 0 0",
+            lineHeight: 1.15,
+            textWrap: "balance",
+          }}
+        >
+          Tu cuerpo en el tiempo
+        </h1>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginTop: 12,
+          }}
+        >
           {!isEmpty && (
             <button
               type="button"
@@ -93,7 +93,11 @@ export function SaludShell({ history, latest, goals }: Props) {
               className="k-tap"
               aria-label="Registrar nueva medición"
               style={{
-                padding: "10px 16px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                minHeight: 44,
+                padding: "11px 16px",
                 background: "var(--k-accent)",
                 color: "var(--k-accent-on)",
                 border: "none",
@@ -108,9 +112,13 @@ export function SaludShell({ history, latest, goals }: Props) {
                 whiteSpace: "nowrap",
               }}
             >
-              + Registrar
+              <Plus size={14} aria-hidden />
+              Registrar
             </button>
           )}
+          <div style={{ marginLeft: "auto" }}>
+            <TourTriggerButton tourId={saludTour.id} />
+          </div>
         </div>
       </header>
 
@@ -154,6 +162,7 @@ export function SaludShell({ history, latest, goals }: Props) {
               className="k-tap"
               style={{
                 margin: "0 16px 18px",
+                minHeight: 44,
                 padding: "14px 18px",
                 background: "transparent",
                 color: "var(--k-t2)",

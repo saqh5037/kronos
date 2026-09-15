@@ -141,13 +141,16 @@ export function GoalCard({ goal, onEdit, onChanged }: Props) {
             overflow: "hidden",
           }}
         >
+          {/* transform, not width (layout-property animation). */}
           <div
             style={{
               height: "100%",
-              width: `${progress}%`,
+              width: "100%",
+              transformOrigin: "left center",
+              transform: `scaleX(${Math.max(0, Math.min(1, progress / 100))})`,
               background: accent,
               boxShadow: "var(--k-accent-glow)",
-              transition: "width 0.6s ease",
+              transition: "transform 0.6s ease",
             }}
           />
         </div>

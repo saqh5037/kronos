@@ -1,7 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
+import { ArrowRight, TriangleAlert } from "lucide-react";
 import AthleteBackLink from "@/components/atleta/AthleteBackLink";
+import {
+  cleanMovementDescription,
+  equipmentLabel,
+  muscleLabel,
+} from "../_lib/movement-i18n";
 import { getMyMovementProfile } from "@/server/analytics/movement";
 import {
   getMyPRProgression,
@@ -15,6 +21,7 @@ import {
   AnimatedItem,
 } from "@/components/kronos/AnimatedSection";
 import { EquipmentIcon } from "@/lib/equipment-icons";
+import { formatDateShort } from "@/lib/format";
 
 export const metadata = { title: "Kronos — Movimiento" };
 
@@ -54,6 +61,34 @@ export default async function MovementDetailPage({
   const isInTodayWod =
     todayWod?.movements.some((m) => m.movementId === id) ?? false;
 
+  const statTiles: { value: string; label: string; accent?: boolean }[] = [];
+  if (profile.currentBest !== null) {
+    statTiles.push({
+      value: `${profile.currentBest}${profile.unit ? ` ${profile.unit}` : ""}`,
+      label: profile.lastPR?.achievedAt
+        ? `PR ACTUAL · ${formatDateShort(new Date(profile.lastPR.achievedAt))}`
+        : "PR ACTUAL",
+      accent: true,
+    });
+  }
+  if (profile.frequency90d > 0) {
+    statTiles.push({
+      value: String(profile.frequency90d),
+      label: profile.frequency90d === 1 ? "ENTRENO 90D" : "ENTRENOS 90D",
+    });
+  }
+  // A rank of #0, or a rank inside a box of one, tells the athlete nothing.
+  if (profile.rankInBox > 0 && profile.totalAthletesInBox > 1) {
+    statTiles.push({
+      value: `#${profile.rankInBox}`,
+      label: `DE ${profile.totalAthletesInBox} EN EL BOX`,
+    });
+    statTiles.push({
+      value: `${profile.percentileInBox}%`,
+      label: "PERCENTIL EN BOX",
+    });
+  }
+
   return (
     <div className="pb-28 relative">
       {/* HERO V3 — limpio */}
@@ -65,7 +100,8 @@ export default async function MovementDetailPage({
           gap: 8,
         }}
       >
-        <div style={{ marginBottom: 4 }}>
+        {/* Left gutter keeps the back link clear of the fixed hamburger. */}
+        <div className="pl-12 lg:pl-0" style={{ marginBottom: 4 }}>
           <AthleteBackLink href="/atleta/movimientos" label="Movimientos" />
         </div>
         <span
@@ -159,7 +195,9 @@ export default async function MovementDetailPage({
                       margin: 0,
                     }}
                   >
-                    {movementInfo.standardDescription}
+                    {/* Seeded copy leaks model scaffolding ("Score: weight
+                        (kg). Tips RX: …"); strip it at the boundary. */}
+                    {cleanMovementDescription(movementInfo.standardDescription)}
                   </p>
 
                   {movementInfo.equipment.length > 0 && (
@@ -201,7 +239,7 @@ export default async function MovementDetailPage({
                             }}
                           >
                             <EquipmentIcon name={eq} size={14} />
-                            {eq}
+                            {equipmentLabel(eq)}
                           </span>
                         ))}
                       </div>
@@ -279,10 +317,12 @@ export default async function MovementDetailPage({
                       borderRadius: 16,
                     }}
                   >
+                    {/* Neutral: a list of common mistakes is coaching content,
+                        not a warning state (audit 2026-09-15, S2). */}
                     <p
                       className="k-eyebrow"
                       style={{
-                        color: "var(--k-warning)",
+                        color: "var(--k-t3)",
                         margin: "0 0 12px",
                       }}
                     >
@@ -386,6 +426,8 @@ export default async function MovementDetailPage({
                             alignItems: "flex-start",
                           }}
                         >
+                          {/* Difficulty is not a warning: outline chips in the
+                              neutral ramp, never orange/red (audit S2). */}
                           <span
                             className="k-mono"
                             style={{
@@ -393,13 +435,8 @@ export default async function MovementDetailPage({
                               letterSpacing: 1.2,
                               padding: "3px 6px",
                               borderRadius: 4,
-                              border: "1px solid var(--k-line)",
-                              color:
-                                p.level === "beginner"
-                                  ? "var(--k-t2)"
-                                  : p.level === "intermediate"
-                                    ? "var(--k-warning)"
-                                    : "var(--k-danger)",
+                              border: "1px solid var(--k-line-2)",
+                              color: "var(--k-t3)",
                             }}
                           >
                             {p.level === "beginner"
@@ -475,7 +512,7 @@ export default async function MovementDetailPage({
                             textTransform: "capitalize",
                           }}
                         >
-                          {m}
+                          {muscleLabel(m)}
                         </span>
                       ))}
                     </div>
@@ -488,41 +525,38 @@ export default async function MovementDetailPage({
         {/* Right column — stats + chart */}
         <div className="lg:col-span-2 space-y-4">
           {/* Stats Grid V3 */}
-          <AnimatedSection className="grid grid-cols-2 gap-2">
-            <AnimatedItem>
-              <V3StatCard
-                value={
-                  profile.currentBest !== null
-                    ? `${profile.currentBest}${profile.unit ? ` ${profile.unit}` : ""}`
-                    : "—"
-                }
-                label={
-                  profile.currentBest && profile.lastPR?.achievedAt
-                    ? `PR ACTUAL · ${new Date(profile.lastPR.achievedAt).toLocaleDateString("es-MX", { month: "short", day: "numeric" })}`
-                    : "PR ACTUAL"
-                }
-                accent
-              />
-            </AnimatedItem>
-            <AnimatedItem>
-              <V3StatCard
-                value={`${profile.percentileInBox}%`}
-                label="PERCENTIL EN BOX"
-              />
-            </AnimatedItem>
-            <AnimatedItem>
-              <V3StatCard
-                value={`#${profile.rankInBox}`}
-                label={`RANK DE ${profile.totalAthletesInBox}`}
-              />
-            </AnimatedItem>
-            <AnimatedItem>
-              <V3StatCard
-                value={String(profile.frequency90d)}
-                label="ENTRENOS 90D"
-              />
-            </AnimatedItem>
-          </AnimatedSection>
+          {/* Zero states shrink instead of printing nonsense: the audit found
+              "– PR ACTUAL · 0% PERCENTIL · #0 RANK DE 3 · 1 ENTRENOS 90D".
+              A tile only renders once its number means something. */}
+          {statTiles.length > 0 ? (
+            <AnimatedSection className="grid grid-cols-2 gap-2">
+              {statTiles.map((tile) => (
+                <AnimatedItem key={tile.label}>
+                  <V3StatCard
+                    value={tile.value}
+                    label={tile.label}
+                    accent={tile.accent}
+                  />
+                </AnimatedItem>
+              ))}
+            </AnimatedSection>
+          ) : (
+            <div
+              style={{
+                padding: 14,
+                borderRadius: 14,
+                background: "var(--k-surface)",
+                border: "1px solid var(--k-line)",
+                fontFamily: "var(--k-font-body)",
+                fontSize: 12,
+                color: "var(--k-t2)",
+                lineHeight: 1.4,
+              }}
+            >
+              Aún no tienes marcas en este movimiento. Regístralo en tu próximo
+              WOD y aquí verás tu PR, tu frecuencia y tu lugar en el box.
+            </div>
+          )}
 
           {/* Progression Chart V3 */}
           <AnimatedSection>
@@ -753,7 +787,10 @@ export default async function MovementDetailPage({
       {isInTodayWod && (
         <AnimatedSection className="px-3.5 mt-4 hidden lg:block">
           <AnimatedItem>
-            <Link href={`/atleta/wod` as Route} style={{ textDecoration: "none" }}>
+            <Link
+              href={`/atleta/wod` as Route}
+              style={{ textDecoration: "none" }}
+            >
               <div
                 style={{
                   padding: 16,
@@ -808,7 +845,16 @@ export default async function MovementDetailPage({
                     textTransform: "uppercase",
                   }}
                 >
-                  Vamos →
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    Vamos
+                    <ArrowRight size={13} aria-hidden />
+                  </span>
                 </span>
               </div>
             </Link>
@@ -932,22 +978,15 @@ function CueGlyph({ tone }: { tone: "ok" | "bad" | "neutral" }) {
 }
 
 function WarningGlyph() {
+  // Neutral tone: this marks coaching content, not an error condition.
   return (
-    <svg
-      width={20}
-      height={20}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="var(--k-warning)"
+    <TriangleAlert
+      size={20}
       strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      color="var(--k-t3)"
+      aria-hidden
       style={{ flexShrink: 0, marginTop: 1 }}
-    >
-      <path d="M12 2L2 21h20L12 2z" />
-      <path d="M12 9v5" />
-      <path d="M12 17h0" />
-    </svg>
+    />
   );
 }
 

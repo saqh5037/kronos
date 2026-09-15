@@ -13,13 +13,21 @@ import {
 } from "../achievements/criteria";
 import { loadAthleteState } from "../achievements/evaluate";
 import { readPrefs } from "@/lib/atleta-prefs";
-import { levelToTier } from "@/lib/skills/progress";
+import { computeAthleteTier, levelToTier } from "@/lib/skills/progress";
 import { getAthleteLevel, type AthleteLevelInfo } from "@/lib/badges/level";
+import {
+  badgeProgressHuman,
+  badgeProgressView,
+  type BadgeIconName,
+  badgeIconName,
+} from "@/lib/badges/progress";
 import {
   badgeTierFromSkillTier,
   isBadgeAboveAthleteTier,
 } from "@/lib/badges/tier";
-import type { SkillTier } from "@/lib/skills/types";
+import { reconcileBadgeXPLedger } from "../achievements/xp";
+import { loadAttendanceStreak } from "../achievements/attendance-streak";
+import type { AthleteTierInfo, SkillTier } from "@/lib/skills/types";
 
 export type BadgeProgress = {
   current: number;
@@ -42,10 +50,14 @@ export type BadgeDetail = {
   progress: BadgeProgress | null;
   tier: BadgeTier | null;
   isAboveTier: boolean;
+  /** lucide icon name — badges never render two-letter text codes. */
+  icon: BadgeIconName;
 };
 
 export type AthleteCollectionStats = {
   athleteTier: SkillTier;
+  tierInfo: AthleteTierInfo;
+  /** Ledger sum — the single XP source for every screen. */
   xpTotal: number;
   level: AthleteLevelInfo;
   unlockedCount: number;
@@ -77,36 +89,50 @@ function humanizeCriterion(c: Criterion): string {
   }
 }
 
+/**
+ * Every counter goes through `badgeProgressView`, which clamps the raw value to
+ * the target. That is what kills "17 / 1 clases · 100 %" (audit 2026-09-15):
+ * the athlete's lifetime attendance was printed against a target of 1.
+ */
+function counted(raw: number, target: number, noun: string): BadgeProgress {
+  const view = badgeProgressView(raw, target);
+  return {
+    current: view.current,
+    target: view.target,
+    ratio: view.ratio,
+    human: badgeProgressHuman(raw, target, noun),
+  };
+}
+
+/**
+ * The badge *grid* must show the streak the athlete actually has, not the
+ * cached `Streak.count` (audit 2026-09-15: "30 días seguidos · 0 %" on day 7).
+ * Unlocking still runs off the cached counter inside the evaluation
+ * transaction; only what we render is recomputed.
+ */
+async function withRealStreak(
+  tenantId: string,
+  athleteId: string,
+  state: AthleteState,
+  needed: boolean,
+): Promise<AthleteState> {
+  if (!needed) return state;
+  const streak = await loadAttendanceStreak(tenantId, athleteId).catch(
+    () => state.attendanceStreak,
+  );
+  return { ...state, attendanceStreak: Math.max(streak, 0) };
+}
+
 function progressFor(c: Criterion, state: AthleteState): BadgeProgress {
   switch (c.type) {
     case "attendance":
-      return {
-        current: state.attendanceCount,
-        target: c.count,
-        ratio: Math.min(1, state.attendanceCount / c.count),
-        human: `${state.attendanceCount} / ${c.count} clases`,
-      };
+      return counted(state.attendanceCount, c.count, "clases");
     case "attendance_streak":
-      return {
-        current: state.attendanceStreak,
-        target: c.count,
-        ratio: Math.min(1, state.attendanceStreak / c.count),
-        human: `${state.attendanceStreak} / ${c.count} días`,
-      };
+      return counted(state.attendanceStreak, c.count, "días");
     case "pr":
-      return {
-        current: state.prCount,
-        target: c.count,
-        ratio: Math.min(1, state.prCount / c.count),
-        human: `${state.prCount} / ${c.count} PRs`,
-      };
+      return counted(state.prCount, c.count, "PRs");
     case "rx_count":
-      return {
-        current: state.rxScoreCount,
-        target: c.count,
-        ratio: Math.min(1, state.rxScoreCount / c.count),
-        human: `${state.rxScoreCount} / ${c.count} WODs RX`,
-      };
+      return counted(state.rxScoreCount, c.count, "WODs RX");
     case "ratio_pr": {
       const bw = state.bodyweightKg;
       if (!bw) {
@@ -114,17 +140,12 @@ function progressFor(c: Criterion, state: AthleteState): BadgeProgress {
           current: 0,
           target: 0,
           ratio: 0,
-          human: "Falta registrar peso corporal",
+          human: "Falta registrar tu peso corporal",
         };
       }
-      const target = bw * c.ratio;
+      const target = Math.round(bw * c.ratio * 10) / 10;
       const best = state.prByMovement[c.movement.toLowerCase()] ?? 0;
-      return {
-        current: best,
-        target,
-        ratio: target > 0 ? Math.min(1, best / target) : 0,
-        human: `${best.toFixed(1)} / ${target.toFixed(1)} kg`,
-      };
+      return counted(Math.round(best * 10) / 10, target, "kg");
     }
     case "skill_level_reached": {
       const key = `${c.movementSlug}:${c.progressionSlug}`;
@@ -133,7 +154,7 @@ function progressFor(c: Criterion, state: AthleteState): BadgeProgress {
         current: reached ? 1 : 0,
         target: 1,
         ratio: reached ? 1 : 0,
-        human: reached ? "Desbloqueada" : "Pendiente de desbloquear",
+        human: reached ? "Progresión dominada" : "Aún sin dominar",
       };
     }
   }
@@ -169,9 +190,12 @@ export async function getBadgeDetail(
 
   let progress: BadgeProgress | null = null;
   if (criteria) {
-    const state = await loadAthleteState(tenantId, me.id, [
-      { criteria: badge.criteria },
-    ]);
+    const state = await withRealStreak(
+      tenantId,
+      me.id,
+      await loadAthleteState(tenantId, me.id, [{ criteria: badge.criteria }]),
+      criteria.type === "attendance_streak",
+    );
     progress = progressFor(criteria, state);
   }
 
@@ -191,6 +215,7 @@ export async function getBadgeDetail(
     progress,
     tier: badge.tier,
     isAboveTier,
+    icon: badgeIconName(badge.code),
   };
 }
 
@@ -229,10 +254,20 @@ export async function listBadgesWithProgress(): Promise<BadgeDetail[]> {
 
   const ownedMap = new Map(achievements.map((a) => [a.badgeId, a.earnedAt]));
 
-  const state = await loadAthleteState(
+  const needsStreak = badges.some(
+    (b) =>
+      isCriterion(b.criteria) &&
+      (b.criteria as Criterion).type === "attendance_streak",
+  );
+  const state = await withRealStreak(
     tenantId,
     athlete.id,
-    badges.map((b) => ({ criteria: b.criteria })),
+    await loadAthleteState(
+      tenantId,
+      athlete.id,
+      badges.map((b) => ({ criteria: b.criteria })),
+    ),
+    needsStreak,
   );
 
   return badges.map((badge) => {
@@ -260,18 +295,20 @@ export async function listBadgesWithProgress(): Promise<BadgeDetail[]> {
       progress,
       tier: badge.tier,
       isAboveTier,
+      icon: badgeIconName(badge.code),
     };
   });
 }
 
+/**
+ * The one XP number. Reconciles the ledger first so badges unlocked outside
+ * `runAchievementEvaluation` (seed, backfills) are credited — that mismatch is
+ * what produced "LOGROS · 0 XP" above four unlocked badges.
+ */
 export async function getAthleteXPTotal(): Promise<number> {
   const { tenantId, athlete } = await resolveAthleteContext();
   if (!athlete) return 0;
-  const result = await rawDb.xPLedger.aggregate({
-    where: { tenantId, athleteId: athlete.id },
-    _sum: { amount: true },
-  });
-  return result._sum.amount ?? 0;
+  return reconcileBadgeXPLedger(tenantId, athlete.id);
 }
 
 export async function getCollectionStats(): Promise<AthleteCollectionStats | null> {
@@ -279,14 +316,11 @@ export async function getCollectionStats(): Promise<AthleteCollectionStats | nul
   if (!athlete) return null;
 
   const prefs = readPrefs(athlete.tags);
-  const athleteTier = levelToTier(prefs.level);
-  const accessibleBadgeTier = badgeTierFromSkillTier(athleteTier);
+  const tierInfo = computeAthleteTier({ declaredLevel: prefs.level });
+  const accessibleBadgeTier = badgeTierFromSkillTier(tierInfo.tier);
 
-  const [xpAgg, badges, ownedCount] = await Promise.all([
-    rawDb.xPLedger.aggregate({
-      where: { tenantId, athleteId: athlete.id },
-      _sum: { amount: true },
-    }),
+  const [xpTotal, badges, ownedCount] = await Promise.all([
+    reconcileBadgeXPLedger(tenantId, athlete.id),
     db.badge.findMany({
       where: {
         tenantId,
@@ -302,9 +336,9 @@ export async function getCollectionStats(): Promise<AthleteCollectionStats | nul
     }),
   ]);
 
-  const xpTotal = xpAgg._sum.amount ?? 0;
   return {
-    athleteTier,
+    athleteTier: tierInfo.tier,
+    tierInfo,
     xpTotal,
     level: getAthleteLevel(xpTotal),
     unlockedCount: ownedCount,

@@ -8,12 +8,18 @@
  * Rendered by LogrosContent (server component) which provides initialData so
  * the first paint is instant (SSR hydration). The presentation lives here
  * because functions (render props) cannot cross the server/client boundary.
+ *
+ * Audit 2026-09-15: unlocked badges used to be gray two-letter codes with the
+ * same treatment as locked ones ("a trophy room where trophies and empty
+ * shelves look the same"). Unlocked is now a lime glyph tile, locked is an
+ * outline in `--k-t3`, and every locked card shows its real computed progress.
  */
 
 import Link from "next/link";
 import type { Route } from "next";
 import { useBadgeCatalog } from "@/lib/query/useBadgeCatalog";
 import type { BadgeDetail } from "@/server/actions/badges";
+import { BadgeGlyph } from "@/app/atleta/logros/_components/BadgeGlyph";
 
 interface Props {
   tenantId: string;
@@ -118,12 +124,6 @@ function LogrosGrid({ items }: { items: BadgeDetail[] }) {
 }
 
 function TrophyTile({ badge }: { badge: BadgeDetail }) {
-  const initial =
-    badge.code
-      .split("-")
-      .map((s) => s[0]?.toUpperCase() ?? "")
-      .join("")
-      .slice(0, 2) || "★";
   const ratio = badge.progress ? Math.round(badge.progress.ratio * 100) : 0;
 
   return (
@@ -141,42 +141,21 @@ function TrophyTile({ badge }: { badge: BadgeDetail }) {
         style={{
           padding: 12,
           background: badge.unlocked ? "var(--k-elevated)" : "var(--k-surface)",
-          opacity: badge.unlocked ? 1 : 0.7,
-          borderColor: badge.unlocked ? "var(--k-line)" : "var(--k-line)",
+          borderColor: badge.unlocked
+            ? "var(--k-accent-line)"
+            : "var(--k-line)",
           minHeight: 168,
           display: "flex",
           flexDirection: "column",
           gap: 8,
         }}
       >
-        <div
-          aria-hidden="true"
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
-            background: badge.unlocked
-              ? "var(--k-elevated)"
-              : "var(--k-line-2)",
-            border: `1px solid ${badge.unlocked ? "var(--k-line)" : "var(--k-line)"}`,
-            display: "grid",
-            placeItems: "center",
-            color: badge.unlocked ? "var(--k-t2)" : "var(--k-t3)",
-            fontFamily: "var(--k-font-display)",
-            fontSize: 18,
-            fontWeight: 600,
-            boxShadow: badge.unlocked
-              ? "0 0 8px rgba(255,255,255,0.06)"
-              : undefined,
-          }}
-        >
-          {badge.unlocked ? initial : <SmallLockIcon />}
-        </div>
+        <BadgeGlyph icon={badge.icon} unlocked={badge.unlocked} />
         <div
           className="k-mono"
           style={{
             fontSize: 9,
-            color: badge.unlocked ? "var(--k-t2)" : "var(--k-t3)",
+            color: badge.unlocked ? "var(--k-accent)" : "var(--k-t3)",
             letterSpacing: 1.2,
           }}
         >
@@ -226,12 +205,16 @@ function TrophyTile({ badge }: { badge: BadgeDetail }) {
                 overflow: "hidden",
               }}
             >
+              {/* transform, not width — animating a layout property reflows
+                  the whole grid on every catalog refresh. */}
               <div
                 style={{
                   height: "100%",
-                  width: `${ratio}%`,
-                  background: "var(--k-t1)",
-                  transition: "width 400ms ease",
+                  width: "100%",
+                  transformOrigin: "left center",
+                  transform: `scaleX(${Math.max(0, Math.min(1, badge.progress.ratio))})`,
+                  background: "var(--k-t2)",
+                  transition: "transform 400ms ease",
                 }}
               />
             </div>
@@ -239,21 +222,5 @@ function TrophyTile({ badge }: { badge: BadgeDetail }) {
         )}
       </div>
     </Link>
-  );
-}
-
-function SmallLockIcon() {
-  return (
-    <svg
-      width={18}
-      height={18}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-    >
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-    </svg>
   );
 }

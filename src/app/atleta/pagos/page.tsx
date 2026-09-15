@@ -31,7 +31,10 @@ export default async function AtletaPagosPage() {
         <div style={{ position: "absolute", top: 48, right: 20 }}>
           <TourTriggerButton tourId={pagosTour.id} />
         </div>
-        <AthleteBackLink href="/atleta" label="Inicio" />
+        {/* Left gutter keeps the back link clear of the fixed hamburger. */}
+        <div className="pl-12 lg:pl-0">
+          <AthleteBackLink href="/atleta" label="Inicio" />
+        </div>
         <span
           style={{
             fontFamily: "var(--k-font-display)",

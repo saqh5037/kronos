@@ -73,11 +73,15 @@ export function WeightChart({ data, targetValue, unit = "kg" }: Props) {
           borderRadius: 14,
         }}
       >
+        {/* One encoding per chart: the cinematic variant drew bars *and* a
+            line over the same series, and the y-axis ticks landed on top of
+            the bars (audit 2026-09-15). Bars off — the line is the series. */}
         <KronosLineChart
           data={data}
           xKey="date"
           yKey="value"
           variant="cinematic"
+          bars={false}
           height={220}
           gradient
           formatY={(v) => `${Math.round(v * 10) / 10}`}

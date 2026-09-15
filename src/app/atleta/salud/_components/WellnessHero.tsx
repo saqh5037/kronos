@@ -23,6 +23,18 @@ function formatDelta(latest: LatestByType): string | null {
   return `${sign}${rounded.toFixed(Math.abs(rounded) < 1 ? 2 : 1)} ${latest.latest.unit}`;
 }
 
+/**
+ * Body fat is directional — down is the goal, so down reads lime and up reads
+ * warning. Weight is not: a kilo up can be muscle. Audit 2026-09-15 flagged
+ * both ends of this ("↓ 1.5 % body fat rendered in orange", "-0.40 kg has no
+ * reference").
+ */
+function bodyFatDeltaColor(trend: LatestByType["trend"]): string {
+  if (trend === "down") return "var(--k-accent)";
+  if (trend === "up") return "var(--k-warning)";
+  return "var(--k-t3)";
+}
+
 export function WellnessHero({ latest }: Props) {
   const weight = findLatest(latest, "WEIGHT");
   const height = findLatest(latest, "HEIGHT");
@@ -31,12 +43,7 @@ export function WellnessHero({ latest }: Props) {
   const bmi =
     weight && height ? calcBMI(weight.latest.value, height.latest.value) : null;
   const delta = weight ? formatDelta(weight) : null;
-  const deltaColor =
-    weight && weight.trend === "down"
-      ? "var(--k-accent)"
-      : weight && weight.trend === "up"
-        ? "var(--k-warning)"
-        : "var(--k-t3)";
+  const bodyFatDelta = bodyFat ? formatDelta(bodyFat) : null;
 
   return (
     <div
@@ -101,13 +108,29 @@ export function WellnessHero({ latest }: Props) {
             <span
               style={{
                 marginLeft: 6,
-                fontFamily: "var(--k-font-display)",
-                fontSize: 12,
-                fontWeight: 700,
-                color: deltaColor,
+                display: "inline-flex",
+                flexDirection: "column",
               }}
             >
-              {delta}
+              <span
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "var(--k-t2)",
+                }}
+              >
+                {delta}
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--k-font-body)",
+                  fontSize: 10,
+                  color: "var(--k-t3)",
+                }}
+              >
+                vs. última medición
+              </span>
             </span>
           )}
         </div>
@@ -143,6 +166,8 @@ export function WellnessHero({ latest }: Props) {
                 bodyFat.latest.value,
                 bodyFat.latest.unit,
               )}
+              delta={bodyFatDelta}
+              deltaColor={bodyFatDeltaColor(bodyFat.trend)}
             />
           )}
         </div>
@@ -151,7 +176,17 @@ export function WellnessHero({ latest }: Props) {
   );
 }
 
-function HeroStat({ label, value }: { label: string; value: string }) {
+function HeroStat({
+  label,
+  value,
+  delta,
+  deltaColor,
+}: {
+  label: string;
+  value: string;
+  delta?: string | null;
+  deltaColor?: string;
+}) {
   return (
     <div
       style={{
@@ -186,6 +221,19 @@ function HeroStat({ label, value }: { label: string; value: string }) {
       >
         {value}
       </div>
+      {delta && (
+        <div
+          style={{
+            marginTop: 2,
+            fontFamily: "var(--k-font-display)",
+            fontSize: 10,
+            fontWeight: 700,
+            color: deltaColor ?? "var(--k-t3)",
+          }}
+        >
+          {delta}
+        </div>
+      )}
     </div>
   );
 }

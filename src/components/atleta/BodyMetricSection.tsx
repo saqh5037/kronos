@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ArrowDown, ArrowUp, Minus, Trash2 } from "lucide-react";
 import {
   createBodyMetric,
   deleteBodyMetric,
@@ -408,17 +409,17 @@ function MetricRow({
     group.current.value,
     group.previous?.value ?? null,
   );
-  const trendArrow = trend === "up" ? "↑" : trend === "down" ? "↓" : "→";
+  const TrendIcon =
+    trend === "up" ? ArrowUp : trend === "down" ? ArrowDown : Minus;
+  // Body fat and waist are directional (down is the goal). Weight is not —
+  // a kilo up can be muscle — so it stays neutral (audit 2026-09-15, S2).
+  const isDirectional = group.type === "BODY_FAT" || group.type === "WAIST";
   const trendColor =
-    trend === "flat"
-      ? "var(--k-t3)"
-      : group.type === "WEIGHT" || group.type === "BODY_FAT"
-        ? trend === "down"
-          ? "var(--k-accent)"
-          : "var(--k-warning)"
-        : trend === "up"
-          ? "var(--k-accent)"
-          : "var(--k-warning)";
+    trend === "flat" || !isDirectional
+      ? "var(--k-t2)"
+      : trend === "down"
+        ? "var(--k-accent)"
+        : "var(--k-warning)";
   const delta =
     group.previous !== null
       ? Math.abs(group.current.value - group.previous.value).toFixed(1)
@@ -484,6 +485,9 @@ function MetricRow({
           {delta !== null && (
             <span
               style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 3,
                 fontFamily: "var(--k-font-display)",
                 fontSize: 10,
                 fontWeight: 700,
@@ -491,7 +495,8 @@ function MetricRow({
                 marginLeft: 6,
               }}
             >
-              {trendArrow} {delta}
+              <TrendIcon size={11} aria-hidden />
+              {delta}
             </span>
           )}
         </div>
@@ -516,16 +521,17 @@ function MetricRow({
           background: "transparent",
           border: "1px solid var(--k-line)",
           color: "var(--k-t3)",
-          padding: "6px 10px",
+          width: 44,
+          height: 44,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
           borderRadius: 8,
           cursor: isPending ? "wait" : "pointer",
-          fontFamily: "var(--k-font-display)",
-          fontSize: 9,
-          fontWeight: 700,
-          letterSpacing: "0.12em",
+          flexShrink: 0,
         }}
       >
-        ✕
+        <Trash2 size={15} aria-hidden />
       </button>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import type { LatestByType } from "@/server/actions/body-metrics";
 import { BODY_METRIC_LABEL } from "@/lib/validations/body-metric";
 
@@ -65,17 +66,17 @@ function MeasurementCard({ entry }: { entry: LatestByType }) {
   const delta = entry.previous
     ? Math.round((entry.latest.value - entry.previous.value) * 10) / 10
     : null;
-  const arrow = entry.trend === "up" ? "↑" : entry.trend === "down" ? "↓" : "→";
+  const TrendIcon =
+    entry.trend === "up" ? ArrowUp : entry.trend === "down" ? ArrowDown : Minus;
+  // Directional metrics (body fat, waist) earn a semantic colour; everything
+  // else — weight above all — stays neutral, because a kilo up can be muscle.
+  const isDirectional = entry.type === "BODY_FAT" || entry.type === "WAIST";
   const arrowColor =
-    entry.trend === "flat"
-      ? "var(--k-t3)"
-      : entry.type === "BODY_FAT" || entry.type === "WAIST"
-        ? entry.trend === "down"
-          ? "var(--k-accent)"
-          : "var(--k-warning)"
-        : entry.trend === "up"
-          ? "var(--k-accent)"
-          : "var(--k-warning)";
+    entry.trend === "flat" || !isDirectional
+      ? "var(--k-t2)"
+      : entry.trend === "down"
+        ? "var(--k-accent)"
+        : "var(--k-warning)";
 
   return (
     <div
@@ -140,13 +141,26 @@ function MeasurementCard({ entry }: { entry: LatestByType }) {
       {delta !== null && delta !== 0 && (
         <div
           style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
             fontFamily: "var(--k-font-display)",
             fontSize: 10,
             fontWeight: 700,
             color: arrowColor,
           }}
         >
-          {arrow} {Math.abs(delta).toFixed(1)} {entry.latest.unit}
+          <TrendIcon size={12} aria-hidden />
+          {Math.abs(delta).toFixed(1)} {entry.latest.unit}
+          <span
+            style={{
+              fontFamily: "var(--k-font-body)",
+              fontWeight: 400,
+              color: "var(--k-t3)",
+            }}
+          >
+            vs. anterior
+          </span>
         </div>
       )}
     </div>
