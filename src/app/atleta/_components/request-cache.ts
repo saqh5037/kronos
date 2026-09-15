@@ -64,11 +64,15 @@ export async function listAvailableClassesCached(): Promise<AvailableClass[]> {
   return _listAvailableClassesByKey(session.user.id, session.user.tenantId);
 }
 
-/** Today's WOD + scores (LeaderboardSection); keyed for the same safety guarantee. */
+/** Today's WOD + ranked board (Today + Leaderboard sections); keyed for the same safety guarantee. */
 export async function getTodayWODWithScoresCached(): Promise<TodayWODWithScores> {
   const session = await getCachedSession();
   if (!session?.user?.tenantId || !session.user.id) {
-    return { wod: null, scores: [] };
+    return {
+      wod: null,
+      board: { entries: [], myEntry: null, myRank: null, totalAthletes: 0 },
+      myScore: null,
+    };
   }
   return _getTodayWODWithScoresByKey(session.user.id, session.user.tenantId);
 }

@@ -9,6 +9,7 @@
  */
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import {
   getSuggestedNextClass,
   type SuggestedBooking,
@@ -44,49 +45,75 @@ export async function BookingSection() {
     >
       {home.nextBooking ? (
         <KCard variant="featured">
-          <div className="p-3.5 flex items-center gap-3.5">
+          <div className="p-3.5 flex flex-col gap-3">
+            <div className="flex items-center gap-3.5">
+              <div
+                className="text-center px-2.5 py-1.5 rounded-xl min-w-[54px]"
+                style={{ background: "var(--k-surface)" }}
+              >
+                <div
+                  className="font-mono text-[9px] tracking-[0.1em] font-bold"
+                  style={{ color: "var(--k-t3)" }}
+                >
+                  {home.nextBooking.startsAt.toDateString() ===
+                  new Date().toDateString()
+                    ? "HOY"
+                    : formatDayMonth(home.nextBooking.startsAt).toUpperCase()}
+                </div>
+                <div
+                  className="font-display text-xl font-bold"
+                  style={{ color: "var(--k-t2)" }}
+                >
+                  {formatTime(home.nextBooking.startsAt)}
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[13px] font-semibold mb-0.5">
+                  Tu próxima clase
+                </div>
+                <div
+                  className="text-[11px] flex gap-2 items-center flex-wrap"
+                  style={{ color: "var(--k-t2)" }}
+                >
+                  {home.nextBooking.wodName && (
+                    <span>{home.nextBooking.wodName}</span>
+                  )}
+                  {home.nextBooking.coachName && (
+                    <>
+                      {home.nextBooking.wodName && (
+                        <span aria-hidden style={{ opacity: 0.4 }}>
+                          ·
+                        </span>
+                      )}
+                      <span>Coach {home.nextBooking.coachName}</span>
+                    </>
+                  )}
+                  {nextClassDetail && (
+                    <>
+                      <span aria-hidden style={{ opacity: 0.4 }}>
+                        ·
+                      </span>
+                      <span>
+                        {nextClassDetail.bookedCount}/
+                        {nextClassDetail.capacity} lugares
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+            {/*
+              Cancelling is a destructive action, so it never sits in the first
+              viewport and never looks primary (audit 2026-09-15, P0 #8: the
+              first reachable button on the home was "Cancelar"). It lives here,
+              inside the class card, as a secondary ghost action.
+            */}
             <div
-              className="text-center px-2.5 py-1.5 rounded-xl min-w-[54px]"
-              style={{ background: "var(--k-surface)" }}
+              className="flex justify-end pt-2"
+              style={{ borderTop: "1px solid var(--k-line)" }}
             >
-              <div
-                className="font-mono text-[9px] tracking-[0.1em] font-bold"
-                style={{ color: "var(--k-t3)" }}
-              >
-                {home.nextBooking.startsAt.toDateString() ===
-                new Date().toDateString()
-                  ? "HOY"
-                  : formatDayMonth(home.nextBooking.startsAt).toUpperCase()}
-              </div>
-              <div
-                className="font-display text-xl font-bold"
-                style={{ color: "var(--k-t2)" }}
-              >
-                {formatTime(home.nextBooking.startsAt)}
-              </div>
+              <CancelMyBookingButton bookingId={home.nextBooking.bookingId} />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[13px] font-semibold mb-0.5">
-                Tu próxima clase
-              </div>
-              <div
-                className="text-[11px] flex gap-2 items-center flex-wrap"
-                style={{ color: "var(--k-t2)" }}
-              >
-                {home.nextBooking.coachName && (
-                  <span>Coach {home.nextBooking.coachName}</span>
-                )}
-                {nextClassDetail && (
-                  <>
-                    <span style={{ opacity: 0.4 }}>·</span>
-                    <span style={{ color: "var(--k-t2)" }}>
-                      ● {nextClassDetail.bookedCount}/{nextClassDetail.capacity}
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-            <CancelMyBookingButton bookingId={home.nextBooking.bookingId} />
           </div>
         </KCard>
       ) : suggestion ? (
@@ -99,7 +126,12 @@ export async function BookingSection() {
               style={{ color: "var(--k-t2)" }}
             >
               Ver clases disponibles
-              <span aria-hidden style={{ color: "var(--k-t3)" }}>→</span>
+              <ArrowRight
+                width={14}
+                height={14}
+                aria-hidden
+                style={{ color: "var(--k-t3)" }}
+              />
             </p>
           </KCard>
         </Link>

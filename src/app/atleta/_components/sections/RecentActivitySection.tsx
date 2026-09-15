@@ -1,6 +1,11 @@
 /**
  * RecentActivitySection — streams last score card + latest PR card.
  *
+ * Audit 2026-09-15 (P1 colour, S2): both cards used an orange kettlebell icon
+ * on a red-tinted tile and the PR chip was `k-chip-ember`. Nothing here is a
+ * warning — a PR is the best thing that happens in the app. Both are lime now,
+ * and the decorative unicode "›" affordance is a lucide `ChevronRight`.
+ *
  * Uses getAthleteHomeCached() for the last score (deduped with other sections)
  * and listMyPRs() independently since no other section needs PR data.
  *
@@ -9,6 +14,7 @@
  */
 
 import Link from "next/link";
+import { ChevronRight, Dumbbell, Trophy } from "lucide-react";
 import { getAthleteHomeCached } from "../request-cache";
 import { listMyPRs } from "@/server/actions/prs";
 import KCard from "@/components/kronos/KCard";
@@ -16,6 +22,20 @@ import RevealOnScroll from "@/components/kronos/RevealOnScroll";
 import { formatScore } from "@/lib/scores";
 import { formatDayMonth } from "@/lib/week";
 import type { ScoreType } from "@/lib/validations/wod";
+
+/** Lime tile, same treatment for both cards — brand, not warning. */
+const ICON_TILE: React.CSSProperties = {
+  width: 42,
+  height: 42,
+  borderRadius: 12,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "var(--k-accent-soft)",
+  border: "1px solid var(--k-accent-line)",
+  color: "var(--k-accent)",
+  flexShrink: 0,
+};
 
 export async function RecentActivitySection() {
   const [home, prs] = await Promise.all([getAthleteHomeCached(), listMyPRs()]);
@@ -31,23 +51,8 @@ export async function RecentActivitySection() {
         <RevealOnScroll variant="fade-up" className="mt-4 px-3.5">
           <KCard>
             <div className="p-3.5 flex items-center gap-3.5">
-              <div
-                className="w-[42px] h-[42px] rounded-xl flex items-center justify-center"
-                style={{
-                  background: "rgba(255, 90, 90, 0.1)",
-                  border: "1px solid rgba(255, 90, 90, 0.3)",
-                }}
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="var(--k-warning)"
-                  strokeWidth="2"
-                >
-                  <path d="M6 9V5h12v4M5 9h14v4H5zM7 13l1 8h8l1-8" />
-                </svg>
+              <div style={ICON_TILE}>
+                <Dumbbell width={20} height={20} aria-hidden />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 mb-0.5">
@@ -68,9 +73,11 @@ export async function RecentActivitySection() {
               </div>
               <Link
                 href="/atleta/perfil"
-                className="text-lg opacity-40 hover:opacity-70 transition-opacity"
+                aria-label="Ver mi perfil"
+                className="opacity-40 hover:opacity-70 transition-opacity"
+                style={{ color: "var(--k-t2)" }}
               >
-                ›
+                <ChevronRight width={18} height={18} aria-hidden />
               </Link>
             </div>
           </KCard>
@@ -82,23 +89,8 @@ export async function RecentActivitySection() {
         <RevealOnScroll variant="fade-up" className="mt-4 px-3.5">
           <KCard>
             <div className="p-3.5 flex items-center gap-3.5">
-              <div
-                className="w-[42px] h-[42px] rounded-xl flex items-center justify-center"
-                style={{
-                  background: "rgba(255, 90, 90, 0.1)",
-                  border: "1px solid rgba(255, 90, 90, 0.3)",
-                }}
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="var(--k-warning)"
-                  strokeWidth="2"
-                >
-                  <path d="M6 9V5h12v4M5 9h14v4H5zM7 13l1 8h8l1-8" />
-                </svg>
+              <div style={ICON_TILE}>
+                <Trophy width={20} height={20} aria-hidden />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 mb-0.5">
@@ -106,8 +98,17 @@ export async function RecentActivitySection() {
                     {latestPR.movementName}
                   </span>
                   <span
-                    className="k-chip k-chip-ember"
-                    style={{ padding: "2px 6px", fontSize: 9 }}
+                    style={{
+                      padding: "2px 6px",
+                      borderRadius: 999,
+                      fontFamily: "var(--k-font-display)",
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: "0.12em",
+                      background: "var(--k-accent-soft)",
+                      border: "1px solid var(--k-accent-line)",
+                      color: "var(--k-accent)",
+                    }}
                   >
                     PR
                   </span>
@@ -122,9 +123,11 @@ export async function RecentActivitySection() {
               </div>
               <Link
                 href="/atleta/perfil"
-                className="text-lg opacity-40 hover:opacity-70 transition-opacity"
+                aria-label="Ver mis PRs"
+                className="opacity-40 hover:opacity-70 transition-opacity"
+                style={{ color: "var(--k-t2)" }}
               >
-                ›
+                <ChevronRight width={18} height={18} aria-hidden />
               </Link>
             </div>
           </KCard>
