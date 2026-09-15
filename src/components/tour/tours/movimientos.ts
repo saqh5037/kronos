@@ -7,7 +7,7 @@ export const movimientosTour: TourDefinition = {
     {
       anchor: "movimientos.header",
       title: "Biblioteca técnica",
-      body: "Todos los movimientos que has entrenado y los disponibles. Acá vives tu tecnique.",
+      body: "Todos los movimientos que has entrenado y los que tiene tu box. Aquí vive tu técnica.",
       placement: "bottom",
     },
     {

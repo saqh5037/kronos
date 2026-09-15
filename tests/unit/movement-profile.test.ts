@@ -27,10 +27,12 @@ describe("computePercentile", () => {
     expect(r.rank).toBe(1);
   });
 
-  it("empty box returns zeroes", () => {
+  // `rank: 0` used to mean "empty cohort", which the profile card rendered as
+  // "#0 DE 0" (audit 2026-09-15). No cohort means no rank at all.
+  it("empty box returns no rank", () => {
     const r = computePercentile([], 100);
     expect(r.total).toBe(0);
-    expect(r.rank).toBe(0);
+    expect(r.rank).toBeNull();
   });
 
   it("single athlete is P100 (no peers to compare)", () => {

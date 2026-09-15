@@ -74,9 +74,26 @@ const responseSchema = z.object({
   cards: z.array(cardSchema).max(3),
 });
 
+/**
+ * Dialect note (audit 2026-09-15, systemic issue S3).
+ *
+ * This prompt sets the dialect of every coach card an athlete reads, so it is
+ * written in the dialect we want back: neutral Mexican Spanish with `tú`. Two
+ * rules for anyone editing it:
+ *
+ *  1. Give the model POSITIVE examples of the conjugations to use. The rule
+ *     used to be phrased by listing the banned Rioplatense forms verbatim,
+ *     which put those exact strings inside `src/**` — where
+ *     `tests/unit/dialect-guard.test.ts` counts them — and primed the model on
+ *     the wrong forms. Name the dialect to avoid; never spell it out.
+ *  2. Every instruction is itself `tú`-conjugated. A prompt that closes with a
+ *     Rioplatense imperative teaches the model to answer with one.
+ */
 const SYSTEM_PROMPT = `Eres el coach virtual de Kronos, una app multi-tenant de CrossFit. Generas cards de feedback proactivas para atletas que entrenan en boxes (con coach humano) o en Box Personal (solos, sin coach).
 
-Tu tono: cálido, accionable, español mexicano neutro (tuteo — "tú", "tienes", "puedes"). Como coach experimentado que conoce al atleta. NUNCA uses voseo argentino ("vos", "tenés", "podés", "querés", "dale", "mirá").
+Tu tono: cálido, accionable, como coach experimentado que conoce al atleta.
+
+DIALECTO (regla dura): español de México neutro, en segunda persona con "tú". Conjuga siempre así: "tienes", "puedes", "quieres", "sabes", "mira", "espera", "mantén", "recuerda", "sube", "aquí". No uses el dialecto rioplatense de Argentina y Uruguay en ninguna de sus formas: ni su pronombre de segunda persona, ni sus conjugaciones acentuadas en la última sílaba, ni sus imperativos. Tampoco uses formas de España ("vosotros", "tenéis").
 
 Output: JSON estricto sin markdown, sin texto extra. Solo el objeto.
 
@@ -87,7 +104,7 @@ Máximo 3 cards. Prioriza por relevancia:
 
 Si Box Personal: tono más íntimo ("buena progresión solo en 2 meses"). Si Box real: comparativo ("top 25% del box"). Te indico cuál con isPersonalBox.
 
-NUNCA prescribas pesos absolutos en kg. Solo técnica + progresión + sugerencia de WOD/movement.`;
+NUNCA prescribas pesos absolutos en kg. Solo técnica + progresión + sugerencia de WOD o movimiento.`;
 
 const USER_PROMPT_TEMPLATE = `Atleta: {firstName} (Box {boxKind})
 
@@ -122,12 +139,12 @@ Genera 1-3 cards en este formato JSON:
 }
 
 Reglas:
-- Body en 2da persona tuteo ("tu deadlift", "te falta", "intenta").
+- Body en segunda persona con "tú" ("tu deadlift", "te falta", "intenta").
 - Si Box Personal y tiene CELEBRATION: tono solidario, no comparativo.
 - Si Box real y tiene CELEBRATION: puedes mencionar comparativo cuando aporte.
 - Si NO hay datos relevantes: devuelve { "cards": [] }.
 
-Devolvé SOLO el JSON. Nada antes, nada después.`;
+Devuelve SOLO el JSON. Nada antes, nada después.`;
 
 export async function generateCoachCards(
   input: CoachCardInput,

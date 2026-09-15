@@ -21,7 +21,8 @@ import { capabilityScoreLabel } from "./copy";
 export type CapabilityBucketInput = {
   category: string;
   label: string;
-  score: number;
+  /** Already `null` for an empty bucket since the fix landed in the primitive. */
+  score: number | null;
   movementCount: number;
   rawValue?: number;
 };

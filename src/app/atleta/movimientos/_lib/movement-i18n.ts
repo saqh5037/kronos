@@ -64,9 +64,16 @@ const EQUIPMENT_ES: Record<string, string> = {
   "no equipment": "Sin equipo",
   gi: "Gi",
   parallettes: "Paralelas",
+  "parallel bars": "Barras paralelas",
   "dip bars": "Barras de fondos",
   "weight vest": "Chaleco con peso",
   vest: "Chaleco con peso",
+  wall: "Pared",
+  "wall target": "Blanco en la pared",
+  harness: "Arnés",
+  // Loanwords a Mexican box speaks as-is. Mapped to themselves so they are
+  // explicitly "already Spanish", not an unmapped value that happens to pass.
+  ghd: "GHD",
 };
 
 const MUSCLE_ES: Record<string, string> = {
@@ -82,6 +89,7 @@ const MUSCLE_ES: Record<string, string> = {
   shoulders: "Hombros",
   delts: "Hombros",
   deltoids: "Hombros",
+  "rear delts": "Deltoides posteriores",
   traps: "Trapecios",
   lats: "Dorsales",
   back: "Espalda",
@@ -92,6 +100,7 @@ const MUSCLE_ES: Record<string, string> = {
   triceps: "Tríceps",
   biceps: "Bíceps",
   forearms: "Antebrazos",
+  "wrist flexors": "Flexores de muñeca",
   grip: "Agarre",
   "hip flexors": "Flexores de cadera",
   hips: "Cadera",

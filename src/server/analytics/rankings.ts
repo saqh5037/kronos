@@ -79,7 +79,7 @@ export async function getAthleteMovementRankings(
     // previous hardcoded `false` ranked every time-based movement backwards.
     const lowerIsBetter = unitDirection(p.unit) === "asc";
     const r = computePercentile(peers, myValue, lowerIsBetter);
-    const hasCohort = r.total > 0 && r.rank > 0;
+    const hasCohort = r.total > 0 && r.rank !== null && r.rank > 0;
     return {
       movementId: p.movementId,
       movementName: p.movement.name,
@@ -118,9 +118,11 @@ export type WODPercentileForMe = {
   total: number;
 };
 
-/** Rank 0 out of 0 peers is not a rank — the UI must render "sin datos". */
-function cohortOrNull(rank: number, total: number) {
-  return total > 0 && rank > 0 ? { rank, total } : { rank: null, total };
+/** No rank, or a rank out of 0 peers, is not a rank — the UI renders "sin datos". */
+function cohortOrNull(rank: number | null, total: number) {
+  return total > 0 && rank !== null && rank > 0
+    ? { rank, total }
+    : { rank: null, total };
 }
 
 /**

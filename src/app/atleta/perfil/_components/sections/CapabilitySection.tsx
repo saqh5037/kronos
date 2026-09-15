@@ -3,12 +3,14 @@
  *
  * Audit 2026-09-15 (P1 bug, /atleta/perfil): the radar plotted "Cardio 0" and
  * "Core 0" while Helen, Karen and Fran were on file. A category with no
- * movements on file has no score — `getMyCapabilityProfile` now returns `null`
- * for it, and this section keeps those categories OUT of the chart and names
- * them under it as "sin datos" instead of drawing them as a zero.
+ * movements on file has no score, and that is now true all the way down:
+ * `buildCapabilityBuckets` returns `null`, `getMyCapabilityProfile` passes it
+ * through, and `CapabilityRadar` keeps those categories off the polygon and
+ * labels their breakdown row "sin datos".
  *
- * Only categories with data reach `CapabilityRadar` (its contract is
- * `score: number`); the whole card is skipped when nothing has data.
+ * So every category is handed to the chart — the nulls no longer have to be
+ * filtered out here to protect a `score: number` contract. The whole card is
+ * still skipped when NOTHING has data.
  *
  * Optional: try/catch → null.
  */
@@ -47,14 +49,14 @@ export async function CapabilitySection() {
               PERFIL DE CAPACIDADES
             </p>
             <CapabilityRadar
-              categories={withData.map((c) => ({
+              categories={capability.categories.map((c) => ({
                 category: c.category,
                 name: c.name,
-                score: c.score ?? 0,
+                score: c.score,
                 rawValue: c.rawValue,
                 movementCount: c.movementCount,
               }))}
-              overallRank={capability.overallRank ?? 0}
+              overallRank={capability.overallRank}
               totalAthletes={capability.totalAthletes}
               weakestCategory={canCompare ? capability.weakestCategory : null}
               strongestCategory={
@@ -71,8 +73,8 @@ export async function CapabilitySection() {
                   lineHeight: 1.5,
                 }}
               >
-                Sin datos en {withoutData.map((c) => c.name).join(", ")} —
-                registra un WOD de esas categorías para medirlas.
+                Registra un WOD de {withoutData.map((c) => c.name).join(", ")}{" "}
+                para medir esas categorías.
               </p>
             )}
           </div>

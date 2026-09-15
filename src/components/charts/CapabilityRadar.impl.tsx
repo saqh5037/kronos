@@ -13,14 +13,16 @@ import { CHART_COLORS } from "./tokens";
 export type CapabilityCategory = {
   category: string;
   name: string;
-  score: number;
+  /** `null` when the athlete has no movements in this category — "sin datos". */
+  score: number | null;
   rawValue: number;
   movementCount: number;
 };
 
 type Props = {
   categories: CapabilityCategory[];
-  overallRank: number;
+  /** `null` when the athlete is not in the ranking pool. */
+  overallRank: number | null;
   totalAthletes: number;
   weakestCategory: string | null;
   strongestCategory: string | null;
@@ -35,12 +37,16 @@ export function CapabilityRadar({
   strongestCategory,
   height = 280,
 }: Props) {
-  const data = categories.map((c) => ({
-    name: c.name,
-    score: Math.round(c.score),
-    fullMark: 100,
-    category: c.category,
-  }));
+  // A category with no score is not plotted: recharts would draw it as a 0,
+  // which is the fabricated value the audit flagged ("Cardio 0" / "Core 0").
+  const data = categories
+    .filter((c) => c.score !== null)
+    .map((c) => ({
+      name: c.name,
+      score: Math.round(c.score as number),
+      fullMark: 100,
+      category: c.category,
+    }));
 
   if (data.length === 0) {
     return (
@@ -53,7 +59,7 @@ export function CapabilityRadar({
     );
   }
 
-  const hasRank = overallRank > 0 && totalAthletes > 0;
+  const hasRank = overallRank !== null && overallRank > 0 && totalAthletes > 0;
 
   return (
     <div>
@@ -151,20 +157,25 @@ export function CapabilityRadar({
               className="flex-1 h-2 rounded-full overflow-hidden"
               style={{ background: "var(--track)" }}
             >
-              <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${Math.min(100, Math.max(0, c.score))}%`,
-                  background: "var(--k-accent)",
-                  opacity: c.score >= 70 ? 1 : c.score >= 40 ? 0.7 : 0.4,
-                }}
-              />
+              {c.score !== null && (
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${Math.min(100, Math.max(0, c.score))}%`,
+                    background: "var(--k-accent)",
+                    opacity: c.score >= 70 ? 1 : c.score >= 40 ? 0.7 : 0.4,
+                  }}
+                />
+              )}
             </div>
             <div
-              className="w-8 text-right text-[11px] font-bold font-mono"
-              style={{ color: "var(--k-t1)" }}
+              className="text-right text-[11px] font-bold font-mono"
+              style={{
+                color: c.score === null ? "var(--k-t3)" : "var(--k-t1)",
+                minWidth: c.score === null ? 56 : 32,
+              }}
             >
-              {Math.round(c.score)}
+              {c.score === null ? "sin datos" : Math.round(c.score)}
             </div>
           </div>
         ))}

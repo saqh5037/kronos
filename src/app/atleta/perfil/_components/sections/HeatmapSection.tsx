@@ -1,21 +1,19 @@
 /**
  * HeatmapSection — attendance heatmap for the last 90 days.
  *
- * KNOWN DIVERGENCE (audit 2026-09-15, P1 bug): the heatmap lights ~4 cells
- * while the streak hero shows 7 days and the card header counts 17 classes.
- * The two numbers come from different predicates on the same table:
+ * Audit 2026-09-15 (P1): the heatmap lit ~4 cells while the streak hero showed
+ * 7 days and the card header counted 17 classes. Two different bugs, both now
+ * fixed upstream of this file:
  *
- *   streak / weekAttendance  →  Booking.status = ATTENDED, dated by class.startsAt
- *   this heatmap             →  Booking.status = ATTENDED AND checkedInAt != null,
- *                               dated by checkedInAt
+ *   PREDICATE — `getMyAttendanceLast90d` required `checkedInAt != null` and
+ *   dated by it, while the streak used `status: ATTENDED` dated by
+ *   `class.startsAt`. A booking a coach marks attended from the roster has no
+ *   `checkedInAt`, so it counted for the streak and was invisible here. Both
+ *   paths now go through `attendanceDayOf` (src/lib/streak.ts), so this card
+ *   shows ASISTENCIAS — the same events the streak counts.
  *
- * A booking a coach marks attended from the roster has no `checkedInAt`, so it
- * counts for the streak and is invisible here. The fix is one predicate in
- * `getMyAttendanceLast90d` (src/server/actions/athlete-home.ts) — a file this
- * wave does not own, so it is reported rather than changed.
- *
- * Until then the card says what the data actually is ("check-ins"), so it no
- * longer reads as a contradiction of the streak.
+ *   TIMEZONE — bucketing happened on the client in the viewer's local time.
+ *   It now happens on the server in the box timezone.
  *
  * Optional: try/catch → null.
  */
@@ -29,14 +27,16 @@ import {
 } from "@/components/kronos/AnimatedSection";
 
 export async function HeatmapSection() {
-  let attendance90d = [];
+  let attendance;
   try {
-    attendance90d = await getMyAttendanceLast90d();
+    attendance = await getMyAttendanceLast90d();
   } catch {
     return null;
   }
 
-  if (attendance90d.length === 0) return null;
+  if (attendance.buckets.length === 0) return null;
+
+  const totalDays = attendance.buckets.length;
 
   return (
     <AnimatedSection className="mt-5 px-3.5">
@@ -45,16 +45,20 @@ export async function HeatmapSection() {
           <div className="p-4">
             <div className="mb-3 flex items-baseline justify-between gap-3">
               <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
-                CHECK-INS · ÚLTIMOS 90 DÍAS
+                ASISTENCIAS · ÚLTIMOS 90 DÍAS
               </p>
               <span
                 className="font-mono text-[10px] font-bold"
                 style={{ color: "var(--k-t2)" }}
               >
-                {attendance90d.length}
+                {totalDays}
               </span>
             </div>
-            <MyHeatmap90d days={attendance90d} />
+            <MyHeatmap90d
+              buckets={attendance.buckets}
+              fromKey={attendance.fromKey}
+              toKey={attendance.toKey}
+            />
             <p
               className="mt-3 text-[11px]"
               style={{
@@ -63,8 +67,8 @@ export async function HeatmapSection() {
                 lineHeight: 1.5,
               }}
             >
-              Cuenta los días en que hiciste check-in en el box. Tu racha usa
-              todas las clases marcadas como asistidas, así que puede ser mayor.
+              Un cuadro por día que entrenaste, en el horario de tu box. Cuenta
+              las mismas clases que tu racha.
             </p>
           </div>
         </KCard>

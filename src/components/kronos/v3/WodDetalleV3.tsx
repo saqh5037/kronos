@@ -271,17 +271,23 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
                 </span>
               </>
             )}
-            <span
-              style={{
-                fontFamily: "var(--k-font-display)",
-                fontSize: 10,
-                fontWeight: 600,
-                letterSpacing: "0.16em",
-                color: "var(--k-t3)",
-              }}
-            >
-              ·
-            </span>
+            {/* A separator only separates: with no difficulty dots and no
+                estimated time, the score type was the first thing in the row
+                and the dot dangled in front of it (audit 2026-09-15). */}
+            {(typeof props.difficulty === "number" ||
+              props.estimatedTimeLabel) && (
+              <span
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: "0.16em",
+                  color: "var(--k-t3)",
+                }}
+              >
+                ·
+              </span>
+            )}
             <span
               style={{
                 fontFamily: "var(--k-font-display)",
@@ -752,7 +758,7 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
                 textDecoration: "none",
               }}
             >
-              VER LEADERBOARD
+              Ver ranking
             </Link>
           )}
         </div>

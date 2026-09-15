@@ -23,7 +23,7 @@ const LABEL_TO_CATEGORY: Record<string, string> = {
   Fuerza: "STRENGTH",
   Olympic: "OLYMPIC",
   Cardio: "CARDIO",
-  "Gimnástico": "GYMNASTIC",
+  Gimnástico: "GYMNASTIC",
   Core: "CORE",
 };
 
@@ -113,9 +113,9 @@ export async function getAthleteCapabilityProfile(
 
   // If athlete has no PRs at all, they're not in the ranking pool.
   const totalAthletes = overallScores.length;
-  const rankInfo =
+  const rankInfo: { rank: number | null; total: number } =
     myPRs.length === 0 || totalAthletes === 0
-      ? { rank: 0, total: totalAthletes }
+      ? { rank: null, total: totalAthletes }
       : computePercentile(overallScores, myOverall, false);
 
   const { weakest, strongest } = pickWeakestStrongest(myBuckets);
@@ -131,7 +131,7 @@ export async function getAthleteCapabilityProfile(
       rawValue: b.rawValue,
       movementCount: b.movementCount,
     })),
-    overallRank: rankInfo.total > 0 && rankInfo.rank > 0 ? rankInfo.rank : null,
+    overallRank: rankInfo.total > 0 ? rankInfo.rank : null,
     totalAthletes: rankInfo.total,
     weakestCategory: weakest ? capabilityLabelES(weakest) : null,
     strongestCategory: strongest ? capabilityLabelES(strongest) : null,
