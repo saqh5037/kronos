@@ -84,7 +84,9 @@ export default async function AuditoriaPage({
     ? present.filter((e) => matchesSearch(e, search))
     : present;
 
-  const hasMore = filtered.length > take;
+  // "more" means the feed has rows we did not fetch, whether or not the search
+  // matched them — otherwise searching would hide the way to find its own hits.
+  const hasMore = raw.length > take;
   const page = filtered.slice(0, take);
 
   /*
@@ -179,24 +181,25 @@ export default async function AuditoriaPage({
           </p>
         </div>
       ) : (
-        <>
-          <AuditTimeline events={events} />
-          <div className="mt-6 flex flex-col items-center gap-2">
-            <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-              {events.length} evento{events.length === 1 ? "" : "s"}
-            </p>
-            {hasMore && take < MAX_TAKE ? (
-              <Link
-                href={moreHref}
-                scroll={false}
-                className="k-btn-ghost inline-flex items-center rounded-full px-5 py-2.5 text-sm font-bold"
-              >
-                Cargar más
-              </Link>
-            ) : null}
-          </div>
-        </>
+        <AuditTimeline events={events} />
       )}
+
+      <div className="mt-6 flex flex-col items-center gap-2">
+        {events.length > 0 ? (
+          <p className="text-xs" style={{ color: "var(--k-t3)" }}>
+            {events.length} evento{events.length === 1 ? "" : "s"}
+          </p>
+        ) : null}
+        {hasMore && take < MAX_TAKE ? (
+          <Link
+            href={moreHref}
+            scroll={false}
+            className="k-btn-ghost inline-flex items-center rounded-full px-5 py-2.5 text-sm font-bold"
+          >
+            Cargar más
+          </Link>
+        ) : null}
+      </div>
     </div>
   );
 }
