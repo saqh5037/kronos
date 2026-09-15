@@ -50,10 +50,8 @@ function AthleteCard({}: AthleteCardProps) {
     >
       <div
         aria-hidden="true"
+        className="lp-rs-pill"
         style={{
-          position: "absolute",
-          top: 24,
-          right: 24,
           padding: "6px 14px",
           background: "var(--k-accent-on)",
           color: "var(--k-accent)",
@@ -182,10 +180,8 @@ function BoxCard({}: BoxCardProps) {
     >
       <div
         aria-hidden="true"
+        className="lp-rs-pill"
         style={{
-          position: "absolute",
-          top: 24,
-          right: 24,
           padding: "5px 12px",
           background: "transparent",
           color: "var(--k-t3)",

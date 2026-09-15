@@ -71,10 +71,7 @@ export function ScheduleNav({
       >
         <ChevronRight size={16} aria-hidden />
       </Link>
-      <p
-        className="text-sm font-bold capitalize ml-2"
-        style={{ color: "var(--k-t1)" }}
-      >
+      <p className="text-sm font-bold ml-2" style={{ color: "var(--k-t1)" }}>
         {label}
       </p>
     </div>

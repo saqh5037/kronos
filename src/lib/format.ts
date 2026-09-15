@@ -44,6 +44,19 @@ export function formatPercentDelta(value: number, digits = 1): string {
 
 const TZ = "America/Mexico_City";
 
+/**
+ * Browser and Node ICU disagree on es-MX short dates ("mar, 15 de sep" vs "mar 15 sep").
+ * Normalise to the house style: no commas, no "de", no trailing dots, single spaces.
+ */
+function normalizeEsDate(s: string): string {
+  return s
+    .replace(/\./g, "")
+    .replace(/,/g, "")
+    .replace(/\bde\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /** "15 sep" */
 export function formatDateShort(date: Date, timeZone: string = TZ): string {
   return new Intl.DateTimeFormat("es-MX", {
@@ -57,26 +70,26 @@ export function formatDateShort(date: Date, timeZone: string = TZ): string {
 
 /** "mar 15 sep" */
 export function formatDateWeekday(date: Date, timeZone: string = TZ): string {
-  return new Intl.DateTimeFormat("es-MX", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    timeZone,
-  })
-    .format(date)
-    .replace(/\./g, "");
+  return normalizeEsDate(
+    new Intl.DateTimeFormat("es-MX", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      timeZone,
+    }).format(date),
+  );
 }
 
 /** "15 sep 2026" */
 export function formatDateLong(date: Date, timeZone: string = TZ): string {
-  return new Intl.DateTimeFormat("es-MX", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone,
-  })
-    .format(date)
-    .replace(".", "");
+  return normalizeEsDate(
+    new Intl.DateTimeFormat("es-MX", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone,
+    }).format(date),
+  );
 }
 
 /** "06:00" — always 24-hour, zero-padded. */

@@ -68,6 +68,8 @@ test.describe("athlete surface runtime errors", () => {
   test("box athlete browses every personal-box route with zero page errors", async ({
     page,
   }) => {
+    // Dev server cold-compiles each route (10–25 s); the default 30 s budget is for warm builds.
+    test.setTimeout(240_000);
     const seen = collect(page);
 
     await loginAs(page, "atleta");

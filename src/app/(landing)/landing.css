@@ -2062,3 +2062,19 @@ button.lp-btn-lime:active {
     padding: 32px 20px;
   }
 }
+
+/* Router split cards: the "GRATIS PARA SIEMPRE" / "PARA DUEÑOS DE BOX" pill sits top-right
+   on wide cards and drops into the flow on narrow phones so it never overlaps the eyebrow
+   (gate ola 0, 2026-09-15). */
+.lp-rs-pill {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+@media (max-width: 480px) {
+  .lp-rs-pill {
+    position: static;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+}

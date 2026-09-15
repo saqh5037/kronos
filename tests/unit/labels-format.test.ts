@@ -30,7 +30,9 @@ import {
 } from "@prisma/client";
 import { humanizeEnum, label, labelMaps } from "@/lib/labels";
 import {
+  formatDateLong,
   formatDateShort,
+  formatDateWeekday,
   formatInt,
   formatMXN,
   formatMXNDelta,
@@ -110,6 +112,9 @@ describe("format", () => {
   it("dates and 24h times in Mexico City", () => {
     const d = new Date("2026-09-15T12:05:00-06:00");
     expect(formatDateShort(d)).toBe("15 sep");
+    expect(formatDateWeekday(d)).toBe("mar 15 sep");
+    expect(formatDateWeekday(d)).not.toMatch(/,|\bde\b|[A-Z]/);
+    expect(formatDateLong(d)).toBe("15 sep 2026");
     expect(formatTime24(d)).toBe("12:05");
     expect(formatInt(1363)).toBe("1,363");
   });
