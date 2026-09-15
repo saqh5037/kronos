@@ -13,7 +13,7 @@ type PlanOption = { id: string; name: string };
  */
 export function PagosFilters({ plans }: { plans: PlanOption[] }) {
   return (
-    <div className="mb-4 flex flex-col gap-3 rounded-xl border border-[var(--line)] bg-[var(--card)] p-3">
+    <div className="mb-4 flex flex-col gap-3 rounded-xl border border-[var(--k-line)] bg-[var(--k-surface)] p-3">
       <div className="flex flex-wrap items-center gap-3">
         <DateRangePicker />
         <SearchInput
