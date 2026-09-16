@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -25,9 +26,14 @@ export default function TerminosPage() {
             textTransform: "uppercase",
             fontWeight: 700,
             textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            minHeight: 44,
           }}
         >
-          ← VOLVER A KRONOS
+          <ArrowLeft size={16} strokeWidth={1.75} aria-hidden />
+          VOLVER A KRONOS
         </Link>
         <h1
           style={{

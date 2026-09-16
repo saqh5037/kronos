@@ -168,7 +168,7 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
           </a>
           {DEV_LOGIN_ENABLED ? (
             <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-              (Dev: entrá con tu email + password <code>dev</code> en{" "}
+              (Dev: entra con tu email + password <code>dev</code> en{" "}
               <a href="/login?dev=1" className="underline">
                 /login
               </a>

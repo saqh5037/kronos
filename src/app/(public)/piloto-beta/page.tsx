@@ -74,7 +74,7 @@ export default async function PilotoBetaPage({
             className="text-[10px] font-mono uppercase tracking-wider"
             style={{ color: "var(--k-t3)" }}
           >
-            Firma piloto-beta · Cupo limitado
+            Firma piloto-beta
           </span>
         </div>
       </header>
@@ -188,10 +188,7 @@ function InvalidStateScreen({
         >
           Escríbenos a {CONTACT_EMAIL}
         </a>
-        <Link
-          href="/"
-          className="k-btn-ghost inline-block text-center"
-        >
+        <Link href="/" className="k-btn-ghost inline-block text-center">
           Ir al inicio
         </Link>
       </div>

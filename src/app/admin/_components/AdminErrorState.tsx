@@ -2,7 +2,9 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import type { AdminDashboardErrorKind } from "@/lib/errors";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 type Props = {
   kind: AdminDashboardErrorKind;
@@ -58,7 +60,7 @@ function buildCopy({
         title: "No encontramos tu box en el sistema.",
         body: "Esto puede ser una incidencia técnica de nuestro lado. Escríbenos a soporte y lo revisamos.",
         primary: { label: "Contactar soporte", action: "mailto" },
-        mailtoHref: `mailto:soporte@kronos-fit.com?subject=${subject}&body=${body}`,
+        mailtoHref: `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`,
       };
     }
     case "DB_ERROR":
@@ -172,17 +174,7 @@ export default function AdminErrorState({
           }}
         >
           {isPending ? "Cargando…" : copy.primary.label}
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </svg>
+          <ArrowRight size={16} strokeWidth={1.75} aria-hidden />
         </button>
 
         {devDetail ? (

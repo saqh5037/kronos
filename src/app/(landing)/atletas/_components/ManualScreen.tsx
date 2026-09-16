@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import type { Screen } from "../_data/screens";
 import { imageExists } from "../_data/screens";
 import PhoneFrame from "./PhoneFrame";
@@ -79,9 +80,15 @@ export default function ManualScreen({
           <a
             href={screen.deepLink}
             className="lp-btn-ghost"
-            style={{ alignSelf: "flex-start", display: "inline-flex" }}
+            style={{
+              alignSelf: "flex-start",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
           >
-            Abrir esta pantalla →
+            Abrir esta pantalla
+            <ArrowRight size={16} strokeWidth={1.75} aria-hidden />
           </a>
         ) : null}
       </div>

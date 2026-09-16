@@ -263,7 +263,7 @@ export default function FoundingForm({
           className="text-xs font-mono uppercase tracking-wider"
           style={{ color: "var(--k-t3)" }}
         >
-          Dirección de tu box
+          Identificador de tu box
         </label>
         <input
           type="text"
@@ -287,8 +287,9 @@ export default function FoundingForm({
             color: errors.slug ? "var(--k-danger)" : "var(--k-t3)",
           }}
         >
+          {/* Ver SignupForm: `kronos-fit.com/<slug>` no es una ruta real. */}
           {errors.slug ??
-            "Así se verá tu box: kronos-fit.com/iron-hands. Solo minúsculas, números y guiones."}
+            "Identifica a tu box en la pantalla de TV y en los links de invitación. Solo minúsculas, números y guiones."}
         </p>
       </div>
       <Field

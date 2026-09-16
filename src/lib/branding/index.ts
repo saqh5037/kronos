@@ -31,7 +31,7 @@ export interface DisciplineBranding {
   heroTitleLine2: string;
   /** Subtítulo del hero. */
   heroSubtitle: string;
-  /** Copy del eyebrow "PILOTO PRIVADO · MÉXICO · CUPO LIMITADO" (mismo en todas las disciplinas por ahora, parametrizable a futuro). */
+  /** Copy del eyebrow "PILOTO PRIVADO · MÉXICO" (mismo en todas las disciplinas por ahora, parametrizable a futuro). */
   heroEyebrow: string;
   /** Tagline corto que aparece en pricing card / footer / OG image. */
   productTagline: string;
@@ -44,12 +44,12 @@ const CROSSFIT_BRANDING: DisciplineBranding = {
   name: "CrossFit",
   metaTitle: "Kronos para Boxes — El sistema operativo de tu CrossFit Box",
   metaDescription:
-    "Software invisible para CrossFit Boxes en LATAM. White-label real, multi-tenant, pagos Stripe + Mercado Pago + OXXO. Tus atletas usan la app gratis incluida.",
+    "Software invisible para CrossFit Boxes en México. Multi-tenant, con tu logo y tu color, pagos con Mercado Pago (tarjeta) y efectivo. App del atleta gratis.",
   heroTitleLine1: "Software invisible",
   heroTitleLine2: "para tu CrossFit Box.",
   heroSubtitle:
     "Reservas, WODs, pagos, racha y admin en una sola app, en español, con tu logo y tu color. Diseñada para CrossFit en México.",
-  heroEyebrow: "PILOTO PRIVADO · MÉXICO · CUPO LIMITADO",
+  heroEyebrow: "PILOTO PRIVADO · MÉXICO",
   productTagline: "El sistema operativo de tu CrossFit Box",
   faqExtras: [],
 };
@@ -58,23 +58,26 @@ const HYROX_BRANDING: DisciplineBranding = {
   slug: "hyrox",
   name: "Hyrox",
   metaTitle:
-    "Kronos para Hyrox — Programación, race format y atletas en una app",
+    "Kronos para Hyrox — Programación, reservas y atletas en una sola app",
   metaDescription:
-    "Software para gyms Hyrox en LATAM. Stations + race format integrados. White-label, multi-tenant, pagos Stripe + Mercado Pago + OXXO. App atleta gratis incluida.",
+    "Software para gyms Hyrox en México. Multi-tenant, con tu logo y tu color, pagos con Mercado Pago (tarjeta) y efectivo. App del atleta gratis.",
   heroTitleLine1: "Software invisible",
   heroTitleLine2: "para tu gym Hyrox.",
   heroSubtitle:
-    "Stations, race format, tiempos, reservas y admin en una sola app, en español, con tu logo y tu color. Diseñada para Hyrox en LATAM.",
-  heroEyebrow: "PILOTO PRIVADO · MÉXICO · CUPO LIMITADO",
+    "Programación, tiempos, reservas y admin en una sola app, en español, con tu logo y tu color. Diseñada para gyms Hyrox en México.",
+  heroEyebrow: "PILOTO PRIVADO · MÉXICO",
   productTagline: "El sistema operativo de tu gym Hyrox",
+  // Las dos respuestas prometían un editor nativo de estaciones y un
+  // leaderboard por estación. `HyroxWODFormPlaceholder` es lo que existe: un
+  // stub que manda al editor estándar. Mientras eso siga así, la FAQ lo dice.
   faqExtras: [
     {
       q: "¿Kronos soporta el race format de Hyrox?",
-      a: "Sí. Los WODs en boxes Hyrox usan estructura stations + tiempos: 8 ejercicios funcionales intercalados con 1 km de remo/run cada uno. El editor de WODs renderiza esa estructura de manera nativa y los atletas registran sus splits directamente.",
+      a: "Todavía no de forma nativa. Hoy cargas la sesión en el editor estándar, en formato libre: escribes las ocho estaciones con su distancia o carga y el kilómetro entre cada una, y tus atletas registran su tiempo total. El editor con estaciones y splits por estación está en el roadmap; escríbenos si lo necesitas y te avisamos cuando salga.",
     },
     {
-      q: "¿Pueden mis atletas registrar PRs por station individual?",
-      a: "Sí. Cada station (SkiErg, Sled Push, Sled Pull, Burpee Broad Jumps, RowErg, Farmers Carry, Sandbag Lunges, Wall Balls) tiene su propio PR tracking + leaderboard por gym.",
+      q: "¿Pueden mis atletas registrar PRs por estación individual?",
+      a: "Por ahora no hay ranking por estación. Los PRs y los rankings del gym funcionan por movimiento y por WOD, así que puedes dar de alta cada estación (SkiErg, Sled Push, Sled Pull, Burpee Broad Jumps, RowErg, Farmers Carry, Sandbag Lunges, Wall Balls) como movimiento y seguir el progreso de cada atleta ahí.",
     },
   ],
 };

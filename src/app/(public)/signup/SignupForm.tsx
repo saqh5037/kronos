@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ArrowRight } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { createBoxAndOwner } from "@/server/actions/signup";
 import { slugify } from "@/lib/slug";
@@ -138,10 +139,11 @@ export default function SignupForm({
           registro aquí. Si eres atleta,{" "}
           <a
             href={`/atleta-signup?email=${encodeURIComponent(initialEmail)}`}
-            className="underline"
+            className="underline inline-flex items-center gap-1"
             style={{ color: "var(--k-accent)" }}
           >
-            regístrate gratis aquí →
+            regístrate gratis aquí
+            <ArrowRight size={14} strokeWidth={1.75} aria-hidden />
           </a>
         </div>
       ) : null}
@@ -182,7 +184,7 @@ export default function SignupForm({
           className="text-xs font-mono uppercase tracking-wider"
           style={{ color: "var(--k-t3)" }}
         >
-          Dirección de tu box
+          Identificador de tu box
         </label>
         <div className="flex items-center gap-2">
           <input
@@ -205,8 +207,11 @@ export default function SignupForm({
             color: errors.slug ? "var(--k-danger)" : "var(--k-t3)",
           }}
         >
+          {/* Decía "Así se verá tu box: kronos-fit.com/iron-hands". Esa ruta
+              no existe: no hay página por slug en la raíz, el slug identifica
+              al box en la pantalla de TV y en los links de invitación. */}
           {errors.slug ??
-            "Así se verá tu box: kronos-fit.com/iron-hands. Solo minúsculas, números y guiones. Puedes cambiarlo."}
+            "Identifica a tu box en la pantalla de TV y en los links de invitación. Solo minúsculas, números y guiones. Puedes cambiarlo."}
         </p>
       </div>
 

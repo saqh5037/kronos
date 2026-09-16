@@ -73,6 +73,19 @@ const VOSEO_FORMS = [
   "acá",
   "vos",
   "dale",
+  // --- fase 0 fix wave (2026-09-16), found on /atleta-signup ---
+  // Each one is safe: the Mexican first-person preterite shifts the accent
+  // (yo instalé, yo toqué, yo bajé, yo entré, yo vine), so these forms are
+  // unambiguously voseo imperatives/presents. The `s?` mirrors the existing
+  // entries and catches the present indicative in the same pass.
+  "instalás?",
+  "tocás?",
+  "bajás?",
+  "entrás?",
+  "vení",
+  "contame",
+  "decime",
+  "avisame",
   // --- pre-existing dialect-guard list (kept: do not lose coverage) ---
   "probás?",
   "elegís",

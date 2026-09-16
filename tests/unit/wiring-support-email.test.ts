@@ -16,20 +16,14 @@ import { SUPPORT_EMAIL, supportMailto } from "@/lib/contact";
 
 const SRC = path.join(process.cwd(), "src");
 
-/** The three addresses that must never appear again. */
-const INVENTED_ADDRESSES = /(demo|ventas|contacto)@kronos-fit\.com/;
-
 /**
- * Files outside this branch's ownership that still carry an invented address.
- * Each one is a hand-off, not a tolerance: the entry goes away with the fix.
+ * The four addresses that must never appear again.
  *
- * - `src/server/email-templates/founding-reservation.ts` belongs to whoever
- *   owns the email templates; it renders `contacto@` inside the reservation
- *   email's HTML.
+ * `soporte@` joined the list once `AdminErrorState` stopped handing it out: it
+ * reads like the obvious support desk, which is exactly why it kept getting
+ * typed into new screens, and no mailbox has ever answered there.
  */
-const PENDING_HANDOFF = new Set([
-  path.join("src", "server", "email-templates", "founding-reservation.ts"),
-]);
+const INVENTED_ADDRESSES = /(demo|ventas|contacto|soporte)@kronos-fit\.com/;
 
 function collect(dir: string): string[] {
   const out: string[] = [];
@@ -64,11 +58,10 @@ describe("no invented contact address in src/", () => {
     expect(FILES.length).toBeGreaterThan(300);
   });
 
-  it("uses no demo@, ventas@ or contacto@ address", () => {
+  it("uses no demo@, ventas@, contacto@ or soporte@ address", () => {
     const hits: string[] = [];
     for (const file of FILES) {
       const rel = path.relative(process.cwd(), file);
-      if (PENDING_HANDOFF.has(rel)) continue;
       readFileSync(file, "utf8")
         .split("\n")
         .forEach((line, i) => {
@@ -80,14 +73,14 @@ describe("no invented contact address in src/", () => {
     expect(hits.join("\n")).toBe("");
   });
 
-  it("keeps the hand-off list honest: every entry still has the problem", () => {
-    // A stale exemption is how a scan quietly stops scanning.
-    for (const rel of PENDING_HANDOFF) {
-      const source = readFileSync(path.join(process.cwd(), rel), "utf8");
-      expect(
-        INVENTED_ADDRESSES.test(source),
-        `${rel} is clean now — drop it from PENDING_HANDOFF`,
-      ).toBe(true);
-    }
+  it("has no exemption list left to go stale", () => {
+    // The scan used to carry a PENDING_HANDOFF set for the founding-reservation
+    // email template. It is fixed, so the exemption is gone: an allow-list is
+    // how a scan quietly stops scanning, and the only safe size for it is zero.
+    const selfSource = readFileSync(
+      path.join(process.cwd(), "tests", "unit", "wiring-support-email.test.ts"),
+      "utf8",
+    );
+    expect(selfSource).not.toMatch(/PENDING_HANDOFF\s*=/);
   });
 });

@@ -58,7 +58,7 @@ function renderMarkdown(): string {
   lines.push("## White-label");
   lines.push("");
   lines.push(
-    "Tu logo, color y nombre dominan la app en todos los tiers. Titanio elimina toda marca Kronos: dominio propio, emails propios y apps publicadas con tu nombre.",
+    "Tu logo, color y nombre aparecen en la app en todos los planes. Dominio propio, correos desde tu dominio y apps publicadas con tu nombre están en el roadmap; hoy no se venden como incluidos.",
   );
   lines.push("");
   lines.push("### Paletas demo");

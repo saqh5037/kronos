@@ -29,6 +29,7 @@ import { TRIAL_DURATION_DAYS } from "@/lib/validations/signup";
 // raíz del repo, desde un worktree o desde donde sea que lo invoque CI.
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const APP = join(REPO_ROOT, "src", "app");
+const LIB = join(REPO_ROOT, "src", "lib");
 
 /** Superficie pública bajo revisión. */
 const SCANNED_DIRS = [
@@ -41,7 +42,17 @@ const SCANNED_DIRS = [
   join(APP, "tv"),
   join(APP, "eventos"),
   join(APP, "logout"),
+  // Public copy does not all live under src/app. `src/lib/branding` holds the
+  // per-discipline metaTitle/metaDescription/hero copy that `/box` renders into
+  // its <head>, OG and Twitter cards — which is exactly where the 2026-09-15
+  // audit found "Stripe + Mercado Pago + OXXO" and "LATAM" surviving a scan
+  // that only walked `src/app/**`. A guard that cannot see the file it is
+  // guarding is not a guard.
+  join(LIB, "branding"),
 ];
+
+/** Single files outside the scanned directories that still render public copy. */
+const SCANNED_FILES = [join(LIB, "contact.ts")];
 
 const SOURCE_EXTENSIONS = [".ts", ".tsx", ".css"];
 
@@ -77,16 +88,18 @@ function collectFiles(dir: string): string[] {
   return out;
 }
 
-const FILES: Array<{ path: string; raw: string; text: string }> =
-  SCANNED_DIRS.flatMap((dir) => collectFiles(dir)).map((path) => {
-    const relative = path.slice(REPO_ROOT.length + 1);
-    const raw = readFileSync(path, "utf8");
-    return {
-      path: relative,
-      raw,
-      text: stripRoadmap(stripComments(raw)),
-    };
-  });
+const FILES: Array<{ path: string; raw: string; text: string }> = [
+  ...SCANNED_DIRS.flatMap((dir) => collectFiles(dir)),
+  ...SCANNED_FILES,
+].map((path) => {
+  const relative = path.slice(REPO_ROOT.length + 1);
+  const raw = readFileSync(path, "utf8");
+  return {
+    path: relative,
+    raw,
+    text: stripRoadmap(stripComments(raw)),
+  };
+});
 
 /** Encuentra `needle` en la superficie escaneada y reporta dónde. */
 function findLiteral(needle: string): string[] {
@@ -108,6 +121,8 @@ describe("superficie pública — archivos escaneados", () => {
       "src/app/invitacion/[token]/page.tsx",
       "src/app/invitacion-staff/[token]/page.tsx",
       "src/app/tv/[slug]/page.tsx",
+      "src/lib/branding/index.ts",
+      "src/lib/contact.ts",
     ]) {
       expect(FILES.map((f) => f.path)).toContain(expected);
     }
@@ -160,6 +175,20 @@ describe("el roadmap es el único lugar donde viven las cosas no lanzadas", () =
     const roadmap = ROADMAP.join(" ");
     expect(roadmap).toMatch(/CFDI/);
     expect(roadmap).toMatch(/tiendas/);
+    // Direccionamiento por Box: no hay `customDomain` en el schema, no hay
+    // ruteo por host en `src/middleware.ts` y `src/lib/email.ts` manda todo
+    // desde un solo `from` global. Hasta que eso exista, vive aquí.
+    expect(roadmap).toMatch(/dominio propio/i);
+  });
+
+  it("ninguna viñeta promete subdominio, dominio propio ni DNS", () => {
+    // El plan Titanio vendía "dominio propio (app.tubox.mx)" y Hierro un
+    // "Subdominio tubox.kronos.app". Ninguno de los dos existe: no hay campo
+    // de dominio en `Box`, ni ruteo por host, ni correo por dominio del Box.
+    const bullets = PRICING.flatMap((tier) => tier.features);
+    for (const bullet of bullets) {
+      expect(bullet).not.toMatch(/dominio propio|app\.tubox|subdominio|DNS/i);
+    }
   });
 
   it("las viñetas contractuales solo listan lo que ya opera", () => {
@@ -228,16 +257,52 @@ describe("una sola prueba, dos CTAs", () => {
 });
 
 describe("dialecto: español mexicano neutro", () => {
-  const VOSEO =
-    /(pedile|cancelás|empezá|recibís|tenés|querés|acá\b|mantené|subí\b)/i;
+  /**
+   * Word boundaries use Unicode letter lookarounds, not `\b`.
+   *
+   * JavaScript's `\b` is ASCII-only, so `/acá\b/i.test("seguir acá y crear")`
+   * is `false`: after `á` there is no ASCII word character, so the boundary
+   * never fires. Voseo endings are accented by definition, which meant the two
+   * anchored forms in this rule (`acá`, `subí`) scanned nothing at all — and
+   * that is exactly how "seguir acá" survived on `/atleta-signup`.
+   * `scripts/guards/rules.ts` already solved this the right way; this mirrors it.
+   */
+  function voseo(...forms: string[]): RegExp {
+    return new RegExp(`(?<!\\p{L})(?:${forms.join("|")})(?!\\p{L})`, "iu");
+  }
+
+  const VOSEO = voseo(
+    "pedile",
+    "cancelás",
+    "empezá",
+    "recibís",
+    "tenés",
+    "querés",
+    "acá",
+    "mantené",
+    "subí",
+    "instalá",
+    "tocá",
+    "bajá",
+    "entrá",
+    "esperá",
+  );
 
   it("no hay voseo argentino en la superficie pública", () => {
     expect(findPattern(VOSEO)).toEqual([]);
   });
 
   it("tampoco las formas que ya se habían colado", () => {
-    expect(findPattern(/\biniciá\b/i)).toEqual([]);
-    expect(findPattern(/\bfijate\b|\bmirá\b|\bacordate\b/i)).toEqual([]);
+    expect(findPattern(voseo("iniciá"))).toEqual([]);
+    expect(findPattern(voseo("fijate", "mirá", "acordate"))).toEqual([]);
+  });
+
+  it("el ancla Unicode sí detecta lo que `\\b` dejaba pasar", () => {
+    // Regresión del propio guard: si alguien vuelve a `\b`, esto falla.
+    expect(VOSEO.test("puedes seguir acá y crear tu cuenta")).toBe(true);
+    expect(VOSEO.test("Subí una foto de la pizarra")).toBe(true);
+    // …sin falsos positivos dentro de otra palabra.
+    expect(VOSEO.test("la sesión acabó")).toBe(false);
   });
 });
 
@@ -259,6 +324,15 @@ describe("nada de pruebas fabricadas", () => {
       expect(link.href).not.toBe("#");
       expect(link.href.startsWith("/")).toBe(true);
     }
+  });
+});
+
+describe("nada de escasez inventada", () => {
+  it("no promete cupo limitado en ninguna superficie pública", () => {
+    // No hay tope de altas en ningún lado: `/signup` provisiona un Box nuevo
+    // sin contar cupos, y ningún flag ni columna limita cuántos entran. Un
+    // "CUPO LIMITADO" en el eyebrow es presión de venta sin nada detrás.
+    expect(findPattern(/cupos? limitados?|lugares limitados/i)).toEqual([]);
   });
 });
 

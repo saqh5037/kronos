@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import KronosLogo from "@/components/brand/KronosLogo";
 import { FOOTER_LINKS } from "../_data/mock";
 
@@ -12,7 +13,7 @@ export default function Footer() {
             className="lp-caption"
             style={{ color: "var(--k-t3)", marginTop: 8 }}
           >
-            Operamos detrás de tu marca, en tu dominio, con tu paleta.
+            Operamos detrás de tu marca, con tu logo y tu paleta.
           </p>
         </div>
 
@@ -67,9 +68,13 @@ export default function Footer() {
                 style={{
                   color: "var(--k-accent)",
                   fontWeight: 600,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
                 }}
               >
-                ¿Eres atleta? Empezar gratis →
+                ¿Eres atleta? Empezar gratis
+                <ArrowRight size={16} strokeWidth={1.75} aria-hidden />
               </a>
             </li>
           </ul>

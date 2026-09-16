@@ -11,6 +11,16 @@ const fadeUp = {
   show: { y: 0, transition: { duration: 0.55, ease: "easeOut" } },
 };
 
+/**
+ * Average of the bars actually drawn below. It used to be a hard-coded "78 %"
+ * against a series that averages 66 %: a demo screenshot whose headline number
+ * contradicts its own chart teaches the reader that our numbers are decoration.
+ */
+const OCCUPANCY_AVERAGE = Math.round(
+  OWNER_OCCUPANCY.reduce((sum, bar) => sum + bar.value, 0) /
+    OWNER_OCCUPANCY.length,
+);
+
 const DAYS = [
   "L",
   "M",
@@ -124,7 +134,7 @@ export default function SectionOwner() {
                 OCUPACIÓN · ÚLTIMOS 14 DÍAS
               </div>
               <div className="lp-caption" style={{ color: "var(--k-t3)" }}>
-                PROMEDIO · 78 %
+                PROMEDIO · {OCCUPANCY_AVERAGE} %
               </div>
             </div>
             <div className="lp-chart-bars">
@@ -200,8 +210,8 @@ export default function SectionOwner() {
                 <strong>Atletas en riesgo, antes de la baja</strong>
                 <span className="desc">
                   Quién dejó de venir 14 días. Quién bajó intensidad. Quién
-                  vence membresía esta semana. Lo ves antes de que se dé de baja,
-                  no después.
+                  vence membresía esta semana. Lo ves antes de que se dé de
+                  baja, no después.
                 </span>
               </div>
             </li>
@@ -209,9 +219,9 @@ export default function SectionOwner() {
               <div>
                 <strong>Pagos sin perseguir a nadie</strong>
                 <span className="desc">
-                  Mercado Pago para tarjeta, y el efectivo registrado en el admin
-                  para que ningún pago se pierda. Ves al corriente y al moroso en
-                  la misma lista, sin tener que llamar.
+                  Mercado Pago para tarjeta, y el efectivo registrado en el
+                  admin para que ningún pago se pierda. Ves al corriente y al
+                  moroso en la misma lista, sin tener que llamar.
                 </span>
               </div>
             </li>

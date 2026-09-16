@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { KeyRound } from "lucide-react";
+import { ArrowRight, KeyRound } from "lucide-react";
 import KCard from "@/components/kronos/KCard";
 
 type Props = {
@@ -218,10 +218,11 @@ export default function OtpRedirectClient({ code, email }: Props) {
                 </p>
                 <a
                   href="/login"
-                  className="inline-block text-sm underline pt-2"
+                  className="inline-flex items-center gap-1.5 text-sm underline pt-2"
                   style={{ color: "var(--k-accent)" }}
                 >
-                  Ir al login →
+                  Ir al login
+                  <ArrowRight size={14} strokeWidth={1.75} aria-hidden />
                 </a>
               </>
             ) : null}

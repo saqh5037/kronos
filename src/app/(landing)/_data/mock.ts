@@ -7,6 +7,11 @@
 //
 // Pagos reales hoy: Mercado Pago (tarjeta) y efectivo registrado en el admin.
 // Nada de Stripe, OXXO, SPEI, CFDI, nómina, apps en stores, API pública ni SSO.
+//
+// Direccionamiento hoy: un solo dominio. `Box` no tiene campo de dominio ni de
+// subdominio, `src/middleware.ts` no rutea por host y `src/lib/email.ts` manda
+// todo desde un `from` global. Por eso "tubox.kronos.app", "app.tubox.mx" y los
+// correos desde el dominio del Box viven en ROADMAP, no en las viñetas.
 
 import { CTA_TRIAL_HREF, CTA_TRIAL_LABEL, CTA_WHATSAPP_LABEL } from "./cta";
 
@@ -67,7 +72,6 @@ export const PRICING: PriceTier[] = [
     features: [
       "App del atleta GRATIS para todos tus miembros — sin costo por usuario",
       "App del atleta con tu logo, color y nombre del Box",
-      "Subdominio tubox.kronos.app",
       "Reservas con lista de espera FIFO",
       "WOD del día + biblioteca de movimientos con video",
       "Control de asistencia (QR + manual)",
@@ -107,12 +111,11 @@ export const PRICING: PriceTier[] = [
     name: "Titanio",
     price: "$5,000",
     unit: "MXN · al mes",
-    desc: "Para multi-sede, franquicias y redes de Boxes. Atletas activos sin límite, white-label total y multi-tenant cross-Box. Un atleta, varias ciudades, una sola racha.",
+    desc: "Para multi-sede, franquicias y redes de Boxes. Atletas activos sin límite y multi-tenant cross-Box. Un atleta, varias ciudades, una sola racha.",
     features: [
       "App del atleta GRATIS para todos tus miembros — sin costo por usuario",
       "Todo lo de Acero, más:",
-      "White-label completo · dominio propio (app.tubox.mx)",
-      "Cero marca Kronos en pantalla, footer ni correos",
+      "Atletas activos sin límite",
       "Multi-tenant cross-Box (racha unificada)",
       "Consolidado de todas las sedes en un solo panel",
       "Cambio de sede desde el admin",
@@ -134,6 +137,8 @@ export const ROADMAP: string[] = [
   "Pagos en efectivo por convenio y transferencia con referencia",
   "Programación de bloques de varias semanas",
   "Apps publicadas en tiendas con el nombre del Box",
+  "Subdominio por Box (tubox.kronos.app)",
+  "Dominio propio del Box y correos desde tu dominio",
   "Integraciones con terceros",
 ];
 
@@ -212,7 +217,7 @@ export const FAQ_ITEMS = [
     id: 1,
     question: "¿Cuánto tarda darse de alta?",
     answer:
-      "Creas tu Box en minutos desde la página de registro: nombre, correo y dirección de tu box. Migrar atletas, reservas y programación toma unas horas más y lo puedes hacer tú con el template CSV, o nosotros te acompañamos si lo prefieres.",
+      "Creas tu Box en minutos desde la página de registro: tu nombre, tu correo, el nombre del Box y su identificador. Migrar atletas, reservas y programación toma unas horas más y lo puedes hacer tú con el template CSV, o nosotros te acompañamos si lo prefieres.",
   },
   {
     id: 2,
@@ -236,7 +241,7 @@ export const FAQ_ITEMS = [
     id: 5,
     question: "¿Qué tan blanco es el white-label?",
     answer:
-      "Hierro y Acero: tu logo, color y nombre dominan la app, en un subdominio tubox.kronos.app con un footer discreto 'Powered by Kronos'. Los correos llegan desde no-reply@kronos-fit.com firmados por el Box. Titanio: dominio propio (app.tubox.mx), correos desde tu dominio, y cero marca Kronos en pantalla. El atleta de Titanio nunca lee Kronos.",
+      "Hoy es tu marca sobre nuestra dirección. Cargas tu logo y tu color al dar de alta el Box, y salen en la pantalla de TV, en las invitaciones que reciben atletas y coaches, y en el panel. La app corre en kronos-fit.com en todos los planes y los correos salen desde no-reply@kronos-fit.com firmados por el Box. El dominio propio y los correos desde tu dominio están en el roadmap y te avisamos cuando salgan; hoy no te los vendemos como incluidos.",
   },
   {
     id: 6,
