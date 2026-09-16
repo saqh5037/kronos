@@ -51,8 +51,8 @@ export default function AuditFilters({
               onClick={() => setDays(f.value)}
               className={`relative z-10 px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
                 currentDays === f.value
-                  ? "text-text"
-                  : "text-text-2 hover:text-text-2"
+                  ? "text-[var(--k-t1)]"
+                  : "text-[var(--k-t2)] hover:text-[var(--k-t2)]"
               }`}
             >
               {currentDays === f.value && (
@@ -111,7 +111,8 @@ export default function AuditFilters({
                 currentCategory === cat
                   ? "var(--k-accent)"
                   : "var(--k-elevated)",
-              color: currentCategory === cat ? "var(--k-accent-on)" : "var(--k-t2)",
+              color:
+                currentCategory === cat ? "var(--k-accent-on)" : "var(--k-t2)",
               border:
                 currentCategory === cat ? "none" : "1px solid var(--k-line)",
             }}

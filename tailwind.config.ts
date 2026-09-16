@@ -17,9 +17,12 @@ const config: Config = {
         "bg-cool": "var(--bg-cool)",
         card: "var(--card)",
         "card-2": "var(--card-2)",
-        text: "var(--text)",
-        "text-2": "var(--text-2)",
-        "text-3": "var(--text-3)",
+        // `text`, `text-2` and `text-3` used to live here and mapped
+        // `text-text*` onto the globals.css compat block, which is how whole
+        // admin screens stayed on the pre-V3 palette without ever writing
+        // `var(--text)` (audit 2026-09-15, ADM-09). Use `text-[var(--k-t1)]`,
+        // `--k-t2` or `--k-t3`; the `legacy-tokens` guard now catches both
+        // spellings.
         line: "var(--line)",
         // Brand palette (Manual de Marca v2)
         red: "var(--red)",

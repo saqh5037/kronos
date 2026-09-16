@@ -151,7 +151,7 @@ export default async function AsistenciaPage({
       <div
         className="sticky top-0 z-10 -mx-6 lg:-mx-8 px-6 lg:px-8 py-3 mb-4 backdrop-blur-md"
         style={{
-          background: "var(--bg)",
+          background: "var(--k-bg)",
           borderBottom: "1px solid var(--k-line)",
         }}
       >

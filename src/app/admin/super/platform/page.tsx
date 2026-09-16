@@ -6,7 +6,7 @@ import {
   getPlatformStats,
   type PlatformBoxRow,
 } from "@/server/actions/super-platform";
-import { formatDateLong } from "@/lib/format";
+import { formatDateLong, formatInt } from "@/lib/format";
 import { label } from "@/lib/labels";
 
 export const metadata: Metadata = {
@@ -137,7 +137,7 @@ function KpiCard({ label: text, value }: { label: string; value: number }) {
           lineHeight: 1,
         }}
       >
-        {value.toLocaleString("es-MX")}
+        {formatInt(value)}
       </span>
     </div>
   );

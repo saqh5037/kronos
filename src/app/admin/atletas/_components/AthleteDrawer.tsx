@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { Heatmap } from "@/components/charts/Heatmap";
-import { subDays, startOfDay } from "date-fns";
+import {
+  DEFAULT_BOX_TIMEZONE,
+  addCivilDays,
+  civilDateInTz,
+  startOfCivilDay,
+} from "@/lib/tz";
 import {
   getAthleteDetail,
   type AthleteDetail,
@@ -25,6 +30,24 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
   const [data, setData] = useState<AthleteDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * "Now" is read AFTER hydration, never in the render body: a `new Date()`
+   * up here makes the server and the client disagree about the heatmap window
+   * whenever the two straddle a minute, which is the hydration bug of
+   * 2026-05-06. `null` means "not hydrated yet" and renders no heatmap.
+   */
+  const [heatmapWindow, setHeatmapWindow] = useState<{
+    from: Date;
+    to: Date;
+  } | null>(null);
+  useEffect(() => {
+    const to = new Date();
+    const today = civilDateInTz(to, DEFAULT_BOX_TIMEZONE);
+    setHeatmapWindow({
+      from: startOfCivilDay(addCivilDays(today, -89), DEFAULT_BOX_TIMEZONE),
+      to,
+    });
+  }, []);
 
   useEffect(() => {
     if (!athleteId) return;
@@ -58,8 +81,6 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
 
   if (!athleteId) return null;
 
-  const heatmapTo = new Date();
-  const heatmapFrom = startOfDay(subDays(heatmapTo, 89));
   const heatData =
     data?.attendanceLast90d.map((a) => ({ date: a.date, value: 1 })) ?? [];
 
@@ -158,17 +179,23 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
             {/* Attendance heatmap */}
             <section>
               <p className="k-eyebrow mb-2">Asistencia · últimos 90 días</p>
-              {data.attendanceLast90d.length > 0 ? (
+              {data.attendanceLast90d.length === 0 ? (
+                <p className="text-sm text-[var(--k-t3)]">
+                  Sin asistencias en los últimos 90 días.
+                </p>
+              ) : heatmapWindow ? (
                 <div className="k-card-flat p-3">
-                  <Heatmap data={heatData} from={heatmapFrom} to={heatmapTo} />
+                  <Heatmap
+                    data={heatData}
+                    from={heatmapWindow.from}
+                    to={heatmapWindow.to}
+                  />
                   <p className="mt-2 text-[10px] text-[var(--k-t3)]">
                     {data.attendanceLast90d.length} clases en el rango
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-[var(--k-t3)]">
-                  Sin asistencias en los últimos 90 días.
-                </p>
+                <div className="k-skeleton h-24 rounded-xl" />
               )}
             </section>
 

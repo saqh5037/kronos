@@ -113,6 +113,21 @@ export function overdueAmountOf(input: {
 export type AtRiskReason = "inactivity" | "never_attended" | "overdue";
 export type AtRiskSeverity = "low" | "med" | "high";
 
+/**
+ * Every signal the rule has, in evaluation order — and the only honest
+ * denominator for "N de M señales".
+ *
+ * `ChurnRiskTable` printed "ALTO · 2/4" over a rule with three signals: the
+ * 4 was a literal left behind when the fourth was dropped. The
+ * `satisfies` below makes the array and the union fail to compile if they
+ * ever disagree again.
+ */
+export const AT_RISK_REASONS = [
+  "inactivity",
+  "never_attended",
+  "overdue",
+] as const satisfies readonly AtRiskReason[];
+
 export type AtRiskEvaluation = {
   atRisk: boolean;
   reasons: AtRiskReason[];

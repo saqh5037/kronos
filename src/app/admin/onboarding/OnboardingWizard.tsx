@@ -26,6 +26,7 @@ import {
   SUPPORTED_CURRENCIES,
 } from "@/lib/validations/box";
 import { PLAN_TYPES, STAFF_ROLES } from "@/lib/validations/onboarding";
+import { wodTypeLabel } from "@/lib/labels";
 import { kToast } from "@/lib/toast";
 import KCard from "@/components/kronos/KCard";
 import { ArrowLeft, ArrowRight, Check, RotateCcw, X } from "lucide-react";
@@ -814,7 +815,7 @@ function StepWods(p: StepWodsProps) {
                       color: "var(--k-t2)",
                     }}
                   >
-                    {wod.type}
+                    {wodTypeLabel[wod.type]}
                   </span>
                 </div>
                 <p

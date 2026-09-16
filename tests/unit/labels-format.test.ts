@@ -30,10 +30,14 @@ import {
 } from "@prisma/client";
 import { humanizeEnum, label, labelMaps } from "@/lib/labels";
 import {
+  formatDateFull,
   formatDateLong,
   formatDateShort,
   formatDateWeekday,
+  formatDecimal,
   formatInt,
+  formatMoney,
+  formatMonthYear,
   formatMXN,
   formatMXNDelta,
   formatPercentDelta,
@@ -117,5 +121,39 @@ describe("format", () => {
     expect(formatDateLong(d)).toBe("15 sep 2026");
     expect(formatTime24(d)).toBe("12:05");
     expect(formatInt(1363)).toBe("1,363");
+  });
+
+  /**
+   * The owner dashboard used to build its own `Intl.NumberFormat(box.locale,
+   * …)`, so "$2,500" on /admin sat next to "$2,500 MXN" on /admin/pagos for
+   * the same peso (audit 2026-09-15, S4). One formatter, one style.
+   */
+  it("money honours a box locale/currency and keeps one house style", () => {
+    expect(formatMoney(2500)).toBe(formatMXN(2500));
+    expect(formatMoney(2500, { locale: "es-MX", currency: "MXN" })).toBe(
+      "$2,500 MXN",
+    );
+    expect(formatMoney(2500, { suffix: false })).toBe("$2,500");
+    expect(formatMoney(2500.5, { cents: true })).toBe("$2,500.50 MXN");
+    expect(formatMoney(2500, { currency: "USD" })).toMatch(/2,500.*USD$/);
+  });
+
+  it("falls back to the house formatter on an unusable locale/currency", () => {
+    expect(formatMoney(2500, { locale: "", currency: "" })).toBe("$2,500 MXN");
+    expect(formatMoney(2500, { locale: "not a locale" })).toBe("$2,500 MXN");
+  });
+
+  it("long dates and month headers stay in the box timezone", () => {
+    // 22:00 of 30 sep in CDMX, already October in UTC.
+    const d = new Date("2026-10-01T04:00:00.000Z");
+    expect(formatDateFull(d)).toBe("30 de septiembre de 2026");
+    expect(formatMonthYear(d)).toBe("septiembre 2026");
+    expect(formatDateFull(d, "UTC")).toBe("1 de octubre de 2026");
+  });
+
+  it("decimals share the thousands separator of the rest of the admin", () => {
+    expect(formatDecimal(1363)).toBe("1,363");
+    expect(formatDecimal(1363.456, 2)).toBe("1,363.46");
+    expect(formatDecimal(0.5, 1)).toBe("0.5");
   });
 });

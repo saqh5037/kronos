@@ -65,7 +65,7 @@ export default function ToastDemoPage() {
               }, 1800);
             }}
           >
-            Loading → Success
+            Loading y luego Success
           </button>
           <button
             type="button"

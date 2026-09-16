@@ -7,14 +7,18 @@ import {
 
 describe("humanizeAuditEvent", () => {
   describe("billing kinds", () => {
-    it("SAAS_CHECKOUT_CONFIRMED_MOCK → activación demo", () => {
+    it("SAAS_CHECKOUT_CONFIRMED_MOCK → activación, with no development note", () => {
       const r = humanizeAuditEvent({
         action: "PAYMENT_CONFIRMED",
         metadata: { kind: "SAAS_CHECKOUT_CONFIRMED_MOCK" },
       });
       expect(r.category).toBe("billing");
       expect(r.severity).toBe("sensitive");
-      expect(r.label).toContain("demo");
+      expect(r.label).toBe("Suscripción activada");
+      // The owner reads WHAT happened to their subscription. "(modo demo)"
+      // described how the platform is wired — and it is not a development
+      // path either: this runs whenever the gateway is unconfigured.
+      expect(r.label).not.toContain("demo");
     });
 
     it("SAAS_LIFECYCLE_PAST_DUE → warning billing", () => {
@@ -52,14 +56,15 @@ describe("humanizeAuditEvent", () => {
       expect(r.severity).toBe("warning");
     });
 
-    it("SAAS_RENEWED_MOCK → billing info", () => {
+    it("SAAS_RENEWED_MOCK → billing info, with no development note", () => {
       const r = humanizeAuditEvent({
         action: "PAYMENT_CONFIRMED",
         metadata: { kind: "SAAS_RENEWED_MOCK" },
       });
       expect(r.category).toBe("billing");
       expect(r.severity).toBe("info");
-      expect(r.label).toContain("demo");
+      expect(r.label).toBe("Renovación automática");
+      expect(r.label).not.toContain("demo");
     });
   });
 

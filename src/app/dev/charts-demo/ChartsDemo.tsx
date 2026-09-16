@@ -6,6 +6,7 @@ import {
   KronosAreaChart,
 } from "@/components/charts/kronos-chart";
 import { CHART_COLORS } from "@/components/charts/tokens";
+import { formatDateShort, formatMXN } from "@/lib/format";
 
 interface PRPoint {
   date: string;
@@ -65,14 +66,8 @@ function buildAttendance(seed: number) {
 function formatDate(iso: unknown) {
   if (typeof iso !== "string") return String(iso ?? "");
   const d = new Date(iso);
-  return d.toLocaleDateString("es-MX", { month: "short", day: "numeric" });
+  return formatDateShort(d);
 }
-
-const moneyFmt = new Intl.NumberFormat("es-MX", {
-  style: "currency",
-  currency: "MXN",
-  maximumFractionDigits: 0,
-});
 
 export function ChartsDemo() {
   const [seed, setSeed] = useState(0);
@@ -167,7 +162,7 @@ export function ChartsDemo() {
               },
             ]}
             height={260}
-            formatY={(v) => moneyFmt.format(v).replace("MX$", "$")}
+            formatY={(v) => formatMXN(v, { suffix: false })}
             formatX={(v) => String(v)}
             ariaLabel="Ingresos por mes"
           />

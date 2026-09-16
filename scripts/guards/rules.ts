@@ -148,6 +148,13 @@ const RAW_ENUMS = [
 ] as const;
 
 /**
+ * Prisma enum FIELDS whose value is a token, not prose. Rendering one as a
+ * bare JSX child (`>{booking.status}<`) prints "ATTENDED" at the owner, the
+ * same defect as the literal list above with a variable in front of it.
+ */
+const RAW_ENUM_FIELDS = ["status", "type", "role", "state", "kind"] as const;
+
+/**
  * Legacy CSS custom properties kept alive only by the compat block at the end
  * of `globals.css`. Matched by EXACT name (closing paren required) so
  * `var(--text-3)` and `var(--line-2)` are not swept up — that mirrors how the
@@ -163,6 +170,54 @@ const LEGACY_TOKENS = [
   "fire",
   "grad",
   "text-2",
+] as const;
+
+/**
+ * The same compat block reached through Tailwind instead of `var()`:
+ * `tailwind.config.ts` mapped `text-text`, `bg-card`, `border-line` … onto
+ * those legacy properties, so a screen could stay on the pre-V3 palette
+ * without ever writing `var(--text)`. The `text`/`text-2`/`text-3` mappings
+ * are gone; this rule is what stops them coming back through another key.
+ *
+ * Matched with Unicode-free lookarounds on `[\w-]` so `text-red-500`,
+ * `bg-gradient-to-r` and `shadow-card-hover` are not swept up.
+ */
+const LEGACY_UTILITY_PREFIXES = [
+  "text",
+  "bg",
+  "border",
+  "from",
+  "via",
+  "to",
+  "fill",
+  "stroke",
+  "ring",
+  "divide",
+  "placeholder",
+  "decoration",
+  "outline",
+  "caret",
+] as const;
+
+const LEGACY_UTILITY_SUFFIXES = [
+  "text-2",
+  "text-3",
+  "text",
+  "card-2",
+  "card",
+  "line",
+  "bg-soft",
+  "bg-warm",
+  "bg-cool",
+  "bg",
+  "fire",
+  "moss",
+  "steel",
+  "ember",
+  "amber",
+  "track",
+  "overlay",
+  "hover-subtle",
 ] as const;
 
 /** Pre-V3 hexes: teal green, cyan, and the three navies. */
@@ -193,10 +248,16 @@ export const RULES: readonly GuardRule[] = [
   {
     name: "legacy-tokens",
     summary:
-      "Legacy CSS custom properties served by the globals.css compat block",
+      "Legacy CSS custom properties served by the globals.css compat block, " +
+      "written as var(--token) or as the Tailwind utility that maps to it",
     roots: SRC_UI,
-    pattern: () => new RegExp(`var\\(--(?:${LEGACY_TOKENS.join("|")})\\)`, "g"),
-    hint: "Use the V3 token directly: --k-t1/--k-t2/--k-t3, --k-surface, --k-line, --k-bg, --k-accent.",
+    pattern: () =>
+      new RegExp(
+        `var\\(--(?:${LEGACY_TOKENS.join("|")})\\)` +
+          `|(?<![\\w-])(?:${LEGACY_UTILITY_PREFIXES.join("|")})-(?:${LEGACY_UTILITY_SUFFIXES.join("|")})(?![\\w-])`,
+        "g",
+      ),
+    hint: "Use the V3 token directly: --k-t1/--k-t2/--k-t3, --k-surface, --k-line, --k-bg, --k-accent — as text-[var(--k-t2)] when it has to be a class.",
   },
   {
     name: "banned-hex",
@@ -215,9 +276,16 @@ export const RULES: readonly GuardRule[] = [
   },
   {
     name: "raw-enum-jsx",
-    summary: "Raw Prisma enum token rendered as JSX text",
+    summary:
+      "Raw Prisma enum rendered as JSX text — the literal token, or an enum " +
+      "field read straight off an object",
     roots: SRC_UI,
-    pattern: () => new RegExp(`>\\s*(?:${RAW_ENUMS.join("|")})\\s*<`, "g"),
+    pattern: () =>
+      new RegExp(
+        `>\\s*(?:${RAW_ENUMS.join("|")})\\s*<` +
+          `|>\\s*\\{\\s*[\\w.]+\\.(?:${RAW_ENUM_FIELDS.join("|")})\\s*\\}\\s*<`,
+        "g",
+      ),
     hint: "Render it through label(...) or a typed map from src/lib/labels.ts.",
   },
 ] as const;

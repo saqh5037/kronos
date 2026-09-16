@@ -1,17 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { formatDecimal, formatMXN } from "@/lib/format";
 
 interface CountUpProps {
   value: number;
   duration?: number;
   /** Number of decimals to display. Defaults to 0. */
   decimals?: number;
-  /** Locale used for thousand separators. Defaults to "es-MX". */
-  locale?: string;
   prefix?: string;
   suffix?: string;
-  /** Set true to format as currency MXN (overrides decimals/locale). */
+  /** Set true to format as money in the house style (overrides `decimals`). */
   money?: boolean;
   className?: string;
   style?: React.CSSProperties;
@@ -19,17 +18,10 @@ interface CountUpProps {
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
-const moneyFmt = new Intl.NumberFormat("es-MX", {
-  style: "currency",
-  currency: "MXN",
-  maximumFractionDigits: 0,
-});
-
 export default function CountUp({
   value,
   duration = 900,
   decimals = 0,
-  locale = "es-MX",
   prefix = "",
   suffix = "",
   money = false,
@@ -59,11 +51,8 @@ export default function CountUp({
   }, [value, duration]);
 
   const formatted = money
-    ? moneyFmt.format(display)
-    : display.toLocaleString(locale, {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      });
+    ? formatMXN(display)
+    : formatDecimal(display, decimals);
 
   return (
     <span className={className} style={style}>

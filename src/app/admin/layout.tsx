@@ -16,7 +16,7 @@ export default async function AdminLayout({
     role === "OWNER" ? await getSensitiveEventCount().catch(() => 0) : 0;
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen bg-bg lg:overflow-hidden">
+    <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen bg-[var(--k-bg)] lg:overflow-hidden">
       <SidebarGate sensitiveCount={sensitiveCount} role={role} />
       <main className="flex-1 lg:overflow-y-auto">{children}</main>
     </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import type { ChurnRiskRow } from "@/server/analytics/churn";
+import { AT_RISK_REASONS } from "@/server/period-summary/rules";
 
 /**
  * Churn severity is intensity of one thing, so it is one hue at three opacities
@@ -32,7 +33,11 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
 
   return (
     <div className="k-card overflow-hidden">
-      <div className="grid grid-cols-12 gap-3 border-b border-[var(--k-line)] px-4 py-2.5 text-[10px] font-mono font-bold tracking-[0.12em] uppercase text-[var(--k-t3)]">
+      {/* The column header only exists while there ARE columns: under `sm`
+          the row stacks, and at 360 this header printed "SEVERIDADSEÑALES"
+          over names truncated to "Andrés…" with the action clipped off the
+          card (visual gate, fase 0). */}
+      <div className="hidden sm:grid grid-cols-12 gap-3 border-b border-[var(--k-line)] px-4 py-2.5 text-[10px] font-mono font-bold tracking-[0.12em] uppercase text-[var(--k-t3)]">
         <div className="col-span-3">Atleta</div>
         <div className="col-span-2">Severidad</div>
         <div className="col-span-5">Señales</div>
@@ -41,9 +46,9 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
       {rows.map((row) => (
         <div
           key={row.athleteId}
-          className="grid grid-cols-12 gap-3 border-b border-[var(--k-line)] px-4 py-3 last:border-b-0 items-center"
+          className="flex flex-col gap-2 border-b border-[var(--k-line)] px-4 py-3 last:border-b-0 sm:grid sm:grid-cols-12 sm:gap-3 sm:items-center"
         >
-          <div className="col-span-3 min-w-0">
+          <div className="min-w-0 sm:col-span-3">
             <p className="font-display text-sm font-bold truncate">
               {row.name}
             </p>
@@ -55,9 +60,9 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
               </p>
             )}
           </div>
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <span
-              className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase px-2 py-0.5 rounded-md inline-block"
+              className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase px-2 py-0.5 rounded-md inline-block whitespace-nowrap"
               style={{
                 color: "var(--k-accent)",
                 opacity: SEVERITY_OPACITY[row.severity],
@@ -65,10 +70,11 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
                 border: "1px solid var(--k-accent-line)",
               }}
             >
-              {SEVERITY_LABEL[row.severity]} · {row.signalCount}/4
+              {SEVERITY_LABEL[row.severity]} · {row.signalCount}/
+              {AT_RISK_REASONS.length}
             </span>
           </div>
-          <div className="col-span-5">
+          <div className="sm:col-span-5">
             <ul className="text-[12px] leading-[1.4] text-[var(--k-t2)] space-y-0.5">
               {row.reasons.map((reason, i) => (
                 <li key={i} className="flex items-start gap-1.5">
@@ -85,7 +91,7 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
               ))}
             </ul>
           </div>
-          <div className="col-span-2 text-right">
+          <div className="sm:col-span-2 sm:text-right">
             <Link
               href={`/admin/atletas/${row.athleteId}` as Route}
               className="k-chip inline-flex items-center gap-1 hover:scale-[1.04] transition-transform"

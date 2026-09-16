@@ -17,6 +17,7 @@ import { MetricDelta } from "@/components/charts/MetricDelta";
 import type { AthleteStatus } from "@prisma/client";
 import { athleteStatusLabel } from "@/lib/labels";
 import { periodLabel } from "../_lib/period";
+import { AT_RISK_DEFAULT_INACTIVITY_DAYS } from "@/server/period-summary/rules";
 import { AtletasFilters } from "./_components/AtletasFilters";
 import { GrowthChart } from "./_components/GrowthChart";
 import { AtletasTable } from "./_components/AtletasTable";
@@ -110,7 +111,10 @@ export default async function AtletasPage({
       range
         ? getAthleteGrowthByDay({ dateFrom: range.from, dateTo: range.to })
         : Promise.resolve([]),
-      getAtRiskAthletes({ inactivityDays: 14, limit: 20 }),
+      getAtRiskAthletes({
+        inactivityDays: AT_RISK_DEFAULT_INACTIVITY_DAYS,
+        limit: 20,
+      }),
       // "Activos" and "(N) en riesgo" come from the shared summary, so this
       // page, the dashboard and Reportes print the same two numbers. The
       // at-risk LIST below is capped at 20; its `.length` is not the count.
@@ -160,6 +164,12 @@ export default async function AtletasPage({
     : `${rows.total} atleta${rows.total === 1 ? "" : "s"}`;
   const activeCount = counts?.active ?? 0;
   const atRiskCount = counts?.atRisk ?? 0;
+  // Every KPI names the window it was computed for. Pagos and Reportes
+  // already require it; this page printed four numbers with no window at all
+  // (audit 2026-09-15, S4 / ADM-12). The list numbers follow the filter, the
+  // roster numbers follow the shared summary — and each says which.
+  const listPeriodLabel = range ? periodLabel(range) : "Todos los registros";
+  const summaryPeriodLabel = counts?.period.label ?? "Últimos 30 días";
   const subtitle = [
     range ? periodLabel(range) : "Todos los registros",
     scopeLabel,
@@ -214,6 +224,7 @@ export default async function AtletasPage({
         <KpiCard
           label={statusLabel ? `${statusLabel}s en la lista` : "En la lista"}
           value={String(rows.total)}
+          period={listPeriodLabel}
           tone="moss"
           subtitle={
             // The list count IS the table's count. When a filter narrows it,
@@ -227,7 +238,7 @@ export default async function AtletasPage({
         <KpiCard
           label={range ? "Nuevos en el rango" : "Nuevos"}
           value={range ? String(newInRange) : "—"}
-          subtitle={range ? undefined : "Elige un rango de fechas"}
+          period={range ? listPeriodLabel : "Elige un rango de fechas"}
           delta={
             range ? (
               <MetricDelta
@@ -241,15 +252,17 @@ export default async function AtletasPage({
         <KpiCard
           label="Página"
           value={`${rows.page} de ${Math.max(1, Math.ceil(rows.total / rows.pageSize))}`}
+          period={listPeriodLabel}
           subtitle={`${rows.pageSize} por página`}
         />
         <KpiCard
           label="En riesgo"
           value={String(atRiskCount)}
+          period={summaryPeriodLabel}
           tone={atRiskCount > 0 ? "ember" : undefined}
           subtitle={
             atRiskCount > 0
-              ? `Sin check-in 14+ días o con adeudo · ${counts?.overdueCount ?? 0} morosos`
+              ? `Sin check-in ${AT_RISK_DEFAULT_INACTIVITY_DAYS}+ días o con adeudo · ${counts?.overdueCount ?? 0} morosos`
               : "Todos al día"
           }
         />
@@ -305,12 +318,15 @@ export default async function AtletasPage({
 function KpiCard({
   label,
   value,
+  period,
   subtitle,
   tone,
   delta,
 }: {
   label: string;
   value: string;
+  /** Required: a number without its window is not a number an owner can use. */
+  period: string;
   subtitle?: string;
   tone?: "moss" | "steel" | "ember";
   delta?: React.ReactNode;
@@ -332,9 +348,10 @@ function KpiCard({
       <p className="font-display mt-1 text-2xl font-bold" style={{ color }}>
         {value}
       </p>
-      {subtitle ? (
-        <p className="mt-1 text-xs text-[var(--k-t2)]">{subtitle}</p>
-      ) : null}
+      <p className="mt-1 text-[11px] text-[var(--k-t3)]">
+        {period}
+        {subtitle ? ` · ${subtitle}` : ""}
+      </p>
     </div>
   );
 }

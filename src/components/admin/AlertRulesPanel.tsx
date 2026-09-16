@@ -8,6 +8,7 @@ import {
   deleteAlertRule,
 } from "@/server/actions/alerts";
 import { hashStringToColor, getInitials } from "@/lib/hash-color";
+import { formatMXN } from "@/lib/format";
 import { Icon, type IconName } from "@/components/kronos/Icon";
 import type { AlertRuleRow } from "@/server/actions/alerts";
 import type { AuditAction, AlertChannel } from "@prisma/client";
@@ -110,7 +111,7 @@ export default function AlertRulesPanel({
     <div className="space-y-4">
       {/* Header + Create button */}
       <div className="flex items-center justify-between">
-        <p className="text-[11px] text-text-3 font-mono uppercase tracking-wider">
+        <p className="text-[11px] text-[var(--k-t3)] font-mono uppercase tracking-wider">
           {rules.length} regla{rules.length !== 1 ? "s" : ""}
         </p>
         <button
@@ -141,13 +142,13 @@ export default function AlertRulesPanel({
             <form action={handleCreate} className="k-card p-5 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[11px] font-mono font-bold tracking-wider text-text-3 uppercase block mb-1.5">
+                  <label className="text-[11px] font-mono font-bold tracking-wider text-[var(--k-t3)] uppercase block mb-1.5">
                     Acción
                   </label>
                   <select
                     name="action"
                     required
-                    className="w-full bg-[var(--k-elevated)] text-text text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)]"
+                    className="w-full bg-[var(--k-elevated)] text-[var(--k-t1)] text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)]"
                   >
                     {actionOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -158,12 +159,12 @@ export default function AlertRulesPanel({
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono font-bold tracking-wider text-text-3 uppercase block mb-1.5">
+                  <label className="text-[11px] font-mono font-bold tracking-wider text-[var(--k-t3)] uppercase block mb-1.5">
                     Canal
                   </label>
                   <select
                     name="channel"
-                    className="w-full bg-[var(--k-elevated)] text-text text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)]"
+                    className="w-full bg-[var(--k-elevated)] text-[var(--k-t1)] text-sm rounded-lg px-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)]"
                   >
                     <option value="EMAIL">Email</option>
                     <option value="BOTH">Email + Push</option>
@@ -173,11 +174,11 @@ export default function AlertRulesPanel({
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono font-bold tracking-wider text-text-3 uppercase block mb-1.5">
+                  <label className="text-[11px] font-mono font-bold tracking-wider text-[var(--k-t3)] uppercase block mb-1.5">
                     Umbral mínimo (MXN)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-3 text-sm">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--k-t3)] text-sm">
                       $
                     </span>
                     <input
@@ -186,20 +187,20 @@ export default function AlertRulesPanel({
                       name="threshold"
                       placeholder="Opcional"
                       min={0}
-                      className="w-full bg-[var(--k-elevated)] text-text text-sm rounded-lg pl-7 pr-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)]"
+                      className="w-full bg-[var(--k-elevated)] text-[var(--k-t1)] text-sm rounded-lg pl-7 pr-3 py-2 border border-white/10 focus:outline-none focus:border-[var(--k-t2)]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono font-bold tracking-wider text-text-3 uppercase block mb-1.5">
+                  <label className="text-[11px] font-mono font-bold tracking-wider text-[var(--k-t3)] uppercase block mb-1.5">
                     Destinatarios
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {owners.map((u) => (
                       <label
                         key={u.id}
-                        className="flex items-center gap-1.5 text-xs text-text-2 cursor-pointer bg-[var(--k-elevated)] rounded-lg px-2 py-1.5 border border-white/5"
+                        className="flex items-center gap-1.5 text-xs text-[var(--k-t2)] cursor-pointer bg-[var(--k-elevated)] rounded-lg px-2 py-1.5 border border-white/5"
                       >
                         <input
                           type="checkbox"
@@ -258,24 +259,23 @@ export default function AlertRulesPanel({
                   <div className="flex-1 min-w-0 space-y-2">
                     {/* Top row: action + channel */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-medium text-text">
+                      <span className="text-sm font-medium text-[var(--k-t1)]">
                         {actionLabel}
                       </span>
                       <span
                         className={`k-chip text-[9px] py-0.5 px-1.5 ${channel.chipClass}`}
                       >
-                        <Icon name={channel.icon} size={16} />{" "}
-                        {channel.label}
+                        <Icon name={channel.icon} size={16} /> {channel.label}
                       </span>
                     </div>
 
                     {/* Middle row: threshold + recipients */}
                     <div className="flex items-center gap-3 flex-wrap">
                       {rule.threshold !== null && (
-                        <span className="text-xs text-text-3">
+                        <span className="text-xs text-[var(--k-t3)]">
                           Si supera{" "}
-                          <strong className="text-text">
-                            ${rule.threshold.toLocaleString("es-MX")} MXN
+                          <strong className="text-[var(--k-t1)]">
+                            {formatMXN(rule.threshold)}
                           </strong>
                         </span>
                       )}

@@ -1,16 +1,33 @@
+/**
+ * Range presets for every admin filter — computed in the BOX timezone.
+ *
+ * Until the fase 0 fix wave this module used date-fns' `startOfDay`,
+ * `endOfDay`, `startOfMonth` and `format`, all of which read the SERVER's
+ * timezone. On a laptop set to Mexico City that is invisible; on the UTC
+ * production host "últimos 30 días" resolved to a window shifted one day at
+ * both edges, and `/admin/pagos` filed a payment collected at 20:00 CDMX under
+ * the NEXT day (`TZ=Asia/Tokyo pnpm test` reproduced it).
+ *
+ * Every function takes the timezone explicitly and defaults to
+ * `DEFAULT_BOX_TIMEZONE`, the same zone `src/lib/format.ts` renders in, so the
+ * window a number was computed for and the label printed beside it can never
+ * drift apart again. Callers that hold a `Box.timezone` should pass it.
+ */
+import { isValid, parseISO } from "date-fns";
 import {
-  startOfDay,
-  endOfDay,
-  startOfMonth,
-  endOfMonth,
-  subDays,
-  subMonths,
-  differenceInDays,
-  format,
-  eachDayOfInterval,
-  isValid,
-  parseISO,
-} from "date-fns";
+  DEFAULT_BOX_TIMEZONE,
+  addCivilDays,
+  civilDateInTz,
+  civilDaysBetween,
+  dayKeyInTz,
+  endOfCivilDay,
+  endOfCivilMonth,
+  startOfCivilDay,
+  startOfCivilMonth,
+  subCivilMonths,
+  parseDayKey,
+} from "@/lib/tz";
+import { formatDateShort } from "@/lib/format";
 
 export type RangePresetKey =
   | "today"
@@ -31,89 +48,194 @@ export const RANGE_PRESET_LABELS: Record<RangePresetKey, string> = {
   lastMonth: "Mes pasado",
 };
 
+const DAY_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 export function rangeFromPreset(
   preset: RangePresetKey,
   now: Date = new Date(),
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
 ): DateRange {
+  const today = civilDateInTz(now, timeZone);
+  const endOfToday = endOfCivilDay(today, timeZone);
+  const lastNDays = (days: number): DateRange => ({
+    from: startOfCivilDay(addCivilDays(today, -(days - 1)), timeZone),
+    to: endOfToday,
+    preset,
+  });
+
   switch (preset) {
     case "today":
-      return { from: startOfDay(now), to: endOfDay(now), preset };
+      return { from: startOfCivilDay(today, timeZone), to: endOfToday, preset };
     case "last7":
-      return { from: startOfDay(subDays(now, 6)), to: endOfDay(now), preset };
+      return lastNDays(7);
     case "last30":
-      return { from: startOfDay(subDays(now, 29)), to: endOfDay(now), preset };
+      return lastNDays(30);
     case "last90":
-      return { from: startOfDay(subDays(now, 89)), to: endOfDay(now), preset };
+      return lastNDays(90);
     case "thisMonth":
-      return { from: startOfMonth(now), to: endOfMonth(now), preset };
+      return {
+        from: startOfCivilDay(startOfCivilMonth(today), timeZone),
+        to: endOfCivilDay(endOfCivilMonth(today), timeZone),
+        preset,
+      };
     case "lastMonth": {
-      const prev = subMonths(now, 1);
-      return { from: startOfMonth(prev), to: endOfMonth(prev), preset };
+      const prev = subCivilMonths(today, 1);
+      return {
+        from: startOfCivilDay(startOfCivilMonth(prev), timeZone),
+        to: endOfCivilDay(endOfCivilMonth(prev), timeZone),
+        preset,
+      };
     }
   }
 }
 
 /**
- * Returns the symmetric previous range for delta calculations.
- * E.g. last30 → the 30 days before the current range.
+ * The symmetric previous range for delta calculations: last30 → the 30 box
+ * days before the current range, ending the day before it starts.
  */
-export function previousRange(range: DateRange): DateRange {
-  const days = differenceInDays(range.to, range.from);
-  const to = endOfDay(subDays(range.from, 1));
-  const from = startOfDay(subDays(to, days));
-  return { from, to };
+export function previousRange(
+  range: DateRange,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): DateRange {
+  const from = civilDateInTz(range.from, timeZone);
+  const to = civilDateInTz(range.to, timeZone);
+  const span = Math.max(0, civilDaysBetween(from, to));
+  const prevTo = addCivilDays(from, -1);
+  const prevFrom = addCivilDays(prevTo, -span);
+  return {
+    from: startOfCivilDay(prevFrom, timeZone),
+    to: endOfCivilDay(prevTo, timeZone),
+  };
 }
 
-export function parseDateParam(value: string | null | undefined): Date | null {
+/**
+ * A `YYYY-MM-DD` query param is a CIVIL day in the box, not an instant: it is
+ * resolved to that day's first instant in `timeZone`. Parsing it with the
+ * ambient zone is what made `?from=2026-01-01` start on 31 dec for half the
+ * world.
+ */
+export function parseDateParam(
+  value: string | null | undefined,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): Date | null {
   if (!value) return null;
-  const d = parseISO(value);
-  return isValid(d) ? d : null;
+  if (DAY_KEY_RE.test(value)) {
+    const civil = parseDayKey(value);
+    if (!Number.isFinite(civil.year) || !Number.isFinite(civil.month)) {
+      return null;
+    }
+    const instant = startOfCivilDay(civil, timeZone);
+    return isValid(instant) ? instant : null;
+  }
+  const parsed = parseISO(value);
+  return isValid(parsed) ? parsed : null;
 }
 
-export function rangeFromParams(params: {
-  preset?: string | null;
-  from?: string | null;
-  to?: string | null;
-}): DateRange {
+export function rangeFromParams(
+  params: {
+    preset?: string | null;
+    from?: string | null;
+    to?: string | null;
+  },
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): DateRange {
   const presetKey = params.preset as RangePresetKey | undefined;
   if (presetKey && presetKey in RANGE_PRESET_LABELS) {
-    return rangeFromPreset(presetKey);
+    return rangeFromPreset(presetKey, new Date(), timeZone);
   }
-  const from = parseDateParam(params.from);
-  const to = parseDateParam(params.to);
+  const from = parseDateParam(params.from, timeZone);
+  const to = parseDateParam(params.to, timeZone);
   if (from && to) {
-    return { from: startOfDay(from), to: endOfDay(to) };
+    return {
+      from: startOfCivilDay(civilDateInTz(from, timeZone), timeZone),
+      to: endOfCivilDay(civilDateInTz(to, timeZone), timeZone),
+    };
   }
-  return rangeFromPreset("last30");
+  return rangeFromPreset("last30", new Date(), timeZone);
 }
 
-/** YYYY-MM-DD — stable key for grouping by day. */
-export function dayKey(date: Date): string {
-  return format(date, "yyyy-MM-dd");
+/** YYYY-MM-DD — stable key for grouping by box civil day. */
+export function dayKey(
+  date: Date,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): string {
+  return dayKeyInTz(date, timeZone);
 }
 
-/** YYYY-MM — stable key for grouping by month. */
-export function monthKey(date: Date): string {
-  return format(date, "yyyy-MM");
+/** YYYY-MM — stable key for grouping by box civil month. */
+export function monthKey(
+  date: Date,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): string {
+  const civil = civilDateInTz(date, timeZone);
+  return `${civil.year}-${String(civil.month).padStart(2, "0")}`;
 }
 
-export function eachDayInRange(range: DateRange): Date[] {
-  return eachDayOfInterval({ start: range.from, end: range.to });
+/** One entry per box civil day in the range, at that day's first instant. */
+export function eachDayInRange(
+  range: DateRange,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): Date[] {
+  const first = civilDateInTz(range.from, timeZone);
+  const last = civilDateInTz(range.to, timeZone);
+  const span = civilDaysBetween(first, last);
+  if (span < 0) return [];
+  const out: Date[] = [];
+  for (let i = 0; i <= span; i += 1) {
+    out.push(startOfCivilDay(addCivilDays(first, i), timeZone));
+  }
+  return out;
 }
 
-export function formatRange(range: DateRange, locale = "es-MX"): string {
+export function formatRange(
+  range: DateRange,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): string {
   if (range.preset && range.preset in RANGE_PRESET_LABELS) {
     return RANGE_PRESET_LABELS[range.preset];
   }
-  const f = (d: Date) =>
-    d.toLocaleDateString(locale, { day: "2-digit", month: "short" });
-  return `${f(range.from)} – ${f(range.to)}`;
+  return `${formatDateShort(range.from, timeZone)} – ${formatDateShort(range.to, timeZone)}`;
 }
 
-export function formatDayShort(date: Date, locale = "es-MX"): string {
-  return date.toLocaleDateString(locale, { day: "2-digit", month: "short" });
+/**
+ * Node and browser ICU disagree on the separator for the numeric-month
+ * shapes ("15-may" vs "15 may"); the house style is a single space, no dots
+ * and no "de" — the same normalisation `src/lib/format.ts` applies.
+ */
+function normalizeEsShort(value: string): string {
+  return value
+    .replace(/\./g, "")
+    .replace(/,/g, "")
+    .replace(/-/g, " ")
+    .replace(/\bde\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-export function formatMonthShort(date: Date, locale = "es-MX"): string {
-  return date.toLocaleDateString(locale, { month: "short", year: "2-digit" });
+/** "15 may" with a zero-padded day. */
+export function formatDayShort(
+  date: Date,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): string {
+  return normalizeEsShort(
+    new Intl.DateTimeFormat("es-MX", {
+      day: "2-digit",
+      month: "short",
+      timeZone,
+    }).format(date),
+  );
+}
+
+/** "may 26" */
+export function formatMonthShort(
+  date: Date,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): string {
+  return normalizeEsShort(
+    new Intl.DateTimeFormat("es-MX", {
+      month: "short",
+      year: "2-digit",
+      timeZone,
+    }).format(date),
+  );
 }

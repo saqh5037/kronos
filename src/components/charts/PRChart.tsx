@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/kronos/Icon";
+import { formatDateShort } from "@/lib/format";
 import { KronosLineChart } from "./kronos-chart";
 import { CHART_COLORS } from "./tokens";
 
@@ -22,7 +23,7 @@ function formatDate(iso: unknown) {
   if (typeof iso !== "string") return String(iso ?? "");
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("es-MX", { month: "short", day: "numeric" });
+  return formatDateShort(d);
 }
 
 export function PRChart({ data, unit, currentBest, height = 240 }: Props) {

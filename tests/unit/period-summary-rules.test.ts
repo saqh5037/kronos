@@ -10,6 +10,7 @@
 import { describe, it, expect } from "vitest";
 import {
   ACTIVE_ATHLETE_RULE,
+  AT_RISK_REASONS,
   AT_RISK_RULE,
   AT_RISK_DEFAULT_INACTIVITY_DAYS,
   OVERDUE_RULE,
@@ -193,6 +194,38 @@ describe("evaluateAtRisk", () => {
       evaluateAtRisk({ createdAt: daysAgo(200), lastAttendedAt: null }, NOW)
         .severity,
     ).toBe("high");
+  });
+});
+
+/**
+ * `ChurnRiskTable` printed "ALTO · 2/4" over a rule that has three signals:
+ * the denominator was a literal nobody updated when the fourth signal was
+ * dropped (audit follow-up P1-11). It now comes from this array, so the union
+ * and the screen can never disagree again.
+ */
+describe("AT_RISK_REASONS", () => {
+  it("lists every member of the AtRiskReason union, once", () => {
+    expect([...AT_RISK_REASONS].sort()).toEqual([
+      "inactivity",
+      "never_attended",
+      "overdue",
+    ]);
+    expect(new Set(AT_RISK_REASONS).size).toBe(AT_RISK_REASONS.length);
+  });
+
+  it("is the denominator a screen can show: no evaluation ever exceeds it", () => {
+    const worst = evaluateAtRisk(
+      {
+        createdAt: daysAgo(200),
+        lastAttendedAt: null,
+        hasOverdueMembership: true,
+      },
+      NOW,
+    );
+    expect(worst.reasons.length).toBeLessThanOrEqual(AT_RISK_REASONS.length);
+    for (const reason of worst.reasons) {
+      expect(AT_RISK_REASONS).toContain(reason);
+    }
   });
 });
 

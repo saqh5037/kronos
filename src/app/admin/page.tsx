@@ -23,7 +23,12 @@ import { AtRiskCard } from "./_components/AtRiskCard";
 import AdminErrorState from "./_components/AdminErrorState";
 import { dashboardGreeting } from "./_lib/greeting";
 import { upcomingClasses } from "./_lib/schedule";
-import { formatDateShort, formatDateWeekday, formatTime24 } from "@/lib/format";
+import {
+  formatDateShort,
+  formatDateWeekday,
+  formatMoney,
+  formatTime24,
+} from "@/lib/format";
 import { roleLabel } from "@/lib/labels";
 import type { Role } from "@prisma/client";
 import OnboardingBanner from "@/components/admin/OnboardingBanner";
@@ -41,14 +46,6 @@ type SearchParams = {
   from?: string;
   to?: string;
 };
-
-function fmtMoney(box: { locale: string; currency: string }) {
-  return new Intl.NumberFormat(box.locale, {
-    style: "currency",
-    currency: box.currency,
-    maximumFractionDigits: 0,
-  });
-}
 
 function pct(part: number, whole: number): number {
   if (whole === 0) return 0;
@@ -165,7 +162,11 @@ export default async function AdminDashboardPage({
     );
   }
 
-  const money = fmtMoney(box);
+  // One money style for the whole product: the dashboard used to print
+  // "$2,500" from its own Intl instance next to "$2,500 MXN" on /admin/pagos
+  // for the same peso (audit 2026-09-15, S4).
+  const money = (amount: number) =>
+    formatMoney(amount, { locale: box.locale, currency: box.currency });
   const now = new Date();
   const dateLabel = formatDateWeekday(now, box.timezone);
 
@@ -262,7 +263,7 @@ export default async function AdminDashboardPage({
     greeting,
     dateLabel,
 
-    mrr: money.format(kpis.mrr),
+    mrr: money(kpis.mrr),
     mrrDelta: kpis.mrrDeltaPct,
     mrrDeltaAbs: kpis.mrrDeltaAbs,
     mrrSpark: kpis.revenueChart.data,
@@ -270,7 +271,7 @@ export default async function AdminDashboardPage({
     // The roster, not seats booked today: this tile said 27 while
     // /admin/atletas said 42 for the same box (audit P0 #6).
     activeAthletes: String(kpis.activeAthletes),
-    arpu: kpis.arpu === null ? "—" : money.format(kpis.arpu),
+    arpu: kpis.arpu === null ? "—" : money(kpis.arpu),
     churn30d: "—",
 
     attendanceToday: {
@@ -306,7 +307,7 @@ export default async function AdminDashboardPage({
     revenueChart: {
       data: kpis.revenueChart.data,
       labels: kpis.revenueChart.labels,
-      total: money.format(kpis.revenueChart.total),
+      total: money(kpis.revenueChart.total),
       delta: kpis.revenueChart.deltaPct,
     },
     attendanceChart: {

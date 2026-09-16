@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db as prismaBase } from "@/server/db";
+import { Check } from "lucide-react";
 import KronosLogo from "@/components/brand/KronosLogo";
 import { verifyPilotBetaToken } from "@/lib/pilot-beta-token";
 import PilotBetaSignForm from "./PilotBetaSignForm";
 import { CONTACT_EMAIL } from "@/app/(landing)/_data/cta";
+import { formatDateFull } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Firma piloto-beta · Kronos",
@@ -205,11 +207,7 @@ function ConfirmationScreen({
   signedAt: Date;
   alreadySigned?: boolean;
 }) {
-  const formatted = signedAt.toLocaleDateString("es-MX", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const formatted = formatDateFull(signedAt);
   return (
     <main
       className="min-h-screen flex items-center justify-center"
@@ -221,12 +219,12 @@ function ConfirmationScreen({
           className="inline-flex items-center justify-center w-14 h-14 rounded-full mx-auto"
           style={{ background: "var(--k-accent-soft)" }}
         >
-          <span
-            className="font-display font-bold text-2xl"
+          <Check
+            size={26}
+            strokeWidth={3}
             style={{ color: "var(--k-accent)" }}
-          >
-            ✓
-          </span>
+            aria-hidden
+          />
         </div>
         <h1
           className="font-display font-bold text-2xl"

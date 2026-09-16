@@ -37,7 +37,7 @@ export type WodDetalleV3Props = {
   bestScoreDateLabel?: string;
   /** Sparkline values (números) */
   bestScoreSpark?: number[];
-  /** Diff motivacional ej "↓ 38s desde el 1°" */
+  /** Diff motivacional ya formateado, ej "desde 4:12" (sin flechas unicode) */
   bestScoreDelta?: string;
   /** Difficulty 1-5 */
   difficulty?: number;

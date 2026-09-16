@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback, useTransition } from "react";
 import { signOut } from "next-auth/react";
 import { Icon } from "@/components/kronos/v3/icons";
+import { formatTime24 } from "@/lib/format";
 
 type LinkHref = ComponentProps<typeof Link>["href"];
 
@@ -516,13 +517,7 @@ function LiveClock() {
   useEffect(() => {
     const update = () => {
       const now = new Date();
-      setTime(
-        now.toLocaleTimeString("es-MX", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }),
-      );
+      setTime(formatTime24(now));
     };
     update();
     const t = setInterval(update, 60000);

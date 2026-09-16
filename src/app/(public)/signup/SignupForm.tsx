@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { createBoxAndOwner } from "@/server/actions/signup";
 import { slugify } from "@/lib/slug";
 import { CTA_TRIAL_LABEL } from "@/app/(landing)/_data/cta";
 import { kToast } from "@/lib/toast";
+import { formatDateFull } from "@/lib/format";
 
 type FieldErrors = Partial<
   Record<"email" | "ownerName" | "boxName" | "slug", string>
@@ -84,12 +85,12 @@ export default function SignupForm({
           className="inline-flex items-center justify-center w-12 h-12 rounded-full"
           style={{ background: "var(--k-accent-soft)" }}
         >
-          <span
-            className="font-display font-bold text-xl"
+          <Check
+            size={22}
+            strokeWidth={3}
             style={{ color: "var(--k-accent)" }}
-          >
-            ✓
-          </span>
+            aria-hidden
+          />
         </div>
         <h2 className="font-display font-bold text-xl">¡Tu box está creado!</h2>
         <p className="text-sm" style={{ color: "var(--k-t2)" }}>
@@ -102,11 +103,7 @@ export default function SignupForm({
           style={{ background: "var(--k-elevated)", color: "var(--k-t3)" }}
         >
           Tu box: <strong>{success.slug}</strong> · Prueba gratis hasta{" "}
-          {success.trialEndsAt.toLocaleDateString("es-MX", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
+          {formatDateFull(success.trialEndsAt)}
         </div>
         {DEV_LOGIN_ENABLED ? (
           <p className="text-xs" style={{ color: "var(--k-t3)" }}>

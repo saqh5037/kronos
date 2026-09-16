@@ -39,8 +39,8 @@ export default async function AliasesPage() {
           >
             <Tag size={20} strokeWidth={1.8} aria-hidden />
           </div>
-          <p className="text-text font-medium">Aún no hay apodos</p>
-          <p className="text-text-3 mx-auto mt-1 max-w-sm text-sm">
+          <p className="text-[var(--k-t1)] font-medium">Aún no hay apodos</p>
+          <p className="text-[var(--k-t3)] mx-auto mt-1 max-w-sm text-sm">
             Se irán guardando conforme subas fotos del pizarrón y corrijas a qué
             atleta corresponde cada nombre.
           </p>
@@ -49,7 +49,7 @@ export default async function AliasesPage() {
         <AliasCardList aliases={aliases} isOwner={isOwner} />
       )}
 
-      <p className="text-text-3 mt-6 text-xs">
+      <p className="text-[var(--k-t3)] mt-6 text-xs">
         Los apodos son solo de tu box. Ningún otro box los ve.
       </p>
     </SettingsShell>

@@ -185,10 +185,10 @@ export default async function AuditoriaPage({
           >
             <FileSearch size={20} strokeWidth={1.8} aria-hidden />
           </div>
-          <p className="text-text font-medium">
+          <p className="text-[var(--k-t1)] font-medium">
             {search ? "Sin coincidencias" : "Sin eventos en este período"}
           </p>
-          <p className="text-text-3 mt-1 text-sm">
+          <p className="text-[var(--k-t3)] mt-1 text-sm">
             {search
               ? "Prueba con otro nombre o amplía el rango de fechas."
               : "Todo tranquilo. Amplía el rango de fechas para ver más actividad."}

@@ -567,13 +567,7 @@ function LiveStrip({ collapsed }: { collapsed: boolean }) {
   useEffect(() => {
     const update = () => {
       const now = new Date();
-      setTime(
-        now.toLocaleTimeString("es-MX", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }),
-      );
+      setTime(formatTime24(now));
     };
     update();
     const t = setInterval(update, 60000);
@@ -1166,9 +1160,15 @@ function KpiHero(props: AdminDashboardV3Props) {
             className="k-mono"
             style={{
               fontFamily: "var(--k-font-display)",
-              fontSize: 88,
+              // The hero carries the currency ("$141,250 MXN"), and the card
+              // that holds it is 412 px wide at 1280: a fixed 88 px broke the
+              // number across two lines. Measured on the real string, 0.68 em
+              // per character, so 4.4vw keeps it on one line from 360 up and
+              // still reaches the original 88 px on a wide screen.
+              fontSize: "clamp(34px, 4.4vw, 88px)",
               fontWeight: 700,
               letterSpacing: "-0.05em",
+              whiteSpace: "nowrap",
               color: ACC,
             }}
           >

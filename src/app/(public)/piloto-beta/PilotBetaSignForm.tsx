@@ -2,7 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { signPilotBeta } from "@/server/actions/pilot-beta";
+import { Check } from "lucide-react";
 import { kToast } from "@/lib/toast";
+import { formatDateFull } from "@/lib/format";
 
 type FieldErrors = Partial<Record<"fullName" | "acceptTerms", string>>;
 
@@ -48,11 +50,7 @@ export default function PilotBetaSignForm({
   }
 
   if (success) {
-    const formatted = success.signedAt.toLocaleDateString("es-MX", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    const formatted = formatDateFull(success.signedAt);
     return (
       <div
         className="k-card p-6 text-center flex flex-col gap-3"
@@ -62,12 +60,12 @@ export default function PilotBetaSignForm({
           className="inline-flex items-center justify-center w-12 h-12 rounded-full mx-auto"
           style={{ background: "var(--k-accent-soft)" }}
         >
-          <span
-            className="font-display font-bold text-xl"
+          <Check
+            size={22}
+            strokeWidth={3}
             style={{ color: "var(--k-accent)" }}
-          >
-            ✓
-          </span>
+            aria-hidden
+          />
         </div>
         <h3
           className="font-display font-bold text-lg"

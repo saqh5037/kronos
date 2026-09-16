@@ -66,8 +66,13 @@ const KIND_MAP: Record<
     category: "billing",
     severity: "info",
   },
+  // Not a development-only path: `confirmCheckoutMock` runs whenever the
+  // gateway is unconfigured (`isMockMode` in src/lib/saas-billing.ts),
+  // production included, so there is no NODE_ENV to hide the label behind.
+  // The owner reads WHAT happened to their subscription; how the platform is
+  // wired is not their note.
   SAAS_CHECKOUT_CONFIRMED_MOCK: {
-    label: "Suscripción activada (modo demo)",
+    label: "Suscripción activada",
     category: "billing",
     severity: "sensitive",
   },
@@ -102,7 +107,7 @@ const KIND_MAP: Record<
     severity: "sensitive",
   },
   SAAS_RENEWED_MOCK: {
-    label: "Renovación automática (modo demo)",
+    label: "Renovación automática",
     category: "billing",
     severity: "info",
   },

@@ -2,7 +2,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatDateShort, formatDateWeekday } from "@/lib/format";
+import {
+  formatDateShort,
+  formatDateWeekday,
+  formatMonthYear,
+} from "@/lib/format";
 
 type View = "day" | "week" | "month";
 
@@ -35,10 +39,7 @@ export function ScheduleNav({
     view === "day"
       ? formatDateWeekday(date)
       : view === "month"
-        ? date.toLocaleDateString("es-MX", {
-            month: "long",
-            year: "numeric",
-          })
+        ? formatMonthYear(date)
         : `Semana del ${formatDateShort(date)}`;
 
   return (

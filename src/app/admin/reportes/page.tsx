@@ -12,6 +12,7 @@ import {
   type ReadinessAverage,
 } from "@/server/actions/surveys";
 import { MetricDelta } from "@/components/charts/MetricDelta";
+import { intensity } from "@/components/charts/tokens";
 import { RevenueLineChart } from "./_components/RevenueLineChart";
 import { NewChurnBarChart } from "./_components/NewChurnBarChart";
 import {
@@ -24,6 +25,7 @@ import ChurnRiskTable from "@/components/admin/ChurnRiskTable";
 import { formatMXN } from "@/lib/format";
 import { planTypeLabel } from "@/lib/labels";
 import { rangeFromParams } from "@/lib/dates";
+import { AT_RISK_DEFAULT_INACTIVITY_DAYS } from "@/server/period-summary/rules";
 import { DateRangePicker } from "@/components/data/DateRangePicker";
 import {
   hasEnoughReadinessData,
@@ -40,6 +42,14 @@ type SearchParams = {
 };
 
 const fmtPct = (v: number) => `${Math.round(v * 100)} %`;
+
+/**
+ * Low/mid/high of ONE metric is intensity, so it ramps the opacity of the
+ * accent instead of switching to orange (project rule 4). The floor is well
+ * above the chart floor (0.18) because these are headline numbers on a card:
+ * at 0.5 the faintest bucket still clears AA for large text.
+ */
+const INTENSITY_TEXT_FLOOR = 0.5;
 
 export default async function ReportesPage({
   searchParams,
@@ -75,7 +85,9 @@ export default async function ReportesPage({
       getReports(periodInput),
       getRevenueByMonth(12),
       getAthletesByMonth(12),
-      getChurnRiskList(),
+      // Same period as `getReports`: the list and the "En riesgo" KPI above
+      // it are the same question, so they cannot answer for two windows.
+      getChurnRiskList(periodInput),
     ]);
     readiness = await getReadinessAverage({ sinceDays: 7 });
   } catch {
@@ -174,7 +186,7 @@ export default async function ReportesPage({
           label="Tasa de asistencia"
           value={fmtPct(r.attendanceRate)}
           period={periodLabel}
-          tone={r.attendanceRate >= 0.65 ? "accent" : "warning"}
+          level={r.attendanceRate}
           subtitle={`${r.monthAttended} de ${r.monthAttended + r.monthNoShow} reservas`}
         />
       </div>
@@ -246,11 +258,13 @@ export default async function ReportesPage({
           </div>
         </div>
         <p className="mb-3 text-xs" style={{ color: "var(--k-t3)" }}>
-          Esta lista mira la asistencia: quién dejó de venir o canceló de más.
-          No mira el dinero.{" "}
+          Un atleta activo entra a esta lista por cualquiera de tres señales:
+          lleva más de {AT_RISK_DEFAULT_INACTIVITY_DAYS} días sin check-in,
+          nunca ha asistido desde que se dio de alta, o arrastra una membresía
+          vencida sin pagar.{" "}
           {r.overdueCount > 0 ? (
             <>
-              Por adeudo hay{" "}
+              El detalle del adeudo, con montos y días, vive en{" "}
               <Link
                 href="/admin/pagos#morosos"
                 className="underline decoration-dotted"
@@ -259,10 +273,10 @@ export default async function ReportesPage({
                 {r.overdueCount} moroso
                 {r.overdueCount === 1 ? "" : "s"} en Pagos
               </Link>
-              , que es otra pregunta.
+              .
             </>
           ) : (
-            <>Por adeudo, hoy no hay morosos en Pagos.</>
+            <>Hoy no hay ningún adeudo abierto en Pagos.</>
           )}
         </p>
         <ChurnRiskTable rows={churnRisk} />
@@ -321,6 +335,7 @@ function KpiCard({
   period,
   subtitle,
   tone,
+  level,
   delta,
 }: {
   label: string;
@@ -328,14 +343,18 @@ function KpiCard({
   period: string;
   subtitle?: string;
   tone?: "accent" | "warning";
+  /** 0–1 position of this metric in its own range: ramps the accent. */
+  level?: number;
   delta?: React.ReactNode;
 }) {
   const color =
-    tone === "accent"
-      ? "var(--k-accent)"
-      : tone === "warning"
-        ? "var(--k-warning)"
-        : "var(--k-t1)";
+    level !== undefined
+      ? intensity(level, INTENSITY_TEXT_FLOOR)
+      : tone === "accent"
+        ? "var(--k-accent)"
+        : tone === "warning"
+          ? "var(--k-warning)"
+          : "var(--k-t1)";
   return (
     <div className="k-card p-3">
       <div className="flex items-start justify-between gap-2">
@@ -510,12 +529,10 @@ function ReadinessTile({ readiness }: { readiness: ReadinessAverage }) {
   const enough = hasEnoughReadinessData(readiness.count, readiness.total);
   const countLabel = responseCountLabel(readiness.count, readiness.total);
 
-  const tone =
-    scorePct >= 70
-      ? "var(--k-accent)"
-      : scorePct >= 40
-        ? "var(--k-t2)"
-        : "var(--k-warning)";
+  // Readiness is one number on one scale: it fades, it does not change hue.
+  // The three-colour version painted a 38 % box orange, next to a chart that
+  // used lime for the same data (audit 2026-09-15, S2 / ADM-11).
+  const tone = intensity(readiness.score, INTENSITY_TEXT_FLOOR);
 
   return (
     <div className="k-card p-4">
