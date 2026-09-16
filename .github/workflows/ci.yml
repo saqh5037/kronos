@@ -61,7 +61,7 @@ jobs:
           NEXTAUTH_SECRET: ci-stub-secret-not-used
           NEXTAUTH_URL: http://localhost:3000
 
-  # Integration (4 files, real Postgres) + the 27 Playwright specs.
+  # Integration (5 files, real Postgres) + the 28 Playwright specs.
   #
   # Not on every push: the suite boots a dev server, seeds three times and
   # drives a browser, so it is minutes, not seconds. It runs when someone asks
