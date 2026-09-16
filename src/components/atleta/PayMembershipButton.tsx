@@ -48,6 +48,7 @@ export default function PayMembershipButton({
       <button
         onClick={handleClick}
         disabled={loading}
+        data-testid="pay-membership"
         className="k-btn-grad w-full text-sm font-display font-bold disabled:opacity-50"
       >
         {loading

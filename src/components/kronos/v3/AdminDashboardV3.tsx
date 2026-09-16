@@ -1422,6 +1422,7 @@ function KpiHero(props: AdminDashboardV3Props) {
 
         <Link
           href="/admin/atletas?at_risk=1"
+          data-testid="dashboard-at-risk-card"
           className="k-grain k-tap"
           style={{
             flex: 1,
@@ -1553,6 +1554,7 @@ function ChartCard({
   data,
   yLabels,
   xLabels,
+  testId,
 }: {
   title: string;
   eyebrow: string;
@@ -1562,6 +1564,8 @@ function ChartCard({
   yLabels: string[];
   /** Tick labels for the requested period. Omitted = no x axis, never fake dates. */
   xLabels?: string[];
+  /** Stable e2e hook, so a spec does not pin the Spanish card title. */
+  testId?: string;
 }) {
   const w = 540;
   const h = 160;
@@ -1590,6 +1594,7 @@ function ChartCard({
   return (
     <div
       className="k-grain"
+      data-testid={testId}
       style={{
         padding: 24,
         background: "var(--k-surface)",
@@ -2258,6 +2263,7 @@ export default function AdminDashboardV3(props: AdminDashboardV3Props) {
               className="k-charts-row"
             >
               <ChartCard
+                testId="dashboard-revenue-chart"
                 title="Ingresos diarios"
                 eyebrow={`INGRESO · ${props.rangeLabel}`}
                 value={props.revenueChart.total}
@@ -2267,6 +2273,7 @@ export default function AdminDashboardV3(props: AdminDashboardV3Props) {
                 xLabels={props.revenueChart.labels}
               />
               <ChartCard
+                testId="dashboard-attendance-chart"
                 title="Asistencia diaria"
                 eyebrow={`CHECK-INS · ${props.rangeLabel}`}
                 value={props.attendanceChart.total}

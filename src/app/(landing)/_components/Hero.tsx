@@ -14,6 +14,7 @@ import {
   DEFAULT_DISCIPLINE_BRANDING,
   type DisciplineBranding,
 } from "@/lib/branding";
+import { ArrowRight } from "lucide-react";
 
 /**
  * Hero del landing de Boxes.
@@ -70,17 +71,7 @@ export default function Hero({
                 }
               >
                 Ir a mi box
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
+                <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
               </a>
             ) : (
               <>
@@ -95,17 +86,7 @@ export default function Hero({
                   }
                 >
                   {ownerLabel}
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
+                  <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
                 </a>
                 <a
                   href={CTA_WHATSAPP_HREF}

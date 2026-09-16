@@ -48,7 +48,11 @@ export default async function StaffInvitationPage({
     const expired = check.reason === "EXPIRED";
     return (
       <Layout boxName={inv.box.name} brandColor={inv.box.brandColor ?? null}>
-        <h1 className="font-display text-2xl font-bold mb-3">
+        <h1
+          data-testid="invitation-unusable"
+          data-reason={expired ? "EXPIRED" : "CANCELLED"}
+          className="font-display text-2xl font-bold mb-3"
+        >
           {expired ? "Esta invitación expiró" : "Esta invitación fue cancelada"}
         </h1>
         <p className="text-[var(--k-t2)] mb-6">

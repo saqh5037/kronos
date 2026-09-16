@@ -251,10 +251,77 @@ export async function ensureDemoAthleteOnboarded(): Promise<void> {
 }
 
 /**
- * Set the demo athlete's ATTENDANCE streak to a known count + lastEventAt so
- * the home hero is deterministic. `lastEventAt` controls whether the read-time
- * gate (`isStreakCurrent`) keeps the streak alive: today/yesterday → shown,
- * 2+ days ago → gated to 0.
+ * Drive the athlete home's streak by writing the ATTENDED bookings it is now
+ * computed from.
+ *
+ * `getAthleteHome` no longer reads `Streak.count`: it recomputes the streak
+ * from the athlete's ATTENDED bookings (`streakFromBookings`), dating each one
+ * by `checkedInAt ?? class.startsAt`. Setting the cached row therefore changes
+ * nothing on screen — which is the point of the fix, and why a spec that only
+ * wrote the cache could no longer tell a working gate from a broken one.
+ *
+ * So this parks EVERY ATTENDED booking far in the past (far enough apart that
+ * they cannot form a chain), then dates the first `daysAgo.length` of them on
+ * exactly the days asked for. `0` is today, `1` yesterday, and so on.
+ *
+ * Non-destructive: it snapshots each row's `checkedInAt` first and returns the
+ * restore, so the seed's attendance history survives for the specs that read it
+ * (historial, perfil, leaderboard). Always await the returned function.
+ */
+export async function setDemoAthleteAttendanceOn(
+  daysAgo: number[],
+): Promise<() => Promise<void>> {
+  const athlete = await getDemoAthlete();
+  const rows = await db().booking.findMany({
+    where: { athleteId: athlete.id, status: "ATTENDED" },
+    select: { id: true, checkedInAt: true },
+    orderBy: { id: "asc" },
+  });
+
+  if (rows.length < daysAgo.length) {
+    throw new Error(
+      `Demo athlete has ${rows.length} ATTENDED bookings, need ${daysAgo.length}. Re-seed?`,
+    );
+  }
+
+  const snapshot = rows.map((r) => ({ id: r.id, checkedInAt: r.checkedInAt }));
+
+  const dayStart = (offset: number): Date => {
+    const d = new Date();
+    d.setUTCHours(12, 0, 0, 0);
+    d.setUTCDate(d.getUTCDate() - offset);
+    return d;
+  };
+
+  // Park everything at ≥ 300 days ago, two days apart, so no pair is
+  // consecutive and the parked set can never contribute to a streak.
+  for (const [i, row] of rows.entries()) {
+    await db().booking.update({
+      where: { id: row.id },
+      data: { checkedInAt: dayStart(300 + i * 2) },
+    });
+  }
+
+  for (const [i, offset] of daysAgo.entries()) {
+    await db().booking.update({
+      where: { id: rows[i].id },
+      data: { checkedInAt: dayStart(offset) },
+    });
+  }
+
+  return async () => {
+    for (const row of snapshot) {
+      await db().booking.update({
+        where: { id: row.id },
+        data: { checkedInAt: row.checkedInAt },
+      });
+    }
+  };
+}
+
+/**
+ * Set the cached `Streak` row. It is deliberately NOT what the home reads any
+ * more — the specs use it to prove a stale cache cannot leak onto the screen.
  */
 export async function setDemoAthleteAttendanceStreak(
   count: number,

@@ -231,7 +231,10 @@ export default async function BillingPage() {
         </div>
 
         {currentSub ? (
-          <div className="border-t border-[var(--k-line)] pt-3">
+          <div
+            data-testid="billing-current-plan"
+            className="border-t border-[var(--k-line)] pt-3"
+          >
             <div className="mb-1 font-mono text-xs tracking-wider text-[var(--k-t3)] uppercase">
               Tu plan
             </div>

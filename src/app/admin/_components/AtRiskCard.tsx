@@ -24,7 +24,12 @@ export function AtRiskCard({ rows }: Props) {
   return (
     <KCard animate={false} className="p-5 md:p-6">
       <div className="flex items-baseline justify-between gap-3 mb-4">
-        <h2 className="font-display text-xl font-bold">Atletas en riesgo</h2>
+        <h2
+          data-testid="at-risk-heading"
+          className="font-display text-xl font-bold"
+        >
+          Atletas en riesgo
+        </h2>
         {rows.length > 0 && (
           <span className="text-xs font-mono uppercase tracking-wider text-[var(--k-t2)]">
             Top {rows.length}

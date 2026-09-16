@@ -4,6 +4,7 @@ import Image from "next/image";
 import { m, useReducedMotion } from "framer-motion";
 import { track } from "../../_lib/track";
 import { FINAL_CTA, CTA_LABEL } from "../_data/copy";
+import { ArrowRight } from "lucide-react";
 
 export default function AtletaClosingCTA({
   boxHref,
@@ -86,17 +87,7 @@ export default function AtletaClosingCTA({
             }
           >
             {boxHref ? "Ir a mi box" : CTA_LABEL}
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
+            <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
           </a>
           <a
             href={FINAL_CTA.ctaSecondaryHref}

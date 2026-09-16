@@ -20,6 +20,8 @@
     "test:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
+    "test:e2e:axe": "playwright test e2e/axe.spec.ts",
+    "test:e2e:axe:update": "AXE_UPDATE_BASELINE=1 playwright test e2e/axe.spec.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -56,6 +58,7 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.52.0",
     "@types/canvas-confetti": "^1.6.4",
     "@types/node": "^22",

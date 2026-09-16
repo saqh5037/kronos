@@ -73,16 +73,15 @@ test.describe.serial("SaaS checkout", () => {
     const proCard = page.locator(".k-card", { hasText: "Pro" });
     await proCard.getByRole("button").click();
 
-    // Aparece la pantalla de mock-confirm
-    await expect(page.getByText(/Confirma la activación de/)).toBeVisible({
+    // Aparece la pantalla de mock-confirm. The copy moved twice ("MercadoPago
+    // no está configurado" → a dev-only eyebrow + softer body, and the CTA
+    // "Confirmar pago" → "Simular pago y activar"), so both hooks are testids.
+    await expect(page.getByTestId("checkout-mock-confirm")).toBeVisible({
       timeout: 5_000,
     });
-    await expect(
-      page.getByText(/MercadoPago no está configurado/),
-    ).toBeVisible();
 
     // Click confirmar mock
-    await page.getByRole("button", { name: /Confirmar pago/ }).click();
+    await page.getByTestId("checkout-confirm").click();
 
     // Redirige a /admin/billing con success (no /admin/billing/checkout)
     await page.waitForURL(/\/admin\/billing(\?|$)/, { timeout: 10_000 });
@@ -113,10 +112,12 @@ test.describe.serial("SaaS checkout", () => {
     await loginAs(page, "owner");
     await page.goto("/admin/billing");
 
-    // El plan actual aparece
-    await expect(page.getByText(/Plan actual/i)).toBeVisible();
-    await expect(page.getByText(/^Pro$/).first()).toBeVisible();
-    await expect(page.getByText(/Próxima facturación/i)).toBeVisible();
+    // El plan actual aparece. The card's label became "Tu plan"; the block
+    // itself carries the hook so the wording is free to move again.
+    const currentPlan = page.getByTestId("billing-current-plan");
+    await expect(currentPlan).toBeVisible();
+    await expect(currentPlan.getByText(/^Pro$/).first()).toBeVisible();
+    await expect(currentPlan.getByText(/Próxima facturación/i)).toBeVisible();
   });
 
   test("confirm checkout crea SaasInvoice con monto correcto", async ({
@@ -137,10 +138,10 @@ test.describe.serial("SaaS checkout", () => {
       .locator(".k-card", { hasText: "Pro" })
       .getByRole("button")
       .click();
-    await expect(page.getByText(/Confirma la activación de/)).toBeVisible({
+    await expect(page.getByTestId("checkout-mock-confirm")).toBeVisible({
       timeout: 5_000,
     });
-    await page.getByRole("button", { name: /Confirmar pago/ }).click();
+    await page.getByTestId("checkout-confirm").click();
     await page.waitForURL(/\/admin\/billing(\?|$)/, { timeout: 10_000 });
 
     const invoices = await db().saasInvoice.findMany({
@@ -165,7 +166,10 @@ test.describe.serial("SaaS checkout", () => {
     const table = page.getByRole("table");
     await expect(table.getByText(/^Pro$/).first()).toBeVisible();
     await expect(table.getByText(/\$499 MXN/).first()).toBeVisible();
-    await expect(table.getByText("Pagado").first()).toBeVisible();
+    // "Pagado" became "Pagada" (it agrees with "factura"); the enum is the hook.
+    const invoiceStatus = table.getByTestId("invoice-status").first();
+    await expect(invoiceStatus).toBeVisible();
+    await expect(invoiceStatus).toHaveAttribute("data-status", "PAID");
     await expect(
       page.getByRole("button", { name: /Descargar CSV/i }),
     ).toBeVisible();

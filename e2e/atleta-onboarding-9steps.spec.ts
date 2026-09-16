@@ -21,6 +21,8 @@ import { test, expect, type Page } from "@playwright/test";
  *  - Audit logging por step
  */
 
+import { disconnect, ensureDemoAthleteOnboarded } from "./fixtures/db";
+
 const DEV_PASSWORD = process.env.DEV_PASSWORD ?? "dev";
 
 function uniqueEmail(): string {
@@ -79,19 +81,35 @@ async function devLoginAs(page: Page, email: string): Promise<void> {
   await page.locator('input[placeholder="email"]').fill(email);
   await page.locator('input[placeholder="password"]').fill(DEV_PASSWORD);
   await Promise.all([
-    page.waitForURL(/\/atleta/, { timeout: 15_000 }),
+    // Same cold-compile headroom as the shared fixture: `waitForURL` waits for
+    // `load`, and a first `/atleta` hit spends most of that compiling.
+    page.waitForURL(/\/atleta/, { timeout: 60_000 }),
     page.getByRole("button", { name: /Entrar \(dev\)/ }).click(),
   ]);
 }
 
 test.describe("Athlete Onboarding 9-Step Wizard", () => {
+  /**
+   * `no-page-errors.spec.ts` clears `onboardingCompletedAt` on this same seed
+   * athlete to reach the wizard, and restores it in a `finally`. A `finally`
+   * does not survive a hard crash, and when it did not run, the damage landed
+   * on THIS spec — the alphabetically first one in the suite — a whole run
+   * later. Establish the precondition instead of inheriting it.
+   */
+  test.beforeAll(async () => {
+    await ensureDemoAthleteOnboarded();
+  });
+
+  test.afterAll(async () => {
+    await disconnect();
+  });
+
   test("Scenario 4: atleta seed (onboarded) NO entra al wizard", async ({
     page,
   }) => {
-    // Seed: atleta@iron-hands.demo tiene onboardingCompletedAt seteado tras
-    // `pnpm db:seed`. El layout `atleta/layout.tsx` debe permitir libre
-    // navegación; y un acceso directo a /atleta/onboarding debe redirigir
-    // a /atleta (bypass inverso del page.tsx onboarding).
+    // El layout `atleta/layout.tsx` debe permitir libre navegación; y un
+    // acceso directo a /atleta/onboarding debe redirigir a /atleta (bypass
+    // inverso del page.tsx onboarding).
     await devLoginAs(page, "atleta@iron-hands.demo");
 
     // Tras login el browser ya está en /atleta (o subpath); NO debe estar

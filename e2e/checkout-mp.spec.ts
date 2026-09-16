@@ -89,10 +89,17 @@ test.describe.serial("Atleta — checkout MercadoPago", () => {
     await page.goto("/atleta/pagos");
 
     await expect(page.getByText(/Membres/i).first()).toBeVisible();
-    await expect(page.getByText(/PENDIENTE DE PAGO/i)).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /Pagar \d/i }).first(),
-    ).toBeVisible();
+    // The chip renders the label map ("Pendiente"), not the enum. Assert on the
+    // enum through `data-status` so a copy change is not a test failure.
+    const status = page.getByTestId("membership-status").first();
+    await expect(status).toBeVisible();
+    await expect(status).toHaveAttribute("data-status", "PENDING");
+    // `/Pagar \d/` stopped matching when money went through the one house
+    // formatter: the label is "Pagar $1,500 MXN", so the character after
+    // "Pagar " is the currency symbol, not a digit.
+    const payBtn = page.getByTestId("pay-membership").first();
+    await expect(payBtn).toBeVisible();
+    await expect(payBtn).toHaveText(/^Pagar \$[\d,]+ MXN$/);
   });
 
   test("click en Pagar dispara POST a mp-checkout (mocked init_point)", async ({
@@ -139,7 +146,7 @@ test.describe.serial("Atleta — checkout MercadoPago", () => {
     await loginAs(page, "atleta");
     await page.goto("/atleta/pagos");
 
-    const payBtn = page.getByRole("button", { name: /Pagar \d/i }).first();
+    const payBtn = page.getByTestId("pay-membership").first();
     await expect(payBtn).toBeVisible();
 
     await Promise.all([

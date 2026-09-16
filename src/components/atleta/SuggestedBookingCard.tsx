@@ -156,8 +156,27 @@ export function SuggestedBookingCard({
                 <span>Coach {suggestion.klass.coach.name}</span>
               )}
               <span style={{ opacity: 0.4 }}>·</span>
-              <span style={{ color: "var(--k-accent)" }}>
-                ● {capacityFraction}
+              <span
+                style={{
+                  color: "var(--k-accent)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                {/* A filled dot is decoration, not an icon: a CSS circle keeps
+                    it out of the accessibility tree and off the glyph guard. */}
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "currentColor",
+                    flexShrink: 0,
+                  }}
+                />
+                {capacityFraction}
               </span>
             </div>
           </div>

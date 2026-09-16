@@ -306,6 +306,7 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
         {/* Description */}
         {props.description && (
           <div
+            data-testid="wod-description"
             style={{
               margin: "0 20px",
               padding: "16px 18px",

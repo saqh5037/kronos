@@ -83,7 +83,26 @@ async function devLogin(
 async function logout(page: import("@playwright/test").Page): Promise<void> {
   await page.goto("/logout?callbackUrl=/login");
   await page.getByRole("button", { name: /Sí, cerrar sesión/ }).click();
-  await page.waitForURL(/\/login/, { timeout: 12_000 });
+  // `waitForURL(/\/login/)` matched the `callbackUrl=/login` QUERY STRING of the
+  // page we were already on, so it returned before NextAuth had finished. The
+  // Box B login that follows then raced the in-flight signOut, which landed
+  // afterwards and wiped the brand-new session — the test failed intermittently
+  // on `/login?callbackUrl=%2Fatleta`, and only when something else in the suite
+  // had warmed the server enough to change the ordering. Wait on the PATHNAME,
+  // then confirm the session is really gone.
+  await page.waitForURL((url) => url.pathname === "/login", {
+    timeout: 15_000,
+  });
+  await expect
+    .poll(
+      async () => {
+        const res = await page.request.get("/api/auth/session");
+        const body = (await res.json()) as { user?: unknown } | null;
+        return body?.user ? "signed-in" : "signed-out";
+      },
+      { timeout: 10_000 },
+    )
+    .toBe("signed-out");
 }
 
 /**

@@ -165,8 +165,8 @@ Ver en admin: https://kronos.app/admin/leads/${lead.id}
   <p style="color:#8A8A94;line-height:1.6;margin-bottom:16px">Hola ${data.ownerName},</p>
   <p style="color:#8A8A94;line-height:1.6;margin-bottom:16px">Recibimos tus datos para ${data.boxName}. En menos de 24 horas hábiles te escribimos por WhatsApp (${data.whatsapp}) para coordinar una demo de 20 minutos.</p>
   <p style="color:#8A8A94;line-height:1.6;margin-bottom:32px">Si quieres ver el admin en vivo antes de la llamada, te lo compartimos por WhatsApp.</p>
-  <p style="color:#54545C;font-size:13px;line-height:1.6">Cualquier cosa, responde este email.</p>
-  <p style="color:#54545C;font-size:13px;line-height:1.6;margin-top:24px">— Equipo Kronos<br/>hola@kronos-fit.com</p>
+  <p style="color:#7d7d87;font-size:13px;line-height:1.6">Cualquier cosa, responde este email.</p>
+  <p style="color:#7d7d87;font-size:13px;line-height:1.6;margin-top:24px">— Equipo Kronos<br/>hola@kronos-fit.com</p>
 </div>`,
     });
 

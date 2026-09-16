@@ -232,7 +232,13 @@ function MembershipCard({
               : `Desde ${formatDateLong(new Date(m.startDate))}`}
           </div>
         </div>
-        <span style={statusChipStyle(variant)}>
+        {/* `data-status` carries the enum for the e2e suite so the assertion
+            does not pin the Spanish label, which is presentation and moves. */}
+        <span
+          data-testid="membership-status"
+          data-status={m.status}
+          style={statusChipStyle(variant)}
+        >
           {membershipStatusLabel[m.status]}
         </span>
       </div>

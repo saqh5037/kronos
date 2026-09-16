@@ -10,7 +10,10 @@ import { InvitationActions, Layout } from "./_components/InvitationShell";
 export default function InvitationNotFound() {
   return (
     <Layout>
-      <h1 className="font-display text-2xl font-bold mb-3">
+      <h1
+        data-testid="invitation-not-found"
+        className="font-display text-2xl font-bold mb-3"
+      >
         Este link de invitación ya no sirve
       </h1>
       <p className="text-[var(--k-t2)] mb-4">

@@ -145,6 +145,8 @@ export default async function InvoiceHistoryPage({
                   </td>
                   <td className="p-3 md:p-4">
                     <span
+                      data-testid="invoice-status"
+                      data-status={inv.status}
                       className={`k-chip ${
                         inv.status === "PAID" ? "k-chip-moss" : "k-chip-ghost"
                       }`}

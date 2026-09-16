@@ -182,7 +182,7 @@ function renderJoinRequestEmail(args: {
       <p style="margin:0 0 24px;line-height:1.6;color:#8a8a94;">
         Para agregarlo, ingresa a tu panel admin y mándale una invitación o responde a este email para coordinar.
       </p>
-      <p style="margin:0;font-size:12px;color:#54545c;">Kronos · kronos-fit.com</p>
+      <p style="margin:0;font-size:12px;color:#7d7d87;">Kronos · kronos-fit.com</p>
     </div>
   </body>
 </html>`.trim();

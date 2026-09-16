@@ -1,0 +1,58 @@
+{
+  "anon / 360": {
+    "seriousCritical": 0,
+    "contrast": 0
+  },
+  "anon /box 1280": {
+    "seriousCritical": 0,
+    "contrast": 0
+  },
+  "anon /login 360": {
+    "seriousCritical": 0,
+    "contrast": 0
+  },
+  "anon /atleta-signup 360": {
+    "seriousCritical": 0,
+    "contrast": 0
+  },
+  "atleta /atleta 360": {
+    "seriousCritical": 0,
+    "contrast": 0
+  },
+  "atleta /atleta/wod 360": {
+    "seriousCritical": 3,
+    "contrast": 3
+  },
+  "atleta /atleta/reservar 360": {
+    "seriousCritical": 21,
+    "contrast": 21
+  },
+  "atleta /atleta/perfil 360": {
+    "seriousCritical": 0,
+    "contrast": 0
+  },
+  "atleta /atleta/skills 360": {
+    "seriousCritical": 18,
+    "contrast": 18
+  },
+  "owner /admin 1280": {
+    "seriousCritical": 0,
+    "contrast": 0
+  },
+  "owner /admin/atletas 1280": {
+    "seriousCritical": 0,
+    "contrast": 0
+  },
+  "owner /admin/programacion 1280": {
+    "seriousCritical": 0,
+    "contrast": 0
+  },
+  "owner /admin/pagos 1280": {
+    "seriousCritical": 0,
+    "contrast": 0
+  },
+  "owner /admin/ajustes 1280": {
+    "seriousCritical": 0,
+    "contrast": 0
+  }
+}

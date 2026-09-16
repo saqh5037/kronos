@@ -467,7 +467,7 @@ function drawAsset(ctx: CanvasRenderingContext2D, args: DrawArgs) {
   ctx.textAlign = "left";
   ctx.fillText("KRONOS", isStory ? 70 : 60, isStory ? 110 : 90);
 
-  ctx.fillStyle = "#54545c";
+  ctx.fillStyle = "#7d7d87";
   ctx.font = `600 ${isStory ? 18 : 16}px "IBM Plex Mono", monospace`;
   ctx.fillText("FIT", isStory ? 240 : 210, isStory ? 110 : 90);
 
@@ -531,7 +531,7 @@ function drawAsset(ctx: CanvasRenderingContext2D, args: DrawArgs) {
   // ── Bottom block: athlete + date + hashtag ──
   const bottomY = h - (isStory ? 280 : 200);
 
-  ctx.fillStyle = "#54545c";
+  ctx.fillStyle = "#7d7d87";
   ctx.font = `700 ${isStory ? 22 : 18}px "IBM Plex Mono", monospace`;
   ctx.textAlign = "center";
   ctx.fillText("ATLETA", w / 2, bottomY);

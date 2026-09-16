@@ -120,6 +120,7 @@ export function BookButton({
             border: "1px solid var(--k-accent-line)",
           }}
           aria-label="Reservado"
+          data-testid="booking-state-booked"
         >
           <svg
             width="12"
@@ -150,6 +151,7 @@ export function BookButton({
         <button
           onClick={handleCancel}
           disabled={isPending}
+          data-testid="booking-cancel"
           style={{
             background: "none",
             border: "none",
@@ -193,6 +195,7 @@ export function BookButton({
             border: "1px solid var(--k-line-2)",
           }}
           aria-label="En lista de espera"
+          data-testid="booking-state-waitlist"
         >
           <svg
             width="11"
@@ -249,6 +252,7 @@ export function BookButton({
     <button
       onClick={handleBook}
       disabled={isPending}
+      data-testid={full ? "booking-waitlist" : "booking-book"}
       style={{
         ...v3Base,
         background: full ? "var(--k-elevated)" : "var(--k-accent)",

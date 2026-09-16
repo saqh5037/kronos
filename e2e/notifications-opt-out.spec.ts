@@ -52,8 +52,11 @@ test.describe.serial("Notifications opt-out", () => {
     await loginAs(page, "owner");
     await page.goto("/admin/ajustes/notificaciones");
 
+    // The page is titled "Tus avisos" now — "Alertas" and "Notificaciones" were
+    // merged into one Avisos page (the URL did not change). Assert the section
+    // this test actually drives instead of the old page name.
     await expect(
-      page.getByRole("heading", { name: /notificaciones/i }),
+      page.getByRole("heading", { name: /Avisos de Kronos/i }),
     ).toBeVisible();
 
     // Toggle weekly digest off (primer switch)
@@ -64,15 +67,21 @@ test.describe.serial("Notifications opt-out", () => {
     await digestSwitch.click();
     await expect(digestSwitch).toHaveAttribute("aria-checked", "false");
 
-    // Save
+    // Save. A fixed 500 ms wait raced a cold server-action compile and read the
+    // row before the write landed, so the assertion polls the row instead.
     await page.getByRole("button", { name: /^Guardar$/ }).click();
-    await page.waitForTimeout(500);
-
-    const box = await db().box.findUnique({
-      where: { id: tenantId },
-      select: { weeklyDigestEnabled: true },
-    });
-    expect(box?.weeklyDigestEnabled).toBe(false);
+    await expect
+      .poll(
+        async () => {
+          const box = await db().box.findUnique({
+            where: { id: tenantId },
+            select: { weeklyDigestEnabled: true },
+          });
+          return box?.weeklyDigestEnabled;
+        },
+        { timeout: 15_000 },
+      )
+      .toBe(false);
   });
 
   test("cron weekly-digest respeta opt-out (counts.optedOut)", async ({

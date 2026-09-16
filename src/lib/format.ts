@@ -142,6 +142,20 @@ export function formatDateWeekday(date: Date, timeZone: string = TZ): string {
   );
 }
 
+/**
+ * "mar" — the weekday on its own, for column headers in the week grid.
+ * Node and browser ICU disagree on the trailing dot ("mar." vs "mar"), so it
+ * goes through the same normaliser as the other es-MX dates.
+ */
+export function formatWeekdayShort(date: Date, timeZone: string = TZ): string {
+  return normalizeEsDate(
+    new Intl.DateTimeFormat("es-MX", {
+      weekday: "short",
+      timeZone,
+    }).format(date),
+  );
+}
+
 /** "15 sep 2026" */
 export function formatDateLong(date: Date, timeZone: string = TZ): string {
   return normalizeEsDate(

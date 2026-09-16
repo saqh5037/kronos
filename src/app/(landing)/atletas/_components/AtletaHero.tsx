@@ -4,6 +4,7 @@ import Image from "next/image";
 import { track } from "../../_lib/track";
 import PhoneFrame from "./PhoneFrame";
 import { HERO, CTA_LABEL } from "../_data/copy";
+import { ArrowRight } from "lucide-react";
 
 /**
  * Entrada (audit 2026-09-15): reposo visible en el servidor; la entrada es CSS
@@ -66,17 +67,7 @@ export default function AtletaHero({ boxHref }: { boxHref: string | null }) {
               }
             >
               {boxHref ? "Ir a mi box" : CTA_LABEL}
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
+              <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
             </a>
           </div>
           {!boxHref && (

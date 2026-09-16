@@ -99,7 +99,7 @@ export function CheckoutClient({ plans, mockMode, isDev }: Props) {
   if (state.step === "mock-confirm") {
     const plan = plans.find((p) => p.slug === state.planSlug);
     return (
-      <div className="k-card max-w-2xl p-6">
+      <div className="k-card max-w-2xl p-6" data-testid="checkout-mock-confirm">
         {demoWording ? (
           <p className="k-eyebrow mb-2 text-[var(--k-t3)]">
             Solo en desarrollo
@@ -118,6 +118,7 @@ export function CheckoutClient({ plans, mockMode, isDev }: Props) {
             type="button"
             disabled={pending}
             onClick={() => handleMockConfirm(state.subscriptionId)}
+            data-testid="checkout-confirm"
             className="k-btn-grad rounded-full px-5 py-3 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending

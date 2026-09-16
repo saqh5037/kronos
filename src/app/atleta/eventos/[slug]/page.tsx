@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { getEventBySlugForAthlete } from "@/server/actions/events";
 import { formatSecondsToTime } from "@/lib/event-score";
+import { DEFAULT_BOX_TIMEZONE } from "@/lib/format";
 import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 import EventResultForm from "./_components/EventResultForm";
 
@@ -13,6 +14,11 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+/**
+ * Without an explicit `timeZone` this read the SERVER's zone, so a 06:00 event
+ * in Mexico City printed as 12:00 on the UTC host — and could even land on the
+ * next weekday. Pinned to the box timezone like the rest of the product.
+ */
 function formatDate(d: Date | null | undefined) {
   if (!d) return null;
   return new Intl.DateTimeFormat("es-MX", {
@@ -22,6 +28,8 @@ function formatDate(d: Date | null | undefined) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
+    timeZone: DEFAULT_BOX_TIMEZONE,
   }).format(d);
 }
 
@@ -68,7 +76,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
 
           {/* A closed event now answers the only question the athlete has:
               what did I do, and where did it land. */}
-          <div className="k-card p-5 mb-5">
+          <div className="k-card p-5 mb-5" data-testid="event-closed-state">
             <p className="k-eyebrow mb-2" style={{ color: "var(--k-t3)" }}>
               Evento concluido
             </p>

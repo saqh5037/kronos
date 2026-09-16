@@ -1646,6 +1646,9 @@
      three: 4.91:1 on --k-bg, 4.67:1 on --k-surface, 4.50:1 on --k-elevated.
      The full matrix is enforced by tests/unit/atleta-infra-contrast.test.ts. */
   --k-t3: #7d7d87;
+  /* Decoration only — 1.63:1 on --k-bg. NEVER text: it shipped as the admin
+     sidebar's section headers and axe flagged all four on every admin screen
+     (audit 2026-09-16). Text stops at --k-t3. */
   --k-t4: #36363c;
 
   /* — ACENTO (default Kronos = lima · sobreescribible por Box) — */

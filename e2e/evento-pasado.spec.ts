@@ -2,8 +2,10 @@
  * E2E: past event detail shows closed state — regression for audit finding #16.
  *
  * Seed creates "dominus-murph-2026" with startDate 2026-05-23 (already past).
- * An athlete without an entry must see "Evento finalizado" — never the
- * QR-registration copy for an event that already happened.
+ * An athlete without an entry must see the closed state — never the
+ * QR-registration copy for an event that already happened. The state is matched
+ * by `data-testid`, not by its wording ("Evento finalizado" became "Evento
+ * concluido" and the assertion went stale).
  *
  * Requires: pnpm db:seed + dev server with NEXT_PUBLIC_DEV_LOGIN=1.
  */
@@ -18,7 +20,7 @@ test.describe("Evento pasado — estado finalizado", () => {
     await loginAs(page, "atleta");
     await page.goto("/atleta/eventos/dominus-murph-2026");
 
-    await expect(page.getByText(/evento finalizado/i)).toBeVisible({
+    await expect(page.getByTestId("event-closed-state")).toBeVisible({
       timeout: 15_000,
     });
     await expect(page.getByText(/escaneando el código QR/i)).toHaveCount(0);

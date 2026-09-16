@@ -90,6 +90,8 @@ export default function OtpInput({
         onChange={handleChange}
         onPaste={handlePaste}
         disabled={disabled}
+        // Typography, not an icon: the bullet is the standard mask character
+        // for a 6-digit code, so it stays baselined in the glyph guard.
         placeholder="• • • • • •"
         className="w-full text-center font-display font-bold rounded-xl py-4 px-3 outline-none transition-all"
         style={{

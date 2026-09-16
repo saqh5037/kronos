@@ -77,6 +77,18 @@ type SweepIssue = {
 
 const issues: SweepIssue[] = [];
 
+/** One readable line per issue, so a failure names the screen and the reason. */
+function summarize(i: SweepIssue): string {
+  const parts: string[] = [];
+  if (i.httpStatus !== null && i.httpStatus >= 500)
+    parts.push(`http ${i.httpStatus}`);
+  if (i.errorBoundary) parts.push("error boundary");
+  if (!i.rendered) parts.push(`no render (${i.finalUrl})`);
+  if (i.pageErrors.length)
+    parts.push(`pageErrors: ${i.pageErrors.slice(0, 2).join(" | ")}`);
+  return parts.join("; ") || i.notes;
+}
+
 test.describe.serial("Atleta sweep — todas las pantallas", () => {
   let page: Page;
 
@@ -113,6 +125,15 @@ test.describe.serial("Atleta sweep — todas las pantallas", () => {
       }
     }
     await page.close();
+
+    // The per-route tests deliberately do not fail — the point is a COMPLETE
+    // sweep, not an abort on the first bad screen. The verdict belongs here,
+    // once, over the whole sweep. It used to be `expect(true).toBe(true)` in
+    // each route, which made the suite structurally incapable of catching the
+    // very regression it was written for (Bernardo, deploy 41531aa).
+    expect(
+      issues.map((i) => `${i.label} (${i.route}): ${summarize(i)}`),
+    ).toEqual([]);
   });
 
   for (const spec of ATLETA_ROUTES) {
@@ -199,8 +220,8 @@ test.describe.serial("Atleta sweep — todas las pantallas", () => {
         });
       }
 
-      // No fallar el test individual — queremos sweep completo, no abortar al primer fallo
-      expect(true).toBe(true);
+      // No fallar el test individual — queremos sweep completo, no abortar al
+      // primer fallo. El veredicto lo da el `afterAll` sobre `issues`.
     });
   }
 });

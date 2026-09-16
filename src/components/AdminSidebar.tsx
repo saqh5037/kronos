@@ -715,7 +715,12 @@ function NavGroup({
             fontSize: 8.5,
             fontWeight: 600,
             letterSpacing: "0.24em",
-            color: "var(--k-t4)",
+            // `--k-t4` (#36363c) measures 1.63:1 on this sidebar — axe flagged
+            // these four section headers on every admin screen (16 of the 58
+            // remaining contrast nodes, 2026-09-16). It was the token's only
+            // use in the codebase, and it was being used as text. `--k-t3` is
+            // the audited AA-safe third text tone.
+            color: "var(--k-t3)",
             display: "flex",
             alignItems: "center",
             gap: 8,
