@@ -20,20 +20,20 @@
     "contrast": 0
   },
   "atleta /atleta/wod 360": {
-    "seriousCritical": 3,
-    "contrast": 3
+    "seriousCritical": 0,
+    "contrast": 0
   },
   "atleta /atleta/reservar 360": {
-    "seriousCritical": 21,
-    "contrast": 21
+    "seriousCritical": 0,
+    "contrast": 0
   },
   "atleta /atleta/perfil 360": {
     "seriousCritical": 0,
     "contrast": 0
   },
   "atleta /atleta/skills 360": {
-    "seriousCritical": 18,
-    "contrast": 18
+    "seriousCritical": 0,
+    "contrast": 0
   },
   "owner /admin 1280": {
     "seriousCritical": 0,

@@ -316,26 +316,24 @@ function ActiveSkillView({
             style={{
               marginTop: 8,
               padding: "10px 14px",
-              background: "var(--k-elevated)",
-              border: "1px solid var(--k-line)",
+              // Ghost, not dimmed: el bloque bajaba a `opacity: 0.7` sobre
+              // `--k-elevated`, o sea que además de apagar el texto flotaba
+              // MÁS alto que el foco de hoy. Ahora es un contorno punteado
+              // sobre el fondo de la página — se lee como casilla vacía y el
+              // texto conserva su tono (`--k-t3` sobre `--k-bg` = 4.91:1).
+              background: "transparent",
+              border: "1px dashed var(--k-line-2)",
               borderRadius: 14,
               display: "flex",
               alignItems: "center",
               gap: 10,
-              opacity: 0.7,
             }}
           >
-            <svg
-              width={14}
-              height={14}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--k-t3)"
-              strokeWidth={2}
-            >
-              <rect x="5" y="11" width="14" height="9" rx="2" />
-              <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-            </svg>
+            <Lock
+              size={14}
+              aria-hidden
+              style={{ color: "var(--k-t3)", flexShrink: 0 }}
+            />
             <div>
               <div
                 style={{
@@ -568,7 +566,9 @@ function ProgressionRow({
         gap: 10,
         padding: "10px 0",
         borderBottom: index < total - 1 ? "1px solid var(--k-line)" : undefined,
-        opacity: isLocked ? 0.45 : 1,
+        // Sin `opacity: 0.45`: una fila bloqueada ya se distingue por el tono
+        // del nombre (`--k-t3` contra `--k-t1`), el círculo punteado y el
+        // candado. Apagar el contenedor entero hundía ese `--k-t3` a 2.2:1.
       }}
     >
       <div
@@ -589,7 +589,7 @@ function ProgressionRow({
             ? "2px solid var(--k-line)"
             : isCurrent
               ? "2px solid var(--k-t2)"
-              : "1.5px solid var(--k-line)",
+              : "1.5px dashed var(--k-line-2)",
         }}
       >
         {isAchieved && (
@@ -615,17 +615,7 @@ function ProgressionRow({
           />
         )}
         {isLocked && (
-          <svg
-            width={11}
-            height={11}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--k-t3)"
-            strokeWidth={2}
-          >
-            <rect x="5" y="11" width="14" height="9" rx="2" />
-            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-          </svg>
+          <Lock size={11} aria-hidden style={{ color: "var(--k-t3)" }} />
         )}
       </div>
 
@@ -668,7 +658,6 @@ function ProgressionRow({
           fontWeight: 700,
           color: "var(--k-t3)",
           letterSpacing: "0.04em",
-          opacity: 0.5,
         }}
       >
         {index + 1}
@@ -705,23 +694,28 @@ function SkillCatalogCard({
       className={selectable && !isLocked ? "k-tap" : undefined}
       style={{
         padding: "13px 16px",
-        background: isCompleted
-          ? "var(--k-elevated)"
+        /**
+         * Bloqueado = tarjeta fantasma, no tarjeta apagada.
+         *
+         * `opacity: 0.55` sobre `--k-elevated` mezclaba el nombre
+         * (`--k-t2`), el motivo del bloqueo y la etiqueta de estado
+         * (`--k-t3`) con el fondo: 2.2–2.5:1, los 18 nodos de
+         * color-contrast que axe marcaba en /atleta/skills. Ahora la
+         * jerarquía la marca la SUPERFICIE — las demás son bloques
+         * rellenos, la bloqueada es un contorno punteado sin relleno —
+         * más el candado y la etiqueta "BLOQUEADO". El texto mantiene su
+         * tono: sobre `--k-bg`, `--k-t2` = 5.85:1 y `--k-t3` = 4.91:1.
+         */
+        background: isLocked
+          ? "transparent"
           : isActive
             ? "var(--k-surface)"
             : "var(--k-elevated)",
-        border: `1px solid ${
-          isCompleted
-            ? "var(--k-line)"
-            : isActive
-              ? "var(--k-line)"
-              : "var(--k-line)"
-        }`,
+        border: `1px ${isLocked ? "dashed var(--k-line-2)" : "solid var(--k-line)"}`,
         borderRadius: 14,
         display: "flex",
         alignItems: "center",
         gap: 12,
-        opacity: isLocked ? 0.55 : 1,
         boxShadow: isActive ? "var(--k-accent-glow)" : "none",
         cursor: selectable && !isLocked ? "pointer" : "default",
       }}
@@ -793,10 +787,12 @@ function SkillCatalogCard({
           letterSpacing: "0.12em",
           color: statusConfig.color,
           textAlign: "right",
-          whiteSpace: "nowrap",
+          // Envuelve en vez de cortar: "PIDE NIVEL ESCALADO" no cabe en
+          // 120 px y se leía "PIDE NIVEL ESCALA…". Dos renglones cortos
+          // ocupan el mismo alto que el nombre + el detalle de la
+          // izquierda, así que no le quitan ancho al nombre del skill.
           maxWidth: 120,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
+          textWrap: "balance",
           textTransform: "uppercase",
         }}
       >

@@ -74,10 +74,16 @@ export default function TabBar({ mode = "box", yoBadge = false }: TabBarProps) {
     <div
       className="fixed bottom-0 left-0 right-0 z-40"
       style={{
-        background: "rgba(8,8,10,0.92)",
+        /**
+         * Opaque, not translucent. At 8 % transparency an accent-filled card
+         * scrolling underneath tinted the bar green and dragged the `--k-t3`
+         * labels from 4.91:1 to 4.26:1 — axe caught it on /atleta/wod and
+         * /atleta/reservar. A nav bar's contrast cannot depend on what happens
+         * to be behind it, so the backdrop blur goes with it (a blur behind an
+         * opaque layer only costs a compositing pass).
+         */
+        background: "var(--k-bg)",
         borderTop: "1px solid var(--k-line)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
         height: 84,
         paddingBottom: 24,
         paddingTop: 12,

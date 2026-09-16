@@ -8,7 +8,9 @@
  *    they collapse into one "Filtros" toggle that shows the active count, and
  *    the list is the first thing on the page.
  *  - Past classes kept a dimmed "RESERVAR" button plus an 8 px "PASADA" chip →
- *    a past row now links to its results, never offers a booking.
+ *    a past row now links to its results, never offers a booking. Fase 0 batch
+ *    7: the row also stopped dimming itself with `opacity`, which was dragging
+ *    its own copy below AA — see the comment on `cardBorder`.
  *  - "F"/"S" initials and a "?" pill stood in for the WOD type → readable
  *    labels via `wodTypeLabel` / `classKindLabel`, coach name on one line.
  *  - The capacity bar animated `width`, a layout property → `transform:
@@ -447,10 +449,13 @@ function ClassRow({
   const isBooked = c.myBookingStatus === "BOOKED";
   const isOpenBox = c.kind === "OPEN_BOX";
 
-  // Escala monocromática lima — la opacidad indica presión sobre el cupo
+  // Escala monocromática lima — la opacidad indica presión sobre el cupo.
+  // Una clase pasada no compite por cupo: su barra se apaga al color de línea.
   let barColor = "var(--k-line-2)";
   let barGlow = "none";
-  if (fillRatio >= 0.85) {
+  if (past) {
+    barColor = "var(--k-line-2)";
+  } else if (fillRatio >= 0.85) {
     barColor = "var(--k-accent)";
     barGlow = "0 0 8px rgba(200, 255, 45, 0.45)";
   } else if (fillRatio >= 0.6) {
@@ -463,12 +468,27 @@ function ClassRow({
   const kindName = classKindLabel[c.kind as ClassKind] ?? c.kind;
   const wodDateKey = classToWodDateKey(c.startsAt, boxTimezone);
 
-  const cardBorder = isBooked
-    ? "var(--k-accent-line)"
-    : isUsual
+  /**
+   * Una clase terminada se apaga por CROMO, no por opacidad.
+   *
+   * El card entero llevaba `opacity: 0.55`, que mezcla el texto con el fondo de
+   * la página: `--k-t2` caía a 2.43:1 y `--k-t3` a 2.15:1 — 21 nodos de
+   * color-contrast en /atleta/reservar. La regla 4 del design system ("opacidad
+   * = intensidad") habla del ACENTO, no de un contenedor con texto adentro.
+   *
+   * Lo que queda apagado: la superficie baja de `--k-surface` a `--k-bg` (el
+   * card se hunde en la página en vez de flotar sobre ella), el borde se vuelve
+   * punteado, el acento se retira (borde, glow, hora reservada, barra de cupo)
+   * y un chip "Terminada" lo dice con palabras. El texto se queda a tono
+   * completo: sobre `--k-bg`, `--k-t2` da 5.85:1 y `--k-t3` 4.91:1.
+   */
+  const cardBorder = past
+    ? "var(--k-line)"
+    : isBooked || isUsual
       ? "var(--k-accent-line)"
       : "var(--k-line)";
-  const cardShadow = isBooked ? "0 0 14px rgba(200, 255, 45, 0.16)" : "none";
+  const cardShadow =
+    isBooked && !past ? "0 0 14px rgba(200, 255, 45, 0.16)" : "none";
 
   return (
     <AnimatedItem>
@@ -476,14 +496,34 @@ function ClassRow({
         {...(isTourCardAnchor ? { "data-tour": "reservar.class-card" } : {})}
         style={{
           position: "relative",
-          background: "var(--k-surface)",
-          border: `1px solid ${cardBorder}`,
+          background: past ? "var(--k-bg)" : "var(--k-surface)",
+          border: `1px ${past ? "dashed" : "solid"} ${cardBorder}`,
           borderRadius: 16,
           padding: 14,
-          opacity: past ? 0.55 : 1,
           boxShadow: cardShadow,
         }}
       >
+        {past && (
+          <span
+            style={{
+              position: "absolute",
+              top: -8,
+              left: 14,
+              padding: "2px 8px",
+              borderRadius: 999,
+              background: "var(--k-bg)",
+              border: "1px solid var(--k-line-2)",
+              color: "var(--k-t2)",
+              fontFamily: "var(--k-font-display)",
+              fontSize: 8,
+              fontWeight: 700,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+            }}
+          >
+            Terminada
+          </span>
+        )}
         {isUsual && !isBooked && !past && (
           <span
             style={{
@@ -521,10 +561,10 @@ function ClassRow({
                 fontSize: 22,
                 fontWeight: 700,
                 letterSpacing: "-0.03em",
-                color: isBooked
-                  ? "var(--k-accent)"
-                  : past
-                    ? "var(--k-t3)"
+                color: past
+                  ? "var(--k-t2)"
+                  : isBooked
+                    ? "var(--k-accent)"
                     : "var(--k-t1)",
                 lineHeight: 1,
               }}
@@ -567,7 +607,9 @@ function ClassRow({
                   style={{
                     color: "inherit",
                     textDecoration: "underline",
-                    textDecorationColor: "var(--k-accent-line)",
+                    textDecorationColor: past
+                      ? "var(--k-line-2)"
+                      : "var(--k-accent-line)",
                     textUnderlineOffset: 3,
                   }}
                   onClick={(e) => e.stopPropagation()}
@@ -631,7 +673,7 @@ function ClassRow({
                   fontSize: 10,
                   fontWeight: 700,
                   letterSpacing: "0.06em",
-                  color: full ? "var(--k-accent)" : "var(--k-t2)",
+                  color: full && !past ? "var(--k-accent)" : "var(--k-t2)",
                 }}
               >
                 {c.bookedCount}/{c.capacity}
@@ -647,8 +689,17 @@ function ClassRow({
             style={{ flexShrink: 0 }}
           >
             {past ? (
+              /*
+               * "VER RESULTADOS" medía 144 px de los 328 del card a 360 px y dejaba
+               * 63 px al cuerpo: el WOD se leía "1RM Ba…" y el coach "Coach Lo…".
+               * Con el card ya sin `opacity` esa mutilación queda a la vista.
+               * "RESULTADOS" + la flecha dicen lo mismo y le devuelven ~30 px al
+               * nombre del WOD, que es el dato por el que el atleta abre una clase
+               * terminada. El `aria-label` conserva la frase completa.
+               */
               <Link
                 href={`/atleta/wod?date=${wodDateKey}` as Route}
+                aria-label={`Ver resultados de ${c.wod?.name ?? "la clase"}`}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -668,7 +719,7 @@ function ClassRow({
                   whiteSpace: "nowrap",
                 }}
               >
-                Ver resultados
+                Resultados
                 <ChevronRight width={13} height={13} aria-hidden />
               </Link>
             ) : (

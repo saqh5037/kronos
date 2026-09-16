@@ -55,18 +55,7 @@
     "width": 360,
     "height": 780,
     "mobile": true,
-    "violations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "nodes": 3,
-        "sample": [
-          "a[aria-label=\"Reservar\"] > span:nth-child(2)",
-          "a[aria-label=\"Skills\"] > span:nth-child(2)"
-        ]
-      }
-    ],
+    "violations": [],
     "passes": 23,
     "incomplete": 1
   },
@@ -76,20 +65,9 @@
     "width": 360,
     "height": 780,
     "mobile": true,
-    "violations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "nodes": 21,
-        "sample": [
-          "div[data-tour=\"reservar.class-card\"] > div > div:nth-child(1) > div:nth-child(1)",
-          "div[data-tour=\"reservar.class-card\"] > div > div:nth-child(1) > div:nth-child(2)"
-        ]
-      }
-    ],
+    "violations": [],
     "passes": 21,
-    "incomplete": 1
+    "incomplete": 0
   },
   {
     "role": "atleta",
@@ -107,20 +85,9 @@
     "width": 360,
     "height": 780,
     "mobile": true,
-    "violations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "nodes": 18,
-        "sample": [
-          ".grid > div:nth-child(5) > div > div:nth-child(2) > div:nth-child(1)",
-          "div:nth-child(5) > div > div:nth-child(2) > div:nth-child(2)"
-        ]
-      }
-    ],
+    "violations": [],
     "passes": 20,
-    "incomplete": 1
+    "incomplete": 0
   },
   {
     "role": "owner",
