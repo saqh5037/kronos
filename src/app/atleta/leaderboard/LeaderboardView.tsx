@@ -28,6 +28,7 @@ import {
   AnimatedItem,
 } from "@/components/kronos/AnimatedSection";
 import { formatScore } from "@/lib/scores";
+import { rankLabel } from "@/lib/scores/copy";
 import { scalingLabel } from "@/lib/labels";
 import type { Scaling } from "@prisma/client";
 import type { ScoreType } from "@/lib/validations/wod";
@@ -74,6 +75,11 @@ function EmptyBoard({ message }: { message: string }) {
   );
 }
 
+/**
+ * P2: the "no cohort" rule was reimplemented inline here and in
+ * `LeaderboardSection`, so a third surface could invent a fourth answer.
+ * `rankLabel` in `src/lib/scores/copy.ts` owns it (and has the tests).
+ */
 function MyPositionNote({
   myRank,
   total,
@@ -81,7 +87,8 @@ function MyPositionNote({
   myRank: number | null;
   total: number;
 }) {
-  if (myRank === null || total === 0) return null;
+  const label = rankLabel(myRank, total);
+  if (label === "sin datos") return null;
   return (
     <p
       className="px-1 mt-2"
@@ -94,7 +101,7 @@ function MyPositionNote({
         color: "var(--k-t3)",
       }}
     >
-      Tu posición: #{myRank} de {total}
+      Tu posición: {label}
     </p>
   );
 }

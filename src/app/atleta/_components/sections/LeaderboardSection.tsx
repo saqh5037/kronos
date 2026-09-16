@@ -19,6 +19,7 @@ import {
 } from "@/components/kronos/AnimatedSection";
 import RevealOnScroll from "@/components/kronos/RevealOnScroll";
 import { formatScore } from "@/lib/scores";
+import { rankLabel } from "@/lib/scores/copy";
 import { scalingLabel } from "@/lib/labels";
 import type { Scaling } from "@prisma/client";
 import type { BoardRow } from "@/lib/scores/leaderboard";
@@ -214,7 +215,8 @@ export async function LeaderboardSection() {
             />
           )}
         </div>
-        {board.myRank !== null && board.totalAthletes > 0 && (
+        {/* P2: same rule as /atleta/leaderboard, one implementation. */}
+        {rankLabel(board.myRank, board.totalAthletes) !== "sin datos" && (
           <p
             style={{
               margin: "8px 4px 0",
@@ -226,7 +228,7 @@ export async function LeaderboardSection() {
               color: "var(--k-t3)",
             }}
           >
-            Vas #{board.myRank} de {board.totalAthletes}
+            Vas {rankLabel(board.myRank, board.totalAthletes)}
           </p>
         )}
       </div>

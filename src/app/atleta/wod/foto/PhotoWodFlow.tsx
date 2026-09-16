@@ -12,6 +12,7 @@ import {
 import type { PhotoWodAIResult } from "@/server/ocr/photo-wod";
 import { fireAchievementToast } from "@/components/atleta/AchievementToast";
 import { formatScore } from "@/lib/scores";
+import { ArrowLeft, ArrowRight, Camera } from "lucide-react";
 
 type WodType = "FORTIME" | "AMRAP" | "EMOM" | "TABATA" | "STRENGTH" | "CUSTOM";
 type ScoreType = "TIME" | "REPS" | "WEIGHT" | "ROUNDS_REPS";
@@ -275,15 +276,12 @@ export default function PhotoWodFlow() {
             />
           ) : (
             <>
-              <div
-                style={{
-                  fontSize: 40,
-                  marginBottom: 8,
-                  color: "var(--k-t2)",
-                }}
-              >
-                📷
-              </div>
+              <Camera
+                size={40}
+                strokeWidth={1.5}
+                aria-hidden
+                style={{ margin: "0 auto 8px", color: "var(--k-t2)" }}
+              />
               <div
                 style={{
                   fontSize: 14,
@@ -292,7 +290,7 @@ export default function PhotoWodFlow() {
                   marginBottom: 4,
                 }}
               >
-                Tocá para tomar foto
+                Toca para tomar foto
               </div>
               <div style={{ fontSize: 11, color: "var(--k-t3)" }}>
                 JPG, PNG o WEBP · max 8 MB
@@ -315,7 +313,21 @@ export default function PhotoWodFlow() {
               cursor: pending ? "wait" : "pointer",
             }}
           >
-            {pending ? "Analizando…" : "Analizar foto →"}
+            {pending ? (
+              "Analizando…"
+            ) : (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
+              >
+                Analizar foto
+                <ArrowRight size={16} aria-hidden />
+              </span>
+            )}
           </button>
         ) : (
           <p
@@ -331,7 +343,16 @@ export default function PhotoWodFlow() {
               href="/atleta/wod/nuevo"
               style={{ color: "var(--k-t2)", textDecoration: "underline" }}
             >
-              Cargar manualmente →
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                }}
+              >
+                Cargar manualmente
+                <ArrowRight size={12} aria-hidden />
+              </span>
             </Link>
           </p>
         )}
@@ -478,7 +499,21 @@ export default function PhotoWodFlow() {
           cursor: pending ? "wait" : "pointer",
         }}
       >
-        {pending || step === "saving" ? "Guardando…" : "Confirmar y guardar →"}
+        {pending || step === "saving" ? (
+          "Guardando…"
+        ) : (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+            }}
+          >
+            Confirmar y guardar
+            <ArrowRight size={16} aria-hidden />
+          </span>
+        )}
       </button>
       <button
         type="button"
@@ -493,7 +528,10 @@ export default function PhotoWodFlow() {
           cursor: "pointer",
         }}
       >
-        ← Tomar otra foto
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+          <ArrowLeft size={12} aria-hidden />
+          Tomar otra foto
+        </span>
       </button>
     </div>
   );

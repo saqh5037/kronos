@@ -11,6 +11,11 @@ import { join, relative } from "node:path";
  *  2. no Argentine voseo (CLAUDE.md: neutral Mexican Spanish)
  *  3. no legacy `var(--text|--card|--line|--bg|--accent)` tokens — `--k-*` only
  *  4. no `window.alert` / `window.confirm`
+ *  5. no vendor names in athlete-facing copy (P1-7) — "OCR Gemini" told the
+ *     athlete which model reads the whiteboard; that is our plumbing, not a
+ *     feature they bought
+ *  6. no promises of things that do not ship (P1-8) — an Apple Health card sat
+ *     in onboarding with `onClick={() => {}}` and "Disponible en iOS app"
  */
 
 const ROOT = process.cwd();
@@ -89,6 +94,7 @@ const GLYPH_ICON_RE = new RegExp(
 
 const VOSEO_WORDS = [
   "dale",
+  "acá",
   "che",
   "vos",
   "sos",
@@ -130,7 +136,16 @@ const VOSEO_WORDS = [
   "tomá",
   "agarrá",
 ];
-const VOSEO_RE = new RegExp(`\\b(${VOSEO_WORDS.join("|")})\\b`, "iu");
+/**
+ * Unicode letter lookarounds, not `\b`. JavaScript's `\b` is ASCII-only, so
+ * `/\bmirá\b/` never fires: the boundary after `á` demands a word character and
+ * `á` is not one. Most voseo forms end in an accent, so `\b` silently disabled
+ * two thirds of this list (the same trap documented in scripts/guards/rules.ts).
+ */
+const VOSEO_RE = new RegExp(
+  `(?<!\\p{L})(?:${VOSEO_WORDS.join("|")})(?!\\p{L})`,
+  "iu",
+);
 
 /** `var(--text)`, `var(--card-2)`, `var(--fire-line)`… but never `var(--k-*)`. */
 const LEGACY_TOKEN_RE =
@@ -154,7 +169,7 @@ describe("scan patterns (self-check)", () => {
 
   it("does not flag ordinary Spanish punctuation or tokens", () => {
     for (const s of [
-      "OCR Gemini · 1 WOD por foto",
+      "Sube una foto de la pizarra · 1 WOD por foto",
       "Mañana a las 18:30 — CrossFit 101",
       "¿Qué hiciste hoy?",
       'style={{ color: "var(--k-t3)" }}',
@@ -166,8 +181,13 @@ describe("scan patterns (self-check)", () => {
   it("flags voseo but not neutral Mexican Spanish", () => {
     expect(VOSEO_RE.test("Pedile a tu Box")).toBe(true);
     expect(VOSEO_RE.test("¿Querés entrenar?")).toBe(true);
+    // Accent-final forms: these silently passed while the regex used `\b`.
+    expect(VOSEO_RE.test("Tocá para tomar foto")).toBe(true);
+    expect(VOSEO_RE.test("Mirá tu progreso")).toBe(true);
+    expect(VOSEO_RE.test("Dejá tu score acá")).toBe(true);
     expect(VOSEO_RE.test("Pide a tu box que te invite")).toBe(false);
     expect(VOSEO_RE.test("Ya está listo, revisa tu correo")).toBe(false);
+    expect(VOSEO_RE.test("Aquí está tu historial")).toBe(false);
   });
 
   it("flags legacy tokens but not --k-* tokens", () => {
@@ -231,6 +251,98 @@ describe("no native dialogs in owned files", () => {
       expect(offenders, offenders.join("\n")).toEqual([]);
     },
   );
+});
+
+/* -------------------------------------------------------------------------- */
+/* Copy-only scans: vendor names and unshipped promises                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The athlete-visible text on a line: every quoted/template literal plus every
+ * JSX text node. Identifiers are deliberately out of scope — `Sentry.captureException`
+ * is plumbing the athlete never reads, and banning the symbol would ban error
+ * reporting. Module specifiers (`"@sentry/nextjs"`, `"./foo"`) are dropped for
+ * the same reason.
+ */
+function visibleText(line: string): string {
+  const parts: string[] = [];
+  const literals = line.match(/"[^"]*"|'[^']*'|`[^`]*`/g) ?? [];
+  for (const raw of literals) {
+    const inner = raw.slice(1, -1);
+    if (/^(@|\.{0,2}\/)/.test(inner)) continue; // module path, not copy
+    parts.push(inner);
+  }
+  // JSX text between tags on the same line…
+  for (const m of line.matchAll(/>([^<>{}]+)</g)) parts.push(m[1]);
+  // …and the far more common case: a text node alone on its own line, which
+  // by definition carries none of JSX/TS's structural punctuation.
+  if (line.trim() !== "" && !/[<>{}();=]/.test(line)) parts.push(line);
+  return parts.join(" ");
+}
+
+/**
+ * P1-7. Whoop is deliberately absent: the athlete connects that device on
+ * purpose, so naming it is the feature. Gemini, OpenAI, Sentry and PostHog are
+ * ours.
+ */
+const VENDOR_RE = /\bgemini\b|\bopenai\b|\bocr\b|\bsentry\b|\bposthog\b/i;
+
+describe("no vendor names in athlete-facing copy", () => {
+  it.each(FILES.map((f) => [relative(ROOT, f), f] as const))(
+    "%s",
+    (_rel, abs) => {
+      const offenders = codeLines(read(abs))
+        .filter(({ text }) => VENDOR_RE.test(visibleText(text)))
+        .map(({ line, text }) => `${line}: ${text.trim()}`);
+      expect(offenders, offenders.join("\n")).toEqual([]);
+    },
+  );
+});
+
+/** P1-8. Copy that sells a native app, a store listing or a health integration. */
+const UNSHIPPED_RE =
+  /apple health|app nativa|disponible en (ios|android)|app store|play store/i;
+
+describe("no promises the product does not ship", () => {
+  it.each(FILES.map((f) => [relative(ROOT, f), f] as const))(
+    "%s",
+    (_rel, abs) => {
+      const offenders = codeLines(read(abs))
+        .filter(({ text }) => UNSHIPPED_RE.test(visibleText(text)))
+        .map(({ line, text }) => `${line}: ${text.trim()}`);
+      expect(offenders, offenders.join("\n")).toEqual([]);
+    },
+  );
+});
+
+describe("copy-only scan patterns (self-check)", () => {
+  it("reads strings and JSX text, not identifiers or imports", () => {
+    expect(
+      VENDOR_RE.test(visibleText('import * as Sentry from "@sentry/nextjs";')),
+    ).toBe(false);
+    expect(
+      VENDOR_RE.test(visibleText("    Sentry.captureException(error);")),
+    ).toBe(false);
+    expect(
+      VENDOR_RE.test(visibleText("              OCR Gemini · 1 WOD por foto")),
+    ).toBe(true);
+    expect(
+      VENDOR_RE.test(
+        visibleText(
+          "              Sube una foto de la pizarra · 1 WOD por foto",
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  it("flags unshipped promises but not shipped copy", () => {
+    expect(UNSHIPPED_RE.test("Sincronizar con Apple Health")).toBe(true);
+    expect(UNSHIPPED_RE.test("Disponible en iOS app")).toBe(true);
+    expect(UNSHIPPED_RE.test("Instala Kronos en tu pantalla de inicio")).toBe(
+      false,
+    );
+    expect(UNSHIPPED_RE.test("Conecta tu Whoop")).toBe(false);
+  });
 });
 
 /** File contents with comments removed, so prose never satisfies a JSX assertion. */

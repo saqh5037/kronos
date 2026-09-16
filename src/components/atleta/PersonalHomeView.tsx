@@ -9,6 +9,7 @@ import {
 import PersonalizedGreeting from "@/components/atleta/PersonalizedGreeting";
 import { StreakHero } from "@/components/atleta/StreakHero";
 import KCard from "@/components/kronos/KCard";
+import { formatDateShort } from "@/lib/format";
 import CoachCardsSection from "@/components/atleta/CoachCardsSection";
 import { getMyCoachCards } from "@/server/actions/coach-cards";
 import {
@@ -309,10 +310,7 @@ export default async function PersonalHomeView() {
                         marginTop: 2,
                       }}
                     >
-                      {new Date(pr.achievedAt).toLocaleDateString("es-MX", {
-                        day: "numeric",
-                        month: "short",
-                      })}
+                      {formatDateShort(new Date(pr.achievedAt))}
                     </div>
                   </div>
                   <div

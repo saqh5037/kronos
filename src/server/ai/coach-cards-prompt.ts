@@ -234,6 +234,70 @@ export function parseCoachCardResponse(raw: string): GeneratedCoachCard[] {
   }));
 }
 
+/**
+ * Deterministic fallback for when the model is unreachable, rate-limited, or
+ * answers with something `parseCoachCardResponse` rejects.
+ *
+ * CLAUDE.md claims every AI flow has one; this was the flow that did not, so a
+ * single bad JSON response made the whole CoachCards section vanish from
+ * `/atleta` with no trace the athlete could see. These cards say less than the
+ * model's, but they are built from the athlete's real numbers and they always
+ * render. Capped at three because that is what the read query takes.
+ */
+export function deterministicCoachCards(
+  input: CoachCardInput,
+): GeneratedCoachCard[] {
+  const { facts } = input;
+  const cards: GeneratedCoachCard[] = [];
+
+  const [pr] = facts.recentPRs;
+  if (pr) {
+    cards.push({
+      type: "CELEBRATION",
+      title: `Subiste tu ${pr.movementName}`,
+      body: `Mejoraste ${pr.deltaPct.toFixed(1)} % en ${pr.movementName}. Ese avance es tuyo: sostén la carga antes de volver a subirla.`,
+      priority: 10,
+    });
+  }
+
+  const [stuck] = facts.stagnantPRs;
+  if (stuck) {
+    cards.push({
+      type: "STAGNATION",
+      title: `${stuck.movementName} lleva ${stuck.daysStuck} días igual`,
+      body: `Tu mejor marca sigue en ${stuck.lastValue}. Prueba una sesión enfocada en ${stuck.movementName} esta semana.`,
+      ctaLabel: "Ver más",
+      ctaHref: "/atleta/movimientos",
+      priority: 20,
+      meta: { movementSlug: null, source: "fallback" },
+    });
+  }
+
+  const [unlock] = facts.nextUnlocks;
+  if (unlock) {
+    cards.push({
+      type: "NEXT_UNLOCK",
+      title: `Sigue ${unlock.nextProgressionName}`,
+      body: `En ${unlock.movementName} estás en ${unlock.currentProgressionName}. El siguiente paso es ${unlock.nextProgressionName}.`,
+      ctaLabel: "Ver más",
+      ctaHref: "/atleta/skills",
+      priority: 30,
+    });
+  }
+
+  const [gap] = facts.avoidancePatterns;
+  if (gap) {
+    cards.push({
+      type: "AVOIDANCE_PATTERN",
+      title: `${gap.muscleGroup} sin trabajo`,
+      body: `Llevas ${gap.daysWithout} días sin entrenar ${gap.muscleGroup}. Súmalo a tu próximo WOD para no dejar un hueco.`,
+      priority: 40,
+    });
+  }
+
+  return cards.slice(0, 3);
+}
+
 function stripCodeFences(s: string): string {
   const fenceMatch = s.match(/```(?:json)?\s*\n([\s\S]*?)\n```/);
   if (fenceMatch?.[1]) return fenceMatch[1];

@@ -20,6 +20,7 @@ import {
   countUnreadNotifications,
 } from "@/server/actions/notifications";
 import type { NotificationRow } from "@/server/actions/notifications";
+import { formatTime24 } from "@/lib/format";
 
 const POLL_INTERVAL_MS = 60_000;
 
@@ -273,10 +274,7 @@ export default function NotificationBell() {
                           </p>
                         )}
                         <p className="text-xs text-[var(--k-t3)] mt-1 font-mono">
-                          {n.createdAt.toLocaleTimeString("es-MX", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {formatTime24(n.createdAt)}
                         </p>
                       </div>
                       {!n.readAt && (

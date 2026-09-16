@@ -15,7 +15,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { CircleCheck, CircleX, Clock } from "lucide-react";
-import { formatMXN } from "@/lib/format";
+import { formatInt, formatMXN } from "@/lib/format";
 import { paymentGatewayLabel } from "@/lib/labels";
 import type { PaymentGateway } from "@prisma/client";
 import {
@@ -101,7 +101,7 @@ export default function PaymentResultClient({
   const amountLabel = payment
     ? payment.currency.toUpperCase() === "MXN"
       ? formatMXN(payment.amount)
-      : `${payment.amount.toLocaleString("es-MX")} ${payment.currency}`
+      : `${formatInt(payment.amount)} ${payment.currency}`
     : null;
   const methodLabel = payment
     ? (paymentGatewayLabel[payment.gateway as PaymentGateway] ??

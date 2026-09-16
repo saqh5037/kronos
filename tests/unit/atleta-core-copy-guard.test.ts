@@ -27,19 +27,23 @@ const OWNED_DIRS = [
   "src/app/atleta/plan",
   "src/components/atleta",
   "src/lib/scores",
+  // The athlete's first screen of the product. It was owned by no guard, and
+  // shipped "✓ ¡Listo!" in two places (fase 0 fix wave, 2026-09-16).
+  "src/app/invitacion",
 ];
 
 const OWNED_FILES = ["src/app/atleta/page.tsx", "src/app/atleta/loading.tsx"];
 
-/** Explicitly NOT ours (other agents own these in the same wave). */
+/**
+ * Explicitly NOT ours (other agents own these in the same wave).
+ *
+ * `wod/nuevo` and `wod/foto` came OFF this list in the fase 0 fix wave
+ * (2026-09-16): nothing else scanned them, and `PhotoWodFlow` was shipping a
+ * 📷 emoji as its camera icon, "Tocá para tomar foto" and four unicode arrows
+ * as affordances. A file that no guard owns is a file that drifts.
+ */
 const EXCLUDED = new Set(
   [
-    "src/app/atleta/wod/nuevo/page.tsx",
-    "src/app/atleta/wod/nuevo/QuickWodForm.tsx",
-    "src/app/atleta/wod/nuevo/loading.tsx",
-    "src/app/atleta/wod/foto/page.tsx",
-    "src/app/atleta/wod/foto/PhotoWodFlow.tsx",
-    "src/app/atleta/wod/foto/loading.tsx",
     "src/components/atleta/PushSubscribeButton.tsx",
     "src/components/atleta/InstallPwaBanner.tsx",
     "src/components/atleta/NotificationBell.tsx",
@@ -78,9 +82,7 @@ const files: { path: string; rel: string; source: string }[] = [
 
 /** Strip comments so documentation about a banned string is not a violation. */
 function stripComments(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/^\s*\/\/.*$/gm, "");
+  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 }
 
 function offenders(pattern: RegExp, opts: { stripComments?: boolean } = {}) {

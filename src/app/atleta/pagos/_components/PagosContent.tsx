@@ -22,7 +22,7 @@ import {
   paymentStatusLabel,
   planTypeLabel,
 } from "@/lib/labels";
-import { formatDateLong, formatMXN } from "@/lib/format";
+import { formatDateLong, formatInt, formatMXN } from "@/lib/format";
 
 type Membership = Awaited<ReturnType<typeof listAthleteMemberships>>[number];
 
@@ -40,7 +40,7 @@ function money(amount: number, currency: string): string {
   // The shared MXN formatter covers the only currency the product bills in;
   // anything else prints the raw code rather than a wrong symbol.
   if (currency.toUpperCase() === "MXN") return formatMXN(amount);
-  return `${amount.toLocaleString("es-MX")} ${currency}`;
+  return `${formatInt(amount)} ${currency}`;
 }
 
 function statusChipStyle(variant: StatusVariant): React.CSSProperties {

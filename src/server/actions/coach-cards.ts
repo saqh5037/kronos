@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { authOptions } from "../auth";
 import { db as rawDb } from "../db";
 import {
+  deterministicCoachCards,
   generateCoachCards,
   type CoachCardInput,
   type GeneratedCoachCard,
@@ -161,14 +162,18 @@ export async function generateCoachCardsForAthlete(
     facts,
   };
 
+  // P2: a bad JSON answer used to be swallowed here and the whole CoachCards
+  // section disappeared from /atleta with no trace. There is real signal at
+  // this point (`hasSignal` above), so we always have something honest to say.
   let generated: GeneratedCoachCard[];
   try {
     generated = await generateCoachCards(input);
   } catch (err) {
-    console.error("[coach-cards] AI generation failed:", err);
-    return { generated: 0 };
+    console.error("[coach-cards] AI generation failed, using fallback:", err);
+    generated = deterministicCoachCards(input);
   }
 
+  if (generated.length === 0) generated = deterministicCoachCards(input);
   if (generated.length === 0) return { generated: 0 };
 
   const validUntil = new Date(now.getTime() + ONE_WEEK_MS);

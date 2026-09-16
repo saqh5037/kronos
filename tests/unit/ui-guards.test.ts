@@ -48,6 +48,16 @@
  *                  names on purpose. Baseline: 213 occurrences / 59 files.
  *   banned-hex     Pre-V3 hard-coded hexes `#19f08b #3aa3ff #1a3457 #0d1b2e
  *                  #07101e`. Already at 0 — an effective zero-tolerance gate.
+ *   to-locale-string
+ *                  A bare `toLocale*String(` in a component. It reads the
+ *                  AMBIENT timezone and locale, so SSR renders the server's
+ *                  zone and the browser re-renders the phone's — that is the
+ *                  P0-4 hydration mismatch on `/atleta/reservar`. The explicit
+ *                  formatters live in `src/lib/format.ts` (pinned to
+ *                  `America/Mexico_City`), which is why `src/lib` is not in
+ *                  the scanned roots. The athlete slice is already at zero
+ *                  (`tests/unit/atleta-format-tz.test.ts` keeps it there); the
+ *                  baseline still carries the admin and public files.
  *   raw-enum-jsx   A Prisma enum token rendered as literal JSX text
  *                  (`>PAID<`). Also 0: the audit's raw enums reach the DOM
  *                  through `{expression}` interpolation, which no regex can

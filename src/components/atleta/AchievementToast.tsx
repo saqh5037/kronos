@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, m } from "framer-motion";
+import { Trophy } from "lucide-react";
 
 export type AchievementBadge = {
   badgeId: string;
@@ -133,7 +134,7 @@ export function AchievementToastHost() {
                 flexShrink: 0,
               }}
             >
-              <TrophyIcon />
+              <Trophy size={22} strokeWidth={1.7} aria-hidden />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
@@ -216,25 +217,4 @@ function fireConfetti() {
   } catch {
     /* ignore */
   }
-}
-
-function TrophyIcon() {
-  return (
-    <svg
-      width={22}
-      height={22}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.7}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 21h8" />
-      <path d="M12 17v4" />
-      <path d="M7 4h10v6a5 5 0 0 1-10 0V4z" />
-      <path d="M7 6H4a2 2 0 0 0 0 4h3" />
-      <path d="M17 6h3a2 2 0 0 1 0 4h-3" />
-    </svg>
-  );
 }

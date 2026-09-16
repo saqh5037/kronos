@@ -60,7 +60,7 @@ export default function OnboardingWizard({ isB2B, boxName, coachName }: Props) {
   function next() {
     if (state.step < TOTAL_STEPS) {
       // Fire-and-forget: el log de progreso no debe bloquear la navegación.
-      // logAudit ya catchea internamente, así que el .catch acá es defensivo
+      // logAudit ya catchea internamente, así que el .catch aquí es defensivo
       // contra errores de red durante el fetch del server action.
       const stepCompleted = state.step;
       void logOnboardingStep(stepCompleted).catch((err) => {

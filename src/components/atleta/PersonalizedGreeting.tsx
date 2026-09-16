@@ -53,7 +53,7 @@ export default function PersonalizedGreeting({
         <div
           className="relative overflow-hidden rounded-[16px] p-4"
           style={{
-            background: "var(--card)",
+            background: "var(--k-surface)",
             border: "1px solid var(--k-line-2)",
             boxShadow: `0 0 0 1px ${style.glow}, 0 12px 36px ${style.glow}`,
           }}
@@ -134,7 +134,7 @@ export default function PersonalizedGreeting({
               </div>
               <p
                 className="font-display text-[16px] leading-[1.45] font-semibold"
-                style={{ color: "var(--text)" }}
+                style={{ color: "var(--k-t1)" }}
               >
                 {greeting.text}
               </p>

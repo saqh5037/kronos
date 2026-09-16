@@ -43,7 +43,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
         <div className="pl-12 pr-4 lg:pl-4" style={{ paddingTop: 48 }}>
           <AthleteBackLink href="/atleta/eventos" label="Eventos" />
         </div>
-        <main className="px-4 pb-24 pt-4 max-w-2xl mx-auto">
+        <div className="px-4 pb-24 pt-4 max-w-2xl mx-auto">
           <header className="mb-5">
             {event.partnerName ? (
               <p
@@ -114,7 +114,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
               </p>
             )}
           </div>
-        </main>
+        </div>
       </>
     );
   }
@@ -126,7 +126,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
         <div className="pl-12 pr-4 lg:pl-4" style={{ paddingTop: 48 }}>
           <AthleteBackLink href="/atleta/eventos" label="Eventos" />
         </div>
-        <main className="px-4 pb-24 pt-4 max-w-2xl mx-auto">
+        <div className="px-4 pb-24 pt-4 max-w-2xl mx-auto">
           <header className="mb-4">
             {event.partnerName ? (
               <p
@@ -183,7 +183,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
               Capturar código
             </Link>
           </div>
-        </main>
+        </div>
       </>
     );
   }
@@ -193,7 +193,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
       <div className="pl-12 pr-4 lg:pl-4" style={{ paddingTop: 48 }}>
         <AthleteBackLink href="/atleta/eventos" label="Eventos" />
       </div>
-      <main className="px-4 pb-24 pt-4 max-w-2xl mx-auto">
+      <div className="px-4 pb-24 pt-4 max-w-2xl mx-auto">
         <header className="mb-5">
           {event.partnerName ? (
             <p className="k-eyebrow mb-1" style={{ color: "var(--k-accent)" }}>
@@ -324,7 +324,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
             para este evento.
           </div>
         )}
-      </main>
+      </div>
     </>
   );
 }

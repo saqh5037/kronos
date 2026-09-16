@@ -1,5 +1,11 @@
 import { test, expect, type ConsoleMessage, type Page } from "@playwright/test";
 import { loginAs } from "./fixtures/auth";
+import {
+  db,
+  disconnect,
+  ensureDemoAthleteOnboarded,
+  getDemoAthlete,
+} from "./fixtures/db";
 
 /**
  * Runtime-error floor for the athlete surface.
@@ -25,6 +31,17 @@ import { loginAs } from "./fixtures/auth";
  *     client` on `/atleta/perfil`, caused by `PushSubscribeButton` seeding
  *     `useState` from `Notification.permission` / `serviceWorker`.
  *
+ * P1-17: this spec passed alone and failed in a full run. `atleta-onboarding-*`
+ * clears `onboardingCompletedAt` on the same seed athlete, and the layout then
+ * redirects every `/atleta/*` request to `/atleta/onboarding` — so the landmark
+ * and error assertions ran against the wizard. `beforeEach` re-onboards, which
+ * makes the spec independent of execution order.
+ *
+ * P1-9: four athlete pages rendered their own `<main>` INSIDE the layout's
+ * `<main id="main">`. The landmark assertion below runs over every static
+ * athlete route, not just `/atleta`, because that is how the duplicates
+ * survived.
+ *
  * `atleta@iron-hands.demo` is a BOX athlete (Iron Hands, non-personal slug),
  * which is exactly the actor that reproduced both errors.
  */
@@ -38,6 +55,32 @@ const ROUTES = [
   "/atleta/wod/foto",
   "/atleta/pagos",
   "/atleta/onboarding",
+] as const;
+
+/**
+ * Every static athlete route. Dynamic segments (`[slug]`, `[code]`, `[id]`)
+ * are out: they need a seeded entity per run and the landmark contract does not
+ * change with the id.
+ */
+const LANDMARK_ROUTES = [
+  "/atleta",
+  "/atleta/ajustes",
+  "/atleta/ayuda",
+  "/atleta/eventos",
+  "/atleta/historial",
+  "/atleta/leaderboard",
+  "/atleta/logros",
+  "/atleta/movimientos",
+  "/atleta/pagos",
+  "/atleta/perfil",
+  "/atleta/plan",
+  "/atleta/programa",
+  "/atleta/reservar",
+  "/atleta/salud",
+  "/atleta/skills",
+  "/atleta/wod",
+  "/atleta/wod/foto",
+  "/atleta/wod/nuevo",
 ] as const;
 
 /** Console errors that prove a React tree-integrity failure. */
@@ -65,6 +108,14 @@ function collect(page: Page): Collected {
 }
 
 test.describe("athlete surface runtime errors", () => {
+  test.beforeEach(async () => {
+    await ensureDemoAthleteOnboarded();
+  });
+
+  test.afterAll(async () => {
+    await disconnect();
+  });
+
   test("box athlete browses every personal-box route with zero page errors", async ({
     page,
   }) => {
@@ -130,15 +181,54 @@ test.describe("athlete surface runtime errors", () => {
     }
   });
 
-  test("the athlete surface exposes one main landmark and a skip link", async ({
+  test("every athlete route exposes exactly one main landmark", async ({
     page,
   }) => {
+    test.setTimeout(300_000); // cold dev compile per route
     await loginAs(page, "atleta");
-    await page.goto("/atleta", { waitUntil: "load", timeout: 60_000 });
 
-    await expect(page.locator("main#main")).toHaveCount(1);
-    await expect(
-      page.getByRole("link", { name: /saltar al contenido/i }),
-    ).toHaveCount(1);
+    for (const route of LANDMARK_ROUTES) {
+      await page.goto(route, { waitUntil: "load", timeout: 60_000 });
+      await expect(page.locator("main"), `${route} main count`).toHaveCount(1);
+      await expect(page.locator("main#main"), `${route} main#main`).toHaveCount(
+        1,
+      );
+      await expect(
+        page.getByRole("link", { name: /saltar al contenido/i }),
+        `${route} skip link`,
+      ).toHaveCount(1);
+    }
+  });
+
+  test("the onboarding wizard is fullscreen and still has one main", async ({
+    page,
+  }) => {
+    // `/atleta/onboarding` is the one athlete route the layout renders WITHOUT
+    // its shell (no drawer, no tab bar, no skip link): the wizard owns the
+    // landmark so the athlete cannot navigate away mid-flow.
+    //
+    // It only renders for an athlete who has NOT finished onboarding — an
+    // onboarded one is bounced to `/atleta`, which aborts the navigation
+    // (`net::ERR_ABORTED`). `beforeEach` onboards the seed athlete, so this
+    // test undoes that for itself and puts it back in `finally`.
+    const athlete = await getDemoAthlete();
+    await db().athlete.update({
+      where: { id: athlete.id },
+      data: { onboardingCompletedAt: null, onboardingSkippedAt: null },
+    });
+    try {
+      await loginAs(page, "atleta");
+      await page.goto("/atleta/onboarding", {
+        waitUntil: "load",
+        timeout: 60_000,
+      });
+      await expect(page).toHaveURL(/\/atleta\/onboarding/);
+      await expect(page.getByText(/PASO 1 DE/i)).toBeVisible({
+        timeout: 15_000,
+      });
+      await expect(page.locator("main")).toHaveCount(1);
+    } finally {
+      await ensureDemoAthleteOnboarded();
+    }
   });
 });

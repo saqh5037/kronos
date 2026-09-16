@@ -28,6 +28,7 @@ import {
 } from "@/components/kronos/AnimatedSection";
 import { formatScore } from "@/lib/scores";
 import { scalingLabel } from "@/lib/labels";
+import { formatDateLong } from "@/lib/format";
 import type { Scaling } from "@prisma/client";
 import type { ScoreType } from "@/lib/validations/wod";
 import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
@@ -233,8 +234,7 @@ export default function HistorialPage({ wodOptions }: Props) {
               <span
                 className="text-[9px] font-bold"
                 style={{
-                  color:
-                    s.scaling === "SCALED" ? "var(--k-t3)" : "var(--k-t2)",
+                  color: s.scaling === "SCALED" ? "var(--k-t3)" : "var(--k-t2)",
                 }}
               >
                 {scalingLabel[s.scaling as Scaling] ?? s.scaling}
@@ -248,11 +248,7 @@ export default function HistorialPage({ wodOptions }: Props) {
                 className="text-[10px] font-mono"
                 style={{ color: "var(--k-t3)" }}
               >
-                {new Date(s.createdAt).toLocaleDateString("es-MX", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })}
+                {formatDateLong(new Date(s.createdAt))}
               </div>
             </div>
             {/*

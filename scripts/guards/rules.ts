@@ -206,6 +206,14 @@ export const RULES: readonly GuardRule[] = [
     hint: "Use --k-accent (#c8ff2d), --k-danger (#ff5a5a) or --k-warning (#ffb020).",
   },
   {
+    name: "to-locale-string",
+    summary:
+      "Bare toLocale*String() — reads the ambient timezone/locale, not the box's",
+    roots: SRC_UI,
+    pattern: () => /\.toLocale(?:Date|Time)?String\s*\(/g,
+    hint: "Use formatTime24 / formatDateShort / formatDateLong / formatInt / formatMXN from src/lib/format.ts (they pin America/Mexico_City). src/lib is not scanned, that is where the explicit formatters live.",
+  },
+  {
     name: "raw-enum-jsx",
     summary: "Raw Prisma enum token rendered as JSX text",
     roots: SRC_UI,

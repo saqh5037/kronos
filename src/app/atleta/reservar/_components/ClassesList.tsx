@@ -26,17 +26,20 @@ import { BookButton } from "@/components/BookingActions";
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
 import { EmptyState } from "@/components/kronos/EmptyState";
 import { wodTypeLabel, classKindLabel } from "@/lib/labels";
+import { formatDateShort, formatTime24 } from "@/lib/format";
 import type { WODType, ClassKind } from "@prisma/client";
 
-const formatTime = (d: Date) =>
-  new Date(d).toLocaleTimeString("es-MX", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+/**
+ * P0-4: both used to be bare `toLocale*String` calls inside this `"use client"`
+ * component, so SSR printed the class hour in the SERVER's zone and the browser
+ * re-printed it in the phone's. They now take the box timezone explicitly and
+ * go through the shared formatters.
+ */
+const formatTime = (d: Date, timeZone: string) =>
+  formatTime24(new Date(d), timeZone);
 
-const formatDayMonth = (d: Date) =>
-  new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short" });
+const formatDayMonth = (d: Date, timeZone: string) =>
+  formatDateShort(new Date(d), timeZone);
 
 type TimeBucket = "all" | "morning" | "midday" | "afternoon";
 
@@ -161,7 +164,9 @@ export function ClassesList({
   }, [filtered]);
 
   const activeFilterCount =
-    (type ? 1 : 0) + (coach ? 1 : 0) + (bucket !== "all" ? 1 : 0) +
+    (type ? 1 : 0) +
+    (coach ? 1 : 0) +
+    (bucket !== "all" ? 1 : 0) +
     (onlyUsual ? 1 : 0);
   const hasFilters = activeFilterCount > 0;
 
@@ -396,7 +401,7 @@ export function ClassesList({
                       color: "var(--k-t2)",
                     }}
                   >
-                    {formatDayMonth(date)}
+                    {formatDayMonth(date, boxTimezone)}
                   </p>
                 )}
                 {dayClasses.map((c) => (
@@ -524,7 +529,7 @@ function ClassRow({
                 lineHeight: 1,
               }}
             >
-              {formatTime(c.startsAt)}
+              {formatTime(c.startsAt, boxTimezone)}
             </div>
             <div
               style={{

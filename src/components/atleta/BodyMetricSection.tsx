@@ -9,6 +9,7 @@ import {
 } from "@/server/actions/body-metrics";
 import type { BodyMetricType } from "@/lib/validations/body-metric";
 import { useConfirm } from "@/lib/use-confirm";
+import { formatDateLong } from "@/lib/format";
 
 type Props = {
   initial: BodyMetricEntry[];
@@ -46,12 +47,13 @@ const TYPE_DEFAULT_UNIT: Record<
   CUSTOM: () => "",
 };
 
+/**
+ * P0-4: was a bare `toLocaleDateString` in a `"use client"` component, so the
+ * SSR pass and the phone could land on different civil days. `formatDateLong`
+ * pins the box timezone ("15 sep 2026").
+ */
 function formatDate(d: Date): string {
-  return d.toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "short",
-    year: "2-digit",
-  });
+  return formatDateLong(d);
 }
 
 function trendBetween(

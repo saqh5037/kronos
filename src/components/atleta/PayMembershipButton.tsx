@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatMXN } from "@/lib/format";
+import { formatInt, formatMXN } from "@/lib/format";
 
 export default function PayMembershipButton({
   paymentId,
@@ -55,7 +55,7 @@ export default function PayMembershipButton({
           : `Pagar ${
               currency.toUpperCase() === "MXN"
                 ? formatMXN(amount)
-                : `${amount.toLocaleString("es-MX")} ${currency}`
+                : `${formatInt(amount)} ${currency}`
             }`}
       </button>
       {error && (

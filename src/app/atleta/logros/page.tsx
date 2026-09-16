@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default function LogrosPage() {
   return (
-    <main
+    <div
       className="min-h-screen pb-28"
       style={{ background: "var(--k-bg)", color: "var(--k-t1)" }}
     >
@@ -50,6 +50,6 @@ export default function LogrosPage() {
       <Suspense fallback={<LogrosContentSkeleton />}>
         <LogrosContent />
       </Suspense>
-    </main>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Check } from "lucide-react";
 import { getInvitationByToken } from "@/server/actions/athlete-invitations";
 import { isInvitationActionable } from "@/lib/athlete-invitation";
 import { AcceptInvitationForm } from "./_components/AcceptInvitationForm";
@@ -25,8 +26,9 @@ export default async function InvitationPage({
     if (check.reason === "ACCEPTED") {
       return (
         <Layout boxName={inv.box.name} brandColor={inv.box.brandColor ?? null}>
-          <p className="font-bold text-[var(--k-accent)] text-lg mb-2">
-            ✓ ¡Listo!
+          <p className="font-bold text-[var(--k-accent)] text-lg mb-2 inline-flex items-center gap-1.5">
+            <Check size={18} aria-hidden />
+            ¡Listo!
           </p>
           <h1 className="font-display text-2xl font-bold mb-3">
             Tu cuenta ya está creada
@@ -87,8 +89,3 @@ export default async function InvitationPage({
     </Layout>
   );
 }
-
-/**
- * Una sola acción primaria (crear cuenta gratis) y una secundaria (ya tengo
- * cuenta). Antes había dos enlaces al mismo login y ninguna salida real.
- */

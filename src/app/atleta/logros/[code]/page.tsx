@@ -38,7 +38,7 @@ export default async function BadgeDetailPage({
     : null;
 
   return (
-    <main
+    <div
       className="min-h-screen pb-28"
       style={{ background: "var(--k-bg)", color: "var(--k-t1)" }}
     >
@@ -56,7 +56,7 @@ export default async function BadgeDetailPage({
         <CriteriaCard badge={badge} />
         <DescriptionCard badge={badge} athleteName={firstName ?? "Atleta"} />
       </div>
-    </main>
+    </div>
   );
 }
 

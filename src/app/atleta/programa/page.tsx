@@ -142,7 +142,7 @@ export default async function ProgramaPage() {
                 marginTop: 2,
               }}
             >
-              OCR Gemini · 1 WOD por foto
+              Sube una foto de la pizarra · 1 WOD por foto
             </div>
           </div>
           <ChevronRight

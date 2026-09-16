@@ -17,7 +17,7 @@ export default function EventosListPage() {
         <AthleteBackLink href="/atleta" label="Inicio" />
       </div>
 
-      <main className="px-4 pb-24 pt-4 max-w-2xl mx-auto">
+      <div className="px-4 pb-24 pt-4 max-w-2xl mx-auto">
         {/* HEADER — paints immediately */}
         <header className="mb-6">
           <p className="k-eyebrow" style={{ color: "var(--k-accent)" }}>
@@ -41,7 +41,7 @@ export default function EventosListPage() {
         <Suspense fallback={<EventosContentSkeleton />}>
           <EventosContent />
         </Suspense>
-      </main>
+      </div>
     </>
   );
 }
