@@ -63,7 +63,7 @@ export const SCREENS: Screen[] = [
     actions: [
       "Ver el WOD del día con peso por movimiento",
       "Anotar score manual (tiempo · reps · peso)",
-      "Subir foto del pizarrón → la IA detecta tu marca",
+      "Subir la foto del pizarrón para que la IA detecte tu marca",
       "Ver tu mejor histórico y una mini gráfica de tus últimos 5 intentos",
       "Comparar contra el leaderboard completo del box",
     ],
@@ -117,7 +117,7 @@ export const SCREENS: Screen[] = [
       "Activar la habilidad que quieres mejorar",
       "Ver progresiones desbloqueables (logradas · actual · bloqueadas)",
       "Leer cards del coach IA personalizadas a tu progreso",
-      "Tap a un movimiento → técnica completa + PR + historia",
+      "Tap a un movimiento para ver técnica completa, PR e historia",
       "Ver predicción IA de tus próximos pasos",
     ],
     deepLink: "/atleta/skills",
@@ -151,7 +151,7 @@ export const SCREENS: Screen[] = [
       "Pantalla de movimientos con ranking por frecuencia y métricas por movimiento",
     actions: [
       "Ver ranking de tus 50 movimientos más entrenados",
-      "Tap a un movimiento → técnica + PR + progresión histórica",
+      "Tap a un movimiento para ver técnica, PR y progresión histórica",
       "Filtrar y buscar en el catálogo completo",
     ],
     deepLink: "/atleta/movimientos",
@@ -168,7 +168,7 @@ export const SCREENS: Screen[] = [
     actions: [
       "Ver badges desbloqueados con la fecha",
       "Ver badges por desbloquear con tu progreso (%)",
-      "Tap a un badge → condición exacta para desbloquearlo",
+      "Tap a un badge para ver la condición exacta que lo desbloquea",
       "Ver nivel atleta global + XP hacia el próximo nivel",
     ],
     deepLink: "/atleta/logros",

@@ -14,6 +14,18 @@
 //   - Cambiar estrategia `/atleta/*` a NETWORK-ONLY (igual que /admin)
 //   - Bump CACHE_VERSION para forzar drop del cache viejo en clientes con SW v1
 
+// Fix v4 (fase 0, batch 4):
+//   - `/eventos` y `/tv` a network-only. Caían a `networkFirst`, que guarda
+//     la respuesta en `kronos-shell-*`: `/eventos/<id>` trae la inscripción
+//     del atleta y `/tv/<slug>` trae roster, leaderboard y PRs del Box. En la
+//     tablet del mostrador ese HTML sobrevive al logout, que es exactamente el
+//     leak de 2026-05-17 por otra puerta.
+//   - Bump de CACHE_VERSION: un cliente con el worker v3 conserva su cache
+//     hasta que cambia el string, así que ampliar la lista sin bump deja lo ya
+//     cacheado en el dispositivo.
+//   - La lista vive ahora bajo un test de IGUALDAD, no de "contiene"
+//     (tests/unit/sw-network-only.test.ts).
+
 // Fix v3 (audit 2026-09-15 §E):
 //   - `/uploads` a network-only: `/uploads/whiteboards/*` son fotos del
 //     whiteboard con nombres y scores de atletas. Con network-first se
@@ -23,7 +35,7 @@
 //   - Borrada la estrategia stale-while-revalidate (código muerto desde v2).
 //   - Bump de CACHE_VERSION para que los clientes con v2 tiren su cache.
 
-const CACHE_VERSION = "kronos-shell-v3";
+const CACHE_VERSION = "kronos-shell-v4";
 const SHELL_PRECACHE = [
   "/manifest.webmanifest",
   "/icons/icon-192.png",
@@ -70,8 +82,9 @@ self.addEventListener("activate", (event) => {
 // Fetch handler con estrategias por tipo de request.
 // Reglas:
 //   - Auth (/api/auth/*) + /admin/* + /atleta/* + /api/* + /uploads/* +
-//     /invitacion* : NETWORK ONLY (todas son user-specific o single-use y NO
-//     deben servirse desde cache)
+//     /invitacion* + /eventos/* + /tv/* : NETWORK ONLY (todas son
+//     user-specific, tenant-specific o single-use y NO deben servirse desde
+//     cache)
 //   - /_next/static/*, /icons/*: CACHE FIRST (assets inmutables por hash)
 //   - Resto GET: NETWORK FIRST con timeout 3s + cache fallback (landing,
 //     /login, /signup, /atleta-signup — todas páginas públicas sin
@@ -92,7 +105,9 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/atleta") ||
     url.pathname.startsWith("/uploads") ||
     url.pathname.startsWith("/invitacion") ||
-    url.pathname.startsWith("/invitacion-staff")
+    url.pathname.startsWith("/invitacion-staff") ||
+    url.pathname.startsWith("/eventos") ||
+    url.pathname.startsWith("/tv")
   ) {
     return; // dejar al browser manejar normal (network)
   }

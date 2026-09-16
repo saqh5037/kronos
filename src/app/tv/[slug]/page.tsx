@@ -8,9 +8,13 @@ import {
   type TVLeader,
   type TVPRRow,
 } from "@/server/actions/tv";
-import { formatTime } from "@/lib/week";
-import { formatDateWeekday } from "@/lib/format";
-import { formatMinutesUntil } from "../_lib/format-countdown";
+import { wodTypeLabel, scoreTypeLabel } from "@/lib/labels";
+import { formatDateWeekday, formatTime24 } from "@/lib/format";
+import {
+  formatDurationMinutes,
+  formatMinutesUntil,
+} from "../_lib/format-countdown";
+import { TvClock } from "../_components/TvClock";
 
 export const metadata = { title: "Kronos — Pantalla del box" };
 
@@ -41,7 +45,7 @@ export default async function TVDisplayPage({
   return (
     <main
       className="min-h-screen p-8 flex flex-col gap-6"
-      style={{ background: "var(--bg)" }}
+      style={{ background: "var(--k-bg)" }}
     >
       <Header boxName={data.box.name} brandColor={data.box.brandColor} />
 
@@ -85,11 +89,10 @@ function Header({
   boxName: string;
   brandColor: string | null;
 }) {
-  const now = new Date();
   return (
     <header
       className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b pb-4"
-      style={{ borderColor: "var(--line)" }}
+      style={{ borderColor: "var(--k-line)" }}
     >
       <div className="min-w-0">
         <h1
@@ -104,21 +107,7 @@ function Header({
           {boxName}
         </h1>
       </div>
-      <div className="text-right min-w-0">
-        <p
-          className="font-mono font-bold"
-          style={{
-            color: "var(--text)",
-            fontSize: "clamp(40px, 11vw, 88px)",
-            lineHeight: 1,
-          }}
-        >
-          {formatTime(now)}
-        </p>
-        <p className="k-eyebrow mt-1" style={{ color: "var(--k-t3)" }}>
-          {formatDateWeekday(now)}
-        </p>
-      </div>
+      <TvClock />
     </header>
   );
 }
@@ -143,11 +132,25 @@ function NowPlaying({
         className="p-8 rounded-2xl border"
         style={{
           borderColor: "var(--k-accent)",
-          background: "var(--card)",
+          background: "var(--k-surface)",
         }}
       >
-        <p className="k-eyebrow" style={{ color: "var(--k-accent)" }}>
-          ● EN VIVO · {formatTime(current.startsAt)} · {current.durationMin}min
+        <p
+          className="k-eyebrow flex items-center gap-2"
+          style={{ color: "var(--k-accent)" }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "var(--k-accent)",
+              flexShrink: 0,
+            }}
+          />
+          EN VIVO · {formatTime24(current.startsAt)} ·{" "}
+          {formatDurationMinutes(current.durationMin)}
         </p>
         <h2 className="font-display font-bold text-5xl mt-2 tracking-tight">
           {current.wodName ?? "Clase en curso"}
@@ -202,12 +205,12 @@ function NowPlaying({
         className="p-8 rounded-2xl border"
         style={{
           borderColor: "var(--k-t2)",
-          background: "var(--card)",
+          background: "var(--k-surface)",
         }}
       >
         <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
           PRÓXIMA · {formatMinutesUntil(minutesUntil)} ·{" "}
-          {formatTime(next.startsAt)}
+          {formatTime24(next.startsAt)}
         </p>
         <h2 className="font-display font-bold text-5xl mt-2 tracking-tight">
           {next.wodName ?? "Por definir"}
@@ -224,7 +227,7 @@ function NowPlaying({
   return (
     <section
       className="p-8 rounded-2xl border text-center"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
     >
       <h2 className="font-display text-3xl" style={{ color: "var(--k-t2)" }}>
         Sin clases programadas para hoy
@@ -240,15 +243,20 @@ function TodaysWOD({ wod }: { wod: TVWOD | null }) {
   return (
     <section
       className="p-6 rounded-2xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
     >
       <div className="flex items-center justify-between">
         <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
           WOD del día
         </p>
         <div className="flex gap-2">
-          <span className="k-chip k-chip-steel">{wod.type}</span>
-          <span className="k-chip k-chip-ghost">{wod.scoreType}</span>
+          <span className="k-chip k-chip-steel">
+            {wodTypeLabel[wod.type as keyof typeof wodTypeLabel] ?? wod.type}
+          </span>
+          <span className="k-chip k-chip-ghost">
+            {scoreTypeLabel[wod.scoreType as keyof typeof scoreTypeLabel] ??
+              wod.scoreType}
+          </span>
           {wod.timeCap && (
             <span className="k-chip k-chip-ember">{wod.timeCap}min cap</span>
           )}
@@ -266,7 +274,7 @@ function TodaysWOD({ wod }: { wod: TVWOD | null }) {
       {wod.movements.length > 0 && (
         <ul
           className="mt-4 grid grid-cols-2 gap-2 border-t pt-3"
-          style={{ borderColor: "var(--line)" }}
+          style={{ borderColor: "var(--k-line)" }}
         >
           {wod.movements.map((m, i) => (
             <li
@@ -304,7 +312,7 @@ function UpcomingList({ classes }: { classes: TVClass[] }) {
   return (
     <section
       className="p-5 rounded-2xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
     >
       <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
         Hoy más tarde
@@ -319,11 +327,11 @@ function UpcomingList({ classes }: { classes: TVClass[] }) {
             <li
               key={c.id}
               className="flex items-center justify-between gap-3 py-2 border-b last:border-b-0"
-              style={{ borderColor: "var(--line)" }}
+              style={{ borderColor: "var(--k-line)" }}
             >
               <div className="min-w-0">
                 <p className="font-mono font-bold text-lg">
-                  {formatTime(c.startsAt)}
+                  {formatTime24(c.startsAt)}
                 </p>
                 <p
                   className="text-sm truncate"
@@ -355,7 +363,7 @@ function WeekLeaders({ leaders }: { leaders: TVLeader[] }) {
   return (
     <section
       className="p-5 rounded-2xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
     >
       <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
         Top de la semana · asistencias
@@ -404,7 +412,7 @@ function RecentPRs({ prs }: { prs: TVPRRow[] }) {
   return (
     <section
       className="p-5 rounded-2xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
     >
       <p
         className="k-eyebrow mb-3 flex items-center gap-2"

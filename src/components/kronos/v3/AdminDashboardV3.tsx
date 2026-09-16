@@ -159,7 +159,18 @@ function Sparkline({
   const area = path + ` L${w},${h} L0,${h} Z`;
   const id = `spark-grad-${gradientId}`;
   return (
-    <svg width={w} height={h} style={{ display: "block" }}>
+    // `viewBox` + `width: 100%` instead of a fixed `width={w}`: the KPI hero
+    // renders this at w=490 and the card is 296 px wide on a phone, so the
+    // last third of the revenue series was simply cut off. The point
+    // coordinates are unchanged — the viewBox scales them. `none` on
+    // preserveAspectRatio matches ChartCard: a sparkline is allowed to squash.
+    <svg
+      width="100%"
+      height={h}
+      viewBox={`0 0 ${w} ${h}`}
+      preserveAspectRatio="none"
+      style={{ display: "block" }}
+    >
       {fill && (
         <>
           <defs>
@@ -646,7 +657,10 @@ function Sidebar({
   boxInitials?: string;
 }) {
   return (
+    // `k-admin-sidebar` is hidden below `md` in globals.css: 240 fixed pixels
+    // with `flexShrink: 0` left the dashboard 120 px wide on a 360 px phone.
     <div
+      className="k-admin-sidebar"
       style={{
         width: collapsed ? 64 : 240,
         background: "var(--k-surface)",
@@ -810,7 +824,11 @@ function AdminHeader({
   notificationCount?: number;
 }) {
   return (
+    // The `k-admin-header*` hooks are what globals.css narrows below `md`:
+    // a 64 px row with 32 px of padding, a box card, a search field and two
+    // avatars does not fit in 360 px and was clipping.
     <div
+      className="k-admin-header"
       style={{
         height: 64,
         borderBottom: "1px solid var(--k-line)",
@@ -824,6 +842,7 @@ function AdminHeader({
       }}
     >
       <div
+        className="k-admin-header__box"
         style={{
           display: "flex",
           alignItems: "center",
@@ -854,6 +873,7 @@ function AdminHeader({
           {boxInitials ?? boxName.slice(0, 2).toUpperCase()}
         </div>
         <span
+          className="k-admin-header__box-name"
           style={{
             fontFamily: "var(--k-font-display)",
             fontSize: 13,
@@ -873,6 +893,7 @@ function AdminHeader({
       </div>
 
       <div
+        className="k-admin-header__search"
         style={{
           flex: 1,
           maxWidth: 520,
@@ -1826,7 +1847,12 @@ function ClassesTable({
           Ver todas las clases <Icon.Right width={11} height={11} />
         </Link>
       </div>
+      {/* Six fixed columns add up to ~692 px, and this wrapper carries
+          `overflow: hidden` inline — so at 360 px COACH, RESERVAS, WAITLIST
+          and ACCIÓN were not clipped-but-reachable, they were gone. Below
+          `md` globals.css turns it into a horizontal scroller. */}
       <div
+        className="k-admin-table"
         style={{
           background: "var(--k-surface)",
           border: "1px solid var(--k-line)",
@@ -1835,6 +1861,7 @@ function ClassesTable({
         }}
       >
         <div
+          className="k-admin-table__row"
           style={{
             display: "grid",
             gridTemplateColumns: "72px 180px 140px 1fr 90px 110px",
@@ -1883,7 +1910,7 @@ function ClassesTable({
             return (
               <div
                 key={i}
-                className="k-tap"
+                className="k-tap k-admin-table__row"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "72px 180px 140px 1fr 90px 110px",

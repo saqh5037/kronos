@@ -7,19 +7,19 @@ import { Check } from "lucide-react";
 const TESTIMONIALS = [
   {
     name: "Laura M.",
-    role: "Atleta • Iron Hands Box",
+    role: "Atleta · Iron Hands Box",
     quote: "En 3 meses mejoré mis PRs 15kg en squat",
     image: "/images/wizard/cierre-collage-04-deadlift.webp",
   },
   {
     name: "Carlos R.",
-    role: "Atleta • CrossFit Central",
+    role: "Atleta · CrossFit Central",
     quote: "El plan AI se adapta a mi ritmo de vida",
     image: "/images/wizard/cierre-collage-02-pullup.webp",
   },
   {
     name: "Sofia L.",
-    role: "Atleta • Summit CrossFit",
+    role: "Atleta · Summit CrossFit",
     quote: "Finalmente entiendo cómo entrenar inteligente",
     image: "/images/wizard/cierre-collage-06-overhead.webp",
   },
@@ -171,7 +171,7 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
                     &quot;{testimonial.quote}&quot;
                   </p>
                   <p className="text-xs mt-2" style={{ color: "var(--k-t3)" }}>
-                    {testimonial.name} • {testimonial.role}
+                    {testimonial.name} · {testimonial.role}
                   </p>
                 </div>
               </m.div>

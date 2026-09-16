@@ -183,7 +183,7 @@ export default function KronosLogo({
                 fontWeight: 600,
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: "var(--k-t3, #54545C)",
+                color: "var(--k-t3, #7D7D87)",
               }}
             >
               {tagline}

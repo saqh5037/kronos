@@ -2,8 +2,13 @@
 
 import { useRef, useEffect } from "react";
 import { m, useReducedMotion } from "framer-motion";
+import { Star } from "lucide-react";
 import { PRICING, ROADMAP } from "../_data/mock";
-import { CTA_WHATSAPP_HREF, CTA_WHATSAPP_LABEL, TRIAL_DAYS } from "../_data/cta";
+import {
+  CTA_WHATSAPP_HREF,
+  CTA_WHATSAPP_LABEL,
+  TRIAL_DAYS,
+} from "../_data/cta";
 import { track } from "../_lib/track";
 
 const fadeUp = {
@@ -93,7 +98,15 @@ export default function Pricing() {
           >
             {tier.featured && (
               <div className="lp-price-badge">
-                <span className="lp-eyebrow">★ RECOMENDADO</span>
+                <span className="lp-eyebrow inline-flex items-center gap-1.5">
+                  <Star
+                    size={11}
+                    fill="currentColor"
+                    strokeWidth={0}
+                    aria-hidden="true"
+                  />
+                  RECOMENDADO
+                </span>
               </div>
             )}
             <div
@@ -142,10 +155,10 @@ export default function Pricing() {
         }}
       >
         Precios en MXN más IVA (16 %); te facturamos tu suscripción. Sin
-        contratos anuales, sin costo de instalación y sin cargo extra por aceptar
-        tarjeta. Si tu Box crece y supera el límite de atletas, te avisamos antes
-        de pasar al plan siguiente. Si decrece, también — pagas lo que
-        corresponde al volumen real del mes.
+        contratos anuales, sin costo de instalación y sin cargo extra por
+        aceptar tarjeta. Si tu Box crece y supera el límite de atletas, te
+        avisamos antes de pasar al plan siguiente. Si decrece, también — pagas
+        lo que corresponde al volumen real del mes.
         <br />
         <br />
         Cualquier plan arranca con {TRIAL_DAYS} días de prueba, sin tarjeta. Si
@@ -159,10 +172,10 @@ export default function Pricing() {
           EN EL ROADMAP · TODAVÍA NO ESTÁ LISTO
         </div>
         <p>
-          Esto <strong>no</strong> está incluido en ningún plan de arriba todavía.
-          Lo listamos para que sepas para dónde va Kronos, no para venderte algo
-          que no existe. Si algo de aquí es indispensable para tu Box, dínoslo y
-          te avisamos cuando salga.
+          Esto <strong>no</strong> está incluido en ningún plan de arriba
+          todavía. Lo listamos para que sepas para dónde va Kronos, no para
+          venderte algo que no existe. Si algo de aquí es indispensable para tu
+          Box, dínoslo y te avisamos cuando salga.
         </p>
         <ul>
           {ROADMAP.map((r) => (

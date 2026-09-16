@@ -1638,9 +1638,14 @@
   /* — TEXTO (fijo) — */
   --k-t1: #f5f5f7;
   --k-t2: #8a8a94;
-  /* #54545c was 2.67:1 on --k-bg (AA needs 4.5:1) — audit 2026-09-15 §B.
-     #7a7a84 = 4.71:1 on --k-bg. Guarded by tests/unit/atleta-infra-contrast. */
-  --k-t3: #7a7a84;
+  /* Third text tone. Two rounds of the same defect (audit 2026-09-15 §B):
+     #54545c was 2.67:1 on --k-bg; #7a7a84 cleared --k-bg (4.71:1) but not the
+     surfaces the ~600 labels actually sit on — 4.48:1 on --k-surface and
+     4.32:1 on --k-elevated, where every .k-card puts them.
+     #7d7d87 is the darkest value in this grey ramp that clears AA on ALL
+     three: 4.91:1 on --k-bg, 4.67:1 on --k-surface, 4.50:1 on --k-elevated.
+     The full matrix is enforced by tests/unit/atleta-infra-contrast.test.ts. */
+  --k-t3: #7d7d87;
   --k-t4: #36363c;
 
   /* — ACENTO (default Kronos = lima · sobreescribible por Box) — */
@@ -1981,6 +1986,73 @@ textarea:focus-visible,
 }
 .k-scroll::-webkit-scrollbar-thumb:hover {
   background: #26262e;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN DASHBOARD V3 — hooks responsivos
+   `k-kpi-hero` y `k-charts-row` estaban en el JSX desde el commit del sistema
+   V3 y NUNCA tuvieron regla: eran los ganchos previstos para colapsar las
+   rejillas de dos columnas y se quedaron sin CSS. Los `k-admin-*` son nuevos.
+   `!important` no es decoración: los cinco traen `style={{}}` inline, que gana
+   a cualquier clase.
+
+   Dos cortes, no uno:
+   · hasta 1023 px (el `lg` de Tailwind que ya usa `src/app/admin/layout.tsx`
+     para su propio shell) se oculta la sidebar interna de 240 px. Con `md`
+     (768) la tablet se quedaba con 528 px útiles, el MRR se cortaba a
+     "$141,250 M" y el header se encimaba.
+   · hasta 767 px las rejillas de dos columnas pasan a una: a 360 px repartían
+     1fr 1fr dentro de ~120 px.
+
+   Fase 1 reemplaza este shell entero; esto es el mínimo para que /admin sea
+   usable en un teléfono mientras tanto.
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 1023px) {
+  .k-admin-sidebar {
+    display: none !important;
+  }
+
+  /* El header mide 64 px con 32 de padding y mete box card + buscador +
+     campana + avatar. El buscador es un placeholder sin input detrás, así que
+     sale; el nombre del Box se trunca en vez de desbordar. */
+  .k-admin-header {
+    padding: 0 16px !important;
+    gap: 12px !important;
+  }
+
+  .k-admin-header__search {
+    display: none !important;
+  }
+
+  .k-admin-header__box {
+    min-width: 0 !important;
+  }
+
+  .k-admin-header__box-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* La tabla de clases son seis columnas fijas (~692 px) dentro de un
+     contenedor con `overflow: hidden` inline: a 360 px COACH, RESERVAS,
+     WAITLIST y ACCIÓN no estaban recortadas, no existían. Se vuelve
+     scrollable en horizontal — los datos siguen ahí y se deslizan. */
+  .k-admin-table {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .k-admin-table__row {
+    min-width: 692px;
+  }
+}
+
+@media (max-width: 767px) {
+  .k-kpi-hero,
+  .k-charts-row {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════

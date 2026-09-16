@@ -103,10 +103,12 @@ export function KronosToaster() {
   }, [toasts]);
 
   return (
+    // No `k-toaster` class: it shipped with the toast engine as a styling
+    // hook and never got a rule in any stylesheet, so it was a selector that
+    // promised styling and delivered none. The stack is positioned inline.
     <div
       aria-live="polite"
       aria-atomic="false"
-      className="k-toaster"
       style={{
         position: "fixed",
         top: 16,

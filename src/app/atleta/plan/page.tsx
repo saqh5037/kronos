@@ -14,6 +14,7 @@ import {
   normalizeGoalId,
   pickDefaultGoal,
   currentPlanWeek,
+  planSessionTypeLabel,
 } from "./_helpers";
 
 export const metadata = { title: "Kronos — Plan IA" };
@@ -411,7 +412,7 @@ async function PlanView({
                         border: "1px solid var(--k-accent-line)",
                       }}
                     >
-                      {nextSession.type}
+                      {planSessionTypeLabel(nextSession.type)}
                     </span>
                   </div>
                   <p
@@ -558,19 +559,24 @@ async function PlanView({
                       listStyle: "none",
                       padding: 0,
                       margin: "8px 0 0",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 8,
+                      // One grid for the whole list instead of one per row, so
+                      // the chip column is as wide as the WIDEST chip and every
+                      // description starts on the same line. With a hard 80px
+                      // column "Recuperación" ran straight into the text next
+                      // to it; `max-content` cannot overflow by construction.
+                      display: "grid",
+                      gridTemplateColumns: "40px max-content 1fr",
+                      gap: "8px 12px",
+                      alignItems: "baseline",
                     }}
                   >
                     {w.sessions.map((s, i) => (
                       <li
                         key={i}
+                        // `contents` promotes the three spans into the list's
+                        // own grid so all rows share its columns.
                         style={{
-                          display: "grid",
-                          gridTemplateColumns: "40px 80px 1fr",
-                          gap: 12,
-                          alignItems: "baseline",
+                          display: "contents",
                           fontSize: 13,
                           fontFamily: "var(--k-font-body)",
                           color: "var(--k-t1)",
@@ -591,6 +597,7 @@ async function PlanView({
                           style={{
                             display: "inline-block",
                             textAlign: "center",
+                            whiteSpace: "nowrap",
                             padding: "3px 8px",
                             borderRadius: 6,
                             fontFamily: "var(--k-font-display)",
@@ -603,9 +610,15 @@ async function PlanView({
                             border: "1px solid var(--k-accent-line)",
                           }}
                         >
-                          {s.type}
+                          {planSessionTypeLabel(s.type)}
                         </span>
-                        <span style={{ color: "var(--k-t1)" }}>
+                        <span
+                          style={{
+                            color: "var(--k-t1)",
+                            fontSize: 13,
+                            fontFamily: "var(--k-font-body)",
+                          }}
+                        >
                           {s.description}
                         </span>
                       </li>

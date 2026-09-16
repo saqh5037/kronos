@@ -38,14 +38,29 @@
  *   emoji-in-jsx   Emoji used as iconography. The product ships `lucide-react`
  *                  since the rebuild base commit; emoji do not scale, do not
  *                  inherit colour, and render differently per platform
- *                  (audit S7: 71 files). Baseline: 128 occurrences / 71 files.
+ *                  (audit S7: 71 files at branch point). The range now covers
+ *                  arrows, geometric shapes, misc symbols, enclosed
+ *                  alphanumerics, regional indicators and U+FE0F — the old one
+ *                  stopped at `1F300-1FAFF` + `2600-27BF` and missed `⬆`, `●`
+ *                  and every flag.
+ *   unicode-glyph  A typographic glyph used as an icon or an affordance —
+ *                  `→ ← ✓ ✕ ★ ▸ •`. Not emoji, so the ranges above mostly miss
+ *                  them, and they fail the same way: no stroke weight, no
+ *                  sizing, platform-dependent shape, and a screen reader that
+ *                  says "rightwards arrow" in the middle of a button label.
+ *                  The public, auth, invitation, TV and athlete surfaces are at
+ *                  zero; the remaining entries are the admin shell's, to be
+ *                  ratcheted down in a later wave.
  *   legacy-tokens  `var(--text|--card|--line|--bg|--accent|--moss|--fire|--grad
  *                  |--text-2)` — legacy names kept alive only by the compat
  *                  block at the end of `globals.css`. Matched by EXACT name
  *                  (closing paren required) so `var(--text-3)` and
  *                  `var(--line-2)` are not swept up. Only `.ts`/`.tsx` is
  *                  scanned: the compat block in `globals.css` *defines* these
- *                  names on purpose. Baseline: 213 occurrences / 59 files.
+ *                  names on purpose. Was 213 occurrences / 59 files at branch
+ *                  point; now `{}` — a zero-tolerance gate. The Tailwind
+ *                  aliases it also covers (`bg-card`, `border-line`, …) were
+ *                  deleted from `tailwind.config.ts` in the same wave.
  *   banned-hex     Pre-V3 hard-coded hexes `#19f08b #3aa3ff #1a3457 #0d1b2e
  *                  #07101e`. Already at 0 — an effective zero-tolerance gate.
  *   to-locale-string
@@ -66,7 +81,16 @@
  *                  this rule only nails the blunt literal form.
  *
  * Voseo lives in its sibling `tests/unit/dialect-guard.test.ts` and shares the
- * same baseline file and machinery.
+ * same baseline file and machinery. A third guard,
+ * `tests/unit/components-guard.test.ts`, is independent: it is a
+ * zero-tolerance gate over `src/components/**` with its own palette allowlist
+ * and does not read the baseline at all.
+ *
+ * SCANNED ROOTS: `src/app` and `src/components`, plus `src/lib` and
+ * `src/server/email-templates` for everything except `to-locale-string` — an
+ * email rendered by a UTC cron and a label helper reach a human exactly like a
+ * component does. `to-locale-string` skips `src/lib` on purpose: that is where
+ * the timezone-pinned formatters live.
  *
  * Rule definitions and the scanner: `scripts/guards/rules.ts`.
  */

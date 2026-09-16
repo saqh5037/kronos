@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, KeyRound } from "lucide-react";
+import { ArrowRight, Check, KeyRound } from "lucide-react";
 import KCard from "@/components/kronos/KCard";
 
 type Props = {
@@ -116,12 +116,12 @@ export default function OtpRedirectClient({ code, email }: Props) {
                   className="inline-flex items-center justify-center w-12 h-12 rounded-full k-pulse-glow"
                   style={{ background: "var(--k-accent-soft)" }}
                 >
-                  <span
-                    className="font-display font-bold text-xl"
+                  <ArrowRight
+                    size={22}
+                    strokeWidth={2.5}
                     style={{ color: "var(--k-accent)" }}
-                  >
-                    →
-                  </span>
+                    aria-hidden="true"
+                  />
                 </div>
                 <h2
                   className="font-display font-bold text-xl"
@@ -142,12 +142,12 @@ export default function OtpRedirectClient({ code, email }: Props) {
                   className="inline-flex items-center justify-center w-12 h-12 rounded-full"
                   style={{ background: "var(--k-accent-soft)" }}
                 >
-                  <span
-                    className="font-display font-bold text-xl"
+                  <Check
+                    size={22}
+                    strokeWidth={2.5}
                     style={{ color: "var(--k-accent)" }}
-                  >
-                    ✓
-                  </span>
+                    aria-hidden="true"
+                  />
                 </div>
                 <h2
                   className="font-display font-bold text-xl"

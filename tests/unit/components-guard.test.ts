@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
 /**
@@ -16,17 +16,27 @@ import path from "node:path";
 const ROOT = path.resolve(__dirname, "../..");
 const COMPONENTS = path.join(ROOT, "src", "components");
 
+/**
+ * Paths owned by another wave. Every entry must still EXIST — a stale
+ * exclusion is a silent hole: `src/components/ThemeToggle.tsx` and
+ * `src/components/kronos/DesktopTabBar.tsx` were both deleted in earlier waves
+ * and sat here excluding nothing, which is exactly how a deleted-then-recreated
+ * file slips past a guard.
+ */
 const EXCLUDED = [
   "src/components/atleta",
   "src/components/providers",
   "src/components/AdminSidebar.tsx",
-  "src/components/ThemeToggle.tsx",
   "src/components/PwaRegister.tsx",
   "src/components/kronos/TabBar.tsx",
-  "src/components/kronos/DesktopTabBar.tsx",
 ];
 
-/** The V3 palette (globals.css) plus the raised `--k-t3` the audit asks for. */
+/**
+ * The V3 palette exactly as `globals.css` declares it. The two retired `--k-t3`
+ * values (`#54545c`, then `#7a7a84`) are NOT here: both fail WCAG AA on the
+ * surfaces the token is used on, so a component hard-coding either is a
+ * regression, not a palette colour (see atleta-infra-contrast.test.ts).
+ */
 const ALLOWED_HEX = new Set([
   "#c8ff2d",
   "#a8d726",
@@ -37,8 +47,7 @@ const ALLOWED_HEX = new Set([
   "#26262e",
   "#f5f5f7",
   "#8a8a94",
-  "#54545c",
-  "#7a7a84",
+  "#7d7d87",
   "#ff5a5a",
   "#ffb020",
   // black/white shorthands, tolerated inside SVG masks only
@@ -90,6 +99,14 @@ describe("components guard", () => {
     expect(FILES.length).toBeGreaterThan(50);
   });
 
+  it("every excluded path still exists", () => {
+    const missing = EXCLUDED.filter((rel) => !existsSync(path.join(ROOT, rel)));
+    expect(
+      missing,
+      "Delete these from EXCLUDED — they exclude nothing and hide the guard's real scope.",
+    ).toEqual([]);
+  });
+
   it("uses lucide icons, never emoji", () => {
     const offenders = FILES.filter((f) =>
       EMOJI.test(readFileSync(f, "utf8")),
@@ -131,6 +148,8 @@ describe("components guard", () => {
     expect(ICON_GLYPH.test("<span>✓</span>")).toBe(true);
     expect(LEGACY_TOKEN.test('style={{ color: "var(--text)" }}')).toBe(true);
     expect(ALLOWED_HEX.has("#19f08b")).toBe(false);
+    expect(ALLOWED_HEX.has("#54545c")).toBe(false);
+    expect(ALLOWED_HEX.has("#7a7a84")).toBe(false);
     expect(stripComments("// arrow → in prose\nconst a = 1;")).not.toContain(
       "→",
     );

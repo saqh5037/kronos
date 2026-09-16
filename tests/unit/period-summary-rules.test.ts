@@ -10,6 +10,7 @@
 import { describe, it, expect } from "vitest";
 import {
   ACTIVE_ATHLETE_RULE,
+  atRiskAsOf,
   AT_RISK_REASONS,
   AT_RISK_RULE,
   AT_RISK_DEFAULT_INACTIVITY_DAYS,
@@ -255,5 +256,66 @@ describe("noShowRate", () => {
 
   it("returns 0 with no completed bookings instead of NaN", () => {
     expect(noShowRate({ checkins: 0, noShows: 0 })).toBe(0);
+  });
+});
+
+/**
+ * `atRiskAsOf` — the fix for the 42/42 bug.
+ *
+ * "En riesgo" and "moroso" are AS-OF facts, not period sums, and
+ * `computePeriodSummary` evaluated them at `period.to`. For "últimos 30 días"
+ * that is the end of today and everything agreed. For **"este mes"**,
+ * `period.to` is the end of the CALENDAR month — a date in the future — so on
+ * 16 September every athlete was "14+ days without a check-in as of 30
+ * September" and /admin/reportes showed 42 of 42 at risk while the dashboard's
+ * last-30-days view showed 3. Same rule, same data, two numbers: exactly the
+ * S4 defect the module exists to remove.
+ *
+ * The clamp is the end of TODAY in the box timezone, never the raw instant:
+ * clamping to `now` would make "días sin asistir" drift during the day, and
+ * the whole point of evaluating at a day boundary is that the number is stable
+ * and reproducible.
+ */
+describe("atRiskAsOf", () => {
+  const TZ = "America/Mexico_City";
+  // 16 Sep 2026, 13:00 in Mexico City (UTC-6) = 19:00 UTC.
+  const TODAY = new Date("2026-09-16T19:00:00.000Z");
+  const endOfSeptember = new Date("2026-10-01T05:59:59.999Z");
+  const endOfToday = new Date("2026-09-17T05:59:59.999Z");
+
+  it("clamps a period that ends in the future to the end of today", () => {
+    const asOf = atRiskAsOf({ to: endOfSeptember, tz: TZ }, TODAY);
+    expect(asOf.toISOString()).toBe(endOfToday.toISOString());
+  });
+
+  it("leaves a period that already closed at its own end", () => {
+    const endOfAugust = new Date("2026-09-01T05:59:59.999Z");
+    const asOf = atRiskAsOf({ to: endOfAugust, tz: TZ }, TODAY);
+    expect(asOf.toISOString()).toBe(endOfAugust.toISOString());
+  });
+
+  it("is a no-op for the default last-30-days window (ends today)", () => {
+    const asOf = atRiskAsOf({ to: endOfToday, tz: TZ }, TODAY);
+    expect(asOf.toISOString()).toBe(endOfToday.toISOString());
+  });
+
+  it("resolves the day boundary in the BOX timezone, not the server's", () => {
+    // Same instant, two boxes: 13:00 in Mexico City is 20:00 in Madrid, so
+    // "end of today" is six hours apart.
+    const mx = atRiskAsOf({ to: endOfSeptember, tz: TZ }, TODAY);
+    const es = atRiskAsOf({ to: endOfSeptember, tz: "Europe/Madrid" }, TODAY);
+    expect(mx.toISOString()).not.toBe(es.toISOString());
+    expect(es.toISOString()).toBe("2026-09-16T21:59:59.999Z");
+  });
+
+  it("does not move an athlete into risk before the period they belong to", () => {
+    // The athlete checked in 3 days ago. Evaluated at the end of September she
+    // is 17 days idle and "at risk"; evaluated today she is not.
+    const athlete = { createdAt: daysAgo(200), lastAttendedAt: daysAgo(3) };
+    expect(evaluateAtRisk(athlete, endOfSeptember).atRisk).toBe(true);
+    expect(
+      evaluateAtRisk(athlete, atRiskAsOf({ to: endOfSeptember, tz: TZ }, NOW))
+        .atRisk,
+    ).toBe(false);
   });
 });

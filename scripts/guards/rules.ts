@@ -1,21 +1,49 @@
 /**
  * Shared rule definitions + scanner for the Kronos hygiene guards.
  *
- * Consumed by:
- *   - tests/unit/dialect-guard.test.ts   (rule: voseo)
- *   - tests/unit/ui-guards.test.ts       (rules: emoji-in-jsx, legacy-tokens,
- *                                         banned-hex, raw-enum-jsx)
- *   - scripts/guards/update-baseline.ts  (regenerates tests/fixtures/guard-baseline.json)
+ * ============================================================================
+ * THE THREE GUARD FILES
+ * ============================================================================
+ * | File                               | Rules it runs                        |
+ * | ---------------------------------- | ------------------------------------ |
+ * | tests/unit/dialect-guard.test.ts   | voseo                                |
+ * | tests/unit/ui-guards.test.ts       | every rule EXCEPT voseo: emoji-in-jsx,|
+ * |                                    | unicode-glyph, legacy-tokens,         |
+ * |                                    | banned-hex, to-locale-string,         |
+ * |                                    | raw-enum-jsx                          |
+ * | tests/unit/components-guard.test.ts| an independent, zero-tolerance gate   |
+ * |                                    | over src/components/** only. It does  |
+ * |                                    | NOT read this file or the baseline:   |
+ * |                                    | it owns the V3 hex palette allowlist  |
+ * |                                    | and its own icon-glyph set, and it    |
+ * |                                    | fails on the first violation instead  |
+ * |                                    | of ratcheting.                        |
  *
- * The guards are RATCHETS, not absolute gates. See the header of
+ * `scripts/guards/update-baseline.ts` regenerates
+ * `tests/fixtures/guard-baseline.json` from the rules below.
+ *
+ * The ratcheting guards are RATCHETS, not absolute gates. See the header of
  * tests/unit/ui-guards.test.ts for the full contract and the ratchet-down
  * procedure after the rebuild worktrees merge.
  *
- * Word boundaries: the Spanish rules use Unicode letter lookarounds
- * `(?<!\p{L}) … (?!\p{L})` instead of `\b`. JavaScript's `\b` is ASCII-only, so
- * `/\bsubí\b/` never matches "Subí una foto" (the boundary after `í` requires a
- * following word character). Accented endings are the norm in voseo, so ASCII
- * `\b` would silently disable most of the rule.
+ * ============================================================================
+ * WORD BOUNDARIES
+ * ============================================================================
+ * The Spanish rules use Unicode letter lookarounds `(?<!\p{L}) … (?!\p{L})`
+ * instead of `\b`. JavaScript's `\b` is ASCII-only, so `/\bsubí\b/` never
+ * matches "Subí una foto" (the boundary after `í` requires a following word
+ * character). Accented endings are the norm in voseo, so ASCII `\b` would
+ * silently disable most of the rule.
+ *
+ * ============================================================================
+ * COMMENTS
+ * ============================================================================
+ * A rule may declare `preprocess` to strip comments before matching. The two
+ * glyph rules use it: `// this maps A → B` is documentation, not a rendered
+ * affordance, and a guard that cannot tell the difference either baselines
+ * ~60 files of prose arrows or teaches people to stop writing comments.
+ * `voseo` deliberately does NOT strip them — CLAUDE.md bans voseo in code
+ * comments and AI prompts too, and that is where it hid last time.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
@@ -34,9 +62,49 @@ export interface GuardRule {
   readonly pattern: () => RegExp;
   /** What to do when a new violation appears. */
   readonly hint: string;
+  /** Optional source transform applied before matching (e.g. strip comments). */
+  readonly preprocess?: (source: string) => string;
 }
 
+/**
+ * Drops `/* … *\/` blocks (including JSX `{/* … *\/}`) and whole-line `//`
+ * comments. A line is only dropped when it STARTS with `//`, so
+ * `<a href="https://…">` and a trailing `// note` on a code line survive —
+ * the first would otherwise be mangled, and the second carries the code the
+ * rule exists to check.
+ */
+export function stripComments(source: string): string {
+  return (
+    source
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .split("\n")
+      .filter((line) => {
+        const t = line.trim();
+        return !t.startsWith("//") && !t.startsWith("*");
+      })
+      // Trailing `// …` on a code line. The lookbehind keeps `https://` and
+      // `///` intact; the cost of the remaining edge case (a literal "//"
+      // inside a string on the same line as a glyph) is under-reporting on two
+      // glyph rules, never a false failure.
+      .map((line) => line.replace(/(?<![:/])\/\/.*$/, ""))
+      .join("\n")
+  );
+}
+
+/** Screens and components — everything that renders through React. */
 const SRC_UI = ["src/app", "src/components"] as const;
+
+/**
+ * Every surface a human reads, React or not. `src/server/email-templates`
+ * renders HTML into an inbox and `src/lib` holds the shared presentation
+ * helpers (labels, formatters, copy), so a glyph or a dead token hidden there
+ * reaches a user exactly like one in a component would.
+ */
+const SRC_SURFACES = [
+  ...SRC_UI,
+  "src/lib",
+  "src/server/email-templates",
+] as const;
 
 /* -------------------------------------------------------------------------- */
 /* voseo                                                                      */
@@ -83,6 +151,10 @@ const VOSEO_FORMS = [
   "bajás?",
   "entrás?",
   "vení",
+  // Found in src/server/email-templates/staff-invitation.ts ("Pegá este link
+  // en tu navegador"). Safe: the Mexican forms are "pega" / "pegue" / "pegué",
+  // none of which carries the accent on the last syllable.
+  "pegás?",
   "contame",
   "decime",
   "avisame",
@@ -126,6 +198,37 @@ const VOSEO_FORMS = [
 /* -------------------------------------------------------------------------- */
 /* UI rules                                                                   */
 /* -------------------------------------------------------------------------- */
+
+/**
+ * Text characters used as iconography or as an affordance. These are NOT
+ * emoji — they are typographic glyphs, so the emoji ranges miss most of them,
+ * and they fail for the same reasons: they do not inherit stroke width, they
+ * cannot be sized, they render differently per platform and font, and a screen
+ * reader announces "rightwards arrow" in the middle of a button label.
+ *
+ * `•` (U+2022) is here as a separator too: the house separator is `·`
+ * (U+00B7), and two different bullets in the same product is the kind of drift
+ * this rule exists to stop.
+ */
+const UNICODE_GLYPHS = [
+  "\u2192", // →
+  "\u2190", // ←
+  "\u2191", // ↑
+  "\u2193", // ↓
+  "\u2197", // ↗
+  "\u2194", // ↔
+  "\u25B8", // ▸
+  "\u25B6", // ▶
+  "\u2713", // ✓
+  "\u2714", // ✔
+  "\u2715", // ✕
+  "\u2716", // ✖
+  "\u2605", // ★
+  "\u2606", // ☆
+  "\u2B06", // ⬆
+  "\u2B07", // ⬇
+  "\u2022", // •
+] as const;
 
 /**
  * Prisma enum values that must never be rendered raw as JSX text. Go through
@@ -218,6 +321,16 @@ const LEGACY_UTILITY_SUFFIXES = [
   "track",
   "overlay",
   "hover-subtle",
+  // The pre-V3 brand scales. They were deleted from `tailwind.config.ts`
+  // together with the compat aliases above, which also un-shadowed Tailwind's
+  // own palette — hence the `(?![\w-])` boundary: `text-red-500` is the
+  // framework's colour and is fine, a bare `text-red` is the dead alias.
+  "blue-deep",
+  "blue",
+  "red",
+  "cyan",
+  "pink",
+  "violet",
 ] as const;
 
 /** Pre-V3 hexes: teal green, cyan, and the three navies. */
@@ -241,28 +354,63 @@ export const RULES: readonly GuardRule[] = [
   {
     name: "emoji-in-jsx",
     summary: "Emoji used as iconography instead of lucide-react",
-    roots: SRC_UI,
-    pattern: () => /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,
+    roots: SRC_SURFACES,
+    /**
+     * The original range was `1F300-1FAFF` + `2600-27BF`, which misses whole
+     * families that ship as emoji on every platform:
+     *   2190-21FF  arrows (→ ← ↔ ↩)
+     *   25A0-25FF  geometric shapes (● ▪ ▸ ▶ ◼)
+     *   2B00-2BFF  misc symbols and arrows (⬆ ⬇ ⭐ ⬛)
+     *   1F000-1F2FF  mahjong, dominoes, cards, enclosed alphanumerics (🀄 🃏 🅰)
+     *   1F1E6-1F1FF  regional indicators — the halves every flag is made of
+     *   FE0F       variation selector-16, the "render the previous character
+     *              as emoji" modifier; on its own it proves emoji intent
+     * `1F1E6-1F1FF` sits inside `1F000-1F2FF`, and it is spelled out because a
+     * flag is two of them and is otherwise easy to assume is covered by the
+     * pictograph range.
+     */
+    pattern: () =>
+      /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{25A0}-\u{25FF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu,
+    preprocess: stripComments,
     hint: "Use a lucide-react icon (see the design-system section of CLAUDE.md).",
+  },
+  {
+    name: "unicode-glyph",
+    summary:
+      "Typographic glyph standing in for an icon or an affordance " +
+      "(\u2192 \u2713 \u2605 \u2022 \u2026) in rendered text",
+    roots: SRC_SURFACES,
+    pattern: () => new RegExp(`[${UNICODE_GLYPHS.join("")}]`, "gu"),
+    preprocess: stripComments,
+    hint:
+      "Use a lucide-react icon (ArrowRight, Check, Star) or plain words. " +
+      "For a separator use \u00B7, the one the rest of the product uses. " +
+      "Email templates get words: an icon font is not guaranteed in an inbox.",
   },
   {
     name: "legacy-tokens",
     summary:
       "Legacy CSS custom properties served by the globals.css compat block, " +
       "written as var(--token) or as the Tailwind utility that maps to it",
-    roots: SRC_UI,
+    roots: SRC_SURFACES,
     pattern: () =>
       new RegExp(
         `var\\(--(?:${LEGACY_TOKENS.join("|")})\\)` +
           `|(?<![\\w-])(?:${LEGACY_UTILITY_PREFIXES.join("|")})-(?:${LEGACY_UTILITY_SUFFIXES.join("|")})(?![\\w-])`,
         "g",
       ),
+    // Comments are stripped for the same reason as the glyph rules: the
+    // migration notes that explain WHICH aliases were removed have to name
+    // them, and a rule that flags its own documentation teaches people to
+    // stop documenting. A stripped trailing `// …` never hides a real
+    // declaration, which sits before it on the line.
+    preprocess: stripComments,
     hint: "Use the V3 token directly: --k-t1/--k-t2/--k-t3, --k-surface, --k-line, --k-bg, --k-accent — as text-[var(--k-t2)] when it has to be a class.",
   },
   {
     name: "banned-hex",
     summary: "Pre-V3 hard-coded hex colours",
-    roots: SRC_UI,
+    roots: SRC_SURFACES,
     pattern: () => new RegExp(BANNED_HEX.join("|"), "gi"),
     hint: "Use --k-accent (#c8ff2d), --k-danger (#ff5a5a) or --k-warning (#ffb020).",
   },
@@ -270,7 +418,10 @@ export const RULES: readonly GuardRule[] = [
     name: "to-locale-string",
     summary:
       "Bare toLocale*String() — reads the ambient timezone/locale, not the box's",
-    roots: SRC_UI,
+    // `src/server/email-templates` is included: a digest rendered on a UTC
+    // server dated the owner's week one day early. `src/lib` is deliberately
+    // NOT, because that is where the explicit formatters live.
+    roots: [...SRC_UI, "src/server/email-templates"],
     pattern: () => /\.toLocale(?:Date|Time)?String\s*\(/g,
     hint: "Use formatTime24 / formatDateShort / formatDateLong / formatInt / formatMXN from src/lib/format.ts (they pin America/Mexico_City). src/lib is not scanned, that is where the explicit formatters live.",
   },
@@ -279,7 +430,7 @@ export const RULES: readonly GuardRule[] = [
     summary:
       "Raw Prisma enum rendered as JSX text — the literal token, or an enum " +
       "field read straight off an object",
-    roots: SRC_UI,
+    roots: SRC_SURFACES,
     pattern: () =>
       new RegExp(
         `>\\s*(?:${RAW_ENUMS.join("|")})\\s*<` +
@@ -326,7 +477,10 @@ export function scanRule(rule: GuardRule, repoRoot: string): RuleCounts {
       continue;
     }
     for (const file of collectFiles(abs)) {
-      const matches = readFileSync(file, "utf-8").match(rule.pattern());
+      const source = readFileSync(file, "utf-8");
+      const matches = (
+        rule.preprocess ? rule.preprocess(source) : source
+      ).match(rule.pattern());
       if (!matches || matches.length === 0) continue;
       const rel = path.relative(repoRoot, file).split(path.sep).join("/");
       counts[rel] = (counts[rel] ?? 0) + matches.length;

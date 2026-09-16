@@ -42,7 +42,7 @@ export const CHART_COLORS = {
   grid: "rgba(255, 255, 255, 0.06)",
   gridStrong: "rgba(255, 255, 255, 0.10)",
   text2: "#8A8A94",
-  text3: "#7A7A84",
+  text3: "#7D7D87",
 
   // Gradient stops (for area fills) — lima neon
   primaryFillStart: "rgba(200, 255, 45, 0.18)",

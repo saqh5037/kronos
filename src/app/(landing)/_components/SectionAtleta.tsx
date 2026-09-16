@@ -1,6 +1,7 @@
 "use client";
 
 import { m, useReducedMotion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 const fadeUp = {
   hidden: { y: 14 },
@@ -75,7 +76,7 @@ export default function SectionAtleta() {
               <div>
                 <strong>Tu marca, contra ti mismo (auto-PR)</strong>
                 <span className="desc">
-                  Helen 11:42 vs tu mejor de 12:16 → el sistema lo detecta, lo
+                  Helen 11:42 vs tu mejor de 12:16: el sistema lo detecta, lo
                   registra y te lo dice en el momento. RX, scaled y
                   modificaciones por separado. Compites contra ti, no contra el
                   feed de extraños.
@@ -132,7 +133,8 @@ export default function SectionAtleta() {
               paddingBottom: 4,
             }}
           >
-            Guía completa de Kronos Atletas →
+            Guía completa de Kronos Atletas
+            <ArrowRight size={12} strokeWidth={2.5} aria-hidden="true" />
           </a>
         </m.div>
 

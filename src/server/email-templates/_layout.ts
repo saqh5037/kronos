@@ -63,7 +63,7 @@ export function renderEmailLayout(input: EmailLayoutInput): string {
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
           <tr>
             <td style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:22px;font-weight:700;letter-spacing:0.04em;color:#c8ff2d;">KRONOS</td>
-            <td align="right" style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#54545c;">tu Box, tu sistema</td>
+            <td align="right" style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#7d7d87;">tu Box, tu sistema</td>
           </tr>
         </table>
       </td></tr>
@@ -78,7 +78,7 @@ export function renderEmailLayout(input: EmailLayoutInput): string {
 
       <tr><td style="padding:0 28px;"><div style="height:1px;background:#1c1c24;margin-top:24px;"></div></td></tr>
 
-      <tr><td style="padding:18px 28px 28px 28px;font-family:'Inter',Arial,sans-serif;font-size:11px;line-height:1.6;color:#54545c;">
+      <tr><td style="padding:18px 28px 28px 28px;font-family:'Inter',Arial,sans-serif;font-size:11px;line-height:1.6;color:#7d7d87;">
         <strong style="color:#8a8a94;">Kronos</strong> · kronos-fit.com · México<br>
         Recibes este correo porque alguien (esperamos que tú) lo solicitó desde Kronos. Si no fuiste tú, puedes ignorarlo sin preocupación.
       </td></tr>

@@ -1,6 +1,7 @@
 "use client";
 
 import { m, useReducedMotion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 const STREAK_DAYS = 14;
 // 14 cells: first 5 muted (warm-up), rest active. Visual weight on the lima fill.
@@ -176,7 +177,10 @@ export default function HeroPhone() {
           </div>
 
           <div className="lp-ph-cta">
-            <button type="button">RESERVAR PRÓXIMA →</button>
+            <button type="button">
+              RESERVAR PRÓXIMA
+              <ArrowRight size={12} strokeWidth={2.5} aria-hidden="true" />
+            </button>
           </div>
 
           <div className="lp-ph-tabs">

@@ -38,6 +38,7 @@ import {
 import {
   ACTIVE_ATHLETE_RULE,
   AT_RISK_DEFAULT_INACTIVITY_DAYS,
+  atRiskAsOf,
   AT_RISK_RULE,
   OVERDUE_DEFAULT_GRACE_DAYS,
   OVERDUE_MEMBERSHIP_STATUSES,
@@ -165,7 +166,10 @@ export type PeriodSummary = {
     /** `Athlete.status = ACTIVE`, per `ACTIVE_ATHLETE_RULE`. */
     active: number;
     newInPeriod: number;
-    /** At-risk athletes per `AT_RISK_RULE`, evaluated as of `period.to`. */
+    /**
+     * At-risk athletes per `AT_RISK_RULE`, evaluated as of
+     * `atRiskAsOf(period, now)` — `period.to`, capped at the end of today.
+     */
     atRisk: number;
     atRiskRule: string;
     atRiskRows: AtRiskAthleteRow[];
@@ -267,9 +271,10 @@ export async function computePeriodSummary(
   const graceDays = options.graceDays ?? OVERDUE_DEFAULT_GRACE_DAYS;
 
   // At-risk and overdue are "as of" facts, not period sums. They are evaluated
-  // at the end of the reported window so the number is deterministic and
-  // testable (for the default "últimos 30 días" that is today).
-  const asOf = period.to;
+  // at the end of the reported window — capped at the end of today in the box
+  // timezone, because a window that has not closed yet (e.g. "este mes") would
+  // otherwise age every athlete into risk. See `atRiskAsOf`.
+  const asOf = atRiskAsOf(period, now);
 
   const db = withTenant(tenantId);
 

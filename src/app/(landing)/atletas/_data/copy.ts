@@ -54,7 +54,7 @@ export const WHY = {
   yesItems: [
     "Trackear tus PRs y ver tu progresión real",
     "Reservar clase en tu box (si tu box usa Kronos)",
-    "Foto del pizarrón → score automático",
+    "Score automático desde la foto del pizarrón",
     "Habilidades con coach de IA y progresiones desbloqueables",
     "Comparar tu rendimiento contra el promedio del box",
     "Leer tu propio histórico sin vender tus datos",

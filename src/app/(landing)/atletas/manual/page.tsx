@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import LandingTracker from "../../_components/LandingTracker";
@@ -56,9 +57,16 @@ export default async function ManualPage() {
               <Link
                 href="/atletas"
                 className="lp-caption"
-                style={{ color: "var(--k-t2)", letterSpacing: "0.18em" }}
+                style={{
+                  color: "var(--k-t2)",
+                  letterSpacing: "0.18em",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
               >
-                ← VOLVER A KRONOS ATLETAS
+                <ArrowLeft size={13} strokeWidth={2.5} aria-hidden="true" />
+                VOLVER A KRONOS ATLETAS
               </Link>
             </p>
           </div>

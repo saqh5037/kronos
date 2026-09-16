@@ -76,3 +76,59 @@ export function currentPlanWeek(
   const week = totalWeeks - weeksLeft + 1;
   return Math.min(totalWeeks, Math.max(1, week));
 }
+
+/**
+ * Session type shown on the plan chips.
+ *
+ * These strings do NOT come from Prisma: `src/lib/ai/training-plan.ts` asks
+ * Gemini for `"type": "Fuerza | Met-Con | Recovery"` and falls back to a
+ * literal `"—"` when the model returns nothing usable. So the chip printed
+ * whatever the model felt like — including an em dash on its own, or an
+ * English `RECOVERY` in caps next to Spanish copy (the `raw-enum-jsx` guard
+ * flags `{s.type}` for exactly this shape).
+ *
+ * Known values get the house label; anything else is humanised rather than
+ * dropped, because the model inventing "Gimnasia" is useful information and
+ * hiding it would be worse than showing it well.
+ */
+const PLAN_SESSION_TYPE_LABEL: Record<string, string> = {
+  fuerza: "Fuerza",
+  strength: "Fuerza",
+  "met-con": "Met-Con",
+  metcon: "Met-Con",
+  "metabolic conditioning": "Met-Con",
+  cardio: "Cardio",
+  recovery: "Recuperación",
+  recuperación: "Recuperación",
+  descanso: "Descanso",
+  rest: "Descanso",
+  movilidad: "Movilidad",
+  mobility: "Movilidad",
+  skill: "Técnica",
+  técnica: "Técnica",
+  gimnasia: "Gimnasia",
+  gymnastics: "Gimnasia",
+};
+
+/** Placeholder the plan generator emits when the model gives it nothing. */
+const PLAN_SESSION_TYPE_FALLBACK = "Sesión";
+
+/**
+ * Humanises an unknown value: `ROUNDS_REPS` → `Rounds reps`, `  met con ` →
+ * `Met con`. Never returns an empty string and never returns a bare glyph.
+ */
+function humanizeSessionType(raw: string): string {
+  const cleaned = raw.replace(/_/g, " ").replace(/\s+/g, " ").trim();
+  if (cleaned.length === 0) return PLAN_SESSION_TYPE_FALLBACK;
+  // A value with no letter at all is a placeholder ("—", "-", "?"), not a type.
+  if (!/\p{L}/u.test(cleaned)) return PLAN_SESSION_TYPE_FALLBACK;
+  const lower = /^[^\p{Ll}]+$/u.test(cleaned) ? cleaned.toLowerCase() : cleaned;
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
+/** The label for a plan session chip. Always safe to render. */
+export function planSessionTypeLabel(raw: string | null | undefined): string {
+  if (raw === null || raw === undefined) return PLAN_SESSION_TYPE_FALLBACK;
+  const key = raw.trim().toLowerCase();
+  return PLAN_SESSION_TYPE_LABEL[key] ?? humanizeSessionType(raw);
+}

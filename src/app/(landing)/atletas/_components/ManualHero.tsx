@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function ManualHero() {
   return (
@@ -22,7 +23,8 @@ export default function ManualHero() {
             marginBottom: 28,
           }}
         >
-          ← VOLVER A KRONOS ATLETAS
+          <ArrowLeft size={13} strokeWidth={2.5} aria-hidden="true" />
+          VOLVER A KRONOS ATLETAS
         </Link>
         <div className="lp-eyebrow">
           <span className="lp-dot" />

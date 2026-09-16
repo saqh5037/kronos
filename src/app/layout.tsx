@@ -83,7 +83,11 @@ export default function RootLayout({
           href="/icons/icon-512.png"
         />
       </head>
-      <body className="font-sans bg-bg text-text antialiased min-h-screen">
+      {/* `bg-bg`/`text-text` were Tailwind aliases onto the globals.css
+          compat block. `text` lost its mapping in the batch-3 sweep, so the
+          document had no declared text colour at all and relied on the
+          `html, body` rule in globals.css. The V3 tokens directly. */}
+      <body className="font-sans bg-[var(--k-bg)] text-[var(--k-t1)] antialiased min-h-screen">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

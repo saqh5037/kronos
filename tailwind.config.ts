@@ -8,52 +8,33 @@ const config: Config = {
     "./src/components/**/*.{ts,tsx}",
     "./src/app/**/*.{ts,tsx}",
   ],
+  /**
+   * The `colors` block used to alias the globals.css compat layer
+   * (`bg: var(--bg)`, `card: var(--card)`, `line: var(--line)`, `text`,
+   * `fire`, `moss`, `red`, `blue`, …). That is how whole admin screens stayed
+   * on the pre-V3 palette without ever writing `var(--text)` — audit
+   * 2026-09-15, ADM-09. Every one of those utilities is now unused in `src/**`
+   * and the aliases are gone; write `bg-[var(--k-bg)]`,
+   * `text-[var(--k-t2)]`, `border-[var(--k-line)]` instead. The
+   * `legacy-tokens` guard (scripts/guards/rules.ts) fails the build if either
+   * spelling comes back.
+   *
+   * `backgroundImage` went with them: `bg-grad`, `bg-grad-soft` and
+   * `bg-grad-glow` had no call sites and their literals were the pre-V3
+   * red/blue/cyan brand gradient, which V3 replaced with a single lime accent.
+   *
+   * Removing `colors.red`/`blue`/`cyan`/… also gives Tailwind's own palette
+   * back: those keys had SHADOWED the default scales, so `text-red-500` did
+   * not exist. Nothing used it, and now it works if a debug screen needs it.
+   */
   theme: {
     extend: {
-      colors: {
-        bg: "var(--bg)",
-        "bg-soft": "var(--bg-soft)",
-        "bg-warm": "var(--bg-warm)",
-        "bg-cool": "var(--bg-cool)",
-        card: "var(--card)",
-        "card-2": "var(--card-2)",
-        // `text`, `text-2` and `text-3` used to live here and mapped
-        // `text-text*` onto the globals.css compat block, which is how whole
-        // admin screens stayed on the pre-V3 palette without ever writing
-        // `var(--text)` (audit 2026-09-15, ADM-09). Use `text-[var(--k-t1)]`,
-        // `--k-t2` or `--k-t3`; the `legacy-tokens` guard now catches both
-        // spellings.
-        line: "var(--line)",
-        // Brand palette (Manual de Marca v2)
-        red: "var(--red)",
-        blue: "var(--blue)",
-        "blue-deep": "var(--blue-deep)",
-        cyan: "var(--cyan)",
-        pink: "var(--pink)",
-        violet: "var(--brand-violet)",
-        // Legacy aliases
-        fire: "var(--fire)",
-        steel: "var(--steel)",
-        moss: "var(--moss)",
-        ember: "var(--ember)",
-        amber: "var(--amber)",
-        track: "var(--track)",
-        overlay: "var(--overlay)",
-        "hover-subtle": "var(--hover-subtle)",
-      },
       fontFamily: {
         // Kronos v3 — Cuarto Oscuro: Plex Mono para display/datos, Inter para body
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         display: ["var(--font-plex-mono)", "ui-monospace", "monospace"],
         script: ["var(--font-plex-mono)", "ui-monospace", "monospace"],
         mono: ["var(--font-plex-mono)", "ui-monospace", "monospace"],
-      },
-      backgroundImage: {
-        grad: "linear-gradient(135deg, #e60026 0%, #0044ff 50%, #00bfff 100%)",
-        "grad-soft":
-          "linear-gradient(135deg, rgba(230,0,38,0.05) 0%, rgba(0,68,255,0.05) 50%, rgba(0,191,255,0.05) 100%)",
-        "grad-glow":
-          "radial-gradient(circle at 50% 50%, rgba(230,0,38,0.10), rgba(0,68,255,0.07) 40%, transparent 70%)",
       },
       borderRadius: {
         lg: "18px",

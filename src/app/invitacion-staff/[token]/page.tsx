@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Check } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getStaffInvitationByToken } from "@/server/actions/staff-invitations";
 import { isInvitationActionable } from "@/lib/staff-invitation";
@@ -24,8 +25,9 @@ export default async function StaffInvitationPage({
     if (check.reason === "ACCEPTED") {
       return (
         <Layout boxName={inv.box.name} brandColor={inv.box.brandColor ?? null}>
-          <p className="font-bold text-[var(--k-accent)] text-lg mb-2">
-            ✓ ¡Listo!
+          <p className="font-bold text-[var(--k-accent)] text-lg mb-2 flex items-center gap-2">
+            <Check size={18} strokeWidth={2.5} aria-hidden="true" />
+            ¡Listo!
           </p>
           <h1 className="font-display text-2xl font-bold mb-3">
             Tu cuenta ya está activa

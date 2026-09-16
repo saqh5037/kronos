@@ -3,7 +3,8 @@
  * different definitions — across Pagos, Reportes, the owner dashboard and
  * Atletas (P0 #6, systemic issue S4 "one fact, many numbers").
  *
- * Pure module: no Prisma, no session, no Next APIs.
+ * Pure module: no Prisma, no session, no Next APIs. The only import is the
+ * timezone arithmetic in `src/lib/tz.ts`, which is pure too.
  *
  * Before this file existed:
  *   - "activos" meant `Athlete.status = ACTIVE` on /admin/atletas (42) and
@@ -17,6 +18,8 @@
  * From here on there is exactly ONE definition of each, stated below and
  * consumed by every KPI through `getPeriodSummary`.
  */
+
+import { DEFAULT_BOX_TIMEZONE, endOfDayInTz } from "@/lib/tz";
 
 /** Athlete lifecycle statuses (mirrors `AthleteStatus` in the Prisma schema). */
 export type AthleteStatusLike = "ACTIVE" | "PAUSED" | "DROPIN" | "CANCELLED";
@@ -137,7 +140,8 @@ export type AtRiskEvaluation = {
 
 /**
  * AT RISK = an ACTIVE athlete who matches at least one signal, evaluated as of
- * the END of the reported period:
+ * `atRiskAsOf(period, now)` — the end of the reported period, capped at the end
+ * of today in the box timezone:
  *
  *   1. `inactivity`      — last check-in is older than `inactivityDays` (14).
  *   2. `never_attended`  — never checked in AND joined more than
@@ -153,13 +157,43 @@ export type AtRiskEvaluation = {
  * Severity is derived, not stored: it drives ordering only.
  */
 export const AT_RISK_RULE =
-  "En riesgo = atleta ACTIVE que cumple al menos una señal, evaluada al cierre del período: " +
+  "En riesgo = atleta ACTIVE que cumple al menos una señal, evaluada al cierre del período " +
+  "(o al cierre de hoy si el período todavía no termina): " +
   "(1) sin check-in hace más de inactivityDays (14 por defecto); " +
   "(2) nunca asistió y se dio de alta hace más de inactivityDays; " +
   "(3) tiene una membresía morosa (regla de moroso). " +
   "Los morosos con atleta ACTIVE son por definición un subconjunto de los atletas en riesgo.";
 
 export const AT_RISK_DEFAULT_INACTIVITY_DAYS = 14;
+
+/**
+ * The instant "en riesgo" and "moroso" are evaluated at: the end of the
+ * reported period, but never later than the end of TODAY in the box timezone.
+ *
+ * ── The bug this closes ─────────────────────────────────────────────────────
+ * Both facts are AS-OF facts, not period sums, and `computePeriodSummary`
+ * evaluated them at `period.to`. For "últimos 30 días" `period.to` is the end
+ * of today, so everything agreed. For **"este mes"** it is the end of the
+ * calendar month — a date in the FUTURE — so on 16 September every athlete was
+ * "14+ days without a check-in as of 30 September" and /admin/reportes showed
+ * 42 of 42 at risk next to a dashboard showing 3. One rule, one dataset, two
+ * numbers: the S4 defect this module exists to remove, reintroduced by the
+ * choice of `asOf`.
+ *
+ * ── Why the end of the day and not `now` ────────────────────────────────────
+ * Clamping to the raw instant would make "sin asistir hace N días" drift while
+ * the owner watches the page, and would make the same question answered twice
+ * in one morning return two different numbers. A civil-day boundary in the BOX
+ * timezone keeps the answer stable for the whole day and identical on a UTC
+ * server and a laptop in Mexico City.
+ */
+export function atRiskAsOf(
+  period: { to: Date; tz?: string },
+  now: Date = new Date(),
+): Date {
+  const endOfToday = endOfDayInTz(now, period.tz || DEFAULT_BOX_TIMEZONE);
+  return endOfToday.getTime() < period.to.getTime() ? endOfToday : period.to;
+}
 
 export function evaluateAtRisk(
   athlete: {

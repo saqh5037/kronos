@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Kronos Atletas — La app de CrossFit que entrena contigo",
   description:
-    "Anota PRs, reserva clases y mejora tus habilidades con coach de IA. Foto del pizarrón → score automático. Para atletas que toman su entrenamiento en serio.",
+    "Anota PRs, reserva clases y mejora tus habilidades con coach de IA. Score automático desde la foto del pizarrón. Para atletas que toman su entrenamiento en serio.",
   keywords: [
     "app atleta CrossFit",
     "tracker PR CrossFit",
