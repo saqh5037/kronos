@@ -40,27 +40,60 @@ describe("confidence bands", () => {
 });
 
 describe("faltan N días", () => {
-  const now = new Date(2026, 8, 15, 9, 30); // 15 sep 2026, local
+  // Instants written in UTC, chosen so the CDMX wall clock is the date named
+  // in each expectation. These used to be `new Date(2026, 8, 15, 9, 30)` — the
+  // HOST's calendar — which meant the suite only agreed with the CDMX-rendered
+  // date on a machine already set to Mexico City. `daysUntil` now counts civil
+  // days in an explicit zone, the same one `formatDateShort` renders in.
+  const at = (iso: string) => new Date(iso);
+  const now = at("2026-09-15T15:30:00.000Z"); // 15 sep 2026, 09:30 CDMX
 
   it("counts whole calendar days regardless of the time of day", () => {
-    expect(daysUntil(new Date(2026, 9, 3, 0, 1), now)).toBe(18);
-    expect(daysUntil(new Date(2026, 8, 15, 23, 59), now)).toBe(0);
+    expect(daysUntil(at("2026-10-03T06:01:00.000Z"), now)).toBe(18); // 3 oct 00:01
+    expect(daysUntil(at("2026-09-16T05:59:00.000Z"), now)).toBe(0); // 15 sep 23:59
   });
 
   it("reads as an action, not a date", () => {
-    expect(formatDaysUntil(new Date(2026, 9, 3), now)).toBe("faltan 18 días");
-    expect(formatDaysUntil(new Date(2026, 8, 15), now)).toBe("hoy");
-    expect(formatDaysUntil(new Date(2026, 8, 16), now)).toBe("mañana");
-    expect(formatDaysUntil(new Date(2026, 8, 14), now)).toBe("venció ayer");
-    expect(formatDaysUntil(new Date(2026, 8, 12), now)).toBe(
+    expect(formatDaysUntil(at("2026-10-03T06:00:00.000Z"), now)).toBe(
+      "faltan 18 días",
+    );
+    expect(formatDaysUntil(at("2026-09-15T06:00:00.000Z"), now)).toBe("hoy");
+    expect(formatDaysUntil(at("2026-09-16T06:00:00.000Z"), now)).toBe("mañana");
+    expect(formatDaysUntil(at("2026-09-14T06:00:00.000Z"), now)).toBe(
+      "venció ayer",
+    );
+    expect(formatDaysUntil(at("2026-09-12T06:00:00.000Z"), now)).toBe(
       "venció hace 3 días",
     );
   });
 
   it("puts the countdown before the short date", () => {
-    const label = formatDeadlineWithCountdown(new Date(2026, 9, 3), now);
+    const label = formatDeadlineWithCountdown(
+      at("2026-10-03T06:00:00.000Z"),
+      now,
+    );
     expect(label.startsWith("faltan 18 días · ")).toBe(true);
     expect(label).not.toMatch(/OCTUBRE|2026/);
+  });
+
+  it("counts in the zone it is given, not the host's", () => {
+    // 2026-10-03T03:00Z is Oct 3 in UTC but still Oct 2 in CDMX, and the two
+    // answers must differ by exactly the civil day they disagree on.
+    const target = at("2026-10-03T03:00:00.000Z");
+    expect(daysUntil(target, now, "UTC")).toBe(18);
+    expect(daysUntil(target, now, "America/Mexico_City")).toBe(17);
+  });
+
+  it("keeps the countdown and the printed date in the same zone", () => {
+    // The bug this replaces: "faltan 18 días · 2 oct" — a sentence whose two
+    // halves were computed in different timezones.
+    const target = at("2026-10-03T03:00:00.000Z");
+    expect(formatDeadlineWithCountdown(target, now, "UTC")).toBe(
+      "faltan 18 días · 3 oct",
+    );
+    expect(
+      formatDeadlineWithCountdown(target, now, "America/Mexico_City"),
+    ).toBe("faltan 17 días · 2 oct");
   });
 });
 

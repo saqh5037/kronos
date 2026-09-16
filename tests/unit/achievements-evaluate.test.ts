@@ -27,11 +27,13 @@ const {
   findManyPR,
 } = mocks;
 
+// P0-1 (audit 2026-09-15): XPLedger writes used to go through the RAW client
+// with a hand-written `tenantId` filter. They now go through `withTenant()`
+// like every other read, so the mock moved with them.
 vi.mock("@/server/db", () => ({
-  db: {
-    xPLedger: { create: mocks.createXP, aggregate: mocks.aggregateXP },
-  },
+  db: {},
   withTenant: () => ({
+    xPLedger: { create: mocks.createXP, aggregate: mocks.aggregateXP },
     badge: { findMany: mocks.findManyBadge },
     achievement: {
       findMany: mocks.findManyAchievement,

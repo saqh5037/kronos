@@ -13,6 +13,11 @@
  */
 
 import { formatDateShort } from "@/lib/format";
+import {
+  civilDateInTz,
+  civilDaysBetween,
+  DEFAULT_BOX_TIMEZONE,
+} from "@/lib/tz";
 
 export type ConfidenceBand = "alta" | "media" | "baja";
 
@@ -37,21 +42,37 @@ export function confidenceLabel(confidence: number): string {
   return `confianza ${confidenceBand(confidence)}`;
 }
 
-const MS_PER_DAY = 86_400_000;
-
-/** Whole days between two dates, counted from local midnight to local midnight. */
-export function daysUntil(target: Date, now: Date): number {
-  const a = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-  const b = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
-  return Math.round((b - a) / MS_PER_DAY);
+/**
+ * Whole civil days between two instants, counted in `timeZone`.
+ *
+ * This used to read `now.getFullYear()` / `getMonth()` / `getDate()`, i.e. the
+ * SERVER's calendar, while `formatDateShort` rendered the same date in
+ * `America/Mexico_City`. On the production host (UTC) the two disagreed and the
+ * athlete's plan printed a countdown and a date that could not both be true —
+ * "faltan 18 días · 2 oct" when the deadline was 3 oct. Both sides now take the
+ * same explicit zone.
+ */
+export function daysUntil(
+  target: Date,
+  now: Date,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): number {
+  return civilDaysBetween(
+    civilDateInTz(now, timeZone),
+    civilDateInTz(target, timeZone),
+  );
 }
 
 /**
  * "hoy" / "mañana" / "faltan 18 días" / "venció ayer" / "venció hace 3 días".
  * Neutral Mexican Spanish, tú.
  */
-export function formatDaysUntil(target: Date, now: Date): string {
-  const days = daysUntil(target, now);
+export function formatDaysUntil(
+  target: Date,
+  now: Date,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): string {
+  const days = daysUntil(target, now, timeZone);
   if (days === 0) return "hoy";
   if (days === 1) return "mañana";
   if (days > 1) return `faltan ${days} días`;
@@ -60,8 +81,15 @@ export function formatDaysUntil(target: Date, now: Date): string {
 }
 
 /** "faltan 18 días · 3 oct" — the deadline with its actionable framing first. */
-export function formatDeadlineWithCountdown(target: Date, now: Date): string {
-  return `${formatDaysUntil(target, now)} · ${formatDateShort(target)}`;
+export function formatDeadlineWithCountdown(
+  target: Date,
+  now: Date,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): string {
+  return `${formatDaysUntil(target, now, timeZone)} · ${formatDateShort(
+    target,
+    timeZone,
+  )}`;
 }
 
 /** Zero is not a rank. `rank <= 0` or a null total means there is no cohort. */

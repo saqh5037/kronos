@@ -220,6 +220,80 @@ describe("resolvePeriod", () => {
   });
 });
 
+/**
+ * The window a preset resolves to must be a function of the BOX timezone alone.
+ *
+ * Before this fix `windowForPreset` used date-fns `startOfDay`/`startOfMonth`,
+ * which snap to the SERVER's midnight, while `eachDayKeyInPeriod` bucketed in
+ * `tz`. On the UTC production host a CDMX box asking for "últimos 30 días" got
+ * 31 civil days, and its previous-period delta got 31 as well — so the "vs
+ * periodo anterior" arrow compared two windows of different sizes.
+ */
+describe("preset windows are a function of the box timezone, not the host", () => {
+  const NOW = new Date("2026-09-15T18:52:00.000Z");
+  const PRESETS = [
+    "today",
+    "last7",
+    "last30",
+    "last90",
+    "thisMonth",
+    "lastMonth",
+  ] as const;
+  const EXPECTED_DAYS: Record<(typeof PRESETS)[number], number> = {
+    today: 1,
+    last7: 7,
+    last30: 30,
+    last90: 90,
+    thisMonth: 30, // September
+    lastMonth: 31, // August
+  };
+
+  it.each(PRESETS)("%s covers its exact civil-day count in CDMX", (preset) => {
+    const p = resolvePeriod({ preset, tz: MX }, NOW);
+    expect(eachDayKeyInPeriod(p)).toHaveLength(EXPECTED_DAYS[preset]);
+  });
+
+  it.each(PRESETS)("%s covers its exact civil-day count in UTC", (preset) => {
+    const p = resolvePeriod({ preset, tz: "UTC" }, NOW);
+    expect(eachDayKeyInPeriod(p)).toHaveLength(EXPECTED_DAYS[preset]);
+  });
+
+  it("anchors the last30 window on CDMX midnight, not the host's", () => {
+    const p = resolvePeriod({ preset: "last30", tz: MX }, NOW);
+    expect(p.from.toISOString()).toBe("2026-08-17T06:00:00.000Z");
+    expect(p.to.toISOString()).toBe("2026-09-16T05:59:59.999Z");
+  });
+
+  it("anchors the same window on UTC midnight when the box is UTC", () => {
+    const p = resolvePeriod({ preset: "last30", tz: "UTC" }, NOW);
+    expect(p.from.toISOString()).toBe("2026-08-17T00:00:00.000Z");
+    expect(p.to.toISOString()).toBe("2026-09-15T23:59:59.999Z");
+  });
+
+  it("resolves `thisMonth` on the box's calendar month", () => {
+    // 2026-09-01T00:00Z is still August 31 in CDMX, so a UTC-anchored
+    // `startOfMonth` would have put the boundary in the wrong month.
+    const p = resolvePeriod(
+      { preset: "thisMonth", tz: MX },
+      new Date("2026-09-01T03:00:00.000Z"), // Aug 31 21:00 CDMX
+    );
+    expect(eachDayKeyInPeriod(p)[0]).toBe("2026-08-01");
+    expect(p.label).toBe("este mes");
+  });
+
+  it.each(PRESETS)(
+    "%s gives the previous window the same number of days",
+    (preset) => {
+      const p = resolvePeriod({ preset, tz: MX }, NOW);
+      const prev = previousPeriodOf(p);
+      expect(eachDayKeyInPeriod(prev)).toHaveLength(
+        eachDayKeyInPeriod(p).length,
+      );
+      expect(prev.to.getTime()).toBeLessThan(p.from.getTime());
+    },
+  );
+});
+
 describe("previousPeriodOf", () => {
   it("returns the symmetric window immediately before the period", () => {
     const period = resolvePeriod(

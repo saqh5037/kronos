@@ -3,6 +3,8 @@
  * One locale (es-MX), one currency style, 24-hour times across admin.
  */
 
+import { DEFAULT_BOX_TIMEZONE } from "@/lib/tz";
+
 const MXN = new Intl.NumberFormat("es-MX", {
   style: "currency",
   currency: "MXN",
@@ -42,7 +44,14 @@ export function formatPercentDelta(value: number, digits = 1): string {
   return `${sign}${Math.abs(value).toFixed(digits)} %`;
 }
 
-const TZ = "America/Mexico_City";
+/**
+ * Every formatter here renders in the box timezone, never the server's. It is
+ * re-exported so the modules that COMPUTE with dates (countdowns, periods) can
+ * use the same zone — the two drifting apart is what printed
+ * "faltan 18 días · 2 oct" on a UTC host.
+ */
+const TZ = DEFAULT_BOX_TIMEZONE;
+export { DEFAULT_BOX_TIMEZONE };
 
 /**
  * Browser and Node ICU disagree on es-MX short dates ("mar, 15 de sep" vs "mar 15 sep").

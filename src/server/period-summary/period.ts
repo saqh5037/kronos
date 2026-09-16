@@ -17,14 +17,19 @@
  */
 
 import {
-  startOfDay,
-  endOfDay,
-  startOfMonth,
-  endOfMonth,
-  subDays,
-  subMonths,
-  differenceInCalendarDays,
-} from "date-fns";
+  addCivilDays,
+  civilDateInTz,
+  civilDaysBetween,
+  dayKeyInTz as civilDayKeyInTz,
+  endOfCivilDay,
+  endOfCivilMonth,
+  formatDayKey,
+  parseDayKey as parseCivilDayKey,
+  startOfCivilDay,
+  startOfCivilMonth,
+  subCivilMonths,
+  type CivilDate,
+} from "@/lib/tz";
 
 /** Presets shared with `src/lib/dates.ts` (the URL contract of the filters). */
 export type PeriodPreset =
@@ -93,28 +98,6 @@ const MONTHS_ES_SHORT = [
   "dic",
 ] as const;
 
-const DAY_KEY_FORMATTERS = new Map<string, Intl.DateTimeFormat>();
-
-function dayKeyFormatter(tz: string): Intl.DateTimeFormat {
-  const cached = DAY_KEY_FORMATTERS.get(tz);
-  if (cached) return cached;
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  };
-  let fmt: Intl.DateTimeFormat;
-  try {
-    // "en-CA" renders YYYY-MM-DD, which is exactly the key shape we want.
-    fmt = new Intl.DateTimeFormat("en-CA", { ...options, timeZone: tz });
-  } catch {
-    // Unknown/invalid timezone: degrade to UTC rather than crash a dashboard.
-    fmt = new Intl.DateTimeFormat("en-CA", { ...options, timeZone: "UTC" });
-  }
-  DAY_KEY_FORMATTERS.set(tz, fmt);
-  return fmt;
-}
-
 /**
  * `YYYY-MM-DD` for the civil day that `date` falls on **in `tz`**.
  *
@@ -123,20 +106,12 @@ function dayKeyFormatter(tz: string): Intl.DateTimeFormat {
  * (20:30 local = 02:30Z the next day) could land on the wrong day.
  */
 export function dayKeyInTz(date: Date, tz: string = DEFAULT_TIMEZONE): string {
-  const parts = dayKeyFormatter(tz).formatToParts(date);
-  const get = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((p) => p.type === type)?.value ?? "";
-  return `${get("year")}-${get("month")}-${get("day")}`;
+  return civilDayKeyInTz(date, tz);
 }
 
 /** Parses a `YYYY-MM-DD` key into its civil components. */
-export function parseDayKey(key: string): {
-  year: number;
-  month: number;
-  day: number;
-} {
-  const [year, month, day] = key.split("-").map((n) => Number.parseInt(n, 10));
-  return { year, month, day };
+export function parseDayKey(key: string): CivilDate {
+  return parseCivilDayKey(key);
 }
 
 /**
@@ -155,23 +130,15 @@ export function eachDayKeyInPeriod(period: {
   const lastKey = dayKeyInTz(period.to, tz);
 
   const first = parseDayKey(firstKey);
-  const last = parseDayKey(lastKey);
-
-  let cursor = Date.UTC(first.year, first.month - 1, first.day);
-  const end = Date.UTC(last.year, last.month - 1, last.day);
+  const span = civilDaysBetween(first, parseDayKey(lastKey));
 
   // Inverted range: emit the single starting day rather than an empty series,
   // so a chart never renders "sin datos" for what is really a bad filter.
-  if (end < cursor) return [firstKey];
+  if (span < 0) return [firstKey];
 
   const keys: string[] = [];
-  while (cursor <= end) {
-    const d = new Date(cursor);
-    const y = d.getUTCFullYear();
-    const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(d.getUTCDate()).padStart(2, "0");
-    keys.push(`${y}-${m}-${day}`);
-    cursor += 86400000;
+  for (let offset = 0; offset <= span; offset++) {
+    keys.push(formatDayKey(addCivilDays(first, offset)));
   }
   return keys;
 }
@@ -227,24 +194,41 @@ export function periodLabel(period: {
   )}`;
 }
 
+/**
+ * The window a preset means, resolved in the BOX timezone.
+ *
+ * This used to call date-fns `startOfDay` / `endOfDay` / `startOfMonth`, which
+ * snap to the SERVER's midnight. Since `eachDayKeyInPeriod` buckets in `tz`,
+ * the two disagreed on any host whose clock is not the box's: production runs
+ * on UTC, so a Mexico City box asking for "últimos 30 días" got a window that
+ * covered 31 civil days, shifted six hours at both edges. Every KPI, chart and
+ * delta downstream inherited that drift.
+ */
 function windowForPreset(
   preset: PeriodPreset,
   now: Date,
+  tz: string,
 ): { from: Date; to: Date } {
+  const today = civilDateInTz(now, tz);
+  const window = (from: CivilDate, to: CivilDate) => ({
+    from: startOfCivilDay(from, tz),
+    to: endOfCivilDay(to, tz),
+  });
+
   switch (preset) {
     case "today":
-      return { from: startOfDay(now), to: endOfDay(now) };
+      return window(today, today);
     case "last7":
-      return { from: startOfDay(subDays(now, 6)), to: endOfDay(now) };
+      return window(addCivilDays(today, -6), today);
     case "last30":
-      return { from: startOfDay(subDays(now, 29)), to: endOfDay(now) };
+      return window(addCivilDays(today, -29), today);
     case "last90":
-      return { from: startOfDay(subDays(now, 89)), to: endOfDay(now) };
+      return window(addCivilDays(today, -89), today);
     case "thisMonth":
-      return { from: startOfMonth(now), to: endOfMonth(now) };
+      return window(startOfCivilMonth(today), endOfCivilMonth(today));
     case "lastMonth": {
-      const prev = subMonths(now, 1);
-      return { from: startOfMonth(prev), to: endOfMonth(prev) };
+      const prev = subCivilMonths(today, 1);
+      return window(startOfCivilMonth(prev), endOfCivilMonth(prev));
     }
   }
 }
@@ -277,7 +261,7 @@ export function resolvePeriod(
   }
 
   const preset = asPreset(input.preset) ?? DEFAULT_PERIOD_PRESET;
-  const { from, to } = windowForPreset(preset, now);
+  const { from, to } = windowForPreset(preset, now, tz);
   const period: Period = { from, to, tz, preset };
   return { ...period, label: periodLabel(period) };
 }
@@ -287,12 +271,19 @@ export function resolvePeriod(
  * Guaranteed not to overlap the current window.
  */
 export function previousPeriodOf(period: Period): LabelledPeriod {
-  const spanDays = Math.max(
-    0,
-    differenceInCalendarDays(period.to, period.from),
-  );
-  const to = endOfDay(subDays(period.from, 1));
-  const from = startOfDay(subDays(to, spanDays));
-  const prev: Period = { from, to, tz: period.tz };
+  const tz = period.tz || DEFAULT_TIMEZONE;
+  const firstDay = civilDateInTz(period.from, tz);
+  const lastDay = civilDateInTz(period.to, tz);
+  // Inclusive civil-day count; an inverted window still gets one day.
+  const spanDays = Math.max(1, civilDaysBetween(firstDay, lastDay) + 1);
+
+  const prevLastDay = addCivilDays(firstDay, -1);
+  const prevFirstDay = addCivilDays(prevLastDay, -(spanDays - 1));
+
+  const prev: Period = {
+    from: startOfCivilDay(prevFirstDay, tz),
+    to: endOfCivilDay(prevLastDay, tz),
+    tz: period.tz,
+  };
   return { ...prev, label: periodLabel(prev) };
 }

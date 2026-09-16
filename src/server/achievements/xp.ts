@@ -17,7 +17,7 @@
  * `@/lib/badges/xp-ledger`.
  */
 
-import { withTenant, db as prismaBase } from "@/server/db";
+import { withTenant } from "@/server/db";
 import {
   BADGE_XP_SOURCE_TYPE,
   missingBadgeXPEntries,
@@ -48,8 +48,8 @@ export async function reconcileBadgeXPLedger(
       where: { athleteId },
       select: { badge: { select: { id: true, code: true, xpReward: true } } },
     }),
-    prismaBase.xPLedger.findMany({
-      where: { tenantId, athleteId, sourceType: BADGE_XP_SOURCE_TYPE },
+    db.xPLedger.findMany({
+      where: { athleteId, sourceType: BADGE_XP_SOURCE_TYPE },
       select: { sourceId: true },
     }),
   ]);
@@ -64,8 +64,10 @@ export async function reconcileBadgeXPLedger(
   );
 
   if (missing.length > 0) {
-    await prismaBase.xPLedger.createMany({
+    await db.xPLedger.createMany({
       data: missing.map((m) => ({
+        // `tenantId` is required by Prisma's generated create input; the
+        // extension injects it too, so the two can never disagree.
         tenantId,
         athleteId,
         amount: m.amount,
@@ -77,8 +79,8 @@ export async function reconcileBadgeXPLedger(
     });
   }
 
-  const total = await prismaBase.xPLedger.aggregate({
-    where: { tenantId, athleteId },
+  const total = await db.xPLedger.aggregate({
+    where: { athleteId },
     _sum: { amount: true },
   });
   return total._sum.amount ?? 0;

@@ -116,9 +116,13 @@ export async function getReports(opts?: PeriodInput): Promise<Reports> {
     db.pR.count({
       where: { achievedAt: { gte: periodStart, lte: periodEnd } },
     }),
+    // `withTenant` now scopes `groupBy` too (audit P0-1), but these two
+    // aggregations used to rank EVERY box in the database inside one owner's
+    // report, so they also name the tenant explicitly: a reader of this file
+    // should not have to trust an extension they cannot see.
     db.score.groupBy({
       by: ["wodId"],
-      where: { createdAt: { gte: periodStart, lte: periodEnd } },
+      where: { tenantId, createdAt: { gte: periodStart, lte: periodEnd } },
       _count: { _all: true },
       orderBy: { _count: { wodId: "desc" } },
       take: 5,
@@ -126,6 +130,7 @@ export async function getReports(opts?: PeriodInput): Promise<Reports> {
     db.booking.groupBy({
       by: ["athleteId"],
       where: {
+        tenantId,
         status: "ATTENDED",
         class: { startsAt: { gte: periodStart, lte: periodEnd } },
       },
