@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import { NumberStepper, CheckboxCard } from "@/components/kronos/forms";
 import type { BiologicalSex } from "@prisma/client";
 
@@ -48,31 +49,11 @@ export function Step2PhysicalProfile({
       </div>
 
       <div className="space-y-3">
-        <button
-          type="button"
-          onClick={() => {}} // TODO: Implement Apple Health sync in Ola 2
-          disabled
-          className="w-full px-4 py-3 rounded-xl border flex items-center gap-3 transition-all disabled:opacity-50"
-          style={{
-            borderColor: "var(--k-line-2)",
-            background: "var(--k-surface)",
-            color: "var(--k-t2)",
-          }}
-        >
-          <span className="text-lg">🍎</span>
-          <div className="text-left flex-1">
-            <div
-              className="text-sm font-semibold"
-              style={{ color: "var(--k-t1)" }}
-            >
-              Sincronizar con Apple Health
-            </div>
-            <div className="text-xs" style={{ color: "var(--k-t3)" }}>
-              Disponible en iOS app
-            </div>
-          </div>
-        </button>
-
+        {/* P1-8: a dead "Sincronizar con Apple Health · Disponible en iOS app"
+            card sat here with `onClick={() => {}}` and `disabled`. There is no
+            Apple Health integration and no native app, so it promised the
+            athlete something that does not ship. Removed rather than relabelled
+            — a disabled control still reads as "coming soon". */}
         <div className="space-y-2">
           <label
             className="text-xs font-mono uppercase tracking-wider"
@@ -167,7 +148,10 @@ export function Step2PhysicalProfile({
           className="text-xs underline disabled:opacity-50"
           style={{ color: "var(--k-t3)" }}
         >
-          ← Atrás
+          <span className="inline-flex items-center justify-center gap-1">
+            <ChevronLeft size={12} aria-hidden />
+            Atrás
+          </span>
         </button>
       </div>
     </div>

@@ -95,8 +95,8 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
 
   return (
     <div
-      className="mx-3.5 rounded-2xl overflow-hidden border border-[var(--line)]"
-      style={{ background: "var(--card)" }}
+      className="mx-3.5 rounded-2xl overflow-hidden border border-[var(--k-line)]"
+      style={{ background: "var(--k-surface)" }}
     >
       {/* Progress dots */}
       <div className="flex items-center justify-center gap-2 pt-4 pb-1">
@@ -106,7 +106,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
               className={`h-2 rounded-full transition-colors ${
                 i <= questionIndex
                   ? "bg-[var(--k-accent)]"
-                  : "bg-[var(--track)]"
+                  : "bg-[var(--k-line)]"
               }`}
               animate={{
                 width: i === questionIndex ? 24 : 8,
@@ -134,7 +134,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
             exit="exit"
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
           >
-            <p className="text-[15px] font-display font-bold text-[var(--text)] text-center mb-4">
+            <p className="text-[15px] font-display font-bold text-[var(--k-t1)] text-center mb-4">
               {currentQuestion.text}
             </p>
 
@@ -144,7 +144,7 @@ export default function QuickSurvey({ survey, classId, onComplete }: Props) {
                   key={opt.value}
                   onClick={() => handleOption(currentQuestion.id, opt.value)}
                   disabled={isPending}
-                  className="flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl transition-colors border border-[var(--line)] bg-[var(--k-surface)] hover:bg-[var(--k-elevated)] disabled:opacity-50"
+                  className="flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl transition-colors border border-[var(--k-line)] bg-[var(--k-surface)] hover:bg-[var(--k-elevated)] disabled:opacity-50"
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.92 }}
                 >

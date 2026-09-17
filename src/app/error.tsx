@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 
 export default function ErrorPage({
   error,
@@ -33,10 +34,9 @@ export default function ErrorPage({
             justifyContent: "center",
             margin: "0 auto 24px",
             color: "var(--k-warning)",
-            fontSize: 28,
           }}
         >
-          ⚠️
+          <AlertTriangle size={28} strokeWidth={1.8} aria-hidden="true" />
         </div>
         <h1
           style={{

@@ -11,19 +11,28 @@ import {
   type MembershipRow,
 } from "@/server/actions/memberships";
 import type { CSVColumn } from "@/lib/csv";
+import { formatDateShort, formatMXN } from "@/lib/format";
+import { membershipStatusLabel, planTypeLabel } from "@/lib/labels";
 import { useUrlPatch } from "@/lib/url-state";
 
 const fmtDate = (d: Date | null) =>
-  d ? d.toLocaleDateString("es-MX", { day: "2-digit", month: "short" }) : "∞";
-const fmtMoney = (v: number) => `$${v.toLocaleString("es-MX")}`;
+  d ? formatDateShort(d) : "Sin vencimiento";
 
 const csvColumns: CSVColumn<MembershipRow>[] = [
   { key: "athleteName", header: "Atleta", value: (r) => r.athleteName },
   { key: "planName", header: "Plan", value: (r) => r.planName },
-  { key: "planType", header: "Tipo", value: (r) => r.planType },
+  {
+    key: "planType",
+    header: "Tipo",
+    value: (r) => planTypeLabel[r.planType] ?? r.planType,
+  },
   { key: "startDate", header: "Inicio", value: (r) => r.startDate },
   { key: "endDate", header: "Fin", value: (r) => r.endDate },
-  { key: "status", header: "Estado", value: (r) => r.status },
+  {
+    key: "status",
+    header: "Estado",
+    value: (r) => membershipStatusLabel[r.status] ?? r.status,
+  },
   { key: "classesUsed", header: "Clases usadas", value: (r) => r.classesUsed },
   {
     key: "classesRemaining",
@@ -44,6 +53,11 @@ type Props = {
     planId?: string;
   };
 };
+
+function classesText(row: MembershipRow): string {
+  if (row.classesRemaining === null) return `${row.classesUsed} usadas`;
+  return `${row.classesUsed} de ${row.classesUsed + row.classesRemaining}`;
+}
 
 export function MembershipsTable({
   rows,
@@ -69,8 +83,8 @@ export function MembershipsTable({
         cell: ({ row }) => (
           <span>
             {row.original.planName}{" "}
-            <span className="ml-1 font-mono text-[10px] text-[var(--k-t3)]">
-              {row.original.planType}
+            <span className="ml-1 text-[11px] text-[var(--k-t3)]">
+              {planTypeLabel[row.original.planType]}
             </span>
           </span>
         ),
@@ -80,7 +94,7 @@ export function MembershipsTable({
         header: "Vigencia",
         cell: ({ row }) => (
           <span className="font-mono text-xs text-[var(--k-t3)]">
-            {fmtDate(row.original.startDate)} → {fmtDate(row.original.endDate)}
+            {fmtDate(row.original.startDate)} – {fmtDate(row.original.endDate)}
           </span>
         ),
       },
@@ -88,22 +102,16 @@ export function MembershipsTable({
         accessorKey: "classesUsed",
         header: "Clases",
         cell: ({ row }) => (
-          <span className="text-xs">
-            <span className="font-mono">{row.original.classesUsed}</span>
-            {row.original.classesRemaining !== null ? (
-              <span className="text-[var(--k-t3)]">
-                {" "}
-                / {row.original.classesUsed + row.original.classesRemaining}
-              </span>
-            ) : null}
-          </span>
+          <span className="text-xs">{classesText(row.original)}</span>
         ),
       },
       {
         accessorKey: "amountPaid",
         header: "Pagado",
         cell: ({ row }) => (
-          <span className="font-mono">{fmtMoney(row.original.amountPaid)}</span>
+          <span className="font-display font-bold">
+            {formatMXN(row.original.amountPaid)}
+          </span>
         ),
       },
     ],
@@ -124,10 +132,11 @@ export function MembershipsTable({
     <div className="k-card overflow-hidden">
       <div className="flex items-center justify-between gap-3 border-b border-[var(--k-line)] px-4 py-3">
         <p className="k-eyebrow">
-          {total} membership{total === 1 ? "" : "s"}
+          {total} membresía{total === 1 ? "" : "s"} activa
+          {total === 1 ? "" : "s"}
         </p>
         <ExportCSVButton<MembershipRow>
-          filename="memberships"
+          filename="membresias"
           columns={csvColumns}
           fetchRows={exportAll}
           disabled={total === 0}
@@ -136,13 +145,43 @@ export function MembershipsTable({
       {rows.length === 0 ? (
         <div className="p-6">
           <EmptyState
-            title="Sin memberships"
+            title="Sin membresías"
             description="Sin resultados para los filtros actuales."
           />
         </div>
       ) : (
         <>
-          <DataTable data={rows} columns={columns} rowKey={(r) => r.id} />
+          {/* Phone: stacked row cards — "Clases" and "Pagado" used to clip away */}
+          <ul className="flex flex-col md:hidden">
+            {rows.map((r) => (
+              <li
+                key={r.id}
+                className="flex items-start justify-between gap-3 border-b border-[var(--k-line)] px-4 py-3 last:border-b-0"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">
+                    {r.athleteName}
+                  </p>
+                  <p
+                    className="truncate text-xs"
+                    style={{ color: "var(--k-t2)" }}
+                  >
+                    {r.planName} · {planTypeLabel[r.planType]}
+                  </p>
+                  <p className="mt-1.5 font-mono text-[11px] text-[var(--k-t3)]">
+                    {fmtDate(r.startDate)} – {fmtDate(r.endDate)} ·{" "}
+                    {classesText(r)}
+                  </p>
+                </div>
+                <span className="font-display shrink-0 text-base font-bold">
+                  {formatMXN(r.amountPaid)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden md:block">
+            <DataTable data={rows} columns={columns} rowKey={(r) => r.id} />
+          </div>
           <div className="border-t border-[var(--k-line)] px-4 py-2">
             <Pagination
               page={page}

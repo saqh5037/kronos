@@ -2,13 +2,20 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, rebuild/base]
   pull_request:
-    branches: [main]
+    branches: [main, rebuild/base]
+  # Manual run and the nightly e2e sweep. `quality` runs on these too: it is
+  # cheap and a nightly green typecheck catches a dependency drifting under us.
+  workflow_dispatch:
+  schedule:
+    # 08:00 UTC = 02:00 America/Mexico_City.
+    - cron: '0 8 * * *'
 
 jobs:
   quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -33,5 +40,119 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # Includes the hygiene guards (tests/unit/dialect-guard.test.ts and
+      # tests/unit/ui-guards.test.ts) — they are ordinary vitest files, so they
+      # need no extra step. They ratchet against tests/fixtures/guard-baseline.json:
+      # a file's violation count may only go down. See the header of
+      # tests/unit/ui-guards.test.ts.
       - name: Unit tests
         run: pnpm test
+
+      # `tsc --noEmit` does not typecheck what `next build` does: route
+      # signatures, `typedRoutes` links, server/client boundaries and the
+      # metadata API all fail at build time and nowhere else. The DB is a stub
+      # URL — nothing connects during a build, but Prisma refuses to load
+      # without one.
+      - name: Production build
+        run: pnpm build
+        env:
+          DATABASE_URL: postgresql://kronos:kronos_dev@localhost:5432/kronos_ci_stub
+          DIRECT_DATABASE_URL: postgresql://kronos:kronos_dev@localhost:5432/kronos_ci_stub
+          NEXTAUTH_SECRET: ci-stub-secret-not-used
+          NEXTAUTH_URL: http://localhost:3000
+
+  # Integration (5 files, real Postgres) + the 28 Playwright specs.
+  #
+  # Not on every push: the suite boots a dev server, seeds three times and
+  # drives a browser, so it is minutes, not seconds. It runs when someone asks
+  # for it (`workflow_dispatch`), every night, or on a PR labelled `run-e2e` —
+  # which is how you get it on a change that touches booking, auth or tenancy.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
+      contains(github.event.pull_request.labels.*.name, 'run-e2e')
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: kronos
+          POSTGRES_PASSWORD: kronos_dev
+          POSTGRES_DB: kronos_db
+        # 5434 mirrors docker-compose.yml so DATABASE_URL is the same string
+        # developers already have locally.
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U kronos -d kronos_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://kronos:kronos_dev@localhost:5434/kronos_db
+      DIRECT_DATABASE_URL: postgresql://kronos:kronos_dev@localhost:5434/kronos_db
+      NEXTAUTH_SECRET: ci-e2e-secret-not-a-real-key
+      NEXTAUTH_URL: http://localhost:3000
+      # The dev CredentialsProvider the specs log in through
+      # (e2e/fixtures/auth.ts). Only ever enabled outside production.
+      NEXT_PUBLIC_DEV_LOGIN: '1'
+      DEV_PASSWORD: dev
+      # The cron specs post this header; the routes 503 without the variable.
+      # Matches the fallback the specs use when it is unset.
+      CRON_SECRET: test-secret-123
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      # `db:push`, not `migrate deploy`: dev and this suite share one schema
+      # source of truth (CLAUDE.md — no `prisma migrate` outside production).
+      - name: Push schema
+        run: pnpm db:push
+
+      # Three seeds, in order: base box + athletes + WODs, then the operational
+      # layer (payments, memberships, announcements), then one athlete's history.
+      # The specs assert on rows from all three.
+      - name: Seed database
+        run: |
+          pnpm db:seed
+          pnpm db:seed:ops
+          pnpm db:seed:story
+
+      # tests/integration/** is excluded from `pnpm test` (it needs this DB).
+      - name: Integration tests
+        run: pnpm test:integration
+
+      - name: Install Playwright chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      # playwright.config.ts starts its own `pnpm dev` (reuseExistingServer is
+      # false under CI) and inherits the env above.
+      - name: E2E tests
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

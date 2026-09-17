@@ -53,7 +53,7 @@ export default function PerfilLoading() {
             <div
               key={i}
               className="flex items-center gap-3 px-4 py-3 border-b last:border-b-0"
-              style={{ borderColor: "var(--line)" }}
+              style={{ borderColor: "var(--k-line)" }}
             >
               <div className="flex-1 space-y-1.5">
                 <KronosSkeleton

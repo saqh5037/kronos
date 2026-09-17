@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
+// House rule (CLAUDE.md, design system): icons come from lucide-react. This
+// header shipped the arrow as a hand-rolled inline <svg> duplicated twice.
+import { ArrowRight } from "lucide-react";
 import KronosLogo from "@/components/brand/KronosLogo";
+import { CTA_TRIAL_HREF, CTA_TRIAL_LABEL } from "../_data/cta";
 import { track } from "../_lib/track";
 
 const NAV_LINKS = [
@@ -31,17 +35,7 @@ export default function Nav({ boxHref }: { boxHref: string | null }) {
             onClick={() => track("cta_clicked", { location: "nav_to_box" })}
           >
             Ir a mi box
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
+            <ArrowRight size={14} strokeWidth={2} aria-hidden="true" />
           </a>
         ) : (
           <>
@@ -49,22 +43,12 @@ export default function Nav({ boxHref }: { boxHref: string | null }) {
               Entrar
             </Link>
             <a
-              href="#section-form"
+              href={CTA_TRIAL_HREF}
               className="lp-btn-lime"
               onClick={() => track("cta_clicked", { location: "nav" })}
             >
-              Reservar lugar
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
+              {CTA_TRIAL_LABEL}
+              <ArrowRight size={14} strokeWidth={2} aria-hidden="true" />
             </a>
           </>
         )}

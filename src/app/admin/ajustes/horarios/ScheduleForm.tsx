@@ -1,16 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
+import { Copy } from "lucide-react";
 import {
   updateBoxSchedule,
   type BoxScheduleSettings,
   type DaySchedule,
 } from "@/server/actions/box";
 
-const DOWS: {
-  key: keyof BoxScheduleSettings["weeklySchedule"];
-  label: string;
-}[] = [
+type DayKey = keyof BoxScheduleSettings["weeklySchedule"];
+
+const DOWS: { key: DayKey; label: string }[] = [
   { key: "mon", label: "Lunes" },
   { key: "tue", label: "Martes" },
   { key: "wed", label: "Miércoles" },
@@ -31,22 +32,20 @@ export function ScheduleForm({
 }) {
   const [state, setState] = useState<BoxScheduleSettings>(initial);
   const [isPending, startTransition] = useTransition();
-  const [msg, setMsg] = useState<string | null>(null);
+  const [msg, setMsg] = useState<{ tone: "ok" | "error"; text: string } | null>(
+    null,
+  );
 
-  function setDay(
-    key: keyof BoxScheduleSettings["weeklySchedule"],
-    value: DaySchedule,
-  ) {
+  const dirty = JSON.stringify(state) !== JSON.stringify(initial);
+
+  function setDay(key: DayKey, value: DaySchedule) {
     setState((s) => ({
       ...s,
       weeklySchedule: { ...s.weeklySchedule, [key]: value },
     }));
   }
 
-  function toggleHour(
-    key: keyof BoxScheduleSettings["weeklySchedule"],
-    hour: number,
-  ) {
+  function toggleHour(key: DayKey, hour: number) {
     setState((s) => {
       const day = s.weeklySchedule[key];
       const current = day ?? { kind: "WOD" as const, hours: [] };
@@ -64,10 +63,7 @@ export function ScheduleForm({
     });
   }
 
-  function setKind(
-    key: keyof BoxScheduleSettings["weeklySchedule"],
-    kind: "WOD" | "OPEN_BOX",
-  ) {
+  function setKind(key: DayKey, kind: "WOD" | "OPEN_BOX") {
     setState((s) => {
       const day = s.weeklySchedule[key];
       if (!day) return s;
@@ -78,39 +74,42 @@ export function ScheduleForm({
     });
   }
 
+  /** Copies one day's hours and kind onto every other day of the week. */
+  function copyToAllDays(key: DayKey) {
+    setState((s) => {
+      const source = s.weeklySchedule[key];
+      if (!source) return s;
+      const next = { ...s.weeklySchedule };
+      for (const { key: k } of DOWS) {
+        next[k] = { kind: source.kind, hours: [...source.hours] };
+      }
+      return { ...s, weeklySchedule: next };
+    });
+  }
+
   async function save() {
     setMsg(null);
     startTransition(async () => {
       try {
         await updateBoxSchedule(state);
-        setMsg("Guardado ✓");
+        setMsg({ tone: "ok", text: "Horarios guardados" });
       } catch (e) {
-        setMsg(`Error: ${(e as Error).message}`);
+        setMsg({ tone: "error", text: (e as Error).message });
       }
     });
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    /* Bottom padding keeps the fixed save bar from covering the last day */
+    <div className="flex flex-col gap-6 pb-32">
       {/* Window settings */}
       <div className="k-card p-5">
-        <h2 className="font-display text-lg font-bold mb-4">
+        <h2 className="font-display mb-4 text-lg font-bold">
           Reglas de reserva
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <NumberField
-            label="Capacity por defecto"
-            value={state.defaultClassCapacity}
-            onChange={(v) =>
-              setState((s) => ({ ...s, defaultClassCapacity: v }))
-            }
-            disabled={!canEdit}
-            min={1}
-            max={200}
-            help="Atletas máx por clase nueva"
-          />
-          <NumberField
-            label="Apertura reservas (horas antes)"
+            label="Apertura de reservas (horas antes)"
             value={state.bookingOpenHoursAhead}
             onChange={(v) =>
               setState((s) => ({ ...s, bookingOpenHoursAhead: v }))
@@ -118,10 +117,10 @@ export function ScheduleForm({
             disabled={!canEdit}
             min={0}
             max={168}
-            help="Default 24h"
+            help="Por omisión, 24 horas antes de la clase."
           />
           <NumberField
-            label="Cierre cancelación (min antes)"
+            label="Cierre de cancelación (minutos antes)"
             value={state.cancelCloseMinBefore}
             onChange={(v) =>
               setState((s) => ({ ...s, cancelCloseMinBefore: v }))
@@ -129,31 +128,52 @@ export function ScheduleForm({
             disabled={!canEdit}
             min={0}
             max={720}
-            help="Default 30 min"
+            help="Por omisión, 30 minutos antes de la clase."
           />
         </div>
+        {/* Capacity is one setting and it lives in Ajustes › Box */}
+        <p className="mt-4 text-xs" style={{ color: "var(--k-t3)" }}>
+          Capacidad por clase:{" "}
+          <strong style={{ color: "var(--k-t2)" }}>
+            {state.defaultClassCapacity} atletas
+          </strong>
+          . Se configura en{" "}
+          <Link
+            href="/admin/ajustes"
+            className="underline decoration-dotted"
+            style={{ color: "var(--k-accent)" }}
+          >
+            Ajustes › Box
+          </Link>
+          .
+        </p>
       </div>
 
       {/* Weekly schedule */}
-      <div className="k-card p-5">
-        <h2 className="font-display text-lg font-bold mb-4">
+      <div className="k-card p-4 md:p-5">
+        <h2 className="font-display mb-1 text-lg font-bold">
           Horarios semanales
         </h2>
+        <p className="mb-4 text-xs" style={{ color: "var(--k-t3)" }}>
+          Toca las horas en las que abre el box. La grilla de Programación se
+          arma con esto.
+        </p>
         <div className="flex flex-col gap-3">
           {DOWS.map(({ key, label }) => {
             const day = state.weeklySchedule[key];
+            const openBox = day?.kind === "OPEN_BOX";
             return (
               <div
                 key={key}
-                className="rounded-xl p-3 border"
+                className="rounded-xl border p-3"
                 style={{
                   background: day ? "var(--k-elevated)" : "transparent",
                   borderColor: "var(--k-line-2)",
                 }}
               >
-                <div className="flex items-center justify-between gap-3 mb-2">
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="flex min-h-11 cursor-pointer items-center gap-2">
                       <input
                         type="checkbox"
                         checked={!!day}
@@ -166,6 +186,7 @@ export function ScheduleForm({
                           )
                         }
                         disabled={!canEdit}
+                        className="h-4 w-4 accent-[var(--k-accent)]"
                       />
                       <span className="font-display text-base font-bold">
                         {label}
@@ -181,7 +202,7 @@ export function ScheduleForm({
                     )}
                   </div>
                   {day && (
-                    <div className="flex gap-1">
+                    <div className="flex flex-wrap items-center gap-1">
                       <KindToggle
                         active={day.kind === "WOD"}
                         onClick={() => setKind(key, "WOD")}
@@ -190,36 +211,62 @@ export function ScheduleForm({
                         WOD
                       </KindToggle>
                       <KindToggle
-                        active={day.kind === "OPEN_BOX"}
+                        active={openBox}
                         onClick={() => setKind(key, "OPEN_BOX")}
                         disabled={!canEdit}
                       >
                         Open Box
                       </KindToggle>
+                      {canEdit && day.hours.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => copyToAllDays(key)}
+                          className="ml-1 inline-flex min-h-11 items-center gap-1.5 rounded-md px-2.5 text-[10px] font-bold tracking-wider uppercase"
+                          style={{
+                            color: "var(--k-t2)",
+                            border: "1px solid var(--k-line-2)",
+                          }}
+                          title={`Copiar el horario de ${label} a todos los días`}
+                        >
+                          <Copy size={12} strokeWidth={2.2} aria-hidden />
+                          Copiar a todos los días
+                        </button>
+                      ) : null}
                     </div>
                   )}
                 </div>
                 {day && (
-                  <div className="flex flex-wrap gap-1.5">
+                  /* 44 px targets, 6 per row at 360 */
+                  <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-8 md:grid-cols-12">
                     {HOURS.map((h) => {
                       const on = day.hours.includes(h);
+                      const onOpenBox = on && openBox;
                       return (
                         <button
                           key={h}
                           type="button"
                           onClick={() => toggleHour(key, h)}
                           disabled={!canEdit}
-                          className="font-mono text-[11px] font-bold rounded-md transition-all"
+                          aria-pressed={on}
+                          className="font-display min-h-11 rounded-md text-[12px] font-bold transition-all"
                           style={{
-                            width: 38,
-                            height: 30,
-                            background: on
-                              ? day.kind === "OPEN_BOX"
-                                ? "var(--k-warning)"
-                                : "var(--k-accent)"
-                              : "var(--k-elevated)",
-                            color: on ? "var(--k-accent-on)" : "var(--k-t3)",
-                            border: `1px solid ${on ? "transparent" : "var(--k-line)"}`,
+                            background: onOpenBox
+                              ? "var(--k-accent-soft)"
+                              : on
+                                ? "var(--k-accent)"
+                                : "var(--k-elevated)",
+                            color: onOpenBox
+                              ? "var(--k-accent)"
+                              : on
+                                ? "var(--k-accent-on)"
+                                : "var(--k-t3)",
+                            border: `1px solid ${
+                              onOpenBox
+                                ? "var(--k-accent-line)"
+                                : on
+                                  ? "transparent"
+                                  : "var(--k-line)"
+                            }`,
                             cursor: canEdit ? "pointer" : "not-allowed",
                             opacity: canEdit ? 1 : 0.7,
                           }}
@@ -234,31 +281,71 @@ export function ScheduleForm({
             );
           })}
         </div>
+        <div
+          className="mt-4 flex flex-wrap items-center gap-4 text-[11px]"
+          style={{ color: "var(--k-t3)" }}
+        >
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              aria-hidden
+              className="inline-block h-3 w-3 rounded-sm"
+              style={{ background: "var(--k-accent)" }}
+            />
+            Hora con WOD
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              aria-hidden
+              className="inline-block h-3 w-3 rounded-sm"
+              style={{
+                background: "var(--k-accent-soft)",
+                border: "1px solid var(--k-accent-line)",
+              }}
+            />
+            Hora de Open Box
+          </span>
+        </div>
       </div>
 
-      {/* Save bar */}
+      {/* Fixed save bar — never covers the grid thanks to the padding above */}
       {canEdit && (
-        <div className="sticky bottom-4 flex items-center justify-end gap-3">
-          {msg && (
-            <span
-              className="text-sm font-medium"
-              style={{
-                color: msg.startsWith("Error")
-                  ? "var(--k-danger)"
-                  : "var(--k-accent)",
-              }}
+        <div
+          className="fixed right-0 bottom-0 left-0 z-40 border-t px-4 py-3"
+          style={{
+            background: "var(--k-surface)",
+            borderColor: "var(--k-line-2)",
+            paddingBottom: "calc(12px + env(safe-area-inset-bottom))",
+          }}
+        >
+          <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-end gap-3">
+            {msg && (
+              <span
+                className="text-sm font-medium"
+                role="status"
+                style={{
+                  color:
+                    msg.tone === "error"
+                      ? "var(--k-danger)"
+                      : "var(--k-accent)",
+                }}
+              >
+                {msg.text}
+              </span>
+            )}
+            {!msg && dirty && (
+              <span className="text-xs" style={{ color: "var(--k-t3)" }}>
+                Tienes cambios sin guardar
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={save}
+              disabled={isPending || !dirty}
+              className="k-btn-grad px-6 py-2.5"
             >
-              {msg}
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={save}
-            disabled={isPending}
-            className="k-btn-grad px-6 py-2.5"
-          >
-            {isPending ? "Guardando…" : "Guardar cambios"}
-          </button>
+              {isPending ? "Guardando…" : "Guardar cambios"}
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -285,7 +372,7 @@ function NumberField({
   return (
     <label className="flex flex-col gap-1.5">
       <span
-        className="font-mono text-[10px] font-bold uppercase tracking-wider"
+        className="font-display text-[10px] font-bold tracking-wider uppercase"
         style={{ color: "var(--k-t3)" }}
       >
         {label}
@@ -326,7 +413,8 @@ function KindToggle({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase transition-all"
+      aria-pressed={active}
+      className="inline-flex min-h-11 items-center rounded-md px-2.5 text-[10px] font-bold tracking-wider uppercase transition-all"
       style={{
         background: active ? "var(--k-surface)" : "transparent",
         color: active ? "var(--k-t1)" : "var(--k-t3)",

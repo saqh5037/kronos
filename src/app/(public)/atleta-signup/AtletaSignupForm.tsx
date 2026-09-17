@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
+import { ArrowRight, Check } from "lucide-react";
 import {
   checkEmailExists,
   createIndependentAthlete,
@@ -147,12 +148,12 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
             className="inline-flex items-center justify-center w-12 h-12 rounded-full"
             style={{ background: "var(--k-accent-soft)" }}
           >
-            <span
-              className="font-display font-bold text-xl"
+            <Check
+              size={22}
+              strokeWidth={2.5}
               style={{ color: "var(--k-accent)" }}
-            >
-              ✓
-            </span>
+              aria-hidden="true"
+            />
           </div>
           <h2 className="font-display font-bold text-xl">¡Listo!</h2>
           <p className="text-sm" style={{ color: "var(--k-t2)" }}>
@@ -162,13 +163,14 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
           </p>
           <a
             href={`/login?email=${encodeURIComponent(success.email)}`}
-            className="k-btn-grad inline-block px-6 py-3 rounded-xl font-bold text-sm"
+            className="k-btn-grad inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
           >
-            Entrar ahora →
+            Entrar ahora
+            <ArrowRight size={15} strokeWidth={2.5} aria-hidden="true" />
           </a>
           {DEV_LOGIN_ENABLED ? (
             <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-              (Dev: entrá con tu email + password <code>dev</code> en{" "}
+              (Dev: entra con tu email + password <code>dev</code> en{" "}
               <a href="/login?dev=1" className="underline">
                 /login
               </a>
@@ -241,15 +243,12 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
             ? "Verificando…"
             : email.length === 0
               ? "Empezar"
-              : "Continuar →"}
+              : "Continuar"}
         </button>
 
-        <p className="text-center text-xs leading-relaxed">
-          <span style={{ color: "var(--k-t3)" }}>¿Primera vez?</span>{" "}
-          <span style={{ color: "var(--k-accent)", fontWeight: 600 }}>
-            Te lleva 10 segundos →
-          </span>
-        </p>
+        {/* La misma frase estaba arriba de la card y adentro, y el "Te lleva 10
+            segundos →" parecía un enlace que competía con el botón sin ir a
+            ningún lado (audit 2026-09-15). */}
       </form>
     );
   }
@@ -424,7 +423,12 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
             style={{ color: "var(--k-t2)" }}
           >
             <span>+ Crear contraseña (opcional)</span>
-            <span style={{ color: "var(--k-t3)" }}>→</span>
+            <ArrowRight
+              size={14}
+              strokeWidth={2.5}
+              style={{ color: "var(--k-t3)" }}
+              aria-hidden="true"
+            />
           </button>
         ) : (
           <div className="space-y-2">
@@ -497,9 +501,10 @@ export default function AtletaSignupForm({ initialEmail = "" }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 mt-1"
+        className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 mt-1 inline-flex items-center justify-center gap-2"
       >
-        Continuar →
+        Continuar
+        <ArrowRight size={15} strokeWidth={2.5} aria-hidden="true" />
       </button>
 
       <p

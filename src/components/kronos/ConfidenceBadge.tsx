@@ -1,11 +1,25 @@
 "use client";
 
 import { m } from "framer-motion";
+import { Icon } from "./Icon";
 
 interface ConfidenceBadgeProps {
   confidence: number;
   showCheck?: boolean;
   delay?: number;
+}
+
+type Tier = { label: string; opacity: number };
+
+/**
+ * AI match confidence. Low confidence is not an error and not a warning — it is
+ * less of the same thing, so it reads as lime at lower opacity plus a word
+ * (audit 2026-09-15, S2: warning/danger used decoratively).
+ */
+function tierFor(confidence: number): Tier {
+  if (confidence >= 0.85) return { label: "Alta", opacity: 1 };
+  if (confidence >= 0.5) return { label: "Media", opacity: 0.7 };
+  return { label: "Baja", opacity: 0.4 };
 }
 
 export default function ConfidenceBadge({
@@ -14,35 +28,7 @@ export default function ConfidenceBadge({
   delay = 0,
 }: ConfidenceBadgeProps) {
   const pct = Math.round(confidence * 100);
-
-  let color: string;
-  let glowColor: string;
-  let bgClass: string;
-  let pulse = false;
-
-  if (confidence >= 0.85) {
-    color = "var(--k-accent)";
-    glowColor = "rgba(74, 124, 89, 0.55)";
-    bgClass =
-      "bg-[var(--k-accent-soft)] text-[var(--k-accent)] border-[var(--k-accent-line)]";
-  } else if (confidence >= 0.5) {
-    color = "var(--k-warning)";
-    glowColor = "rgba(217, 119, 6, 0.45)";
-    bgClass =
-      "bg-[var(--amber-soft)] text-[var(--k-warning)] border-[var(--amber-line)]";
-  } else if (confidence === 0) {
-    // No match at all — informative, not alarming
-    color = "var(--k-warning)";
-    glowColor = "rgba(217, 119, 6, 0.35)";
-    bgClass =
-      "bg-[var(--amber-soft)] text-[var(--k-warning)] border-[var(--amber-line)]";
-  } else {
-    color = "var(--k-warning)";
-    glowColor = "rgba(196, 69, 54, 0.55)";
-    bgClass =
-      "bg-[rgba(255, 90, 90, 0.1)] text-[var(--k-warning)] border-[rgba(255, 90, 90, 0.3)]";
-    pulse = true;
-  }
+  const tier = tierFor(confidence);
 
   return (
     <m.div
@@ -52,38 +38,19 @@ export default function ConfidenceBadge({
       transition={{ delay, type: "spring", stiffness: 300, damping: 20 }}
     >
       <span
-        className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-mono font-bold border ${bgClass} ${pulse ? "k-pulse-glow" : ""}`}
-        style={
-          !pulse
-            ? {
-                boxShadow: `0 0 12px ${glowColor}`,
-              }
-            : undefined
-        }
+        className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs font-bold"
+        style={{
+          background: "var(--k-accent-soft)",
+          borderColor: "var(--k-accent-line)",
+          color: "var(--k-accent)",
+          opacity: tier.opacity,
+        }}
+        title={`Confianza ${tier.label.toLowerCase()} · ${pct}%`}
       >
-        {showCheck && (
-          <m.svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ delay: delay + 0.15, duration: 0.3 }}
-          >
-            <m.path
-              d="M2.5 6.5L5 9L9.5 3.5"
-              stroke={color}
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ delay: delay + 0.15, duration: 0.3 }}
-            />
-          </m.svg>
-        )}
-        {pct}%
+        {showCheck && <Icon name="check" size={16} />}
+        <span>
+          {tier.label} · {pct}%
+        </span>
       </span>
     </m.div>
   );

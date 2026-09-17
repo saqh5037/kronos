@@ -1,11 +1,17 @@
 import Link from "next/link";
 import type { Route } from "next";
 import type { ChurnRiskRow } from "@/server/analytics/churn";
+import { AT_RISK_REASONS } from "@/server/period-summary/rules";
 
-const SEVERITY_COLOR: Record<ChurnRiskRow["severity"], string> = {
-  high: "var(--k-accent)",
-  med: "var(--brand-violet)",
-  low: "var(--brand-blue)",
+/**
+ * Churn severity is intensity of one thing, so it is one hue at three opacities
+ * (audit 2026-09-15, S2) — and no `var()` carries an alpha suffix, which is not
+ * valid CSS.
+ */
+const SEVERITY_OPACITY: Record<ChurnRiskRow["severity"], number> = {
+  high: 1,
+  med: 0.7,
+  low: 0.45,
 };
 
 const SEVERITY_LABEL: Record<ChurnRiskRow["severity"], string> = {
@@ -27,7 +33,11 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
 
   return (
     <div className="k-card overflow-hidden">
-      <div className="grid grid-cols-12 gap-3 border-b border-[var(--line)] px-4 py-2.5 text-[10px] font-mono font-bold tracking-[0.12em] uppercase text-[var(--k-t3)]">
+      {/* The column header only exists while there ARE columns: under `sm`
+          the row stacks, and at 360 this header printed "SEVERIDADSEÑALES"
+          over names truncated to "Andrés…" with the action clipped off the
+          card (visual gate, fase 0). */}
+      <div className="hidden sm:grid grid-cols-12 gap-3 border-b border-[var(--k-line)] px-4 py-2.5 text-[10px] font-mono font-bold tracking-[0.12em] uppercase text-[var(--k-t3)]">
         <div className="col-span-3">Atleta</div>
         <div className="col-span-2">Severidad</div>
         <div className="col-span-5">Señales</div>
@@ -36,9 +46,9 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
       {rows.map((row) => (
         <div
           key={row.athleteId}
-          className="grid grid-cols-12 gap-3 border-b border-[var(--line)] px-4 py-3 last:border-b-0 items-center"
+          className="flex flex-col gap-2 border-b border-[var(--k-line)] px-4 py-3 last:border-b-0 sm:grid sm:grid-cols-12 sm:gap-3 sm:items-center"
         >
-          <div className="col-span-3 min-w-0">
+          <div className="min-w-0 sm:col-span-3">
             <p className="font-display text-sm font-bold truncate">
               {row.name}
             </p>
@@ -50,33 +60,38 @@ export default function ChurnRiskTable({ rows }: { rows: ChurnRiskRow[] }) {
               </p>
             )}
           </div>
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <span
-              className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase px-2 py-0.5 rounded-md inline-block"
+              className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase px-2 py-0.5 rounded-md inline-block whitespace-nowrap"
               style={{
-                color: SEVERITY_COLOR[row.severity],
+                color: "var(--k-accent)",
+                opacity: SEVERITY_OPACITY[row.severity],
                 background: "var(--k-surface)",
-                border: `1px solid ${SEVERITY_COLOR[row.severity]}55`,
+                border: "1px solid var(--k-accent-line)",
               }}
             >
-              {SEVERITY_LABEL[row.severity]} · {row.signalCount}/4
+              {SEVERITY_LABEL[row.severity]} · {row.signalCount}/
+              {AT_RISK_REASONS.length}
             </span>
           </div>
-          <div className="col-span-5">
+          <div className="sm:col-span-5">
             <ul className="text-[12px] leading-[1.4] text-[var(--k-t2)] space-y-0.5">
               {row.reasons.map((reason, i) => (
                 <li key={i} className="flex items-start gap-1.5">
                   <span
                     aria-hidden
                     className="mt-1 h-1 w-1 rounded-full flex-shrink-0"
-                    style={{ background: SEVERITY_COLOR[row.severity] }}
+                    style={{
+                      background: "var(--k-accent)",
+                      opacity: SEVERITY_OPACITY[row.severity],
+                    }}
                   />
                   <span>{reason}</span>
                 </li>
               ))}
             </ul>
           </div>
-          <div className="col-span-2 text-right">
+          <div className="sm:col-span-2 sm:text-right">
             <Link
               href={`/admin/atletas/${row.athleteId}` as Route}
               className="k-chip inline-flex items-center gap-1 hover:scale-[1.04] transition-transform"

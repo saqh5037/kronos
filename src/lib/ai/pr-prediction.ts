@@ -16,6 +16,14 @@ const MIN_POINTS = 3;
 const DEFAULT_HORIZON_WEEKS = 6;
 const PLATEAU_SLOPE_THRESHOLD = 0.01;
 
+/** `status` is an internal token; this is how it is spelled to a model or a human. */
+const STATUS_ES: Record<PRPrediction["status"], string> = {
+  improving: "mejorando",
+  plateau: "estancado",
+  declining: "a la baja",
+  insufficient: "sin datos suficientes",
+};
+
 export function predictNextPR(
   data: PRDataPoint[],
   movementName: string,
@@ -28,7 +36,7 @@ export function predictNextPR(
       confidence: 0,
       currentBest: 0,
       status: "insufficient",
-      fallbackNarrative: `Sin datos suficientes en ${movementName}. Empieza a registrar attempts.`,
+      fallbackNarrative: `Sin datos suficientes en ${movementName}. Empieza a registrar intentos.`,
     };
   }
 
@@ -48,7 +56,7 @@ export function predictNextPR(
       confidence: 0,
       currentBest,
       status: "insufficient",
-      fallbackNarrative: `Tu PR actual de ${movementName} es ${formatKg(currentBest)}. Necesitamos al menos ${MIN_POINTS} attempts para predecir.`,
+      fallbackNarrative: `Tu PR actual de ${movementName} es ${formatKg(currentBest)}. Necesitamos al menos ${MIN_POINTS} intentos para predecir.`,
     };
   }
 
@@ -81,7 +89,7 @@ export function predictNextPR(
       confidence: clamp(r2, 0, 1),
       currentBest,
       status: "plateau",
-      fallbackNarrative: `Plateau en ${movementName} desde hace ${daysAgo(last.achievedAt)} días. Romperlo necesita un cambio de estímulo.`,
+      fallbackNarrative: `Tu ${movementName} lleva ${daysAgo(last.achievedAt)} días estancado. Romperlo necesita un cambio de estímulo.`,
     };
   }
 
@@ -111,7 +119,9 @@ export function buildPRNarrativePrompt(
     "",
     `Atleta: ${athleteFirstName}`,
     `Movimiento: ${movementName}`,
-    `Status: ${pred.status}`,
+    // Spanish label AND Spanish value: the model echoes what it is handed, and
+    // "plateau" came back inside the athlete-facing sentence.
+    `Tendencia: ${STATUS_ES[pred.status]}`,
     `PR actual: ${pred.currentBest}`,
     `Predicho en ${pred.weeksFromNow} semanas: ${pred.predictedKg}`,
     `Confianza estadística: ${(pred.confidence * 100).toFixed(0)}%`,

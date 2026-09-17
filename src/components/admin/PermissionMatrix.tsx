@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { m } from "framer-motion";
 import { updatePermission } from "@/server/actions/permissions";
+import { Icon, type IconName } from "@/components/kronos/Icon";
 import type { PermissionAction, Role } from "@prisma/client";
 
 const ALL_ACTIONS: PermissionAction[] = [
@@ -29,17 +30,33 @@ const ACTION_LABELS: Record<PermissionAction, string> = {
   MANAGE_ATHLETE_METRICS: "Registrar mediciones de atletas",
 };
 
-const ACTION_ICONS: Partial<Record<PermissionAction, string>> = {
-  REGISTER_CASH_PAYMENT: "💵",
-  APPLY_DISCOUNT: "✂️",
-  REFUND_PAYMENT: "↩️",
-  EDIT_PLAN_PRICING: "🏷️",
-  DELETE_ATHLETE: "🗑️",
-  MARK_OVERDUE: "⚠️",
-  VIEW_FINANCIAL_REPORTS: "📊",
-  EDIT_OTHERS_SCORES: "✏️",
-  MANAGE_ATHLETE_METRICS: "⚖️",
+const ACTION_ICONS: Partial<Record<PermissionAction, IconName>> = {
+  REGISTER_CASH_PAYMENT: "cash",
+  APPLY_DISCOUNT: "discount",
+  REFUND_PAYMENT: "refund",
+  EDIT_PLAN_PRICING: "tag",
+  DELETE_ATHLETE: "trash",
+  MARK_OVERDUE: "alert",
+  VIEW_FINANCIAL_REPORTS: "chart",
+  EDIT_OTHERS_SCORES: "edit",
+  MANAGE_ATHLETE_METRICS: "metrics",
 };
+
+/**
+ * The actions that move money, and therefore the only ones an amount threshold
+ * can mean anything for.
+ *
+ * The matrix used to render a `$` input on every row, so the owner was invited
+ * to set a peso ceiling on "Eliminar atleta" and "Ver reportes financieros" —
+ * a control with nothing behind it (audit 2026-09-15). Everything else shows a
+ * dash and says why.
+ */
+const MONEY_ACTIONS = new Set<PermissionAction>([
+  "REGISTER_CASH_PAYMENT",
+  "APPLY_DISCOUNT",
+  "REFUND_PAYMENT",
+  "EDIT_PLAN_PRICING",
+]);
 
 const ROLES: Role[] = ["COACH", "STAFF"];
 
@@ -129,34 +146,36 @@ export default function PermissionMatrix({
   }
 
   return (
-    <div className="rounded-xl border border-[var(--line)] bg-[var(--card)] overflow-hidden">
+    <div className="rounded-xl border border-[var(--k-line)] bg-[var(--k-surface)] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[var(--line)]">
-              <th className="text-left p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider">
+            <tr className="border-b border-[var(--k-line)]">
+              <th className="text-left p-4 text-[var(--k-t2)] font-mono text-[10px] uppercase tracking-wider">
                 Acción
               </th>
               {ROLES.map((role) => (
                 <th
                   key={role}
-                  className="text-center p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider w-28"
+                  className="text-center p-4 text-[var(--k-t2)] font-mono text-[10px] uppercase tracking-wider w-28"
                 >
                   {ROLE_LABELS[role]}
                 </th>
               ))}
-              <th className="text-center p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider w-32">
+              <th className="text-center p-4 text-[var(--k-t2)] font-mono text-[10px] uppercase tracking-wider w-32">
                 <span className="inline-flex items-center gap-1">
-                  <span>🛡️</span> Aprobación
+                  <Icon name="shield" size={16} /> Aprobación
                 </span>
               </th>
-              <th className="text-center p-4 text-text-3 font-mono text-[10px] uppercase tracking-wider w-36">
+              <th className="w-36 p-4 text-center font-mono text-[10px] tracking-wider text-[var(--k-t2)] uppercase">
                 Umbral (MXN)
               </th>
-              <th className="w-20 p-4"></th>
+              <th className="w-20 p-4 text-right font-mono text-[10px] tracking-wider text-[var(--k-t2)] uppercase">
+                {ROLE_LABELS.OWNER}
+              </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--line)]">
+          <tbody className="divide-y divide-[var(--k-line)]">
             {ALL_ACTIONS.map((action, idx) => {
               const state = getState(action);
 
@@ -170,10 +189,12 @@ export default function PermissionMatrix({
                 >
                   <td className="p-4">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-lg">
-                        {ACTION_ICONS[action] ?? "⚙️"}
-                      </span>
-                      <span className="font-medium text-text text-[13px]">
+                      <Icon
+                        name={ACTION_ICONS[action] ?? "settings"}
+                        size={20}
+                        style={{ color: "var(--k-t2)" }}
+                      />
+                      <span className="font-medium text-[var(--k-t1)] text-[13px]">
                         {ACTION_LABELS[action]}
                       </span>
                     </div>
@@ -185,13 +206,15 @@ export default function PermissionMatrix({
                       <td key={role} className="p-4 text-center">
                         <button
                           onClick={() => toggleRole(action, role)}
-                          className="relative inline-flex items-center justify-center cursor-pointer"
+                          aria-pressed={checked}
+                          aria-label={`${ACTION_LABELS[action]} · ${ROLE_LABELS[role]}`}
+                          className="relative inline-flex min-h-11 min-w-11 items-center justify-center cursor-pointer"
                         >
                           <div
                             className={`w-5 h-5 rounded border-2 transition-colors flex items-center justify-center ${
                               checked
                                 ? "bg-[var(--k-accent)] border-[var(--k-accent)]"
-                                : "border-white/20 bg-transparent hover:border-white/40"
+                                : "border-[var(--k-line-2)] bg-transparent hover:border-[var(--k-t3)]"
                             }`}
                           >
                             {checked && (
@@ -209,7 +232,7 @@ export default function PermissionMatrix({
                               >
                                 <path
                                   d="M2.5 6.5L5 9L9.5 3.5"
-                                  stroke="white"
+                                  stroke="var(--k-accent-on)"
                                   strokeWidth="1.5"
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
@@ -226,13 +249,15 @@ export default function PermissionMatrix({
                   <td className="p-4 text-center">
                     <button
                       onClick={() => toggleApproval(action)}
-                      className="relative inline-flex items-center justify-center cursor-pointer"
+                      aria-pressed={state.requiresOwnerApproval}
+                      aria-label={`${ACTION_LABELS[action]} · requiere aprobación del dueño`}
+                      className="relative inline-flex min-h-11 min-w-11 items-center justify-center cursor-pointer"
                     >
                       <div
                         className={`w-5 h-5 rounded border-2 transition-colors flex items-center justify-center ${
                           state.requiresOwnerApproval
-                            ? "bg-[var(--k-warning)] border-[var(--k-warning)]"
-                            : "border-white/20 bg-transparent hover:border-white/40"
+                            ? "bg-[var(--k-accent)] border-[var(--k-accent)]"
+                            : "border-[var(--k-line-2)] bg-transparent hover:border-[var(--k-t3)]"
                         }`}
                       >
                         {state.requiresOwnerApproval && (
@@ -250,7 +275,7 @@ export default function PermissionMatrix({
                           >
                             <path
                               d="M2.5 6.5L5 9L9.5 3.5"
-                              stroke="white"
+                              stroke="var(--k-accent-on)"
                               strokeWidth="1.5"
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -261,27 +286,40 @@ export default function PermissionMatrix({
                     </button>
                   </td>
 
-                  {/* Threshold */}
+                  {/* Threshold — only where an amount exists to compare */}
                   <td className="p-4 text-center">
-                    <div className="relative inline-block">
-                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-3 text-xs">
-                        $
+                    {MONEY_ACTIONS.has(action) ? (
+                      <div className="relative inline-block">
+                        <span className="absolute top-1/2 left-2.5 -translate-y-1/2 text-xs text-[var(--k-t2)]">
+                          $
+                        </span>
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          defaultValue={state.threshold ?? ""}
+                          onBlur={(e) =>
+                            updateThreshold(action, e.target.value)
+                          }
+                          placeholder="Sin límite"
+                          aria-label={`${ACTION_LABELS[action]} · umbral en pesos`}
+                          className="w-24 rounded-lg border border-[var(--k-line-2)] bg-[var(--k-elevated)] py-1.5 pr-2 pl-6 text-center text-sm text-[var(--k-t1)] transition-colors focus:border-[var(--k-accent-line)] focus:outline-none"
+                          min={0}
+                        />
+                      </div>
+                    ) : (
+                      <span
+                        className="text-xs"
+                        style={{ color: "var(--k-t3)" }}
+                        title="Esta acción no mueve dinero, así que no tiene umbral."
+                      >
+                        No aplica
                       </span>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        defaultValue={state.threshold ?? ""}
-                        onBlur={(e) => updateThreshold(action, e.target.value)}
-                        placeholder="—"
-                        className="w-24 bg-[var(--k-elevated)] text-text text-sm rounded-lg pl-6 pr-2 py-1.5 border border-white/10 text-center focus:outline-none focus:border-[var(--k-t2)] transition-colors"
-                        min={0}
-                      />
-                    </div>
+                    )}
                   </td>
 
                   <td className="p-4 text-right">
-                    <span className="text-[10px] text-text-3 font-mono">
-                      OWNER
+                    <span className="font-mono text-[10px] text-[var(--k-t2)]">
+                      Siempre
                     </span>
                   </td>
                 </m.tr>
@@ -290,6 +328,48 @@ export default function PermissionMatrix({
           </tbody>
         </table>
       </div>
+
+      {/*
+        A grid of bare checkboxes does not say what ticking one does. The
+        legend names each column in the owner's terms, so the matrix can be
+        read without guessing (audit 2026-09-15, S7).
+      */}
+      <dl
+        className="grid gap-x-6 gap-y-2 border-t p-4 text-xs sm:grid-cols-2"
+        style={{ borderColor: "var(--k-line)" }}
+      >
+        <div className="flex gap-2">
+          <dt className="shrink-0 font-semibold text-[var(--k-t2)]">
+            {ROLE_LABELS.COACH} / {ROLE_LABELS.STAFF}
+          </dt>
+          <dd style={{ color: "var(--k-t3)" }}>
+            marcado = ese rol puede hacer la acción sin pedir permiso.
+          </dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="shrink-0 font-semibold text-[var(--k-t2)]">
+            Aprobación
+          </dt>
+          <dd style={{ color: "var(--k-t3)" }}>
+            marcado = la acción queda pendiente hasta que tú la autorices.
+          </dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="shrink-0 font-semibold text-[var(--k-t2)]">Umbral</dt>
+          <dd style={{ color: "var(--k-t3)" }}>
+            monto a partir del cual hace falta tu autorización. Solo en acciones
+            que mueven dinero.
+          </dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="shrink-0 font-semibold text-[var(--k-t2)]">
+            {ROLE_LABELS.OWNER}
+          </dt>
+          <dd style={{ color: "var(--k-t3)" }}>
+            siempre puede todo; no se puede restringir.
+          </dd>
+        </div>
+      </dl>
     </div>
   );
 }

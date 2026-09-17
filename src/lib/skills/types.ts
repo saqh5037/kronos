@@ -21,7 +21,20 @@ export type CatalogSkill = {
   name: string;
   status: CatalogSkillStatus;
   progressPercent?: number;
+  /** Short headline for a locked skill ("Pide nivel RX"). */
   lockReason?: string;
+  /** Second line that resolves the ambiguity ("Tu nivel: Principiante"). */
+  lockDetail?: string;
+};
+
+/**
+ * The tier we may show the athlete. `known: false` means nobody declared a
+ * level and nothing was earned yet, so the UI must not print a tier chip.
+ */
+export type AthleteTierInfo = {
+  tier: SkillTier;
+  known: boolean;
+  source: "declared" | "earned" | "default";
 };
 
 export type ActiveSkillData = {

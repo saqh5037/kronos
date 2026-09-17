@@ -7,7 +7,7 @@ import {
   format,
   differenceInCalendarDays,
 } from "date-fns";
-import { CHART_COLORS } from "./tokens";
+import { CHART_COLORS, intensityOpacity } from "./tokens";
 
 export type HeatmapDatum = { date: Date; value: number };
 
@@ -17,7 +17,7 @@ type Props = {
   to: Date;
   cellSize?: number;
   cellGap?: number;
-  /** Color used at the maximum intensity. Defaults to neutral grey. */
+  /** Colour used at the maximum intensity. Defaults to the lime brand hue. */
   intensityColor?: string;
   emptyColor?: string;
   ariaLabel?: string;
@@ -33,7 +33,7 @@ export function Heatmap({
   to,
   cellSize = 14,
   cellGap = 3,
-  intensityColor = CHART_COLORS.steel,
+  intensityColor = CHART_COLORS.primary,
   emptyColor = CHART_COLORS.grid,
   ariaLabel = "Heatmap de actividad",
 }: Props) {
@@ -77,10 +77,8 @@ export function Heatmap({
   function colorFor(value: number, inRange: boolean): string {
     if (!inRange) return "transparent";
     if (max === 0 || value === 0) return emptyColor;
-    const intensity = Math.min(1, value / max);
-    const minOpacity = 0.18;
-    const opacity = minOpacity + intensity * (1 - minOpacity);
-    return hexWithAlpha(intensityColor, opacity);
+    // Monochrome: one hue, opacity carries the intensity.
+    return hexWithAlpha(intensityColor, intensityOpacity(value / max));
   }
 
   return (

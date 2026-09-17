@@ -12,7 +12,6 @@ import { EmptyProfileSection } from "./_components/sections/EmptyProfileSection"
 import { GoalsSection } from "./_components/sections/GoalsSection";
 import { PredictionsSection } from "./_components/sections/PredictionsSection";
 import { ScoresSection } from "./_components/sections/ScoresSection";
-import { TimelineSection } from "./_components/sections/TimelineSection";
 import { CapabilitySection } from "./_components/sections/CapabilitySection";
 import { HeatmapSection } from "./_components/sections/HeatmapSection";
 import {
@@ -61,11 +60,6 @@ export default function PerfilPage() {
       {/* Scores historial + sparkline */}
       <Suspense fallback={<ScoresSkeleton />}>
         <ScoresSection />
-      </Suspense>
-
-      {/* Progress timeline */}
-      <Suspense fallback={<ChartSkeleton />}>
-        <TimelineSection />
       </Suspense>
 
       {/* Capability radar */}

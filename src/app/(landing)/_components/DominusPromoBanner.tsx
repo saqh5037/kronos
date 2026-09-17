@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import {
   isDominusPromoActive,
   promoDaysLeft,
@@ -33,8 +34,9 @@ export default function DominusPromoBanner() {
           <strong>Founding Box Dominus</strong> · lock-in 12 meses + 3 meses
           gratis al anual · {PROMO_EVENT_DATE}
         </span>
-        <span className="font-bold underline whitespace-nowrap">
-          Ver oferta →
+        <span className="font-bold underline whitespace-nowrap inline-flex items-center gap-1">
+          Ver oferta
+          <ArrowRight size={13} strokeWidth={2.5} aria-hidden="true" />
         </span>
       </div>
     </Link>

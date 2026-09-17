@@ -113,7 +113,7 @@ export default function OpenGraphImage() {
           marginTop: 32,
           paddingTop: 24,
           borderTop: "1px solid #1c1c24",
-          color: "#54545c",
+          color: "#7d7d87",
           fontSize: 18,
           letterSpacing: "0.06em",
           zIndex: 1,
@@ -123,7 +123,7 @@ export default function OpenGraphImage() {
         <span>·</span>
         <span>ATLETAS · BOXES</span>
         <span>·</span>
-        <span>LATAM</span>
+        <span>MÉXICO</span>
       </div>
     </div>,
     { ...size },

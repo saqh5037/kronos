@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
+
 const MUSCLES = [
   "Pecho",
   "Espalda",
@@ -80,8 +82,8 @@ export function Step7ExcludedMuscles({
         <div
           className="px-3 py-2 rounded-lg text-xs"
           style={{
-            background: "var(--k-accent-soft)",
-            borderLeft: "3px solid var(--k-accent)",
+            background: "var(--k-surface)",
+            borderLeft: "3px solid var(--k-line)",
             color: "var(--k-t1)",
           }}
         >
@@ -105,7 +107,10 @@ export function Step7ExcludedMuscles({
           className="text-xs underline disabled:opacity-50"
           style={{ color: "var(--k-t3)" }}
         >
-          ← Atrás
+          <span className="inline-flex items-center justify-center gap-1">
+            <ChevronLeft size={12} aria-hidden />
+            Atrás
+          </span>
         </button>
       </div>
     </div>

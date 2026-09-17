@@ -1,11 +1,24 @@
 "use client";
 
 import { useState, useRef, type FormEvent } from "react";
+import { AlertTriangle, ArrowUpRight, Camera, Check } from "lucide-react";
 import {
   analyzeMovementForm,
   type FormAnalysisResult,
 } from "@/server/actions/ai";
 import { FORM_ANALYSIS_DISCLAIMER } from "@/lib/ai/form-analysis";
+import { label } from "@/lib/labels";
+
+/** Native selects get the house chevron instead of the browser default. */
+const SELECT_CLASS =
+  "w-full appearance-none rounded-md border border-[var(--k-line-2)] bg-[var(--k-surface)] pl-3 pr-8 py-2 text-sm text-[var(--k-t1)] bg-no-repeat focus:outline-none focus:border-[var(--k-t2)]";
+
+const SELECT_STYLE = {
+  backgroundImage:
+    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a94' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>\")",
+  backgroundPosition: "right 0.6rem center",
+  backgroundSize: "12px",
+} as const;
 
 const SCORE_LABEL: Record<
   FormAnalysisResult["feedback"]["overallScore"],
@@ -40,6 +53,7 @@ export default function FormAnalyzerClient({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -62,9 +76,11 @@ export default function FormAnalyzerClient({
     const file = e.target.files?.[0];
     if (!file) {
       setPreviewUrl(null);
+      setFileName(null);
       return;
     }
     setPreviewUrl(URL.createObjectURL(file));
+    setFileName(file.name);
   }
 
   return (
@@ -78,7 +94,8 @@ export default function FormAnalyzerClient({
           <label className="k-eyebrow mb-2 block">Atleta (opcional)</label>
           <select
             name="athleteId"
-            className="w-full rounded-md border border-[var(--k-line-2)] bg-[var(--k-surface)] px-3 py-2 text-sm"
+            className={SELECT_CLASS}
+            style={SELECT_STYLE}
           >
             <option value="">— Sin atleta específico —</option>
             {athletes.map((a) => (
@@ -94,12 +111,13 @@ export default function FormAnalyzerClient({
           <select
             name="movementId"
             required
-            className="w-full rounded-md border border-[var(--k-line-2)] bg-[var(--k-surface)] px-3 py-2 text-sm"
+            className={SELECT_CLASS}
+            style={SELECT_STYLE}
           >
             <option value="">— Elige el movimiento —</option>
             {movements.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.category} · {m.name}
+                {label("movementCategory", m.category)} · {m.name}
               </option>
             ))}
           </select>
@@ -107,17 +125,32 @@ export default function FormAnalyzerClient({
 
         <div>
           <label className="k-eyebrow mb-2 block">Foto de la ejecución *</label>
+          {/* Labelled button instead of the native "Choose File / No file
+              chosen" control, which renders in English and unstyled. */}
           <input
             ref={fileInputRef}
             type="file"
+            id="form-photo"
             name="photo"
             accept="image/jpeg,image/png,image/webp"
             required
             onChange={handleFileChange}
-            className="w-full text-xs"
+            className="sr-only"
           />
-          <p className="mt-1.5 text-[10px]" style={{ color: "var(--k-t3)" }}>
-            JPG / PNG / WEBP · máximo 6MB · Vista frontal o 3/4 idealmente.
+          <div className="flex flex-wrap items-center gap-3">
+            <label
+              htmlFor="form-photo"
+              className="k-btn-ghost inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-4 text-xs font-bold"
+            >
+              <Camera size={14} aria-hidden />
+              {fileName ? "Cambiar foto" : "Elegir foto"}
+            </label>
+            <span className="text-xs" style={{ color: "var(--k-t2)" }}>
+              {fileName ?? "Ningún archivo seleccionado"}
+            </span>
+          </div>
+          <p className="mt-1.5 text-[10px]" style={{ color: "var(--k-t2)" }}>
+            JPG / PNG / WEBP · máximo 6 MB · Vista frontal o 3/4 idealmente.
           </p>
           {previewUrl && (
             <div className="mt-3">
@@ -142,7 +175,7 @@ export default function FormAnalyzerClient({
             fontSize: 11,
           }}
         >
-          {loading ? "Analizando con Gemini Vision…" : "Analizar postura"}
+          {loading ? "Analizando la foto…" : "Analizar postura"}
         </button>
 
         {error && (
@@ -192,7 +225,7 @@ export default function FormAnalyzerClient({
               </svg>
             </div>
             <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-              Subí una foto y el modelo te da feedback técnico de la ejecución.
+              Sube una foto y el modelo te da feedback técnico de la ejecución.
             </p>
           </div>
         )}
@@ -244,10 +277,11 @@ export default function FormAnalyzerClient({
                 }}
               >
                 <p
-                  className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase mb-1.5"
+                  className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase mb-1.5 inline-flex items-center gap-1.5"
                   style={{ color: "var(--k-danger)" }}
                 >
-                  ⚠ Atención
+                  <AlertTriangle size={12} aria-hidden />
+                  Atención
                 </p>
                 <ul className="space-y-1 text-sm">
                   {result.feedback.safetyFlags.map((s, i) => (
@@ -262,10 +296,11 @@ export default function FormAnalyzerClient({
             {result.feedback.strengths.length > 0 && (
               <div className="mb-3">
                 <p
-                  className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase mb-1.5"
+                  className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase mb-1.5 inline-flex items-center gap-1.5"
                   style={{ color: "var(--k-accent)" }}
                 >
-                  ✓ Puntos fuertes
+                  <Check size={12} aria-hidden />
+                  Puntos fuertes
                 </p>
                 <ul className="space-y-1 text-sm">
                   {result.feedback.strengths.map((s, i) => (
@@ -285,10 +320,10 @@ export default function FormAnalyzerClient({
             {result.feedback.improvements.length > 0 && (
               <div>
                 <p
-                  className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase mb-1.5"
+                  className="font-mono text-[10px] tracking-[0.16em] font-bold uppercase mb-1.5 inline-flex items-center gap-1.5"
                   style={{ color: "var(--k-warning)" }}
                 >
-                  ↗ A mejorar
+                  <ArrowUpRight size={12} aria-hidden />A mejorar
                 </p>
                 <ul className="space-y-1 text-sm">
                   {result.feedback.improvements.map((s, i) => (
@@ -314,8 +349,8 @@ export default function FormAnalyzerClient({
             >
               Análisis:{" "}
               {result.feedback.source === "ai"
-                ? "Gemini Vision"
-                : "fallback (sin IA)"}
+                ? "análisis de técnica con IA"
+                : "guía general (sin IA)"}
               {" · "}
               {FORM_ANALYSIS_DISCLAIMER}
             </p>

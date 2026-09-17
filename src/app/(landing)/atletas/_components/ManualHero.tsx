@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function ManualHero() {
   return (
@@ -22,7 +23,8 @@ export default function ManualHero() {
             marginBottom: 28,
           }}
         >
-          ← VOLVER A KRONOS ATLETAS
+          <ArrowLeft size={13} strokeWidth={2.5} aria-hidden="true" />
+          VOLVER A KRONOS ATLETAS
         </Link>
         <div className="lp-eyebrow">
           <span className="lp-dot" />
@@ -45,9 +47,9 @@ export default function ManualHero() {
           <span className="lp-tag-lime">qué hace</span>, cómo se usa.
         </h1>
         <p className="lp-lead" style={{ marginTop: 24 }}>
-          Las 9 pantallas del atleta documentadas paso a paso. Quien la lea,
-          entiende toda la app. Linkeable por sección — copia la URL y
-          compártela.
+          Las 9 pantallas del atleta documentadas paso a paso. Quien lo lea,
+          entiende toda la app. Cada sección tiene su propio enlace: copia la
+          dirección de la barra y compártela.
         </p>
       </div>
     </section>

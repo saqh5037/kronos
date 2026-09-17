@@ -1,24 +1,47 @@
 "use client";
 
+/**
+ * ClassesList — the day's classes on /atleta/reservar.
+ *
+ * Audit 2026-09-15 (P1/P2, /atleta/reservar) fixed here:
+ *  - Three stacked full-width selects took 170 px before the first class →
+ *    they collapse into one "Filtros" toggle that shows the active count, and
+ *    the list is the first thing on the page.
+ *  - Past classes kept a dimmed "RESERVAR" button plus an 8 px "PASADA" chip →
+ *    a past row now links to its results, never offers a booking. Fase 0 batch
+ *    7: the row also stopped dimming itself with `opacity`, which was dragging
+ *    its own copy below AA — see the comment on `cardBorder`.
+ *  - "F"/"S" initials and a "?" pill stood in for the WOD type → readable
+ *    labels via `wodTypeLabel` / `classKindLabel`, coach name on one line.
+ *  - The capacity bar animated `width`, a layout property → `transform:
+ *    scaleX()` (impeccable detector, 10 layout-property animations).
+ */
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import type { Route } from "next";
+import { ChevronRight, SlidersHorizontal, X } from "lucide-react";
 import type { AvailableClass } from "@/server/actions/bookings";
 import { classToWodDateKey } from "@/lib/wod-date";
 import { BookButton } from "@/components/BookingActions";
 import { AnimatedItem } from "@/components/kronos/AnimatedSection";
 import { EmptyState } from "@/components/kronos/EmptyState";
-import { JargonTip } from "@/components/kronos/JargonTip";
+import { wodTypeLabel, classKindLabel } from "@/lib/labels";
+import { formatDateShort, formatTime24 } from "@/lib/format";
+import type { WODType, ClassKind } from "@prisma/client";
 
-const formatTime = (d: Date) =>
-  new Date(d).toLocaleTimeString("es-MX", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+/**
+ * P0-4: both used to be bare `toLocale*String` calls inside this `"use client"`
+ * component, so SSR printed the class hour in the SERVER's zone and the browser
+ * re-printed it in the phone's. They now take the box timezone explicitly and
+ * go through the shared formatters.
+ */
+const formatTime = (d: Date, timeZone: string) =>
+  formatTime24(new Date(d), timeZone);
 
-const formatDayMonth = (d: Date) =>
-  new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short" });
+const formatDayMonth = (d: Date, timeZone: string) =>
+  formatDateShort(new Date(d), timeZone);
 
 type TimeBucket = "all" | "morning" | "midday" | "afternoon";
 
@@ -38,9 +61,9 @@ const selectStyle: React.CSSProperties = {
   color: "var(--k-t1)",
   border: "1px solid var(--k-line)",
   borderRadius: 10,
-  padding: "8px 30px 8px 12px",
+  padding: "10px 30px 10px 12px",
   fontFamily: "var(--k-font-body)",
-  fontSize: 12,
+  fontSize: 13,
   fontWeight: 500,
   appearance: "none",
   WebkitAppearance: "none",
@@ -49,7 +72,14 @@ const selectStyle: React.CSSProperties = {
   backgroundRepeat: "no-repeat",
   backgroundPosition: "right 10px center",
   cursor: "pointer",
+  minHeight: 44,
+  width: "100%",
 };
+
+function wodTypeName(type: string | null | undefined): string | null {
+  if (!type) return null;
+  return wodTypeLabel[type as WODType] ?? type;
+}
 
 export function ClassesList({
   classes,
@@ -70,6 +100,7 @@ export function ClassesList({
   const onlyUsual = params.get("usual") === "1";
 
   const [now, setNow] = useState<number | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   useEffect(() => {
     setNow(Date.now());
   }, []);
@@ -134,7 +165,12 @@ export function ClassesList({
     return Array.from(map.entries());
   }, [filtered]);
 
-  const hasFilters = type || coach || bucket !== "all" || onlyUsual;
+  const activeFilterCount =
+    (type ? 1 : 0) +
+    (coach ? 1 : 0) +
+    (bucket !== "all" ? 1 : 0) +
+    (onlyUsual ? 1 : 0);
+  const hasFilters = activeFilterCount > 0;
 
   // Tour anchors: the first visible card carries `reservar.class-card`,
   // the first card that still needs booking carries `reservar.book-button`.
@@ -144,77 +180,43 @@ export function ClassesList({
 
   return (
     <div style={{ padding: "0 16px" }}>
-      {/* Filtros — en mobile: selects stack vertical, botones en fila aparte */}
-      <div data-tour="reservar.time-filter" className="mb-3 space-y-2">
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            style={selectStyle}
-            className="w-full sm:w-auto sm:min-w-[140px]"
-            aria-label="Filtrar por tipo"
-          >
-            <option value="">Todos los tipos</option>
-            {wodTypes.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          {coaches.length > 0 ? (
-            <select
-              value={coach}
-              onChange={(e) => setCoach(e.target.value)}
-              style={selectStyle}
-              className="w-full sm:w-auto sm:min-w-[140px]"
-              aria-label="Filtrar por coach"
-            >
-              <option value="">Todos los coaches</option>
-              {coaches.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          ) : null}
-          <select
-            value={bucket}
-            onChange={(e) => setBucket(e.target.value as TimeBucket)}
-            style={selectStyle}
-            className="w-full sm:w-auto sm:min-w-[140px]"
-            aria-label="Filtrar por hora"
-          >
-            {TIME_BUCKETS.map((b) => (
-              <option key={b.value} value={b.value}>
-                {b.label}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Filtros — one compact toggle; the list comes first */}
+      <div data-tour="reservar.time-filter" className="mb-3">
         <div className="flex items-center gap-2">
-          {usualHours.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setOnlyUsual(!onlyUsual)}
-              aria-pressed={onlyUsual}
-              style={{
-                fontFamily: "var(--k-font-display)",
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                padding: "8px 12px",
-                borderRadius: 10,
-                background: onlyUsual ? "var(--k-accent)" : "transparent",
-                color: onlyUsual ? "var(--k-accent-on)" : "var(--k-accent)",
-                border: onlyUsual ? "none" : "1px solid var(--k-accent-line)",
-                cursor: "pointer",
-                boxShadow: onlyUsual ? "var(--k-accent-glow)" : "none",
-              }}
-            >
-              Mi horario
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            aria-expanded={filtersOpen}
+            aria-controls="reservar-filtros"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 7,
+              minHeight: 40,
+              padding: "8px 12px",
+              borderRadius: 10,
+              background: hasFilters
+                ? "var(--k-accent-soft)"
+                : "var(--k-elevated)",
+              border: `1px solid ${hasFilters ? "var(--k-accent-line)" : "var(--k-line)"}`,
+              color: hasFilters ? "var(--k-accent)" : "var(--k-t2)",
+              fontFamily: "var(--k-font-display)",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              cursor: "pointer",
+            }}
+          >
+            {filtersOpen ? (
+              <X width={14} height={14} aria-hidden />
+            ) : (
+              <SlidersHorizontal width={14} height={14} aria-hidden />
+            )}
+            Filtros
+            {activeFilterCount > 0 && ` · ${activeFilterCount}`}
+          </button>
+
           {hasFilters && (
             <button
               type="button"
@@ -225,6 +227,7 @@ export function ClassesList({
                 fontWeight: 600,
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
+                minHeight: 40,
                 padding: "8px 10px",
                 borderRadius: 8,
                 background: "transparent",
@@ -236,6 +239,7 @@ export function ClassesList({
               Limpiar
             </button>
           )}
+
           <span
             style={{
               marginLeft: "auto",
@@ -250,6 +254,86 @@ export function ClassesList({
             {filtered.length} clase{filtered.length === 1 ? "" : "s"}
           </span>
         </div>
+
+        {filtersOpen && (
+          <div
+            id="reservar-filtros"
+            className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap"
+            style={{
+              padding: 12,
+              borderRadius: 12,
+              background: "var(--k-surface)",
+              border: "1px solid var(--k-line)",
+            }}
+          >
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              style={selectStyle}
+              className="sm:w-auto sm:min-w-[150px]"
+              aria-label="Filtrar por tipo de WOD"
+            >
+              <option value="">Todos los tipos</option>
+              {wodTypes.map((t) => (
+                <option key={t} value={t}>
+                  {wodTypeName(t)}
+                </option>
+              ))}
+            </select>
+            {coaches.length > 0 && (
+              <select
+                value={coach}
+                onChange={(e) => setCoach(e.target.value)}
+                style={selectStyle}
+                className="sm:w-auto sm:min-w-[150px]"
+                aria-label="Filtrar por coach"
+              >
+                <option value="">Todos los coaches</option>
+                {coaches.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            )}
+            <select
+              value={bucket}
+              onChange={(e) => setBucket(e.target.value as TimeBucket)}
+              style={selectStyle}
+              className="sm:w-auto sm:min-w-[150px]"
+              aria-label="Filtrar por hora"
+            >
+              {TIME_BUCKETS.map((b) => (
+                <option key={b.value} value={b.value}>
+                  {b.label}
+                </option>
+              ))}
+            </select>
+            {usualHours.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setOnlyUsual(!onlyUsual)}
+                aria-pressed={onlyUsual}
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  minHeight: 44,
+                  padding: "8px 14px",
+                  borderRadius: 10,
+                  background: onlyUsual ? "var(--k-accent)" : "transparent",
+                  color: onlyUsual ? "var(--k-accent-on)" : "var(--k-accent)",
+                  border: onlyUsual ? "none" : "1px solid var(--k-accent-line)",
+                  cursor: "pointer",
+                }}
+              >
+                Mi horario
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Lista */}
@@ -278,6 +362,7 @@ export function ClassesList({
                     fontWeight: 700,
                     letterSpacing: "0.16em",
                     textTransform: "uppercase",
+                    minHeight: 44,
                     padding: "9px 14px",
                     borderRadius: 10,
                     background: "transparent",
@@ -318,7 +403,7 @@ export function ClassesList({
                       color: "var(--k-t2)",
                     }}
                   >
-                    {formatDayMonth(date)}
+                    {formatDayMonth(date, boxTimezone)}
                   </p>
                 )}
                 {dayClasses.map((c) => (
@@ -359,15 +444,18 @@ function ClassRow({
   isTourBookAnchor?: boolean;
 }) {
   const full = c.bookedCount >= c.capacity;
-  const fillRatio = c.bookedCount / c.capacity;
+  const fillRatio = Math.min(1, c.bookedCount / Math.max(1, c.capacity));
   const past = now !== null && new Date(c.startsAt).getTime() < now;
   const isBooked = c.myBookingStatus === "BOOKED";
   const isOpenBox = c.kind === "OPEN_BOX";
 
-  // Escala monocromática lima — la opacidad indica presión sobre el cupo
+  // Escala monocromática lima — la opacidad indica presión sobre el cupo.
+  // Una clase pasada no compite por cupo: su barra se apaga al color de línea.
   let barColor = "var(--k-line-2)";
   let barGlow = "none";
-  if (fillRatio >= 0.85) {
+  if (past) {
+    barColor = "var(--k-line-2)";
+  } else if (fillRatio >= 0.85) {
     barColor = "var(--k-accent)";
     barGlow = "0 0 8px rgba(200, 255, 45, 0.45)";
   } else if (fillRatio >= 0.6) {
@@ -376,15 +464,31 @@ function ClassRow({
     barColor = "rgba(200, 255, 45, 0.32)";
   }
 
-  const typeInitial =
-    (c.wod?.type ?? "?").trim().charAt(0).toUpperCase() || "?";
+  const typeName = wodTypeName(c.wod?.type);
+  const kindName = classKindLabel[c.kind as ClassKind] ?? c.kind;
+  const wodDateKey = classToWodDateKey(c.startsAt, boxTimezone);
 
-  const cardBorder = isBooked
-    ? "var(--k-accent-line)"
-    : isUsual
+  /**
+   * Una clase terminada se apaga por CROMO, no por opacidad.
+   *
+   * El card entero llevaba `opacity: 0.55`, que mezcla el texto con el fondo de
+   * la página: `--k-t2` caía a 2.43:1 y `--k-t3` a 2.15:1 — 21 nodos de
+   * color-contrast en /atleta/reservar. La regla 4 del design system ("opacidad
+   * = intensidad") habla del ACENTO, no de un contenedor con texto adentro.
+   *
+   * Lo que queda apagado: la superficie baja de `--k-surface` a `--k-bg` (el
+   * card se hunde en la página en vez de flotar sobre ella), el borde se vuelve
+   * punteado, el acento se retira (borde, glow, hora reservada, barra de cupo)
+   * y un chip "Terminada" lo dice con palabras. El texto se queda a tono
+   * completo: sobre `--k-bg`, `--k-t2` da 5.85:1 y `--k-t3` 4.91:1.
+   */
+  const cardBorder = past
+    ? "var(--k-line)"
+    : isBooked || isUsual
       ? "var(--k-accent-line)"
       : "var(--k-line)";
-  const cardShadow = isBooked ? "0 0 14px rgba(200, 255, 45, 0.16)" : "none";
+  const cardShadow =
+    isBooked && !past ? "0 0 14px rgba(200, 255, 45, 0.16)" : "none";
 
   return (
     <AnimatedItem>
@@ -392,15 +496,35 @@ function ClassRow({
         {...(isTourCardAnchor ? { "data-tour": "reservar.class-card" } : {})}
         style={{
           position: "relative",
-          background: "var(--k-surface)",
-          border: `1px solid ${cardBorder}`,
+          background: past ? "var(--k-bg)" : "var(--k-surface)",
+          border: `1px ${past ? "dashed" : "solid"} ${cardBorder}`,
           borderRadius: 16,
           padding: 14,
-          opacity: past ? 0.4 : 1,
           boxShadow: cardShadow,
         }}
       >
-        {isUsual && !isBooked && (
+        {past && (
+          <span
+            style={{
+              position: "absolute",
+              top: -8,
+              left: 14,
+              padding: "2px 8px",
+              borderRadius: 999,
+              background: "var(--k-bg)",
+              border: "1px solid var(--k-line-2)",
+              color: "var(--k-t2)",
+              fontFamily: "var(--k-font-display)",
+              fontSize: 8,
+              fontWeight: 700,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+            }}
+          >
+            Terminada
+          </span>
+        )}
+        {isUsual && !isBooked && !past && (
           <span
             style={{
               position: "absolute",
@@ -421,10 +545,10 @@ function ClassRow({
           </span>
         )}
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          {/* Hora + duración + tipo */}
+          {/* Hora + duración */}
           <div
             style={{
-              minWidth: 64,
+              minWidth: 60,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -437,15 +561,15 @@ function ClassRow({
                 fontSize: 22,
                 fontWeight: 700,
                 letterSpacing: "-0.03em",
-                color: isBooked
-                  ? "var(--k-accent)"
-                  : past
-                    ? "var(--k-t3)"
+                color: past
+                  ? "var(--k-t2)"
+                  : isBooked
+                    ? "var(--k-accent)"
                     : "var(--k-t1)",
                 lineHeight: 1,
               }}
             >
-              {formatTime(c.startsAt)}
+              {formatTime(c.startsAt, boxTimezone)}
             </div>
             <div
               style={{
@@ -458,55 +582,34 @@ function ClassRow({
             >
               {c.durationMin} MIN
             </div>
-            {c.wod?.type && (
-              <JargonTip term={c.wod.type}>
-                <div
-                  style={{
-                    marginTop: 2,
-                    width: 24,
-                    height: 24,
-                    borderRadius: 8,
-                    background: "var(--k-elevated)",
-                    border: "1px solid var(--k-line)",
-                    color: "var(--k-accent)",
-                    fontFamily: "var(--k-font-display)",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {typeInitial}
-                </div>
-              </JargonTip>
-            )}
           </div>
 
           {/* Body */}
           <div style={{ minWidth: 0, flex: 1 }}>
             <div
               style={{
-                marginBottom: 8,
+                marginBottom: 6,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
                 fontFamily: "var(--k-font-body)",
                 fontSize: 13,
                 fontWeight: 600,
-                color: isOpenBox ? "var(--k-accent)" : "var(--k-t1)",
+                color: "var(--k-t1)",
                 letterSpacing: "-0.01em",
               }}
             >
               {isOpenBox ? (
-                "Open Box · Acceso libre"
+                `${kindName} · acceso libre`
               ) : c.wod?.name ? (
                 <Link
-                  href={`/atleta/wod?date=${classToWodDateKey(c.startsAt, boxTimezone)}`}
+                  href={`/atleta/wod?date=${wodDateKey}` as Route}
                   style={{
                     color: "inherit",
                     textDecoration: "underline",
-                    textDecorationColor: "var(--k-accent-line)",
+                    textDecorationColor: past
+                      ? "var(--k-line-2)"
+                      : "var(--k-accent-line)",
                     textUnderlineOffset: 3,
                   }}
                   onClick={(e) => e.stopPropagation()}
@@ -517,6 +620,24 @@ function ClassRow({
                 "WOD por definir"
               )}
             </div>
+
+            {/* Coach + tipo, en una sola línea legible */}
+            <div
+              style={{
+                marginBottom: 8,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                fontFamily: "var(--k-font-body)",
+                fontSize: 11,
+                color: "var(--k-t2)",
+              }}
+            >
+              {[c.coach?.name ? `Coach ${c.coach.name}` : null, typeName]
+                .filter(Boolean)
+                .join(" · ")}
+            </div>
+
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div
                 style={{
@@ -527,82 +648,89 @@ function ClassRow({
                   background: "var(--k-line)",
                 }}
               >
+                {/*
+                  Animating `width` forces layout on every frame; `scaleX` runs
+                  on the compositor. Same visual, no reflow.
+                */}
                 <div
                   style={{
                     height: "100%",
-                    width: `${Math.min(100, fillRatio * 100)}%`,
+                    width: "100%",
+                    transformOrigin: "left center",
+                    transform: `scaleX(${fillRatio})`,
                     background: barColor,
                     boxShadow: barGlow,
                     borderRadius: 999,
-                    transition: "width 500ms ease, background 200ms ease",
+                    transition: "transform 500ms ease, background 200ms ease",
                   }}
                 />
               </div>
               <div
                 style={{
-                  minWidth: 44,
+                  minWidth: 52,
                   textAlign: "right",
                   fontFamily: "var(--k-font-display)",
                   fontSize: 10,
                   fontWeight: 700,
                   letterSpacing: "0.06em",
-                  color: full ? "var(--k-accent)" : "var(--k-t2)",
+                  color: full && !past ? "var(--k-accent)" : "var(--k-t2)",
                 }}
               >
                 {c.bookedCount}/{c.capacity}
               </div>
             </div>
-            <div
-              style={{
-                marginTop: 6,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontFamily: "var(--k-font-display)",
-                fontSize: 9,
-                fontWeight: 600,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: "var(--k-t3)",
-              }}
-            >
-              {c.coach?.name && <span>Coach {c.coach.name}</span>}
-              {c.coach?.name && c.wod?.type && <span aria-hidden>·</span>}
-              {c.wod?.type && (
-                <JargonTip term={c.wod.type}>
-                  <span>{c.wod.type}</span>
-                </JargonTip>
-              )}
-              {past && (
-                <span
-                  style={{
-                    padding: "2px 6px",
-                    borderRadius: 6,
-                    background: "var(--k-elevated)",
-                    border: "1px solid var(--k-line)",
-                    color: "var(--k-t3)",
-                  }}
-                >
-                  Pasada
-                </span>
-              )}
-            </div>
           </div>
 
-          {/* CTA */}
+          {/* CTA — una clase pasada no se reserva, se consulta */}
           <div
-            {...(isTourBookAnchor
+            {...(isTourBookAnchor && !past
               ? { "data-tour": "reservar.book-button" }
               : {})}
             style={{ flexShrink: 0 }}
           >
-            <BookButton
-              classId={c.id}
-              bookedCount={c.bookedCount}
-              capacity={c.capacity}
-              myStatus={c.myBookingStatus}
-              myBookingId={c.myBookingId}
-            />
+            {past ? (
+              /*
+               * "VER RESULTADOS" medía 144 px de los 328 del card a 360 px y dejaba
+               * 63 px al cuerpo: el WOD se leía "1RM Ba…" y el coach "Coach Lo…".
+               * Con el card ya sin `opacity` esa mutilación queda a la vista.
+               * "RESULTADOS" + la flecha dicen lo mismo y le devuelven ~30 px al
+               * nombre del WOD, que es el dato por el que el atleta abre una clase
+               * terminada. El `aria-label` conserva la frase completa.
+               */
+              <Link
+                href={`/atleta/wod?date=${wodDateKey}` as Route}
+                aria-label={`Ver resultados de ${c.wod?.name ?? "la clase"}`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  minHeight: 40,
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  background: "transparent",
+                  border: "1px solid var(--k-line)",
+                  color: "var(--k-t2)",
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Resultados
+                <ChevronRight width={13} height={13} aria-hidden />
+              </Link>
+            ) : (
+              <BookButton
+                classId={c.id}
+                bookedCount={c.bookedCount}
+                capacity={c.capacity}
+                myStatus={c.myBookingStatus}
+                myBookingId={c.myBookingId}
+              />
+            )}
           </div>
         </div>
       </div>

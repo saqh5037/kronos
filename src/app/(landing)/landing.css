@@ -1791,44 +1791,15 @@ button.lp-btn-lime:active {
 .manual-screen:last-of-type {
   border-bottom: none;
 }
+/* Sin captura real no hay marco de teléfono: la sección va a ancho completo
+   como texto (audit 2026-09-15). */
+.manual-screen.manual-screen-textonly {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
 .manual-screen-frame-wrap {
   width: 100%;
   max-width: 300px;
-}
-.manual-screen-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background: var(--k-surface);
-  color: var(--k-t3);
-  text-align: center;
-  padding: 24px;
-}
-.manual-screen-placeholder .lbl {
-  font-family: var(--k-font-display), monospace;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  color: var(--k-accent);
-  text-transform: uppercase;
-}
-.manual-screen-placeholder .nm {
-  font-family: var(--k-font-display), monospace;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--k-t1);
-}
-.manual-screen-placeholder .hnt {
-  font-family: var(--k-font-body), Inter;
-  font-size: 13px;
-  color: var(--k-t3);
-  line-height: 1.45;
-  max-width: 220px;
 }
 
 .manual-screen-body h3 {
@@ -1978,5 +1949,132 @@ button.lp-btn-lime:active {
 @media (prefers-reduced-motion: reduce) {
   .lp-mute-cta-pulse {
     animation: none;
+  }
+}
+
+/* ============= ENTRADA VISIBLE EN SSR =============
+   Audit 2026-09-15 (P0 #1): la home renderizaba en blanco a 360 y 768 porque
+   framer sacaba cada elemento con `initial="hidden"` (opacity 0) y un error de
+   JS dejaba el stagger sin arrancar. Regla: el estado de reposo es VISIBLE y la
+   entrada es una mejora CSS que corre sin JS y solo si el usuario no pidió
+   menos movimiento. Nada de contenido detrás de `whileInView`. */
+.lp-rise {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes lp-rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .lp-rise {
+    animation: lp-rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .lp-rise-1 {
+    animation-delay: 0.06s;
+  }
+  .lp-rise-2 {
+    animation-delay: 0.12s;
+  }
+  .lp-rise-3 {
+    animation-delay: 0.18s;
+  }
+  .lp-rise-4 {
+    animation-delay: 0.24s;
+  }
+  .lp-rise-5 {
+    animation-delay: 0.3s;
+  }
+}
+
+/* ============= BLOQUE ROADMAP =============
+   El ÚNICO lugar de la landing donde pueden aparecer features no lanzadas. */
+.lp-roadmap {
+  max-width: 760px;
+  margin: 48px auto 0;
+  padding: 24px 28px;
+  border: 1px dashed var(--k-line-2);
+  border-radius: 16px;
+  background: var(--k-bg);
+}
+.lp-roadmap p {
+  margin-top: 12px;
+  font-family: var(--k-font-body), Inter;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--k-t2);
+}
+.lp-roadmap ul {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lp-roadmap li {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 10px;
+  align-items: baseline;
+  font-family: var(--k-font-body), Inter;
+  font-size: 13px;
+  color: var(--k-t2);
+}
+.lp-roadmap li::before {
+  content: "·";
+  font-family: var(--k-font-display), monospace;
+  color: var(--k-t3);
+  font-weight: 700;
+}
+
+/* ============= CIERRE: NADA RECORTADO A 360 =============
+   Audit 2026-09-15: la card de cierre de /atletas y /box cortaba texto a mitad
+   de palabra a 360 ("SIN CLÁUSU…", "Sin permiso de t…"). El `overflow: hidden`
+   del contenedor es necesario para el borde redondeado del fondo, así que el
+   arreglo va en el contenido: sin `min-width` rígido y con quiebre de palabra. */
+.lp-cta-tail > div {
+  min-width: 0;
+  max-width: 100%;
+}
+.lp-cta-tail h2,
+.lp-cta-tail p,
+.lp-cta-tail .lp-eyebrow,
+.lp-cta-tail .lp-caption {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.lp-cta-tail .lp-eyebrow {
+  white-space: normal;
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+@media (max-width: 420px) {
+  .lp-cta-tail {
+    padding: 32px 20px;
+  }
+}
+
+/* Router split cards: the "GRATIS PARA SIEMPRE" / "PARA DUEÑOS DE BOX" pill sits top-right
+   on wide cards and drops into the flow on narrow phones so it never overlaps the eyebrow
+   (gate ola 0, 2026-09-15). */
+.lp-rs-pill {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+@media (max-width: 480px) {
+  .lp-rs-pill {
+    position: static;
+    display: inline-block;
+    margin-bottom: 12px;
   }
 }

@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ArrowRight, Check } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { createBoxAndOwner } from "@/server/actions/signup";
 import { slugify } from "@/lib/slug";
+import { CTA_TRIAL_LABEL } from "@/app/(landing)/_data/cta";
 import { kToast } from "@/lib/toast";
+import { formatDateFull } from "@/lib/format";
 
 type FieldErrors = Partial<
   Record<"email" | "ownerName" | "boxName" | "slug", string>
@@ -82,12 +85,12 @@ export default function SignupForm({
           className="inline-flex items-center justify-center w-12 h-12 rounded-full"
           style={{ background: "var(--k-accent-soft)" }}
         >
-          <span
-            className="font-display font-bold text-xl"
+          <Check
+            size={22}
+            strokeWidth={3}
             style={{ color: "var(--k-accent)" }}
-          >
-            ✓
-          </span>
+            aria-hidden
+          />
         </div>
         <h2 className="font-display font-bold text-xl">¡Tu box está creado!</h2>
         <p className="text-sm" style={{ color: "var(--k-t2)" }}>
@@ -99,12 +102,8 @@ export default function SignupForm({
           className="text-xs px-3 py-2 rounded-lg"
           style={{ background: "var(--k-elevated)", color: "var(--k-t3)" }}
         >
-          Slug: <strong>{success.slug}</strong> · Trial hasta{" "}
-          {success.trialEndsAt.toLocaleDateString("es-MX", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
+          Tu box: <strong>{success.slug}</strong> · Prueba gratis hasta{" "}
+          {formatDateFull(success.trialEndsAt)}
         </div>
         {DEV_LOGIN_ENABLED ? (
           <p className="text-xs" style={{ color: "var(--k-t3)" }}>
@@ -137,15 +136,16 @@ export default function SignupForm({
           registro aquí. Si eres atleta,{" "}
           <a
             href={`/atleta-signup?email=${encodeURIComponent(initialEmail)}`}
-            className="underline"
+            className="underline inline-flex items-center gap-1"
             style={{ color: "var(--k-accent)" }}
           >
-            regístrate gratis aquí →
+            regístrate gratis aquí
+            <ArrowRight size={14} strokeWidth={1.75} aria-hidden />
           </a>
         </div>
       ) : null}
       <Field
-        label="Email del owner"
+        label="Tu correo"
         name="email"
         type="email"
         value={email}
@@ -172,7 +172,7 @@ export default function SignupForm({
         type="text"
         value={boxName}
         onChange={onBoxNameChange}
-        placeholder="Iron Hands CrossFit"
+        placeholder="Ej. Iron Hands CrossFit"
         error={errors.boxName}
         required
       />
@@ -181,14 +181,14 @@ export default function SignupForm({
           className="text-xs font-mono uppercase tracking-wider"
           style={{ color: "var(--k-t3)" }}
         >
-          Slug (URL única)
+          Identificador de tu box
         </label>
         <div className="flex items-center gap-2">
           <input
             type="text"
             value={slug}
             onChange={(e) => onSlugChange(e.target.value)}
-            placeholder="iron-hands"
+            placeholder="Ej. iron-hands"
             required
             className="flex-1 px-4 py-3 rounded-xl text-sm border focus:outline-none transition-colors"
             style={{
@@ -204,7 +204,11 @@ export default function SignupForm({
             color: errors.slug ? "var(--k-danger)" : "var(--k-t3)",
           }}
         >
-          {errors.slug ?? "Solo minúsculas, números y guiones. Editable."}
+          {/* Decía "Así se verá tu box: kronos-fit.com/iron-hands". Esa ruta
+              no existe: no hay página por slug en la raíz, el slug identifica
+              al box en la pantalla de TV y en los links de invitación. */}
+          {errors.slug ??
+            "Identifica a tu box en la pantalla de TV y en los links de invitación. Solo minúsculas, números y guiones. Puedes cambiarlo."}
         </p>
       </div>
 
@@ -213,7 +217,7 @@ export default function SignupForm({
         disabled={pending}
         className="k-btn-grad w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 mt-2"
       >
-        {pending ? "Creando tu box…" : "Empezar prueba de 14 días"}
+        {pending ? "Creando tu box…" : CTA_TRIAL_LABEL}
       </button>
 
       <p

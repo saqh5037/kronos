@@ -9,8 +9,10 @@ interface HeadOrbProps {
   animate: boolean;
   reduceMotion: boolean;
   delay?: number;
-  /** When true, render a more pronounced radial halo (cinematic). */
+  /** When true, render a more pronounced radial halo. */
   intense?: boolean;
+  /** Opt-in drop-shadow halo. Off by default — glow costs contrast. */
+  glow?: boolean;
 }
 
 export function HeadOrb({
@@ -21,6 +23,7 @@ export function HeadOrb({
   reduceMotion,
   delay = 1.2,
   intense = false,
+  glow = false,
 }: HeadOrbProps) {
   const skipPulse = !animate || reduceMotion;
 
@@ -28,9 +31,11 @@ export function HeadOrb({
   const coreR = intense ? 6.5 : 5;
   const dotR = intense ? 2.8 : 2.2;
   const outerOpacity = intense ? 0.22 : 0.16;
-  const coreShadow = intense
-    ? `drop-shadow(0 0 14px ${color}) drop-shadow(0 0 6px ${color})`
-    : `drop-shadow(0 0 8px ${color})`;
+  const coreShadow = !glow
+    ? undefined
+    : intense
+      ? `drop-shadow(0 0 14px ${color}) drop-shadow(0 0 6px ${color})`
+      : `drop-shadow(0 0 8px ${color})`;
 
   return (
     <g style={{ pointerEvents: "none" }}>
@@ -113,7 +118,7 @@ export function HeadOrb({
         cx={cx}
         cy={cy}
         r={dotR}
-        fill="#ffffff"
+        fill="var(--k-t1)"
         initial={skipPulse ? false : { opacity: 0 }}
         animate={{ opacity: intense ? 1 : 0.95 }}
         transition={

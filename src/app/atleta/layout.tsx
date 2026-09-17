@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import dynamic from "next/dynamic";
 import { db } from "@/server/db";
+import { getBoxMode } from "@/server/actions/box-mode";
 import PwaRegister from "@/components/PwaRegister";
 import AthleteDrawer from "@/components/atleta/AthleteDrawer";
 import { QueryProvider } from "@/components/providers/QueryProvider";
@@ -47,7 +48,7 @@ export default async function AtletaLayout({
 
   // El onboarding es un flow fullscreen — sin drawer/tabbar/install banner
   // para que el atleta complete los 9 pasos sin distracción ni navegación
-  // a rutas que aún no debería visitar.
+  // a rutas que aún no debería visitar. Su page.tsx aporta su propio <main>.
   if (isOnboarding) {
     return (
       <div
@@ -59,6 +60,15 @@ export default async function AtletaLayout({
     );
   }
 
+  // Box mode se resuelve UNA vez aquí (getBoxMode está memoizado por request)
+  // y baja al TabBar, que esconde las tabs de box (Reservar) cuando el atleta
+  // está en Box Personal. Las páginas personal-only NO redirigen: renderizan
+  // su propio estado explicativo, porque un `redirect()` a nivel page se
+  // resolvía en el cliente DESPUÉS de que este layout ya había streameado su
+  // shell → "Rendered more hooks than during the previous render"
+  // (audit 2026-09-15, sección C).
+  const { isPersonal } = await getBoxMode();
+
   return (
     <QueryProvider userId={session.user.id}>
       <div
@@ -66,36 +76,33 @@ export default async function AtletaLayout({
         style={{ background: "var(--k-bg)", paddingBottom: 96 }}
       >
         <PwaRegister />
-        {/* Mobile: drawer trigger + notification bell */}
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:px-4 focus:py-2 focus:text-xs focus:font-bold focus:uppercase focus:tracking-widest focus:no-underline focus:bg-[var(--k-accent)] focus:text-[var(--k-accent-on)]"
+        >
+          Saltar al contenido
+        </a>
+        {/* Drawer trigger: solo mobile/tablet. En lg+ la navegación vive en el
+            TabBar, así que el drawer no aporta nada. */}
         <div className="lg:hidden">
           <AthleteDrawer />
-          <div
-            style={{
-              position: "fixed",
-              top: "max(env(safe-area-inset-top), 12px)",
-              right: 12,
-              zIndex: 30,
-            }}
-          >
-            <NotificationBell />
-          </div>
         </div>
-        {/* Desktop: notification bell only */}
-        <div className="hidden lg:block">
-          <div
-            style={{
-              position: "fixed",
-              top: "max(env(safe-area-inset-top), 12px)",
-              right: 12,
-              zIndex: 30,
-            }}
-          >
-            <NotificationBell />
-          </div>
+        {/* Una sola instancia del bell. Su posición es CSS, no duplicación por
+            breakpoint: antes se montaba dos veces (mobile + desktop) y eso
+            duplicaba el polling de notificaciones cada 60s. */}
+        <div
+          style={{
+            position: "fixed",
+            top: "max(env(safe-area-inset-top), 12px)",
+            right: 12,
+            zIndex: 30,
+          }}
+        >
+          <NotificationBell />
         </div>
         <InstallPwaBanner />
-        {children}
-        <TabBar />
+        <main id="main">{children}</main>
+        <TabBar mode={isPersonal ? "personal" : "box"} />
       </div>
     </QueryProvider>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Share2, X } from "lucide-react";
 
 type Format = "story" | "feed";
 
@@ -17,6 +18,31 @@ const DIMS: Record<Format, { w: number; h: number }> = {
   story: { w: 1080, h: 1920 },
   feed: { w: 1080, h: 1080 },
 };
+
+/** lucide `award`, 24×24 viewBox, drawn as a stroked path. */
+const AWARD_RIBBON =
+  "M15.477 12.89l1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526";
+
+function drawAwardGlyph(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  size: number,
+) {
+  const scale = size / 24;
+  ctx.save();
+  ctx.translate(cx - (24 * scale) / 2, cy - (24 * scale) / 2);
+  ctx.scale(scale, scale);
+  ctx.strokeStyle = "#C8FF2D";
+  ctx.lineWidth = 2;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  ctx.stroke(new Path2D(AWARD_RIBBON));
+  ctx.beginPath();
+  ctx.arc(12, 8, 6, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+}
 
 export default function BadgeShareCanvas(props: Props) {
   const [open, setOpen] = useState(false);
@@ -99,16 +125,58 @@ function ShareModal({
     xp,
   ]);
 
-  function handleDownload() {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const url = canvas.toDataURL("image/png");
+  function download(blobOrUrl: Blob | string) {
+    const url =
+      typeof blobOrUrl === "string"
+        ? blobOrUrl
+        : URL.createObjectURL(blobOrUrl);
     const a = document.createElement("a");
     a.href = url;
     a.download = `kronos-${badgeCode}-${format}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    if (typeof blobOrUrl !== "string") URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Web Share API first (the native sheet is what an athlete expects on a
+   * phone), download as the fallback. Replaces the disabled
+   * "COMPARTIR · PRONTO" button the audit flagged.
+   */
+  async function handleShare() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/png"),
+    );
+    if (!blob) {
+      download(canvas.toDataURL("image/png"));
+      return;
+    }
+
+    const file = new File([blob], `kronos-${badgeCode}-${format}.png`, {
+      type: "image/png",
+    });
+
+    const nav = navigator as Navigator & {
+      canShare?: (data: ShareData) => boolean;
+    };
+    if (nav.share && nav.canShare?.({ files: [file] })) {
+      try {
+        await nav.share({
+          files: [file],
+          title: badgeName,
+          text: `${badgeName} · Kronos`,
+        });
+        return;
+      } catch {
+        // The athlete dismissed the sheet, or the browser refused: fall back.
+      }
+    }
+
+    download(blob);
   }
 
   const dims = DIMS[format];
@@ -185,9 +253,12 @@ function ShareModal({
               border: "1px solid var(--k-line)",
               color: "var(--k-t2)",
               cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            ✕
+            <X size={16} aria-hidden />
           </button>
         </div>
 
@@ -242,9 +313,13 @@ function ShareModal({
 
         <button
           type="button"
-          onClick={handleDownload}
+          onClick={handleShare}
           className="k-tap"
           style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
             background: "var(--k-accent)",
             color: "var(--k-accent-on)",
             border: "none",
@@ -259,7 +334,8 @@ function ShareModal({
             boxShadow: "var(--k-accent-glow)",
           }}
         >
-          Descargar PNG
+          <Share2 size={16} aria-hidden />
+          Compartir
         </button>
         <p
           style={{
@@ -391,7 +467,7 @@ function drawAsset(ctx: CanvasRenderingContext2D, args: DrawArgs) {
   ctx.textAlign = "left";
   ctx.fillText("KRONOS", isStory ? 70 : 60, isStory ? 110 : 90);
 
-  ctx.fillStyle = "#54545c";
+  ctx.fillStyle = "#7d7d87";
   ctx.font = `600 ${isStory ? 18 : 16}px "IBM Plex Mono", monospace`;
   ctx.fillText("FIT", isStory ? 240 : 210, isStory ? 110 : 90);
 
@@ -402,12 +478,9 @@ function drawAsset(ctx: CanvasRenderingContext2D, args: DrawArgs) {
   ctx.fillText("LOGRO DESBLOQUEADO", w / 2, isStory ? 320 : 220);
 
   // ── Badge icon ──
-  const initial =
-    args.badgeCode
-      .split("-")
-      .map((s) => s[0]?.toUpperCase() ?? "")
-      .join("")
-      .slice(0, 2) || "★";
+  // House rule 1 is SVG only. The share asset used to burn the badge's
+  // two-letter code (or "★") into the image; it now draws the same lucide
+  // glyph the app renders, so the asset and the screen agree.
   const iconY = isStory ? 540 : 360;
   const iconR = isStory ? 130 : 100;
 
@@ -419,11 +492,7 @@ function drawAsset(ctx: CanvasRenderingContext2D, args: DrawArgs) {
   ctx.lineWidth = 4;
   ctx.stroke();
 
-  ctx.fillStyle = "#C8FF2D";
-  ctx.font = `700 ${isStory ? 80 : 60}px "IBM Plex Mono", monospace`;
-  ctx.textBaseline = "middle";
-  ctx.fillText(initial, w / 2, iconY + 5);
-  ctx.textBaseline = "alphabetic";
+  drawAwardGlyph(ctx, w / 2, iconY, iconR * 1.1);
 
   // ── Badge name ──
   ctx.fillStyle = "#f5f5f7";
@@ -462,7 +531,7 @@ function drawAsset(ctx: CanvasRenderingContext2D, args: DrawArgs) {
   // ── Bottom block: athlete + date + hashtag ──
   const bottomY = h - (isStory ? 280 : 200);
 
-  ctx.fillStyle = "#54545c";
+  ctx.fillStyle = "#7d7d87";
   ctx.font = `700 ${isStory ? 22 : 18}px "IBM Plex Mono", monospace`;
   ctx.textAlign = "center";
   ctx.fillText("ATLETA", w / 2, bottomY);

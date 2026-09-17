@@ -1,0 +1,19 @@
+{
+  "voseo": {
+    "src/components/auth/MagicLinkWaiting.tsx": 1,
+    "src/lib/disciplines/registry.ts": 1,
+    "src/lib/disciplines/types.ts": 1,
+    "src/lib/features.ts": 1,
+    "src/lib/pwa-detect.ts": 1,
+    "src/middleware.ts": 2,
+    "src/server/auth.ts": 2
+  },
+  "emoji-in-jsx": {},
+  "unicode-glyph": {
+    "src/components/auth/OtpInput.tsx": 6
+  },
+  "legacy-tokens": {},
+  "banned-hex": {},
+  "to-locale-string": {},
+  "raw-enum-jsx": {}
+}

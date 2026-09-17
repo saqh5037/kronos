@@ -2,23 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { m } from "framer-motion";
+import { Check } from "lucide-react";
 
 const TESTIMONIALS = [
   {
     name: "Laura M.",
-    role: "Atleta • Iron Hands Box",
+    role: "Atleta · Iron Hands Box",
     quote: "En 3 meses mejoré mis PRs 15kg en squat",
     image: "/images/wizard/cierre-collage-04-deadlift.webp",
   },
   {
     name: "Carlos R.",
-    role: "Atleta • CrossFit Central",
+    role: "Atleta · CrossFit Central",
     quote: "El plan AI se adapta a mi ritmo de vida",
     image: "/images/wizard/cierre-collage-02-pullup.webp",
   },
   {
     name: "Sofia L.",
-    role: "Atleta • Summit CrossFit",
+    role: "Atleta · Summit CrossFit",
     quote: "Finalmente entiendo cómo entrenar inteligente",
     image: "/images/wizard/cierre-collage-06-overhead.webp",
   },
@@ -170,7 +171,7 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
                     &quot;{testimonial.quote}&quot;
                   </p>
                   <p className="text-xs mt-2" style={{ color: "var(--k-t3)" }}>
-                    {testimonial.name} • {testimonial.role}
+                    {testimonial.name} · {testimonial.role}
                   </p>
                 </div>
               </m.div>
@@ -190,9 +191,10 @@ export function PlanCreatingScreen({ onComplete }: PlanCreatingScreenProps) {
             <m.div
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 0.6 }}
-              className="text-6xl mb-4 inline-block"
+              className="mb-4 inline-flex items-center justify-center"
+              style={{ color: "var(--k-accent)" }}
             >
-              ✓
+              <Check size={56} strokeWidth={2.5} aria-hidden />
             </m.div>
             <h2 className="font-display font-bold text-2xl tracking-[-0.01em]">
               ¡Listo!

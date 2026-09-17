@@ -8,13 +8,22 @@
  *  - Atleta sube primer score 1RM → PR detectado (UI + tabla PR)
  *  - Atleta sube score MEJOR → PR actualizado (1 PR por movement, upsert)
  *  - Atleta sube score PEOR → Score guardado, PR no cambia
+ *  - El host del toast de logros está montado (P1-6)
  *  - Perfil renderiza
+ *
+ * Selectores: `/atleta/wod` dejó de usar el `ScoreForm` compartido en
+ * `0aef256` y ahora renderiza `src/app/atleta/wod/_components/AthleteScoreForm`,
+ * con un stepper etiquetado "Peso en kilos", el CTA "Registrar resultado" y el
+ * toast "Resultado guardado". Este spec apuntaba a `input[name="value"]` y a
+ * "Guardar score", que ya no existen en esta ruta (el nombre `value` solo
+ * sobrevive en la variante TIME).
  */
 
 import { test, expect } from "@playwright/test";
 import { loginAs } from "./fixtures/auth";
 import {
   clearScoresAndPR,
+  ensureDemoAthleteOnboarded,
   ensureTodayStrengthClass,
   getDemoAthlete,
   db,
@@ -26,6 +35,9 @@ test.describe.serial("Atleta — score submission + PR detection (1RM)", () => {
   let movementId: string;
 
   test.beforeAll(async () => {
+    // An earlier spec in a full run can leave the seed athlete un-onboarded,
+    // and `/atleta/*` then redirects to `/atleta/onboarding` (P1-17).
+    await ensureDemoAthleteOnboarded();
     const target = await ensureTodayStrengthClass();
     wodId = target.wodId;
     movementId = target.movementId;
@@ -43,10 +55,10 @@ test.describe.serial("Atleta — score submission + PR detection (1RM)", () => {
     await loginAs(page, "atleta");
     await page.goto("/atleta/wod");
 
-    await page.locator('input[name="value"]').fill("100");
-    await page.getByRole("button", { name: /Guardar score/i }).click();
+    await page.getByLabel("Peso en kilos").fill("100");
+    await page.getByRole("button", { name: /Registrar resultado/i }).click();
 
-    // "Nuevo PR registrado" aparece tanto en el label del ScoreForm como en el
+    // "Nuevo PR registrado" aparece tanto en el label del formulario como en el
     // toast. Usamos el toast (.k-toast__title) para evitar strict mode violation.
     await expect(
       page.locator(".k-toast__title", { hasText: /Nuevo PR registrado/i }),
@@ -73,8 +85,8 @@ test.describe.serial("Atleta — score submission + PR detection (1RM)", () => {
     await loginAs(page, "atleta");
     await page.goto("/atleta/wod");
 
-    await page.locator('input[name="value"]').fill("120");
-    await page.getByRole("button", { name: /Guardar score/i }).click();
+    await page.getByLabel("Peso en kilos").fill("120");
+    await page.getByRole("button", { name: /Registrar resultado/i }).click();
 
     await expect(
       page.locator(".k-toast__title", { hasText: /Nuevo PR registrado/i }),
@@ -107,13 +119,13 @@ test.describe.serial("Atleta — score submission + PR detection (1RM)", () => {
     await loginAs(page, "atleta");
     await page.goto("/atleta/wod");
 
-    await page.locator('input[name="value"]').fill("80");
-    await page.getByRole("button", { name: /Guardar score/i }).click();
+    await page.getByLabel("Peso en kilos").fill("80");
+    await page.getByRole("button", { name: /Registrar resultado/i }).click();
 
-    // "Score guardado" aparece tanto como feedback inline como en el toast.
+    // "Resultado guardado" aparece tanto como feedback inline como en el toast.
     // Usar el toast específicamente para evitar strict mode violation.
     await expect(
-      page.locator(".k-toast__title", { hasText: /Score guardado/i }),
+      page.locator(".k-toast__title", { hasText: /Resultado guardado/i }),
     ).toBeVisible({ timeout: 10_000 });
 
     const pr = await db().pR.findUnique({
@@ -126,6 +138,46 @@ test.describe.serial("Atleta — score submission + PR detection (1RM)", () => {
       where: { athleteId: athlete.id, wodId },
     });
     expect(totalScores).toBe(3);
+  });
+
+  /**
+   * P1-6 regression: `AchievementToastHost` was commented out of
+   * `src/app/layout.tsx` while five call sites kept calling
+   * `fireAchievementToast`, so every badge unlock dispatched
+   * `kronos:achievement` into a tree with no listener and the athlete saw
+   * nothing.
+   *
+   * The assertion dispatches that exact event instead of riding on a badge
+   * unlock: which badges fire for a given PR depends on what the seed athlete
+   * has already unlocked, but the host being mounted does not. That mount is
+   * the thing P1-6 broke.
+   */
+  test("el host del toast de logros está montado en el layout", async ({
+    page,
+  }) => {
+    await loginAs(page, "atleta");
+    await page.goto("/atleta/wod");
+    await expect(page.locator("body")).toBeVisible();
+
+    await page.evaluate(() => {
+      window.dispatchEvent(
+        new CustomEvent("kronos:achievement", {
+          detail: {
+            badgeId: "e2e-achievement-host",
+            code: "E2E_HOST",
+            name: "Host montado",
+            description: "El listener del layout recibió el evento.",
+            xp: 10,
+            toastId: "e2e-host-1",
+            createdAt: Date.now(),
+          },
+        }),
+      );
+    });
+
+    const toast = page.locator('[data-testid="achievement-toast"]');
+    await expect(toast).toBeVisible({ timeout: 5_000 });
+    await expect(toast).toContainText("Host montado");
   });
 
   test("/atleta/perfil carga sin errores", async ({ page }) => {

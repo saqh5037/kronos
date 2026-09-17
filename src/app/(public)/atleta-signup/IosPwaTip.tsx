@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ArrowRight, Lightbulb, Share, Smartphone } from "lucide-react";
 import { detectPwaPlatform, buildSafariDeepLink } from "@/lib/pwa-detect";
 
 type Mode = "ios-safari-not-installed" | "ios-other" | "hidden";
@@ -8,11 +9,11 @@ type Mode = "ios-safari-not-installed" | "ios-other" | "hidden";
 /**
  * Banner contextual NO bloqueante mostrado encima del form de signup.
  *
- * - iOS Safari y NO standalone → tip "Instalá la app primero (mejor UX)"
- *   con instrucciones colapsables.
- * - iOS Chrome/Firefox/etc → tip "Esto es Chrome, mejor en Safari" con
+ * - iOS Safari y NO standalone: tip "Instala la app primero" con
+ *   instrucciones colapsables.
+ * - iOS Chrome/Firefox/etc: tip "Esto es Chrome, mejor en Safari" con
  *   botón "Abrir en Safari".
- * - Resto (Android, desktop, iOS standalone ya instalado) → no se muestra.
+ * - Resto (Android, desktop, iOS standalone ya instalado): no se muestra.
  */
 export default function IosPwaTip() {
   const [mode, setMode] = useState<Mode>("hidden");
@@ -46,8 +47,12 @@ export default function IosPwaTip() {
     >
       {mode === "ios-other" ? (
         <div className="space-y-2">
-          <p className="text-xs font-bold" style={{ color: "var(--k-accent)" }}>
-            📱 Estás en Chrome iPhone
+          <p
+            className="text-xs font-bold inline-flex items-center gap-1.5"
+            style={{ color: "var(--k-accent)" }}
+          >
+            <Smartphone size={14} strokeWidth={1.75} aria-hidden />
+            Estás en Chrome iPhone
           </p>
           <p
             className="text-[11px] leading-relaxed"
@@ -59,15 +64,16 @@ export default function IosPwaTip() {
           <button
             type="button"
             onClick={openInSafari}
-            className="k-btn-grad text-[11px] px-3 py-1.5 rounded-lg font-semibold w-full"
+            className="k-btn-grad text-[11px] px-3 py-1.5 rounded-lg font-semibold w-full inline-flex items-center justify-center gap-1.5"
           >
-            Abrir en Safari →
+            Abrir en Safari
+            <ArrowRight size={14} strokeWidth={1.75} aria-hidden />
           </button>
           <p
             className="text-[10px] text-center"
             style={{ color: "var(--k-t3)" }}
           >
-            (también puedes seguir acá y crear contraseña abajo)
+            (también puedes seguir aquí y crear contraseña abajo)
           </p>
         </div>
       ) : (
@@ -78,10 +84,11 @@ export default function IosPwaTip() {
             className="w-full flex items-center justify-between text-left"
           >
             <p
-              className="text-xs font-bold"
+              className="text-xs font-bold inline-flex items-center gap-1.5"
               style={{ color: "var(--k-accent)" }}
             >
-              💡 Tip: instalá Kronos primero (mejor UX)
+              <Lightbulb size={14} strokeWidth={1.75} aria-hidden />
+              Tip: instala Kronos primero
             </p>
             <span style={{ color: "var(--k-accent)", fontSize: 14 }}>
               {showInstructions ? "−" : "+"}
@@ -93,11 +100,17 @@ export default function IosPwaTip() {
                 className="text-[11px] leading-relaxed"
                 style={{ color: "var(--k-t2)" }}
               >
-                1. Tocá el botón{" "}
-                <strong style={{ color: "var(--k-warning)" }}>Compartir</strong>{" "}
-                de Safari (icono ⬆ abajo)
+                1. Toca el botón{" "}
+                <strong
+                  style={{ color: "var(--k-warning)" }}
+                  className="inline-flex items-center gap-1"
+                >
+                  Compartir
+                  <Share size={12} strokeWidth={1.75} aria-hidden />
+                </strong>{" "}
+                de Safari, abajo en la barra
                 <br />
-                2. Bajá y tocá{" "}
+                2. Baja y toca{" "}
                 <strong style={{ color: "var(--k-warning)" }}>
                   Agregar a inicio
                 </strong>

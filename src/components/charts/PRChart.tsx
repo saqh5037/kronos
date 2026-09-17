@@ -1,5 +1,7 @@
 "use client";
 
+import { Icon } from "@/components/kronos/Icon";
+import { formatDateShort } from "@/lib/format";
 import { KronosLineChart } from "./kronos-chart";
 import { CHART_COLORS } from "./tokens";
 
@@ -21,7 +23,7 @@ function formatDate(iso: unknown) {
   if (typeof iso !== "string") return String(iso ?? "");
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("es-MX", { month: "short", day: "numeric" });
+  return formatDateShort(d);
 }
 
 export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
@@ -29,7 +31,7 @@ export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
     return (
       <div
         className="flex items-center justify-center text-xs"
-        style={{ height, color: "var(--k-t3)" }}
+        style={{ height, color: "var(--k-t2)" }}
       >
         Sin datos de progresión
       </div>
@@ -44,6 +46,9 @@ export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
       variant="cinematic"
       height={height}
       gradient
+      /* A 1RM is neither a count nor money: zero-flooring the axis would flatten
+         a season of progression into one line (audit 2026-09-15). */
+      zeroFloor={false}
       formatY={(v) => `${v}`}
       formatX={formatDate}
       referenceLines={
@@ -51,7 +56,7 @@ export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
           ? [
               {
                 y: currentBest,
-                color: CHART_COLORS.primaryBright,
+                color: CHART_COLORS.primary,
                 label: "PR ACTUAL",
               },
             ]
@@ -63,14 +68,14 @@ export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
           <div>
             <div
               className="font-mono text-[10px] uppercase tracking-wider"
-              style={{ color: "var(--k-t3)" }}
+              style={{ color: "var(--k-t2)" }}
             >
               {formatDate(p.date)}
             </div>
             <div className="mt-1 flex items-center gap-2">
               <span
                 className="font-display text-sm font-bold"
-                style={{ color: CHART_COLORS.primaryBright }}
+                style={{ color: CHART_COLORS.primary }}
               >
                 {p.value} {unit}
               </span>
@@ -88,10 +93,11 @@ export function PRChart({ data, unit, currentBest, height = 240 }: Props) {
             </div>
             {p.isCurrentBest && (
               <div
-                className="mt-1 text-[10px] font-bold tracking-wide"
-                style={{ color: "var(--k-warning)" }}
+                className="mt-1 flex items-center gap-1 text-[10px] font-bold tracking-wide"
+                style={{ color: "var(--k-accent)" }}
               >
-                ★ PR ACTUAL
+                <Icon name="trophy" size={16} />
+                PR ACTUAL
               </div>
             )}
           </div>

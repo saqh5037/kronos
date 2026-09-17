@@ -28,6 +28,8 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
     <div className="flex items-end justify-center gap-3 mb-6">
       {ordered.map((e, i) => {
         const isFirst = e.rank === 1;
+        // Rank is intensity of one thing, so it is one hue at three opacities.
+        const rankOpacity = e.rank === 1 ? 1 : e.rank === 2 ? 0.7 : 0.4;
         const heightClass = isFirst ? "h-32" : e.rank === 2 ? "h-24" : "h-20";
         const delay = i * 0.1;
 
@@ -47,10 +49,10 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-sm"
               style={{
-                background: isFirst ? "var(--k-accent)" : "var(--k-elevated)",
-                border: isFirst ? "none" : "1px solid var(--line)",
-                color: isFirst ? "#1c1917" : "var(--text)",
-                boxShadow: isFirst ? "0 0 20px rgba(220,75,23,0.25)" : "none",
+                background: "var(--k-accent)",
+                opacity: rankOpacity,
+                border: "none",
+                color: "var(--k-accent-on)",
               }}
             >
               {e.rank}
@@ -59,7 +61,10 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
               <p className="text-xs font-medium truncate">{e.name}</p>
               <p
                 className="font-mono font-bold text-sm mt-0.5"
-                style={{ color: isFirst ? "var(--k-accent)" : "var(--text)" }}
+                style={{
+                  color: "var(--k-accent)",
+                  opacity: rankOpacity,
+                }}
               >
                 {formatScore(e.value, e.scoreType)}
               </p>
@@ -72,8 +77,9 @@ export default function Podium({ entries }: { entries: PodiumEntry[] }) {
             <div
               className={`w-16 rounded-t-lg ${heightClass}`}
               style={{
-                background: isFirst ? "var(--k-accent)" : "var(--btn-ghost-bg)",
-                border: isFirst ? "none" : "1px solid var(--line)",
+                background: "var(--k-accent)",
+                opacity: rankOpacity,
+                border: "none",
                 borderBottom: "none",
               }}
             />

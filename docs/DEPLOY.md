@@ -177,7 +177,7 @@ pm2 logs kronos --lines 30
 
 ## 4 · Crons
 
-Vercel Cron no aplica acá — usar `crontab` del sistema:
+Vercel Cron no aplica aquí — usar `crontab` del sistema:
 
 ```bash
 sudo crontab -u ubuntu -e

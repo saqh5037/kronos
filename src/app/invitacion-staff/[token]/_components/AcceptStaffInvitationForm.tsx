@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { Check } from "lucide-react";
 import { acceptStaffInvitation } from "@/server/actions/staff-invitations";
 
 type Props = {
@@ -37,13 +38,16 @@ export function AcceptStaffInvitationForm({
     return (
       <div className="space-y-4">
         <div className="rounded-lg border border-[var(--k-accent-line)] bg-[var(--k-accent-soft)] p-4">
-          <p className="font-bold text-[var(--k-accent)]">✓ ¡Listo!</p>
+          <p className="font-bold text-[var(--k-accent)] flex items-center gap-2">
+            <Check size={16} strokeWidth={2.5} aria-hidden="true" />
+            ¡Listo!
+          </p>
           <p className="text-sm mt-1">
             Tu cuenta para <strong>{email}</strong> quedó activa.
           </p>
         </div>
         <p className="text-sm text-[var(--k-t2)]">
-          Iniciá sesión con tu email para entrar al admin del Box:
+          Inicia sesión con tu correo para entrar al panel del Box:
         </p>
         <Link
           href={`/login?email=${encodeURIComponent(email)}`}

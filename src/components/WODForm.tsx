@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { createWOD } from "@/server/actions/wods";
+import { Icon } from "@/components/kronos/Icon";
 import { wodTypes, scoreTypes } from "@/lib/validations/wod";
 
 type Movement = {
@@ -104,7 +105,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
         required
         maxLength={120}
         className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       />
 
       <div className="grid grid-cols-3 gap-2">
@@ -114,7 +115,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
             name="type"
             defaultValue="FORTIME"
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)", background: "var(--card)" }}
+            style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
           >
             {wodTypes.map((t) => (
               <option key={t} value={t}>
@@ -129,7 +130,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
             name="scoreType"
             defaultValue="TIME"
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)", background: "var(--card)" }}
+            style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
           >
             {scoreTypes.map((t) => (
               <option key={t} value={t}>
@@ -148,7 +149,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
             max="180"
             placeholder="0 = sin cap"
             className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-            style={{ borderColor: "var(--line)" }}
+            style={{ borderColor: "var(--k-line)" }}
           />
         </label>
       </div>
@@ -159,12 +160,12 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
         rows={2}
         maxLength={2000}
         className="px-3 py-2 rounded-lg text-sm border bg-transparent resize-none"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       />
 
       <div
         className="border-t pt-3 mt-1 flex flex-col gap-2"
-        style={{ borderColor: "var(--line)" }}
+        style={{ borderColor: "var(--k-line)" }}
       >
         <p className="k-eyebrow">Movimientos</p>
 
@@ -178,7 +179,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
               value={line.movementId}
               onChange={(e) => updateLine(idx, { movementId: e.target.value })}
               className="col-span-5 px-2 py-1.5 rounded-md border bg-transparent text-xs"
-              style={{ borderColor: "var(--line)", background: "var(--card)" }}
+              style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
             >
               <option value="">— Movimiento —</option>
               {movements.map((m) => (
@@ -195,7 +196,7 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
               inputMode="numeric"
               min="0"
               className="col-span-2 px-2 py-1.5 rounded-md border bg-transparent text-xs"
-              style={{ borderColor: "var(--line)" }}
+              style={{ borderColor: "var(--k-line)" }}
             />
             <input
               value={line.weight}
@@ -206,24 +207,24 @@ export default function WODForm({ movements }: { movements: Movement[] }) {
               min="0"
               step="0.5"
               className="col-span-2 px-2 py-1.5 rounded-md border bg-transparent text-xs"
-              style={{ borderColor: "var(--line)" }}
+              style={{ borderColor: "var(--k-line)" }}
             />
             <input
               value={line.notes}
               onChange={(e) => updateLine(idx, { notes: e.target.value })}
               placeholder="Notas"
               className="col-span-2 px-2 py-1.5 rounded-md border bg-transparent text-xs"
-              style={{ borderColor: "var(--line)" }}
+              style={{ borderColor: "var(--k-line)" }}
             />
             <button
               type="button"
               onClick={() => removeLine(idx)}
               disabled={lines.length === 1}
-              className="col-span-1 text-xs disabled:opacity-30"
+              className="col-span-1 inline-flex min-h-11 items-center justify-center disabled:opacity-30"
               style={{ color: "var(--k-danger)" }}
               aria-label="Quitar movimiento"
             >
-              ×
+              <Icon name="close" size={16} />
             </button>
           </div>
         ))}

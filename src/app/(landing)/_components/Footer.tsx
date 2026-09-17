@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import KronosLogo from "@/components/brand/KronosLogo";
 import { FOOTER_LINKS } from "../_data/mock";
 
@@ -12,7 +13,7 @@ export default function Footer() {
             className="lp-caption"
             style={{ color: "var(--k-t3)", marginTop: 8 }}
           >
-            Operamos detrás de tu marca, en tu dominio, con tu paleta.
+            Operamos detrás de tu marca, con tu logo y tu paleta.
           </p>
         </div>
 
@@ -32,26 +33,7 @@ export default function Footer() {
           <ul>
             {FOOTER_LINKS.recursos.map((l) => (
               <li key={l.label}>
-                {l.comingSoon ? (
-                  <span style={{ color: "var(--k-t3)", cursor: "default" }}>
-                    {l.label}
-                    <span
-                      style={{
-                        fontSize: 9,
-                        letterSpacing: "0.1em",
-                        textTransform: "uppercase",
-                        marginLeft: 8,
-                        color: "var(--k-accent)",
-                        fontFamily: "var(--k-font-display), monospace",
-                        fontWeight: 700,
-                      }}
-                    >
-                      PRÓX.
-                    </span>
-                  </span>
-                ) : (
-                  <a href={l.href}>{l.label}</a>
-                )}
+                <a href={l.href}>{l.label}</a>
               </li>
             ))}
           </ul>
@@ -86,9 +68,13 @@ export default function Footer() {
                 style={{
                   color: "var(--k-accent)",
                   fontWeight: 600,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
                 }}
               >
-                ¿Eres atleta? Empezar gratis →
+                ¿Eres atleta? Empezar gratis
+                <ArrowRight size={16} strokeWidth={1.75} aria-hidden />
               </a>
             </li>
           </ul>
@@ -145,7 +131,7 @@ export default function Footer() {
           <a href="/legal/terminos">TÉRMINOS</a> ·{" "}
           <a href="/legal/privacidad">PRIVACIDAD</a>
         </span>
-        <span>HECHO EN LATAM, PARA BOXES EN LATAM</span>
+        <span>HECHO EN MÉXICO, PARA BOXES EN MÉXICO</span>
       </div>
     </>
   );

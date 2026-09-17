@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { listPendingInvitations } from "@/server/actions/athlete-invitations";
 import { InviteForm } from "./_components/InviteForm";
 import { PendingInvitationsList } from "./_components/PendingInvitationsList";
@@ -18,9 +19,10 @@ export default async function InvitarAtletasPage() {
       <div className="mb-6">
         <Link
           href="/admin/atletas"
-          className="k-eyebrow text-[var(--k-t3)] hover:text-[var(--k-t2)]"
+          className="k-eyebrow inline-flex min-h-11 items-center gap-1.5 text-[var(--k-t2)] hover:text-[var(--k-t1)]"
         >
-          ← Atletas
+          <ArrowLeft size={14} aria-hidden />
+          Atletas
         </Link>
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
           <span

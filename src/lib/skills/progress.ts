@@ -1,4 +1,5 @@
 import type {
+  AthleteTierInfo,
   CatalogSkill,
   CatalogSkillStatus,
   Skill,
@@ -6,18 +7,19 @@ import type {
   SkillTier,
 } from "./types";
 import type { AthleteLevel } from "@/lib/skill-tree";
-
-const TIER_LABEL: Record<SkillTier, string> = {
-  principiante: "Principiante",
-  escalado: "Escalado",
-  rx: "RX",
-};
+import { badgeTierLabel } from "@/lib/labels";
+import { badgeTierFromSkillTier } from "@/lib/badges/tier";
 
 const TIER_RANK: Record<SkillTier, number> = {
   principiante: 1,
   escalado: 2,
   rx: 3,
 };
+
+/** Presentation label for a skill tier, routed through the enum label map. */
+export function skillTierLabel(tier: SkillTier): string {
+  return badgeTierLabel[badgeTierFromSkillTier(tier)];
+}
 
 export function levelToTier(
   level: "rx" | "scaled" | "beginner" | null,
@@ -26,6 +28,35 @@ export function levelToTier(
   if (level === "scaled") return "escalado";
   if (level === "beginner") return "principiante";
   return "principiante";
+}
+
+/**
+ * Resolve the tier we are allowed to *show* the athlete (audit 2026-09-15:
+ * a "PRINCIPIANTE" chip was rendered for everybody because the default tier
+ * and an actually-declared beginner tier were indistinguishable).
+ *
+ * - `declared`: the athlete picked a level during onboarding (`level:` tag).
+ * - `earned`: they completed a skill whose tier outranks what they declared.
+ * - `default`: nothing declared, nothing earned → `known: false`, and the UI
+ *   must not print a tier chip.
+ */
+export function computeAthleteTier(args: {
+  declaredLevel: "rx" | "scaled" | "beginner" | null;
+  completedSkillTiers?: readonly SkillTier[];
+}): AthleteTierInfo {
+  const declared = args.declaredLevel ? levelToTier(args.declaredLevel) : null;
+  const earned = (args.completedSkillTiers ?? []).reduce<SkillTier | null>(
+    (best, tier) =>
+      best === null || TIER_RANK[tier] > TIER_RANK[best] ? tier : best,
+    null,
+  );
+
+  if (declared && earned && TIER_RANK[earned] > TIER_RANK[declared]) {
+    return { tier: earned, known: true, source: "earned" };
+  }
+  if (declared) return { tier: declared, known: true, source: "declared" };
+  if (earned) return { tier: earned, known: true, source: "earned" };
+  return { tier: "principiante", known: false, source: "default" };
 }
 
 export function computeSkillProgressTotals(
@@ -97,6 +128,7 @@ export function computeCatalogSkillStatus(args: {
   status: CatalogSkillStatus;
   progressPercent?: number;
   lockReason?: string;
+  lockDetail?: string;
 } {
   const {
     skill,
@@ -108,7 +140,13 @@ export function computeCatalogSkillStatus(args: {
   } = args;
 
   if (TIER_RANK[skill.tier] > TIER_RANK[athleteTier]) {
-    return { status: "locked", lockReason: `Nivel ${TIER_LABEL[skill.tier]}` };
+    // Audit 2026-09-15: "Nivel Escalado" alone never said whether that was a
+    // requirement or the athlete's own level. Name both sides.
+    return {
+      status: "locked",
+      lockReason: `Pide nivel ${skillTierLabel(skill.tier)}`,
+      lockDetail: `Tu nivel: ${skillTierLabel(athleteTier)}`,
+    };
   }
 
   const missingPrereq = skill.prereqSkillIds.find(
@@ -117,7 +155,8 @@ export function computeCatalogSkillStatus(args: {
   if (missingPrereq) {
     return {
       status: "locked",
-      lockReason: `Completa ${prettyPrereq(missingPrereq)}`,
+      lockReason: "Falta un requisito",
+      lockDetail: `Primero domina ${prettyPrereq(missingPrereq)}`,
     };
   }
 
@@ -184,6 +223,7 @@ export function buildCatalog(args: {
       status: result.status,
       progressPercent: result.progressPercent,
       lockReason: result.lockReason,
+      lockDetail: result.lockDetail,
     };
   });
 }

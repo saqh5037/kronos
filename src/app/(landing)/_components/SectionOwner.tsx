@@ -3,13 +3,23 @@
 import Image from "next/image";
 import { m, useReducedMotion } from "framer-motion";
 import { OWNER_KPIS, OWNER_OCCUPANCY } from "../_data/mock";
+import { CTA_TRIAL_HREF, CTA_TRIAL_LABEL } from "../_data/cta";
 import { track } from "../_lib/track";
-import CountUp from "./CountUp";
 
 const fadeUp = {
   hidden: { y: 14 },
   show: { y: 0, transition: { duration: 0.55, ease: "easeOut" } },
 };
+
+/**
+ * Average of the bars actually drawn below. It used to be a hard-coded "78 %"
+ * against a series that averages 66 %: a demo screenshot whose headline number
+ * contradicts its own chart teaches the reader that our numbers are decoration.
+ */
+const OCCUPANCY_AVERAGE = Math.round(
+  OWNER_OCCUPANCY.reduce((sum, bar) => sum + bar.value, 0) /
+    OWNER_OCCUPANCY.length,
+);
 
 const DAYS = [
   "L",
@@ -60,7 +70,7 @@ export default function SectionOwner() {
       >
         <Image
           src="/images/landing/box-coach-correcting-form.webp"
-          alt=""
+          alt="Coach corrigiendo la forma de una atleta durante una clase en un Box de CrossFit"
           fill
           sizes="100vw"
           style={{
@@ -95,10 +105,10 @@ export default function SectionOwner() {
           >
             <div className="lp-caption" style={{ color: "var(--k-accent)" }}>
               <span className="lp-dot" style={{ marginRight: 10 }} />
-              ADMIN · IRON HANDS · MAYO 2026
+              PANEL DEL DUEÑO · VISTA DEL MES
             </div>
             <span className="lp-caption" style={{ color: "var(--k-t3)" }}>
-              v1.0
+              DATOS DE EJEMPLO
             </span>
           </div>
 
@@ -106,15 +116,7 @@ export default function SectionOwner() {
             {OWNER_KPIS.map((k) => (
               <div key={k.label} className="lp-kpi">
                 <div className="l">{k.label}</div>
-                <div className="v">
-                  <CountUp
-                    to={k.displayTo}
-                    prefix={k.prefix}
-                    suffix={k.suffix}
-                    decimals={k.decimals}
-                  />
-                  {k.pct ? <span className="pct">{k.pct}</span> : null}
-                </div>
+                <div className="v">{k.value}</div>
                 <div className={`delta${k.up ? " up" : ""}`}>{k.delta}</div>
               </div>
             ))}
@@ -132,7 +134,7 @@ export default function SectionOwner() {
                 OCUPACIÓN · ÚLTIMOS 14 DÍAS
               </div>
               <div className="lp-caption" style={{ color: "var(--k-t3)" }}>
-                PROMEDIO · 78%
+                PROMEDIO · {OCCUPANCY_AVERAGE} %
               </div>
             </div>
             <div className="lp-chart-bars">
@@ -173,22 +175,23 @@ export default function SectionOwner() {
         <m.div variants={v}>
           <div className="lp-eyebrow">
             <span className="lp-dot" />
-            /02 · PARA EL OWNER
+            /02 · PARA EL DUEÑO DEL BOX
           </div>
           <h2>Tu operación, en cifras frías.</h2>
           <p>
             Un panel que tu contador respeta y tu coach principal abre cada
-            mañana. Sin gráficos decorativos, sin métricas de vanity. Las cifras
+            mañana. Sin gráficos decorativos, sin métricas de adorno. Las cifras
             que dictan si el mes cierra en azul o en rojo, en una sola pantalla.
           </p>
           <ul className="lp-feature-list">
             <li>
               <div>
-                <strong>MRR, churn, CAC, LTV</strong>
+                <strong>
+                  Cuánto entró, cuántos atletas activos y cuántos se fueron
+                </strong>
                 <span className="desc">
-                  Las cuatro métricas vitales en tiempo real, listas para tu
-                  junta mensual. Sin armar Excel, sin pedirle al contador, sin
-                  exportar nada.
+                  Ingresos del mes, atletas activos, bajas y quién no ha pagado,
+                  en tiempo real. Sin armar Excel, sin pedirle al contador.
                 </span>
               </div>
             </li>
@@ -207,8 +210,8 @@ export default function SectionOwner() {
                 <strong>Atletas en riesgo, antes de la baja</strong>
                 <span className="desc">
                   Quién dejó de venir 14 días. Quién bajó intensidad. Quién
-                  vence membresía esta semana. Acción de retención antes del
-                  churn definitivo.
+                  vence membresía esta semana. Lo ves antes de que se dé de
+                  baja, no después.
                 </span>
               </div>
             </li>
@@ -216,19 +219,19 @@ export default function SectionOwner() {
               <div>
                 <strong>Pagos sin perseguir a nadie</strong>
                 <span className="desc">
-                  Stripe para tarjeta, Mercado Pago para tarjeta y OXXO, SPEI
-                  para transferencias. Reintentos automáticos. Bloqueo de acceso
-                  por mora sin tener que llamar.
+                  Mercado Pago para tarjeta, y el efectivo registrado en el
+                  admin para que ningún pago se pierda. Ves al corriente y al
+                  moroso en la misma lista, sin tener que llamar.
                 </span>
               </div>
             </li>
           </ul>
           <a
-            href="#section-form"
+            href={CTA_TRIAL_HREF}
             className="lp-btn-ghost lp-btn-lg"
             onClick={() => track("cta_clicked", { location: "section_owner" })}
           >
-            Ver el admin completo en demo →
+            {CTA_TRIAL_LABEL}
           </a>
         </m.div>
       </m.div>

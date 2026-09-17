@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import KronosLogo from "@/components/brand/KronosLogo";
 import { FOOTER } from "../_data/copy";
 
@@ -77,9 +78,13 @@ export default function FooterMinimal() {
               color: "var(--k-accent)",
               textDecoration: "none",
               fontWeight: 600,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
             }}
           >
-            {FOOTER.coachLinkLabel} →
+            {FOOTER.coachLinkLabel}
+            <ArrowRight size={12} strokeWidth={2.5} aria-hidden="true" />
           </a>
         </p>
       </div>

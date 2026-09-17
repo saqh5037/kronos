@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db as prismaBase } from "@/server/db";
+import { Check } from "lucide-react";
 import KronosLogo from "@/components/brand/KronosLogo";
 import { verifyPilotBetaToken } from "@/lib/pilot-beta-token";
 import PilotBetaSignForm from "./PilotBetaSignForm";
+import { CONTACT_EMAIL } from "@/app/(landing)/_data/cta";
+import { formatDateFull } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Firma piloto-beta · Kronos",
@@ -72,7 +76,7 @@ export default async function PilotoBetaPage({
             className="text-[10px] font-mono uppercase tracking-wider"
             style={{ color: "var(--k-t3)" }}
           >
-            Firma piloto-beta · Cupo limitado
+            Firma piloto-beta
           </span>
         </div>
       </header>
@@ -159,11 +163,10 @@ function InvalidStateScreen({
   };
   const bodyByReason = {
     missing:
-      "Llegaste a esta página sin token. Abre el link completo que Samuel te envió.",
+      "Llegaste a esta página sin token. Abre el link completo que te enviaron.",
     invalid:
       "No pudimos validar tu link. Verifica que esté completo (a veces el correo lo recorta).",
-    expired:
-      "Tu link expiró. Escríbele a Samuel y te mandamos uno nuevo en minutos.",
+    expired: "Tu link expiró. Escríbenos y te mandamos uno nuevo en minutos.",
   };
   return (
     <main
@@ -182,11 +185,14 @@ function InvalidStateScreen({
           {bodyByReason[reason]}
         </p>
         <a
-          href="mailto:contacto@kronos-fit.com?subject=Link%20de%20firma%20piloto-beta"
-          className="lp-btn-lime mt-3 inline-flex items-center justify-center"
+          href={`mailto:${CONTACT_EMAIL}?subject=Link%20de%20firma%20piloto-beta`}
+          className="k-btn-grad mt-3 inline-block text-center"
         >
-          Escribir a contacto
+          Escríbenos a {CONTACT_EMAIL}
         </a>
+        <Link href="/" className="k-btn-ghost inline-block text-center">
+          Ir al inicio
+        </Link>
       </div>
     </main>
   );
@@ -201,11 +207,7 @@ function ConfirmationScreen({
   signedAt: Date;
   alreadySigned?: boolean;
 }) {
-  const formatted = signedAt.toLocaleDateString("es-MX", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const formatted = formatDateFull(signedAt);
   return (
     <main
       className="min-h-screen flex items-center justify-center"
@@ -217,12 +219,12 @@ function ConfirmationScreen({
           className="inline-flex items-center justify-center w-14 h-14 rounded-full mx-auto"
           style={{ background: "var(--k-accent-soft)" }}
         >
-          <span
-            className="font-display font-bold text-2xl"
+          <Check
+            size={26}
+            strokeWidth={3}
             style={{ color: "var(--k-accent)" }}
-          >
-            ✓
-          </span>
+            aria-hidden
+          />
         </div>
         <h1
           className="font-display font-bold text-2xl"

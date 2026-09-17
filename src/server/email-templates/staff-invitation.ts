@@ -18,14 +18,14 @@ export function renderStaffInvitationEmail(args: {
     </p>
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 28px 0;">
       <tr><td style="background:#c8ff2d;border-radius:999px;">
-        <a href="${link}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:700;color:#08080a;text-decoration:none;letter-spacing:0.01em;">Activar mi cuenta →</a>
+        <a href="${link}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:700;color:#08080a;text-decoration:none;letter-spacing:0.01em;">Activar mi cuenta</a>
       </td></tr>
     </table>
-    <p style="font-family:'Inter',Arial,sans-serif;font-size:12px;line-height:1.6;color:#54545c;margin:0 0 12px 0;">
+    <p style="font-family:'Inter',Arial,sans-serif;font-size:12px;line-height:1.6;color:#7d7d87;margin:0 0 12px 0;">
       El link expira en 14 días.
     </p>
-    <p style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:11px;line-height:1.5;color:#54545c;margin:16px 0 0 0;word-break:break-all;">
-      ¿No funciona el botón? Pegá este link en tu navegador:<br><a href="${link}" style="color:#8a8a94;text-decoration:underline;">${link}</a>
+    <p style="font-family:'IBM Plex Mono',Consolas,monospace;font-size:11px;line-height:1.5;color:#7d7d87;margin:16px 0 0 0;word-break:break-all;">
+      ¿No funciona el botón? Pega este link en tu navegador:<br><a href="${link}" style="color:#8a8a94;text-decoration:underline;">${link}</a>
     </p>
   `;
 

@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import type { Screen } from "../_data/screens";
 import { imageExists } from "../_data/screens";
 import PhoneFrame from "./PhoneFrame";
@@ -18,27 +19,21 @@ export default function ManualScreen({
       : "manual-screen-chip";
   const indexLabel = String(index).padStart(2, "0");
 
-  const placeholderNode = (
-    <div className="manual-screen-placeholder">
-      <span className="lbl">CAPTURA · PRÓXIMAMENTE</span>
-      <span className="nm">{screen.label}</span>
-      <span className="hnt">
-        Esta sección se ilustrará con captura real en la próxima iteración. La
-        descripción es definitiva.
-      </span>
-    </div>
-  );
-
+  // Audit 2026-09-15: 7 de 9 secciones mostraban un marco de teléfono vacío con
+  // "CAPTURA · PRÓXIMAMENTE" — unos 3,600 px de nada que recorrer con el pulgar
+  // a 360. Sin captura real no se dibuja marco: la sección queda como texto.
   return (
-    <article id={screen.id} className="manual-screen">
-      <div className="manual-screen-frame-wrap">
-        <PhoneFrame
-          src={hasImage ? screen.imageSrc : undefined}
-          alt={screen.imageAlt}
-          size="md"
-          placeholder={placeholderNode}
-        />
-      </div>
+    <article
+      id={screen.id}
+      className={
+        hasImage ? "manual-screen" : "manual-screen manual-screen-textonly"
+      }
+    >
+      {hasImage ? (
+        <div className="manual-screen-frame-wrap">
+          <PhoneFrame src={screen.imageSrc} alt={screen.imageAlt} size="md" />
+        </div>
+      ) : null}
 
       <div className="manual-screen-body">
         <div
@@ -85,9 +80,15 @@ export default function ManualScreen({
           <a
             href={screen.deepLink}
             className="lp-btn-ghost"
-            style={{ alignSelf: "flex-start", display: "inline-flex" }}
+            style={{
+              alignSelf: "flex-start",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
           >
-            Abrir esta pantalla →
+            Abrir esta pantalla
+            <ArrowRight size={16} strokeWidth={1.75} aria-hidden />
           </a>
         ) : null}
       </div>

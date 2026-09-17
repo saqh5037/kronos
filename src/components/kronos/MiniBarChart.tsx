@@ -44,18 +44,19 @@ export default function MiniBarChart({
               className="w-full relative flex items-end"
               style={{ height: height - 20 }}
             >
+              {/* Grow with transform, not height: a layout animation costs a
+                  reflow per frame (audit 2026-09-15, E). */}
               <m.div
                 className="w-full rounded-[3px]"
                 style={{
+                  height: `${Math.max(8, bar.value * 100)}%`,
                   background: bar.isBest
                     ? "var(--k-accent)"
                     : (bar.color ?? "var(--chart-inactive)"),
-                  boxShadow: bar.isBest
-                    ? "0 0 12px rgba(220,75,23,0.35)"
-                    : "none",
+                  transformOrigin: "bottom",
                 }}
-                initial={{ height: 0 }}
-                animate={{ height: `${Math.max(8, bar.value * 100)}%` }}
+                initial={{ scaleY: 0 }}
+                animate={{ scaleY: 1 }}
                 transition={{
                   delay: 0.2 + i * 0.08,
                   duration: 0.6,

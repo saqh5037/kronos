@@ -1,4 +1,5 @@
 import type { AthleteAtRiskRow } from "../owner-digest/compute";
+import { formatDateLong, formatInt } from "@/lib/format";
 
 function escapeHtml(s: string): string {
   return s
@@ -8,18 +9,15 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/**
+ * Money and dates go through `src/lib/format.ts` like every other surface.
+ * The bare `toLocale*String` calls this replaces read the AMBIENT timezone:
+ * the digest is rendered by a cron on a UTC server, so "próxima facturación"
+ * could print the day before the one the owner sees inside the product.
+ */
 function formatPriceMxn(cents: number): string {
   if (cents === 0) return "$0 MXN";
-  const pesos = cents / 100;
-  return `$${pesos.toLocaleString("es-MX", { maximumFractionDigits: 0 })} MXN`;
-}
-
-function formatDateShort(d: Date): string {
-  return d.toLocaleDateString("es-MX", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return `$${formatInt(Math.round(cents / 100))} MXN`;
 }
 
 function deltaLabel(delta: number): string {
@@ -67,7 +65,7 @@ export function renderOwnerDigestEmail(args: {
 
   const riskListHtml =
     args.athletesAtRisk.length === 0
-      ? `<p style="font-size: 14px; color: #c8ff2d; margin: 0;">✓ Ningún atleta en riesgo esta semana.</p>`
+      ? `<p style="font-size: 14px; color: #c8ff2d; margin: 0;">Sin atletas en riesgo esta semana.</p>`
       : args.athletesAtRisk
           .map(
             (r) => `
@@ -85,7 +83,7 @@ export function renderOwnerDigestEmail(args: {
 
   const nextBillingHtml = args.nextBillingDate
     ? `<p style="font-size: 13px; color: #aaa; margin: 16px 0 0 0;">
-         Próxima facturación: <strong style="color: #eaeaea;">${formatDateShort(args.nextBillingDate)}</strong>
+         Próxima facturación: <strong style="color: #eaeaea;">${formatDateLong(args.nextBillingDate)}</strong>
        </p>`
     : "";
 
@@ -132,7 +130,7 @@ export function renderOwnerDigestEmail(args: {
     ${nextBillingHtml}
 
     <p style="font-size: 11px; color: #777; text-align: center; margin-top: 24px;">
-      Este resumen llega cada lunes. ¿Querés frenar estos emails? Respondé este mensaje.
+      Este resumen llega cada lunes. ¿Quieres dejar de recibirlo? Responde este mensaje.
     </p>
   </div>
 </body></html>

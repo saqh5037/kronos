@@ -148,7 +148,9 @@ test.describe.serial("Invitaciones de atletas", () => {
   }) => {
     await context.clearCookies();
     await page.goto("/invitacion/token-que-no-existe-12345");
-    await expect(page.getByText(/no encontrada/i)).toBeVisible();
+    // The 404 state was rewritten ("invitación no encontrada" → "No encontramos
+    // ninguna invitación con este link"). Pin the state, not the sentence.
+    await expect(page.getByTestId("invitation-not-found")).toBeVisible();
   });
 
   test("token ya aceptado muestra estado 'ya aceptada'", async ({

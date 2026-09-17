@@ -36,7 +36,7 @@ export default function SectionWhiteLabel() {
       >
         <Image
           src="/images/landing/box-community-celebration.webp"
-          alt=""
+          alt="Atletas de un Box celebrando juntos al terminar el WOD"
           fill
           sizes="100vw"
           style={{
@@ -65,12 +65,10 @@ export default function SectionWhiteLabel() {
         </m.div>
         <m.h2 variants={v}>La marca del Box, al frente.</m.h2>
         <m.p variants={v}>
-          Tu logo, tu color y tu nombre dominan la experiencia del atleta en
-          todos los tiers. Hierro y Acero corren sobre{" "}
-          <code>tubox.kronos.app</code> con un footer discreto &ldquo;Powered by
-          Kronos&rdquo;. Titanio elimina toda marca Kronos: dominio propio,
-          emails propios y apps publicadas con tu nombre en App Store y Play
-          Store.
+          Tu logo, tu color y tu nombre se cargan al dar de alta el Box y salen
+          en la pantalla de TV, en las invitaciones que reciben atletas y
+          coaches, y en el panel. En todos los planes la app corre sobre{" "}
+          <code>kronos-fit.com</code>.
         </m.p>
       </m.div>
 
@@ -86,43 +84,37 @@ export default function SectionWhiteLabel() {
         }
         style={{ position: "relative", zIndex: 1 }}
       >
+        {/* Los cuatro pilares son de todos los planes: lo que distinguía a
+            Titanio era el dominio propio y el correo desde el dominio del Box,
+            y ninguno de los dos existe todavía (ver ROADMAP en _data/mock.ts). */}
         {[
           {
-            tier: "TODOS",
             title: "Tu marca, no la nuestra",
-            body: "Logo, nombre, color y tipografía del Box. El atleta ve tu identidad en cada pantalla, sin cobrand visual ni el logo de un proveedor extranjero.",
+            body: "Subes el logo del Box y eliges su color al dar de alta, sin cobrand visual ni el logo de un proveedor extranjero encima del tuyo.",
           },
           {
-            tier: "TODOS",
-            title: "Tu paleta, contraste calculado",
-            body: "Pegas un #hex y el motor calcula el contraste accesible sobre cada superficie. Lima requiere texto negro. Sangre requiere texto blanco. Cero ajustes manuales.",
+            title: "Donde tu atleta sí la ve",
+            body: "Tu logo y tu color salen en la pantalla de TV del Box, en la invitación con la que entra cada atleta y en la que firman tus coaches.",
           },
           {
-            tier: "TITANIO",
-            title: "Tu dominio, sin Kronos",
-            body: "app.tubox.mx (o el dominio que elijas). Sin redirects, sin subdominios compartidos, sin badge en el footer. Configuración DNS asistida en el onboarding.",
-          },
-          {
-            tier: "TITANIO",
             title: "Tus comunicaciones, tu nombre",
-            body: "Emails desde no-reply@tubox.mx, no desde Kronos. Push notifications firmadas como el Box. SMS desde tu sender ID si lo configuras. En Hierro y Acero los emails llegan desde no-reply@kronos-fit.com firmados por el Box.",
+            body: "Los correos del Box llegan desde no-reply@kronos-fit.com firmados con el nombre de tu Box, y las notificaciones push salen a nombre del Box.",
           },
           {
-            tier: "TITANIO",
-            title: "Tu marca en App Store y Play Store",
-            body: "App nativa con tu nombre y tu ícono publicada en stores. Apple Developer Account a tu nombre, gestión del review process incluida. En Acero las apps son cobranded (tu logo, sub-marca Kronos).",
+            title: "Se instala desde el navegador",
+            body: "La app del atleta es una app web instalable: tus atletas la agregan a la pantalla de inicio desde el navegador, sin pasar por ninguna tienda de apps.",
           },
         ].map((p) => (
           <m.div key={p.title} className="lp-wl-pillar" variants={v}>
             <span
               className="lp-eyebrow"
               style={{
-                color: p.tier === "TITANIO" ? "var(--k-accent)" : "var(--k-t3)",
+                color: "var(--k-t3)",
                 fontSize: 11,
                 marginBottom: 12,
               }}
             >
-              {p.tier === "TITANIO" ? "★ TITANIO" : "TODOS LOS TIERS"}
+              TODOS LOS PLANES
             </span>
             <h3>{p.title}</h3>
             <p>{p.body}</p>
@@ -176,10 +168,9 @@ export default function SectionWhiteLabel() {
       >
         <span className="lp-dot" />
         <div className="text">
-          Pegas el <code>#hex</code> de tu marca en el setup. El motor calcula
-          contraste, estados hover, bordes y focus rings automáticamente.
-          Cualquier hex válido en sRGB funciona. Si no pasa los thresholds WCAG
-          AA, el sistema sugiere el más cercano que sí los pasa.
+          Eliges el color de tu marca en el alta, con el selector o pegando el{" "}
+          <code>#hex</code>. Cualquier hex válido en sRGB funciona, y lo puedes
+          cambiar cuando quieras desde la configuración del Box.
         </div>
       </m.div>
     </section>

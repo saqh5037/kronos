@@ -9,12 +9,15 @@ import type { Progression } from "@/lib/validations/movement";
 import { SKILL_CATALOG, getSkillById } from "@/lib/skills/catalog";
 import {
   buildCatalog,
+  computeAthleteTier,
   computeSkillProgressTotals,
+  isSkillCompleted,
   levelToTier,
   selectActiveSkillId,
 } from "@/lib/skills/progress";
 import type {
   ActiveSkillData,
+  AthleteTierInfo,
   CatalogSkill,
   SkillTier,
 } from "@/lib/skills/types";
@@ -24,6 +27,7 @@ type AthleteSession = {
   userId: string;
   athleteId: string;
   athleteTier: SkillTier;
+  declaredLevel: "rx" | "scaled" | "beginner" | null;
 };
 
 async function getAthleteSession(): Promise<AthleteSession | null> {
@@ -40,6 +44,7 @@ async function getAthleteSession(): Promise<AthleteSession | null> {
     userId: session.user.id,
     athleteId: athlete.id,
     athleteTier: levelToTier(prefs.level),
+    declaredLevel: prefs.level,
   };
 }
 
@@ -138,12 +143,19 @@ export async function getActiveSkillForAthlete(): Promise<ActiveSkillData | null
 
 export async function getSkillCatalogForAthlete(): Promise<{
   athleteTier: SkillTier;
+  /**
+   * Whether we may print a tier chip at all. Audit 2026-09-15: every athlete
+   * was labelled "PRINCIPIANTE" because the default tier was indistinguishable
+   * from a declared one.
+   */
+  tierInfo: AthleteTierInfo;
   catalog: CatalogSkill[];
 }> {
   const session = await getAthleteSession();
   if (!session) {
     return {
       athleteTier: "principiante",
+      tierInfo: { tier: "principiante", known: false, source: "default" },
       catalog: SKILL_CATALOG.map((s) => ({
         id: s.id,
         name: s.name,
@@ -165,14 +177,27 @@ export async function getSkillCatalogForAthlete(): Promise<{
     ]),
   );
 
+  const completedSkillTiers = SKILL_CATALOG.filter((s) =>
+    isSkillCompleted(
+      levels,
+      s.movementSlug,
+      totalsByMovementSlug.get(s.movementSlug) ?? 0,
+    ),
+  ).map((s) => s.tier);
+
+  const tierInfo = computeAthleteTier({
+    declaredLevel: session.declaredLevel,
+    completedSkillTiers,
+  });
+
   const catalog = buildCatalog({
     skills: SKILL_CATALOG,
     athleteLevels: levels,
-    athleteTier: session.athleteTier,
+    athleteTier: tierInfo.tier,
     totalsByMovementSlug,
   });
 
-  return { athleteTier: session.athleteTier, catalog };
+  return { athleteTier: tierInfo.tier, tierInfo, catalog };
 }
 
 export async function getAthleteTier(): Promise<SkillTier> {

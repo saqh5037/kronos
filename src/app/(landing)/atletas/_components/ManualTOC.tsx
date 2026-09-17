@@ -41,6 +41,22 @@ export default function ManualTOC({ items }: { items: TocItem[] }) {
       >
         ÍNDICE
       </div>
+      {/* Los chips de cada sección no decían para quién eran (audit
+          2026-09-15). Esta es su leyenda, junto al índice. */}
+      <p
+        style={{
+          fontFamily: "var(--k-font-body), Inter",
+          fontSize: 12,
+          lineHeight: 1.5,
+          color: "var(--k-t3)",
+          padding: "0 16px",
+          margin: "0 0 16px",
+        }}
+      >
+        Cada pantalla dice para quién es: <strong>Box personal</strong> si
+        cargas tus propios WODs, <strong>Atleta de box</strong> si tu box usa
+        Kronos, o <strong>Ambos</strong>.
+      </p>
       <ul className="atletas-toc-list">
         {items.map((item) => (
           <li key={item.id}>

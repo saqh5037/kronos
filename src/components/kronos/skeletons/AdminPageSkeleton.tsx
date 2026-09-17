@@ -88,7 +88,7 @@ export default function AdminPageSkeleton({
           {/* Table header */}
           <div
             className="flex items-center gap-3 px-4 py-3 border-b"
-            style={{ borderColor: "var(--line)" }}
+            style={{ borderColor: "var(--k-line)" }}
           >
             {Array.from({ length: 4 }).map((_, i) => (
               <KronosSkeleton
@@ -104,7 +104,7 @@ export default function AdminPageSkeleton({
             <div
               key={i}
               className="flex items-center gap-3 px-4 py-3 border-b last:border-b-0"
-              style={{ borderColor: "var(--line)" }}
+              style={{ borderColor: "var(--k-line)" }}
             >
               <KronosSkeleton
                 variant="circle"

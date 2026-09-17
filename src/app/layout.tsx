@@ -6,13 +6,13 @@ import GlobalEffects from "@/components/GlobalEffects";
 import { KronosToaster } from "@/components/kronos/KronosToaster";
 import { ConfirmProvider } from "@/lib/use-confirm";
 import { MotionProvider } from "@/components/providers/MotionProvider";
-
-// TODO: Fix canvas-confetti webpack bundling issue
-// const AchievementToastHost = dynamic(() =>
-//   import("@/components/atleta/AchievementToast").then(
-//     (m) => m.AchievementToastHost,
-//   ),
-// );
+// P1-6: five call sites fire `fireAchievementToast` (ScoreForm,
+// AthleteScoreForm, QuickWodForm, PhotoWodFlow) and nothing rendered the
+// listener, so every PR and badge unlock dispatched an event into the void.
+// The host is a `"use client"` component with no static `canvas-confetti`
+// import — it reads `window.confetti` and degrades silently when absent — so
+// the old dynamic() wrapper (and the bundling TODO it carried) is not needed.
+import { AchievementToastHost } from "@/components/atleta/AchievementToast";
 
 // V3 "Cuarto Oscuro" canoniza a 2 fonts: Inter (body) + IBM Plex Mono
 // (display + monoespaciado). Playfair/Dancing/JetBrains_Mono fueron eliminados
@@ -83,7 +83,11 @@ export default function RootLayout({
           href="/icons/icon-512.png"
         />
       </head>
-      <body className="font-sans bg-bg text-text antialiased min-h-screen">
+      {/* `bg-bg`/`text-text` were Tailwind aliases onto the globals.css
+          compat block. `text` lost its mapping in the batch-3 sweep, so the
+          document had no declared text colour at all and relied on the
+          `html, body` rule in globals.css. The V3 tokens directly. */}
+      <body className="font-sans bg-[var(--k-bg)] text-[var(--k-t1)] antialiased min-h-screen">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -96,8 +100,7 @@ export default function RootLayout({
             <ConfirmProvider>
               {children}
               <KronosToaster />
-              {/* TODO: Fix canvas-confetti webpack bundling issue */}
-              {/* <AchievementToastHost /> */}
+              <AchievementToastHost />
             </ConfirmProvider>
           </MotionProvider>
         </ThemeProvider>

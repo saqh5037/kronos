@@ -43,10 +43,11 @@ export default function MembershipAssignForm({
   if (!open) {
     return (
       <button
+        type="button"
         onClick={() => setOpen(true)}
-        className="k-btn-grad px-4 py-2 rounded-xl text-sm"
+        className="k-btn-grad rounded-xl px-4 py-2 text-sm"
       >
-        + Asignar membership
+        Asignar membresía
       </button>
     );
   }
@@ -58,14 +59,17 @@ export default function MembershipAssignForm({
       onSubmit={handleSubmit}
       className="k-card p-4 flex flex-col gap-3 w-full max-w-md"
     >
-      <p className="k-eyebrow">Asignar membership</p>
+      <p className="k-eyebrow">Asignar membresía</p>
       <label className="flex flex-col gap-1 text-xs">
         <span style={{ color: "var(--k-t2)" }}>Atleta</span>
         <select
           name="athleteId"
           required
           className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
+          style={{
+            borderColor: "var(--k-line)",
+            background: "var(--k-surface)",
+          }}
         >
           <option value="">— Seleccionar —</option>
           {athletes.map((a) => (
@@ -81,7 +85,10 @@ export default function MembershipAssignForm({
           name="planId"
           required
           className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-          style={{ borderColor: "var(--line)", background: "var(--card)" }}
+          style={{
+            borderColor: "var(--k-line)",
+            background: "var(--k-surface)",
+          }}
         >
           <option value="">— Seleccionar —</option>
           {plans.map((p) => (
@@ -99,7 +106,7 @@ export default function MembershipAssignForm({
           defaultValue={today}
           required
           className="px-3 py-2 rounded-lg text-sm border bg-transparent"
-          style={{ borderColor: "var(--line)" }}
+          style={{ borderColor: "var(--k-line)" }}
         />
       </label>
       <label className="flex items-center gap-2 text-xs">
@@ -115,7 +122,7 @@ export default function MembershipAssignForm({
         <input
           name="pendingPayment"
           type="checkbox"
-          style={{ accentColor: "var(--k-warning)" }}
+          style={{ accentColor: "var(--k-accent)" }}
         />
         <span style={{ color: "var(--k-t2)" }}>
           Crear pendiente de pago (atleta paga por MercadoPago)

@@ -13,14 +13,16 @@ import { CHART_COLORS } from "./tokens";
 export type CapabilityCategory = {
   category: string;
   name: string;
-  score: number;
+  /** `null` when the athlete has no movements in this category — "sin datos". */
+  score: number | null;
   rawValue: number;
   movementCount: number;
 };
 
 type Props = {
   categories: CapabilityCategory[];
-  overallRank: number;
+  /** `null` when the athlete is not in the ranking pool. */
+  overallRank: number | null;
   totalAthletes: number;
   weakestCategory: string | null;
   strongestCategory: string | null;
@@ -35,12 +37,16 @@ export function CapabilityRadar({
   strongestCategory,
   height = 280,
 }: Props) {
-  const data = categories.map((c) => ({
-    name: c.name,
-    score: Math.round(c.score),
-    fullMark: 100,
-    category: c.category,
-  }));
+  // A category with no score is not plotted: recharts would draw it as a 0,
+  // which is the fabricated value the audit flagged ("Cardio 0" / "Core 0").
+  const data = categories
+    .filter((c) => c.score !== null)
+    .map((c) => ({
+      name: c.name,
+      score: Math.round(c.score as number),
+      fullMark: 100,
+      category: c.category,
+    }));
 
   if (data.length === 0) {
     return (
@@ -53,7 +59,7 @@ export function CapabilityRadar({
     );
   }
 
-  const hasRank = overallRank > 0 && totalAthletes > 0;
+  const hasRank = overallRank !== null && overallRank > 0 && totalAthletes > 0;
 
   return (
     <div>
@@ -65,12 +71,12 @@ export function CapabilityRadar({
           <PolarGrid stroke={CHART_COLORS.grid} radialLines={true} />
           <PolarAngleAxis
             dataKey="name"
-            tick={{ fontSize: 10, fill: CHART_COLORS.text2, fontWeight: 600 }}
+            tick={{ fontSize: 11, fill: CHART_COLORS.text2, fontWeight: 600 }}
           />
           <PolarRadiusAxis
             angle={90}
             domain={[0, 100]}
-            tick={{ fontSize: 9, fill: CHART_COLORS.text3 }}
+            tick={{ fontSize: 11, fill: CHART_COLORS.text2 }}
             tickCount={5}
             stroke={CHART_COLORS.grid}
           />
@@ -113,7 +119,7 @@ export function CapabilityRadar({
             </div>
             <div
               className="text-[10px] font-bold tracking-wide"
-              style={{ color: "var(--k-t3)" }}
+              style={{ color: "var(--k-t2)" }}
             >
               MÁS FUERTE
             </div>
@@ -123,13 +129,13 @@ export function CapabilityRadar({
           <div className="text-center">
             <div
               className="font-display text-lg font-bold"
-              style={{ color: "var(--k-warning)" }}
+              style={{ color: "var(--k-accent)", opacity: 0.55 }}
             >
               {weakestCategory}
             </div>
             <div
               className="text-[10px] font-bold tracking-wide"
-              style={{ color: "var(--k-t3)" }}
+              style={{ color: "var(--k-t2)" }}
             >
               A MEJORAR
             </div>
@@ -151,20 +157,25 @@ export function CapabilityRadar({
               className="flex-1 h-2 rounded-full overflow-hidden"
               style={{ background: "var(--track)" }}
             >
-              <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${Math.min(100, Math.max(0, c.score))}%`,
-                  background: "var(--k-accent)",
-                  opacity: c.score >= 70 ? 1 : c.score >= 40 ? 0.7 : 0.4,
-                }}
-              />
+              {c.score !== null && (
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${Math.min(100, Math.max(0, c.score))}%`,
+                    background: "var(--k-accent)",
+                    opacity: c.score >= 70 ? 1 : c.score >= 40 ? 0.7 : 0.4,
+                  }}
+                />
+              )}
             </div>
             <div
-              className="w-8 text-right text-[11px] font-bold font-mono"
-              style={{ color: "var(--text)" }}
+              className="text-right text-[11px] font-bold font-mono"
+              style={{
+                color: c.score === null ? "var(--k-t3)" : "var(--k-t1)",
+                minWidth: c.score === null ? 56 : 32,
+              }}
             >
-              {Math.round(c.score)}
+              {c.score === null ? "sin datos" : Math.round(c.score)}
             </div>
           </div>
         ))}

@@ -81,16 +81,17 @@ test.describe.serial("WOD page — date nav + description", () => {
     await expect(page.getByTestId("wod-nav-prev")).toBeVisible();
   });
 
-  test("description renders with multi-line text when WOD has description", async ({
+  test("the free-text description is a fallback, never a second version of the WOD", async ({
     page,
   }) => {
-    // Seed the WOD with a description for today, then check it renders
-    // If the seed WOD already has a description, this test passes naturally.
-    // We check via DB that there is a WOD with description; if not, we skip gracefully.
-
-    // Resolve "today" exactly like the app does: box-local calendar day,
-    // scoped to the logged-in athlete's tenant (UTC windows pick the wrong
-    // class for evening slots — that was the original bug).
+    // The audit found the description contradicting the structured movement
+    // list ("1 mile run …" against "3200 Run"), so `WodContentSection` now
+    // passes the free text ONLY when there are no movements. This spec used to
+    // assert the description always rendered, which is the defect, not the fix.
+    //
+    // Resolve "today" exactly like the app does: box-local calendar day, scoped
+    // to the logged-in athlete's tenant (UTC windows pick the wrong class for
+    // evening slots — that was the original bug).
     const athleteUser = await db().user.findUnique({
       where: { email: "atleta@iron-hands.demo" },
       select: { tenantId: true, box: { select: { timezone: true } } },
@@ -111,7 +112,7 @@ test.describe.serial("WOD page — date nav + description", () => {
         wod: { description: { not: null } },
       },
       orderBy: { startsAt: "asc" },
-      include: { wod: true },
+      include: { wod: { include: { movements: true } } },
     });
 
     if (!klass?.wod?.description) {
@@ -123,14 +124,19 @@ test.describe.serial("WOD page — date nav + description", () => {
     await page.goto("/atleta/wod");
     await page.getByTestId("wod-day-nav").waitFor({ timeout: 15_000 });
 
-    // Description block should be visible
-    // The description is a <p> with whitespace-pre-line inside the WOD card
-    const desc = klass.wod.description;
-    const firstLine = desc.split("\n")[0].trim();
-    if (firstLine) {
-      await expect(
-        page.locator("p").filter({ hasText: firstLine }),
-      ).toBeVisible();
+    const description = page.getByTestId("wod-description");
+
+    if (klass.wod.movements.length > 0) {
+      // Structured list wins: the free text must NOT also be on screen.
+      await expect(page.locator('[data-tour="wod.movements"]')).toBeVisible();
+      await expect(description).toHaveCount(0);
+    } else {
+      // No movements: the free text is the only description of the workout.
+      await expect(description).toBeVisible();
+      const firstLine = klass.wod.description.split("\n")[0].trim();
+      if (firstLine) {
+        await expect(description).toContainText(firstLine);
+      }
     }
   });
 });

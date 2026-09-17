@@ -4,6 +4,29 @@ import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { m } from "framer-motion";
+import {
+  Activity,
+  CalendarDays,
+  Dumbbell,
+  Home,
+  Star,
+  User,
+  type LucideIcon,
+} from "lucide-react";
+
+/**
+ * P2 — every tab drew its own inline `<svg>` path. The bottom nav is the one
+ * surface an athlete sees on every screen, so five hand-rolled glyphs were five
+ * chances to drift from the icon system (CLAUDE.md house rule 1: lucide-react).
+ *
+ * The swap is deliberately like-for-like: same 22 px box, same 1.8 / 2.4 stroke
+ * pair, same meaning per tab (house → Home, calendar → CalendarDays, star →
+ * Star, pulse line → Activity, barbell → Dumbbell, bust → User), so the visual
+ * weight at 360 px is unchanged.
+ */
+const ICON_SIZE = 22;
+const STROKE_IDLE = 1.8;
+const STROKE_ACTIVE = 2.4;
 
 type Tab = {
   href: string;
@@ -12,121 +35,21 @@ type Tab = {
   hideForPersonal?: boolean;
   /** Oculto siempre del bottom nav (la ruta sigue accesible por URL). */
   hideAlways?: boolean;
-  icon: (active: boolean) => React.ReactNode;
+  Icon: LucideIcon;
 };
 
 const allTabs: Tab[] = [
-  {
-    href: "/atleta",
-    label: "Inicio",
-    icon: (active: boolean) => (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={active ? 2.4 : 1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H10v7H4a1 1 0 0 1-1-1z" />
-      </svg>
-    ),
-  },
+  { href: "/atleta", label: "Inicio", Icon: Home },
   {
     href: "/atleta/reservar",
     label: "Reservar",
     hideForPersonal: true,
-    icon: (active: boolean) => (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={active ? 2.4 : 1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="3" y="5" width="18" height="16" rx="2" />
-        <path d="M3 10h18M8 3v4M16 3v4" />
-      </svg>
-    ),
+    Icon: CalendarDays,
   },
-  {
-    href: "/atleta/skills",
-    label: "Skills",
-    icon: (active: boolean) => (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={active ? 2.4 : 1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M12 2l3 6 6 1-4 5 1 6-6-3-6 3 1-6-4-5 6-1z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/atleta/salud",
-    label: "Salud",
-    icon: (active: boolean) => (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={active ? 2.4 : 1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 12h4l2-6 4 12 2-6h6" />
-      </svg>
-    ),
-  },
-  {
-    href: "/atleta/wod",
-    label: "WOD",
-    icon: (active: boolean) => (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={active ? 2.4 : 1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12" />
-      </svg>
-    ),
-  },
-  {
-    href: "/atleta/perfil",
-    label: "Yo",
-    icon: (active: boolean) => (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={active ? 2.4 : 1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21c1-4.5 4.5-7 8-7s7 2.5 8 7" />
-      </svg>
-    ),
-  },
+  { href: "/atleta/skills", label: "Skills", Icon: Star },
+  { href: "/atleta/salud", label: "Salud", Icon: Activity },
+  { href: "/atleta/wod", label: "WOD", Icon: Dumbbell },
+  { href: "/atleta/perfil", label: "Yo", Icon: User },
 ];
 
 type TabBarProps = {
@@ -151,10 +74,16 @@ export default function TabBar({ mode = "box", yoBadge = false }: TabBarProps) {
     <div
       className="fixed bottom-0 left-0 right-0 z-40"
       style={{
-        background: "rgba(8,8,10,0.92)",
+        /**
+         * Opaque, not translucent. At 8 % transparency an accent-filled card
+         * scrolling underneath tinted the bar green and dragged the `--k-t3`
+         * labels from 4.91:1 to 4.26:1 — axe caught it on /atleta/wod and
+         * /atleta/reservar. A nav bar's contrast cannot depend on what happens
+         * to be behind it, so the backdrop blur goes with it (a blur behind an
+         * opaque layer only costs a compositing pass).
+         */
+        background: "var(--k-bg)",
         borderTop: "1px solid var(--k-line)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
         height: 84,
         paddingBottom: 24,
         paddingTop: 12,
@@ -182,7 +111,11 @@ export default function TabBar({ mode = "box", yoBadge = false }: TabBarProps) {
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 className="relative"
               >
-                {tab.icon(isActive)}
+                <tab.Icon
+                  size={ICON_SIZE}
+                  strokeWidth={isActive ? STROKE_ACTIVE : STROKE_IDLE}
+                  aria-hidden
+                />
                 {showBadge && (
                   <span
                     style={{

@@ -1,5 +1,20 @@
 "use client";
 
+/**
+ * LeaderboardView — box rankings for the athlete.
+ *
+ * Audit 2026-09-15 (P1/P2, /atleta/leaderboard):
+ *  - "six strangers, no me": there was no pinned "Tu posición" row. Every board
+ *    now renders the athlete's own row, highlighted when it is inside the top
+ *    and pinned underneath when it is not.
+ *  - "three names for one thing (title 'Tabla de rankings', eyebrow
+ *    'LEADERBOARDS', profile tile 'Ranking')" → one name: Ranking.
+ *  - The 1RM board that topped at 111 kg while the athlete's profile said
+ *    "#1 de 36" now reads the union of scores and the PR ledger; a row sourced
+ *    from the PR ledger is labelled "PR" so the number is traceable.
+ *  - Scaling chips printed the raw enum → `scalingLabel`.
+ */
+
 import { useState, useTransition } from "react";
 import {
   getWODLeaderboard,
@@ -13,6 +28,9 @@ import {
   AnimatedItem,
 } from "@/components/kronos/AnimatedSection";
 import { formatScore } from "@/lib/scores";
+import { rankLabel } from "@/lib/scores/copy";
+import { scalingLabel } from "@/lib/labels";
+import type { Scaling } from "@prisma/client";
 import type { ScoreType } from "@/lib/validations/wod";
 import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
 import { leaderboardTour } from "@/components/tour/tours/leaderboard";
@@ -21,6 +39,13 @@ type Tab = "wod" | "movement" | "attendance";
 
 type WODOption = { id: string; name: string; scoreType: ScoreType };
 type MovementOption = { id: string; name: string };
+
+type AttendanceBoard = {
+  entries: AttendanceLeader[];
+  myEntry: AttendanceLeader | null;
+  myRank: number | null;
+  totalAthletes: number;
+};
 
 const v3SelectStyle: React.CSSProperties = {
   width: "100%",
@@ -39,7 +64,47 @@ const v3SelectStyle: React.CSSProperties = {
   backgroundRepeat: "no-repeat",
   backgroundPosition: "right 12px center",
   cursor: "pointer",
+  minHeight: 44,
 };
+
+function EmptyBoard({ message }: { message: string }) {
+  return (
+    <div className="p-6 text-center text-sm" style={{ color: "var(--k-t3)" }}>
+      {message}
+    </div>
+  );
+}
+
+/**
+ * P2: the "no cohort" rule was reimplemented inline here and in
+ * `LeaderboardSection`, so a third surface could invent a fourth answer.
+ * `rankLabel` in `src/lib/scores/copy.ts` owns it (and has the tests).
+ */
+function MyPositionNote({
+  myRank,
+  total,
+}: {
+  myRank: number | null;
+  total: number;
+}) {
+  const label = rankLabel(myRank, total);
+  if (label === "sin datos") return null;
+  return (
+    <p
+      className="px-1 mt-2"
+      style={{
+        fontFamily: "var(--k-font-display)",
+        fontSize: 10,
+        fontWeight: 600,
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color: "var(--k-t3)",
+      }}
+    >
+      Tu posición: {label}
+    </p>
+  );
+}
 
 export default function LeaderboardPage({
   wodOptions,
@@ -58,14 +123,14 @@ export default function LeaderboardPage({
   initialMovementData: Awaited<
     ReturnType<typeof getMovementLeaderboard>
   > | null;
-  initialAttendanceData: AttendanceLeader[];
+  initialAttendanceData: AttendanceBoard;
 }) {
   const [tab, setTab] = useState<Tab>("wod");
   const [wodId, setWodId] = useState(initialWODId);
   const [movementId, setMovementId] = useState(initialMovementId);
   const [wodData, setWodData] = useState(initialWODData);
   const [movementData, setMovementData] = useState(initialMovementData);
-  const [attendanceData] = useState(initialAttendanceData);
+  const [attendance] = useState(initialAttendanceData);
   const [isPending, startTransition] = useTransition();
 
   async function loadWOD(id: string) {
@@ -102,14 +167,14 @@ export default function LeaderboardPage({
       <header
         data-tour="leaderboard.header"
         style={{
-          padding: "56px 20px 20px",
+          padding: "20px 20px 20px",
           display: "flex",
           flexDirection: "column",
           gap: 8,
           position: "relative",
         }}
       >
-        <div style={{ position: "absolute", top: 56, right: 20 }}>
+        <div style={{ position: "absolute", top: 20, right: 20 }}>
           <TourTriggerButton tourId={leaderboardTour.id} />
         </div>
         <span
@@ -122,7 +187,7 @@ export default function LeaderboardPage({
             textTransform: "uppercase",
           }}
         >
-          LEADERBOARDS · ATLETA
+          RANKING · TU BOX
         </span>
         <h1
           style={{
@@ -135,7 +200,7 @@ export default function LeaderboardPage({
             lineHeight: 1.05,
           }}
         >
-          Tabla de rankings
+          Ranking
         </h1>
       </header>
 
@@ -158,6 +223,7 @@ export default function LeaderboardPage({
                 onClick={() => setTab(t.key)}
                 style={{
                   flex: 1,
+                  minHeight: 40,
                   padding: "8px 12px",
                   borderRadius: 8,
                   fontFamily: "var(--k-font-display)",
@@ -165,13 +231,10 @@ export default function LeaderboardPage({
                   fontWeight: 700,
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
-                  transition: "all 150ms ease",
                   background: tab === t.key ? "var(--k-t1)" : "transparent",
                   color: tab === t.key ? "var(--k-bg)" : "var(--k-t2)",
                   border: "none",
                   cursor: "pointer",
-                  boxShadow:
-                    tab === t.key ? "0 0 8px rgba(255,255,255,0.06)" : "none",
                 }}
               >
                 {t.label}
@@ -192,6 +255,7 @@ export default function LeaderboardPage({
                 loadWOD(e.target.value);
               }}
               style={v3SelectStyle}
+              aria-label="Elegir WOD"
             >
               {wodOptions.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -208,6 +272,7 @@ export default function LeaderboardPage({
                 loadMovement(e.target.value);
               }}
               style={v3SelectStyle}
+              aria-label="Elegir movimiento"
             >
               {movementOptions.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -224,7 +289,7 @@ export default function LeaderboardPage({
         <div className="px-3.5 mt-4">
           <KCard variant="ghost" className="p-6 text-center">
             <div className="text-sm" style={{ color: "var(--k-t3)" }}>
-              Cargando...
+              Cargando…
             </div>
           </KCard>
         </div>
@@ -236,25 +301,31 @@ export default function LeaderboardPage({
           <KCard className="overflow-hidden">
             <AnimatedSection key={`wod-${wodId}`}>
               {wodData.entries.map((e, i, arr) => (
-                <AnimatedItem key={e.athleteId}>
+                <AnimatedItem key={`${e.athleteId}-${e.source}`}>
                   <LeaderboardRow
-                    rank={i + 1}
                     entry={e}
                     scoreType={wodData.scoreType}
-                    isLast={i === arr.length - 1}
+                    isLast={i === arr.length - 1 && !wodData.myEntry}
                   />
                 </AnimatedItem>
               ))}
             </AnimatedSection>
+            {wodData.myEntry && (
+              <LeaderboardRow
+                entry={wodData.myEntry}
+                scoreType={wodData.scoreType}
+                isLast
+                pinned
+              />
+            )}
             {wodData.entries.length === 0 && (
-              <div
-                className="p-6 text-center text-sm"
-                style={{ color: "var(--k-t3)" }}
-              >
-                Sin scores registrados para este WOD.
-              </div>
+              <EmptyBoard message="Sin resultados registrados para este WOD." />
             )}
           </KCard>
+          <MyPositionNote
+            myRank={wodData.myRank}
+            total={wodData.totalAthletes}
+          />
         </div>
       )}
 
@@ -266,23 +337,29 @@ export default function LeaderboardPage({
               {movementData.entries.map((e, i, arr) => (
                 <AnimatedItem key={e.athleteId}>
                   <LeaderboardRow
-                    rank={i + 1}
                     entry={e}
                     scoreType="WEIGHT"
-                    isLast={i === arr.length - 1}
+                    isLast={i === arr.length - 1 && !movementData.myEntry}
                   />
                 </AnimatedItem>
               ))}
             </AnimatedSection>
+            {movementData.myEntry && (
+              <LeaderboardRow
+                entry={movementData.myEntry}
+                scoreType="WEIGHT"
+                isLast
+                pinned
+              />
+            )}
             {movementData.entries.length === 0 && (
-              <div
-                className="p-6 text-center text-sm"
-                style={{ color: "var(--k-t3)" }}
-              >
-                Sin PRs registrados para este movimiento.
-              </div>
+              <EmptyBoard message="Sin PRs registrados para este movimiento." />
             )}
           </KCard>
+          <MyPositionNote
+            myRank={movementData.myRank}
+            total={movementData.totalAthletes}
+          />
         </div>
       )}
 
@@ -291,111 +368,137 @@ export default function LeaderboardPage({
         <div data-tour="leaderboard.ranking" className="px-3.5 mt-3">
           <KCard className="overflow-hidden">
             <AnimatedSection>
-              {attendanceData.map((e, i, arr) => (
+              {attendance.entries.map((e, i, arr) => (
                 <AnimatedItem key={e.athleteId}>
                   <AttendanceRow
-                    rank={i + 1}
                     entry={e}
-                    isLast={i === arr.length - 1}
+                    isLast={i === arr.length - 1 && !attendance.myEntry}
                   />
                 </AnimatedItem>
               ))}
             </AnimatedSection>
-            {attendanceData.length === 0 && (
-              <div
-                className="p-6 text-center text-sm"
-                style={{ color: "var(--k-t3)" }}
-              >
-                Sin datos de asistencia esta semana.
-              </div>
+            {attendance.myEntry && (
+              <AttendanceRow entry={attendance.myEntry} isLast pinned />
+            )}
+            {attendance.entries.length === 0 && (
+              <EmptyBoard message="Sin datos de asistencia esta semana." />
             )}
           </KCard>
+          <MyPositionNote
+            myRank={attendance.myRank}
+            total={attendance.totalAthletes}
+          />
         </div>
       )}
     </div>
   );
 }
 
-function LeaderboardRow({
-  rank,
-  entry,
-  scoreType,
-  isLast,
-}: {
-  rank: number;
-  entry: LeaderboardEntry;
-  scoreType: ScoreType;
-  isLast: boolean;
-}) {
-  const isTop3 = rank <= 3;
-  const isFirst = rank === 1;
-  const rankColor = isTop3 ? "var(--k-t2)" : "var(--k-t3)";
+const rowStyle = (
+  isLast: boolean,
+  pinned: boolean,
+  isMe: boolean,
+): React.CSSProperties => ({
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  padding: "12px",
+  minHeight: 52,
+  borderBottom: isLast ? "none" : "1px solid var(--k-line)",
+  borderTop: pinned ? "1px solid var(--k-accent-line)" : undefined,
+  background: isMe ? "var(--k-accent-soft)" : undefined,
+  minWidth: 0,
+  overflow: "hidden",
+});
 
+function RankCell({ rank, isMe }: { rank: number; isMe: boolean }) {
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        padding: "10px 12px",
-        borderBottom: isLast ? "none" : "1px solid var(--k-line)",
-        minWidth: 0,
-        overflow: "hidden",
+        fontFamily: "var(--k-font-display)",
+        fontSize: 16,
+        fontWeight: 700,
+        width: 22,
+        flexShrink: 0,
+        textAlign: "center",
+        color: isMe
+          ? "var(--k-accent)"
+          : rank <= 3
+            ? "var(--k-t2)"
+            : "var(--k-t3)",
       }}
     >
-      {/* Rank number — fixed width */}
-      <div
-        style={{
-          fontFamily: "var(--k-font-display)",
-          fontSize: 16,
-          fontWeight: 700,
-          width: 18,
-          flexShrink: 0,
-          textAlign: "center",
-          color: rankColor,
-          textShadow: isFirst ? "0 0 8px rgba(255,255,255,0.06)" : "none",
-        }}
-      >
-        {rank}
-      </div>
-      {/* Avatar initial — fixed */}
-      <div
-        style={{
-          width: 28,
-          height: 28,
-          flexShrink: 0,
-          borderRadius: 999,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "var(--k-font-display)",
-          fontSize: 10,
-          fontWeight: 700,
-          background: "var(--k-elevated)",
-          border: "1px solid var(--k-line)",
-          color: isTop3 ? "var(--k-t2)" : "var(--k-t3)",
-        }}
-      >
-        {entry.athleteName[0]}
-      </div>
-      {/* Name — truncates, takes remaining space */}
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          fontSize: 13,
-          fontFamily: "var(--k-font-body)",
-          fontWeight: 500,
-          color: "var(--k-t1)",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {entry.athleteName}
-      </div>
-      {/* Scaling chip — fixed, hidden on very narrow screens via maxWidth trick */}
+      {rank}
+    </div>
+  );
+}
+
+function AvatarCell({ name, isMe }: { name: string; isMe: boolean }) {
+  return (
+    <div
+      style={{
+        width: 28,
+        height: 28,
+        flexShrink: 0,
+        borderRadius: 999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "var(--k-font-display)",
+        fontSize: 10,
+        fontWeight: 700,
+        background: "var(--k-elevated)",
+        border: `1px solid ${isMe ? "var(--k-accent-line)" : "var(--k-line)"}`,
+        color: isMe ? "var(--k-accent)" : "var(--k-t2)",
+      }}
+    >
+      {name.charAt(0)}
+    </div>
+  );
+}
+
+function NameCell({ name, isMe }: { name: string; isMe: boolean }) {
+  return (
+    <div
+      style={{
+        flex: 1,
+        minWidth: 0,
+        fontSize: 13,
+        fontFamily: "var(--k-font-body)",
+        fontWeight: isMe ? 600 : 500,
+        color: "var(--k-t1)",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {isMe ? "Tu posición" : name}
+    </div>
+  );
+}
+
+function LeaderboardRow({
+  entry,
+  scoreType,
+  isLast,
+  pinned = false,
+}: {
+  entry: LeaderboardEntry;
+  scoreType: ScoreType;
+  isLast: boolean;
+  pinned?: boolean;
+}) {
+  return (
+    <div style={rowStyle(isLast, pinned, entry.isMe)}>
+      <RankCell rank={entry.rank} isMe={entry.isMe} />
+      <AvatarCell name={entry.athleteName} isMe={entry.isMe} />
+      <NameCell name={entry.athleteName} isMe={entry.isMe} />
       <span
+        title={
+          entry.source === "pr"
+            ? "Marca del registro de PRs, no de un score de este WOD"
+            : undefined
+        }
         style={{
           flexShrink: 0,
           padding: "3px 6px",
@@ -405,17 +508,15 @@ function LeaderboardRow({
           fontWeight: 700,
           letterSpacing: "0.1em",
           background: "var(--k-elevated)",
-          color: entry.scaling === "RX" ? "var(--k-t2)" : "var(--k-t3)",
+          color: "var(--k-t2)",
           border: "1px solid var(--k-line)",
-          maxWidth: 40,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
           whiteSpace: "nowrap",
         }}
       >
-        {entry.scaling}
+        {entry.source === "pr"
+          ? "PR"
+          : (scalingLabel[entry.scaling as Scaling] ?? entry.scaling)}
       </span>
-      {/* Score — fixed, right-aligned */}
       <div
         style={{
           fontFamily: "var(--k-font-display)",
@@ -433,74 +534,19 @@ function LeaderboardRow({
 }
 
 function AttendanceRow({
-  rank,
   entry,
   isLast,
+  pinned = false,
 }: {
-  rank: number;
   entry: AttendanceLeader;
   isLast: boolean;
+  pinned?: boolean;
 }) {
-  const isTop3 = rank <= 3;
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        padding: "10px 12px",
-        borderBottom: isLast ? "none" : "1px solid var(--k-line)",
-        minWidth: 0,
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "var(--k-font-display)",
-          fontSize: 16,
-          fontWeight: 700,
-          width: 18,
-          flexShrink: 0,
-          textAlign: "center",
-          color: isTop3 ? "var(--k-t2)" : "var(--k-t3)",
-        }}
-      >
-        {rank}
-      </div>
-      <div
-        style={{
-          width: 28,
-          height: 28,
-          flexShrink: 0,
-          borderRadius: 999,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "var(--k-font-display)",
-          fontSize: 10,
-          fontWeight: 700,
-          background: "var(--k-elevated)",
-          border: "1px solid var(--k-line)",
-          color: isTop3 ? "var(--k-t2)" : "var(--k-t3)",
-        }}
-      >
-        {entry.athleteName[0]}
-      </div>
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          fontSize: 13,
-          fontFamily: "var(--k-font-body)",
-          fontWeight: 500,
-          color: "var(--k-t1)",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {entry.athleteName}
-      </div>
+    <div style={rowStyle(isLast, pinned, entry.isMe)}>
+      <RankCell rank={entry.rank} isMe={entry.isMe} />
+      <AvatarCell name={entry.athleteName} isMe={entry.isMe} />
+      <NameCell name={entry.athleteName} isMe={entry.isMe} />
       <div
         style={{
           fontFamily: "var(--k-font-display)",
@@ -524,7 +570,7 @@ function AttendanceRow({
           textTransform: "uppercase",
         }}
       >
-        cls
+        {entry.attendedCount === 1 ? "clase" : "clases"}
       </div>
     </div>
   );

@@ -6,6 +6,10 @@
  * run in parallel where possible. The two conditional fetches (WOD + movement
  * initial data) keep their original try/catch resilience.
  *
+ * Attendance uses `getWeeklyAttendanceBoard` (not the flat admin list) so the
+ * athlete's own row is pinned when it falls outside the visible ten — audit
+ * 2026-09-15, "six strangers, no me".
+ *
  * No request-cache needed: these fetches are consumed only here.
  */
 
@@ -13,17 +17,17 @@ import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 import {
   getWODLeaderboard,
   getMovementLeaderboard,
-  getWeeklyAttendanceLeaderboard,
+  getWeeklyAttendanceBoard,
   listWODOptions,
   listMovementOptions,
 } from "@/server/actions/leaderboards";
 import LeaderboardView from "../../LeaderboardView";
 
 export async function LeaderboardContentSection() {
-  const [wodOptions, movementOptions, attendanceData] = await Promise.all([
+  const [wodOptions, movementOptions, attendanceBoard] = await Promise.all([
     listWODOptions(),
     listMovementOptions(),
-    getWeeklyAttendanceLeaderboard(0),
+    getWeeklyAttendanceBoard(0),
   ]);
 
   const initialWODId = wodOptions[0]?.id ?? "";
@@ -50,7 +54,8 @@ export async function LeaderboardContentSection() {
 
   return (
     <>
-      <div style={{ padding: "48px 16px 0" }}>
+      {/* 56px clears the 40px hamburger pinned at top:12 (see atleta/layout). */}
+      <div style={{ padding: "56px 16px 0" }}>
         <AthleteBackLink href="/atleta" label="Inicio" />
       </div>
       <LeaderboardView
@@ -60,7 +65,7 @@ export async function LeaderboardContentSection() {
         initialMovementId={initialMovementId}
         initialWODData={initialWODData}
         initialMovementData={initialMovementData}
-        initialAttendanceData={attendanceData}
+        initialAttendanceData={attendanceBoard}
       />
     </>
   );

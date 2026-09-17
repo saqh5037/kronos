@@ -80,10 +80,10 @@ test.describe.serial("Coach dashboard role-aware", () => {
     // loginAs ya aterriza en /admin — no navegar de nuevo para evitar ERR_ABORTED
     await loginAs(page, "owner");
 
-    // AdminDashboardV3 muestra "Revenue diario" en el MiniChart del owner.
-    // "Ingresos rango" solo existe en /admin/pagos (no en el dashboard principal).
-    // TEST-BUG original: esperaba "Ingresos rango" aquí — corregido a "Revenue diario".
-    await expect(page.getByText(/Revenue diario/i).first()).toBeVisible({
+    // The owner dashboard's revenue chart. It was asserted by its Spanish title
+    // ("Revenue diario", then "Ingresos diarios"), which broke on every copy
+    // pass; `data-testid` pins the card itself.
+    await expect(page.getByTestId("dashboard-revenue-chart")).toBeVisible({
       timeout: 10_000,
     });
 

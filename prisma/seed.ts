@@ -9,6 +9,7 @@ import {
   type AuditAction,
 } from "@prisma/client";
 import { seedStandardMovements, STANDARD_MOVEMENTS } from "./seed-movements";
+import { badgeXPLedgerRows, SEEDED_ACHIEVEMENTS } from "./data/achievements";
 import {
   WOD_LIBRARY as CANONICAL_WOD_LIBRARY,
   type WodRecipe as CanonicalWodRecipe,
@@ -426,6 +427,8 @@ async function main() {
   });
   await prisma.wOD.deleteMany({ where: { tenantId: box1.id } });
   await prisma.movement.deleteMany({ where: { tenantId: box1.id } });
+  await prisma.xPLedger.deleteMany({ where: { tenantId: box1.id } });
+  await prisma.achievement.deleteMany({ where: { tenantId: box1.id } });
   await prisma.streak.deleteMany({ where: { tenantId: box1.id } });
   await prisma.athlete.deleteMany({
     where: { tenantId: box1.id, id: { startsWith: "seed-" } },
@@ -954,43 +957,50 @@ async function main() {
   const badgesData = [
     {
       code: "first-class",
+      xpReward: 10,
       name: "Primera clase",
       description: "Completaste tu primera clase",
       criteria: { type: "attendance", count: 1 },
     },
     {
       code: "streak-7",
+      xpReward: 25,
       name: "7 días seguidos",
       description: "7 días de asistencia consecutivos",
       criteria: { type: "attendance_streak", count: 7 },
     },
     {
       code: "streak-30",
+      xpReward: 75,
       name: "30 días seguidos",
       description: "30 días de asistencia consecutivos",
       criteria: { type: "attendance_streak", count: 30 },
     },
     {
       code: "first-pr",
+      xpReward: 50,
       name: "PR desbloqueado",
       description: "Registraste tu primera marca personal",
       criteria: { type: "pr", count: 1 },
     },
     {
       code: "rx-warrior",
+      xpReward: 50,
       name: "Guerrero RX",
       description: "5 WODs completados en RX",
       criteria: { type: "rx_count", count: 5 },
     },
     {
       code: "double-bw-deadlift",
-      name: "Double bodyweight DL",
+      xpReward: 100,
+      name: "Peso muerto al doble de tu peso",
       description: "Deadlift de 2x tu peso corporal",
       criteria: { type: "ratio_pr", movement: "Deadlift", ratio: 2 },
     },
     // Skill unlocks — disparados al marcar una progression como ACHIEVED
     {
       code: "first-strict-pull-up",
+      xpReward: 25,
       name: "Primer Pull-up estricto",
       description: "Dominaste tu primer strict pull-up sin asistencia",
       criteria: {
@@ -1001,6 +1011,7 @@ async function main() {
     },
     {
       code: "first-muscle-up-bar",
+      xpReward: 25,
       name: "Primer Muscle-up en barra",
       description: "Subiste por encima de la barra en un solo movimiento",
       criteria: {
@@ -1011,6 +1022,7 @@ async function main() {
     },
     {
       code: "first-strict-hspu",
+      xpReward: 25,
       name: "Primer HSPU estricto",
       description: "Handstand push-up estricto contra la pared",
       criteria: {
@@ -1021,6 +1033,7 @@ async function main() {
     },
     {
       code: "first-pistol",
+      xpReward: 25,
       name: "Primer Pistol Squat",
       description: "Pistol squat completo en cada pierna",
       criteria: {
@@ -1031,6 +1044,7 @@ async function main() {
     },
     {
       code: "first-double-under",
+      xpReward: 25,
       name: "Primer Double Under",
       description: "Doble salto sin tropezar la cuerda",
       criteria: {
@@ -1041,11 +1055,51 @@ async function main() {
     },
   ];
 
+  const badgeByCode = new Map<string, { id: string; xpReward: number }>();
   for (const b of badgesData) {
-    await prisma.badge.upsert({
+    const row = await prisma.badge.upsert({
       where: { tenantId_code: { tenantId: box1.id, code: b.code } },
-      update: {},
+      update: { xpReward: b.xpReward },
       create: { tenantId: box1.id, ...b },
+      select: { id: true, xpReward: true },
+    });
+    badgeByCode.set(b.code, row);
+  }
+
+  // ─── Achievements + their XP ────────────────────────────────────────────────
+  // Unlocked badges and the XPLedger rows that pay for them are created
+  // together, because XP in this product is the ledger sum and nothing else.
+  // A seed that granted badges without ledger rows is exactly what printed
+  // "LOGROS · 0 XP" above four unlocked badges (audit 2026-09-15, S10).
+  // `prisma/data/achievements.ts` owns the pairing; see its header for why each
+  // badge goes to a single athlete.
+  const achievementRows = SEEDED_ACHIEVEMENTS.flatMap((granted) => {
+    const badge = badgeByCode.get(granted.badgeCode);
+    const athleteId = athleteIds[granted.athleteIndex];
+    if (!badge || !athleteId) return [];
+    const earnedAt = new Date();
+    earnedAt.setDate(earnedAt.getDate() - granted.daysAgo);
+    earnedAt.setHours(19, 30, 0, 0);
+    return [{ tenantId: box1.id, athleteId, badgeId: badge.id, earnedAt }];
+  });
+
+  if (achievementRows.length > 0) {
+    await prisma.achievement.createMany({
+      data: achievementRows,
+      skipDuplicates: true,
+    });
+  }
+
+  const xpRows = badgeXPLedgerRows(
+    SEEDED_ACHIEVEMENTS,
+    badgeByCode,
+    (index) => athleteIds[index],
+  );
+
+  if (xpRows.length > 0) {
+    await prisma.xPLedger.createMany({
+      data: xpRows.map((row) => ({ tenantId: box1.id, ...row })),
+      skipDuplicates: true,
     });
   }
 
@@ -1239,12 +1293,12 @@ async function main() {
       name: "Dominus Murph 2026",
       partnerName: "Dominus",
       description:
-        "Hero WOD anual: 1 milla de carrera + 100 pull-ups + 200 push-ups + 300 air squats + 1 milla de carrera. Para tiempo. RX: con chaleco 20lb/14lb. Scaled: sin chaleco o con menos peso. Partitioned: dividir reps libremente.",
+        "Hero WOD anual: 1 milla de carrera + 100 pull-ups + 200 push-ups + 300 air squats + 1 milla de carrera. Para tiempo. RX: con chaleco 20lb/14lb. Scaled: sin chaleco o con menos peso. Por partes: divide las reps libremente.",
       startDate: new Date("2026-05-23T13:00:00.000Z"),
       endDate: new Date("2026-05-24T05:00:00.000Z"),
       scoreType: "TIME",
       scoreUnit: "tiempo total",
-      divisions: ["RX", "Scaled", "Partitioned"],
+      divisions: ["RX", "Scaled", "Por partes"],
       status: "OPEN",
     },
     create: {
@@ -1252,12 +1306,12 @@ async function main() {
       name: "Dominus Murph 2026",
       partnerName: "Dominus",
       description:
-        "Hero WOD anual: 1 milla de carrera + 100 pull-ups + 200 push-ups + 300 air squats + 1 milla de carrera. Para tiempo. RX: con chaleco 20lb/14lb. Scaled: sin chaleco o con menos peso. Partitioned: dividir reps libremente.",
+        "Hero WOD anual: 1 milla de carrera + 100 pull-ups + 200 push-ups + 300 air squats + 1 milla de carrera. Para tiempo. RX: con chaleco 20lb/14lb. Scaled: sin chaleco o con menos peso. Por partes: divide las reps libremente.",
       startDate: new Date("2026-05-23T13:00:00.000Z"),
       endDate: new Date("2026-05-24T05:00:00.000Z"),
       scoreType: "TIME",
       scoreUnit: "tiempo total",
-      divisions: ["RX", "Scaled", "Partitioned"],
+      divisions: ["RX", "Scaled", "Por partes"],
       accessToken: `evt_${randomBytes(16).toString("hex")}`,
       status: "OPEN",
     },
@@ -1277,6 +1331,7 @@ async function main() {
   Goals: ${goalRows.length} (mix ACTIVE + ACHIEVED, PR + ATTENDANCE)
   BodyMetrics: ${bodyMetricRows.length} (~13 weights + 3 body-fat por atleta tracked)
   Badges: ${badgesData.length}
+  Achievements: ${achievementRows.length} (con ${xpRows.length} filas de XPLedger)
   Surveys: READINESS + RPE por box
   Sport events: 1 (${murph.name}) — accessToken${existingMurph ? " preservado" : ` nuevo: ${murph.accessToken}`}
   QR URL: http://localhost:3000/eventos/${murph.accessToken}`);

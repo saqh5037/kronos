@@ -4,7 +4,9 @@ import { useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { reserveFoundingPlan } from "@/server/actions/founding-dominus";
 import { slugify } from "@/lib/slug";
+import { Check } from "lucide-react";
 import { kToast } from "@/lib/toast";
+import { formatDateFull } from "@/lib/format";
 import type {
   BillingCycle,
   FoundingDisciplineSlugType,
@@ -96,12 +98,12 @@ export default function FoundingForm({
           className="inline-flex items-center justify-center w-12 h-12 rounded-full"
           style={{ background: "var(--k-accent-soft)" }}
         >
-          <span
-            className="font-display font-bold text-xl"
+          <Check
+            size={22}
+            strokeWidth={3}
             style={{ color: "var(--k-accent)" }}
-          >
-            ✓
-          </span>
+            aria-hidden
+          />
         </div>
         <h2 className="font-display font-bold text-xl">Reserva confirmada</h2>
         <p className="text-sm" style={{ color: "var(--k-t2)" }}>
@@ -113,13 +115,8 @@ export default function FoundingForm({
           className="text-xs px-3 py-2 rounded-lg"
           style={{ background: "var(--k-elevated)", color: "var(--k-t3)" }}
         >
-          Box: <strong>{success.slug}</strong> · Trial hasta{" "}
-          {success.trialEndsAt.toLocaleDateString("es-MX", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}{" "}
-          ·{" "}
+          Tu box: <strong>{success.slug}</strong> · Prueba gratis hasta{" "}
+          {formatDateFull(success.trialEndsAt)} ·{" "}
           <strong>
             {success.billingCycle === "annual"
               ? "Anual (15 meses)"
@@ -129,11 +126,11 @@ export default function FoundingForm({
         <p className="text-xs" style={{ color: "var(--k-t3)" }}>
           ¿No te llegaron los correos en 5 min? Revisa spam o escríbenos a{" "}
           <a
-            href="mailto:contacto@kronos-fit.com"
+            href="mailto:hola@kronos-fit.com"
             className="underline"
             style={{ color: "var(--k-accent)" }}
           >
-            contacto@kronos-fit.com
+            hola@kronos-fit.com
           </a>
         </p>
       </div>
@@ -227,7 +224,7 @@ export default function FoundingForm({
       </div>
 
       <Field
-        label="Email del owner"
+        label="Correo del dueño"
         name="email"
         type="email"
         value={email}
@@ -263,7 +260,7 @@ export default function FoundingForm({
           className="text-xs font-mono uppercase tracking-wider"
           style={{ color: "var(--k-t3)" }}
         >
-          Slug (URL única)
+          Identificador de tu box
         </label>
         <input
           type="text"
@@ -287,8 +284,9 @@ export default function FoundingForm({
             color: errors.slug ? "var(--k-danger)" : "var(--k-t3)",
           }}
         >
+          {/* Ver SignupForm: `kronos-fit.com/<slug>` no es una ruta real. */}
           {errors.slug ??
-            "kronos-fit.com/[slug]. Solo minúsculas, números y guiones."}
+            "Identifica a tu box en la pantalla de TV y en los links de invitación. Solo minúsculas, números y guiones."}
         </p>
       </div>
       <Field

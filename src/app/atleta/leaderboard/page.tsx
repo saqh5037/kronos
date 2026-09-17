@@ -29,7 +29,7 @@ export default async function LeaderboardPage() {
           paddingBottom: 96,
         }}
       >
-        <div style={{ padding: "48px 16px 0" }}>
+        <div style={{ padding: "56px 16px 0" }}>
           <AthleteBackLink href="/atleta" label="Inicio" />
         </div>
         <div style={{ padding: "24px 20px" }}>

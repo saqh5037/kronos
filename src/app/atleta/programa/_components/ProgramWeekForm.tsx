@@ -1,12 +1,21 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { Check, ChevronLeft, ChevronRight, X } from "lucide-react";
 import {
   createProgramDays,
   deleteProgramWod,
   type ScheduledProgramWod,
 } from "@/server/actions/athlete-program";
 import { useConfirm } from "@/lib/use-confirm";
+import { DEFAULT_BOX_TIMEZONE, formatDateShort } from "@/lib/format";
+import {
+  addCivilDays,
+  civilDateInTz,
+  formatDayKey,
+  startOfCivilDay,
+  type CivilDate,
+} from "@/lib/tz";
 
 type Props = {
   initialUpcoming: ScheduledProgramWod[];
@@ -22,24 +31,39 @@ const DAY_LABELS = [
   "Domingo",
 ];
 
-function startOfWeekMonday(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = (day + 6) % 7;
-  d.setDate(d.getDate() - diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
+/**
+ * P0-4 — the week used to be anchored and printed with the BROWSER's timezone
+ * (`getDay`, `setHours(0,0,0,0)`, `toLocaleDateString`) while the rest of the
+ * product formats and stores in the box timezone. On any host that is not
+ * `America/Mexico_City` the two disagreed by a day, so the label, the
+ * `YYYY-MM-DD` key and the `scheduledFor` instant sent to the server could all
+ * name different days. Everything below now speaks box-civil days.
+ */
+const TZ = DEFAULT_BOX_TIMEZONE;
+
+/** 0 = Sunday, matching `Date.prototype.getDay`, but for a civil date. */
+function civilWeekday(civil: CivilDate): number {
+  return new Date(Date.UTC(civil.year, civil.month - 1, civil.day)).getUTCDay();
 }
 
-function fmtDateInput(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+/** The Monday of the week `civil` falls in. */
+function mondayOf(civil: CivilDate): CivilDate {
+  return addCivilDays(civil, -((civilWeekday(civil) + 6) % 7));
 }
 
-function fmtDateShort(d: Date): string {
-  return d.toLocaleDateString("es-MX", { day: "2-digit", month: "short" });
+/** The Monday of the week containing `date`, read in the box timezone. */
+function startOfWeekMonday(date: Date): CivilDate {
+  return mondayOf(civilDateInTz(date, TZ));
+}
+
+/** `YYYY-MM-DD`, the value shape the server action coerces. */
+function fmtDateInput(civil: CivilDate): string {
+  return formatDayKey(civil);
+}
+
+/** "15 sep" in the box timezone. */
+function fmtDateShort(civil: CivilDate): string {
+  return formatDateShort(startOfCivilDay(civil, TZ), TZ);
 }
 
 type DayState = {
@@ -52,9 +76,9 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
   const confirm = useConfirm();
   const [upcoming, setUpcoming] =
     useState<ScheduledProgramWod[]>(initialUpcoming);
-  // Hydration-safe: weekStart depende del día actual en la TZ local.
-  // SSR no lo conoce — arrancamos en null y lo calculamos post-mount.
-  const [weekStart, setWeekStart] = useState<Date | null>(null);
+  // Hydration-safe: weekStart depende del día de hoy, que el SSR no conoce.
+  // Arrancamos en null y lo calculamos post-mount, ya en días civiles del box.
+  const [weekStart, setWeekStart] = useState<CivilDate | null>(null);
   useEffect(() => {
     setWeekStart(startOfWeekMonday(new Date()));
   }, []);
@@ -79,9 +103,7 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
 
   function shiftWeek(deltaDays: number) {
     if (!weekStart) return;
-    const next = new Date(weekStart);
-    next.setDate(next.getDate() + deltaDays);
-    setWeekStart(startOfWeekMonday(next));
+    setWeekStart(mondayOf(addCivilDays(weekStart, deltaDays)));
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -94,10 +116,8 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
     const payload = days
       .map((d, i) => {
         if (!d.enabled || !d.name.trim()) return null;
-        const date = new Date(base);
-        date.setDate(date.getDate() + i);
         return {
-          scheduledFor: date,
+          scheduledFor: startOfCivilDay(addCivilDays(base, i), TZ),
           name: d.name.trim(),
           description: d.description.trim() || undefined,
         };
@@ -198,7 +218,11 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
                     }}
                   >
                     {DAY_LABELS[
-                      (new Date(u.scheduledFor).getDay() + 6) % 7
+                      (civilWeekday(
+                        civilDateInTz(new Date(u.scheduledFor), TZ),
+                      ) +
+                        6) %
+                        7
                     ]?.slice(0, 3)}
                   </div>
                   <div
@@ -210,7 +234,7 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
                       marginTop: 2,
                     }}
                   >
-                    {fmtDateShort(new Date(u.scheduledFor))}
+                    {fmtDateShort(civilDateInTz(new Date(u.scheduledFor), TZ))}
                   </div>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -259,9 +283,13 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
                     padding: "6px 10px",
                     borderRadius: 8,
                     cursor: isPending ? "wait" : "pointer",
+                    minWidth: 44,
+                    minHeight: 44,
+                    display: "grid",
+                    placeItems: "center",
                   }}
                 >
-                  ✕
+                  <X size={16} aria-hidden />
                 </button>
               </div>
             ))}
@@ -313,8 +341,9 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
               onClick={() => shiftWeek(-7)}
               className="k-tap"
               style={navBtn}
+              aria-label="Semana anterior"
             >
-              ‹
+              <ChevronLeft size={18} aria-hidden />
             </button>
             <div style={{ textAlign: "center" }}>
               <div
@@ -337,7 +366,7 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
                 }}
               >
                 {fmtDateShort(weekStart)} —{" "}
-                {fmtDateShort(addDaysJS(weekStart, 6))}
+                {fmtDateShort(addCivilDays(weekStart, 6))}
               </div>
             </div>
             <button
@@ -345,13 +374,14 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
               onClick={() => shiftWeek(7)}
               className="k-tap"
               style={navBtn}
+              aria-label="Semana siguiente"
             >
-              ›
+              <ChevronRight size={18} aria-hidden />
             </button>
           </div>
 
           {days.map((d, i) => {
-            const date = addDaysJS(weekStart, i);
+            const date = addCivilDays(weekStart, i);
             return (
               <div
                 key={i}
@@ -455,9 +485,13 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
                 fontWeight: 700,
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
               }}
             >
-              ✓ {success}
+              <Check size={14} aria-hidden />
+              {success}
             </div>
           )}
 
@@ -490,12 +524,6 @@ export default function ProgramWeekForm({ initialUpcoming }: Props) {
   );
 }
 
-function addDaysJS(date: Date, days: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
-}
-
 const inputStyle: React.CSSProperties = {
   padding: "10px 12px",
   background: "var(--k-bg)",
@@ -510,14 +538,13 @@ const inputStyle: React.CSSProperties = {
 };
 
 const navBtn: React.CSSProperties = {
-  width: 36,
-  height: 36,
+  width: 44,
+  height: 44,
   borderRadius: 10,
   background: "var(--k-elevated)",
   border: "1px solid var(--k-line)",
   color: "var(--k-t1)",
-  fontFamily: "var(--k-font-display)",
-  fontSize: 18,
-  fontWeight: 700,
+  display: "grid",
+  placeItems: "center",
   cursor: "pointer",
 };

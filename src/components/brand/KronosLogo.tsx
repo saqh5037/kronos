@@ -113,7 +113,12 @@ export default function KronosLogo({
 
   if (variant === "mark") {
     return (
-      <span className={className} style={wrapStyle} aria-label={ariaLabel}>
+      <span
+        className={className}
+        style={wrapStyle}
+        role="img"
+        aria-label={ariaLabel}
+      >
         <MarkSVG size={size ?? 56} fill={LIMA} textFill={INK} />
       </span>
     );
@@ -124,6 +129,7 @@ export default function KronosLogo({
       <span
         className={className}
         style={{ ...wrapStyle, color: "currentColor" }}
+        role="img"
         aria-label={ariaLabel}
       >
         <MarkSVG
@@ -139,7 +145,12 @@ export default function KronosLogo({
 
   if (variant === "mark-paper") {
     return (
-      <span className={className} style={wrapStyle} aria-label={ariaLabel}>
+      <span
+        className={className}
+        style={wrapStyle}
+        role="img"
+        aria-label={ariaLabel}
+      >
         <MarkSVG size={size ?? 56} fill={INK} textFill={PAPER} />
       </span>
     );
@@ -150,6 +161,7 @@ export default function KronosLogo({
       <span
         className={className}
         style={{ ...wrapStyle, color: "currentColor" }}
+        role="img"
         aria-label={ariaLabel}
       >
         <Wordmark size={size ?? 32} />
@@ -168,6 +180,7 @@ export default function KronosLogo({
           gap: Math.round(markSize * 0.37),
           color: "currentColor",
         }}
+        role="img"
         aria-label={ariaLabel}
       >
         <MarkSVG size={markSize} fill={LIMA} textFill={INK} />
@@ -183,7 +196,7 @@ export default function KronosLogo({
                 fontWeight: 600,
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: "var(--k-t3, #54545C)",
+                color: "var(--k-t3, #7D7D87)",
               }}
             >
               {tagline}
@@ -207,6 +220,7 @@ export default function KronosLogo({
           gap: 16,
           color: "currentColor",
         }}
+        role="img"
         aria-label={ariaLabel}
       >
         <MarkSVG size={markSize} fill={LIMA} textFill={INK} />
@@ -240,6 +254,7 @@ export default function KronosLogo({
           gap: Math.round(markSize * 0.5),
           color: "currentColor",
         }}
+        role="img"
         aria-label={ariaLabel}
       >
         <MarkSVG

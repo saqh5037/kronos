@@ -1,28 +1,35 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
+import type { AuditAction } from "@prisma/client";
 import { authOptions } from "@/server/auth";
+import { db as rawDb } from "@/server/db";
 import { getBoxNotifications } from "@/server/actions/box-notifications";
+import { listAlertRules } from "@/server/actions/alerts";
+import AlertRulesPanel from "@/components/admin/AlertRulesPanel";
+import { SettingsShell } from "../_components/SettingsShell";
 import { NotificationsForm } from "./_components/NotificationsForm";
 
-export const metadata = { title: "Kronos — Notificaciones" };
+export const metadata = { title: "Kronos — Avisos" };
 export const dynamic = "force-dynamic";
 
-const TABS = [
-  { href: "/admin/ajustes" as const, label: "Box" },
-  { href: "/admin/ajustes/horarios" as const, label: "Horarios" },
-  {
-    href: "/admin/ajustes/notificaciones" as const,
-    label: "Notificaciones",
-    active: true,
-  },
-  { href: "/admin/ajustes/alertas" as const, label: "Alertas" },
-  { href: "/admin/ajustes/apodos" as const, label: "Apodos" },
-  { href: "/admin/ajustes/permisos" as const, label: "Permisos" },
-  { href: "/admin/ajustes/seguridad" as const, label: "Seguridad" },
+const ACTION_OPTIONS: { value: AuditAction; label: string }[] = [
+  { value: "PAYMENT_REGISTERED", label: "Pago registrado" },
+  { value: "PAYMENT_VOIDED", label: "Pago anulado" },
+  { value: "PAYMENT_INITIATED", label: "Checkout iniciado" },
+  { value: "PAYMENT_CONFIRMED", label: "Pago confirmado" },
+  { value: "MEMBERSHIP_CANCELLED", label: "Membresía cancelada" },
+  { value: "MEMBERSHIP_PAUSED", label: "Membresía pausada" },
+  { value: "SCORE_SUBMITTED", label: "Score registrado" },
 ];
 
-export default async function NotificacionesPage() {
+/**
+ * Avisos — one page, two sections (audit 2026-09-15, admin-management P1).
+ *
+ * "Alertas" and "Notificaciones" were two tabs for one concept: emails the
+ * owner receives. They are now two sections here, and /admin/ajustes/alertas
+ * redirects to the second one.
+ */
+export default async function AvisosPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.tenantId) redirect("/login");
   if (session.user.role !== "OWNER") redirect("/admin/ajustes");
@@ -30,47 +37,45 @@ export default async function NotificacionesPage() {
   const settings = await getBoxNotifications();
   if (!settings) redirect("/admin");
 
+  const [rules, owners] = await Promise.all([
+    listAlertRules(),
+    rawDb.user.findMany({
+      where: { tenantId: session.user.tenantId, role: "OWNER" },
+      select: { id: true, name: true, email: true },
+    }),
+  ]);
+
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto">
-      <span className="k-eyebrow-bar">Configuración</span>
-      <div className="mt-2 mb-6 flex items-baseline gap-2 flex-wrap">
-        <span
-          className="font-display text-[26px] leading-none"
-          style={{ color: "var(--k-accent)" }}
-        >
-          Tus
-        </span>
-        <h1
-          className="k-h-italic font-display font-extrabold text-[32px] md:text-[40px] leading-[1] tracking-[-0.02em]"
-          style={{ color: "var(--k-t1)" }}
-        >
-          <em>notificaciones</em>
-        </h1>
-      </div>
-      <nav className="flex gap-1 mb-6 overflow-x-auto pb-1">
-        {TABS.map((t) => (
-          <Link
-            key={t.href}
-            href={t.href}
-            className="px-3.5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all"
-            style={{
-              background: t.active ? "var(--k-accent)" : "var(--k-surface)",
-              color: t.active ? "var(--k-accent-on)" : "var(--k-t2)",
-              border: t.active ? "none" : "1px solid var(--k-line-2)",
-            }}
-          >
-            {t.label}
-          </Link>
-        ))}
-      </nav>
+    <SettingsShell
+      active="avisos"
+      title="Tus"
+      emphasis="avisos"
+      description="Todo lo que Kronos te manda por correo, en un solo lugar: los avisos que te enviamos nosotros y las alertas que dispara tu propio box."
+    >
+      <section className="mb-8">
+        <h2 className="font-display mb-1 text-lg font-bold">
+          Avisos de Kronos
+        </h2>
+        <p className="mb-4 text-sm" style={{ color: "var(--k-t2)" }}>
+          Correos que te manda Kronos sobre tu suscripción y el resumen del mes.
+        </p>
+        <NotificationsForm initial={settings} />
+      </section>
 
-      <p className="text-sm text-[var(--k-t2)] mb-6 max-w-2xl">
-        Controla qué emails recibís de Kronos. Los avisos críticos del cobro
-        (cargos fallidos, suscripción expirada) y el resumen semanal se pueden
-        desactivar individualmente.
-      </p>
-
-      <NotificationsForm initial={settings} />
-    </div>
+      <section id="alertas" className="scroll-mt-24">
+        <h2 className="font-display mb-1 text-lg font-bold">
+          Alertas de tu box
+        </h2>
+        <p className="mb-4 text-sm" style={{ color: "var(--k-t2)" }}>
+          Correos que dispara lo que pasa dentro del box: un cobro registrado,
+          una membresía cancelada, un score nuevo.
+        </p>
+        <AlertRulesPanel
+          rules={rules}
+          owners={owners}
+          actionOptions={ACTION_OPTIONS}
+        />
+      </section>
+    </SettingsShell>
   );
 }

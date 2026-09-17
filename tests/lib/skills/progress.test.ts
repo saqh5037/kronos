@@ -180,7 +180,10 @@ describe("computeCatalogSkillStatus", () => {
       totalProgressions: 5,
     });
     expect(result.status).toBe("locked");
-    expect(result.lockReason).toBe("Nivel RX");
+    // Audit 2026-09-15: "Nivel RX" alone never said whether that was a
+    // requirement or the athlete's own level, so the lock now names both.
+    expect(result.lockReason).toBe("Pide nivel RX");
+    expect(result.lockDetail).toBe("Tu nivel: Principiante");
   });
 
   it("locks skills with missing prereq", () => {
@@ -193,7 +196,8 @@ describe("computeCatalogSkillStatus", () => {
       totalProgressions: 5,
     });
     expect(result.status).toBe("locked");
-    expect(result.lockReason).toContain("Ring Dip");
+    expect(result.lockReason).toBe("Falta un requisito");
+    expect(result.lockDetail).toContain("Ring Dip");
   });
 
   it("returns completed when all progressions achieved", () => {
@@ -266,11 +270,14 @@ describe("buildCatalog", () => {
       status: "active",
       progressPercent: 25,
       lockReason: undefined,
+      lockDetail: undefined,
     });
     expect(catalog[1]?.status).toBe("locked");
-    expect(catalog[1]?.lockReason).toBe("Nivel RX");
+    expect(catalog[1]?.lockReason).toBe("Pide nivel RX");
+    expect(catalog[1]?.lockDetail).toBe("Tu nivel: Principiante");
     expect(catalog[2]?.status).toBe("locked");
-    expect(catalog[2]?.lockReason).toBe("Nivel Escalado");
+    expect(catalog[2]?.lockReason).toBe("Pide nivel Escalado");
+    expect(catalog[2]?.lockDetail).toBe("Tu nivel: Principiante");
   });
 
   it("unlocks prereq when prerequisite skill is completed", () => {

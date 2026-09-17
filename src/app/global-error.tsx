@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
+import { AlertTriangle } from "lucide-react";
 
 export default function GlobalError({
   error,
@@ -41,10 +42,9 @@ export default function GlobalError({
               justifyContent: "center",
               margin: "0 auto 24px",
               color: "var(--k-warning, #ffb020)",
-              fontSize: 28,
             }}
           >
-            ⚠️
+            <AlertTriangle size={28} strokeWidth={1.8} aria-hidden="true" />
           </div>
           <h1
             style={{

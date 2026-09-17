@@ -38,9 +38,9 @@ export default function PhoneFrame({
   showNotch = true,
   width,
   className,
-  placeholder,
 }: {
-  src?: string;
+  /** Obligatorio (audit 2026-09-15): sin captura real no se dibuja marco. */
+  src: string;
   alt: string;
   size?: PhoneFrameSize;
   priority?: boolean;
@@ -48,10 +48,8 @@ export default function PhoneFrame({
   showNotch?: boolean;
   width?: number | string;
   className?: string;
-  placeholder?: React.ReactNode;
 }) {
   const c = SIZE_CONFIG[size];
-  const hasImage = !!src;
 
   return (
     <div
@@ -81,21 +79,17 @@ export default function PhoneFrame({
           aspectRatio: "9 / 19.5",
         }}
       >
-        {hasImage ? (
-          <Image
-            src={src!}
-            alt={alt}
-            fill
-            priority={priority}
-            sizes="(max-width: 720px) 280px, 360px"
-            style={{
-              objectFit: "cover",
-              objectPosition: "center top",
-            }}
-          />
-        ) : (
-          placeholder
-        )}
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          priority={priority}
+          sizes="(max-width: 720px) 280px, 360px"
+          style={{
+            objectFit: "cover",
+            objectPosition: "center top",
+          }}
+        />
         {showNotch && (
           <div
             aria-hidden="true"

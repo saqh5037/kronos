@@ -11,12 +11,13 @@ export const dynamic = "force-dynamic";
 export default function EventosListPage() {
   return (
     <>
-      {/* BACK LINK — paints immediately */}
-      <div style={{ padding: "48px 16px 0" }}>
+      {/* BACK LINK — paints immediately. Left gutter keeps it clear of the
+          fixed hamburger. */}
+      <div className="pl-12 pr-4 lg:pl-4" style={{ paddingTop: 48 }}>
         <AthleteBackLink href="/atleta" label="Inicio" />
       </div>
 
-      <main className="px-4 pb-24 pt-4 max-w-2xl mx-auto">
+      <div className="px-4 pb-24 pt-4 max-w-2xl mx-auto">
         {/* HEADER — paints immediately */}
         <header className="mb-6">
           <p className="k-eyebrow" style={{ color: "var(--k-accent)" }}>
@@ -32,9 +33,7 @@ export default function EventosListPage() {
             className="text-sm mt-2 leading-relaxed"
             style={{ color: "var(--k-t2)" }}
           >
-            Escanea el código QR que reparte el organizador del evento para
-            inscribirte. Aquí van a aparecer todas tus participaciones y
-            resultados.
+            Aquí aparecen tus participaciones y tus resultados.
           </p>
         </header>
 
@@ -42,7 +41,7 @@ export default function EventosListPage() {
         <Suspense fallback={<EventosContentSkeleton />}>
           <EventosContent />
         </Suspense>
-      </main>
+      </div>
     </>
   );
 }

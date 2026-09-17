@@ -1,6 +1,8 @@
 import { ClassCard } from "./ClassCard";
 import type { ClassRow } from "@/server/actions/classes";
 import { EmptyState } from "@/components/kronos/EmptyState";
+import { formatDateWeekday } from "@/lib/format";
+import { sortClassesByStart } from "../../_lib/schedule";
 
 const HOUR_HEIGHT = 56;
 const START_HOUR = 5;
@@ -13,9 +15,7 @@ export function DayView({
   date: Date;
   classes: ClassRow[];
 }) {
-  const sorted = [...classes].sort(
-    (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
-  );
+  const sorted = sortClassesByStart(classes);
   const hours = Array.from(
     { length: END_HOUR - START_HOUR + 1 },
     (_, i) => START_HOUR + i,
@@ -61,12 +61,8 @@ export function DayView({
             <p
               className="font-display text-2xl font-bold leading-none mt-1"
               style={{
-                color:
-                  fillPct >= 80
-                    ? "var(--k-accent)"
-                    : fillPct >= 50
-                      ? "var(--k-accent)"
-                      : "var(--k-t1)",
+                color: "var(--k-accent)",
+                opacity: fillPct >= 80 ? 1 : fillPct >= 50 ? 0.8 : 0.55,
               }}
             >
               {Math.round(fillPct)}%
@@ -78,11 +74,7 @@ export function DayView({
       {sorted.length === 0 ? (
         <EmptyState
           tone="neutral"
-          title={`Sin clases el ${date.toLocaleDateString("es-MX", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-          })}`}
+          title={`Sin clases el ${formatDateWeekday(date)}`}
           description="Si este día no opera, configúralo en Ajustes › Horarios. Si quieres agregar una clase puntual, usa ‘+ Nueva clase’."
         />
       ) : (

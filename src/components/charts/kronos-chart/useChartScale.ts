@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { computeYDomain } from "../domain";
 
 export interface ChartPoint<T = unknown> {
   x: number;
@@ -43,6 +44,12 @@ export interface UseChartScaleOptions {
   xTickCount?: number;
   yPad?: number;
   niceY?: boolean;
+  /**
+   * Floor the y domain at 0 when the data has no negatives. Default true: counts
+   * and money must not sit on a truncated axis (audit 2026-09-15). Pass false for
+   * a series that genuinely lives away from zero (body weight, a 1RM in kg).
+   */
+  zeroFloor?: boolean;
 }
 
 export function useChartScale<T>(
@@ -72,19 +79,14 @@ export function useChartScale<T>(
       xMax += 1;
     }
 
-    let yMin = Math.min(...ys);
-    let yMax = Math.max(...ys);
-    const yRange = yMax - yMin || Math.max(1, Math.abs(yMax) * 0.1);
-    const yPadAmount = yRange * (options.yPad ?? 0.14);
-    yMin -= yPadAmount;
-    yMax += yPadAmount;
-
-    if (options.niceY !== false) {
-      const niced = niceDomain(yMin, yMax, options.yTickCount ?? 5);
-      yMin = niced.min;
-      yMax = niced.max;
-    }
-    if (yMin === yMax) yMax = yMin + 1;
+    const yDomain = computeYDomain(ys, {
+      zeroFloor: options.zeroFloor !== false,
+      pad: options.yPad ?? 0.14,
+      tickCount: options.yTickCount ?? 5,
+      nice: options.niceY !== false,
+    });
+    const yMin = yDomain.min;
+    const yMax = yDomain.max;
 
     const xScale = (x: number) =>
       padding.left + ((x - xMin) / (xMax - xMin)) * innerWidth;
@@ -123,27 +125,6 @@ export function useChartScale<T>(
       points,
     };
   }, [points, width, height, options]);
-}
-
-function niceDomain(
-  min: number,
-  max: number,
-  tickCount: number,
-): { min: number; max: number; step: number } {
-  const range = max - min;
-  if (range === 0) return { min, max: max + 1, step: 1 };
-  const rough = range / Math.max(1, tickCount - 1);
-  const pow10 = Math.pow(10, Math.floor(Math.log10(rough)));
-  const norm = rough / pow10;
-  let step: number;
-  if (norm < 1.5) step = 1;
-  else if (norm < 3) step = 2;
-  else if (norm < 7) step = 5;
-  else step = 10;
-  step *= pow10;
-  const niceMin = Math.floor(min / step) * step;
-  const niceMax = Math.ceil(max / step) * step;
-  return { min: niceMin, max: niceMax, step };
 }
 
 export function buildSmoothPath(coords: [number, number][]): string {

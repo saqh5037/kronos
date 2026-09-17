@@ -118,8 +118,8 @@ export default function OpenGraphImage() {
             maxWidth: 920,
           }}
         >
-          Anota PRs. Reserva clases. Mejora skills con coach IA. Foto del
-          pizarrón → score automático.
+          Anota PRs. Reserva clases. Mejora skills con coach IA. Score
+          automático desde la foto del pizarrón.
         </div>
       </div>
 
@@ -131,7 +131,7 @@ export default function OpenGraphImage() {
           marginTop: 32,
           paddingTop: 24,
           borderTop: "1px solid #1c1c24",
-          color: "#54545c",
+          color: "#7d7d87",
           fontSize: 18,
           letterSpacing: "0.06em",
           zIndex: 1,

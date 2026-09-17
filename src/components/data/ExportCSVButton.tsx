@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Download } from "lucide-react";
 import { downloadCSV, toCSV, type CSVColumn } from "@/lib/csv";
 import { cn } from "@/lib/utils";
 
@@ -46,20 +47,18 @@ export function ExportCSVButton<T>({
         onClick={handle}
         disabled={disabled || busy}
         className={cn(
-          "k-btn-ghost inline-flex items-center gap-2 px-3 py-2 text-xs sm:py-1.5",
+          "k-btn-ghost inline-flex min-h-11 items-center gap-2 px-3 py-2 text-xs",
           (disabled || busy) && "opacity-50",
           className,
         )}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Download
+          width={16}
+          height={16}
+          strokeWidth={1.75}
+          aria-hidden
+          focusable={false}
+        />
         {busy ? "Exportando…" : label}
       </button>
       {error ? (

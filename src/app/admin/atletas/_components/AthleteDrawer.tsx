@@ -1,12 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { Heatmap } from "@/components/charts/Heatmap";
-import { subDays, startOfDay } from "date-fns";
+import {
+  DEFAULT_BOX_TIMEZONE,
+  addCivilDays,
+  civilDateInTz,
+  startOfCivilDay,
+} from "@/lib/tz";
 import {
   getAthleteDetail,
   type AthleteDetail,
 } from "@/server/actions/athletes";
+import { formatDateLong, formatMXN, formatTime24 } from "@/lib/format";
+import { label } from "@/lib/labels";
+import { formatPhoneMX } from "../../_lib/phone";
 import { AthleteBodyMetrics } from "./AthleteBodyMetrics";
 
 type Props = {
@@ -15,19 +24,30 @@ type Props = {
 };
 
 const fmtDate = (d: Date | null | undefined) =>
-  d
-    ? new Date(d).toLocaleDateString("es-MX", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-    : "—";
-const fmtMoney = (v: number) => `$${v.toLocaleString("es-MX")}`;
+  d ? formatDateLong(new Date(d)) : "—";
 
 export function AthleteDrawer({ athleteId, onClose }: Props) {
   const [data, setData] = useState<AthleteDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * "Now" is read AFTER hydration, never in the render body: a `new Date()`
+   * up here makes the server and the client disagree about the heatmap window
+   * whenever the two straddle a minute, which is the hydration bug of
+   * 2026-05-06. `null` means "not hydrated yet" and renders no heatmap.
+   */
+  const [heatmapWindow, setHeatmapWindow] = useState<{
+    from: Date;
+    to: Date;
+  } | null>(null);
+  useEffect(() => {
+    const to = new Date();
+    const today = civilDateInTz(to, DEFAULT_BOX_TIMEZONE);
+    setHeatmapWindow({
+      from: startOfCivilDay(addCivilDays(today, -89), DEFAULT_BOX_TIMEZONE),
+      to,
+    });
+  }, []);
 
   useEffect(() => {
     if (!athleteId) return;
@@ -61,8 +81,6 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
 
   if (!athleteId) return null;
 
-  const heatmapTo = new Date();
-  const heatmapFrom = startOfDay(subDays(heatmapTo, 89));
   const heatData =
     data?.attendanceLast90d.map((a) => ({ date: a.date, value: 1 })) ?? [];
 
@@ -87,17 +105,19 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
             </h2>
             {data ? (
               <p className="mt-1 text-xs text-[var(--k-t2)]">
-                {data.email ?? "Sin email"} · {data.phone ?? "Sin teléfono"} ·
-                Alta {fmtDate(data.createdAt)}
+                {data.email ?? "Sin email"} ·{" "}
+                {formatPhoneMX(data.phone, "Sin teléfono")} · Alta{" "}
+                {fmtDate(data.createdAt)}
               </p>
             ) : null}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="k-btn-ghost px-3 py-1.5 text-xs"
+            className="k-btn-ghost inline-flex min-h-11 items-center gap-1.5 px-3 text-xs"
           >
-            ✕ Cerrar
+            <X size={14} aria-hidden />
+            Cerrar
           </button>
         </div>
 
@@ -111,31 +131,31 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
           <div className="space-y-5">
             {/* Membership */}
             <section>
-              <p className="k-eyebrow mb-2">Membership activa</p>
+              <p className="k-eyebrow mb-2">Membresía activa</p>
               {data.activeMembership ? (
                 <div className="k-card-flat p-3">
                   <div className="flex items-baseline justify-between">
                     <p className="font-semibold">
                       {data.activeMembership.planName}
                     </p>
-                    <span className="font-mono text-[10px] text-[var(--k-t3)]">
-                      {data.activeMembership.planType}
+                    <span className="font-mono text-[10px] text-[var(--k-t2)]">
+                      {label("planType", data.activeMembership.planType)}
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-[var(--k-t2)]">
-                    {fmtDate(data.activeMembership.startDate)} →{" "}
+                    Del {fmtDate(data.activeMembership.startDate)} al{" "}
                     {fmtDate(data.activeMembership.endDate)}
                   </p>
                   <p className="mt-1 text-xs">
                     <span className="font-mono">
                       {data.activeMembership.classesUsed}
                     </span>{" "}
-                    <span className="text-[var(--k-t3)]">clases asistidas</span>
+                    <span className="text-[var(--k-t2)]">clases asistidas</span>
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-[var(--k-t3)]">
-                  Sin membership activa.
+                <p className="text-sm text-[var(--k-t2)]">
+                  Sin membresía activa.
                 </p>
               )}
             </section>
@@ -150,10 +170,7 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                   </p>
                   <p className="text-xs text-[var(--k-t2)]">
                     {fmtDate(data.nextClass.startsAt)} ·{" "}
-                    {new Date(data.nextClass.startsAt).toLocaleTimeString(
-                      "es-MX",
-                      { hour: "2-digit", minute: "2-digit" },
-                    )}
+                    {formatTime24(new Date(data.nextClass.startsAt))}
                   </p>
                 </div>
               </section>
@@ -162,17 +179,23 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
             {/* Attendance heatmap */}
             <section>
               <p className="k-eyebrow mb-2">Asistencia · últimos 90 días</p>
-              {data.attendanceLast90d.length > 0 ? (
+              {data.attendanceLast90d.length === 0 ? (
+                <p className="text-sm text-[var(--k-t3)]">
+                  Sin asistencias en los últimos 90 días.
+                </p>
+              ) : heatmapWindow ? (
                 <div className="k-card-flat p-3">
-                  <Heatmap data={heatData} from={heatmapFrom} to={heatmapTo} />
+                  <Heatmap
+                    data={heatData}
+                    from={heatmapWindow.from}
+                    to={heatmapWindow.to}
+                  />
                   <p className="mt-2 text-[10px] text-[var(--k-t3)]">
                     {data.attendanceLast90d.length} clases en el rango
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-[var(--k-t3)]">
-                  Sin asistencias en los últimos 90 días.
-                </p>
+                <div className="k-skeleton h-24 rounded-xl" />
               )}
             </section>
 
@@ -215,7 +238,8 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                       className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-[var(--k-elevated)]"
                     >
                       <span className="text-xs text-[var(--k-t2)]">
-                        {fmtDate(p.paidAt ?? p.createdAt)} · {p.gateway}
+                        {fmtDate(p.paidAt ?? p.createdAt)} ·{" "}
+                        {label("paymentGateway", p.gateway)}
                       </span>
                       <span
                         className="font-mono text-sm font-bold"
@@ -228,7 +252,7 @@ export function AthleteDrawer({ athleteId, onClose }: Props) {
                                 : "var(--k-t3)",
                         }}
                       >
-                        {fmtMoney(p.amount)}
+                        {formatMXN(p.amount)}
                       </span>
                     </li>
                   ))}

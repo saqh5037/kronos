@@ -1,0 +1,142 @@
+[
+  {
+    "role": "anon",
+    "route": "/",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [],
+    "passes": 19,
+    "incomplete": 1
+  },
+  {
+    "role": "anon",
+    "route": "/box",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [],
+    "passes": 28,
+    "incomplete": 3
+  },
+  {
+    "role": "anon",
+    "route": "/login",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [],
+    "passes": 24,
+    "incomplete": 0
+  },
+  {
+    "role": "anon",
+    "route": "/atleta-signup",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [],
+    "passes": 26,
+    "incomplete": 1
+  },
+  {
+    "role": "atleta",
+    "route": "/atleta",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [],
+    "passes": 21,
+    "incomplete": 1
+  },
+  {
+    "role": "atleta",
+    "route": "/atleta/wod",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [],
+    "passes": 23,
+    "incomplete": 1
+  },
+  {
+    "role": "atleta",
+    "route": "/atleta/reservar",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [],
+    "passes": 21,
+    "incomplete": 0
+  },
+  {
+    "role": "atleta",
+    "route": "/atleta/perfil",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [],
+    "passes": 21,
+    "incomplete": 1
+  },
+  {
+    "role": "atleta",
+    "route": "/atleta/skills",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [],
+    "passes": 20,
+    "incomplete": 0
+  },
+  {
+    "role": "owner",
+    "route": "/admin",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [],
+    "passes": 22,
+    "incomplete": 1
+  },
+  {
+    "role": "owner",
+    "route": "/admin/atletas",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [],
+    "passes": 26,
+    "incomplete": 1
+  },
+  {
+    "role": "owner",
+    "route": "/admin/programacion",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [],
+    "passes": 21,
+    "incomplete": 1
+  },
+  {
+    "role": "owner",
+    "route": "/admin/pagos",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [],
+    "passes": 29,
+    "incomplete": 1
+  },
+  {
+    "role": "owner",
+    "route": "/admin/ajustes",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [],
+    "passes": 24,
+    "incomplete": 1
+  }
+]

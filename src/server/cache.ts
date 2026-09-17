@@ -205,7 +205,10 @@ export function getCachedBoxMovementStats(tenantId: string) {
           myPRs: prs,
           boxMaxByMovement,
         });
-        const total = buckets.reduce((s, b) => s + b.score, 0);
+        // An untrained category now scores `null` instead of a fabricated 0
+        // (src/lib/analytics/capability.ts); it contributes nothing to the
+        // overall, which is exactly what the previous 0 did.
+        const total = buckets.reduce((s, b) => s + (b.score ?? 0), 0);
         overallByAthlete[aid] = total;
         overallScores.push(total);
       }

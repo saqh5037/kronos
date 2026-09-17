@@ -1,16 +1,22 @@
+import { Check, Repeat2 } from "lucide-react";
 import {
   getTodayClasses,
   getTodayStats,
   getAttendanceByDay,
   getAttendanceHeatmap,
+  getAttendanceStats,
   listFrequentNoShows,
   type AttendanceByDayPoint,
   type AttendanceHeatmapCell,
+  type AttendanceStats,
   type FrequentNoShow,
 } from "@/server/actions/attendance";
 import { getClassRoster, type ClassRoster } from "@/server/actions/bookings";
-import { rangeFromParams, previousRange, formatRange } from "@/lib/dates";
+import { rangeFromParams, previousRange } from "@/lib/dates";
+import { formatDateShort, formatDateWeekday } from "@/lib/format";
 import { MetricDelta } from "@/components/charts/MetricDelta";
+import { periodLabel } from "../_lib/period";
+import { pickNextClass, sortClassesByStart } from "../_lib/schedule";
 import { AsistenciaFilters } from "./_components/AsistenciaFilters";
 import {
   AttendanceCinematicChart,
@@ -57,12 +63,17 @@ export default async function AsistenciaPage({
   searchParams?: Promise<SearchParams>;
 }) {
   const sp = (await searchParams) ?? {};
+  // Same default as the date picker, so the subtitle and the filter can never
+  // disagree (audit 2026-09-15: "Últimos 7 días" over a 30-day filter).
   const range = rangeFromParams({
-    preset: sp.preset ?? "last7",
+    preset: sp.preset ?? "last30",
     from: sp.from,
     to: sp.to,
   });
   const prev = previousRange(range);
+  const periodInput = range.preset
+    ? { preset: range.preset }
+    : { from: range.from, to: range.to };
 
   let classesToday: Awaited<ReturnType<typeof getTodayClasses>> = [];
   let statsToday = {
@@ -72,24 +83,27 @@ export default async function AsistenciaPage({
     totalNoShow: 0,
     attendanceRate: 0,
   };
-  let rangePoints: AttendanceByDayPoint[] = [];
+  let rangeStatsServer: AttendanceStats | null = null;
   let prevPoints: AttendanceByDayPoint[] = [];
   let heatmap: AttendanceHeatmapCell[] = [];
   let noShows: FrequentNoShow[] = [];
   let rosters: ClassRoster[] = [];
 
   try {
+    // `getAttendanceStats` carries the period label with its numbers, so the
+    // subtitle can never say "Últimos 7 días" over a 30-day filter again
+    // (audit 2026-09-15, S4). Its `byDay` is the series the charts draw.
     const [tcl, stt, rangeData, prevData, hm, ns] = await Promise.all([
       getTodayClasses(),
       getTodayStats(),
-      getAttendanceByDay({ dateFrom: range.from, dateTo: range.to }),
+      getAttendanceStats(periodInput),
       getAttendanceByDay({ dateFrom: prev.from, dateTo: prev.to }),
       getAttendanceHeatmap({ dateFrom: range.from, dateTo: range.to }),
       listFrequentNoShows({ windowDays: 30, threshold: 3 }),
     ]);
-    classesToday = tcl;
+    classesToday = sortClassesByStart(tcl);
     statsToday = stt;
-    rangePoints = rangeData;
+    rangeStatsServer = rangeData;
     prevPoints = prevData;
     heatmap = hm;
     noShows = ns;
@@ -98,17 +112,19 @@ export default async function AsistenciaPage({
     // BD/sesión ausentes
   }
 
+  const rangePoints = rangeStatsServer?.byDay ?? [];
   const rangeStats = summarize(rangePoints);
   const prevStats = summarize(prevPoints);
+  // The label of the window the data covers, from the server that computed it.
+  const rangeLabel = rangeStatsServer?.period.label ?? periodLabel(range);
 
-  const today = new Date();
-  const todayLabel = today.toLocaleDateString("es-MX", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
+  const now = new Date();
+  const todayLabel = formatDateWeekday(now);
+  // The class the coach is here for: expanded by default. Computed on the
+  // server so the client never renders a different "now" (hydration rule).
+  const nextClassId = pickNextClass(classesToday, now)?.id ?? null;
 
-  const pct = (v: number) => `${Math.round(v * 100)}%`;
+  const pct = (v: number) => `${Math.round(v * 100)} %`;
 
   return (
     <div className="p-6 lg:p-8">
@@ -123,7 +139,11 @@ export default async function AsistenciaPage({
           </h1>
         </div>
         <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
-          {formatRange(range)} · {rangeStats.attended} asistencias en el rango
+          {`${rangeLabel} · ${rangeStatsServer?.checkins ?? 0} ${
+            (rangeStatsServer?.checkins ?? 0) === 1
+              ? "asistencia"
+              : "asistencias"
+          }`}
         </p>
       </div>
 
@@ -131,12 +151,31 @@ export default async function AsistenciaPage({
       <div
         className="sticky top-0 z-10 -mx-6 lg:-mx-8 px-6 lg:px-8 py-3 mb-4 backdrop-blur-md"
         style={{
-          background: "var(--bg)",
+          background: "var(--k-bg)",
           borderBottom: "1px solid var(--k-line)",
         }}
       >
         <AsistenciaFilters />
       </div>
+
+      {/* Hoy — the coach's task comes first, analytics after it. */}
+      <section className="mb-8">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
+          <p className="k-eyebrow">Clases de hoy · {todayLabel}</p>
+          <p className="font-mono text-xs text-[var(--k-t2)]">
+            {statsToday.totalAttended}/{statsToday.totalBooked} asistidos hoy
+          </p>
+        </div>
+        {classesToday.length === 0 ? (
+          <div className="k-card p-6 text-center">
+            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
+              No hay clases programadas para hoy.
+            </p>
+          </div>
+        ) : (
+          <BulkRoster rosters={rosters} initialOpenClassId={nextClassId} />
+        )}
+      </section>
 
       {/* KPIs rango */}
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -149,12 +188,11 @@ export default async function AsistenciaPage({
               current={rangeStats.attendanceRate}
               previous={prevStats.attendanceRate}
               goodWhen="higher"
-              formatter={(v) => `${(v * 100).toFixed(1)}%`}
             />
           }
         />
         <KpiCard
-          label="No-show rate"
+          label="Tasa de no-show"
           value={pct(rangeStats.noShowRate)}
           tone={rangeStats.noShowRate > 0.15 ? "ember" : "steel"}
           delta={
@@ -162,7 +200,6 @@ export default async function AsistenciaPage({
               current={rangeStats.noShowRate}
               previous={prevStats.noShowRate}
               goodWhen="lower"
-              formatter={(v) => `${(v * 100).toFixed(1)}%`}
             />
           }
         />
@@ -170,7 +207,7 @@ export default async function AsistenciaPage({
           label="Capacidad usada"
           value={pct(rangeStats.capacityUtil)}
           tone="steel"
-          subtitle={`${rangeStats.attended}/${rangeStats.capacity}`}
+          subtitle={`${rangeStats.attended} de ${rangeStats.capacity} lugares`}
         />
         <KpiCard
           label="No-shows recurrentes"
@@ -187,16 +224,16 @@ export default async function AsistenciaPage({
             <p className="k-eyebrow">Asistencia diaria</p>
             <p
               className="font-mono text-[10px] font-bold"
-              style={{ color: "var(--k-t3)" }}
+              style={{ color: "var(--k-t2)" }}
             >
-              {formatRange(range)}
+              {rangeLabel}
             </p>
           </div>
           {rangePoints.length > 0 &&
           rangePoints.some((p) => p.attended + p.noShow + p.booked > 0) ? (
             <AttendanceCinematicChart data={rangePoints} />
           ) : (
-            <p className="py-10 text-center text-sm text-[var(--k-t3)]">
+            <p className="py-10 text-center text-sm text-[var(--k-t2)]">
               Sin actividad en el rango
             </p>
           )}
@@ -207,8 +244,9 @@ export default async function AsistenciaPage({
             {rangePoints.length > 0 && rangePoints.some((p) => p.noShow > 0) ? (
               <NoShowCinematicChart data={rangePoints} />
             ) : (
-              <p className="py-10 text-center text-sm text-[var(--k-t3)]">
-                Sin no-shows en el rango ✓
+              <p className="inline-flex items-center justify-center gap-1.5 w-full py-10 text-center text-sm text-[var(--k-t2)]">
+                <Check size={14} aria-hidden />
+                Sin no-shows en el rango
               </p>
             )}
           </div>
@@ -217,7 +255,7 @@ export default async function AsistenciaPage({
             {heatmap.length > 0 ? (
               <DayHourHeatmap cells={heatmap} />
             ) : (
-              <p className="py-10 text-center text-sm text-[var(--k-t3)]">
+              <p className="py-10 text-center text-sm text-[var(--k-t2)]">
                 Sin datos en el rango
               </p>
             )}
@@ -228,8 +266,12 @@ export default async function AsistenciaPage({
       {/* No-shows recurrentes */}
       {noShows.length > 0 && (
         <section className="mb-6">
-          <p className="k-eyebrow mb-3" style={{ color: "var(--k-warning)" }}>
-            🔁 No-shows recurrentes ({noShows.length})
+          <p
+            className="k-eyebrow mb-3 inline-flex items-center gap-1.5"
+            style={{ color: "var(--k-warning)" }}
+          >
+            <Repeat2 size={14} aria-hidden />
+            No-shows recurrentes ({noShows.length})
           </p>
           <div className="k-card overflow-hidden">
             <table className="k-table text-sm">
@@ -249,13 +291,8 @@ export default async function AsistenciaPage({
                         {ns.noShowCount}
                       </span>
                     </td>
-                    <td className="font-mono text-xs text-[var(--k-t3)]">
-                      {ns.lastNoShowAt
-                        ? ns.lastNoShowAt.toLocaleDateString("es-MX", {
-                            day: "2-digit",
-                            month: "short",
-                          })
-                        : "—"}
+                    <td className="font-mono text-xs text-[var(--k-t2)]">
+                      {ns.lastNoShowAt ? formatDateShort(ns.lastNoShowAt) : "—"}
                     </td>
                   </tr>
                 ))}
@@ -264,25 +301,6 @@ export default async function AsistenciaPage({
           </div>
         </section>
       )}
-
-      {/* Hoy */}
-      <section>
-        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
-          <p className="k-eyebrow capitalize">Clases de hoy · {todayLabel}</p>
-          <p className="font-mono text-xs text-[var(--k-t3)]">
-            {statsToday.totalAttended}/{statsToday.totalBooked} asistidos hoy
-          </p>
-        </div>
-        {classesToday.length === 0 ? (
-          <div className="k-card p-6 text-center">
-            <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-              No hay clases programadas para hoy.
-            </p>
-          </div>
-        ) : (
-          <BulkRoster rosters={rosters} />
-        )}
-      </section>
     </div>
   );
 }
@@ -320,7 +338,7 @@ function KpiCard({
         {value}
       </p>
       {subtitle ? (
-        <p className="mt-1 text-xs text-[var(--k-t3)]">{subtitle}</p>
+        <p className="mt-1 text-xs text-[var(--k-t2)]">{subtitle}</p>
       ) : null}
     </div>
   );

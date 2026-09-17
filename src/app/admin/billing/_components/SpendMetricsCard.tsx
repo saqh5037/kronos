@@ -96,7 +96,7 @@ export function SpendMetricsCard({ metrics }: Props) {
             <span>Historial mensual</span>
             <span className="font-mono">
               {firstNonZero ? formatMonthLabel(firstNonZero.month) : ""}
-              {lastBucket ? ` → ${formatMonthLabel(lastBucket.month)}` : ""}
+              {lastBucket ? ` – ${formatMonthLabel(lastBucket.month)}` : ""}
             </span>
           </p>
           <div className="w-full overflow-hidden">

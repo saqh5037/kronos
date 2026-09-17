@@ -71,7 +71,7 @@ export async function uploadAndAnalyzePhotoWod(
     return {
       ok: false,
       error: "RATE_LIMITED",
-      message: `Esperá ${rlIp.retryAfterSec}s antes de subir otra foto.`,
+      message: `Espera ${rlIp.retryAfterSec}s antes de subir otra foto.`,
     };
   }
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD UTC

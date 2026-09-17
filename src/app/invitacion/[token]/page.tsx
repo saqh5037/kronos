@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Check } from "lucide-react";
 import { getInvitationByToken } from "@/server/actions/athlete-invitations";
 import { isInvitationActionable } from "@/lib/athlete-invitation";
 import { AcceptInvitationForm } from "./_components/AcceptInvitationForm";
+import { Layout, InvitationActions } from "./_components/InvitationShell";
 
 export const metadata = { title: "Kronos — Invitación" };
 export const dynamic = "force-dynamic";
@@ -14,36 +17,24 @@ export default async function InvitationPage({
   const { token } = await params;
   const inv = await getInvitationByToken(token);
 
-  if (!inv) {
-    return (
-      <Layout>
-        <h1 className="font-display text-2xl font-bold mb-3">
-          Invitación no encontrada
-        </h1>
-        <p className="text-[var(--k-t2)] mb-6">
-          Este link no coincide con ninguna invitación. Pedile a tu Box que te
-          envíe uno nuevo.
-        </p>
-        <Link href="/login" className="k-btn-ghost">
-          Ir al login
-        </Link>
-      </Layout>
-    );
-  }
+  // Token que no resuelve a nada: 404 real (audit 2026-09-15). El estado vive
+  // en not-found.tsx, con logo, explicación y una sola acción primaria.
+  if (!inv) notFound();
 
   const check = isInvitationActionable(inv);
   if (!check.ok) {
     if (check.reason === "ACCEPTED") {
       return (
         <Layout boxName={inv.box.name} brandColor={inv.box.brandColor ?? null}>
-          <p className="font-bold text-[var(--k-accent)] text-lg mb-2">
-            ✓ ¡Listo!
+          <p className="font-bold text-[var(--k-accent)] text-lg mb-2 inline-flex items-center gap-1.5">
+            <Check size={18} aria-hidden />
+            ¡Listo!
           </p>
           <h1 className="font-display text-2xl font-bold mb-3">
             Tu cuenta ya está creada
           </h1>
           <p className="text-[var(--k-t2)] mb-6">
-            Inicia sesión con tu email <strong>{inv.email}</strong> para entrar
+            Inicia sesión con tu correo <strong>{inv.email}</strong> para entrar
             a la app.
           </p>
           <Link
@@ -55,21 +46,24 @@ export default async function InvitationPage({
         </Layout>
       );
     }
-    const message =
-      check.reason === "EXPIRED"
-        ? "Esta invitación expiró. Pídele a tu Box que te envíe una nueva."
-        : "Esta invitación fue revocada por tu Box.";
+    const expired = check.reason === "EXPIRED";
     return (
-      <Layout boxName={inv.box.name}>
+      <Layout boxName={inv.box.name} brandColor={inv.box.brandColor ?? null}>
         <h1 className="font-display text-2xl font-bold mb-3">
-          {check.reason === "EXPIRED"
-            ? "Invitación expirada"
-            : "Invitación revocada"}
+          {expired ? "Esta invitación expiró" : "Esta invitación fue cancelada"}
         </h1>
-        <p className="text-[var(--k-t2)] mb-6">{message}</p>
-        <Link href="/login" className="k-btn-ghost">
-          Ir al login
-        </Link>
+        <p className="text-[var(--k-t2)] mb-4">
+          {expired
+            ? `La invitación de ${inv.box.name} ya venció.`
+            : `${inv.box.name} canceló esta invitación.`}{" "}
+          Escríbele a tu coach y te manda una nueva.
+        </p>
+        <p className="text-[var(--k-t2)] mb-6">
+          Mientras tanto puedes crear tu cuenta gratis: registras tus PRs y tu
+          racha desde hoy, y cuando tu coach te vuelva a invitar todo se conecta
+          solo.
+        </p>
+        <InvitationActions />
       </Layout>
     );
   }
@@ -93,40 +87,5 @@ export default async function InvitationPage({
         defaultPhone={inv.phone ?? ""}
       />
     </Layout>
-  );
-}
-
-function Layout({
-  children,
-  boxName,
-  brandColor,
-}: {
-  children: React.ReactNode;
-  boxName?: string;
-  brandColor?: string | null;
-}) {
-  return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--k-bg)]">
-      <div className="w-full max-w-md">
-        {boxName && (
-          <p
-            className="k-eyebrow text-center mb-6"
-            style={{ color: brandColor ?? "var(--k-t3)" }}
-          >
-            {boxName}
-          </p>
-        )}
-        <div className="k-card p-6">{children}</div>
-        <p className="mt-4 text-xs text-center text-[var(--k-t3)]">
-          ¿Ya tienes cuenta?{" "}
-          <Link
-            href="/login"
-            className="text-[var(--k-accent)] hover:underline"
-          >
-            Iniciar sesión
-          </Link>
-        </p>
-      </div>
-    </div>
   );
 }

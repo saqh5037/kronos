@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import LoginForm from "./LoginForm";
 import KCard from "@/components/kronos/KCard";
+import { CTA_TRIAL_LABEL } from "@/app/(landing)/_data/cta";
 
 export const metadata = { title: "Kronos — Iniciar sesión" };
 
@@ -63,17 +64,32 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
         </KCard>
 
+        {/* Dos caminos, no uno (audit 2026-09-15): antes el único enlace era
+            para dueños de box y el atleta que caía aquí no tenía salida. */}
         <p
-          className="text-center text-xs mt-6"
+          className="text-center text-sm mt-6"
+          style={{ color: "var(--k-t2)" }}
+        >
+          ¿Eres atleta?{" "}
+          <Link
+            href="/atleta-signup"
+            className="underline"
+            style={{ color: "var(--k-accent)" }}
+          >
+            Entra o crea tu cuenta gratis
+          </Link>
+        </p>
+        <p
+          className="text-center text-xs mt-3"
           style={{ color: "var(--k-t3)" }}
         >
-          ¿Aún no tienes box?{" "}
+          ¿Tienes un box y todavía no lo das de alta?{" "}
           <Link
             href="/signup"
             className="underline"
             style={{ color: "var(--k-t2)" }}
           >
-            Empieza tu trial de 14 días
+            {CTA_TRIAL_LABEL}
           </Link>
         </p>
       </div>

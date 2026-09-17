@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 import SkillTree from "@/components/atleta/SkillTree";
 import { getSkillById, SKILL_CATALOG } from "@/lib/skills/catalog";
+import { skillTierLabel } from "@/lib/skills/progress";
+import type { SkillTier } from "@/lib/skills/types";
 import { getMyMovementSkillTree } from "@/server/actions/skill-levels";
 
 export const metadata = { title: "Kronos — Skill" };
@@ -26,7 +28,8 @@ export default async function SkillDetailPage({
   return (
     <div className="pb-28 relative">
       <header style={{ padding: "48px 20px 16px" }}>
-        <div style={{ marginBottom: 4 }}>
+        {/* Left gutter keeps the back link clear of the fixed hamburger. */}
+        <div className="pl-12 lg:pl-0" style={{ marginBottom: 4 }}>
           <AthleteBackLink href="/atleta/skills" label="Skills" />
         </div>
         <span
@@ -95,8 +98,10 @@ export default async function SkillDetailPage({
   );
 }
 
-function tierLabel(tier: "principiante" | "escalado" | "rx"): string {
-  if (tier === "rx") return "NIVEL RX · ATLETA";
-  if (tier === "escalado") return "NIVEL ESCALADO · ATLETA";
-  return "NIVEL PRINCIPIANTE · ATLETA";
+/**
+ * The eyebrow describes the *skill's* requirement, not the athlete's level —
+ * the audit found "Nivel Escalado" ambiguous on exactly this point.
+ */
+function tierLabel(tier: SkillTier): string {
+  return `PIDE NIVEL ${skillTierLabel(tier).toUpperCase()}`;
 }

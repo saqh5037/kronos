@@ -8,18 +8,53 @@
 
 import { KronosSkeleton } from "@/components/kronos/KronosSkeleton";
 
-// ─── Hero + Stats ─────────────────────────────────────────────────────────────
+// ─── Header ───────────────────────────────────────────────────────────────────
+
+export function HomeHeaderSkeleton() {
+  return (
+    <div className="pt-14 pb-3 px-5 space-y-3">
+      <KronosSkeleton variant="line" width={120} height={9} />
+      <KronosSkeleton variant="line" width={200} height={28} />
+    </div>
+  );
+}
+
+// ─── Hoy ──────────────────────────────────────────────────────────────────────
+
+export function TodaySkeleton() {
+  return (
+    <div className="px-3.5 mt-3">
+      <div
+        style={{
+          background: "var(--k-surface)",
+          border: "1px solid var(--k-line)",
+          borderRadius: 18,
+          padding: 18,
+        }}
+        className="space-y-3"
+      >
+        <KronosSkeleton variant="line" width={40} height={9} />
+        <KronosSkeleton variant="line" width="70%" height={28} delay={40} />
+        <KronosSkeleton variant="line" width="45%" height={10} delay={80} />
+        <KronosSkeleton
+          variant="line"
+          width="100%"
+          height={48}
+          rounded={12}
+          delay={120}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Streak + Stats ───────────────────────────────────────────────────────────
 
 export function HeroSkeleton() {
   return (
     <div className="pb-4">
-      {/* Header text */}
-      <div className="pt-14 pb-6 px-4 space-y-3">
-        <KronosSkeleton variant="line" width={120} height={9} />
-        <KronosSkeleton variant="line" width={240} height={32} />
-      </div>
       {/* Stats circles */}
-      <div className="grid grid-cols-3 gap-3 px-4">
+      <div className="grid grid-cols-3 gap-3 px-4 mt-5">
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
@@ -179,6 +214,28 @@ export function LeaderboardSkeleton() {
             </div>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Badges ───────────────────────────────────────────────────────────────────
+
+export function BadgesSkeleton() {
+  return (
+    <div className="mt-6 px-3.5 space-y-2">
+      <KronosSkeleton variant="line" width={160} height={9} />
+      <div className="flex gap-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <KronosSkeleton
+            key={i}
+            variant="circle"
+            width={52}
+            height={52}
+            rounded={14}
+            delay={i * 50}
+          />
+        ))}
       </div>
     </div>
   );

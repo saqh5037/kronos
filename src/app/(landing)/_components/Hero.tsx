@@ -1,24 +1,29 @@
 "use client";
 
-import { m, useReducedMotion } from "framer-motion";
 import HeroVideo from "./HeroVideo";
 import DuotoneImage from "./DuotoneImage";
 import { HERO_META } from "../_data/mock";
+import {
+  CTA_TRIAL_HREF,
+  CTA_TRIAL_LABEL,
+  CTA_WHATSAPP_HREF,
+  CTA_WHATSAPP_LABEL,
+} from "../_data/cta";
 import { track } from "../_lib/track";
 import {
   DEFAULT_DISCIPLINE_BRANDING,
   type DisciplineBranding,
 } from "@/lib/branding";
+import { ArrowRight } from "lucide-react";
 
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-};
-const item = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
-
+/**
+ * Hero del landing de Boxes.
+ *
+ * Entrada (audit 2026-09-15, P0 #1): el stagger de framer con
+ * `initial="hidden"` (opacity 0) dejaba el hero invisible ante cualquier fallo
+ * de JS. Ahora el markup es visible en el servidor y la entrada es CSS pura
+ * (`.lp-rise`, solo bajo `prefers-reduced-motion: no-preference`).
+ */
 export default function Hero({
   boxHref,
   dominusActive = false,
@@ -28,13 +33,10 @@ export default function Hero({
   dominusActive?: boolean;
   branding?: DisciplineBranding;
 }) {
-  const reduce = useReducedMotion();
-  const variants = reduce ? undefined : stagger;
-  const child = reduce ? undefined : item;
-  const ownerHref = dominusActive ? "/founding-dominus" : "/signup";
+  const ownerHref = dominusActive ? "/founding-dominus" : CTA_TRIAL_HREF;
   const ownerLabel = dominusActive
     ? "Tengo un box · Founding Dominus"
-    : "Tengo un box · Trial 14 días";
+    : CTA_TRIAL_LABEL;
 
   return (
     <section className="lp-hero" id="producto">
@@ -48,20 +50,18 @@ export default function Hero({
       />
       <div className="lp-hero-bg" aria-hidden="true" />
       <div className="lp-hero-grid">
-        <m.div initial="hidden" animate="show" variants={variants}>
-          <m.div className="lp-eyebrow" variants={child}>
+        <div>
+          <div className="lp-eyebrow lp-rise">
             <span className="lp-dot" />
             {branding.heroEyebrow}
-          </m.div>
-          <m.h1 variants={child}>
+          </div>
+          <h1 className="lp-rise lp-rise-1">
             {branding.heroTitleLine1}
             <br />
             {branding.heroTitleLine2}
-          </m.h1>
-          <m.p className="lp-lead" variants={child}>
-            {branding.heroSubtitle}
-          </m.p>
-          <m.div className="lp-hero-actions" variants={child}>
+          </h1>
+          <p className="lp-lead lp-rise lp-rise-2">{branding.heroSubtitle}</p>
+          <div className="lp-hero-actions lp-rise lp-rise-3">
             {boxHref ? (
               <a
                 href={boxHref}
@@ -71,42 +71,36 @@ export default function Hero({
                 }
               >
                 Ir a mi box
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
+                <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
               </a>
             ) : (
-              <a
-                href={ownerHref}
-                className="lp-btn-lime lp-btn-lg"
-                onClick={() =>
-                  track("cta_clicked", {
-                    location: "box_hero_primary",
-                    audience: "owner",
-                  })
-                }
-              >
-                {ownerLabel}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
+              <>
+                <a
+                  href={ownerHref}
+                  className="lp-btn-lime lp-btn-lg"
+                  onClick={() =>
+                    track("cta_clicked", {
+                      location: "box_hero_primary",
+                      audience: "owner",
+                    })
+                  }
                 >
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </a>
+                  {ownerLabel}
+                  <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+                </a>
+                <a
+                  href={CTA_WHATSAPP_HREF}
+                  className="lp-btn-ghost lp-btn-lg"
+                  onClick={() =>
+                    track("cta_clicked", {
+                      location: "box_hero_whatsapp",
+                      audience: "owner",
+                    })
+                  }
+                >
+                  {CTA_WHATSAPP_LABEL}
+                </a>
+              </>
             )}
             {boxHref ? (
               <a
@@ -118,29 +112,12 @@ export default function Hero({
               >
                 Ver cómo funciona
               </a>
-            ) : (
-              <a
-                href="#section-owner"
-                className="lp-link-tertiary"
-                onClick={() =>
-                  track("cta_clicked", { location: "hero_tertiary" })
-                }
-                style={{
-                  fontSize: 13,
-                  color: "var(--k-t3)",
-                  textDecoration: "underline",
-                  marginTop: 8,
-                  display: "inline-block",
-                }}
-              >
-                ¿Ver cómo funciona primero?
-              </a>
-            )}
-          </m.div>
-          <m.div className="lp-hero-meta" variants={child}>
+            ) : null}
+          </div>
+          <div className="lp-hero-meta lp-rise lp-rise-4">
             {HERO_META.strip}
-          </m.div>
-        </m.div>
+          </div>
+        </div>
 
         <HeroVideo />
       </div>

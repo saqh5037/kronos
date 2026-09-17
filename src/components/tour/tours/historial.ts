@@ -19,7 +19,7 @@ export const historialTour: TourDefinition = {
     {
       anchor: "historial.lista",
       title: "Cada score",
-      body: "Nombre del WOD, fecha, escalado y valor. Tocá para ver detalles o subir al perfil completo.",
+      body: "Nombre del WOD, fecha, escalado y valor. Toca para ver el detalle o ir a tu perfil completo.",
       placement: "auto",
     },
     {

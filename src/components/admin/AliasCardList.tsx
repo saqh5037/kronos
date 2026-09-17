@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { removeAlias } from "@/server/actions/aliases";
+import { Icon } from "@/components/kronos/Icon";
+import { formatDateShort } from "@/lib/format";
 
 type Alias = {
   id: string;
@@ -43,7 +45,7 @@ export default function AliasCardList({
       {/* Search */}
       <div className="relative">
         <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-text-3"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--k-t3)]"
           width="16"
           height="16"
           viewBox="0 0 16 16"
@@ -62,12 +64,12 @@ export default function AliasCardList({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar apodo o atleta..."
-          className="w-full bg-[var(--k-elevated)] text-text text-sm rounded-xl pl-10 pr-4 py-2.5 border border-white/10 placeholder:text-text-3 focus:outline-none focus:border-[var(--k-t2)] transition-colors"
+          className="w-full bg-[var(--k-elevated)] text-[var(--k-t1)] text-sm rounded-xl pl-10 pr-4 py-2.5 border border-white/10 placeholder:text-[var(--k-t3)] focus:outline-none focus:border-[var(--k-t2)] transition-colors"
         />
         {search && (
           <button
             onClick={() => setSearch("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-3 hover:text-text-2"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--k-t3)] hover:text-[var(--k-t2)]"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path
@@ -81,7 +83,7 @@ export default function AliasCardList({
         )}
       </div>
 
-      <p className="text-[11px] text-text-3 font-mono uppercase tracking-wider">
+      <p className="text-[11px] text-[var(--k-t3)] font-mono uppercase tracking-wider">
         {filtered.length} apodo{filtered.length !== 1 ? "s" : ""}
       </p>
 
@@ -106,7 +108,7 @@ export default function AliasCardList({
                 height="16"
                 viewBox="0 0 16 16"
                 fill="none"
-                className="text-text-3 shrink-0"
+                className="text-[var(--k-t3)] shrink-0"
               >
                 <path
                   d="M3 8H13M13 8L9 4M13 8L9 12"
@@ -117,28 +119,30 @@ export default function AliasCardList({
                 />
               </svg>
 
-              <span className="text-sm text-text-2 truncate flex-1">
+              <span className="text-sm text-[var(--k-t2)] truncate flex-1">
                 {a.athleteName}
               </span>
 
-              <span className="text-[10px] text-text-3 font-mono shrink-0 hidden sm:block">
-                {a.createdAt.toLocaleDateString("es-MX")}
+              <span className="text-[10px] text-[var(--k-t3)] font-mono shrink-0 hidden sm:block">
+                {formatDateShort(a.createdAt)}
               </span>
 
               {isOwner && (
                 <div className="shrink-0">
                   {confirmingId === a.id ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-text-3">¿Seguro?</span>
+                      <span className="text-[11px] text-[var(--k-t3)]">
+                        ¿Seguro?
+                      </span>
                       <button
                         onClick={() => handleDelete(a.id)}
-                        className="text-[11px] text-[var(--k-warning)] font-medium hover:underline"
+                        className="text-[11px] text-[var(--k-accent)] font-medium hover:underline"
                       >
                         Sí, borrar
                       </button>
                       <button
                         onClick={() => setConfirmingId(null)}
-                        className="text-[11px] text-text-3 hover:text-text-2"
+                        className="text-[11px] text-[var(--k-t3)] hover:text-[var(--k-t2)]"
                       >
                         Cancelar
                       </button>
@@ -146,7 +150,7 @@ export default function AliasCardList({
                   ) : (
                     <button
                       onClick={() => setConfirmingId(a.id)}
-                      className="text-[11px] text-text-3 hover:text-[var(--k-warning)] transition-colors"
+                      className="text-[11px] text-[var(--k-t2)] hover:text-[var(--k-danger)] transition-colors"
                     >
                       <svg
                         width="14"
@@ -176,8 +180,10 @@ export default function AliasCardList({
           animate={{ opacity: 1 }}
           className="k-card p-8 text-center"
         >
-          <p className="text-3xl mb-2">🔍</p>
-          <p className="text-sm text-text-2">
+          <div className="mb-2 flex justify-center text-[var(--k-t2)]">
+            <Icon name="search" size={24} />
+          </div>
+          <p className="text-sm text-[var(--k-t2)]">
             No encontramos apodos con &quot;{search}&quot;
           </p>
         </m.div>

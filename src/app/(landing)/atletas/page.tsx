@@ -5,9 +5,7 @@ import LandingTracker from "../_components/LandingTracker";
 import NavAtletas from "./_components/NavAtletas";
 import AtletaHero from "./_components/AtletaHero";
 import BenefitSection from "./_components/BenefitSection";
-import TestimonialHero from "./_components/TestimonialHero";
 import AtletaSiNo from "./_components/AtletaSiNo";
-import DualQuotes from "./_components/DualQuotes";
 import AtletaClosingCTA from "./_components/AtletaClosingCTA";
 import FooterMinimal from "./_components/FooterMinimal";
 import MovementStrip from "./_components/MovementStrip";
@@ -87,19 +85,16 @@ export default async function AtletasLanding() {
           ctaHref={ctaHref}
         />
 
-        {/* 4 — Movement strip (6 movimientos: skills + wod) */}
+        {/* 4 — Movement strip (6 movimientos: habilidades + wod) */}
         <MovementStrip />
 
-        {/* 5 — Testimonial destacado */}
-        <TestimonialHero />
-
-        {/* 5 — Por qué Kronos (SÍ / NO) */}
+        {/* 5 — Por qué Kronos (SÍ / NO).
+            Nota (audit 2026-09-15): aquí vivían dos bloques de testimonios
+            rotulados "EJEMPLO ILUSTRATIVO". Se quitaron hasta tener citas
+            reales con consentimiento firmado. */}
         <AtletaSiNo />
 
-        {/* 6 — Dual quotes */}
-        <DualQuotes />
-
-        {/* 7 — CTA final */}
+        {/* 6 — CTA final */}
         <AtletaClosingCTA boxHref={boxHref} />
       </main>
       <FooterMinimal />

@@ -1,7 +1,15 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getBadgeDetail, type BadgeDetail } from "@/server/actions/badges";
+import { notFound } from "next/navigation";
+import AthleteBackLink from "@/components/atleta/AthleteBackLink";
+import BadgeShareCanvas from "@/components/atleta/BadgeShareCanvas";
+import {
+  getBadgeDetail,
+  getMyAthleteFirstName,
+  type BadgeDetail,
+} from "@/server/actions/badges";
+import { badgeCelebrationCopy } from "@/lib/badges/progress";
+import { formatDateLong } from "@/lib/format";
+import { BadgeGlyph } from "../_components/BadgeGlyph";
 
 export const dynamic = "force-dynamic";
 
@@ -25,50 +33,34 @@ export default async function BadgeDetailPage({
   const badge = await getBadgeDetail(code);
   if (!badge) notFound();
 
+  const firstName = badge.unlocked
+    ? await getMyAthleteFirstName().catch(() => null)
+    : null;
+
   return (
-    <main
+    <div
       className="min-h-screen pb-28"
       style={{ background: "var(--k-bg)", color: "var(--k-t1)" }}
     >
-      <div className="px-4 pt-5">
-        <Link
-          href="/atleta/logros"
-          className="k-eyebrow inline-flex items-center gap-1.5"
-          style={{ color: "var(--k-t2)" }}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M15 18l-6-6 6-6"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Volver a logros
-        </Link>
+      {/* The back link gets its own row with a left gutter so the fixed
+          hamburger (12 px + 40 px) stops clipping it into "LVER A LOGROS". */}
+      <div className="pt-5 pr-4 pl-12 lg:pl-4">
+        <AthleteBackLink href="/atleta/logros" label="Logros" />
       </div>
 
-      <div className="px-4 pt-4">
+      <div className="px-4 pt-2">
         <BadgeHero badge={badge} />
       </div>
 
       <div className="px-4 mt-5 flex flex-col gap-4">
         <CriteriaCard badge={badge} />
-        <DescriptionCard badge={badge} />
+        <DescriptionCard badge={badge} athleteName={firstName ?? "Atleta"} />
       </div>
-    </main>
+    </div>
   );
 }
 
 function BadgeHero({ badge }: { badge: BadgeDetail }) {
-  const initial =
-    badge.code
-      .split("-")
-      .map((s) => s[0]?.toUpperCase() ?? "")
-      .join("")
-      .slice(0, 2) || "★";
-
   return (
     <div
       className="k-card relative overflow-hidden"
@@ -77,7 +69,7 @@ function BadgeHero({ badge }: { badge: BadgeDetail }) {
         background: badge.unlocked
           ? "linear-gradient(180deg, var(--k-elevated) 0%, var(--k-surface) 100%)"
           : "var(--k-surface)",
-        borderColor: badge.unlocked ? "var(--k-line)" : "var(--k-line)",
+        borderColor: badge.unlocked ? "var(--k-accent-line)" : "var(--k-line)",
       }}
     >
       {badge.unlocked && (
@@ -86,35 +78,12 @@ function BadgeHero({ badge }: { badge: BadgeDetail }) {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.06), transparent 60%)",
+              "radial-gradient(ellipse at 50% 0%, rgba(200,255,45,0.10), transparent 60%)",
           }}
         />
       )}
       <div className="relative flex flex-col items-center text-center gap-4">
-        <div
-          aria-hidden="true"
-          style={{
-            width: 120,
-            height: 120,
-            borderRadius: 30,
-            background: badge.unlocked
-              ? "var(--k-elevated)"
-              : "var(--k-line-2)",
-            border: `2px solid ${badge.unlocked ? "var(--k-line)" : "var(--k-line)"}`,
-            display: "grid",
-            placeItems: "center",
-            color: badge.unlocked ? "var(--k-t2)" : "var(--k-t3)",
-            fontFamily: "var(--k-font-display)",
-            fontSize: 48,
-            fontWeight: 700,
-            boxShadow: badge.unlocked
-              ? "0 0 8px rgba(255,255,255,0.06)"
-              : undefined,
-            opacity: badge.unlocked ? 1 : 0.7,
-          }}
-        >
-          {badge.unlocked ? initial : <LockIcon />}
-        </div>
+        <BadgeGlyph icon={badge.icon} unlocked={badge.unlocked} size={120} />
 
         <div>
           <div
@@ -122,13 +91,13 @@ function BadgeHero({ badge }: { badge: BadgeDetail }) {
             style={{
               fontSize: 9,
               letterSpacing: "0.18em",
-              color: badge.unlocked ? "var(--k-t2)" : "var(--k-t3)",
+              color: badge.unlocked ? "var(--k-accent)" : "var(--k-t3)",
               marginBottom: 6,
             }}
           >
             {badge.unlocked ? "DESBLOQUEADO" : "BLOQUEADO"}
             {badge.unlocked && badge.earnedAt
-              ? ` · ${formatDate(badge.earnedAt)}`
+              ? ` · ${formatDateLong(new Date(badge.earnedAt))}`
               : ""}
           </div>
           <h1
@@ -158,22 +127,26 @@ function BadgeHero({ badge }: { badge: BadgeDetail }) {
           </div>
         </div>
 
+        {/* Unlocked: the XP is already in the ledger the home reads, so say so
+            instead of promising a reward twice. */}
         <div
           className="k-mono"
           style={{
             display: "inline-flex",
             alignItems: "center",
             gap: 6,
-            background: "var(--k-elevated)",
-            border: "1px solid var(--k-line)",
-            color: "var(--k-t2)",
+            background: badge.unlocked
+              ? "var(--k-accent-soft)"
+              : "var(--k-elevated)",
+            border: `1px solid ${badge.unlocked ? "var(--k-accent-line)" : "var(--k-line)"}`,
+            color: badge.unlocked ? "var(--k-accent)" : "var(--k-t2)",
             padding: "6px 12px",
             borderRadius: 999,
             fontSize: 11,
             letterSpacing: "0.12em",
           }}
         >
-          +{badge.xp} XP
+          {badge.unlocked ? `${badge.xp} XP SUMADOS` : `VALE ${badge.xp} XP`}
         </div>
       </div>
     </div>
@@ -230,7 +203,7 @@ function CriteriaCard({ badge }: { badge: BadgeDetail }) {
               className="k-mono"
               style={{
                 fontSize: 11,
-                color: badge.unlocked ? "var(--k-t2)" : "var(--k-t2)",
+                color: badge.unlocked ? "var(--k-accent)" : "var(--k-t2)",
                 fontWeight: 600,
               }}
             >
@@ -246,14 +219,15 @@ function CriteriaCard({ badge }: { badge: BadgeDetail }) {
               overflow: "hidden",
             }}
           >
+            {/* transform, not width (layout-property animation). */}
             <div
               style={{
                 height: "100%",
-                width: `${ratio}%`,
-                background: badge.unlocked
-                  ? "var(--k-t2)"
-                  : "linear-gradient(90deg, var(--k-t2), var(--k-t2))",
-                transition: "width 600ms ease",
+                width: "100%",
+                transformOrigin: "left center",
+                transform: `scaleX(${Math.max(0, Math.min(1, p.ratio))})`,
+                background: badge.unlocked ? "var(--k-accent)" : "var(--k-t2)",
+                transition: "transform 600ms ease",
               }}
             />
           </div>
@@ -263,7 +237,13 @@ function CriteriaCard({ badge }: { badge: BadgeDetail }) {
   );
 }
 
-function DescriptionCard({ badge }: { badge: BadgeDetail }) {
+function DescriptionCard({
+  badge,
+  athleteName,
+}: {
+  badge: BadgeDetail;
+  athleteName: string;
+}) {
   if (badge.unlocked) {
     return (
       <div className="k-card" style={{ padding: 16 }}>
@@ -271,12 +251,12 @@ function DescriptionCard({ badge }: { badge: BadgeDetail }) {
           className="k-mono"
           style={{
             fontSize: 9,
-            color: "var(--k-t2)",
+            color: "var(--k-accent)",
             letterSpacing: "0.18em",
             marginBottom: 6,
           }}
         >
-          ¡LO TIENES!
+          LO TIENES
         </div>
         <div
           style={{
@@ -284,29 +264,21 @@ function DescriptionCard({ badge }: { badge: BadgeDetail }) {
             fontSize: 14,
             color: "var(--k-t1)",
             lineHeight: 1.4,
+            marginBottom: 12,
           }}
         >
-          Comparte este logro. Cada PR cuenta una historia.
+          {/* Celebration copy per badge: a first class is no longer
+              congratulated with "Cada PR cuenta una historia". */}
+          {badgeCelebrationCopy(badge.code, badge.name)}
         </div>
-        <button
-          disabled
-          style={{
-            marginTop: 12,
-            background: "var(--k-elevated)",
-            color: "var(--k-t3)",
-            border: "1px solid var(--k-line)",
-            borderRadius: 12,
-            padding: "10px 16px",
-            fontFamily: "var(--k-font-display)",
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            cursor: "not-allowed",
-          }}
-        >
-          Compartir · Pronto
-        </button>
+        <BadgeShareCanvas
+          athleteName={athleteName}
+          badgeName={badge.name}
+          badgeCode={badge.code}
+          badgeDescription={badge.description}
+          earnedAtISO={new Date(badge.earnedAt ?? Date.now()).toISOString()}
+          xp={badge.xp}
+        />
       </div>
     );
   }
@@ -337,28 +309,4 @@ function DescriptionCard({ badge }: { badge: BadgeDetail }) {
       </div>
     </div>
   );
-}
-
-function LockIcon() {
-  return (
-    <svg
-      width={36}
-      height={36}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-    >
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-    </svg>
-  );
-}
-
-function formatDate(d: Date): string {
-  return new Intl.DateTimeFormat("es-MX", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(d);
 }

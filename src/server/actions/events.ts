@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import { authOptions } from "../auth";
 import { db as rawDb, withTenant } from "../db";
 import { getStorage } from "../storage";
+import { computeEventRank, type EventRank } from "@/lib/event-score";
 
 const MAX_MEDIA_BYTES = 8 * 1024 * 1024;
 const MAX_NOTES_LEN = 1000;
@@ -135,6 +136,12 @@ export async function getEventByAccessToken(
 export type EventWithMyEntry = {
   event: SportEventDTO;
   entry: EventEntryDTO | null;
+  /**
+   * Position inside the athlete's own division, or null when they submitted no
+   * comparable score. Audit 2026-09-15: a closed event was "a closed door" —
+   * it showed neither the result nor where it landed.
+   */
+  rank: EventRank | null;
 };
 
 /**
@@ -156,7 +163,33 @@ export async function getEventBySlugForAthlete(
     where: { eventId_athleteId: { eventId: row.id, athleteId: me.id } },
   });
 
-  return { event: eventDto, entry: toEntryDTO(entry) };
+  const entryDto = toEntryDTO(entry);
+  let rank: EventRank | null = null;
+  if (entryDto?.submittedAt && entryDto.scoreValue !== null) {
+    // Ranking spans the whole event, not the box: a partner competition is the
+    // same field for everyone. Only aggregate positions leave this query — no
+    // names, no scores from other athletes.
+    const competitors = await rawDb.eventEntry.findMany({
+      where: { eventId: row.id, submittedAt: { not: null } },
+      select: {
+        athleteId: true,
+        scoreValue: true,
+        submittedAt: true,
+        division: true,
+      },
+    });
+    rank = computeEventRank(
+      competitors.map((c) => ({
+        athleteId: c.athleteId,
+        scoreValue: c.scoreValue === null ? null : Number(c.scoreValue),
+        submittedAt: c.submittedAt,
+        division: c.division,
+      })),
+      me.id,
+    );
+  }
+
+  return { event: eventDto, entry: entryDto, rank };
 }
 
 /**

@@ -7,7 +7,12 @@ import {
   SendButton,
   DeleteAnnouncementButton,
 } from "@/components/SendAnnouncementButton";
-import { formatDayMonth, formatTime } from "@/lib/week";
+import {
+  announcementAudienceLabel,
+  announcementChannelLabel,
+  label,
+} from "@/lib/labels";
+import { formatDateShort, formatTime24 } from "@/lib/format";
 
 export const metadata = { title: "Kronos — Comunicaciones" };
 
@@ -27,20 +32,20 @@ export default async function ComunicacionesPage() {
   );
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex items-end justify-between gap-4 flex-wrap">
+    <div className="p-4 md:p-8">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="k-eyebrow-bar">Engagement</span>
-          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+          <div className="mt-2 flex flex-wrap items-baseline gap-2">
             <h1
-              className="k-h-italic font-display font-extrabold text-[40px] leading-[1] tracking-[-0.02em]"
+              className="k-h-italic font-display text-[34px] leading-[1] font-extrabold tracking-[-0.02em] md:text-[40px]"
               style={{ color: "var(--k-t1)" }}
             >
               Comunica<em>ciones</em>
             </h1>
           </div>
-          <p className="text-sm mt-1" style={{ color: "var(--k-t2)" }}>
-            Anuncios al box · email/in-app/push (proveedor mockeado en Fase 1)
+          <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
+            Avisos a todo el box, por correo o dentro de la app.
           </p>
         </div>
         <AnnouncementForm />
@@ -66,7 +71,7 @@ export default async function ComunicacionesPage() {
         {sent.length === 0 ? (
           <div className="k-card p-6 text-center">
             <p className="text-sm" style={{ color: "var(--k-t2)" }}>
-              Sin anuncios enviados todavía.
+              Todavía no has enviado ningún aviso.
             </p>
           </div>
         ) : (
@@ -84,19 +89,21 @@ export default async function ComunicacionesPage() {
 function Card({ a }: { a: AnnouncementRow }) {
   return (
     <div className="k-card p-4">
-      <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
+      <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="font-display font-bold text-base">{a.title}</h3>
+          <h3 className="font-display text-base font-bold">{a.title}</h3>
           <div
-            className="flex items-center gap-2 mt-1 text-[10px] flex-wrap"
+            className="mt-1 flex flex-wrap items-center gap-2 text-[10px]"
             style={{ color: "var(--k-t3)" }}
           >
-            <span className="k-chip k-chip-ghost text-[10px]">{a.channel}</span>
+            <span className="k-chip k-chip-ghost text-[10px]">
+              {announcementChannelLabel[a.channel]}
+            </span>
             <span className="k-chip k-chip-steel text-[10px]">
-              {a.audience}
+              {announcementAudienceLabel[a.audience]}
             </span>
             <span className={`k-chip ${chipForStatus(a.status)} text-[10px]`}>
-              {a.status}
+              {label("announcementStatus", a.status)}
             </span>
           </div>
         </div>
@@ -114,18 +121,18 @@ function Card({ a }: { a: AnnouncementRow }) {
         {a.body}
       </p>
       <div
-        className="flex items-center gap-3 mt-3 pt-3 border-t text-[10px]"
+        className="mt-3 flex flex-wrap items-center gap-3 border-t pt-3 text-[10px]"
         style={{ borderColor: "var(--k-line)", color: "var(--k-t3)" }}
       >
         <span>
-          {a.authorName ?? "—"} · {formatDayMonth(a.createdAt)}{" "}
-          {formatTime(a.createdAt)}
+          {a.authorName ?? "—"} · {formatDateShort(a.createdAt)}{" "}
+          {formatTime24(a.createdAt)}
         </span>
         {a.sentAt && (
           <>
             <span>·</span>
             <span>
-              Enviado a {a.recipientCount} · {formatDayMonth(a.sentAt)}
+              Enviado a {a.recipientCount} · {formatDateShort(a.sentAt)}
             </span>
           </>
         )}
@@ -133,8 +140,8 @@ function Card({ a }: { a: AnnouncementRow }) {
           <>
             <span>·</span>
             <span style={{ color: "var(--k-t2)" }}>
-              Programado para {formatDayMonth(a.scheduledAt)}{" "}
-              {formatTime(a.scheduledAt)}
+              Programado para {formatDateShort(a.scheduledAt)}{" "}
+              {formatTime24(a.scheduledAt)}
             </span>
           </>
         )}

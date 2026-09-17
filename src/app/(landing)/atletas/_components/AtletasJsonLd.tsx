@@ -59,7 +59,7 @@ export default function AtletasJsonLd() {
       serviceType: "Fitness tracking app",
       audience: { "@type": "Audience", audienceType: "CrossFit Athlete" },
       description:
-        "App gratuita para atletas de CrossFit: track de PRs, reservas en tu box, skills con coach IA y foto del pizarrón con detección automática de score. Funciona aunque tu Box todavía no use Kronos.",
+        "App gratuita para atletas de CrossFit: registro de PRs, reservas en tu box, habilidades con coach de IA y foto del pizarrón con detección automática de score. Funciona aunque tu Box todavía no use Kronos.",
       isAccessibleForFree: true,
       offers: {
         "@type": "Offer",

@@ -13,6 +13,7 @@ import { sendEmail } from "@/lib/email";
 import { renderFoundingReservationEmail } from "@/server/email-templates/founding-reservation";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { isPersonalBoxSlug } from "@/lib/personal-box";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 const RESERVED_SLUGS = new Set([
   "admin",
@@ -94,8 +95,7 @@ export async function reserveFoundingPlan(
     return {
       ok: false,
       error: "PROMO_CLOSED",
-      message:
-        "La oferta Founding Dominus se cerró. Escríbenos a contacto@kronos-fit.com para próximas promociones.",
+      message: `La oferta Founding Dominus se cerró. Escríbenos a ${SUPPORT_EMAIL} para próximas promociones.`,
     };
   }
 
@@ -162,8 +162,7 @@ export async function reserveFoundingPlan(
     return {
       ok: false,
       error: "PLAN_NOT_FOUND",
-      message:
-        "No encontramos el plan Founding. Si sigues acá, escríbenos a contacto@kronos-fit.com.",
+      message: `No encontramos el plan Founding. Si sigues aquí, escríbenos a ${SUPPORT_EMAIL}.`,
     };
   }
 
@@ -237,8 +236,7 @@ export async function reserveFoundingPlan(
       return {
         ok: false,
         error: "EMAIL_TAKEN",
-        message:
-          "Ya tenemos tu reserva — revisa tu correo o escríbenos a contacto@kronos-fit.com",
+        message: `Ya tenemos tu reserva — revisa tu correo o escríbenos a ${SUPPORT_EMAIL}`,
       };
     }
     throw e;

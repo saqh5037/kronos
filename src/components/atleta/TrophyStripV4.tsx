@@ -1,6 +1,9 @@
 import Link from "next/link";
 import type { Route } from "next";
+import { ChevronRight } from "lucide-react";
 import type { FeaturedTrophy } from "@/server/actions/athlete-home";
+import { badgeIconName } from "@/lib/badges/progress";
+import { BadgeGlyph } from "@/app/atleta/logros/_components/BadgeGlyph";
 
 type Props = {
   featured: FeaturedTrophy | null;
@@ -32,7 +35,7 @@ export default function TrophyStripV4({ featured }: Props) {
             marginBottom: 4,
           }}
         >
-          LOGROS · TROPHY ROOM
+          LOGROS
         </div>
         <div
           style={{
@@ -46,13 +49,6 @@ export default function TrophyStripV4({ featured }: Props) {
       </Link>
     );
   }
-
-  const initial =
-    featured.code
-      .split("-")
-      .map((s) => s[0]?.toUpperCase() ?? "")
-      .join("")
-      .slice(0, 2) || "★";
 
   const fechaRel = formatRelativeMonth(featured.earnedAt);
   const eyebrow = featured.isThisMonth
@@ -80,26 +76,7 @@ export default function TrophyStripV4({ featured }: Props) {
           gap: 14,
         }}
       >
-        <div
-          aria-hidden
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 14,
-            background: "var(--k-accent-soft)",
-            border: "1px solid var(--k-accent-line)",
-            display: "grid",
-            placeItems: "center",
-            color: "var(--k-accent)",
-            fontFamily: "var(--k-font-display)",
-            fontSize: 20,
-            fontWeight: 700,
-            flexShrink: 0,
-            boxShadow: "var(--k-accent-glow)",
-          }}
-        >
-          {initial}
-        </div>
+        <BadgeGlyph icon={badgeIconName(featured.code)} unlocked size={56} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -139,7 +116,11 @@ export default function TrophyStripV4({ featured }: Props) {
             {featured.description}
           </div>
         </div>
-        <span style={{ color: "var(--k-t3)", fontSize: 18 }}>›</span>
+        <ChevronRight
+          size={18}
+          aria-hidden
+          style={{ color: "var(--k-t3)", flexShrink: 0 }}
+        />
       </div>
     </Link>
   );

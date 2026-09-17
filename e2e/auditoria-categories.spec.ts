@@ -3,6 +3,11 @@
  *
  * Cubre:
  *  - Owner ve evento billing con label humano (no action enum raw)
+ *
+ * The label lost its "(modo demo)" suffix: `confirmCheckoutMock` runs whenever
+ * the gateway is unconfigured, production included, so the suffix was a
+ * development note on an owner-facing screen. The assertion matched the defect,
+ * so it is now on the label the owner actually reads.
  *  - Filtro por categoría billing oculta otros eventos
  *  - Categoría "Todo" muestra todo
  */
@@ -76,9 +81,9 @@ test.describe.serial("Auditoría — categories + humanize", () => {
     await loginAs(page, "owner");
     await page.goto("/admin/auditoria");
 
-    await expect(
-      page.getByText(/Suscripción activada \(modo demo\)/),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/Suscripción activada/)).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("owner ve label humano del evento email digest", async ({ page }) => {
@@ -92,9 +97,7 @@ test.describe.serial("Auditoría — categories + humanize", () => {
     await loginAs(page, "owner");
     await page.goto("/admin/auditoria?category=billing");
 
-    await expect(
-      page.getByText(/Suscripción activada \(modo demo\)/),
-    ).toBeVisible();
+    await expect(page.getByText(/Suscripción activada/)).toBeVisible();
     await expect(page.getByText(/Resumen semanal enviado/)).toHaveCount(0);
   });
 
@@ -103,8 +106,6 @@ test.describe.serial("Auditoría — categories + humanize", () => {
     await page.goto("/admin/auditoria?category=email");
 
     await expect(page.getByText(/Resumen semanal enviado/)).toBeVisible();
-    await expect(
-      page.getByText(/Suscripción activada \(modo demo\)/),
-    ).toHaveCount(0);
+    await expect(page.getByText(/Suscripción activada/)).toHaveCount(0);
   });
 });

@@ -42,7 +42,7 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
   if (!resend) {
     if (process.env.NODE_ENV !== "test") {
       console.log(
-        `[email:mock] → ${msg.to.length} recipients · "${msg.subject}"`,
+        `[email:mock] -> ${msg.to.length} recipients · "${msg.subject}"`,
       );
     }
     return { ok: true, delivered: msg.to.length, failed: 0 };

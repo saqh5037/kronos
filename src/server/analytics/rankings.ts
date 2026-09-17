@@ -4,6 +4,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
 import { withTenant } from "../db";
 import { computePercentile } from "@/lib/analytics/percentile";
+import {
+  isBetterByDirection,
+  scoreDirection,
+  unitDirection,
+} from "@/lib/scores/direction";
+import type { ScoreType } from "@/lib/validations/wod";
 import { getCachedBoxMovementStats } from "@/server/cache";
 
 async function requireSession() {
@@ -17,8 +23,14 @@ export type MovementRanking = {
   movementName: string;
   myValue: number;
   unit: string;
-  percentile: number;
-  rank: number;
+  /**
+   * `null` when there is no cohort to compare against. `computePercentile`
+   * returns `{ percentile: 0, rank: 0, total: 0 }` for an empty peer list, and
+   * the UI used to render that as "0 % percentil · #0 rank de 3" — a fact that
+   * is not true (audit 2026-09-15, P2 on /atleta/movimientos/[id]).
+   */
+  percentile: number | null;
+  rank: number | null;
   total: number;
   achievedAt: Date;
 };
@@ -62,20 +74,28 @@ export async function getAthleteMovementRankings(
     const entry = boxStats.byMovement[p.movementId];
     const peers = entry?.values ?? [];
     const myValue = Number(p.value);
-    const r = computePercentile(peers, myValue, false);
+    // A PR carries no scoreType, so direction comes from the stored unit:
+    // a run PR in seconds ranks ascending, a squat in kg descending. The
+    // previous hardcoded `false` ranked every time-based movement backwards.
+    const lowerIsBetter = unitDirection(p.unit) === "asc";
+    const r = computePercentile(peers, myValue, lowerIsBetter);
+    const hasCohort = r.total > 0 && r.rank !== null && r.rank > 0;
     return {
       movementId: p.movementId,
       movementName: p.movement.name,
       myValue,
       unit: p.unit,
-      percentile: r.percentile,
-      rank: r.rank,
+      percentile: hasCohort ? r.percentile : null,
+      rank: hasCohort ? r.rank : null,
       total: r.total,
       achievedAt: p.achievedAt,
     };
   });
 
-  return rankings.sort((a, b) => b.percentile - a.percentile).slice(0, limit);
+  // Movements with no cohort sort last — they carry no signal either way.
+  return rankings
+    .sort((a, b) => (b.percentile ?? -1) - (a.percentile ?? -1))
+    .slice(0, limit);
 }
 
 export async function getMyMovementRankings(
@@ -97,6 +117,13 @@ export type WODPercentileForMe = {
   rank: number | null;
   total: number;
 };
+
+/** No rank, or a rank out of 0 peers, is not a rank — the UI renders "sin datos". */
+function cohortOrNull(rank: number | null, total: number) {
+  return total > 0 && rank !== null && rank > 0
+    ? { rank, total }
+    : { rank: null, total };
+}
 
 /**
  * Returns the percentile of the current athlete in a WOD without re-running
@@ -129,15 +156,13 @@ export async function getMyWODRanking(
     select: { athleteId: true, value: true },
   });
 
+  const direction = scoreDirection(wod.scoreType as ScoreType);
+  const lowerIsBetter = direction === "asc";
   const bestByAthlete = new Map<string, number>();
-  const lowerIsBetter = wod.scoreType === "TIME";
   for (const s of scores) {
     const v = Number(s.value);
     const existing = bestByAthlete.get(s.athleteId);
-    if (
-      existing === undefined ||
-      (lowerIsBetter ? v < existing : v > existing)
-    ) {
+    if (existing === undefined || isBetterByDirection(existing, v, direction)) {
       bestByAthlete.set(s.athleteId, v);
     }
   }
@@ -158,11 +183,12 @@ export async function getMyWODRanking(
     myBest,
     lowerIsBetter,
   );
+  const cohort = cohortOrNull(r.rank, r.total);
   return {
     wodId,
     myBest,
-    percentile: r.percentile,
-    rank: r.rank,
-    total: r.total,
+    percentile: cohort.rank === null ? null : r.percentile,
+    rank: cohort.rank,
+    total: cohort.total,
   };
 }

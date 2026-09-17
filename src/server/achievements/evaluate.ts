@@ -1,4 +1,4 @@
-import { withTenant, db as prismaBase } from "@/server/db";
+import { withTenant } from "@/server/db";
 import {
   evaluateCriterion,
   isCriterion,
@@ -87,8 +87,10 @@ export async function runAchievementEvaluation(
 
     const xp = xpForBadgeCode(b.code);
     try {
-      await prismaBase.xPLedger.create({
+      await db.xPLedger.create({
         data: {
+          // Prisma's generated create input keeps `tenantId` required, so it
+          // stays explicit here even though `withTenant` also injects it.
           tenantId,
           athleteId,
           amount: xp,
@@ -137,8 +139,9 @@ export async function awardXP({
   sourceId: string;
 }): Promise<{ awarded: boolean }> {
   if (amount <= 0) return { awarded: false };
+  const db = withTenant(tenantId);
   try {
-    await prismaBase.xPLedger.create({
+    await db.xPLedger.create({
       data: { tenantId, athleteId, amount, reason, sourceType, sourceId },
     });
     return { awarded: true };
@@ -151,8 +154,9 @@ export async function getAthleteXPTotal(
   tenantId: string,
   athleteId: string,
 ): Promise<number> {
-  const sum = await prismaBase.xPLedger.aggregate({
-    where: { tenantId, athleteId },
+  const db = withTenant(tenantId);
+  const sum = await db.xPLedger.aggregate({
+    where: { athleteId },
     _sum: { amount: true },
   });
   return sum._sum.amount ?? 0;
@@ -234,8 +238,8 @@ export async function loadAthleteState(
 
   const skillLevelsAchieved = new Set<string>();
   if (needsSkillLevels) {
-    const skillRows = await prismaBase.athleteSkillLevel.findMany({
-      where: { tenantId, athleteId, status: "ACHIEVED" },
+    const skillRows = await db.athleteSkillLevel.findMany({
+      where: { athleteId, status: "ACHIEVED" },
       select: { movementSlug: true, progressionSlug: true },
     });
     for (const r of skillRows) {

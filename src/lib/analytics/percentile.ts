@@ -6,8 +6,10 @@
  */
 
 export type PercentileResult = {
-  percentile: number;
-  rank: number;
+  /** `null` when there is no cohort — a 0 here reads as "worse than everyone". */
+  percentile: number | null;
+  /** 1 is best. `null` when there is no cohort to hold a position in. */
+  rank: number | null;
   total: number;
   betterThan: number;
 };
@@ -17,8 +19,10 @@ export function computePercentile(
   target: number,
   lowerIsBetter = false,
 ): PercentileResult {
+  // No cohort means no position, not last place. Audit 2026-09-15: an athlete
+  // with no PRs came back as `rank: 0` and the profile printed "#0 DE 0".
   if (values.length === 0) {
-    return { percentile: 0, rank: 0, total: 0, betterThan: 0 };
+    return { percentile: null, rank: null, total: 0, betterThan: 0 };
   }
 
   let betterThan = 0;

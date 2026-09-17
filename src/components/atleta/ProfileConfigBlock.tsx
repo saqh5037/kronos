@@ -130,7 +130,7 @@ export default function ProfileConfigBlock({
               className="text-sm font-mono uppercase tracking-wider"
               style={{ color: "var(--k-accent)", letterSpacing: "0.05em" }}
             >
-              Unirme a un box →
+              Unirme a un box
             </button>
           ) : (
             <div className="space-y-2">

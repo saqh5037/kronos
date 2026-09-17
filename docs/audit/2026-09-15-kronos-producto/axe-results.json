@@ -1,0 +1,398 @@
+[
+  {
+    "role": "anon",
+    "route": "/",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [],
+    "passes": 33,
+    "incomplete": 1
+  },
+  {
+    "role": "anon",
+    "route": "/box",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [
+      {
+        "id": "heading-order",
+        "impact": "moderate",
+        "help": "Heading levels should only increase by one",
+        "nodes": 1,
+        "sample": ["div:nth-child(2) > h4"]
+      },
+      {
+        "id": "region",
+        "impact": "moderate",
+        "help": "All page content should be contained by landmarks",
+        "nodes": 2,
+        "sample": [".lp-root > div:nth-child(6)", ".lp-foot-bottom"]
+      }
+    ],
+    "passes": 43,
+    "incomplete": 3
+  },
+  {
+    "role": "anon",
+    "route": "/login",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 2,
+        "sample": [".mb-8 > p", ".mt-6"]
+      }
+    ],
+    "passes": 35,
+    "incomplete": 0
+  },
+  {
+    "role": "anon",
+    "route": "/atleta-signup",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [
+      {
+        "id": "aria-prohibited-attr",
+        "impact": "serious",
+        "help": "Elements must only use permitted ARIA attributes",
+        "nodes": 1,
+        "sample": ["span[aria-label=\"Kronos\"]"]
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 3,
+        "sample": [
+          "label",
+          ".leading-relaxed.text-center.text-xs > span:nth-child(1)"
+        ]
+      }
+    ],
+    "passes": 36,
+    "incomplete": 1
+  },
+  {
+    "role": "atleta",
+    "route": "/atleta",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 13,
+        "sample": [
+          "header > span",
+          "a[href$=\"streak-30\"] > .k-card[data-locked=\"true\"][data-testid=\"trophy-card\"] > .k-mono"
+        ]
+      },
+      {
+        "id": "landmark-one-main",
+        "impact": "moderate",
+        "help": "Document should have one main landmark",
+        "nodes": 1,
+        "sample": ["html"]
+      },
+      {
+        "id": "region",
+        "impact": "moderate",
+        "help": "All page content should be contained by landmarks",
+        "nodes": 18,
+        "sample": [
+          ".lg\\:hidden > div:nth-child(2)",
+          ".gap-5 > .min-w-0.flex-1"
+        ]
+      }
+    ],
+    "passes": 31,
+    "incomplete": 1
+  },
+  {
+    "role": "atleta",
+    "route": "/atleta/wod",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 8,
+        "sample": [
+          "label:nth-child(1) > span",
+          ".grid > label:nth-child(2) > span"
+        ]
+      },
+      {
+        "id": "landmark-one-main",
+        "impact": "moderate",
+        "help": "Document should have one main landmark",
+        "nodes": 1,
+        "sample": ["html"]
+      },
+      {
+        "id": "page-has-heading-one",
+        "impact": "moderate",
+        "help": "Page should contain a level-one heading",
+        "nodes": 1,
+        "sample": ["html"]
+      },
+      {
+        "id": "region",
+        "impact": "moderate",
+        "help": "All page content should be contained by landmarks",
+        "nodes": 21,
+        "sample": [
+          ".lg\\:hidden > div:nth-child(2)",
+          "a[aria-label=\"Volver\"]"
+        ]
+      }
+    ],
+    "passes": 27,
+    "incomplete": 2
+  },
+  {
+    "role": "atleta",
+    "route": "/atleta/reservar",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 44,
+        "sample": [
+          ".k-tap:nth-child(1) > span:nth-child(1)",
+          ".k-tap:nth-child(2) > span:nth-child(1)"
+        ]
+      },
+      {
+        "id": "landmark-one-main",
+        "impact": "moderate",
+        "help": "Document should have one main landmark",
+        "nodes": 1,
+        "sample": ["html"]
+      },
+      {
+        "id": "page-has-heading-one",
+        "impact": "moderate",
+        "help": "Page should contain a level-one heading",
+        "nodes": 1,
+        "sample": ["html"]
+      },
+      {
+        "id": "region",
+        "impact": "moderate",
+        "help": "All page content should be contained by landmarks",
+        "nodes": 45,
+        "sample": [
+          ".lg\\:hidden > div:nth-child(2)",
+          "a[aria-label=\"Volver\"]"
+        ]
+      }
+    ],
+    "passes": 26,
+    "incomplete": 2
+  },
+  {
+    "role": "atleta",
+    "route": "/atleta/perfil",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 45,
+        "sample": [
+          "header > .relative > div:nth-child(1) > span",
+          ".col-span-1:nth-child(1) > .p-3\\.5.h-full.k-card > .tracking-\\[0\\.08em\\].text-\\[9px\\].font-mono"
+        ]
+      },
+      {
+        "id": "landmark-one-main",
+        "impact": "moderate",
+        "help": "Document should have one main landmark",
+        "nodes": 1,
+        "sample": ["html"]
+      },
+      {
+        "id": "region",
+        "impact": "moderate",
+        "help": "All page content should be contained by landmarks",
+        "nodes": 37,
+        "sample": [
+          ".lg\\:hidden > div:nth-child(2)",
+          ".pb-3\\.5.px-3\\.5:nth-child(2)"
+        ]
+      }
+    ],
+    "passes": 33,
+    "incomplete": 1
+  },
+  {
+    "role": "atleta",
+    "route": "/atleta/skills",
+    "width": 360,
+    "height": 780,
+    "mobile": true,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 9,
+        "sample": [
+          ".mb-3 > span:nth-child(1)",
+          "a[href$=\"double-under\"] > .k-tap > div:nth-child(2)"
+        ]
+      },
+      {
+        "id": "landmark-one-main",
+        "impact": "moderate",
+        "help": "Document should have one main landmark",
+        "nodes": 1,
+        "sample": ["html"]
+      },
+      {
+        "id": "region",
+        "impact": "moderate",
+        "help": "All page content should be contained by landmarks",
+        "nodes": 6,
+        "sample": [".lg\\:hidden > div:nth-child(2)", "h1"]
+      }
+    ],
+    "passes": 29,
+    "incomplete": 1
+  },
+  {
+    "role": "owner",
+    "route": "/admin",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 9,
+        "sample": [
+          "main > div > div > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > span:nth-child(2)",
+          ".k-tap > div:nth-child(3) > span:nth-child(2)"
+        ]
+      }
+    ],
+    "passes": 29,
+    "incomplete": 1
+  },
+  {
+    "role": "owner",
+    "route": "/admin/atletas",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 12,
+        "sample": [
+          "div[title=\"Colapsar\"] > div:nth-child(2) > span:nth-child(2)",
+          "div:nth-child(3) > span:nth-child(2)"
+        ]
+      }
+    ],
+    "passes": 40,
+    "incomplete": 1
+  },
+  {
+    "role": "owner",
+    "route": "/admin/programacion",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 14,
+        "sample": [
+          "div:nth-child(2) > span:nth-child(2)",
+          "div:nth-child(3) > span:nth-child(2)"
+        ]
+      }
+    ],
+    "passes": 31,
+    "incomplete": 1
+  },
+  {
+    "role": "owner",
+    "route": "/admin/pagos",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 16,
+        "sample": [
+          "div[title=\"Colapsar\"] > div:nth-child(2) > span:nth-child(2)",
+          ".k-tap > div:nth-child(3) > span:nth-child(2)"
+        ]
+      },
+      {
+        "id": "heading-order",
+        "impact": "moderate",
+        "help": "Heading levels should only increase by one",
+        "nodes": 1,
+        "sample": [
+          ".p-4.flex-col.k-card:nth-child(1) > .items-start.gap-2.justify-between > h3"
+        ]
+      }
+    ],
+    "passes": 41,
+    "incomplete": 1
+  },
+  {
+    "role": "owner",
+    "route": "/admin/ajustes",
+    "width": 1280,
+    "height": 800,
+    "mobile": false,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 11,
+        "sample": [
+          "div[title=\"Colapsar\"] > div:nth-child(2) > span:nth-child(2)",
+          "div:nth-child(3) > span:nth-child(2)"
+        ]
+      }
+    ],
+    "passes": 35,
+    "incomplete": 1
+  }
+]

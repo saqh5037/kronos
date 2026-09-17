@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Trophy } from "lucide-react";
 import {
   getTVDisplay,
   type TVDisplay,
@@ -7,9 +8,27 @@ import {
   type TVLeader,
   type TVPRRow,
 } from "@/server/actions/tv";
-import { formatTime, formatDayMonth } from "@/lib/week";
+import { wodTypeLabel, scoreTypeLabel } from "@/lib/labels";
+import { formatDateWeekday, formatTime24 } from "@/lib/format";
+import {
+  formatDurationMinutes,
+  formatMinutesUntil,
+} from "../_lib/format-countdown";
+import { TvClock } from "../_components/TvClock";
 
 export const metadata = { title: "Kronos — Pantalla del box" };
+
+/**
+ * Intensidad monocromática: el rank 1 va a full y los siguientes bajan opacidad
+ * en vez de cambiar de color. Naranja y rojo quedan solo para advertencias y
+ * errores reales (audit 2026-09-15).
+ */
+function rankOpacity(index: number): number {
+  if (index === 0) return 1;
+  if (index === 1) return 0.78;
+  if (index === 2) return 0.6;
+  return 0.42;
+}
 
 // Refresh data every 30 seconds when the TV is left running
 export const revalidate = 30;
@@ -26,9 +45,9 @@ export default async function TVDisplayPage({
   return (
     <main
       className="min-h-screen p-8 flex flex-col gap-6"
-      style={{ background: "var(--bg)" }}
+      style={{ background: "var(--k-bg)" }}
     >
-      <Header boxName={data.box.name} />
+      <Header boxName={data.box.name} brandColor={data.box.brandColor} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
         <div className="lg:col-span-2 flex flex-col gap-6">
@@ -45,50 +64,50 @@ export default async function TVDisplayPage({
           <RecentPRs prs={data.recentPRs} />
         </div>
       </div>
+
+      {/* Marca discreta: la pantalla la ve el atleta del Box, no un prospecto
+          de Kronos (audit 2026-09-15). */}
+      <footer
+        className="k-eyebrow text-right"
+        style={{ color: "var(--k-t3)", fontSize: 10 }}
+      >
+        Kronos
+      </footer>
     </main>
   );
 }
 
-function Header({ boxName }: { boxName: string }) {
-  const now = new Date();
+/**
+ * La pantalla es del Box, no de Kronos (audit 2026-09-15). El nombre del Box es
+ * el título y toma su color de marca; "Kronos" queda como marca discreta al pie.
+ * Los tamaños usan clamp() para que nada se desborde a 360.
+ */
+function Header({
+  boxName,
+  brandColor,
+}: {
+  boxName: string;
+  brandColor: string | null;
+}) {
   return (
     <header
-      className="flex items-end justify-between border-b pb-4"
-      style={{ borderColor: "var(--line)" }}
+      className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b pb-4"
+      style={{ borderColor: "var(--k-line)" }}
     >
-      <div>
-        <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
-          {boxName}
-        </p>
+      <div className="min-w-0">
         <h1
-          className="font-display font-bold text-5xl tracking-tight mt-1"
+          className="font-display font-bold tracking-tight"
           style={{
-            background: "var(--k-accent)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            color: brandColor ?? "var(--k-accent)",
+            fontSize: "clamp(28px, 6vw, 64px)",
+            lineHeight: 1.02,
+            overflowWrap: "anywhere",
           }}
         >
-          KRONOS
+          {boxName}
         </h1>
       </div>
-      <div className="text-right">
-        <p
-          className="font-mono font-bold text-7xl"
-          style={{ color: "var(--text)" }}
-        >
-          {formatTime(now)}
-        </p>
-        <p
-          className="k-eyebrow mt-1 capitalize"
-          style={{ color: "var(--k-t3)" }}
-        >
-          {now.toLocaleDateString("es-MX", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-          })}
-        </p>
-      </div>
+      <TvClock />
     </header>
   );
 }
@@ -113,11 +132,25 @@ function NowPlaying({
         className="p-8 rounded-2xl border"
         style={{
           borderColor: "var(--k-accent)",
-          background: "var(--card)",
+          background: "var(--k-surface)",
         }}
       >
-        <p className="k-eyebrow" style={{ color: "var(--k-accent)" }}>
-          ● EN VIVO · {formatTime(current.startsAt)} · {current.durationMin}min
+        <p
+          className="k-eyebrow flex items-center gap-2"
+          style={{ color: "var(--k-accent)" }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "var(--k-accent)",
+              flexShrink: 0,
+            }}
+          />
+          EN VIVO · {formatTime24(current.startsAt)} ·{" "}
+          {formatDurationMinutes(current.durationMin)}
         </p>
         <h2 className="font-display font-bold text-5xl mt-2 tracking-tight">
           {current.wodName ?? "Clase en curso"}
@@ -172,11 +205,12 @@ function NowPlaying({
         className="p-8 rounded-2xl border"
         style={{
           borderColor: "var(--k-t2)",
-          background: "var(--card)",
+          background: "var(--k-surface)",
         }}
       >
         <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
-          PRÓXIMA · en {minutesUntil}min · {formatTime(next.startsAt)}
+          PRÓXIMA · {formatMinutesUntil(minutesUntil)} ·{" "}
+          {formatTime24(next.startsAt)}
         </p>
         <h2 className="font-display font-bold text-5xl mt-2 tracking-tight">
           {next.wodName ?? "Por definir"}
@@ -193,7 +227,7 @@ function NowPlaying({
   return (
     <section
       className="p-8 rounded-2xl border text-center"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
     >
       <h2 className="font-display text-3xl" style={{ color: "var(--k-t2)" }}>
         Sin clases programadas para hoy
@@ -204,18 +238,25 @@ function NowPlaying({
 
 function TodaysWOD({ wod }: { wod: TVWOD | null }) {
   if (!wod) return null;
+  // Sin `flex-1`: la card se estiraba a 750 px con una sola línea adentro y
+  // ~550 px de vacío (audit 2026-09-15). Ahora crece con su contenido.
   return (
     <section
-      className="p-6 rounded-2xl border flex-1"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      className="p-6 rounded-2xl border"
+      style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
     >
       <div className="flex items-center justify-between">
         <p className="k-eyebrow" style={{ color: "var(--k-t2)" }}>
           WOD del día
         </p>
         <div className="flex gap-2">
-          <span className="k-chip k-chip-steel">{wod.type}</span>
-          <span className="k-chip k-chip-ghost">{wod.scoreType}</span>
+          <span className="k-chip k-chip-steel">
+            {wodTypeLabel[wod.type as keyof typeof wodTypeLabel] ?? wod.type}
+          </span>
+          <span className="k-chip k-chip-ghost">
+            {scoreTypeLabel[wod.scoreType as keyof typeof scoreTypeLabel] ??
+              wod.scoreType}
+          </span>
           {wod.timeCap && (
             <span className="k-chip k-chip-ember">{wod.timeCap}min cap</span>
           )}
@@ -233,7 +274,7 @@ function TodaysWOD({ wod }: { wod: TVWOD | null }) {
       {wod.movements.length > 0 && (
         <ul
           className="mt-4 grid grid-cols-2 gap-2 border-t pt-3"
-          style={{ borderColor: "var(--line)" }}
+          style={{ borderColor: "var(--k-line)" }}
         >
           {wod.movements.map((m, i) => (
             <li
@@ -271,7 +312,7 @@ function UpcomingList({ classes }: { classes: TVClass[] }) {
   return (
     <section
       className="p-5 rounded-2xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
     >
       <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
         Hoy más tarde
@@ -286,11 +327,11 @@ function UpcomingList({ classes }: { classes: TVClass[] }) {
             <li
               key={c.id}
               className="flex items-center justify-between gap-3 py-2 border-b last:border-b-0"
-              style={{ borderColor: "var(--line)" }}
+              style={{ borderColor: "var(--k-line)" }}
             >
               <div className="min-w-0">
                 <p className="font-mono font-bold text-lg">
-                  {formatTime(c.startsAt)}
+                  {formatTime24(c.startsAt)}
                 </p>
                 <p
                   className="text-sm truncate"
@@ -322,10 +363,10 @@ function WeekLeaders({ leaders }: { leaders: TVLeader[] }) {
   return (
     <section
       className="p-5 rounded-2xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
     >
       <p className="k-eyebrow mb-3" style={{ color: "var(--k-t2)" }}>
-        Top de la semana
+        Top de la semana · asistencias
       </p>
       {leaders.length === 0 ? (
         <p className="text-sm" style={{ color: "var(--k-t3)" }}>
@@ -342,12 +383,8 @@ function WeekLeaders({ leaders }: { leaders: TVLeader[] }) {
                 <span
                   className="font-mono font-bold text-lg w-6"
                   style={{
-                    color:
-                      idx === 0
-                        ? "var(--k-accent)"
-                        : idx < 3
-                          ? "var(--k-warning)"
-                          : "var(--k-t3)",
+                    color: "var(--k-accent)",
+                    opacity: rankOpacity(idx),
                   }}
                 >
                   {idx + 1}
@@ -357,7 +394,8 @@ function WeekLeaders({ leaders }: { leaders: TVLeader[] }) {
               <span
                 className="font-mono font-bold"
                 style={{
-                  color: idx === 0 ? "var(--k-accent)" : "var(--text)",
+                  color: "var(--k-accent)",
+                  opacity: rankOpacity(idx),
                 }}
               >
                 {l.attendedCount}
@@ -374,10 +412,14 @@ function RecentPRs({ prs }: { prs: TVPRRow[] }) {
   return (
     <section
       className="p-5 rounded-2xl border"
-      style={{ borderColor: "var(--line)", background: "var(--card)" }}
+      style={{ borderColor: "var(--k-line)", background: "var(--k-surface)" }}
     >
-      <p className="k-eyebrow mb-3" style={{ color: "var(--k-warning)" }}>
-        🏆 PRs recientes
+      <p
+        className="k-eyebrow mb-3 flex items-center gap-2"
+        style={{ color: "var(--k-accent)" }}
+      >
+        <Trophy size={14} strokeWidth={2} aria-hidden="true" />
+        PRs recientes
       </p>
       {prs.length === 0 ? (
         <p className="text-sm" style={{ color: "var(--k-t3)" }}>
@@ -393,14 +435,14 @@ function RecentPRs({ prs }: { prs: TVPRRow[] }) {
                 </span>
                 <span
                   className="font-mono font-bold text-sm"
-                  style={{ color: "var(--k-warning)" }}
+                  style={{ color: "var(--k-accent)" }}
                 >
                   {p.value}
                   {p.unit}
                 </span>
               </div>
               <p className="text-xs" style={{ color: "var(--k-t3)" }}>
-                {p.movementName} · {formatDayMonth(p.achievedAt)}
+                {p.movementName} · {formatDateWeekday(p.achievedAt)}
               </p>
             </li>
           ))}

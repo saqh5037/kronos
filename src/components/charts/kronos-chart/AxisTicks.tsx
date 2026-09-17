@@ -37,10 +37,10 @@ export function AxisTicks({
             y={y + 3}
             textAnchor="end"
             style={{
-              fontSize: 10,
+              fontSize: 11,
               fontFamily: "var(--font-mono, ui-monospace), monospace",
               letterSpacing: "0.04em",
-              fill: "var(--k-t3)",
+              fill: "var(--k-t2)",
             }}
             initial={skipMotion ? false : { opacity: 0, x: padding.left - 14 }}
             animate={{ opacity: 0.85, x: padding.left - 8 }}
@@ -71,10 +71,10 @@ export function AxisTicks({
               i === 0 ? "start" : i === xTicks.length - 1 ? "end" : "middle"
             }
             style={{
-              fontSize: 10,
+              fontSize: 11,
               fontFamily: "var(--font-mono, ui-monospace), monospace",
               letterSpacing: "0.04em",
-              fill: "var(--k-t3)",
+              fill: "var(--k-t2)",
             }}
             initial={
               skipMotion

@@ -14,7 +14,28 @@
 //   - Cambiar estrategia `/atleta/*` a NETWORK-ONLY (igual que /admin)
 //   - Bump CACHE_VERSION para forzar drop del cache viejo en clientes con SW v1
 
-const CACHE_VERSION = "kronos-shell-v2";
+// Fix v4 (fase 0, batch 4):
+//   - `/eventos` y `/tv` a network-only. Caían a `networkFirst`, que guarda
+//     la respuesta en `kronos-shell-*`: `/eventos/<id>` trae la inscripción
+//     del atleta y `/tv/<slug>` trae roster, leaderboard y PRs del Box. En la
+//     tablet del mostrador ese HTML sobrevive al logout, que es exactamente el
+//     leak de 2026-05-17 por otra puerta.
+//   - Bump de CACHE_VERSION: un cliente con el worker v3 conserva su cache
+//     hasta que cambia el string, así que ampliar la lista sin bump deja lo ya
+//     cacheado en el dispositivo.
+//   - La lista vive ahora bajo un test de IGUALDAD, no de "contiene"
+//     (tests/unit/sw-network-only.test.ts).
+
+// Fix v3 (audit 2026-09-15 §E):
+//   - `/uploads` a network-only: `/uploads/whiteboards/*` son fotos del
+//     whiteboard con nombres y scores de atletas. Con network-first se
+//     cacheaban y sobrevivían al logout en una tablet compartida del box.
+//   - `/invitacion` y `/invitacion-staff` a network-only: el HTML del token
+//     de invitación es single-use y no debe quedar en cache.
+//   - Borrada la estrategia stale-while-revalidate (código muerto desde v2).
+//   - Bump de CACHE_VERSION para que los clientes con v2 tiren su cache.
+
+const CACHE_VERSION = "kronos-shell-v4";
 const SHELL_PRECACHE = [
   "/manifest.webmanifest",
   "/icons/icon-192.png",
@@ -60,8 +81,10 @@ self.addEventListener("activate", (event) => {
 
 // Fetch handler con estrategias por tipo de request.
 // Reglas:
-//   - Auth (/api/auth/*) + /admin/* + /atleta/* + /api/*: NETWORK ONLY
-//     (todas son user-specific y NO deben servirse desde cache)
+//   - Auth (/api/auth/*) + /admin/* + /atleta/* + /api/* + /uploads/* +
+//     /invitacion* + /eventos/* + /tv/* : NETWORK ONLY (todas son
+//     user-specific, tenant-specific o single-use y NO deben servirse desde
+//     cache)
 //   - /_next/static/*, /icons/*: CACHE FIRST (assets inmutables por hash)
 //   - Resto GET: NETWORK FIRST con timeout 3s + cache fallback (landing,
 //     /login, /signup, /atleta-signup — todas páginas públicas sin
@@ -79,7 +102,12 @@ self.addEventListener("fetch", (event) => {
   if (
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/admin") ||
-    url.pathname.startsWith("/atleta")
+    url.pathname.startsWith("/atleta") ||
+    url.pathname.startsWith("/uploads") ||
+    url.pathname.startsWith("/invitacion") ||
+    url.pathname.startsWith("/invitacion-staff") ||
+    url.pathname.startsWith("/eventos") ||
+    url.pathname.startsWith("/tv")
   ) {
     return; // dejar al browser manejar normal (network)
   }
@@ -111,19 +139,6 @@ async function cacheFirst(req) {
   } catch {
     return new Response("Offline", { status: 503 });
   }
-}
-
-async function staleWhileRevalidate(req) {
-  const cached = await caches.match(req);
-  const refresh = fetch(req)
-    .then((res) => {
-      if (res.ok) {
-        caches.open(CACHE_VERSION).then((cache) => cache.put(req, res.clone()));
-      }
-      return res;
-    })
-    .catch(() => null);
-  return cached || (await refresh) || new Response("Offline", { status: 503 });
 }
 
 async function networkFirst(req, timeoutMs) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import { RadioCard } from "@/components/kronos/forms";
 import type { FitnessExperience } from "@prisma/client";
 
@@ -74,7 +75,10 @@ export function Step3Experience({
           className="text-xs underline disabled:opacity-50"
           style={{ color: "var(--k-t3)" }}
         >
-          ← Atrás
+          <span className="inline-flex items-center justify-center gap-1">
+            <ChevronLeft size={12} aria-hidden />
+            Atrás
+          </span>
         </button>
       </div>
     </div>

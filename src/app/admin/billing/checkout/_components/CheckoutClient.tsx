@@ -2,20 +2,20 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Check, Dot } from "lucide-react";
 import {
   createSaasCheckout,
   confirmCheckoutMock,
   type SaasPlanRow,
 } from "@/server/actions/saas-billing";
-import {
-  formatPriceMxn,
-  describePlanLimits,
-  describeFeatures,
-} from "@/lib/saas-billing";
+import { describeFeatures } from "@/lib/saas-billing";
+import { formatMXN } from "@/lib/format";
 
 type Props = {
   plans: SaasPlanRow[];
   mockMode: boolean;
+  /** Demo wording only ever renders outside production. */
+  isDev: boolean;
 };
 
 type CheckoutState =
@@ -31,11 +31,30 @@ type CheckoutState =
     }
   | { step: "done" };
 
-export function CheckoutClient({ plans, mockMode }: Props) {
+/** "Gratis" / "$999 MXN" — cents in, one money format out. */
+function planPrice(cents: number): string {
+  return cents === 0 ? "Gratis" : formatMXN(cents / 100);
+}
+
+/** Pluralised limits — the shared helper says "Hasta 1 coaches". */
+function planLimitLines(plan: SaasPlanRow): string[] {
+  return [
+    plan.maxAthletes === null
+      ? "Atletas ilimitados"
+      : `Hasta ${plan.maxAthletes} atleta${plan.maxAthletes === 1 ? "" : "s"}`,
+    plan.maxCoaches === null
+      ? "Coaches ilimitados"
+      : `Hasta ${plan.maxCoaches} coach${plan.maxCoaches === 1 ? "" : "es"}`,
+  ];
+}
+
+export function CheckoutClient({ plans, mockMode, isDev }: Props) {
   const router = useRouter();
   const [state, setState] = useState<CheckoutState>({ step: "select" });
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  const demoWording = mockMode && isDev;
 
   const handleSelect = (slug: string) => {
     setError(null);
@@ -54,7 +73,7 @@ export function CheckoutClient({ plans, mockMode }: Props) {
       } else {
         const url = res.initPoint ?? res.sandboxInitPoint;
         if (!url) {
-          setError("No se pudo obtener el link de pago.");
+          setError("No se pudo obtener el enlace de pago.");
           return;
         }
         setState({ step: "redirecting", url });
@@ -80,30 +99,39 @@ export function CheckoutClient({ plans, mockMode }: Props) {
   if (state.step === "mock-confirm") {
     const plan = plans.find((p) => p.slug === state.planSlug);
     return (
-      <div className="k-card p-6 max-w-2xl">
-        <p className="k-eyebrow text-[var(--k-t3)] mb-2">Modo demo</p>
-        <h2 className="font-display text-2xl font-bold mb-3">
+      <div className="k-card max-w-2xl p-6" data-testid="checkout-mock-confirm">
+        {demoWording ? (
+          <p className="k-eyebrow mb-2 text-[var(--k-t3)]">
+            Solo en desarrollo
+          </p>
+        ) : null}
+        <h2 className="font-display mb-3 text-2xl font-bold">
           Confirma la activación de <strong>{plan?.name}</strong>
         </h2>
-        <p className="text-[var(--k-t2)] mb-4">
-          MercadoPago no está configurado en este servidor, así que puedes
-          simular el cobro acá. Esto activa la suscripción inmediatamente sin
-          cargo real.
+        <p className="mb-4 text-[var(--k-t2)]">
+          {demoWording
+            ? "El cobro en línea todavía no está configurado en este entorno, así que puedes simularlo aquí: activa la suscripción sin ningún cargo real."
+            : "Al confirmar, tu box queda activo de inmediato y te llega el comprobante por correo. Puedes cambiar de plan o cancelar cuando quieras."}
         </p>
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
             disabled={pending}
             onClick={() => handleMockConfirm(state.subscriptionId)}
-            className="k-btn-grad px-5 py-3 rounded-full font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            data-testid="checkout-confirm"
+            className="k-btn-grad rounded-full px-5 py-3 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {pending ? "Activando…" : "Confirmar pago (mock)"}
+            {pending
+              ? "Activando…"
+              : demoWording
+                ? "Simular pago y activar"
+                : "Confirmar y activar"}
           </button>
           <button
             type="button"
             onClick={() => setState({ step: "select" })}
             disabled={pending}
-            className="k-btn-ghost px-5 py-3 rounded-full font-bold text-sm disabled:opacity-50"
+            className="k-btn-ghost rounded-full px-5 py-3 text-sm font-bold disabled:opacity-50"
           >
             Volver
           </button>
@@ -119,11 +147,18 @@ export function CheckoutClient({ plans, mockMode }: Props) {
 
   if (state.step === "redirecting") {
     return (
-      <div className="k-card p-6 max-w-2xl">
-        <p>Redirigiendo a MercadoPago…</p>
+      <div className="k-card max-w-2xl p-6">
+        <p>Te estamos llevando a Mercado Pago…</p>
       </div>
     );
   }
+
+  const gridCols =
+    plans.length === 4
+      ? "sm:grid-cols-2 lg:grid-cols-4"
+      : plans.length === 2
+        ? "sm:grid-cols-2"
+        : "sm:grid-cols-2 lg:grid-cols-3";
 
   return (
     <>
@@ -132,97 +167,121 @@ export function CheckoutClient({ plans, mockMode }: Props) {
           {error}
         </p>
       )}
-      <div className="grid gap-4 md:gap-5 md:grid-cols-3">
+      <div className={`grid gap-4 md:gap-5 ${gridCols}`}>
         {plans.map((plan) => (
           <PlanCard
             key={plan.id}
             plan={plan}
+            demoWording={demoWording}
             mockMode={mockMode}
             pending={pending}
             onSelect={() => handleSelect(plan.slug)}
           />
         ))}
       </div>
-      {mockMode && (
-        <p className="mt-6 text-xs text-[var(--k-t3)]">
-          Para activar cobros reales con MercadoPago, configura la variable de
-          entorno <code className="font-mono">MERCADOPAGO_ACCESS_TOKEN</code>.
-        </p>
-      )}
     </>
   );
 }
 
 function PlanCard({
   plan,
+  demoWording,
   mockMode,
   pending,
   onSelect,
 }: {
   plan: SaasPlanRow;
+  demoWording: boolean;
   mockMode: boolean;
   pending: boolean;
   onSelect: () => void;
 }) {
   const isFree = plan.priceMxnCents === 0;
   const featuresList = describeFeatures(plan.features);
-  const limits = describePlanLimits({
-    maxAthletes: plan.maxAthletes,
-    maxCoaches: plan.maxCoaches,
-  });
+  const limits = planLimitLines(plan);
+
+  const ctaLabel = pending
+    ? "Procesando…"
+    : demoWording
+      ? "Elegir plan (demo)"
+      : mockMode
+        ? "Activar plan"
+        : "Pagar con Mercado Pago";
 
   return (
-    <div className="k-card p-5 md:p-6 flex flex-col">
-      <div className="flex items-baseline justify-between mb-3">
+    <div className="k-card flex flex-col p-5 md:p-6">
+      <div className="mb-3 flex items-baseline justify-between gap-2">
         <h3 className="font-display text-2xl font-bold">{plan.name}</h3>
         {plan.slug === "pro" && (
-          <span className="k-chip k-chip-strain">Recomendado</span>
+          <span className="k-chip k-chip-ghost text-[10px]">Recomendado</span>
         )}
       </div>
-      <div className="mb-4">
-        <span className="font-display text-3xl md:text-4xl font-extrabold">
-          {formatPriceMxn(plan.priceMxnCents)}
+      <div className="mb-1">
+        <span className="font-display text-3xl font-extrabold md:text-4xl">
+          {planPrice(plan.priceMxnCents)}
         </span>
         {!isFree && (
-          <span className="text-sm text-[var(--k-t3)] ml-1">/ mes</span>
+          <span className="ml-1 text-sm whitespace-nowrap text-[var(--k-t3)]">
+            / mes
+          </span>
         )}
       </div>
-      <ul className="space-y-1.5 mb-5 text-sm">
+      {!isFree && (
+        <p className="mb-4 text-[11px]" style={{ color: "var(--k-t3)" }}>
+          más IVA
+        </p>
+      )}
+      {isFree && <div className="mb-4" />}
+      <ul className="mb-5 space-y-1.5 text-sm">
         {limits.map((l) => (
           <li key={l} className="flex items-center gap-2">
-            <span style={{ color: "var(--k-warning)" }}>·</span>
+            <Dot
+              size={16}
+              strokeWidth={3}
+              aria-hidden
+              style={{ color: "var(--k-t3)" }}
+            />
             <span>{l}</span>
           </li>
         ))}
         {featuresList.map((f) => (
           <li key={f} className="flex items-center gap-2">
-            <span style={{ color: "var(--k-accent)" }}>✓</span>
+            <Check
+              size={14}
+              strokeWidth={2.6}
+              aria-hidden
+              style={{ color: "var(--k-accent)" }}
+            />
             <span className="text-[var(--k-t2)]">{f}</span>
           </li>
         ))}
       </ul>
       <div className="mt-auto pt-3">
         {isFree ? (
-          <button
-            type="button"
-            disabled
-            className="w-full k-btn-ghost py-2.5 rounded-full text-sm opacity-50 cursor-not-allowed"
-            title="Plan Free se asigna automáticamente"
-          >
-            Incluido en trial
-          </button>
+          <>
+            <button
+              type="button"
+              disabled
+              className="k-btn-ghost w-full cursor-not-allowed rounded-full py-2.5 text-sm opacity-50"
+            >
+              Ya lo tienes
+            </button>
+            <p
+              className="mt-2 text-center text-[11px]"
+              style={{ color: "var(--k-t3)" }}
+            >
+              El plan gratuito viene incluido con tu prueba, no hay nada que
+              activar.
+            </p>
+          </>
         ) : (
           <button
             type="button"
             onClick={onSelect}
             disabled={pending}
-            className="w-full k-btn-grad py-2.5 rounded-full text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="k-btn-grad w-full rounded-full py-2.5 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {pending
-              ? "Procesando…"
-              : mockMode
-                ? "Elegir plan (demo)"
-                : "Pagar con MercadoPago"}
+            {ctaLabel}
           </button>
         )}
       </div>

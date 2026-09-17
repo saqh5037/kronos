@@ -4,9 +4,10 @@ import Link from "next/link";
 import KronosLogo from "@/components/brand/KronosLogo";
 import { track } from "../../_lib/track";
 import { CTA_LABEL } from "../_data/copy";
+import { ArrowRight } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Skills", href: "#skills" },
+  { label: "Habilidades", href: "#skills" },
   { label: "WOD", href: "#wod" },
   { label: "Por qué", href: "#por-que" },
 ];
@@ -38,38 +39,18 @@ export default function NavAtletas({ boxHref }: { boxHref: string | null }) {
             }
           >
             Ir a mi box
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
+            <ArrowRight size={14} strokeWidth={2} aria-hidden="true" />
           </a>
         ) : (
           <Link
-            href="/login"
+            href="/atleta-signup"
             className="lp-btn-lime"
             onClick={() =>
-              track("cta_clicked", { location: "atletas_nav_login" })
+              track("cta_clicked", { location: "atletas_nav_signup" })
             }
           >
             {CTA_LABEL}
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
+            <ArrowRight size={14} strokeWidth={2} aria-hidden="true" />
           </Link>
         )}
       </div>

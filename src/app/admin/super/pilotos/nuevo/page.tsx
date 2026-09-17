@@ -3,7 +3,7 @@ import { db } from "@/server/db";
 import { PilotOnboardingForm } from "./PilotOnboardingForm";
 
 export const metadata: Metadata = {
-  title: "Onboarding Pilot Box · Kronos super-admin",
+  title: "Nuevo box piloto · Kronos super-admin",
   robots: { index: false, follow: false },
 };
 
@@ -20,18 +20,11 @@ export default async function NuevoPilotoPage() {
       style={{
         maxWidth: 720,
         margin: "0 auto",
-        padding: "48px 24px",
+        padding: "32px 24px 48px",
         color: "var(--k-t1)",
       }}
     >
       <header style={{ marginBottom: 32 }}>
-        <p
-          className="lp-eyebrow"
-          style={{ color: "var(--k-accent)", letterSpacing: "0.22em" }}
-        >
-          <span className="lp-dot" />
-          SUPER-ADMIN · ONBOARDING PILOTO
-        </p>
         <h1
           style={{
             fontFamily: "var(--k-font-display)",
@@ -39,11 +32,11 @@ export default async function NuevoPilotoPage() {
             fontWeight: 700,
             letterSpacing: "-0.03em",
             color: "var(--k-t1)",
-            margin: "12px 0 8px",
+            margin: "0 0 8px",
             lineHeight: 1.1,
           }}
         >
-          Crear Box piloto
+          Crear box piloto
         </h1>
         <p
           style={{
@@ -54,8 +47,10 @@ export default async function NuevoPilotoPage() {
             margin: 0,
           }}
         >
-          Onboarding manual de Box piloto con disciplina, geo, exclusividad y
-          feature flags. El owner recibirá magic link después del submit.
+          Da de alta un box a mano: disciplina, ciudad, exclusividad y las
+          funciones que quieras dejarle encendidas. Antes de crearlo verás un
+          resumen para confirmar. Al crearlo, le mandamos al dueño un enlace de
+          acceso por correo.
         </p>
       </header>
 

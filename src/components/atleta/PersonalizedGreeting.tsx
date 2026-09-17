@@ -7,12 +7,15 @@ type ToneStyle = {
   label: string;
 };
 
-// V3 — lima neon monochrome; intensity via opacity only
+// V3 — lima neon monochrome; intensity via opacity only.
+// Labels are Spanish: the audit (2026-09-15, P2 copy) caught "PUSH" and
+// "RECOVERY" as English tags on an otherwise Spanish card. CrossFit jargon
+// stays in English (WOD, RX, AMRAP) — a tone tag is not jargon.
 const TONE_STYLES: Record<DailyGreeting["tone"], ToneStyle> = {
   push: {
     accent: "var(--k-accent)",
     glow: "rgba(200, 255, 45, 0.32)",
-    label: "PUSH",
+    label: "VE FUERTE",
   },
   maintain: {
     accent: "var(--k-accent)",
@@ -22,7 +25,7 @@ const TONE_STYLES: Record<DailyGreeting["tone"], ToneStyle> = {
   recover: {
     accent: "var(--k-accent)",
     glow: "rgba(200, 255, 45, 0.18)",
-    label: "RECOVERY",
+    label: "RECUPERA",
   },
   comeback: {
     accent: "var(--k-accent)",
@@ -50,7 +53,7 @@ export default function PersonalizedGreeting({
         <div
           className="relative overflow-hidden rounded-[16px] p-4"
           style={{
-            background: "var(--card)",
+            background: "var(--k-surface)",
             border: "1px solid var(--k-line-2)",
             boxShadow: `0 0 0 1px ${style.glow}, 0 12px 36px ${style.glow}`,
           }}
@@ -131,7 +134,7 @@ export default function PersonalizedGreeting({
               </div>
               <p
                 className="font-display text-[16px] leading-[1.45] font-semibold"
-                style={{ color: "var(--text)" }}
+                style={{ color: "var(--k-t1)" }}
               >
                 {greeting.text}
               </p>

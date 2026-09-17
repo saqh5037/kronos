@@ -120,7 +120,9 @@ test.describe.serial("Invitaciones de staff/coach", () => {
   }) => {
     await context.clearCookies();
     await page.goto("/invitacion-staff/token-fake-staff-12345");
-    await expect(page.getByText(/no encontrada/i)).toBeVisible();
+    // The 404 state was rewritten ("invitación no encontrada" → "No encontramos
+    // ninguna invitación con este link"). Pin the state, not the sentence.
+    await expect(page.getByTestId("invitation-not-found")).toBeVisible();
   });
 
   test("token ya aceptado muestra 'Tu cuenta ya está activa'", async ({
@@ -159,6 +161,11 @@ test.describe.serial("Invitaciones de staff/coach", () => {
 
     await context.clearCookies();
     await page.goto(`/invitacion-staff/${token}`);
-    await expect(page.getByText(/Invitación expirada/i)).toBeVisible();
+    // The state is titled "Esta invitación expiró" now, and it shares a page
+    // with the cancelled one — `data-reason` distinguishes them without pinning
+    // either sentence.
+    const state = page.getByTestId("invitation-unusable");
+    await expect(state).toBeVisible();
+    await expect(state).toHaveAttribute("data-reason", "EXPIRED");
   });
 });

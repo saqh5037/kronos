@@ -76,12 +76,13 @@ export function WellnessHomeCard({ latest }: Props) {
     delta === null || delta === 0
       ? null
       : `${delta > 0 ? "+" : ""}${delta.toFixed(1)} ${weight.latest.unit}`;
+  // A body-weight delta has no good or bad direction: the sign says which way
+  // it moved, and colour would editorialise. Lime marks a change, grey a flat
+  // week (audit 2026-09-15, S2).
   const deltaColor =
-    weight.trend === "down"
+    weight.trend === "down" || weight.trend === "up"
       ? "var(--k-accent)"
-      : weight.trend === "up"
-        ? "var(--k-warning)"
-        : "var(--k-t3)";
+      : "var(--k-t3)";
 
   return (
     <Link
@@ -163,7 +164,7 @@ export function WellnessHomeCard({ latest }: Props) {
             textTransform: "uppercase",
           }}
         >
-          Ver salud →
+          Ver salud
         </span>
       </div>
     </Link>

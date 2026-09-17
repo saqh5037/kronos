@@ -28,8 +28,8 @@ export default function WODSelector({
         }}
         className="px-3 py-2 rounded-lg text-sm border bg-transparent flex-1 max-w-xs"
         style={{
-          borderColor: "var(--line)",
-          background: "var(--card)",
+          borderColor: "var(--k-line)",
+          background: "var(--k-surface)",
         }}
       >
         {options.length === 0 && <option value="">— Sin WODs —</option>}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ComponentProps } from "react";
 import { Icon } from "./icons";
+import { Icon as KIcon } from "@/components/kronos/Icon";
 import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
 import { wodTour } from "@/components/tour/tours/wod";
 
@@ -36,7 +37,7 @@ export type WodDetalleV3Props = {
   bestScoreDateLabel?: string;
   /** Sparkline values (números) */
   bestScoreSpark?: number[];
-  /** Diff motivacional ej "↓ 38s desde el 1°" */
+  /** Diff motivacional ya formateado, ej "desde 4:12" (sin flechas unicode) */
   bestScoreDelta?: string;
   /** Difficulty 1-5 */
   difficulty?: number;
@@ -270,17 +271,23 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
                 </span>
               </>
             )}
-            <span
-              style={{
-                fontFamily: "var(--k-font-display)",
-                fontSize: 10,
-                fontWeight: 600,
-                letterSpacing: "0.16em",
-                color: "var(--k-t3)",
-              }}
-            >
-              ·
-            </span>
+            {/* A separator only separates: with no difficulty dots and no
+                estimated time, the score type was the first thing in the row
+                and the dot dangled in front of it (audit 2026-09-15). */}
+            {(typeof props.difficulty === "number" ||
+              props.estimatedTimeLabel) && (
+              <span
+                style={{
+                  fontFamily: "var(--k-font-display)",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: "0.16em",
+                  color: "var(--k-t3)",
+                }}
+              >
+                ·
+              </span>
+            )}
             <span
               style={{
                 fontFamily: "var(--k-font-display)",
@@ -299,6 +306,7 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
         {/* Description */}
         {props.description && (
           <div
+            data-testid="wod-description"
             style={{
               margin: "0 20px",
               padding: "16px 18px",
@@ -407,16 +415,16 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
                     >
                       {m.name}
                       {m.movementId && (
-                        <span
-                          aria-hidden="true"
+                        <KIcon
+                          name="arrowUpRight"
+                          size={16}
                           style={{
                             color: "var(--k-accent)",
                             marginLeft: 6,
-                            fontSize: 11,
+                            display: "inline",
+                            verticalAlign: "middle",
                           }}
-                        >
-                          ↗
-                        </span>
+                        />
                       )}
                     </span>
                     {m.sub && (
@@ -751,7 +759,7 @@ export default function WodDetalleV3(props: WodDetalleV3Props) {
                 textDecoration: "none",
               }}
             >
-              VER LEADERBOARD
+              Ver ranking
             </Link>
           )}
         </div>

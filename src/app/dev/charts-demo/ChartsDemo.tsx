@@ -6,6 +6,7 @@ import {
   KronosAreaChart,
 } from "@/components/charts/kronos-chart";
 import { CHART_COLORS } from "@/components/charts/tokens";
+import { formatDateShort, formatMXN } from "@/lib/format";
 
 interface PRPoint {
   date: string;
@@ -65,14 +66,8 @@ function buildAttendance(seed: number) {
 function formatDate(iso: unknown) {
   if (typeof iso !== "string") return String(iso ?? "");
   const d = new Date(iso);
-  return d.toLocaleDateString("es-MX", { month: "short", day: "numeric" });
+  return formatDateShort(d);
 }
-
-const moneyFmt = new Intl.NumberFormat("es-MX", {
-  style: "currency",
-  currency: "MXN",
-  maximumFractionDigits: 0,
-});
 
 export function ChartsDemo() {
   const [seed, setSeed] = useState(0);
@@ -84,9 +79,9 @@ export function ChartsDemo() {
   return (
     <div
       style={{
-        background: "var(--bg)",
+        background: "var(--k-bg)",
         minHeight: "100vh",
-        color: "var(--text)",
+        color: "var(--k-t1)",
       }}
       className="p-4 md:p-8"
     >
@@ -98,7 +93,7 @@ export function ChartsDemo() {
             </h1>
             <p
               className="text-xs md:text-sm font-mono mt-1"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               dev only · /dev/charts-demo · path-draw + glow + head orb + grid
               stagger
@@ -121,7 +116,7 @@ export function ChartsDemo() {
                 {currentBest.toFixed(1)}{" "}
                 <span
                   className="text-sm font-mono"
-                  style={{ color: "var(--text-3)" }}
+                  style={{ color: "var(--k-t3)" }}
                 >
                   kg
                 </span>
@@ -167,7 +162,7 @@ export function ChartsDemo() {
               },
             ]}
             height={260}
-            formatY={(v) => moneyFmt.format(v).replace("MX$", "$")}
+            formatY={(v) => formatMXN(v, { suffix: false })}
             formatX={(v) => String(v)}
             ariaLabel="Ingresos por mes"
           />
@@ -208,7 +203,7 @@ export function ChartsDemo() {
             <h2 className="k-eyebrow">Variant CINEMATIC — stock chart style</h2>
             <p
               className="text-xs font-mono mt-1"
-              style={{ color: "var(--text-3)" }}
+              style={{ color: "var(--k-t3)" }}
             >
               bars + line + halo intenso + paleta azul · fondo deep navy con
               grid azul

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import LandingTracker from "../../_components/LandingTracker";
@@ -13,7 +15,7 @@ import { SCREENS } from "../_data/screens";
 export const metadata: Metadata = {
   title: "Manual Kronos Atletas — Guía completa pantalla por pantalla",
   description:
-    "Cómo usar Kronos Atletas: home, WOD, reservas, skills, perfil, logros. 9 pantallas documentadas con capturas reales y acciones por pantalla.",
+    "Cómo usar Kronos Atletas: inicio, WOD, reservas, habilidades, perfil y logros. Nueve pantallas documentadas con lo que puedes hacer en cada una.",
   alternates: { canonical: "/atletas/manual" },
   robots: { index: true, follow: true },
 };
@@ -49,6 +51,24 @@ export default async function ManualPage() {
                 showDeepLink={showDeepLink}
               />
             ))}
+            {/* Después de la sección 9 no había forma de volver
+                (audit 2026-09-15). */}
+            <p style={{ padding: "40px 0 8px" }}>
+              <Link
+                href="/atletas"
+                className="lp-caption"
+                style={{
+                  color: "var(--k-t2)",
+                  letterSpacing: "0.18em",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <ArrowLeft size={13} strokeWidth={2.5} aria-hidden="true" />
+                VOLVER A KRONOS ATLETAS
+              </Link>
+            </p>
           </div>
         </div>
         <AtletaClosingCTA boxHref={boxHref} />

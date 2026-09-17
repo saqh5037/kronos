@@ -3,10 +3,12 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import type { Route } from "next";
+import { ChevronDown, ChevronUp, Lock } from "lucide-react";
 import {
   markMyProgressionStatus,
   unmarkMyProgression,
 } from "@/server/actions/skill-levels";
+import { useConfirm } from "@/lib/use-confirm";
 import type { ProgressionNode } from "@/lib/skill-tree";
 
 type Props = {
@@ -79,6 +81,8 @@ export default function SkillTree({ movementId, movementSlug, nodes }: Props) {
         <SkillNode
           key={node.slug}
           node={node}
+          step={idx + 1}
+          totalSteps={nodes.length}
           isLast={idx === nodes.length - 1}
           disabled={isPending}
           pending={pendingSlug === node.slug}
@@ -202,6 +206,8 @@ export default function SkillTree({ movementId, movementSlug, nodes }: Props) {
 
 function SkillNode({
   node,
+  step,
+  totalSteps,
   isLast,
   disabled,
   pending,
@@ -211,6 +217,8 @@ function SkillNode({
   onUnmark,
 }: {
   node: ProgressionNode;
+  step: number;
+  totalSteps: number;
   isLast: boolean;
   disabled: boolean;
   pending: boolean;
@@ -219,11 +227,32 @@ function SkillNode({
   onMarkAchieved: () => void;
   onUnmark: () => void;
 }) {
+  const confirm = useConfirm();
   const [expanded, setExpanded] = useState(false);
+  const [techniqueOpen, setTechniqueOpen] = useState(false);
   const isAchieved = node.status === "achieved";
   const isCurrent = node.status === "current";
   const isLocked = node.status === "locked";
   const techniqueHref = `/atleta/movimientos/${movementId}` as Route;
+  const stepLabel = `Paso ${step} de ${totalSteps}`;
+  // Inline technique only exists when the progression carries its own copy;
+  // otherwise the movement page is still the honest destination.
+  const hasInlineTechnique = !!node.description;
+
+  /**
+   * Audit 2026-09-15: "QUITAR is ambiguous (drop the skill? the step?)".
+   * The label now names the object and the action is confirmed.
+   */
+  async function handleUnmarkConfirmed() {
+    const ok = await confirm({
+      title: "¿Quitar esta progresión de tu progreso?",
+      message: `"${node.name}" vuelve a quedar sin marcar. Puedes volver a marcarla cuando quieras.`,
+      confirmLabel: "Quitar",
+      cancelLabel: "Conservar",
+      tone: "danger",
+    });
+    if (ok) onUnmark();
+  }
 
   // Achieved colapsado (default) — fila slim escaneable
   if (isAchieved && !expanded) {
@@ -240,10 +269,11 @@ function SkillNode({
             background: "var(--k-elevated)",
             border: "1px solid var(--k-accent-line)",
             borderRadius: 12,
-            opacity: pending ? 0.6 : 1,
+            ...busyStyle(pending),
             minHeight: 48,
             minWidth: 0,
           }}
+          aria-busy={pending || undefined}
         >
           <Link
             href={techniqueHref}
@@ -262,17 +292,35 @@ function SkillNode({
             <StatusGlyph status="achieved" />
             <span
               style={{
-                fontFamily: "var(--k-font-body)",
-                fontSize: 13,
-                fontWeight: 600,
-                color: "var(--k-t1)",
+                display: "flex",
+                flexDirection: "column",
                 flex: 1,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                minWidth: 0,
               }}
             >
-              {node.name}
+              <span
+                className="k-mono"
+                style={{
+                  fontSize: 9,
+                  letterSpacing: 1.2,
+                  color: "var(--k-t3)",
+                }}
+              >
+                {stepLabel.toUpperCase()}
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--k-font-body)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "var(--k-t1)",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {node.name}
+              </span>
             </span>
             <LevelChip level={node.level} />
           </Link>
@@ -355,9 +403,10 @@ function SkillNode({
           display: "flex",
           flexDirection: "column",
           gap: 10,
-          opacity: pending ? 0.6 : 1,
+          ...busyStyle(pending),
           minWidth: 0,
         }}
+        aria-busy={pending || undefined}
       >
         <div
           style={{
@@ -368,6 +417,17 @@ function SkillNode({
         >
           <StatusGlyph status={node.status} />
           <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              className="k-mono"
+              style={{
+                fontSize: 9,
+                letterSpacing: 1.2,
+                color: "var(--k-t3)",
+                marginBottom: 2,
+              }}
+            >
+              {stepLabel.toUpperCase()}
+            </div>
             <div
               style={{
                 display: "flex",
@@ -388,20 +448,85 @@ function SkillNode({
               </span>
               <LevelChip level={node.level} />
             </div>
-            {node.description && (
-              <p
-                style={{
-                  margin: "4px 0 0",
-                  fontFamily: "var(--k-font-body)",
-                  fontSize: 12,
-                  color: "var(--k-t2)",
-                  lineHeight: 1.4,
-                }}
-              >
-                {node.description}
-              </p>
+            {!isLocked && hasInlineTechnique && (
+              <>
+                {/* Inline accordion: reading the cue no longer costs the
+                    athlete their place in the ladder. */}
+                <button
+                  type="button"
+                  onClick={() => setTechniqueOpen((v) => !v)}
+                  aria-expanded={techniqueOpen}
+                  aria-controls={`skill-technique-${node.slug}`}
+                  data-testid={`skill-technique-toggle-${node.slug}`}
+                  className="k-tap"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    marginTop: 8,
+                    minHeight: 44,
+                    padding: "10px 0",
+                    background: "transparent",
+                    border: "none",
+                    fontFamily: "var(--k-font-display)",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    color: "var(--k-accent)",
+                    cursor: "pointer",
+                  }}
+                >
+                  Ver técnica
+                  {techniqueOpen ? (
+                    <ChevronUp size={14} aria-hidden />
+                  ) : (
+                    <ChevronDown size={14} aria-hidden />
+                  )}
+                </button>
+                {techniqueOpen && (
+                  <div
+                    id={`skill-technique-${node.slug}`}
+                    style={{
+                      marginTop: 2,
+                      padding: "10px 12px",
+                      background: "var(--k-bg)",
+                      border: "1px solid var(--k-line)",
+                      borderRadius: 10,
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        fontFamily: "var(--k-font-body)",
+                        fontSize: 12,
+                        color: "var(--k-t2)",
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {node.description}
+                    </p>
+                    <Link
+                      href={techniqueHref}
+                      data-testid={`skill-technique-link-${node.slug}`}
+                      style={{
+                        display: "inline-block",
+                        marginTop: 8,
+                        fontFamily: "var(--k-font-display)",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "var(--k-t2)",
+                      }}
+                    >
+                      Abrir ficha del movimiento
+                    </Link>
+                  </div>
+                )}
+              </>
             )}
-            {!isLocked && (
+            {!isLocked && !hasInlineTechnique && (
               <Link
                 href={techniqueHref}
                 data-testid={`skill-technique-link-${node.slug}`}
@@ -410,6 +535,7 @@ function SkillNode({
                   alignItems: "center",
                   gap: 4,
                   marginTop: 8,
+                  minHeight: 44,
                   fontFamily: "var(--k-font-display)",
                   fontSize: 11,
                   fontWeight: 700,
@@ -419,7 +545,7 @@ function SkillNode({
                   textDecoration: "none",
                 }}
               >
-                Ver técnica →
+                Ver técnica
               </Link>
             )}
           </div>
@@ -478,11 +604,11 @@ function SkillNode({
               <button
                 type="button"
                 disabled={disabled}
-                onClick={onUnmark}
+                onClick={handleUnmarkConfirmed}
                 className="k-tap"
                 style={ghostBtn()}
               >
-                Quitar dominado
+                Quitar de mi progreso
               </button>
             ) : (
               <>
@@ -510,11 +636,11 @@ function SkillNode({
                   <button
                     type="button"
                     disabled={disabled}
-                    onClick={onUnmark}
+                    onClick={handleUnmarkConfirmed}
                     className="k-tap"
                     style={ghostBtn()}
                   >
-                    Quitar
+                    Quitar de mi progreso
                   </button>
                 )}
               </>
@@ -540,6 +666,29 @@ function SkillNode({
   );
 }
 
+/**
+ * "Guardando" sin apagar el texto.
+ *
+ * El nodo en vuelo llevaba `opacity: 0.6`, que mezcla su propio texto con el
+ * fondo: `--k-t3` caía de 4.50:1 a 2.4:1 mientras duraba la transición. La
+ * regla 4 del design system ("opacidad = intensidad") habla del acento, no de
+ * un contenedor con copy adentro.
+ *
+ * El sustituto retira el COLOR, no la luz: `grayscale(1)` colapsa el lima a un
+ * gris claro y deja los tonos de texto prácticamente intactos — son casi
+ * neutros, así que su luminancia no se mueve (`--k-t3 #7d7d87` → `#7e7e7e`,
+ * 4.50:1 → 4.52:1 sobre `--k-elevated`). Se lee como "este nodo está inerte
+ * ahorita" y `aria-busy` lo dice para quien no ve el color.
+ */
+function busyStyle(pending: boolean): React.CSSProperties {
+  if (!pending) return {};
+  return {
+    filter: "grayscale(1)",
+    cursor: "progress",
+    transition: "filter 150ms ease",
+  };
+}
+
 function nodeStyles(status: ProgressionNode["status"]) {
   if (status === "achieved") {
     return {
@@ -557,9 +706,12 @@ function nodeStyles(status: ProgressionNode["status"]) {
       text: "var(--k-t1)",
     };
   }
+  // Bloqueado: contorno fantasma sobre el fondo de la página, sin relleno y
+  // sin acento. La jerarquía la marca la superficie, no la opacidad — y el
+  // texto se queda a tono (`--k-t3` sobre `--k-bg` = 4.91:1).
   return {
-    bg: "var(--k-elevated)",
-    border: "1px solid var(--k-line)",
+    bg: "transparent",
+    border: "1px dashed var(--k-line-2)",
     shadow: "none",
     text: "var(--k-t3)",
   };
@@ -608,18 +760,12 @@ function StatusGlyph({ status }: { status: ProgressionNode["status"] }) {
     );
   }
   return (
-    <svg
-      width={20}
-      height={20}
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="var(--k-t3)"
+    <Lock
+      size={20}
       strokeWidth={2}
-      style={{ flexShrink: 0, marginTop: 2 }}
-    >
-      <rect x={5} y={9} width={10} height={8} rx={1.5} />
-      <path d="M7 9V7a3 3 0 0 1 6 0v2" />
-    </svg>
+      aria-hidden
+      style={{ color: "var(--k-t3)", flexShrink: 0, marginTop: 2 }}
+    />
   );
 }
 

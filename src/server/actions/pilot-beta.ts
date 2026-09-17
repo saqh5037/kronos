@@ -9,6 +9,7 @@ import {
   pilotBetaSignSchema,
   type PilotBetaSignInput,
 } from "@/lib/validations/pilot-beta";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export type PilotBetaSignResult =
   | {
@@ -119,7 +120,7 @@ export async function signPilotBeta(
     return {
       ok: false,
       error: "BOX_NOT_FOUND",
-      message: "No encontramos tu Box. Escríbenos a contacto@kronos-fit.com.",
+      message: `No encontramos tu Box. Escríbenos a ${SUPPORT_EMAIL}.`,
     };
   }
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Route } from "next";
+import { ArrowRight } from "lucide-react";
 import type { ActiveSkillData, SkillTier } from "@/lib/skills/types";
 
 const TIER_VERB: Record<SkillTier, string> = {
@@ -166,13 +167,17 @@ function ActiveHero({
           marginTop: 10,
         }}
       >
+        {/* transform, not width: the hero animates on every home visit and a
+            width transition relayouts the section below it. */}
         <div
           style={{
             height: "100%",
-            width: `${data.progressPercent}%`,
+            width: "100%",
+            transformOrigin: "left center",
+            transform: `scaleX(${Math.max(0, Math.min(1, data.progressPercent / 100))})`,
             background: "var(--k-accent)",
             borderRadius: 2,
-            transition: "width 800ms ease",
+            transition: "transform 800ms ease",
           }}
         />
       </div>
@@ -193,6 +198,9 @@ function ActiveHero({
 
       <div
         style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
           fontFamily: "var(--k-font-display)",
           fontSize: 9,
           fontWeight: 700,
@@ -202,7 +210,8 @@ function ActiveHero({
           textTransform: "uppercase",
         }}
       >
-        VER SKILL →
+        VER SKILL
+        <ArrowRight size={12} aria-hidden />
       </div>
     </Link>
   );
@@ -242,7 +251,9 @@ function EmptyHero({ firstName }: { firstName: string }) {
       </p>
       <div
         style={{
-          display: "inline-block",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
           padding: "10px 16px",
           background: "var(--k-accent)",
           color: "var(--k-accent-on)",
@@ -255,7 +266,8 @@ function EmptyHero({ firstName }: { firstName: string }) {
           boxShadow: "var(--k-accent-glow)",
         }}
       >
-        Ir a Skills →
+        Ir a Skills
+        <ArrowRight size={14} aria-hidden />
       </div>
     </Link>
   );

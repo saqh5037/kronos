@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -25,9 +26,14 @@ export default function TerminosPage() {
             textTransform: "uppercase",
             fontWeight: 700,
             textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            minHeight: 44,
           }}
         >
-          ← VOLVER A KRONOS
+          <ArrowLeft size={16} strokeWidth={1.75} aria-hidden />
+          VOLVER A KRONOS
         </Link>
         <h1
           style={{
@@ -69,27 +75,28 @@ export default function TerminosPage() {
               gestión de CrossFit Boxes. <strong>Box</strong>{" "}
               (&ldquo;usted&rdquo;, &ldquo;su&rdquo;) es el gimnasio, centro de
               entrenamiento o establecimiento deportivo que contrata el
-              servicio.
-              <strong>Atleta</strong> es la persona que utiliza la aplicación
-              del Box para reservar clases, registrar scores y realizar pagos.
+              servicio. <strong>Atleta</strong> es la persona que utiliza la
+              aplicación del Box para reservar clases, registrar scores y
+              realizar pagos.
             </p>
           </Section>
 
           <Section title="2. Objeto del servicio">
             <p>
-              Kronos proporciona una plataforma white-label de gestión para
-              Boxes de CrossFit, incluyendo: reservas de clases, control de
-              asistencia, programación de WODs, procesamiento de pagos, registro
-              de PRs, comunicaciones y panel administrativo.
+              Kronos proporciona una plataforma de gestión para Boxes de
+              CrossFit que opera bajo la marca del Box, incluyendo: reservas de
+              clases, control de asistencia, programación de WODs, procesamiento
+              de pagos, registro de PRs, comunicaciones y panel administrativo.
             </p>
           </Section>
 
           <Section title="3. Suscripción y pagos">
             <p>
               El servicio se contrata bajo un modelo de suscripción mensual en
-              MXN. No hay contratos anuales obligatorios ni setup fee. Los
-              precios están publicados en la landing page y pueden actualizarse
-              con previo aviso de 30 días calendario.
+              MXN. No hay contratos anuales obligatorios ni costo de
+              instalación. Los precios están publicados en la página de Kronos
+              para Boxes y pueden actualizarse con previo aviso de 30 días
+              calendario.
             </p>
             <p>
               El Box puede cancelar en cualquier momento. No hay penalidad por
@@ -98,22 +105,24 @@ export default function TerminosPage() {
             </p>
           </Section>
 
-          <Section title="4. White-label y marca">
+          <Section title="4. Marca del Box">
             <p>
-              En los planes Acero y Titanio, el Box puede personalizar la
-              aplicación del atleta con su propio dominio, logo, paleta de
-              colores y comunicaciones. Kronos opera como infraestructura
-              invisible: el atleta no verá la marca Kronos en la interfaz de la
-              app del Box.
+              En todos los planes, el Box puede personalizar la aplicación del
+              atleta con su logo, su nombre y su paleta de colores. En el plan
+              Titanio puede además usar su propio dominio y enviar las
+              comunicaciones desde su dominio: en ese caso el atleta no verá la
+              marca Kronos en la interfaz.
             </p>
           </Section>
 
           <Section title="5. Procesamiento de pagos">
             <p>
-              Kronos integra pasarelas de pago de terceros (Stripe, Mercado
-              Pago). Kronos no cobra comisión sobre las transacciones de los
-              atletas. Las tarifas de procesamiento son directamente entre el
-              Box y el proveedor de pagos.
+              Kronos integra hoy una sola pasarela de pago de terceros: Mercado
+              Pago, para cobros con tarjeta. Los pagos en efectivo se registran
+              manualmente en el panel del Box y Kronos no participa en ellos.
+              Kronos no cobra comisión sobre las transacciones de los atletas;
+              las tarifas de procesamiento son directamente entre el Box y el
+              proveedor de pagos.
             </p>
           </Section>
 
@@ -128,18 +137,18 @@ export default function TerminosPage() {
 
           <Section title="7. Confidencialidad y seguridad">
             <p>
-              Cada Box opera como tenant aislado en la base de datos. No
-              compartimos data entre Boxes. Implementamos encryption at rest,
-              backups diarios con retención de 30 días, y accesos controlados
-              por rol.
+              Cada Box opera como espacio de datos aislado en la base de datos.
+              No compartimos información entre Boxes. Implementamos cifrado en
+              reposo, respaldos diarios con retención de 30 días y accesos
+              controlados por rol.
             </p>
           </Section>
 
           <Section title="8. Limitación de responsabilidad">
             <p>
               Kronos no será responsable por interrupciones del servicio
-              causadas por factores fuera de nuestro control reasonable,
-              incluyendo: fallas de proveedores de infraestructura cloud,
+              causadas por factores fuera de nuestro control razonable,
+              incluyendo: fallas de proveedores de infraestructura en la nube,
               problemas de conectividad de internet del Box o sus atletas, o
               modificaciones no autorizadas del código por parte del Box.
             </p>

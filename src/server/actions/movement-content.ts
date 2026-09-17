@@ -257,7 +257,7 @@ export async function regenerateMovementContent(
 
   if (existing.contentSource === "MANUAL_OVERRIDE") {
     throw new Error(
-      "Este movement tiene override manual. Editá manualmente o quitá el override antes de regenerar.",
+      "Este movimiento tiene override manual. Edítalo a mano o quita el override antes de regenerar.",
     );
   }
 

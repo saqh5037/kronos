@@ -1,27 +1,23 @@
 /**
- * MovimientosContentSection — personal movements list + full catalog.
+ * MovimientosContentSection — the athlete's movement library.
  *
- * Fetches listMyMovementsRated and listMovements in parallel.
- * No cache needed: both fetches are consumed only here.
+ * Audit 2026-09-15: this route stitched two products vertically (a 14-row
+ * "trained" ranking, then a 52-card library whose search and filters sat
+ * ~1,500 px down). The library is now the page and "Entrenados" is a filter
+ * chip at the top; both datasets are still fetched in parallel and handed to
+ * one client component.
  */
 
-import Link from "next/link";
-import type { Route } from "next";
 import {
   listMyMovementsRated,
   type RankedMovement,
 } from "@/server/analytics/movement";
 import { listMovements, type MovementRow } from "@/server/actions/movements";
-import {
-  AnimatedSection,
-  AnimatedItem,
-} from "@/components/kronos/AnimatedSection";
-import KCard from "@/components/kronos/KCard";
-import MovementCatalogCached from "@/components/atleta/MovementCatalogCached";
 import { TourTriggerButton } from "@/components/tour/TourTriggerButton";
 import { movimientosTour } from "@/components/tour/tours/movimientos";
 import { getCachedSession } from "@/server/session";
 import AthleteBackLink from "@/components/atleta/AthleteBackLink";
+import MovementLibrary from "../MovementLibrary";
 
 export async function MovimientosContentSection() {
   let movements: RankedMovement[] = [];
@@ -42,18 +38,18 @@ export async function MovimientosContentSection() {
 
   return (
     <div className="pb-28 relative">
-      {/* Hero */}
       <header
         data-tour="movimientos.header"
         style={{
-          padding: "56px 20px 20px",
+          padding: "56px 20px 16px",
           display: "flex",
           flexDirection: "column",
           gap: 8,
           position: "relative",
         }}
       >
-        <div style={{ marginBottom: 4 }}>
+        {/* Left gutter keeps the back link clear of the fixed hamburger. */}
+        <div className="pl-12 lg:pl-0" style={{ marginBottom: 4 }}>
           <AthleteBackLink href="/atleta" label="Inicio" />
         </div>
         <div style={{ position: "absolute", top: 56, right: 20 }}>
@@ -95,122 +91,19 @@ export async function MovimientosContentSection() {
             margin: "4px 0 0",
           }}
         >
-          {movements.length} entrenados · 90 días
+          {catalog.length} movimientos · {movements.length} entrenados en 90
+          días
         </p>
       </header>
 
-      {/* Personal movements */}
-      <AnimatedSection
-        data-tour="movimientos.lista-personal"
-        className="px-3.5 mt-2 space-y-2"
-      >
-        {movements.length === 0 && (
-          <AnimatedItem>
-            <KCard variant="ghost" className="p-6 text-center">
-              <p className="text-sm text-[var(--k-t2)]">
-                Aún no has registrado scores. Empieza entrenando y tus
-                movimientos aparecerán aquí.
-              </p>
-            </KCard>
-          </AnimatedItem>
-        )}
-
-        {movements.map((m, i) => (
-          <AnimatedItem key={m.movementId}>
-            <Link
-              {...(i === 0
-                ? { "data-tour": "movimientos.card-movimiento" }
-                : {})}
-              href={`/atleta/movimientos/${m.movementId}` as Route}
-            >
-              <KCard
-                variant="ghost"
-                className="p-3.5 flex items-center gap-3"
-                animate={true}
-              >
-                <div className="font-display text-sm font-bold w-5 text-center text-[var(--k-t3)]">
-                  {i + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[13px] font-semibold truncate text-[var(--text)]">
-                      {m.movementName}
-                    </span>
-                    {m.isStale && (
-                      <span className="k-chip k-chip-pr text-[9px] py-0.5 px-1.5">
-                        SIN ENTRENAR
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 flex-1 max-w-[120px]">
-                      <div
-                        className="h-1.5 rounded-full flex-1"
-                        style={{ background: "var(--track)" }}
-                      >
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${Math.min(100, (m.frequency90d / 20) * 100)}%`,
-                            background: m.isStale
-                              ? "var(--k-warning)"
-                              : "var(--k-t2)",
-                          }}
-                        />
-                      </div>
-                      <span className="text-[10px] font-mono font-bold text-[var(--k-t3)]">
-                        {m.frequency90d}×
-                      </span>
-                    </div>
-                    {m.daysSinceLastAttempt !== null && (
-                      <span className="text-[10px] text-[var(--k-t3)]">
-                        Hace {m.daysSinceLastAttempt}d
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  {m.currentBest !== null ? (
-                    <>
-                      <div className="font-display text-sm font-bold text-[var(--text)]">
-                        {m.currentBest} {m.unit}
-                      </div>
-                      <div className="text-[9px] font-bold tracking-wide mt-1 text-[var(--k-t3)]">
-                        PR ACTUAL
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-[11px] text-[var(--k-t3)]">Sin PR</div>
-                  )}
-                </div>
-                <div className="text-lg opacity-30 text-[var(--k-t3)]">›</div>
-              </KCard>
-            </Link>
-          </AnimatedItem>
-        ))}
-      </AnimatedSection>
-
-      {/* Full catalog */}
-      {catalog.length > 0 && (
-        <AnimatedSection
-          data-tour="movimientos.catalogo"
-          className="px-3.5 mt-8"
-        >
-          <div className="flex items-baseline justify-between mb-4">
-            <p className="k-eyebrow text-[var(--k-t2)]">
-              BIBLIOTECA DE MOVIMIENTOS
-            </p>
-            <span className="font-mono text-[10px] font-bold text-[var(--k-t3)]">
-              {catalog.length} MOVIMIENTOS
-            </span>
-          </div>
-          <MovementCatalogCached
-            tenantId={tenantId}
-            userId={userId}
-            initialData={catalog}
-          />
-        </AnimatedSection>
-      )}
+      <section data-tour="movimientos.catalogo" className="px-3.5">
+        <MovementLibrary
+          tenantId={tenantId}
+          userId={userId}
+          initialCatalog={catalog}
+          trained={movements}
+        />
+      </section>
     </div>
   );
 }

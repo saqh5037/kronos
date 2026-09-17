@@ -6,6 +6,14 @@ import {
   WHITE_LABEL_PALETTES,
   OWNER_KPIS,
 } from "@/app/(landing)/_data/mock";
+import {
+  CTA_TRIAL_HREF,
+  CTA_TRIAL_LABEL,
+  CTA_WHATSAPP_HREF,
+  CTA_WHATSAPP_LABEL,
+  TRIAL_DAYS,
+} from "@/app/(landing)/_data/cta";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -43,13 +51,16 @@ export function GET() {
       palettesExamples: WHITE_LABEL_PALETTES,
     },
     faq: FAQ_ITEMS.map((f) => ({ question: f.question, answer: f.answer })),
+    // The machine-readable mirror of /box must offer the SAME two actions the
+    // page offers. It used to advertise a demo desk and a sales team through
+    // `demo@` and `ventas@` — two inboxes nobody reads for a product that is
+    // self-serve (audit 2026-09-15, public-auth review).
     cta: {
-      primary: { label: "Reservar demo", href: "mailto:demo@kronos-fit.com" },
-      secondary: {
-        label: "Hablar con ventas",
-        href: "mailto:ventas@kronos-fit.com",
-      },
-      trial: "30 días sin cargo. Sin tarjeta. Sin contrato anual.",
+      primary: { label: CTA_TRIAL_LABEL, href: CTA_TRIAL_HREF },
+      secondary: { label: CTA_WHATSAPP_LABEL, href: CTA_WHATSAPP_HREF },
+      contact: `mailto:${SUPPORT_EMAIL}`,
+      trial: `${TRIAL_DAYS} días sin cargo. Sin tarjeta. Sin contrato anual.`,
+      trialDays: TRIAL_DAYS,
     },
   };
 

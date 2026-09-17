@@ -21,7 +21,7 @@ export default async function FormaPage() {
   return (
     <div className="p-8 relative">
       <div className="mb-7 relative">
-        <span className="k-eyebrow-bar">Kronos AI · Vision</span>
+        <span className="k-eyebrow-bar">Análisis de técnica con IA</span>
         <div className="mt-3 flex items-baseline gap-3 flex-wrap">
           <span
             className="font-display text-[34px] leading-none"
@@ -40,9 +40,9 @@ export default async function FormaPage() {
           className="mt-3 text-[14px] leading-[1.6] max-w-[560px]"
           style={{ color: "var(--k-t2)" }}
         >
-          Subí una foto de un atleta ejecutando un movimiento. Gemini Vision te
-          devuelve fortalezas, áreas de mejora y banderas de seguridad — todo
-          informativo, no diagnóstico médico.
+          Sube una foto de un atleta ejecutando un movimiento. El análisis de
+          técnica con IA te devuelve fortalezas, áreas de mejora y banderas de
+          seguridad — todo informativo, no diagnóstico médico.
         </p>
       </div>
 

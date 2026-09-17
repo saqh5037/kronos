@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   getReports,
   getRevenueByMonth,
@@ -11,18 +12,65 @@ import {
   type ReadinessAverage,
 } from "@/server/actions/surveys";
 import { MetricDelta } from "@/components/charts/MetricDelta";
-import { ReportesFilters } from "./_components/ReportesFilters";
+import { intensity } from "@/components/charts/tokens";
 import { RevenueLineChart } from "./_components/RevenueLineChart";
 import { NewChurnBarChart } from "./_components/NewChurnBarChart";
+import {
+  ExportAthletesMonths,
+  ExportChurnRisk,
+  ExportRevenueMonths,
+} from "./_components/ReportesExport";
 import { getChurnRiskList, type ChurnRiskRow } from "@/server/analytics/churn";
 import ChurnRiskTable from "@/components/admin/ChurnRiskTable";
+import { formatMXN } from "@/lib/format";
+import { planTypeLabel } from "@/lib/labels";
+import { rangeFromParams } from "@/lib/dates";
+import { AT_RISK_DEFAULT_INACTIVITY_DAYS } from "@/server/period-summary/rules";
+import { DateRangePicker } from "@/components/data/DateRangePicker";
+import {
+  hasEnoughReadinessData,
+  responseCountLabel,
+  rollingMonthsLabel,
+} from "./_lib/period-label";
 
 export const metadata = { title: "Kronos — Reportes" };
 
-const fmtMoney = (v: number) => `$${v.toLocaleString("es-MX")}`;
-const fmtPct = (v: number) => `${Math.round(v * 100)}%`;
+type SearchParams = {
+  preset?: string;
+  from?: string;
+  to?: string;
+};
 
-export default async function ReportesPage() {
+const fmtPct = (v: number) => `${Math.round(v * 100)} %`;
+
+/**
+ * Low/mid/high of ONE metric is intensity, so it ramps the opacity of the
+ * accent instead of switching to orange (project rule 4). The floor is well
+ * above the chart floor (0.18) because these are headline numbers on a card:
+ * at 0.5 the faintest bucket still clears AA for large text.
+ */
+const INTENSITY_TEXT_FLOOR = 0.5;
+
+export default async function ReportesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<SearchParams>;
+}) {
+  const sp = (await searchParams) ?? {};
+  // The picker is back and it drives the query. It was removed because
+  // `getReports()` ignored its range — a control that changes nothing is worse
+  // than none — and `getReports` now takes the period, so the fix is to wire
+  // the control rather than to hide it. Default: "este mes", the window the
+  // headline copy has always claimed.
+  const range = rangeFromParams({
+    preset: sp.preset ?? "thisMonth",
+    from: sp.from,
+    to: sp.to,
+  });
+  const periodInput = range.preset
+    ? { preset: range.preset }
+    : { from: range.from, to: range.to };
+
   let r: Reports | null = null;
   let revenue12m: RevenueByMonthPoint[] = [];
   let athletes12m: AthletesByMonthPoint[] = [];
@@ -30,11 +78,16 @@ export default async function ReportesPage() {
   let churnRisk: ChurnRiskRow[] = [];
 
   try {
+    // Morosos come from `getReports().overdueCount` — the authoritative count
+    // of the same shared rule Pagos shows. The page used to fetch the row list
+    // and print `.length`, which a `limit: 50` could silently truncate.
     [r, revenue12m, athletes12m, churnRisk] = await Promise.all([
-      getReports(),
+      getReports(periodInput),
       getRevenueByMonth(12),
       getAthletesByMonth(12),
-      getChurnRiskList(),
+      // Same period as `getReports`: the list and the "En riesgo" KPI above
+      // it are the same question, so they cannot answer for two windows.
+      getChurnRiskList(periodInput),
     ]);
     readiness = await getReadinessAverage({ sinceDays: 7 });
   } catch {
@@ -43,20 +96,15 @@ export default async function ReportesPage() {
 
   if (!r) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <div className="mb-6">
           <span className="k-eyebrow-bar">Análisis</span>
-          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
-            <h1
-              className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
-              style={{ color: "var(--k-t1)" }}
-            >
-              Re<em>portes</em>
-            </h1>
-          </div>
-          <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
-            Sin datos disponibles. Verifica que la base esté conectada.
-          </p>
+          <h1
+            className="k-h-italic font-display mt-2 text-[32px] leading-[1] font-extrabold tracking-[-0.02em] md:text-[38px]"
+            style={{ color: "var(--k-t1)" }}
+          >
+            Re<em>portes</em>
+          </h1>
         </div>
         <div className="k-card p-6 text-center">
           <p className="text-sm" style={{ color: "var(--k-t2)" }}>
@@ -67,10 +115,9 @@ export default async function ReportesPage() {
     );
   }
 
-  const monthLabel = r.generatedAt.toLocaleDateString("es-MX", {
-    month: "long",
-    year: "numeric",
-  });
+  // The label of the window the data actually covers, straight off the
+  // summary — never a literal, never `generatedAt`.
+  const periodLabel = r.period.label;
 
   const totalRevenue12m = revenue12m.reduce((s, p) => s + p.revenue, 0);
   const totalNew12m = athletes12m.reduce((s, p) => s + p.newAthletes, 0);
@@ -78,147 +125,189 @@ export default async function ReportesPage() {
     (s, p) => s + p.churnedMemberships,
     0,
   );
+  const twelveMonthLabel = rollingMonthsLabel(12);
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div className="p-4 md:p-8">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="k-eyebrow-bar">Análisis</span>
-          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
-            <h1
-              className="k-h-italic font-display font-extrabold text-[38px] leading-[1] tracking-[-0.02em]"
-              style={{ color: "var(--k-t1)" }}
-            >
-              Re<em>portes</em>
-            </h1>
-          </div>
-          <p
-            className="mt-1 text-sm capitalize"
-            style={{ color: "var(--k-t2)" }}
+          <h1
+            className="k-h-italic font-display mt-2 text-[32px] leading-[1] font-extrabold tracking-[-0.02em] md:text-[38px]"
+            style={{ color: "var(--k-t1)" }}
           >
-            {monthLabel} · actualizado{" "}
-            {r.generatedAt.toLocaleTimeString("es-MX", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            Re<em>portes</em>
+          </h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--k-t2)" }}>
+            {periodLabel} · lo que pasó en tu box
           </p>
         </div>
+        <DateRangePicker />
       </div>
 
-      <ReportesFilters />
-
-      {/* Hero KPIs con MetricDelta */}
-      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      {/* Hero KPIs */}
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
         <KpiCard
-          label="Ingresos del mes"
-          value={fmtMoney(r.monthRevenue)}
-          tone="moss"
+          label="Ingresos"
+          value={formatMXN(r.monthRevenue)}
+          period={periodLabel}
+          tone="accent"
           delta={
             <MetricDelta
               current={r.monthRevenue}
               previous={r.prevMonthRevenue}
               goodWhen="higher"
-              formatter={fmtMoney}
             />
           }
         />
         <KpiCard
-          label="MRR estimado"
-          value={fmtMoney(Math.round(r.mrr))}
-          tone="steel"
-          subtitle="por mes equivalente"
+          label="Ingreso recurrente"
+          value={formatMXN(Math.round(r.mrr))}
+          period="por mes equivalente"
         />
         <KpiCard
           label="Atletas activos"
           value={String(r.activeAthletes)}
-          subtitle={`+${r.newAthletesMonth} este mes · ${r.pausedAthletes} pausados`}
+          period={periodLabel}
+          subtitle={`+${r.newAthletesMonth} nuevos · ${r.pausedAthletes} pausados`}
+        />
+        <KpiCard
+          label="En riesgo"
+          value={String(r.athletesAtRisk)}
+          period={periodLabel}
+          tone={r.athletesAtRisk > 0 ? "warning" : undefined}
+          subtitle={
+            r.overdueCount > 0
+              ? `${r.overdueCount} con adeudo · ${formatMXN(r.overdueTotal)}`
+              : "Nadie con adeudo"
+          }
         />
         <KpiCard
           label="Tasa de asistencia"
           value={fmtPct(r.attendanceRate)}
-          tone={
-            r.attendanceRate >= 0.85
-              ? "moss"
-              : r.attendanceRate >= 0.65
-                ? "steel"
-                : "ember"
-          }
-          subtitle={`${r.monthAttended}/${r.monthAttended + r.monthNoShow}`}
+          period={periodLabel}
+          level={r.attendanceRate}
+          subtitle={`${r.monthAttended} de ${r.monthAttended + r.monthNoShow} reservas`}
         />
       </div>
 
-      {/* Revenue 12m chart */}
+      {/* Twelve-month charts */}
       <div className="mb-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
         <div className="k-card p-4">
-          <div className="mb-3 flex items-baseline justify-between gap-3">
-            <p className="k-eyebrow">Revenue · últimos 12 meses</p>
-            <span className="font-mono text-xs text-[var(--k-t3)]">
-              total {fmtMoney(totalRevenue12m)}
-            </span>
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
+            <p className="k-eyebrow">Ingresos · {twelveMonthLabel}</p>
+            <div className="flex items-center gap-3">
+              <span className="font-display text-xs text-[var(--k-t3)]">
+                total {formatMXN(totalRevenue12m)}
+              </span>
+              <ExportRevenueMonths rows={revenue12m} />
+            </div>
           </div>
           {revenue12m.some((p) => p.revenue > 0) ? (
             <RevenueLineChart data={revenue12m} />
           ) : (
             <p className="py-10 text-center text-sm text-[var(--k-t3)]">
-              Sin pagos en los últimos 12 meses
+              Sin cobros en los últimos 12 meses
             </p>
           )}
         </div>
         <div className="k-card p-4">
-          <div className="mb-3 flex items-baseline justify-between gap-3">
-            <p className="k-eyebrow">Nuevos vs bajas · últimos 12 meses</p>
-            <span className="font-mono text-xs text-[var(--k-t3)]">
-              +{totalNew12m} / −{totalChurn12m}
-            </span>
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
+            <p className="k-eyebrow">Altas y bajas · {twelveMonthLabel}</p>
+            <div className="flex items-center gap-3">
+              <span className="font-display text-xs text-[var(--k-t3)]">
+                +{totalNew12m} / −{totalChurn12m}
+              </span>
+              <ExportAthletesMonths rows={athletes12m} />
+            </div>
           </div>
           {athletes12m.some((p) => p.newAthletes + p.churnedMemberships > 0) ? (
             <NewChurnBarChart data={athletes12m} />
           ) : (
             <p className="py-10 text-center text-sm text-[var(--k-t3)]">
-              Sin actividad en los últimos 12 meses
+              Sin altas ni bajas en los últimos 12 meses
             </p>
           )}
         </div>
       </div>
 
-      {/* Readiness tile */}
+      {/* Readiness */}
       {readiness !== null && (
         <div className="mb-6">
           <ReadinessTile readiness={readiness} />
         </div>
       )}
 
-      {/* Churn risk — atletas en riesgo de abandono */}
+      {/* Churn risk */}
       <div className="mb-6">
-        <div className="mb-3 flex items-baseline justify-between gap-3">
-          <span className="k-eyebrow-bar">En riesgo de churn</span>
-          <span className="font-mono text-xs text-[var(--k-t3)]">
-            {churnRisk.length} atleta{churnRisk.length === 1 ? "" : "s"}
-          </span>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
+          <span className="k-eyebrow-bar">En riesgo de dejar el box</span>
+          <div className="flex items-center gap-3">
+            <span className="font-display text-xs text-[var(--k-t3)]">
+              {churnRisk.length} atleta{churnRisk.length === 1 ? "" : "s"}
+            </span>
+            <ExportChurnRisk
+              rows={churnRisk.map((c) => ({
+                name: c.name,
+                severity: c.severity,
+                signalCount: c.signalCount,
+                reasons: c.reasons.join(" · "),
+                daysSinceLastAttended: c.daysSinceLastAttended,
+              }))}
+            />
+          </div>
         </div>
+        <p className="mb-3 text-xs" style={{ color: "var(--k-t3)" }}>
+          Un atleta activo entra a esta lista por cualquiera de tres señales:
+          lleva más de {AT_RISK_DEFAULT_INACTIVITY_DAYS} días sin check-in,
+          nunca ha asistido desde que se dio de alta, o arrastra una membresía
+          vencida sin pagar.{" "}
+          {r.overdueCount > 0 ? (
+            <>
+              El detalle del adeudo, con montos y días, vive en{" "}
+              <Link
+                href="/admin/pagos#morosos"
+                className="underline decoration-dotted"
+                style={{ color: "var(--k-accent)" }}
+              >
+                {r.overdueCount} moroso
+                {r.overdueCount === 1 ? "" : "s"} en Pagos
+              </Link>
+              .
+            </>
+          ) : (
+            <>Hoy no hay ningún adeudo abierto en Pagos.</>
+          )}
+        </p>
         <ChurnRiskTable rows={churnRisk} />
       </div>
 
       {/* Activity */}
       <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-3">
-        <SimpleStat label="Clases del mes" value={String(r.monthClassesHeld)} />
         <SimpleStat
-          label="Scores subidos"
+          label="Clases impartidas"
+          value={String(r.monthClassesHeld)}
+          period={periodLabel}
+        />
+        <SimpleStat
+          label="Scores registrados"
           value={String(r.monthScores)}
+          period={periodLabel}
           subtitle={`${r.monthPRs} PRs nuevos`}
         />
         <SimpleStat
-          label="Bookings del mes"
+          label="Reservas"
           value={String(r.monthBookings)}
-          subtitle={`${r.monthAttended} asistidos · ${r.monthNoShow} no-show`}
+          period={periodLabel}
+          subtitle={`${r.monthAttended} asistidas · ${r.monthNoShow} no-show`}
         />
       </div>
 
       {/* Top tables + plan distribution */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <TopTable
-          title="Top WODs del mes"
-          subtitle="Por scores subidos"
+          title="Top WODs"
+          subtitle={`Por scores registrados · ${periodLabel}`}
           rows={r.topWODs.map((w, i) => ({
             rank: i + 1,
             label: w.name,
@@ -226,8 +315,8 @@ export default async function ReportesPage() {
           }))}
         />
         <TopTable
-          title="Top atletas asistencia"
-          subtitle="Clases asistidas este mes"
+          title="Top atletas por asistencia"
+          subtitle={`Clases asistidas · ${periodLabel}`}
           rows={r.topAttendees.map((a, i) => ({
             rank: i + 1,
             label: a.athleteName,
@@ -243,22 +332,27 @@ export default async function ReportesPage() {
 function KpiCard({
   label,
   value,
+  period,
   subtitle,
   tone,
+  level,
   delta,
 }: {
   label: string;
   value: string;
+  period: string;
   subtitle?: string;
-  tone?: "moss" | "steel" | "ember";
+  tone?: "accent" | "warning";
+  /** 0–1 position of this metric in its own range: ramps the accent. */
+  level?: number;
   delta?: React.ReactNode;
 }) {
   const color =
-    tone === "moss"
-      ? "var(--k-accent)"
-      : tone === "steel"
-        ? "var(--k-t2)"
-        : tone === "ember"
+    level !== undefined
+      ? intensity(level, INTENSITY_TEXT_FLOOR)
+      : tone === "accent"
+        ? "var(--k-accent)"
+        : tone === "warning"
           ? "var(--k-warning)"
           : "var(--k-t1)";
   return (
@@ -272,9 +366,10 @@ function KpiCard({
       <p className="font-display mt-1 text-2xl font-bold" style={{ color }}>
         {value}
       </p>
-      {subtitle ? (
-        <p className="mt-1 text-xs text-[var(--k-t3)]">{subtitle}</p>
-      ) : null}
+      <p className="mt-1 text-[11px]" style={{ color: "var(--k-t3)" }}>
+        {period}
+        {subtitle ? ` · ${subtitle}` : ""}
+      </p>
     </div>
   );
 }
@@ -282,10 +377,12 @@ function KpiCard({
 function SimpleStat({
   label,
   value,
+  period,
   subtitle,
 }: {
   label: string;
   value: string;
+  period: string;
   subtitle?: string;
 }) {
   return (
@@ -294,9 +391,10 @@ function SimpleStat({
         {label}
       </p>
       <p className="font-display mt-1 text-2xl font-bold">{value}</p>
-      {subtitle ? (
-        <p className="mt-1 text-xs text-[var(--k-t3)]">{subtitle}</p>
-      ) : null}
+      <p className="mt-1 text-[11px]" style={{ color: "var(--k-t3)" }}>
+        {period}
+        {subtitle ? ` · ${subtitle}` : ""}
+      </p>
     </div>
   );
 }
@@ -325,7 +423,7 @@ function TopTable({
       </div>
       {rows.length === 0 ? (
         <p className="p-4 text-center text-xs" style={{ color: "var(--k-t3)" }}>
-          Sin datos este mes.
+          Sin datos en el período.
         </p>
       ) : (
         <ul className="flex flex-col">
@@ -337,7 +435,7 @@ function TopTable({
             >
               <div className="flex min-w-0 items-center gap-3">
                 <span
-                  className="w-5 font-mono text-xs"
+                  className="font-display w-5 text-xs"
                   style={{
                     color:
                       r.rank === 1
@@ -352,7 +450,7 @@ function TopTable({
                 <span className="truncate text-sm">{r.label}</span>
               </div>
               <span
-                className="flex-shrink-0 font-mono text-sm font-bold"
+                className="font-display flex-shrink-0 text-sm font-bold"
                 style={{
                   color: r.rank === 1 ? "var(--k-accent)" : "var(--k-t1)",
                 }}
@@ -373,46 +471,48 @@ function PlanDistribution({
   distribution: { type: string; count: number; revenue: number }[];
 }) {
   const totalCount = distribution.reduce((acc, d) => acc + d.count, 0);
+  /* The bar is labelled with money, so it is scaled by money. Scaling by head
+     count made the Anual plan — the biggest earner — the shortest bar. */
+  const maxRevenue = distribution.reduce((m, d) => Math.max(m, d.revenue), 0);
   return (
     <div className="k-card overflow-hidden">
       <div
         className="border-b px-4 py-3"
         style={{ borderColor: "var(--k-line)" }}
       >
-        <p className="font-display text-base font-bold">
-          Distribución de planes
-        </p>
+        <p className="font-display text-base font-bold">Ingresos por plan</p>
         <p className="mt-0.5 text-xs" style={{ color: "var(--k-t3)" }}>
-          {totalCount} membership{totalCount === 1 ? "" : "s"} activa
+          {totalCount} membresía{totalCount === 1 ? "" : "s"} activa
           {totalCount === 1 ? "" : "s"}
         </p>
       </div>
       {distribution.length === 0 ? (
         <p className="p-4 text-center text-xs" style={{ color: "var(--k-t3)" }}>
-          Sin memberships activas.
+          Sin membresías activas.
         </p>
       ) : (
         <ul className="flex flex-col gap-3 p-3">
           {distribution.map((d) => {
-            const pct = totalCount === 0 ? 0 : (d.count / totalCount) * 100;
+            const pct = maxRevenue === 0 ? 0 : (d.revenue / maxRevenue) * 100;
             return (
               <li key={d.type}>
                 <div className="mb-1 flex items-center justify-between text-xs">
-                  <span className="font-mono font-semibold">{d.type}</span>
+                  <span className="font-semibold">
+                    {planTypeLabel[d.type as keyof typeof planTypeLabel] ??
+                      d.type}
+                  </span>
                   <span style={{ color: "var(--k-t3)" }}>
-                    {d.count} · {fmtMoney(d.revenue)}
+                    {formatMXN(d.revenue)} · {d.count} activa
+                    {d.count === 1 ? "" : "s"}
                   </span>
                 </div>
                 <div
                   className="h-2 overflow-hidden rounded-full"
-                  style={{ background: "var(--btn-ghost-bg)" }}
+                  style={{ background: "var(--k-elevated)" }}
                 >
                   <div
                     className="h-full rounded-full"
-                    style={{
-                      width: `${pct}%`,
-                      background: "var(--k-accent)",
-                    }}
+                    style={{ width: `${pct}%`, background: "var(--k-accent)" }}
                   />
                 </div>
               </li>
@@ -426,70 +526,56 @@ function PlanDistribution({
 
 function ReadinessTile({ readiness }: { readiness: ReadinessAverage }) {
   const scorePct = Math.round(readiness.score * 100);
-  const responsePct =
-    readiness.total > 0
-      ? Math.round((readiness.count / readiness.total) * 100)
-      : 0;
-  const lowEngagement = responsePct < 40;
+  const enough = hasEnoughReadinessData(readiness.count, readiness.total);
+  const countLabel = responseCountLabel(readiness.count, readiness.total);
 
-  const tone =
-    scorePct >= 70
-      ? "var(--k-accent)"
-      : scorePct >= 40
-        ? "var(--k-t2)"
-        : "var(--k-warning)";
+  // Readiness is one number on one scale: it fades, it does not change hue.
+  // The three-colour version painted a 38 % box orange, next to a chart that
+  // used lime for the same data (audit 2026-09-15, S2 / ADM-11).
+  const tone = intensity(readiness.score, INTENSITY_TEXT_FLOOR);
 
   return (
     <div className="k-card p-4">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <p className="k-eyebrow mb-1" style={{ color: "var(--k-t2)" }}>
-            Readiness del box hoy
-          </p>
-          <div className="flex items-baseline gap-2">
+      <p className="k-eyebrow mb-1" style={{ color: "var(--k-t2)" }}>
+        Cómo llega tu box
+      </p>
+      {/* The sample comes first: a 100 % built on one answer is not a box-wide number */}
+      <p className="text-sm" style={{ color: "var(--k-t1)" }}>
+        {countLabel}
+        <span className="ml-1" style={{ color: "var(--k-t3)" }}>
+          · últimos 7 días
+        </span>
+      </p>
+
+      {enough ? (
+        <>
+          <div className="mt-2 flex items-baseline gap-2">
             <span
               className="font-display text-3xl font-bold"
               style={{ color: tone }}
             >
-              {scorePct}%
+              {scorePct} %
             </span>
             <span className="text-sm" style={{ color: "var(--k-t2)" }}>
-              promedio 7 días
+              de energía promedio
             </span>
           </div>
-        </div>
-        <div className="text-right">
-          <div className="text-sm font-bold">
-            {readiness.count}
-            <span
-              className="text-[11px] font-normal"
-              style={{ color: "var(--k-t2)" }}
-            >
-              /{readiness.total} respondieron
-            </span>
-          </div>
-          {lowEngagement && (
+          <div
+            className="mt-3 h-2 overflow-hidden rounded-full"
+            style={{ background: "var(--k-surface)" }}
+          >
             <div
-              className="mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
-              style={{
-                background: "rgba(255, 90, 90, 0.1)",
-                color: "var(--k-warning)",
-              }}
-            >
-              Engagement bajo
-            </div>
-          )}
-        </div>
-      </div>
-      <div
-        className="mt-3 h-2 rounded-full overflow-hidden"
-        style={{ background: "var(--k-surface)" }}
-      >
-        <div
-          className="h-full rounded-full transition-all"
-          style={{ width: `${scorePct}%`, background: tone }}
-        />
-      </div>
+              className="h-full rounded-full transition-all"
+              style={{ width: `${scorePct}%`, background: tone }}
+            />
+          </div>
+        </>
+      ) : (
+        <p className="mt-2 text-sm" style={{ color: "var(--k-t2)" }}>
+          Sin datos suficientes para hablar del box. Con menos de una de cada
+          cinco respuestas, el promedio dice más de quien contestó que del box.
+        </p>
+      )}
     </div>
   );
 }

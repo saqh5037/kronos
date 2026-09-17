@@ -20,42 +20,48 @@ export function HistorialFilters({ plans }: Props) {
   const hasAny = Boolean(from || to || planSlug);
 
   return (
-    <div className="k-card p-4 md:p-5 mb-4">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+    <div className="k-card mb-4 p-4 md:p-5">
+      <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-3">
         <div>
           <label
             htmlFor="filter-from"
-            className="block text-xs font-mono uppercase tracking-wider text-[var(--k-t3)] mb-1"
+            className="mb-1 block font-mono text-xs tracking-wider text-[var(--k-t3)] uppercase"
           >
-            Desde
+            Cobros desde
           </label>
           <input
             id="filter-from"
             type="date"
             value={from}
             onChange={(e) => patch({ from: e.target.value || null })}
-            className="w-full rounded-lg p-2 bg-[var(--k-surface)] border border-[var(--border)] text-[var(--k-t1)] text-sm focus:outline-none focus:border-[var(--k-warning)]"
+            className="w-full rounded-lg border border-[var(--k-line-2)] bg-[var(--k-surface)] p-2 text-sm text-[var(--k-t1)] focus:border-[var(--k-accent)] focus:outline-none"
           />
+          <p className="mt-1 text-[10px]" style={{ color: "var(--k-t3)" }}>
+            Día / mes / año
+          </p>
         </div>
         <div>
           <label
             htmlFor="filter-to"
-            className="block text-xs font-mono uppercase tracking-wider text-[var(--k-t3)] mb-1"
+            className="mb-1 block font-mono text-xs tracking-wider text-[var(--k-t3)] uppercase"
           >
-            Hasta
+            Cobros hasta
           </label>
           <input
             id="filter-to"
             type="date"
             value={to}
             onChange={(e) => patch({ to: e.target.value || null })}
-            className="w-full rounded-lg p-2 bg-[var(--k-surface)] border border-[var(--border)] text-[var(--k-t1)] text-sm focus:outline-none focus:border-[var(--k-warning)]"
+            className="w-full rounded-lg border border-[var(--k-line-2)] bg-[var(--k-surface)] p-2 text-sm text-[var(--k-t1)] focus:border-[var(--k-accent)] focus:outline-none"
           />
+          <p className="mt-1 text-[10px]" style={{ color: "var(--k-t3)" }}>
+            Día / mes / año
+          </p>
         </div>
         <div>
           <label
             htmlFor="filter-plan"
-            className="block text-xs font-mono uppercase tracking-wider text-[var(--k-t3)] mb-1"
+            className="mb-1 block font-mono text-xs tracking-wider text-[var(--k-t3)] uppercase"
           >
             Plan
           </label>
@@ -63,7 +69,7 @@ export function HistorialFilters({ plans }: Props) {
             id="filter-plan"
             value={planSlug}
             onChange={(e) => patch({ plan: e.target.value || null })}
-            className="w-full rounded-lg p-2 bg-[var(--k-surface)] border border-[var(--border)] text-[var(--k-t1)] text-sm focus:outline-none focus:border-[var(--k-warning)]"
+            className="w-full rounded-lg border border-[var(--k-line-2)] bg-[var(--k-surface)] p-2 text-sm text-[var(--k-t1)] focus:border-[var(--k-accent)] focus:outline-none"
           >
             <option value="">Todos</option>
             {plans.map((p) => (
@@ -72,6 +78,9 @@ export function HistorialFilters({ plans }: Props) {
               </option>
             ))}
           </select>
+          <p className="mt-1 text-[10px]" style={{ color: "var(--k-t3)" }}>
+            &nbsp;
+          </p>
         </div>
       </div>
 

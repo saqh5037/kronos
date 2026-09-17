@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import { getEventByAccessToken } from "@/server/actions/events";
+import { label } from "@/lib/labels";
 import RegisterButton from "./_components/RegisterButton";
+import { divisionLabel } from "./_lib/division-label";
 
 export const metadata = { title: "Kronos — Eventos" };
 export const dynamic = "force-dynamic";
@@ -62,6 +65,15 @@ export default async function EventoLandingPage({ params }: PageProps) {
               El código del QR no coincide con ningún evento activo. Verifica
               que tengas el código correcto o pídele uno nuevo a tu organizador.
             </p>
+            {/* Salida: este estado era un callejón sin salida (audit 2026-09-15). */}
+            <Link
+              href="/"
+              className="mt-4 inline-flex min-h-11 items-center justify-center gap-1.5 text-sm underline"
+              style={{ color: "var(--k-accent)" }}
+            >
+              <ArrowLeft size={16} strokeWidth={1.75} aria-hidden />
+              Volver a Kronos
+            </Link>
           </div>
         ) : (
           <div className="k-card p-6">
@@ -71,7 +83,7 @@ export default async function EventoLandingPage({ params }: PageProps) {
                   className="k-eyebrow mb-1"
                   style={{ color: "var(--k-accent)" }}
                 >
-                  Partner · {event.partnerName}
+                  Organiza · {event.partnerName}
                 </p>
               ) : null}
               <h1
@@ -100,7 +112,7 @@ export default async function EventoLandingPage({ params }: PageProps) {
               <div className="mb-5 flex flex-wrap gap-2">
                 {event.divisions.map((d) => (
                   <span key={d} className="k-chip">
-                    {d}
+                    {divisionLabel(d)}
                   </span>
                 ))}
               </div>
@@ -124,7 +136,7 @@ export default async function EventoLandingPage({ params }: PageProps) {
             ) : !session?.user ? (
               <Link
                 href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
-                className="k-btn-grad w-full text-center inline-block"
+                className="k-btn-grad w-full text-center block px-5 py-3 leading-snug"
               >
                 Iniciar sesión para inscribirme
               </Link>
@@ -139,7 +151,7 @@ export default async function EventoLandingPage({ params }: PageProps) {
               >
                 Inicia sesión como atleta para inscribirte. Tu sesión actual es{" "}
                 <strong style={{ color: "var(--k-t1)" }}>
-                  {session.user.role}
+                  {label("role", session.user.role)}
                 </strong>
                 .{" "}
                 <Link
@@ -159,7 +171,14 @@ export default async function EventoLandingPage({ params }: PageProps) {
           className="mt-6 text-center text-xs"
           style={{ color: "var(--k-t3)" }}
         >
-          Kronos · Plataforma para boxes y atletas
+          <Link
+            href="/"
+            className="inline-flex min-h-11 items-center justify-center gap-1.5"
+            style={{ color: "var(--k-t3)" }}
+          >
+            <ArrowLeft size={14} strokeWidth={1.75} aria-hidden />
+            Kronos · Plataforma para boxes y atletas
+          </Link>
         </p>
       </div>
     </main>

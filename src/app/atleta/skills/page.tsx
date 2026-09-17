@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import type { Route } from "next";
+import { ArrowDown, ArrowRight, Lock, Sparkles } from "lucide-react";
 import KCard from "@/components/kronos/KCard";
 import {
   AnimatedSection,
@@ -14,6 +15,7 @@ import {
   getSkillCatalogForAthlete,
 } from "@/server/actions/skills";
 import { AIPlanSection, AIPlanSkeleton } from "./_components/AIPlanSection";
+import { skillTierLabel } from "@/lib/skills/progress";
 
 import AthleteBackLink from "@/components/atleta/AthleteBackLink";
 import type {
@@ -31,38 +33,24 @@ const TIER_VERB: Record<SkillTier, string> = {
   rx: "Domina",
 };
 
-const TIER_LABEL: Record<
-  SkillTier,
-  { label: string; color: string; bg: string }
-> = {
-  principiante: {
-    label: "PRINCIPIANTE",
-    color: "var(--k-t2)",
-    bg: "var(--k-elevated)",
-  },
-  escalado: {
-    label: "ESCALADO",
-    color: "var(--k-t2)",
-    bg: "var(--k-elevated)",
-  },
-  rx: { label: "RX", color: "var(--k-t2)", bg: "var(--k-elevated)" },
-};
-
 export default async function SkillsPage() {
   const [activeSkill, catalogResult] = await Promise.all([
     getActiveSkillForAthlete().catch(() => null),
     getSkillCatalogForAthlete().catch(() => ({
       athleteTier: "principiante" as SkillTier,
+      tierInfo: {
+        tier: "principiante" as SkillTier,
+        known: false,
+        source: "default" as const,
+      },
       catalog: [] as CatalogSkill[],
     })),
   ]);
 
-  const tierCfg = TIER_LABEL[catalogResult.athleteTier];
-
   return (
     <div className="pb-28 relative">
       <header style={{ padding: "56px 20px 0" }}>
-        <div style={{ marginBottom: 4 }}>
+        <div className="pl-12 lg:pl-0" style={{ marginBottom: 4 }}>
           <AthleteBackLink href="/atleta" label="Inicio" />
         </div>
         <div className="flex items-center gap-2 mb-3">
@@ -78,21 +66,27 @@ export default async function SkillsPage() {
           >
             SKILLS · ATLETA
           </span>
-          <span
-            style={{
-              fontFamily: "var(--k-font-display)",
-              fontSize: 9,
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              padding: "2px 7px",
-              borderRadius: 4,
-              background: tierCfg.bg,
-              color: tierCfg.color,
-              border: `1px solid currentColor`,
-            }}
-          >
-            {tierCfg.label}
-          </span>
+          {/* The tier chip only appears when the athlete actually has a level.
+              Audit 2026-09-15: everyone was labelled "PRINCIPIANTE" because the
+              default tier was indistinguishable from a declared one. */}
+          {catalogResult.tierInfo.known && (
+            <span
+              style={{
+                fontFamily: "var(--k-font-display)",
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                padding: "2px 7px",
+                borderRadius: 4,
+                background: "var(--k-elevated)",
+                color: "var(--k-t2)",
+                border: "1px solid currentColor",
+                textTransform: "uppercase",
+              }}
+            >
+              {skillTierLabel(catalogResult.tierInfo.tier)}
+            </span>
+          )}
           <div style={{ marginLeft: "auto" }}>
             <TourTriggerButton tourId={skillsTour.id} />
           </div>
@@ -219,14 +213,17 @@ function ActiveSkillView({
             marginTop: 12,
           }}
         >
+          {/* transform, not width (layout-property animation). */}
           <div
             style={{
               height: "100%",
-              width: `${data.progressPercent}%`,
+              width: "100%",
+              transformOrigin: "left center",
+              transform: `scaleX(${Math.max(0, Math.min(1, data.progressPercent / 100))})`,
               background:
                 data.progressPercent > 0 ? "var(--k-accent)" : "var(--k-t1)",
               borderRadius: 2,
-              transition: "width 800ms ease",
+              transition: "transform 800ms ease",
             }}
           />
         </div>
@@ -319,26 +316,24 @@ function ActiveSkillView({
             style={{
               marginTop: 8,
               padding: "10px 14px",
-              background: "var(--k-elevated)",
-              border: "1px solid var(--k-line)",
+              // Ghost, not dimmed: el bloque bajaba a `opacity: 0.7` sobre
+              // `--k-elevated`, o sea que además de apagar el texto flotaba
+              // MÁS alto que el foco de hoy. Ahora es un contorno punteado
+              // sobre el fondo de la página — se lee como casilla vacía y el
+              // texto conserva su tono (`--k-t3` sobre `--k-bg` = 4.91:1).
+              background: "transparent",
+              border: "1px dashed var(--k-line-2)",
               borderRadius: 14,
               display: "flex",
               alignItems: "center",
               gap: 10,
-              opacity: 0.7,
             }}
           >
-            <svg
-              width={14}
-              height={14}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--k-t3)"
-              strokeWidth={2}
-            >
-              <rect x="5" y="11" width="14" height="9" rx="2" />
-              <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-            </svg>
+            <Lock
+              size={14}
+              aria-hidden
+              style={{ color: "var(--k-t3)", flexShrink: 0 }}
+            />
             <div>
               <div
                 style={{
@@ -387,6 +382,9 @@ function ActiveSkillView({
               <Link
                 href={`/atleta/skills/${skill.id}` as Route}
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
                   fontFamily: "var(--k-font-display)",
                   fontSize: 10,
                   fontWeight: 700,
@@ -395,7 +393,8 @@ function ActiveSkillView({
                   textDecoration: "none",
                 }}
               >
-                VER COMPLETO →
+                VER COMPLETO
+                <ArrowRight size={12} aria-hidden />
               </Link>
             </div>
             <div style={{ display: "grid", gap: 6 }}>
@@ -466,18 +465,7 @@ function EmptySkillView({ catalog }: { catalog: CatalogSkill[] }) {
               boxShadow: "0 0 8px rgba(255,255,255,0.06)",
             }}
           >
-            <svg
-              width={28}
-              height={28}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--k-t2)"
-              strokeWidth={1.6}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 2l3 6 6 1-4 5 1 6-6-3-6 3 1-6-4-5 6-1z" />
-            </svg>
+            <Sparkles size={28} strokeWidth={1.6} color="var(--k-t2)" />
           </div>
 
           <h1
@@ -504,28 +492,36 @@ function EmptySkillView({ catalog }: { catalog: CatalogSkill[] }) {
             Elige un skill y te decimos exactamente qué practicar para lograrlo.
           </p>
 
-          <div
+          {/* A real link to the list below, not a div that only looks like a
+              button (audit 2026-09-15: "a button that scrolls"). */}
+          <a
+            href="#skills-catalogo"
             style={{
-              display: "inline-block",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              minHeight: 44,
               padding: "12px 20px",
-              background: "var(--k-t1)",
-              color: "var(--k-bg)",
+              background: "var(--k-accent)",
+              color: "var(--k-accent-on)",
               fontFamily: "var(--k-font-display)",
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               borderRadius: 12,
-              boxShadow: "0 0 8px rgba(255,255,255,0.06)",
+              textDecoration: "none",
+              boxShadow: "var(--k-accent-glow)",
             }}
           >
-            Elige un objetivo ↓
-          </div>
+            Elige un objetivo
+            <ArrowDown size={14} aria-hidden />
+          </a>
         </div>
       </section>
 
       {catalog.length > 0 && (
-        <section style={{ padding: "0 14px 16px" }}>
+        <section id="skills-catalogo" style={{ padding: "0 14px 16px" }}>
           <span
             className="k-eyebrow"
             style={{
@@ -570,7 +566,9 @@ function ProgressionRow({
         gap: 10,
         padding: "10px 0",
         borderBottom: index < total - 1 ? "1px solid var(--k-line)" : undefined,
-        opacity: isLocked ? 0.45 : 1,
+        // Sin `opacity: 0.45`: una fila bloqueada ya se distingue por el tono
+        // del nombre (`--k-t3` contra `--k-t1`), el círculo punteado y el
+        // candado. Apagar el contenedor entero hundía ese `--k-t3` a 2.2:1.
       }}
     >
       <div
@@ -591,7 +589,7 @@ function ProgressionRow({
             ? "2px solid var(--k-line)"
             : isCurrent
               ? "2px solid var(--k-t2)"
-              : "1.5px solid var(--k-line)",
+              : "1.5px dashed var(--k-line-2)",
         }}
       >
         {isAchieved && (
@@ -617,17 +615,7 @@ function ProgressionRow({
           />
         )}
         {isLocked && (
-          <svg
-            width={11}
-            height={11}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--k-t3)"
-            strokeWidth={2}
-          >
-            <rect x="5" y="11" width="14" height="9" rx="2" />
-            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-          </svg>
+          <Lock size={11} aria-hidden style={{ color: "var(--k-t3)" }} />
         )}
       </div>
 
@@ -658,7 +646,7 @@ function ProgressionRow({
               marginTop: 1,
             }}
           >
-            ← trabaja esto hoy
+            Trabaja esto hoy
           </div>
         )}
       </div>
@@ -670,7 +658,6 @@ function ProgressionRow({
           fontWeight: 700,
           color: "var(--k-t3)",
           letterSpacing: "0.04em",
-          opacity: 0.5,
         }}
       >
         {index + 1}
@@ -700,44 +687,73 @@ function SkillCatalogCard({
     locked: { label: skill.lockReason ?? "BLOQUEADO", color: "var(--k-t3)" },
   }[skill.status];
 
+  const nameColor = isCompleted || isActive ? "var(--k-t1)" : "var(--k-t2)";
+
   const inner = (
     <div
       className={selectable && !isLocked ? "k-tap" : undefined}
       style={{
         padding: "13px 16px",
-        background: isCompleted
-          ? "var(--k-elevated)"
+        /**
+         * Bloqueado = tarjeta fantasma, no tarjeta apagada.
+         *
+         * `opacity: 0.55` sobre `--k-elevated` mezclaba el nombre
+         * (`--k-t2`), el motivo del bloqueo y la etiqueta de estado
+         * (`--k-t3`) con el fondo: 2.2–2.5:1, los 18 nodos de
+         * color-contrast que axe marcaba en /atleta/skills. Ahora la
+         * jerarquía la marca la SUPERFICIE — las demás son bloques
+         * rellenos, la bloqueada es un contorno punteado sin relleno —
+         * más el candado y la etiqueta "BLOQUEADO". El texto mantiene su
+         * tono: sobre `--k-bg`, `--k-t2` = 5.85:1 y `--k-t3` = 4.91:1.
+         */
+        background: isLocked
+          ? "transparent"
           : isActive
             ? "var(--k-surface)"
             : "var(--k-elevated)",
-        border: `1px solid ${
-          isCompleted
-            ? "var(--k-line)"
-            : isActive
-              ? "var(--k-line)"
-              : "var(--k-line)"
-        }`,
+        border: `1px ${isLocked ? "dashed var(--k-line-2)" : "solid var(--k-line)"}`,
         borderRadius: 14,
         display: "flex",
         alignItems: "center",
         gap: 12,
-        opacity: isLocked ? 0.55 : 1,
         boxShadow: isActive ? "var(--k-accent-glow)" : "none",
         cursor: selectable && !isLocked ? "pointer" : "default",
       }}
     >
+      {isLocked && (
+        <Lock
+          size={14}
+          aria-hidden
+          style={{ color: "var(--k-t3)", flexShrink: 0 }}
+        />
+      )}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
             fontFamily: "var(--k-font-display)",
             fontSize: 13,
             fontWeight: 700,
-            color: isCompleted || isActive ? "var(--k-t1)" : "var(--k-t2)",
+            color: nameColor,
             letterSpacing: "0.02em",
           }}
         >
           {skill.name}
         </div>
+
+        {/* A locked row now says what it requires AND where the athlete stands
+            ("Pide nivel RX · Tu nivel: Principiante"). */}
+        {isLocked && skill.lockDetail && (
+          <div
+            style={{
+              fontFamily: "var(--k-font-body)",
+              fontSize: 11,
+              color: "var(--k-t3)",
+              marginTop: 3,
+            }}
+          >
+            {skill.lockDetail}
+          </div>
+        )}
 
         {isActive && skill.progressPercent !== undefined && (
           <div
@@ -752,7 +768,9 @@ function SkillCatalogCard({
             <div
               style={{
                 height: "100%",
-                width: `${skill.progressPercent}%`,
+                width: "100%",
+                transformOrigin: "left center",
+                transform: `scaleX(${Math.max(0, Math.min(1, skill.progressPercent / 100))})`,
                 background: "var(--k-accent)",
                 borderRadius: 2,
               }}
@@ -769,10 +787,13 @@ function SkillCatalogCard({
           letterSpacing: "0.12em",
           color: statusConfig.color,
           textAlign: "right",
-          whiteSpace: "nowrap",
-          maxWidth: 110,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
+          // Envuelve en vez de cortar: "PIDE NIVEL ESCALADO" no cabe en
+          // 120 px y se leía "PIDE NIVEL ESCALA…". Dos renglones cortos
+          // ocupan el mismo alto que el nombre + el detalle de la
+          // izquierda, así que no le quitan ancho al nombre del skill.
+          maxWidth: 120,
+          textWrap: "balance",
+          textTransform: "uppercase",
         }}
       >
         {statusConfig.label}

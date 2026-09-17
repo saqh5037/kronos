@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/server/auth";
 import KCard from "@/components/kronos/KCard";
 import KronosLogo from "@/components/brand/KronosLogo";
+import { TRIAL_DAYS } from "@/app/(landing)/_data/cta";
 import {
   isDominusPromoActive,
   promoDaysLeft,
@@ -11,18 +13,19 @@ import {
   PROMO_EVENT_URL,
 } from "@/lib/dominus-promo";
 import FoundingForm from "./FoundingForm";
+import skipStyles from "./skip-link.module.css";
 
 export const metadata: Metadata = {
   title: "Founding Box Dominus · Kronos",
   description:
-    "Lanzamiento Kronos en Dominus 23-may. Lock-in de precio fundador 12 meses + 3 meses gratis al pagar anual. Cupos limitados.",
+    "Lanzamiento Kronos en Dominus 23-may. Lock-in de precio fundador 12 meses + 3 meses gratis al pagar anual.",
   alternates: {
     canonical: "https://www.kronos-fit.com/founding-dominus",
   },
   openGraph: {
     title: "Founding Box Dominus · Kronos",
     description:
-      "Lanzamiento Kronos en Dominus MX el 23 de mayo. Precio fundador 12 meses + 3 meses gratis al pagar anual. Cupos limitados.",
+      "Lanzamiento Kronos en Dominus MX el 23 de mayo. Precio fundador 12 meses + 3 meses gratis al pagar anual.",
     url: "https://www.kronos-fit.com/founding-dominus",
     type: "website",
     locale: "es_MX",
@@ -32,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Founding Box Dominus · Kronos",
     description:
-      "Lock-in precio fundador 12 meses + 3 gratis. Lanzamiento en Dominus MX, 23 de mayo. Cupos limitados.",
+      "Lock-in precio fundador 12 meses + 3 gratis. Lanzamiento en Dominus MX, 23 de mayo.",
   },
 };
 
@@ -47,7 +50,9 @@ export default async function FoundingDominusPage() {
 
   return (
     <>
-      <a href="#main" className="lp-skip">
+      {/* `.lp-skip` vive en landing.css y este grupo de rutas no lo carga, así
+          que el enlace quedaba visible siempre (audit 2026-09-15). */}
+      <a href="#main" className={skipStyles.skip}>
         Saltar al contenido
       </a>
       <main
@@ -57,7 +62,9 @@ export default async function FoundingDominusPage() {
       >
         <div className="max-w-3xl mx-auto px-4 py-12 md:py-16">
           <header className="text-center mb-10">
-            <div className="inline-flex mb-4">
+            {/* El logo va en su propia línea: como `inline-flex` compartía
+                renglón con el chip y se encimaban a 1280. */}
+            <div className="flex justify-center mb-4">
               <KronosLogo variant="mark" size={56} />
             </div>
             {active ? (
@@ -103,7 +110,7 @@ export default async function FoundingDominusPage() {
                     Dominus MX
                   </a>{" "}
                   · {PROMO_EVENT_DATE}. Lock-in de precio fundador 12 meses + 3
-                  meses gratis al pagar anual. Cupos limitados.
+                  meses gratis al pagar anual.
                 </>
               ) : (
                 <>
@@ -111,11 +118,11 @@ export default async function FoundingDominusPage() {
                   Mantenemos la lista de interesados para próximas promos —
                   escríbenos a{" "}
                   <a
-                    href="mailto:contacto@kronos-fit.com"
+                    href="mailto:hola@kronos-fit.com"
                     className="underline"
                     style={{ color: "var(--k-accent)" }}
                   >
-                    contacto@kronos-fit.com
+                    hola@kronos-fit.com
                   </a>
                   .
                 </>
@@ -138,7 +145,7 @@ export default async function FoundingDominusPage() {
                 />
                 <BenefitCard
                   eyebrow="Founding"
-                  title="Onboarding 1-a-1"
+                  title="Alta acompañada 1 a 1"
                   desc="Sesión privada para configurar tu Box: horarios, atletas, plan de membresías. Soporte directo."
                 />
               </section>
@@ -167,7 +174,7 @@ export default async function FoundingDominusPage() {
                   />
                   <FaqItem
                     q="¿Qué pasa si no quiero seguir tras el trial?"
-                    a="Tienes 14 días gratis para explorar. Si no procesas el pago cuando llegue el link, simplemente no se activa la suscripción. Sin cargos sorpresa."
+                    a={`Tienes ${TRIAL_DAYS} días gratis para explorar. Si no procesas el pago cuando llegue el link, simplemente no se activa la suscripción. Sin cargos sorpresa.`}
                   />
                   <FaqItem
                     q="¿Cuántos atletas puedo tener?"
@@ -181,6 +188,17 @@ export default async function FoundingDominusPage() {
               </section>
             </>
           ) : null}
+
+          {/* Salida: esta página no tenía ninguna (audit 2026-09-15). */}
+          <p className="mt-12 text-center">
+            <Link
+              href="/"
+              className="text-sm underline"
+              style={{ color: "var(--k-t2)" }}
+            >
+              Ir al inicio de Kronos
+            </Link>
+          </p>
         </div>
       </main>
     </>

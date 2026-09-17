@@ -1,6 +1,8 @@
 import { listClassesInRange, type ClassRow } from "@/server/actions/classes";
 import { getClassRoster, type ClassRoster } from "@/server/actions/bookings";
-import { addDays, formatTime } from "@/lib/week";
+import { addDays } from "@/lib/week";
+import { formatTime24 } from "@/lib/format";
+import { pickNextClass, sortClassesByStart } from "../_lib/schedule";
 import Eyebrow from "@/components/kronos/Eyebrow";
 import { ScheduleNav } from "@/app/admin/programacion/_components/ScheduleNav";
 import { ScheduleViewSwitch } from "@/app/admin/programacion/_components/ScheduleViewSwitch";
@@ -57,13 +59,12 @@ export default async function ReservasPage({
 
   try {
     classes = await listClassesInRange(from, to);
-    const sorted = [...classes].sort(
-      (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
-    );
+    // Auto-select the NEXT class, not the first of the day: at 12:46 the
+    // roster used to open on the 06:00 Murph (audit /admin/reservas P2).
     const targetId =
       sp.classId && classes.find((c) => c.id === sp.classId)
         ? sp.classId
-        : sorted[0]?.id;
+        : pickNextClass(classes, new Date())?.id;
     if (targetId) {
       selectedRoster = await getClassRoster(targetId);
     }
@@ -71,9 +72,7 @@ export default async function ReservasPage({
     // BD/sesión ausentes
   }
 
-  const sortedClasses = [...classes].sort(
-    (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
-  );
+  const sortedClasses = sortClassesByStart(classes);
 
   return (
     <div className="p-6 lg:p-8">
@@ -99,7 +98,7 @@ export default async function ReservasPage({
       <div
         className="sticky top-0 z-10 -mx-6 lg:-mx-8 px-6 lg:px-8 py-3 mb-4 backdrop-blur-md flex items-center justify-between gap-3 flex-wrap"
         style={{
-          background: "var(--bg)",
+          background: "var(--k-bg)",
           borderBottom: "1px solid var(--k-line)",
         }}
       >
@@ -115,7 +114,7 @@ export default async function ReservasPage({
         <EmptyState
           tone="neutral"
           title="Sin clases en este rango"
-          description="Cambia la fecha o el rango para ver clases con reservas. Si necesitas crear clases, anda a Programación."
+          description="Cambia la fecha o el rango para ver clases con reservas. Si necesitas crear clases, ve a Programación."
         />
       ) : (
         <ReservasView
@@ -127,7 +126,7 @@ export default async function ReservasPage({
             coachName: c.coach?.name ?? null,
             bookingCount: c.bookingCount,
             capacity: c.capacity,
-            timeLabel: formatTime(c.startsAt),
+            timeLabel: formatTime24(c.startsAt),
           }))}
           roster={
             selectedRoster

@@ -1,36 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { m, useReducedMotion } from "framer-motion";
+import { m } from "framer-motion";
 import KronosLogo from "@/components/brand/KronosLogo";
 import { track } from "../../_lib/track";
+import { ArrowRight } from "lucide-react";
 
-const container = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-  },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 16 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.55, ease: "easeOut" },
-  },
-};
-
-const cardItem = {
-  hidden: { opacity: 0, y: 20, scale: 0.97 },
-  show: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.6, ease: "easeOut" },
-  },
-};
-
+/**
+ * Entrada (audit 2026-09-15, P0 #1): la home renderizaba en blanco a 360 y 768
+ * porque cada elemento salía con `initial="hidden"` (opacity 0) y un error de
+ * JS dejaba el stagger sin arrancar. Ahora el markup es visible en el servidor
+ * y la entrada es CSS pura (`.lp-rise`). framer solo queda para hover/tap, que
+ * son interacciones, no visibilidad.
+ */
 const MotionLink = m.create(Link);
 
 type AthleteCardProps = { audience: "athlete" };
@@ -39,7 +21,7 @@ type BoxCardProps = { audience: "box" };
 function AthleteCard({}: AthleteCardProps) {
   return (
     <MotionLink
-      variants={cardItem}
+      className="lp-rise lp-rise-3"
       whileHover={{ y: -6 }}
       whileTap={{ scale: 0.99 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
@@ -69,10 +51,8 @@ function AthleteCard({}: AthleteCardProps) {
     >
       <div
         aria-hidden="true"
+        className="lp-rs-pill"
         style={{
-          position: "absolute",
-          top: 24,
-          right: 24,
           padding: "6px 14px",
           background: "var(--k-accent-on)",
           color: "var(--k-accent)",
@@ -154,17 +134,7 @@ function AthleteCard({}: AthleteCardProps) {
         }}
       >
         Empezar gratis
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          aria-hidden="true"
-        >
-          <path d="M5 12h14M13 6l6 6-6 6" />
-        </svg>
+        <ArrowRight size={18} strokeWidth={2.5} aria-hidden="true" />
       </span>
     </MotionLink>
   );
@@ -173,7 +143,7 @@ function AthleteCard({}: AthleteCardProps) {
 function BoxCard({}: BoxCardProps) {
   return (
     <MotionLink
-      variants={cardItem}
+      className="lp-rise lp-rise-4"
       whileHover={{ y: -4 }}
       whileTap={{ scale: 0.99 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
@@ -201,10 +171,8 @@ function BoxCard({}: BoxCardProps) {
     >
       <div
         aria-hidden="true"
+        className="lp-rs-pill"
         style={{
-          position: "absolute",
-          top: 24,
-          right: 24,
           padding: "5px 12px",
           background: "transparent",
           color: "var(--k-t3)",
@@ -255,8 +223,8 @@ function BoxCard({}: BoxCardProps) {
           flexGrow: 1,
         }}
       >
-        White-label real, multi-tenant, pagos LATAM nativos. Tus atletas usan la
-        app gratis incluida — sin costo extra por usuario.
+        White-label real, multi-tenant, cobranza con Mercado Pago y efectivo.
+        Tus atletas usan la app gratis incluida — sin costo extra por usuario.
       </p>
 
       <span
@@ -268,27 +236,13 @@ function BoxCard({}: BoxCardProps) {
         }}
       >
         Ver Kronos para tu Box
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          aria-hidden="true"
-        >
-          <path d="M5 12h14M13 6l6 6-6 6" />
-        </svg>
+        <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
       </span>
     </MotionLink>
   );
 }
 
 export default function RouterSplit() {
-  const reduce = useReducedMotion();
-  const containerVariants = reduce ? undefined : container;
-  const itemVariants = reduce ? undefined : item;
-
   return (
     <>
       <header
@@ -321,10 +275,7 @@ export default function RouterSplit() {
           padding: "56px 24px",
         }}
       >
-        <m.div
-          initial="hidden"
-          animate="show"
-          variants={containerVariants}
+        <div
           style={{
             width: "100%",
             maxWidth: 1180,
@@ -334,8 +285,8 @@ export default function RouterSplit() {
             alignItems: "center",
           }}
         >
-          <m.div
-            variants={itemVariants}
+          <div
+            className="lp-rise"
             style={{ textAlign: "center", maxWidth: 720 }}
           >
             <p
@@ -376,7 +327,7 @@ export default function RouterSplit() {
               </span>{" "}
               Premium para tu Box.
             </p>
-          </m.div>
+          </div>
 
           <div
             className="router-dual-grid"
@@ -389,7 +340,7 @@ export default function RouterSplit() {
             <AthleteCard audience="athlete" />
             <BoxCard audience="box" />
           </div>
-        </m.div>
+        </div>
       </main>
 
       <footer

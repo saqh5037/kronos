@@ -8,6 +8,12 @@ import {
   SUPPORTED_TIMEZONES,
 } from "@/lib/validations/box";
 import { LogoUpload } from "@/components/admin/LogoUpload";
+import {
+  currencyLabel,
+  localeLabel,
+  timezoneLabel,
+} from "@/components/admin/box-setting-labels";
+import { roleLabel } from "@/lib/labels";
 
 type Props = {
   box: BoxSettings;
@@ -22,7 +28,7 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
   const [defaultClassCapacity, setDefaultClassCapacity] = useState(
     String(box.defaultClassCapacity),
   );
-  const [brandColor, setBrandColor] = useState(box.brandColor ?? "#4a7c59");
+  const [brandColor, setBrandColor] = useState(box.brandColor ?? "#c8ff2d");
   const [logoUrl, setLogoUrl] = useState(box.logoUrl ?? "");
 
   const [error, setError] = useState<string | null>(null);
@@ -69,12 +75,16 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
             />
           </Field>
 
-          <Field label="Slug (URL pública)">
+          <Field
+            label="Slug"
+            hint="Es la dirección pública de tu box: kronos-fit.com/box/tu-slug. No se puede cambiar; escríbenos si lo necesitas."
+          >
             <input
               type="text"
               value={box.slug}
               readOnly
-              className={`${inputClass} opacity-60 cursor-not-allowed`}
+              aria-readonly
+              className={`${inputClass} cursor-not-allowed opacity-60`}
             />
           </Field>
 
@@ -87,15 +97,15 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
                 disabled={!canEdit}
                 className="w-12 h-10 rounded-lg border cursor-pointer disabled:cursor-not-allowed"
                 style={{
-                  borderColor: "var(--line)",
-                  background: "var(--card)",
+                  borderColor: "var(--k-line)",
+                  background: "var(--k-surface)",
                 }}
               />
               <input
                 type="text"
                 value={brandColor}
                 onChange={(e) => setBrandColor(e.target.value)}
-                placeholder="#4a7c59"
+                placeholder="#c8ff2d"
                 disabled={!canEdit}
                 pattern="^#[0-9a-fA-F]{6}$"
                 className={`${inputClass} font-mono uppercase`}
@@ -139,7 +149,7 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
             >
               {SUPPORTED_LOCALES.map((l) => (
                 <option key={l} value={l}>
-                  {l}
+                  {localeLabel[l]}
                 </option>
               ))}
             </select>
@@ -154,7 +164,7 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
             >
               {SUPPORTED_CURRENCIES.map((c) => (
                 <option key={c} value={c}>
-                  {c}
+                  {currencyLabel[c]}
                 </option>
               ))}
             </select>
@@ -169,7 +179,7 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
             >
               {SUPPORTED_TIMEZONES.map((tz) => (
                 <option key={tz} value={tz}>
-                  {tz}
+                  {timezoneLabel[tz]}
                 </option>
               ))}
             </select>
@@ -215,7 +225,8 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
       )}
       {!canEdit && (
         <p className="text-xs" style={{ color: "var(--k-t2)" }}>
-          Solo el OWNER del box puede modificar estos ajustes.
+          Solo el {roleLabel.OWNER.toLowerCase()} del box puede modificar estos
+          ajustes.
         </p>
       )}
     </form>
@@ -223,24 +234,32 @@ export default function BoxSettingsForm({ box, canEdit }: Props) {
 }
 
 const inputClass =
-  "w-full px-3 py-2 rounded-lg text-sm border bg-transparent text-text focus:outline-none focus:border-recovery/50 disabled:opacity-60";
+  "w-full rounded-lg border border-[var(--k-line)] bg-transparent px-3 py-2 text-sm text-[var(--k-t1)] focus:border-[var(--k-accent-line)] focus:outline-none disabled:opacity-60";
 
 function Field({
   label,
+  hint,
   children,
 }: {
   label: string;
+  /** What this field controls, in the owner's words. Rendered under it. */
+  hint?: string;
   children: React.ReactNode;
 }) {
   return (
     <label className="flex flex-col gap-1.5">
       <span
-        className="text-xs uppercase tracking-wider"
+        className="text-xs tracking-wider uppercase"
         style={{ color: "var(--k-t2)" }}
       >
         {label}
       </span>
       {children}
+      {hint ? (
+        <span className="text-[11px]" style={{ color: "var(--k-t3)" }}>
+          {hint}
+        </span>
+      ) : null}
     </label>
   );
 }
