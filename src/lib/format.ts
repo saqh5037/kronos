@@ -198,7 +198,7 @@ export function formatTime24(date: Date, timeZone: string = TZ): string {
   return new Intl.DateTimeFormat("es-MX", {
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false,
+    hourCycle: "h23",
     timeZone,
   }).format(date);
 }

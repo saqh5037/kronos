@@ -42,7 +42,7 @@ export function hourInTimeZone(
 ): number {
   const parts = new Intl.DateTimeFormat("en-US", {
     hour: "2-digit",
-    hour12: false,
+    hourCycle: "h23",
     timeZone,
   }).format(date);
   const hour = Number.parseInt(parts, 10);
