@@ -31,7 +31,7 @@ function bucketParts(d: Date, tz: string): { day: number; hour: number } {
       timeZone: tz,
       weekday: "short",
       hour: "numeric",
-      hour12: false,
+      hourCycle: "h23",
     });
     const parts = fmt.formatToParts(d);
     const wd = parts.find((p) => p.type === "weekday")?.value ?? "Sun";

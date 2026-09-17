@@ -100,7 +100,7 @@ function snapToLocalMidnight(
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false,
+    hourCycle: "h23",
   });
 
   // Walk from approx to find exact midnight
@@ -185,7 +185,7 @@ function getDateParts(
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    hour12: false,
+    hourCycle: "h23",
   });
   const parts = fmt.formatToParts(date);
   const get = (type: string) =>

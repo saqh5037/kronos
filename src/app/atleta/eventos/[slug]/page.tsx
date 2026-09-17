@@ -28,7 +28,7 @@ function formatDate(d: Date | null | undefined) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false,
+    hourCycle: "h23",
     timeZone: DEFAULT_BOX_TIMEZONE,
   }).format(d);
 }
