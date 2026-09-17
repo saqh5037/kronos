@@ -12,6 +12,7 @@
 import { db as prismaBase } from "../db";
 import { shouldNotifyTrialExpiring } from "./lifecycle";
 import { notifyTrialExpiring } from "./notifications";
+import { PERSONAL_PREFIX } from "@/lib/personal-box";
 
 export type TrialDispatchSummary = {
   scanned: number;
@@ -31,6 +32,12 @@ export async function dispatchTrialExpiringNotifications(
     where: {
       subscriptionStatus: "TRIAL",
       trialEndsAt: { gt: now, lte: threeDaysFromNow },
+      // A personal box belongs to an independent athlete, and the athlete never
+      // pays Kronos — only a box does. Excluding them here is what makes that
+      // rule hold in code: today no dunning reaches them only because personal
+      // boxes happen to have no OWNER user and a null trialEndsAt, and neither
+      // coincidence is enforced anywhere.
+      NOT: { slug: { startsWith: PERSONAL_PREFIX } },
     },
     select: { id: true, trialEndsAt: true, trialLastNotifiedAt: true },
   });
