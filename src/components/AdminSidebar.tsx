@@ -904,7 +904,7 @@ export default function AdminSidebar({
           borderRight: "1px solid var(--k-line)",
           display: "flex",
           flexDirection: "column",
-          height: "100vh",
+          height: "100dvh",
           position: "fixed",
           top: 0,
           left: 0,
@@ -918,14 +918,26 @@ export default function AdminSidebar({
         <BoxCard collapsed={collapsed} />
         <div
           className="k-scroll"
-          style={{
-            flex: 1,
-            minHeight: 0,
-            overflowY: "auto",
-            overflowX: "hidden",
-            paddingTop: 2,
-            paddingBottom: 8,
-          }}
+          style={
+            {
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+              overflowX: "hidden",
+              paddingTop: 2,
+              paddingBottom: 8,
+              // CONFIG (el último grupo, "Ajustes del Box" / "Auditoría") vive
+              // al fondo de esta lista, y en el drawer móvil este contenedor
+              // queda anidado dentro de un `<nav>` `position: fixed` que además
+              // anima `transform` al abrir/cerrar. iOS Safari es conocido por
+              // "congelar" el scroll táctil de un hijo con overflow dentro de
+              // ese combo si no se pide explícitamente el scroll con inercia —
+              // sin esto, CONFIG nunca era alcanzable a 360/390px aunque el
+              // contenido sí desbordaba.
+              WebkitOverflowScrolling: "touch",
+              overscrollBehavior: "contain",
+            } as React.CSSProperties
+          }
         >
           {visibleGroups.map((g) => (
             <NavGroup key={g.title} section={g.title} collapsed={collapsed}>

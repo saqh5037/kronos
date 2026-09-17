@@ -7,6 +7,7 @@ import { getBoxMode } from "@/server/actions/box-mode";
 import PwaRegister from "@/components/PwaRegister";
 import AthleteDrawer from "@/components/atleta/AthleteDrawer";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import StandaloneBackButton from "@/components/kronos/StandaloneBackButton";
 
 const TabBar = dynamic(() => import("@/components/kronos/TabBar"));
 const NotificationBell = dynamic(
@@ -102,6 +103,13 @@ export default async function AtletaLayout({
         </div>
         <InstallPwaBanner />
         <main id="main">{children}</main>
+        {/* bottom offset despeja el TabBar de 84px fijo abajo, no la barra
+            superior (ahí ya viven el trigger del drawer y la campana). */}
+        <StandaloneBackButton
+          style={{
+            bottom: "calc(84px + env(safe-area-inset-bottom) + 12px)",
+          }}
+        />
         <TabBar mode={isPersonal ? "personal" : "box"} />
       </div>
     </QueryProvider>
