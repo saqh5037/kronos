@@ -45,7 +45,14 @@ const authMiddleware = withAuth(
     // layout sepa si está en la ruta /atleta/onboarding (excluida del gate).
 
     if (shouldRedirectToBilling(subscriptionStatus, pathname)) {
-      return NextResponse.redirect(new URL("/admin/billing", req.url));
+      // `bounced` tells the billing page the owner did not come here on
+      // purpose. The gate reads `subscriptionStatus` from the JWT cookie and
+      // cannot re-issue it, so a stale EXPIRED claim bounces every /admin link
+      // back here — including billing's own "Volver al panel". The page owns
+      // the database truth and uses this marker to break that loop.
+      return NextResponse.redirect(
+        new URL("/admin/billing?bounced=1", req.url),
+      );
     }
 
     // x-pathname debe ir en REQUEST headers (no response) para que los server

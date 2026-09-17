@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { ArrowLeft, ArrowRight, Receipt } from "lucide-react";
+import { StaleSessionRecovery } from "./StaleSessionRecovery";
 import { authOptions } from "@/server/auth";
 import { db as prismaBase } from "@/server/db";
 import KCard from "@/components/kronos/KCard";
@@ -120,7 +121,12 @@ const TONE_COLOR: Record<StatusCopy["tone"], string> = {
   success: "var(--k-accent)",
 };
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ bounced?: string }>;
+}) {
+  const bounced = (await searchParams).bounced === "1";
   const session = await getServerSession(authOptions);
   if (!session?.user?.tenantId) redirect("/login");
   if (session.user.role !== "OWNER") redirect("/admin");
@@ -156,6 +162,10 @@ export default async function BillingPage() {
         <ArrowLeft size={16} strokeWidth={2.2} aria-hidden />
         Volver al panel
       </Link>
+
+      {/* The link above is useless on its own when the session cookie still
+          says EXPIRED: /admin bounces straight back here. */}
+      <StaleSessionRecovery dbStatus={status} bounced={bounced} />
 
       {showFoundingPromo ? (
         <div
