@@ -1,4 +1,9 @@
 import { Suspense } from "react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auth";
+import { db as prismaBase } from "@/server/db";
+import { isPersonalBoxSlug } from "@/lib/personal-box";
+import PersonalHomeView from "@/components/atleta/PersonalHomeView";
 import {
   HeroSection,
   HomeHeaderSection,
@@ -47,7 +52,27 @@ export const metadata = { title: "Kronos — Inicio" };
  * home is null, all other sections also return null via the cached fetch — no
  * cascading errors, just a clean "Sin perfil" card.
  */
-export default function AtletaHomePage() {
+export default async function AtletaHomePage() {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.tenantId) {
+    const box = await prismaBase.box.findUnique({
+      where: { id: session.user.tenantId },
+      select: { slug: true },
+    });
+    if (box && isPersonalBoxSlug(box.slug)) {
+      // Same `pb-28 relative` shell as the box branch below: the athlete TabBar
+      // is `fixed bottom-0` and 84px tall, so without the padding it sits on
+      // top of the last card instead of below it.
+      return (
+        <div className="pb-28 relative">
+          <Suspense fallback={null}>
+            <PersonalHomeView />
+          </Suspense>
+        </div>
+      );
+    }
+  }
+
   return (
     <div className="pb-28 relative">
       {/* COMPLETE PROFILE BANNER — only shown when onboarding was skipped */}

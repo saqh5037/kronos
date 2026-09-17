@@ -116,6 +116,21 @@ export default async function PersonalHomeView() {
 
   return (
     <div style={{ padding: "64px 16px 32px" }}>
+      {/* Only the `!home.athlete` fallback above carried an <h1>, so the path
+          every athlete with a profile actually takes rendered with no heading
+          at all. */}
+      <h1
+        style={{
+          fontFamily: "var(--k-font-display)",
+          fontSize: 22,
+          fontWeight: 700,
+          letterSpacing: "-0.02em",
+          color: "var(--k-t1)",
+          margin: "0 0 16px",
+        }}
+      >
+        Mi entrenamiento
+      </h1>
       <PersonalizedGreeting greeting={greeting} />
 
       {coachCards.length > 0 && (

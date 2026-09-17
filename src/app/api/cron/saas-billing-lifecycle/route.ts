@@ -28,6 +28,7 @@ import {
   getLastTrialExpiringNotification,
 } from "@/server/saas-billing/notifications";
 import { renewSubscriptionMock } from "@/server/saas-billing/renewal";
+import { PERSONAL_PREFIX } from "@/lib/personal-box";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -153,7 +154,14 @@ export async function GET(req: Request) {
 
   // ─── Trials que vencieron ────────────────────────────────────────────────────
   const trialBoxes = await rawDb.box.findMany({
-    where: { subscriptionStatus: "TRIAL" },
+    where: {
+      subscriptionStatus: "TRIAL",
+      // Personal boxes have no subscription to expire — the athlete never pays
+      // Kronos. They survive this sweep today only because their trialEndsAt is
+      // null, so one signup change that set a trial date would flip every
+      // independent athlete to EXPIRED. Keep them out by rule, not by luck.
+      NOT: { slug: { startsWith: PERSONAL_PREFIX } },
+    },
     select: { id: true, trialEndsAt: true, subscriptionStatus: true },
   });
 

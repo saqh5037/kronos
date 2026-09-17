@@ -13,6 +13,14 @@ import {
   runIncrementalSync,
   WhoopReconnectRequiredError,
 } from "@/lib/wearables/whoop-sync";
+import {
+  DEFAULT_BOX_TIMEZONE,
+  addCivilDays,
+  civilDateInTz,
+  dayKeyInTz,
+  endOfCivilDay,
+  startOfCivilDay,
+} from "@/lib/tz";
 
 const providerSchema = z.enum(["WHOOP", "GARMIN", "APPLE_HEALTH", "OURA"]);
 
@@ -331,12 +339,332 @@ export async function triggerManualSync(
     if (err instanceof WhoopReconnectRequiredError) {
       return {
         ok: false,
-        message: "Reconectá tu Whoop para seguir sincronizando",
+        message: "Reconecta tu Whoop para seguir sincronizando",
       };
     }
     return {
       ok: false,
       message: err instanceof Error ? err.message : "Error desconocido",
     };
+  }
+}
+
+/**
+ * `days` trailing window, in the box timezone — never the host's. Mirrors
+ * `rangeFromPreset` in `src/lib/dates.ts`: the window edges are civil days in
+ * `timeZone`, so "últimos 30 días" means the same 30 calendar days it prints.
+ */
+function trailingWindow(
+  days: number,
+  timeZone: string = DEFAULT_BOX_TIMEZONE,
+): { from: Date; to: Date } {
+  const today = civilDateInTz(new Date(), timeZone);
+  return {
+    from: startOfCivilDay(addCivilDays(today, -(days - 1)), timeZone),
+    to: endOfCivilDay(today, timeZone),
+  };
+}
+
+export type RecoveryTrendPoint = {
+  dayKey: string;
+  score: number | null;
+  hrvRmssd: number | null;
+  restingHr: number | null;
+};
+
+/** 30-day (default) recovery trend, oldest first, bucketed by box civil day. */
+export async function getMyRecoveryTrend(
+  days = 30,
+): Promise<RecoveryTrendPoint[]> {
+  const session = await requireCachedSession();
+  const tenantId = session.user.tenantId;
+  const me = await getMyAthlete(session.user.id, tenantId);
+  if (!me) return [];
+
+  const db = withTenant(tenantId);
+  const { from, to } = trailingWindow(days);
+  try {
+    const rows = await db.whoopRecovery.findMany({
+      where: { athleteId: me.id, recoveredAt: { gte: from, lte: to } },
+      orderBy: { recoveredAt: "asc" },
+    });
+    // One recovery per cycle, and two cycles can share a civil day, so a plain
+    // row-per-point map would emit the same `dayKey` twice. Keep the last
+    // reading of the day — the one the athlete actually woke up to.
+    const byDay = new Map<string, RecoveryTrendPoint>();
+    for (const r of rows) {
+      const dayKey = dayKeyInTz(r.recoveredAt, DEFAULT_BOX_TIMEZONE);
+      byDay.set(dayKey, {
+        dayKey,
+        score: r.score,
+        hrvRmssd: r.hrvRmssd,
+        restingHr: r.restingHr,
+      });
+    }
+    return Array.from(byDay.values()).sort((a, b) =>
+      a.dayKey.localeCompare(b.dayKey),
+    );
+  } catch (err) {
+    console.error("[wearables] getMyRecoveryTrend failed:", err);
+    return [];
+  }
+}
+
+export type SleepTrendStages = {
+  lightMin: number | null;
+  deepMin: number | null;
+  remMin: number | null;
+  awakeMin: number | null;
+};
+
+export type SleepTrendPoint = {
+  dayKey: string;
+  asleepMs: number | null;
+  inBedMs: number | null;
+  needMin: number | null;
+  efficiency: number | null;
+  performance: number | null;
+  stages: SleepTrendStages;
+};
+
+type SleepRawShape = {
+  needMin?: unknown;
+  stages?: {
+    lightMin?: unknown;
+    deepMin?: unknown;
+    remMin?: unknown;
+    awakeMin?: unknown;
+  };
+};
+
+function numberOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function parseSleepRaw(raw: unknown): {
+  needMin: number | null;
+  stages: SleepTrendStages;
+} {
+  const shape = raw && typeof raw === "object" ? (raw as SleepRawShape) : {};
+  const stages =
+    shape.stages && typeof shape.stages === "object" ? shape.stages : {};
+  return {
+    needMin: numberOrNull(shape.needMin),
+    stages: {
+      lightMin: numberOrNull(stages.lightMin),
+      deepMin: numberOrNull(stages.deepMin),
+      remMin: numberOrNull(stages.remMin),
+      awakeMin: numberOrNull(stages.awakeMin),
+    },
+  };
+}
+
+/** 30-day (default) sleep trend, nights only, oldest first. */
+export async function getMySleepTrend(days = 30): Promise<SleepTrendPoint[]> {
+  const session = await requireCachedSession();
+  const tenantId = session.user.tenantId;
+  const me = await getMyAthlete(session.user.id, tenantId);
+  if (!me) return [];
+
+  const db = withTenant(tenantId);
+  const { from, to } = trailingWindow(days);
+  try {
+    const rows = await db.whoopSleep.findMany({
+      where: {
+        athleteId: me.id,
+        nap: false,
+        start: { gte: from, lte: to },
+      },
+      orderBy: { start: "asc" },
+    });
+    // Whoop sometimes splits one night into two non-nap records, which then
+    // bucket into the same civil day: two bars for one night, and a duplicate
+    // React key. Collapse per day — the durations add up because they are the
+    // same night's sleep, while the ratio fields (efficiency, performance,
+    // stages, need) come from the longest record, i.e. the main sleep rather
+    // than the fragment.
+    const byDay = new Map<
+      string,
+      { point: SleepTrendPoint; longestMs: number }
+    >();
+    for (const row of rows) {
+      const { needMin, stages } = parseSleepRaw(row.raw);
+      const dayKey = dayKeyInTz(row.start, DEFAULT_BOX_TIMEZONE);
+      const asleep = row.totalAsleepMs ?? 0;
+      const prev = byDay.get(dayKey);
+
+      if (!prev) {
+        byDay.set(dayKey, {
+          longestMs: asleep,
+          point: {
+            dayKey,
+            asleepMs: row.totalAsleepMs,
+            inBedMs: row.totalInBedMs,
+            needMin,
+            efficiency: row.efficiency,
+            performance: row.performance,
+            stages,
+          },
+        });
+        continue;
+      }
+
+      prev.point.asleepMs = (prev.point.asleepMs ?? 0) + asleep;
+      prev.point.inBedMs = (prev.point.inBedMs ?? 0) + (row.totalInBedMs ?? 0);
+      if (asleep > prev.longestMs) {
+        prev.longestMs = asleep;
+        prev.point.needMin = needMin;
+        prev.point.efficiency = row.efficiency;
+        prev.point.performance = row.performance;
+        prev.point.stages = stages;
+      }
+    }
+    return Array.from(byDay.values())
+      .map((v) => v.point)
+      .sort((a, b) => a.dayKey.localeCompare(b.dayKey));
+  } catch (err) {
+    console.error("[wearables] getMySleepTrend failed:", err);
+    return [];
+  }
+}
+
+export type StrainTrendPoint = {
+  dayKey: string;
+  strain: number | null;
+  kilojoule: number | null;
+};
+
+/** 30-day (default) daily strain trend, oldest first. */
+export async function getMyStrainTrend(days = 30): Promise<StrainTrendPoint[]> {
+  const session = await requireCachedSession();
+  const tenantId = session.user.tenantId;
+  const me = await getMyAthlete(session.user.id, tenantId);
+  if (!me) return [];
+
+  const db = withTenant(tenantId);
+  const { from, to } = trailingWindow(days);
+  try {
+    const rows = await db.whoopCycle.findMany({
+      where: { athleteId: me.id, start: { gte: from, lte: to } },
+      orderBy: { start: "asc" },
+    });
+    // Two cycles can land on the same civil day. Strain is a bounded 0-21
+    // score, not a quantity, so the day takes the dominant cycle's strain
+    // rather than a meaningless sum; energy IS a quantity, so it adds up.
+    const byDay = new Map<string, StrainTrendPoint>();
+    for (const c of rows) {
+      const dayKey = dayKeyInTz(c.start, DEFAULT_BOX_TIMEZONE);
+      const prev = byDay.get(dayKey);
+      if (!prev) {
+        byDay.set(dayKey, {
+          dayKey,
+          strain: c.strain,
+          kilojoule: c.kilojoule,
+        });
+        continue;
+      }
+      if (c.strain != null && (prev.strain == null || c.strain > prev.strain)) {
+        prev.strain = c.strain;
+      }
+      if (c.kilojoule != null) {
+        prev.kilojoule = (prev.kilojoule ?? 0) + c.kilojoule;
+      }
+    }
+    return Array.from(byDay.values()).sort((a, b) =>
+      a.dayKey.localeCompare(b.dayKey),
+    );
+  } catch (err) {
+    console.error("[wearables] getMyStrainTrend failed:", err);
+    return [];
+  }
+}
+
+export type SportBreakdownRow = {
+  slug: string;
+  label: string;
+  sessions: number;
+  totalMs: number;
+  avgStrain: number | null;
+};
+
+type RawSport = { slug: string; label: string };
+
+/**
+ * `WhoopWorkout.sportId` is null on purpose — the canonical sport lives at
+ * `raw.sport = { slug, label, whoopActivity }`. Read defensively: an odd or
+ * missing shape falls back to "otro" rather than throwing.
+ */
+function extractSport(raw: unknown): RawSport | null {
+  if (!raw || typeof raw !== "object") return null;
+  const sport = (raw as Record<string, unknown>).sport;
+  if (!sport || typeof sport !== "object") return null;
+  const slug = (sport as Record<string, unknown>).slug;
+  const label = (sport as Record<string, unknown>).label;
+  if (typeof slug !== "string" || typeof label !== "string") return null;
+  return { slug, label };
+}
+
+/** Sessions per sport over the trailing `days` (default 90), by session count. */
+export async function getMySportBreakdown(
+  days = 90,
+): Promise<SportBreakdownRow[]> {
+  const session = await requireCachedSession();
+  const tenantId = session.user.tenantId;
+  const me = await getMyAthlete(session.user.id, tenantId);
+  if (!me) return [];
+
+  const db = withTenant(tenantId);
+  const { from, to } = trailingWindow(days);
+  try {
+    const rows = await db.whoopWorkout.findMany({
+      where: { athleteId: me.id, start: { gte: from, lte: to } },
+      select: { start: true, end: true, strain: true, raw: true },
+      orderBy: { start: "asc" },
+    });
+
+    const buckets = new Map<
+      string,
+      {
+        slug: string;
+        label: string;
+        sessions: number;
+        totalMs: number;
+        strainSum: number;
+        strainCount: number;
+      }
+    >();
+
+    for (const w of rows) {
+      const sport = extractSport(w.raw) ?? { slug: "otro", label: "Otro" };
+      const durationMs = Math.max(0, w.end.getTime() - w.start.getTime());
+      const bucket = buckets.get(sport.slug) ?? {
+        slug: sport.slug,
+        label: sport.label,
+        sessions: 0,
+        totalMs: 0,
+        strainSum: 0,
+        strainCount: 0,
+      };
+      bucket.sessions += 1;
+      bucket.totalMs += durationMs;
+      if (w.strain != null) {
+        bucket.strainSum += w.strain;
+        bucket.strainCount += 1;
+      }
+      buckets.set(sport.slug, bucket);
+    }
+
+    return Array.from(buckets.values())
+      .map((b) => ({
+        slug: b.slug,
+        label: b.label,
+        sessions: b.sessions,
+        totalMs: b.totalMs,
+        avgStrain: b.strainCount > 0 ? b.strainSum / b.strainCount : null,
+      }))
+      .sort((a, b) => b.sessions - a.sessions);
+  } catch (err) {
+    console.error("[wearables] getMySportBreakdown failed:", err);
+    return [];
   }
 }

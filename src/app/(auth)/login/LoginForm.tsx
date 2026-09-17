@@ -7,6 +7,23 @@ import MagicLinkWaiting from "@/components/auth/MagicLinkWaiting";
 
 const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEV_LOGIN === "1";
 
+/**
+ * Where the user who just signed in actually lives. Both handlers below used to
+ * hardcode "/admin": an athlete was sent to a surface their role forbids, the
+ * middleware bounced them to /atleta, and the onboarding gate bounced them
+ * again — two hops through a dead end, and a window where athlete server
+ * actions answer "Sesión expirada".
+ */
+async function landingForCurrentSession(): Promise<string> {
+  try {
+    const res = await fetch("/api/auth/session");
+    const session = (await res.json()) as { user?: { role?: string } } | null;
+    return session?.user?.role === "ATHLETE" ? "/atleta" : "/admin";
+  } catch {
+    return "/admin";
+  }
+}
+
 type Mode = "magic" | "password";
 
 type LoginFormProps = {
@@ -68,7 +85,7 @@ export default function LoginForm({ initialEmail = "" }: LoginFormProps) {
       return;
     }
     kToast.success("Sesión iniciada");
-    window.location.href = "/admin";
+    window.location.href = await landingForCurrentSession();
   }
 
   if (sent) {
@@ -208,7 +225,7 @@ function DevLoginForm() {
       return;
     }
     kToast.success("Sesión iniciada");
-    window.location.href = "/admin";
+    window.location.href = await landingForCurrentSession();
   }
 
   return (
