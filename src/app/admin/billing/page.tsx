@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { ArrowRight, Receipt } from "lucide-react";
+import { ArrowLeft, ArrowRight, Receipt } from "lucide-react";
 import { authOptions } from "@/server/auth";
 import { db as prismaBase } from "@/server/db";
 import KCard from "@/components/kronos/KCard";
@@ -43,6 +43,7 @@ function daysUntil(date: Date | null): number | null {
 function copyForStatus(
   status: SubscriptionStatus | null,
   trialEndsAt: Date | null,
+  hasPlan: boolean,
 ): StatusCopy {
   switch (status) {
     case "TRIAL": {
@@ -59,13 +60,21 @@ function copyForStatus(
       };
     }
     case "ACTIVE":
-      return {
-        eyebrow: "Suscripción activa",
-        title: "Tu box está al día",
-        body: "Tu plan está vigente. Abajo ves el plan, el precio y la próxima fecha de cobro.",
-        cta: null,
-        tone: "success",
-      };
+      return hasPlan
+        ? {
+            eyebrow: "Suscripción activa",
+            title: "Tu box está al día",
+            body: "Tu plan está vigente. Abajo ves el plan, el precio y la próxima fecha de cobro.",
+            cta: null,
+            tone: "success",
+          }
+        : {
+            eyebrow: "Suscripción activa",
+            title: "Tu box está al día",
+            body: "Todavía no tienes un plan contratado. Elige uno para ver aquí el precio y la fecha del siguiente cobro.",
+            cta: { label: "Elegir plan", href: "/admin/billing/checkout" },
+            tone: "success",
+          };
     case "PAST_DUE":
       return {
         eyebrow: "Pago pendiente",
@@ -132,13 +141,22 @@ export default async function BillingPage() {
   if (!box) redirect("/login");
 
   const status = box.subscriptionStatus as SubscriptionStatus;
-  const copy = copyForStatus(status, box.trialEndsAt);
+  const copy = copyForStatus(status, box.trialEndsAt, currentSub !== null);
 
   const showFoundingPromo = isDominusPromoActive() && status === "TRIAL";
   const promoDays = promoDaysLeft();
 
   return (
     <div className="mx-auto max-w-3xl p-6 md:p-8">
+      <Link
+        href="/admin"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium hover:underline"
+        style={{ color: "var(--k-t2)", minHeight: 44 }}
+      >
+        <ArrowLeft size={16} strokeWidth={2.2} aria-hidden />
+        Volver al panel
+      </Link>
+
       {showFoundingPromo ? (
         <div
           className="mb-6 flex flex-wrap items-start gap-3 rounded-xl border p-4 md:flex-nowrap md:p-5"

@@ -16,7 +16,14 @@ import { validateMagicLinkSignIn } from "./auth-signin";
 import { deriveOtpFromToken, hashEmailToken } from "./otp";
 
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 90; // 90 días — keep-alive mobile
-const SESSION_UPDATE_AGE_SECONDS = 60 * 60 * 24; // refrescar JWT 1x/día si activo
+// `src/middleware.ts` decide si mandar al owner a /admin/billing leyendo
+// `subscriptionStatus` de ESTE JWT, no de la base de datos — así que este
+// valor es la ventana de bloqueo máxima que un owner sufre después de que
+// arreglamos su suscripción en DB: hasta que el JWT se re-emita, el
+// middleware lo sigue devolviendo a billing aunque la página misma (que sí
+// lee DB) le diga "Activa". 24h de ventana atrapó a un owner en
+// /admin/billing sin salida (PWA standalone, sin URL bar). 5 minutos.
+const SESSION_UPDATE_AGE_SECONDS = 5 * 60;
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),

@@ -2,6 +2,7 @@ import { getCachedSession } from "@/server/session";
 import { redirect } from "next/navigation";
 import { getSensitiveEventCount } from "@/server/actions/owner-feed";
 import { SidebarGate } from "./_components/SidebarGate";
+import StandaloneBackButton from "@/components/kronos/StandaloneBackButton";
 
 export default async function AdminLayout({
   children,
@@ -19,6 +20,7 @@ export default async function AdminLayout({
     <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen bg-[var(--k-bg)] lg:overflow-hidden">
       <SidebarGate sensitiveCount={sensitiveCount} role={role} />
       <main className="flex-1 lg:overflow-y-auto">{children}</main>
+      <StandaloneBackButton className="lg:hidden" />
     </div>
   );
 }
