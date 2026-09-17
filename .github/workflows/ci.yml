@@ -5,6 +5,12 @@ on:
     branches: [main, rebuild/base]
   pull_request:
     branches: [main, rebuild/base]
+    # `labeled` is what makes the `run-e2e` label actually do something. The
+    # default activity types are opened/synchronize/reopened, so without it
+    # labelling an open PR fires no event at all and the `e2e` job's label
+    # condition is only ever evaluated against whatever labels happened to be
+    # attached when the PR was opened or last pushed to.
+    types: [opened, synchronize, reopened, labeled]
   # Manual run and the nightly e2e sweep. `quality` runs on these too: it is
   # cheap and a nightly green typecheck catches a dependency drifting under us.
   workflow_dispatch:
@@ -16,6 +22,9 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # A label change should not re-run typecheck/lint/test/build: nothing about
+    # the code moved. Adding `run-e2e` is only a request for the e2e job below.
+    if: github.event.action != 'labeled'
     steps:
       - uses: actions/checkout@v4
 
@@ -67,6 +76,8 @@ jobs:
   # drives a browser, so it is minutes, not seconds. It runs when someone asks
   # for it (`workflow_dispatch`), every night, or on a PR labelled `run-e2e` —
   # which is how you get it on a change that touches booking, auth or tenancy.
+  # The label works on an already-open PR because `pull_request` above opts into
+  # the `labeled` activity type.
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 45
