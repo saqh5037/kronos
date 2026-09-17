@@ -17,7 +17,7 @@
  *       "name": "Snatch pull con codos altos",
  *       "type": "STRENGTH",                // WODType
  *       "scoreType": "WEIGHT",             // ScoreType
- *       "timeCapSeconds": 900,             // optional
+ *       "timeCapMinutes": 15,              // optional — the column is MINUTES
  *       "description": "...",
  *       "movements": [{ "slug": "snatch", "reps": 3, "weight": 60, "notes": "...", "order": 0 }]
  *     }]
@@ -62,7 +62,7 @@ type WodSpec = {
   name: string;
   type: WODType;
   scoreType: ScoreType;
-  timeCapSeconds?: number | null;
+  timeCapMinutes?: number | null;
   description?: string;
   movements?: MovementSpec[];
 };
@@ -181,7 +181,7 @@ async function main(): Promise<void> {
         type: wod.type,
         scoreType: wod.scoreType,
         description: wod.description ?? null,
-        timeCap: wod.timeCapSeconds ?? null,
+        timeCap: wod.timeCapMinutes ?? null,
         scheduledFor,
         isActive: true,
       };
