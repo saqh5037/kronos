@@ -102,3 +102,5 @@ kronos-atleta-self-serve/
 !/scripts/backfill-movement-progressions.ts
 !/scripts/archive/
 !/scripts/guards/
+!/scripts/import-whoop-export.ts
+!/scripts/import-program-wods.ts
