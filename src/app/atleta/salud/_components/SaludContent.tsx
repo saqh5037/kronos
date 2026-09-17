@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   getBodyMetricsHistory,
   getLatestByType,
@@ -5,6 +6,10 @@ import {
 import { listMyWellnessGoals } from "@/server/actions/goals";
 import { SaludShell } from "./SaludShell";
 import { DevicesCard } from "./DevicesCard";
+import {
+  WearableInsights,
+  WearableInsightsSkeleton,
+} from "./wearables/WearableInsights";
 
 export async function SaludContent() {
   const [history, latest, goals] = await Promise.all([
@@ -16,8 +21,12 @@ export async function SaludContent() {
   return (
     <>
       <SaludShell history={history} latest={latest} goals={goals} />
+      {/* Recuperación, sueño, carga y deportes desde Whoop. */}
+      <Suspense fallback={<WearableInsightsSkeleton />}>
+        <WearableInsights />
+      </Suspense>
       {/* Whoop lives here, honestly: a real connect entry point and a
-          read-only status. The recovery card is a later phase. */}
+          read-only status. */}
       <DevicesCard />
     </>
   );
